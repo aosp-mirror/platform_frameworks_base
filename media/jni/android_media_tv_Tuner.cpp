@@ -947,20 +947,45 @@ FilterClientCallbackImpl::~FilterClientCallbackImpl() {
 }
 
 /////////////// FrontendClientCallbackImpl ///////////////////////
-FrontendClientCallbackImpl::FrontendClientCallbackImpl(jweak tunerObj) : mObject(tunerObj) {}
+FrontendClientCallbackImpl::FrontendClientCallbackImpl(JTuner* jtuner, jweak listener) {
+    ALOGV("FrontendClientCallbackImpl() with listener:%p", listener);
+    addCallbackListener(jtuner, listener);
+}
+
+void FrontendClientCallbackImpl::addCallbackListener(JTuner* jtuner, jweak listener) {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jweak listenerRef = env->NewWeakGlobalRef(listener);
+    ALOGV("addCallbackListener() with listener:%p and ref:%p @%p", listener, listenerRef, this);
+    std::scoped_lock<std::mutex> lock(mMutex);
+    mListenersMap[jtuner] = listenerRef;
+}
+
+void FrontendClientCallbackImpl::removeCallbackListener(JTuner* listener) {
+    ALOGV("removeCallbackListener for listener:%p", listener);
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    std::scoped_lock<std::mutex> lock(mMutex);
+    if (mListenersMap.find(listener) != mListenersMap.end() && mListenersMap[listener]) {
+        env->DeleteWeakGlobalRef(mListenersMap[listener]);
+        mListenersMap.erase(listener);
+    }
+}
 
 void FrontendClientCallbackImpl::onEvent(FrontendEventType frontendEventType) {
     ALOGV("FrontendClientCallbackImpl::onEvent, type=%d", frontendEventType);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jobject frontend(env->NewLocalRef(mObject));
-    if (!env->IsSameObject(frontend, nullptr)) {
-        env->CallVoidMethod(
-                frontend,
-                gFields.onFrontendEventID,
-                (jint)frontendEventType);
-    } else {
-        ALOGE("FrontendClientCallbackImpl::onEvent:"
-                "Frontend object has been freed. Ignoring callback.");
+    std::scoped_lock<std::mutex> lock(mMutex);
+    for (const auto& mapEntry : mListenersMap) {
+        ALOGV("JTuner:%p, jweak:%p", mapEntry.first, mapEntry.second);
+        jobject frontend(env->NewLocalRef(mapEntry.second));
+        if (!env->IsSameObject(frontend, nullptr)) {
+            env->CallVoidMethod(
+                    frontend,
+                    gFields.onFrontendEventID,
+                    (jint)frontendEventType);
+        } else {
+            ALOGW("FrontendClientCallbackImpl::onEvent:"
+                    "Frontend object has been freed. Ignoring callback.");
+        }
     }
 }
 
@@ -969,12 +994,25 @@ void FrontendClientCallbackImpl::onScanMessage(
     ALOGV("FrontendClientCallbackImpl::onScanMessage, type=%d", type);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass clazz = env->FindClass("android/media/tv/tuner/Tuner");
-    jobject frontend(env->NewLocalRef(mObject));
-    if (env->IsSameObject(frontend, nullptr)) {
-        ALOGE("FrontendClientCallbackImpl::onScanMessage:"
-                "Frontend object has been freed. Ignoring callback.");
-        return;
+
+    std::scoped_lock<std::mutex> lock(mMutex);
+    for (const auto& mapEntry : mListenersMap) {
+        jobject frontend(env->NewLocalRef(mapEntry.second));
+        if (env->IsSameObject(frontend, nullptr)) {
+            ALOGE("FrontendClientCallbackImpl::onScanMessage:"
+                    "Tuner object has been freed. Ignoring callback.");
+            continue;
+        }
+        executeOnScanMessage(env, clazz, frontend, type, message);
     }
+}
+
+void FrontendClientCallbackImpl::executeOnScanMessage(
+         JNIEnv *env, const jclass& clazz, const jobject& frontend,
+         FrontendScanMessageType type,
+         const FrontendScanMessage& message) {
+    ALOGV("FrontendClientCallbackImpl::executeOnScanMessage, type=%d", type);
+
     switch(type) {
         case FrontendScanMessageType::LOCKED: {
             if (message.get<FrontendScanMessage::Tag::isLocked>()) {
@@ -1153,11 +1191,14 @@ void FrontendClientCallbackImpl::onScanMessage(
 }
 
 FrontendClientCallbackImpl::~FrontendClientCallbackImpl() {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    if (mObject != nullptr) {
-        env->DeleteWeakGlobalRef(mObject);
-        mObject = nullptr;
+    JNIEnv *env = android::AndroidRuntime::getJNIEnv();
+    ALOGV("~FrontendClientCallbackImpl()");
+    std::scoped_lock<std::mutex> lock(mMutex);
+    for (const auto& mapEntry : mListenersMap) {
+        ALOGV("deleteRef :%p at @ %p", mapEntry.second, this);
+        env->DeleteWeakGlobalRef(mapEntry.second);
     }
+    mListenersMap.clear();
 }
 
 /////////////// Tuner ///////////////////////
@@ -1176,6 +1217,10 @@ JTuner::JTuner(JNIEnv *env, jobject thiz) : mClass(nullptr) {
     mSharedFeId = (int)Constant::INVALID_FRONTEND_ID;
 }
 
+jweak JTuner::getObject() {
+    return mObject;
+}
+
 JTuner::~JTuner() {
     if (mFeClient != nullptr) {
         mFeClient->close();
@@ -1188,6 +1233,7 @@ JTuner::~JTuner() {
     env->DeleteWeakGlobalRef(mObject);
     env->DeleteGlobalRef(mClass);
     mFeClient = nullptr;
+    mFeClientCb = nullptr;
     mDemuxClient = nullptr;
     mClass = nullptr;
     mObject = nullptr;
@@ -1243,9 +1289,8 @@ jobject JTuner::openFrontendByHandle(int feHandle) {
         return nullptr;
     }
 
-    sp<FrontendClientCallbackImpl> feClientCb =
-            new FrontendClientCallbackImpl(env->NewWeakGlobalRef(mObject));
-    mFeClient->setCallback(feClientCb);
+    mFeClientCb = new FrontendClientCallbackImpl(this, mObject);
+    mFeClient->setCallback(mFeClientCb);
     // TODO: add more fields to frontend
     return env->NewObject(
             env->FindClass("android/media/tv/tuner/Tuner$Frontend"),
@@ -1263,6 +1308,18 @@ int JTuner::shareFrontend(int feId) {
 
     mSharedFeId = feId;
     return (int)Result::SUCCESS;
+}
+
+void JTuner::registerFeCbListener(JTuner* jtuner) {
+    if (mFeClientCb != nullptr && jtuner != nullptr) {
+        mFeClientCb->addCallbackListener(jtuner, jtuner->getObject());
+    }
+}
+
+void JTuner::unregisterFeCbListener(JTuner* jtuner) {
+    if (mFeClientCb != nullptr && jtuner != nullptr) {
+        mFeClientCb->removeCallbackListener(jtuner);
+    }
 }
 
 jobject JTuner::getAnalogFrontendCaps(JNIEnv *env, FrontendCapabilities &caps) {
@@ -3184,6 +3241,20 @@ static int android_media_tv_Tuner_share_frontend(
     return tuner->shareFrontend(id);
 }
 
+static void android_media_tv_Tuner_register_fe_cb_listener(
+        JNIEnv *env, jobject thiz, jlong shareeJTuner) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    JTuner *jtuner = (JTuner *)shareeJTuner;
+    tuner->registerFeCbListener(jtuner);
+}
+
+static void android_media_tv_Tuner_unregister_fe_cb_listener(
+        JNIEnv *env, jobject thiz, jlong shareeJTuner) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    JTuner *jtuner = (JTuner *)shareeJTuner;
+    tuner->unregisterFeCbListener(jtuner);
+}
+
 static int android_media_tv_Tuner_tune(JNIEnv *env, jobject thiz, jint type, jobject settings) {
     sp<JTuner> tuner = getTuner(env, thiz);
     FrontendSettings setting = getFrontendSettings(env, type, settings);
@@ -4346,6 +4417,10 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_frontend_by_handle },
     { "nativeShareFrontend", "(I)I",
             (void *)android_media_tv_Tuner_share_frontend },
+    { "nativeRegisterFeCbListener", "(J)V",
+            (void*)android_media_tv_Tuner_register_fe_cb_listener },
+    { "nativeUnregisterFeCbListener", "(J)V",
+            (void*)android_media_tv_Tuner_unregister_fe_cb_listener },
     { "nativeTune", "(ILandroid/media/tv/tuner/frontend/FrontendSettings;)I",
             (void *)android_media_tv_Tuner_tune },
     { "nativeStopTune", "()I", (void *)android_media_tv_Tuner_stop_tune },
