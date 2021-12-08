@@ -564,8 +564,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mWifiEntries.add(mWifiEntry1);
         mWifiEntries.add(mWifiEntry2);
         mWifiEntries.add(mWifiEntry3);
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries,
+                null /* connectedEntry */, true /* hasMoreEntry */);
 
         // Turn off airplane mode to has carrier WiFi, then Wi-Fi entries will keep the same.
         reset(mInternetDialogCallback);
@@ -573,8 +573,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         mInternetDialogController.onAccessPointsChanged(mAccessPoints);
 
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries,
+                null /* connectedEntry */, true /* hasMoreEntry */);
     }
 
     @Test
