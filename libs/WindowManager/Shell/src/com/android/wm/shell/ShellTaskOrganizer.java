@@ -52,8 +52,8 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.recents.RecentTasksController;
-import com.android.wm.shell.sizecompatui.SizeCompatUIController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 
 import java.io.PrintWriter;
@@ -69,7 +69,7 @@ import java.util.function.Consumer;
  * TODO(b/167582004): may consider consolidating this class and TaskOrganizer
  */
 public class ShellTaskOrganizer extends TaskOrganizer implements
-        SizeCompatUIController.SizeCompatUICallback {
+        CompatUIController.CompatUICallback {
 
     // Intentionally using negative numbers here so the positive numbers can be used
     // for task id specific listeners that will be added later.
@@ -98,9 +98,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         default void onTaskInfoChanged(RunningTaskInfo taskInfo) {}
         default void onTaskVanished(RunningTaskInfo taskInfo) {}
         default void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {}
-        /** Whether this task listener supports size compat UI. */
-        default boolean supportSizeCompatUI() {
-            // All TaskListeners should support size compat except PIP.
+        /** Whether this task listener supports  compat UI. */
+        default boolean supportCompatUI() {
+            // All TaskListeners should support compat UI except PIP.
             return true;
         }
         /** Attaches the a child window surface to the task surface. */
@@ -159,11 +159,11 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     private StartingWindowController mStartingWindow;
 
     /**
-     * In charge of showing size compat UI. Can be {@code null} if device doesn't support size
+     * In charge of showing compat UI. Can be {@code null} if device doesn't support size
      * compat.
      */
     @Nullable
-    private final SizeCompatUIController mSizeCompatUI;
+    private final CompatUIController mCompatUI;
 
     @Nullable
     private final Optional<RecentTasksController> mRecentTasks;
@@ -172,32 +172,32 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     private RunningTaskInfo mLastFocusedTaskInfo;
 
     public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context) {
-        this(null /* taskOrganizerController */, mainExecutor, context, null /* sizeCompatUI */,
+        this(null /* taskOrganizerController */, mainExecutor, context, null /* compatUI */,
                 Optional.empty() /* recentTasksController */);
     }
 
     public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context, @Nullable
-            SizeCompatUIController sizeCompatUI) {
-        this(null /* taskOrganizerController */, mainExecutor, context, sizeCompatUI,
+            CompatUIController compatUI) {
+        this(null /* taskOrganizerController */, mainExecutor, context, compatUI,
                 Optional.empty() /* recentTasksController */);
     }
 
     public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context, @Nullable
-            SizeCompatUIController sizeCompatUI,
+            CompatUIController compatUI,
             Optional<RecentTasksController> recentTasks) {
-        this(null /* taskOrganizerController */, mainExecutor, context, sizeCompatUI,
+        this(null /* taskOrganizerController */, mainExecutor, context, compatUI,
                 recentTasks);
     }
 
     @VisibleForTesting
     ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController, ShellExecutor mainExecutor,
-            Context context, @Nullable SizeCompatUIController sizeCompatUI,
+            Context context, @Nullable CompatUIController compatUI,
             Optional<RecentTasksController> recentTasks) {
         super(taskOrganizerController, mainExecutor);
-        mSizeCompatUI = sizeCompatUI;
+        mCompatUI = compatUI;
         mRecentTasks = recentTasks;
-        if (sizeCompatUI != null) {
-            sizeCompatUI.setSizeCompatUICallback(this);
+        if (compatUI != null) {
+            compatUI.setCompatUICallback(this);
         }
     }
 
@@ -428,7 +428,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             listener.onTaskAppeared(info.getTaskInfo(), info.getLeash());
         }
         notifyLocusVisibilityIfNeeded(info.getTaskInfo());
-        notifySizeCompatUI(info.getTaskInfo(), listener);
+        notifyCompatUI(info.getTaskInfo(), listener);
     }
 
     /**
@@ -459,8 +459,8 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             }
             notifyLocusVisibilityIfNeeded(taskInfo);
             if (updated || !taskInfo.equalsForSizeCompat(data.getTaskInfo())) {
-                // Notify the size compat UI if the listener or task info changed.
-                notifySizeCompatUI(taskInfo, newListener);
+                // Notify the compat UI if the listener or task info changed.
+                notifyCompatUI(taskInfo, newListener);
             }
             if (data.getTaskInfo().getWindowingMode() != taskInfo.getWindowingMode()) {
                 // Notify the recent tasks when a task changes windowing modes
@@ -504,8 +504,8 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 listener.onTaskVanished(taskInfo);
             }
             notifyLocusVisibilityIfNeeded(taskInfo);
-            // Pass null for listener to remove the size compat UI on this task if there is any.
-            notifySizeCompatUI(taskInfo, null /* taskListener */);
+            // Pass null for listener to remove the compat UI on this task if there is any.
+            notifyCompatUI(taskInfo, null /* taskListener */);
             // Notify the recent tasks that a task has been removed
             mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskRemoved(taskInfo));
         }
@@ -618,28 +618,28 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     /**
-     * Notifies {@link SizeCompatUIController} about the size compat info changed on the give Task
+     * Notifies {@link CompatUIController} about the compat info changed on the give Task
      * to update the UI accordingly.
      *
      * @param taskInfo the new Task info
      * @param taskListener listener to handle the Task Surface placement. {@code null} if task is
      *                     vanished.
      */
-    private void notifySizeCompatUI(RunningTaskInfo taskInfo, @Nullable TaskListener taskListener) {
-        if (mSizeCompatUI == null) {
+    private void notifyCompatUI(RunningTaskInfo taskInfo, @Nullable TaskListener taskListener) {
+        if (mCompatUI == null) {
             return;
         }
 
-        // The task is vanished or doesn't support size compat UI, notify to remove size compat UI
+        // The task is vanished or doesn't support compat UI, notify to remove compat UI
         // on this Task if there is any.
-        if (taskListener == null || !taskListener.supportSizeCompatUI()
+        if (taskListener == null || !taskListener.supportCompatUI()
                 || !taskInfo.topActivityInSizeCompat || !taskInfo.isVisible) {
-            mSizeCompatUI.onSizeCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
+            mCompatUI.onCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
                     null /* taskConfig */, null /* taskListener */);
             return;
         }
 
-        mSizeCompatUI.onSizeCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
+        mCompatUI.onCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
                 taskInfo.configuration, taskListener);
     }
 
