@@ -27,14 +27,22 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProviderRule;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -50,11 +58,19 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class VibratorTest {
 
+    @Rule
+    public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+
+    private Context mContextSpy;
     private Vibrator mVibratorSpy;
 
     @Before
     public void setUp() {
-        mVibratorSpy = spy(InstrumentationRegistry.getContext().getSystemService(Vibrator.class));
+        mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
+
+        ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
+        when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
+        mVibratorSpy = spy(new SystemVibrator(mContextSpy));
     }
 
     @Test
