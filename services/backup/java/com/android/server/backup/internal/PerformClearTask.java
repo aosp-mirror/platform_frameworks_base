@@ -21,9 +21,9 @@ import static com.android.server.backup.BackupManagerService.TAG;
 import android.content.pm.PackageInfo;
 import android.util.Slog;
 
-import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
+import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 
 import java.io.File;
@@ -47,7 +47,7 @@ public class PerformClearTask implements Runnable {
 
     public void run() {
         String callerLogString = "PerformClearTask.run()";
-        IBackupTransport transport = null;
+        BackupTransportClient transport = null;
         try {
             // Clear the on-device backup state to ensure a full backup next time
             String transportDirName =

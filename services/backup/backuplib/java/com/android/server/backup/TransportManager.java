@@ -39,6 +39,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.Preconditions;
+import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.OnTransportRegisteredListener;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportConnectionManager;
@@ -641,7 +642,7 @@ public class TransportManager {
         TransportConnection transportConnection =
                 mTransportConnectionManager.getTransportClient(
                         transportComponent, extras, callerLogString);
-        final IBackupTransport transport;
+        final BackupTransportClient transport;
         try {
             transport = transportConnection.connectOrThrow(callerLogString);
         } catch (TransportNotAvailableException e) {
@@ -653,10 +654,6 @@ public class TransportManager {
 
         int result;
         try {
-            // This is a temporary fix to allow blocking calls.
-            // TODO: b/147702043. Redesign IBackupTransport so as to make the calls non-blocking.
-            Binder.allowBlocking(transport.asBinder());
-
             String transportName = transport.name();
             String transportDirName = transport.transportDirName();
             registerTransport(transportComponent, transport);
@@ -674,8 +671,8 @@ public class TransportManager {
     }
 
     /** If {@link RemoteException} is thrown the transport is guaranteed to not be registered. */
-    private void registerTransport(ComponentName transportComponent, IBackupTransport transport)
-            throws RemoteException {
+    private void registerTransport(ComponentName transportComponent,
+            BackupTransportClient transport) throws RemoteException {
         checkCanUseTransport();
 
         TransportDescription description =

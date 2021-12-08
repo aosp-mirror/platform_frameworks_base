@@ -34,8 +34,8 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.RemoteException;
 
-import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.transport.TransportNotRegisteredException;
@@ -160,7 +160,7 @@ public class TransportTestUtils {
             when(transportConnectionMock.getTransportComponent()).thenReturn(transportComponent);
             if (status == TransportStatus.REGISTERED_AVAILABLE) {
                 // Transport registered and available
-                IBackupTransport transportMock = mockTransportBinder(transport);
+                BackupTransportClient transportMock = mockTransportBinder(transport);
                 when(transportConnectionMock.connectOrThrow(any())).thenReturn(transportMock);
                 when(transportConnectionMock.connect(any())).thenReturn(transportMock);
 
@@ -179,8 +179,9 @@ public class TransportTestUtils {
         }
     }
 
-    private static IBackupTransport mockTransportBinder(TransportData transport) throws Exception {
-        IBackupTransport transportBinder = mock(IBackupTransport.class);
+    private static BackupTransportClient mockTransportBinder(TransportData transport)
+            throws Exception {
+        BackupTransportClient transportBinder = mock(BackupTransportClient.class);
         try {
             when(transportBinder.name()).thenReturn(transport.transportName);
             when(transportBinder.transportDirName()).thenReturn(transport.transportDirName);
@@ -199,12 +200,12 @@ public class TransportTestUtils {
     public static class TransportMock {
         public final TransportData transportData;
         @Nullable public final TransportConnection mTransportConnection;
-        @Nullable public final IBackupTransport transport;
+        @Nullable public final BackupTransportClient transport;
 
         private TransportMock(
                 TransportData transportData,
                 @Nullable TransportConnection transportConnection,
-                @Nullable IBackupTransport transport) {
+                @Nullable BackupTransportClient transport) {
             this.transportData = transportData;
             this.mTransportConnection = transportConnection;
             this.transport = transport;

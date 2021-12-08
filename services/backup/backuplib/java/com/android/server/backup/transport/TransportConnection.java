@@ -59,7 +59,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 /**
- * A {@link TransportConnection} manages the connection to an {@link IBackupTransport} service,
+ * A {@link TransportConnection} manages the connection to a {@link BackupTransportClient},
  * obtained via the {@param bindIntent} parameter provided in the constructor. A
  * {@link TransportConnection} is responsible for only one connection to the transport service,
  * not more.
@@ -67,9 +67,9 @@ import java.util.concurrent.ExecutionException;
  * <p>After retrieved using {@link TransportManager#getTransportClient(String, String)}, you can
  * call either {@link #connect(String)}, if you can block your thread, or {@link
  * #connectAsync(TransportConnectionListener, String)}, otherwise, to obtain a {@link
- * IBackupTransport} instance. It's meant to be passed around as a token to a connected transport.
- * When the connection is not needed anymore you should call {@link #unbind(String)} or indirectly
- * via {@link TransportManager#disposeOfTransportClient(TransportConnection, String)}.
+ * BackupTransportClient} instance. It's meant to be passed around as a token to a connected
+ * transport. When the connection is not needed anymore you should call {@link #unbind(String)} or
+ * indirectly via {@link TransportManager#disposeOfTransportClient(TransportConnection, String)}.
  *
  * <p>DO NOT forget to unbind otherwise there will be dangling connections floating around.
  *
@@ -106,7 +106,7 @@ public class TransportConnection {
     private int mState = State.IDLE;
 
     @GuardedBy("mStateLock")
-    private volatile IBackupTransport mTransport;
+    private volatile BackupTransportClient mTransport;
 
     TransportConnection(
             @UserIdInt int userId,
@@ -174,10 +174,12 @@ public class TransportConnection {
      * trigger another one, just piggyback on the original request.
      *
      * <p>It's guaranteed that you are going to get a call back to {@param listener} after this
-     * call. However, the {@param IBackupTransport} parameter, the transport binder, is not
-     * guaranteed to be non-null, or if it's non-null it's not guaranteed to be usable - i.e. it can
-     * throw {@link DeadObjectException}s on method calls. You should check for both in your code.
-     * The reasons for a null transport binder are:
+     * call. However, the {@link BackupTransportClient} parameter in
+     * {@link TransportConnectionListener#onTransportConnectionResult(BackupTransportClient,
+     * TransportConnection)}, the transport client, is not guaranteed to be non-null, or if it's
+     * non-null it's not guaranteed to be usable - i.e. it can throw {@link DeadObjectException}s
+     * on method calls. You should check for both in your code. The reasons for a null transport
+     * client are:
      *
      * <ul>
      *   <li>Some code called {@link #unbind(String)} before you got a callback.
@@ -193,7 +195,7 @@ public class TransportConnection {
      * For unusable transport binders check {@link DeadObjectException}.
      *
      * @param listener The listener that will be called with the (possibly null or unusable) {@link
-     *     IBackupTransport} instance and this {@link TransportConnection} object.
+     *     BackupTransportClient} instance and this {@link TransportConnection} object.
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. This
      *     should be a human-readable short string that is easily identifiable in the logs. Ideally
      *     TAG.methodName(), where TAG is the one used in logcat. In cases where this is is not very
@@ -293,8 +295,8 @@ public class TransportConnection {
      *
      * <p>Synchronous version of {@link #connectAsync(TransportConnectionListener, String)}. The
      * same observations about state are valid here. Also, what was said about the {@link
-     * IBackupTransport} parameter of {@link TransportConnectionListener} now apply to the return
-     * value of this method.
+     * BackupTransportClient} parameter of {@link TransportConnectionListener} now apply to the
+     * return value of this method.
      *
      * <p>This is a potentially blocking operation, so be sure to call this carefully on the correct
      * threads. You can't call this from the process main-thread (it throws an exception if you do
@@ -305,18 +307,18 @@ public class TransportConnection {
      *
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
      *     {@link #connectAsync(TransportConnectionListener, String)} for more details.
-     * @return A {@link IBackupTransport} transport binder instance or null. If it's non-null it can
-     *     still be unusable - throws {@link DeadObjectException} on method calls
+     * @return A {@link BackupTransportClient} transport client instance or null. If it's non-null
+     *     it can still be unusable - throws {@link DeadObjectException} on method calls
      */
     @WorkerThread
     @Nullable
-    public IBackupTransport connect(String caller) {
+    public BackupTransportClient connect(String caller) {
         // If called on the main-thread this could deadlock waiting because calls to
         // ServiceConnection are on the main-thread as well
         Preconditions.checkState(
                 !Looper.getMainLooper().isCurrentThread(), "Can't call connect() on main thread");
 
-        IBackupTransport transport = mTransport;
+        BackupTransportClient transport = mTransport;
         if (transport != null) {
             log(Priority.DEBUG, caller, "Sync connect: reusing transport");
             return transport;
@@ -330,7 +332,7 @@ public class TransportConnection {
             }
         }
 
-        CompletableFuture<IBackupTransport> transportFuture = new CompletableFuture<>();
+        CompletableFuture<BackupTransportClient> transportFuture = new CompletableFuture<>();
         TransportConnectionListener requestListener =
                 (requestedTransport, transportClient) ->
                         transportFuture.complete(requestedTransport);
@@ -359,13 +361,14 @@ public class TransportConnection {
      *
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
      *     {@link #connectAsync(TransportConnectionListener, String)} for more details.
-     * @return A {@link IBackupTransport} transport binder instance.
+     * @return A {@link BackupTransportClient} transport binder instance.
      * @see #connect(String)
      * @throws TransportNotAvailableException if connection attempt fails.
      */
     @WorkerThread
-    public IBackupTransport connectOrThrow(String caller) throws TransportNotAvailableException {
-        IBackupTransport transport = connect(caller);
+    public BackupTransportClient connectOrThrow(String caller)
+            throws TransportNotAvailableException {
+        BackupTransportClient transport = connect(caller);
         if (transport == null) {
             log(Priority.ERROR, caller, "Transport connection failed");
             throw new TransportNotAvailableException();
@@ -379,12 +382,12 @@ public class TransportConnection {
      *
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
      *     {@link #connectAsync(TransportConnectionListener, String)} for more details.
-     * @return A {@link IBackupTransport} transport binder instance.
+     * @return A {@link BackupTransportClient} transport client instance.
      * @throws TransportNotAvailableException if not connected.
      */
-    public IBackupTransport getConnectedTransport(String caller)
+    public BackupTransportClient getConnectedTransport(String caller)
             throws TransportNotAvailableException {
-        IBackupTransport transport = mTransport;
+        BackupTransportClient transport = mTransport;
         if (transport == null) {
             log(Priority.ERROR, caller, "Transport not connected");
             throw new TransportNotAvailableException();
@@ -425,7 +428,8 @@ public class TransportConnection {
     }
 
     private void onServiceConnected(IBinder binder) {
-        IBackupTransport transport = IBackupTransport.Stub.asInterface(binder);
+        IBackupTransport transportBinder = IBackupTransport.Stub.asInterface(binder);
+        BackupTransportClient transport = new BackupTransportClient(transportBinder);
         synchronized (mStateLock) {
             checkStateIntegrityLocked();
 
@@ -492,15 +496,15 @@ public class TransportConnection {
 
     private void notifyListener(
             TransportConnectionListener listener,
-            @Nullable IBackupTransport transport,
+            @Nullable BackupTransportClient transport,
             String caller) {
-        String transportString = (transport != null) ? "IBackupTransport" : "null";
+        String transportString = (transport != null) ? "BackupTransportClient" : "null";
         log(Priority.INFO, "Notifying [" + caller + "] transport = " + transportString);
         mListenerHandler.post(() -> listener.onTransportConnectionResult(transport, this));
     }
 
     @GuardedBy("mStateLock")
-    private void notifyListenersAndClearLocked(@Nullable IBackupTransport transport) {
+    private void notifyListenersAndClearLocked(@Nullable BackupTransportClient transport) {
         for (Map.Entry<TransportConnectionListener, String> entry : mListeners.entrySet()) {
             TransportConnectionListener listener = entry.getKey();
             String caller = entry.getValue();
@@ -510,7 +514,7 @@ public class TransportConnection {
     }
 
     @GuardedBy("mStateLock")
-    private void setStateLocked(@State int state, @Nullable IBackupTransport transport) {
+    private void setStateLocked(@State int state, @Nullable BackupTransportClient transport) {
         log(Priority.VERBOSE, "State: " + stateToString(mState) + " => " + stateToString(state));
         onStateTransition(mState, state);
         mState = state;
