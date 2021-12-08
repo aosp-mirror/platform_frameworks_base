@@ -1458,6 +1458,7 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public boolean isPstnCallAudioInterceptable();
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int requestAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String, int, int);
     method public void setRampingRingerEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setTestDeviceConnectionState(@NonNull android.media.AudioDeviceAttributes, boolean);
   }
 
   public static final class AudioRecord.MetricsConstants {
