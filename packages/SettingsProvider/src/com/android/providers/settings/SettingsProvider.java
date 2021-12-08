@@ -25,6 +25,7 @@ import static android.provider.Settings.Config.SYNC_DISABLED_MODE_UNTIL_REBOOT;
 import static android.provider.Settings.SET_ALL_RESULT_DISABLED;
 import static android.provider.Settings.SET_ALL_RESULT_FAILURE;
 import static android.provider.Settings.SET_ALL_RESULT_SUCCESS;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER;
 import static android.provider.Settings.Secure.NOTIFICATION_BUBBLES;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
@@ -3585,7 +3586,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 204;
+            private static final int SETTINGS_VERSION = 205;
 
             private final int mUserId;
 
@@ -5225,6 +5226,30 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 204;
+                }
+
+                if (currentVersion == 204) {
+                    // Version 204: Reset the
+                    // Secure#ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT as enabled
+                    // status for showing the tooltips.
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting accessibilityButtonMode = secureSettings.getSettingLocked(
+                            Secure.ACCESSIBILITY_BUTTON_MODE);
+                    if (!accessibilityButtonMode.isNull()
+                            && accessibilityButtonMode.getValue().equals(
+                            String.valueOf(ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU))) {
+                        if (isGestureNavigateEnabled()
+                                && hasValueInA11yButtonTargets(secureSettings)) {
+                            secureSettings.insertSettingLocked(
+                                    Secure.ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
+                                    /* enabled */ "1",
+                                    /* tag= */ null,
+                                    /* makeDefault= */ false,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 205;
                 }
 
                 // vXXX: Add new settings above this point.
