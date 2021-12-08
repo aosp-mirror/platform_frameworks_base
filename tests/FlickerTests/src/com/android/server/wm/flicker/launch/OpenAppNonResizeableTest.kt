@@ -231,7 +231,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     @Test
     fun screenLockedStart() {
         testSpec.assertLayersStart {
-            isVisible(colorFadComponent)
+            isEmpty()
         }
     }
 
