@@ -2238,8 +2238,7 @@ public final class ProcessList {
                 // not the calling one.
                 appInfo.packageName = app.getHostingRecord().getDefiningPackageName();
                 appInfo.uid = uid;
-                int runtimeFlags = decideTaggingLevel(app);
-                appZygote = new AppZygote(appInfo, uid, firstUid, lastUid, runtimeFlags);
+                appZygote = new AppZygote(appInfo, uid, firstUid, lastUid);
                 mAppZygotes.put(app.info.processName, uid, appZygote);
                 zygoteProcessList = new ArrayList<ProcessRecord>();
                 mAppZygoteProcesses.put(appZygote, zygoteProcessList);
