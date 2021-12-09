@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.window.DisplayWindowPolicyController;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
@@ -38,11 +39,11 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-/** @hide */
 @SuppressLint("LongLogTag")
 public class VirtualDeviceManagerService extends SystemService {
 
@@ -84,6 +85,15 @@ public class VirtualDeviceManagerService extends SystemService {
         publishLocalService(VirtualDeviceManagerInternal.class, new LocalService());
     }
 
+    @GuardedBy("mVirtualDeviceManagerLock")
+    private boolean isValidVirtualDeviceLocked(IVirtualDevice virtualDevice) {
+        try {
+            return mVirtualDevices.contains(virtualDevice.getAssociationId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @Override
     public void onUserStarting(@NonNull TargetUser user) {
         super.onUserStarting(user);
@@ -121,6 +131,7 @@ public class VirtualDeviceManagerService extends SystemService {
 
         private final AssociationInfo mAssociationInfo;
         private final int mOwnerUid;
+        private final ArrayList<Integer> mDisplayIds = new ArrayList<>();
 
         private VirtualDeviceImpl(int ownerUid, IBinder token, AssociationInfo associationInfo) {
             mOwnerUid = ownerUid;
@@ -148,6 +159,24 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override
         public void binderDied() {
             close();
+        }
+
+        DisplayWindowPolicyController onVirtualDisplayCreatedLocked(int displayId) {
+            if (mDisplayIds.contains(displayId)) {
+                throw new IllegalStateException(
+                        "Virtual device already have a virtual display with ID " + displayId);
+            }
+            mDisplayIds.add(displayId);
+            // TODO(b/201712607): Return the corresponding DisplayWindowPolicyController.
+            return null;
+        }
+
+        void onVirtualDisplayRemovedLocked(int displayId) {
+            if (!mDisplayIds.contains(displayId)) {
+                throw new IllegalStateException(
+                        "Virtual device doesn't have a virtual display with ID " + displayId);
+            }
+            mDisplayIds.remove(displayId);
         }
     }
 
@@ -228,6 +257,28 @@ public class VirtualDeviceManagerService extends SystemService {
     }
 
     private final class LocalService extends VirtualDeviceManagerInternal {
+
+        @Override
+        public boolean isValidVirtualDevice(IVirtualDevice virtualDevice) {
+            synchronized (mVirtualDeviceManagerLock) {
+                return isValidVirtualDeviceLocked(virtualDevice);
+            }
+        }
+
+        @Override
+        public DisplayWindowPolicyController onVirtualDisplayCreated(IVirtualDevice virtualDevice,
+                int displayId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                return ((VirtualDeviceImpl) virtualDevice).onVirtualDisplayCreatedLocked(displayId);
+            }
+        }
+
+        @Override
+        public void onVirtualDisplayRemoved(IVirtualDevice virtualDevice, int displayId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                ((VirtualDeviceImpl) virtualDevice).onVirtualDisplayRemovedLocked(displayId);
+            }
+        }
 
         @Override
         public boolean isAppOwnerOfAnyVirtualDevice(int uid) {
