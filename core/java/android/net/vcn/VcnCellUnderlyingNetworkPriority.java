@@ -151,7 +151,7 @@ public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetwork
 
     /** Retrieve the allowed PLMN IDs, or an empty set if any PLMN ID is acceptable. */
     @NonNull
-    public Set<String> getAllowedPlmnIds() {
+    public Set<String> getAllowedOperatorPlmnIds() {
         return Collections.unmodifiableSet(mAllowedNetworkPlmnIds);
     }
 
@@ -211,7 +211,7 @@ public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetwork
     }
 
     /** This class is used to incrementally build WifiNetworkPriority objects. */
-    public static class Builder extends VcnUnderlyingNetworkPriority.Builder<Builder> {
+    public static final class Builder extends VcnUnderlyingNetworkPriority.Builder<Builder> {
         @NonNull private final Set<String> mAllowedNetworkPlmnIds = new ArraySet<>();
         @NonNull private final Set<Integer> mAllowedSpecificCarrierIds = new ArraySet<>();
 
@@ -233,7 +233,7 @@ public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetwork
          *     and {@link SubscriptionInfo#getMncString()}.
          */
         @NonNull
-        public Builder setAllowedPlmnIds(@NonNull Set<String> allowedNetworkPlmnIds) {
+        public Builder setAllowedOperatorPlmnIds(@NonNull Set<String> allowedNetworkPlmnIds) {
             validatePlmnIds(allowedNetworkPlmnIds);
 
             mAllowedNetworkPlmnIds.clear();
