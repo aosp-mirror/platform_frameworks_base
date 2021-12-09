@@ -42,6 +42,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
@@ -92,6 +93,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     @Mock
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock
+    private SystemUIDialogManager mDialogManager;
+    @Mock
     private UdfpsController mUdfpsController;
     private FakeSystemClock mSystemClock = new FakeSystemClock();
 
@@ -130,6 +133,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
                 mSystemClock,
                 mKeyguardStateController,
                 mUnlockedScreenOffAnimationController,
+                mDialogManager,
                 mUdfpsController);
     }
 
