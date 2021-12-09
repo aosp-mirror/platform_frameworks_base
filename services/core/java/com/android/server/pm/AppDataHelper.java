@@ -293,6 +293,9 @@ final class AppDataHelper {
             String primaryCpuAbi = AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting);
             if (primaryCpuAbi != null && !VMRuntime.is64BitAbi(primaryCpuAbi)) {
                 final String nativeLibPath = pkg.getNativeLibraryDir();
+                if (!(new File(nativeLibPath).exists())) {
+                    return;
+                }
                 try {
                     mInstaller.linkNativeLibraryDirectory(volumeUuid, packageName,
                             nativeLibPath, userId);
