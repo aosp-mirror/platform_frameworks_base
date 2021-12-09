@@ -870,7 +870,8 @@ public class SystemConfig {
                                 boolean allowedMinSdk = minDeviceSdk <= Build.VERSION.SDK_INT;
                                 boolean allowedMaxSdk =
                                         maxDeviceSdk == 0 || maxDeviceSdk >= Build.VERSION.SDK_INT;
-                                if (allowedMinSdk && allowedMaxSdk) {
+                                final boolean exists = new File(lfile).exists();
+                                if (allowedMinSdk && allowedMaxSdk && exists) {
                                     int bcpSince = XmlUtils.readIntAttribute(parser,
                                             "on-bootclasspath-since", 0);
                                     int bcpBefore = XmlUtils.readIntAttribute(parser,
@@ -880,6 +881,19 @@ public class SystemConfig {
                                                     ? new String[0] : ldependency.split(":"),
                                             bcpSince, bcpBefore);
                                     mSharedLibraries.put(lname, entry);
+                                } else {
+                                    final StringBuilder msg = new StringBuilder(
+                                            "Ignore shared library ").append(lname).append(":");
+                                    if (!allowedMinSdk) {
+                                        msg.append(" min-device-sdk=").append(minDeviceSdk);
+                                    }
+                                    if (!allowedMaxSdk) {
+                                        msg.append(" max-device-sdk=").append(maxDeviceSdk);
+                                    }
+                                    if (!exists) {
+                                        msg.append(" ").append(lfile).append(" does not exist");
+                                    }
+                                    Slog.i(TAG, msg.toString());
                                 }
                             }
                         } else {

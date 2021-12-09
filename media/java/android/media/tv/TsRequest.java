@@ -22,6 +22,8 @@ import android.os.Parcelable;
 
 /** @hide */
 public class TsRequest extends BroadcastInfoRequest implements Parcelable {
+    public static final int requestType = BroadcastInfoType.TS;
+
     public static final @NonNull Parcelable.Creator<TsRequest> CREATOR =
             new Parcelable.Creator<TsRequest>() {
                 @Override
@@ -36,30 +38,29 @@ public class TsRequest extends BroadcastInfoRequest implements Parcelable {
                 }
             };
 
-    int tsPid;
+    private final int mTsPid;
 
     public static TsRequest createFromParcelBody(Parcel in) {
         return new TsRequest(in);
     }
 
-    public TsRequest(int requestId, int tsPid) {
-        super(requestId);
-        this.tsPid = tsPid;
+    public TsRequest(int requestId, int option, int tsPid) {
+        super(requestType, requestId, option);
+        mTsPid = tsPid;
     }
 
     protected TsRequest(Parcel source) {
-        super(source);
-        tsPid = source.readInt();
+        super(requestType, source);
+        mTsPid = source.readInt();
     }
 
     public int getTsPid() {
-        return tsPid;
+        return mTsPid;
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(PARCEL_TOKEN_TS_REQUEST);
         super.writeToParcel(dest, flags);
-        dest.writeInt(tsPid);
+        dest.writeInt(mTsPid);
     }
 }

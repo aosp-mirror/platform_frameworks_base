@@ -103,7 +103,6 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
@@ -127,6 +126,7 @@ import com.android.server.backup.params.ClearRetryParams;
 import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.restore.ActiveRestoreSession;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
+import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.transport.TransportNotRegisteredException;
@@ -3719,7 +3719,8 @@ public class UserBackupManagerService {
                 mTransportManager.getTransportClient(newTransportName, callerLogString);
         if (transportConnection != null) {
             try {
-                IBackupTransport transport = transportConnection.connectOrThrow(callerLogString);
+                BackupTransportClient transport = transportConnection.connectOrThrow(
+                        callerLogString);
                 mCurrentToken = transport.getCurrentRestoreSet();
             } catch (Exception e) {
                 // Oops.  We can't know the current dataset token, so reset and figure it out
@@ -4371,7 +4372,7 @@ public class UserBackupManagerService {
 
         final long oldCallingId = Binder.clearCallingIdentity();
         try {
-            IBackupTransport transport = transportConnection.connectOrThrow(
+            BackupTransportClient transport = transportConnection.connectOrThrow(
                     /* caller */ "BMS.getOperationTypeFromTransport");
             if ((transport.getTransportFlags() & BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER) != 0) {
                 return OperationType.MIGRATION;

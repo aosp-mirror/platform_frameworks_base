@@ -32,6 +32,7 @@ import android.media.IAudioRoutesObserver;
 import android.media.IAudioServerStateDispatcher;
 import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.ICommunicationDeviceDispatcher;
+import android.media.IMuteAwaitConnectionCallback;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
@@ -447,4 +448,16 @@ interface IAudioService {
     boolean isVolumeFixed();
 
     boolean isPstnCallAudioInterceptable();
+
+    oneway void muteAwaitConnection(in int[] usagesToMute, in AudioDeviceAttributes dev,
+            long timeOutMs);
+
+    oneway void cancelMuteAwaitConnection(in AudioDeviceAttributes dev);
+
+    AudioDeviceAttributes getMutingExpectedDevice();
+
+    void registerMuteAwaitConnectionDispatcher(in IMuteAwaitConnectionCallback cb,
+            boolean register);
+
+    void setTestDeviceConnectionState(in AudioDeviceAttributes device, boolean connected);
 }

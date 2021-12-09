@@ -24,6 +24,7 @@ import static com.android.server.wm.WindowOrganizerController.configurationsAreE
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -577,6 +578,28 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             case PendingTaskFragmentEvent.EVENT_ERROR:
                 state.onTaskFragmentError(taskFragmentOrg, event.mErrorCallback,
                         event.mException);
+        }
+    }
+
+    // TODO(b/204399167): change to push the embedded state to the client side
+    @Override
+    public boolean isActivityEmbedded(IBinder activityToken) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord activity = ActivityRecord.forTokenLocked(activityToken);
+            if (activity == null) {
+                return false;
+            }
+            final TaskFragment taskFragment = activity.getOrganizedTaskFragment();
+            if (taskFragment == null) {
+                return false;
+            }
+            final Task parentTask = taskFragment.getTask();
+            if (parentTask != null) {
+                final Rect taskBounds = parentTask.getBounds();
+                final Rect taskFragBounds = taskFragment.getBounds();
+                return !taskBounds.equals(taskFragBounds) && taskBounds.contains(taskFragBounds);
+            }
+            return false;
         }
     }
 }

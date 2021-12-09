@@ -84,9 +84,11 @@ public class TransportConnectionTest {
     @Mock private TransportConnectionListener mTransportConnectionListener;
     @Mock private TransportConnectionListener mTransportConnectionListener2;
     @Mock private IBackupTransport.Stub mTransportBinder;
+
     @UserIdInt private int mUserId;
     private TransportStats mTransportStats;
     private TransportConnection mTransportConnection;
+    private BackupTransportClient mTransportClient;
     private ComponentName mTransportComponent;
     private String mTransportString;
     private Intent mBindIntent;
@@ -116,6 +118,7 @@ public class TransportConnectionTest {
                         "1",
                         "caller",
                         new Handler(mainLooper));
+        mTransportClient = new BackupTransportClient(mTransportBinder);
 
         when(mContext.bindServiceAsUser(
                         eq(mBindIntent),
@@ -156,7 +159,8 @@ public class TransportConnectionTest {
 
         mShadowMainLooper.runToEndOfTasks();
         verify(mTransportConnectionListener)
-                .onTransportConnectionResult(any(IBackupTransport.class), eq(mTransportConnection));
+                .onTransportConnectionResult(any(BackupTransportClient.class),
+                        eq(mTransportConnection));
     }
 
     @Test
@@ -169,9 +173,11 @@ public class TransportConnectionTest {
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
         mShadowMainLooper.runToEndOfTasks();
         verify(mTransportConnectionListener)
-                .onTransportConnectionResult(any(IBackupTransport.class), eq(mTransportConnection));
+                .onTransportConnectionResult(any(BackupTransportClient.class),
+                        eq(mTransportConnection));
         verify(mTransportConnectionListener2)
-                .onTransportConnectionResult(any(IBackupTransport.class), eq(mTransportConnection));
+                .onTransportConnectionResult(any(BackupTransportClient.class),
+                        eq(mTransportConnection));
     }
 
     @Test
@@ -184,7 +190,8 @@ public class TransportConnectionTest {
 
         mShadowMainLooper.runToEndOfTasks();
         verify(mTransportConnectionListener2)
-                .onTransportConnectionResult(any(IBackupTransport.class), eq(mTransportConnection));
+                .onTransportConnectionResult(any(BackupTransportClient.class),
+                        eq(mTransportConnection));
     }
 
     @Test
@@ -312,10 +319,10 @@ public class TransportConnectionTest {
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
 
-        IBackupTransport transportBinder =
+        BackupTransportClient transportClient =
                 runInWorkerThread(() -> mTransportConnection.connect("caller2"));
 
-        assertThat(transportBinder).isNotNull();
+        assertThat(transportClient).isNotNull();
     }
 
     @Test
@@ -325,10 +332,10 @@ public class TransportConnectionTest {
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
         connection.onServiceDisconnected(mTransportComponent);
 
-        IBackupTransport transportBinder =
+        BackupTransportClient transportClient =
                 runInWorkerThread(() -> mTransportConnection.connect("caller2"));
 
-        assertThat(transportBinder).isNull();
+        assertThat(transportClient).isNull();
     }
 
     @Test
@@ -337,10 +344,10 @@ public class TransportConnectionTest {
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onBindingDied(mTransportComponent);
 
-        IBackupTransport transportBinder =
+        BackupTransportClient transportClient =
                 runInWorkerThread(() -> mTransportConnection.connect("caller2"));
 
-        assertThat(transportBinder).isNull();
+        assertThat(transportClient).isNull();
     }
 
     @Test
@@ -354,17 +361,17 @@ public class TransportConnectionTest {
         doAnswer(
                         invocation -> {
                             TransportConnectionListener listener = invocation.getArgument(0);
-                            listener.onTransportConnectionResult(mTransportBinder,
+                            listener.onTransportConnectionResult(mTransportClient,
                                     transportConnection);
                             return null;
                         })
                 .when(transportConnection)
                 .connectAsync(any(), any());
 
-        IBackupTransport transportBinder =
+        BackupTransportClient transportClient =
                 runInWorkerThread(() -> transportConnection.connect("caller"));
 
-        assertThat(transportBinder).isNotNull();
+        assertThat(transportClient).isNotNull();
     }
 
     @Test

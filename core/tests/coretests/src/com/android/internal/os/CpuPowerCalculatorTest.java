@@ -98,6 +98,8 @@ public class CpuPowerCalculatorTest {
                 new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];
         supportedPowerBuckets[MeasuredEnergyStats.POWER_BUCKET_CPU] = true;
 
+        when(mMockCpuUidFreqTimeReader.isFastCpuTimesReader()).thenReturn(true);
+
         mStatsRule.getBatteryStats()
                 .setUserInfoProvider(mMockUserInfoProvider)
                 .setKernelCpuSpeedReaders(mMockKernelCpuSpeedReaders)
@@ -277,8 +279,6 @@ public class CpuPowerCalculatorTest {
 
     @Test
     public void testTimerBasedModel_byProcessState() {
-        mStatsRule.getBatteryStats().setTrackingCpuByProcStateEnabled(true);
-
         when(mMockUserInfoProvider.exists(anyInt())).thenReturn(true);
 
         when(mMockCpuUidFreqTimeReader.allUidTimesAvailable()).thenReturn(true);
@@ -311,7 +311,7 @@ public class CpuPowerCalculatorTest {
         }).when(mMockKerneCpuUidActiveTimeReader).readAbsolute(any());
 
         mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, null);
-        mStatsRule.getBatteryStats().copyFromAllUidsCpuTimes(true, true);
+        mStatsRule.getBatteryStats().updateCpuTimesForAllUids();
 
         mockSingleUidTimeReader(APP_UID1, new long[]{1000, 2000, 3000, 4000});
         mockSingleUidTimeReader(APP_UID2, new long[]{1111, 2222, 3333, 4444});
@@ -326,7 +326,7 @@ public class CpuPowerCalculatorTest {
         }).when(mMockKerneCpuUidActiveTimeReader).readAbsolute(any());
 
         mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, null);
-        mStatsRule.getBatteryStats().copyFromAllUidsCpuTimes(true, true);
+        mStatsRule.getBatteryStats().updateCpuTimesForAllUids();
 
         mockSingleUidTimeReader(APP_UID1, new long[] {5000, 6000, 7000, 8000});
         mockSingleUidTimeReader(APP_UID2, new long[]{5555, 6666, 7777, 8888});
@@ -346,7 +346,7 @@ public class CpuPowerCalculatorTest {
         }).when(mMockKerneCpuUidActiveTimeReader).readAbsolute(any());
 
         mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, null);
-        mStatsRule.getBatteryStats().copyFromAllUidsCpuTimes(true, true);
+        mStatsRule.getBatteryStats().updateCpuTimesForAllUids();
 
         CpuPowerCalculator calculator =
                 new CpuPowerCalculator(mStatsRule.getPowerProfile());

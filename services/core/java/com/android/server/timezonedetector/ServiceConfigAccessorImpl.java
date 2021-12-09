@@ -36,7 +36,6 @@ import android.location.LocationManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.util.ArraySet;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -45,7 +44,6 @@ import com.android.server.timedetector.ServerFlags;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -59,33 +57,31 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     /**
      * Device config keys that can affect the content of {@link ConfigurationInternal}.
      */
-    private static final Set<String> CONFIGURATION_INTERNAL_SERVER_FLAGS_KEYS_TO_WATCH =
-            Collections.unmodifiableSet(new ArraySet<>(new String[] {
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED,
-                    ServerFlags.KEY_ENHANCED_METRICS_COLLECTION_ENABLED,
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
-                    ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED,
-            }));
+    private static final Set<String> CONFIGURATION_INTERNAL_SERVER_FLAGS_KEYS_TO_WATCH = Set.of(
+            ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
+            ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED,
+            ServerFlags.KEY_ENHANCED_METRICS_COLLECTION_ENABLED,
+            ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
+            ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
+            ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED
+    );
 
     /**
      * Device config keys that can affect {@link
      * com.android.server.timezonedetector.location.LocationTimeZoneManagerService} behavior.
      */
-    private static final Set<String> LOCATION_TIME_ZONE_MANAGER_SERVER_FLAGS_KEYS_TO_WATCH =
-            Collections.unmodifiableSet(new ArraySet<>(new String[] {
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED,
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
-                    ServerFlags.KEY_PRIMARY_LTZP_MODE_OVERRIDE,
-                    ServerFlags.KEY_SECONDARY_LTZP_MODE_OVERRIDE,
-                    ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_MILLIS,
-                    ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
-                    ServerFlags.KEY_LTZP_EVENT_FILTERING_AGE_THRESHOLD_MILLIS,
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS
-            }));
+    private static final Set<String> LOCATION_TIME_ZONE_MANAGER_SERVER_FLAGS_KEYS_TO_WATCH = Set.of(
+            ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
+            ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED,
+            ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
+            ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
+            ServerFlags.KEY_PRIMARY_LTZP_MODE_OVERRIDE,
+            ServerFlags.KEY_SECONDARY_LTZP_MODE_OVERRIDE,
+            ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_MILLIS,
+            ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
+            ServerFlags.KEY_LTZP_EVENT_FILTERING_AGE_THRESHOLD_MILLIS,
+            ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS
+    );
 
     private static final Duration DEFAULT_LTZP_INITIALIZATION_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration DEFAULT_LTZP_INITIALIZATION_TIMEOUT_FUZZ = Duration.ofMinutes(1);

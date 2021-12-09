@@ -224,6 +224,7 @@ public class AudioDeviceInventory {
         public final String mAddress;
         public final String mName;
         public final String mCaller;
+        public boolean mForTest = false;
 
         /*package*/ WiredDeviceConnectionState(int type, @AudioService.ConnectionState int state,
                                                String address, String name, String caller) {
@@ -521,7 +522,7 @@ public class AudioDeviceInventory {
             }
 
             if (!handleDeviceConnection(wdcs.mState == AudioService.CONNECTION_STATE_CONNECTED,
-                    wdcs.mType, wdcs.mAddress, wdcs.mName)) {
+                    wdcs.mType, wdcs.mAddress, wdcs.mName, wdcs.mForTest)) {
                 // change of connection state failed, bailout
                 mmi.set(MediaMetrics.Property.EARLY_RETURN, "change of connection state failed")
                         .record();
@@ -593,7 +594,7 @@ public class AudioDeviceInventory {
     }
 
     //------------------------------------------------------------
-    //
+    // preferred device(s)
 
     /*package*/ int setPreferredDevicesForStrategySync(int strategy,
             @NonNull List<AudioDeviceAttributes> devices) {
@@ -674,16 +675,34 @@ public class AudioDeviceInventory {
         mDevRoleCapturePresetDispatchers.unregister(dispatcher);
     }
 
+    //-----------------------------------------------------------------------
+
+    /**
+     * Check if a device is in the list of connected devices
+     * @param device the device whose connection state is queried
+     * @return true if connected
+     */
+    // called with AudioDeviceBroker.mDeviceStateLock lock held
+    public boolean isDeviceConnected(@NonNull AudioDeviceAttributes device) {
+        final String key = DeviceInfo.makeDeviceListKey(device.getInternalType(),
+                device.getAddress());
+        synchronized (mDevicesLock) {
+            return (mConnectedDevices.get(key) != null);
+        }
+    }
+
     /**
      * Implements the communication with AudioSystem to (dis)connect a device in the native layers
      * @param connect true if connection
      * @param device the device type
      * @param address the address of the device
      * @param deviceName human-readable name of device
+     * @param isForTesting if true, not calling AudioSystem for the connection as this is
+     *                    just for testing
      * @return false if an error was reported by AudioSystem
      */
     /*package*/ boolean handleDeviceConnection(boolean connect, int device, String address,
-            String deviceName) {
+            String deviceName, boolean isForTesting) {
         if (AudioService.DEBUG_DEVICES) {
             Slog.i(TAG, "handleDeviceConnection(" + connect + " dev:"
                     + Integer.toHexString(device) + " address:" + address
@@ -706,9 +725,14 @@ public class AudioDeviceInventory {
                 Slog.i(TAG, "deviceInfo:" + di + " is(already)Connected:" + isConnected);
             }
             if (connect && !isConnected) {
-                final int res = mAudioSystem.setDeviceConnectionState(device,
-                        AudioSystem.DEVICE_STATE_AVAILABLE, address, deviceName,
-                        AudioSystem.AUDIO_FORMAT_DEFAULT);
+                final int res;
+                if (isForTesting) {
+                    res = AudioSystem.AUDIO_STATUS_OK;
+                } else {
+                    res = mAudioSystem.setDeviceConnectionState(device,
+                            AudioSystem.DEVICE_STATE_AVAILABLE, address, deviceName,
+                            AudioSystem.AUDIO_FORMAT_DEFAULT);
+                }
                 if (res != AudioSystem.AUDIO_STATUS_OK) {
                     final String reason = "not connecting device 0x" + Integer.toHexString(device)
                             + " due to command error " + res;
@@ -912,6 +936,15 @@ public class AudioDeviceInventory {
                     delay);
             return delay;
         }
+    }
+
+    /*package*/ void setTestDeviceConnectionState(@NonNull AudioDeviceAttributes device,
+            @AudioService.ConnectionState int state) {
+        final WiredDeviceConnectionState connection = new WiredDeviceConnectionState(
+                device.getInternalType(), state, device.getAddress(),
+                "test device", "com.android.server.audio");
+        connection.mForTest = true;
+        onSetWiredDeviceConnectionState(connection);
     }
 
     //-------------------------------------------------------------------

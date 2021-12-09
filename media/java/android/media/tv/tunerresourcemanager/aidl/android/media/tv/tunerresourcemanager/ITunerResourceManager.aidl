@@ -412,4 +412,34 @@ interface ITunerResourceManager {
      * @param resourceType The resource type to restore the map for.
      */
     void restoreResourceMap(in int resourceType);
+
+    /**
+     * Grants the lock to the caller for public {@link Tuner} APIs
+     *
+     * <p>{@link Tuner} functions that call both [@link TunerResourceManager} APIs and
+     * grabs lock that are also used in {@link IResourcesReclaimListener#onReclaimResources()}
+     * must call this API before acquiring lock used in onReclaimResources().
+     *
+     * <p>This API will block until it releases the lock or fails
+     *
+     * @param clientId The ID of the caller.
+     *
+     * @return true if the lock is granted. If false is returned, calling this API again is not
+     * guaranteed to work and may be unrecoverrable. (This should not happen.)
+     */
+    boolean acquireLock(in int clientId, in long clientThreadId);
+
+    /**
+     * Releases the lock to the caller for public {@link Tuner} APIs
+     *
+     * <p>This API must be called in pair with {@link #acquireLock(int, int)}
+     *
+     * <p>This API will block until it releases the lock or fails
+     *
+     * @param clientId The ID of the caller.
+     *
+     * @return true if the lock is granted. If false is returned, calling this API again is not
+     * guaranteed to work and may be unrecoverrable. (This should not happen.)
+     */
+    boolean releaseLock(in int clientId);
 }

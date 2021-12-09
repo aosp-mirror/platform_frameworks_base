@@ -89,6 +89,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -5775,6 +5776,23 @@ public class AudioManager {
     }
 
     /**
+     * Indicate wired accessory connection state change.
+     * @param device {@link AudioDeviceAttributes} of the device to "fake-connect"
+     * @param connected true for connected, false for disconnected
+     * {@hide}
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setTestDeviceConnectionState(@NonNull AudioDeviceAttributes device,
+            boolean connected) {
+        try {
+            getService().setTestDeviceConnectionState(device, connected);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Indicate Bluetooth profile connection state change.
      * Configuration changes for A2DP are indicated by having the same <code>newDevice</code> and
      * <code>previousDevice</code>
@@ -7964,6 +7982,231 @@ public class AudioManager {
                     }
                 }
             }
+        }
+    }
+
+    //---------------------------------------------------------
+    // audio device connection-dependent muting
+    /**
+     * @hide
+     * Mute a set of playback use cases until a given audio device is connected.
+     * Automatically unmute upon connection of the device, or after the given timeout, whichever
+     * happens first.
+     * @param usagesToMute non-empty array of {@link AudioAttributes} usages (for example
+     *                     {@link AudioAttributes#USAGE_MEDIA}) to mute until the
+     *                     device connects
+     * @param device the audio device expected to connect within the timeout duration
+     * @param timeout the maximum amount of time to wait for the device connection
+     * @param timeUnit the unit for the timeout
+     * @throws IllegalStateException when trying to issue the command while another is already in
+     *         progress and hasn't been cancelled by
+     *         {@link #cancelMuteAwaitConnection(AudioDeviceAttributes)}. See
+     *         {@link #getMutingExpectedDevice()} to check if a muting command is active.
+     * @see #registerMuteAwaitConnectionCallback(Executor, AudioManager.MuteAwaitConnectionCallback)
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void muteAwaitConnection(@NonNull int[] usagesToMute,
+            @NonNull AudioDeviceAttributes device,
+            long timeout, @NonNull TimeUnit timeUnit) throws IllegalStateException {
+        if (timeout <= 0) {
+            throw new IllegalArgumentException("Timeout must be greater than 0");
+        }
+        Objects.requireNonNull(usagesToMute);
+        if (usagesToMute.length == 0) {
+            throw new IllegalArgumentException("Array of usages to mute cannot be empty");
+        }
+        Objects.requireNonNull(device);
+        Objects.requireNonNull(timeUnit);
+        try {
+            getService().muteAwaitConnection(usagesToMute, device, timeUnit.toMillis(timeout));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Query which audio device, if any, is causing some playback use cases to be muted until it
+     * connects.
+     * @return the audio device used in
+     *        {@link #muteAwaitConnection(int[], AudioDeviceAttributes, long, TimeUnit)}, or null
+     *        if there is no active muting command (either because the muting command was not issued
+     *        or because it timed out)
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @Nullable AudioDeviceAttributes getMutingExpectedDevice() {
+        try {
+            return getService().getMutingExpectedDevice();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Cancel a {@link #muteAwaitConnection(int[], AudioDeviceAttributes, long, TimeUnit)}
+     * command.
+     * @param device the device whose connection was expected when the {@code muteAwaitConnection}
+     *               command was issued.
+     * @throws IllegalStateException when trying to issue the command for a device whose connection
+     *         is not anticipated by a previous call to
+     *         {@link #muteAwaitConnection(int[], AudioDeviceAttributes, long, TimeUnit)}
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void cancelMuteAwaitConnection(@NonNull AudioDeviceAttributes device)
+            throws IllegalStateException {
+        Objects.requireNonNull(device);
+        try {
+            getService().cancelMuteAwaitConnection(device);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * A callback class to receive events about the muting and unmuting of playback use cases
+     * conditional on the upcoming connection of an audio device.
+     * @see #registerMuteAwaitConnectionCallback(Executor, AudioManager.MuteAwaitConnectionCallback)
+     */
+    @SystemApi
+    public abstract static class MuteAwaitConnectionCallback {
+
+        /**
+         * An event where the expected audio device connected
+         * @see MuteAwaitConnectionCallback#onUnmutedEvent(int, AudioDeviceAttributes, int[])
+         */
+        public static final int EVENT_CONNECTION = 1;
+        /**
+         * An event where the expected audio device failed connect before the timeout happened
+         * @see MuteAwaitConnectionCallback#onUnmutedEvent(int, AudioDeviceAttributes, int[])
+         */
+        public static final int EVENT_TIMEOUT    = 2;
+        /**
+         * An event where the {@code muteAwaitConnection()} command
+         * was cancelled with {@link #cancelMuteAwaitConnection(AudioDeviceAttributes)}
+         * @see MuteAwaitConnectionCallback#onUnmutedEvent(int, AudioDeviceAttributes, int[])
+         */
+        public static final int EVENT_CANCEL     = 3;
+
+        /** @hide */
+        @IntDef(flag = false, prefix = "EVENT_", value = {
+                EVENT_CONNECTION,
+                EVENT_TIMEOUT,
+                EVENT_CANCEL }
+        )
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface UnmuteEvent {}
+
+        /**
+         * Called when a number of playback use cases are muted in response to a call to
+         * {@link #muteAwaitConnection(int[], AudioDeviceAttributes, long, TimeUnit)}.
+         * @param device the audio device whose connection is expected. Playback use cases are
+         *               unmuted when that device connects
+         * @param mutedUsages an array of {@link AudioAttributes} usages that describe the affected
+         *                    playback use cases.
+         */
+        public void onMutedUntilConnection(
+                @NonNull AudioDeviceAttributes device,
+                @NonNull int[] mutedUsages) {}
+
+        /**
+         * Called when an event occurred that caused playback uses cases to be unmuted
+         * @param unmuteEvent the nature of the event
+         * @param device the device that was expected to connect
+         * @param mutedUsages the array of {@link AudioAttributes} usages that were muted until
+         *                    the event occurred
+         */
+        public void onUnmutedEvent(
+                @UnmuteEvent int unmuteEvent,
+                @NonNull AudioDeviceAttributes device, @NonNull int[] mutedUsages) {}
+    }
+
+
+    /**
+     * @hide
+     * Register a callback to receive updates on the playback muting conditional on a specific
+     * audio device connection.
+     * @param executor the {@link Executor} handling the callback
+     * @param callback the callback to register
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void registerMuteAwaitConnectionCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull MuteAwaitConnectionCallback callback) {
+        synchronized (mMuteAwaitConnectionListenerLock) {
+            final Pair<ArrayList<ListenerInfo<MuteAwaitConnectionCallback>>,
+                    MuteAwaitConnectionDispatcherStub> res =
+                    CallbackUtil.addListener("registerMuteAwaitConnectionCallback",
+                            executor, callback, mMuteAwaitConnectionListeners,
+                            mMuteAwaitConnDispatcherStub,
+                            () -> new MuteAwaitConnectionDispatcherStub(),
+                            stub -> stub.register(true));
+            mMuteAwaitConnectionListeners = res.first;
+            mMuteAwaitConnDispatcherStub = res.second;
+        }
+    }
+
+    /**
+     * @hide
+     * Unregister a previously registered callback for playback muting conditional on device
+     * connection.
+     * @param callback the callback to unregister
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void unregisterMuteAwaitConnectionCallback(
+            @NonNull MuteAwaitConnectionCallback callback) {
+        synchronized (mMuteAwaitConnectionListenerLock) {
+            final Pair<ArrayList<ListenerInfo<MuteAwaitConnectionCallback>>,
+                    MuteAwaitConnectionDispatcherStub> res =
+                    CallbackUtil.removeListener("unregisterMuteAwaitConnectionCallback",
+                            callback, mMuteAwaitConnectionListeners, mMuteAwaitConnDispatcherStub,
+                            stub -> stub.register(false));
+            mMuteAwaitConnectionListeners = res.first;
+            mMuteAwaitConnDispatcherStub = res.second;
+        }
+    }
+
+    private final Object mMuteAwaitConnectionListenerLock = new Object();
+
+    @GuardedBy("mMuteAwaitConnectionListenerLock")
+    private @Nullable ArrayList<ListenerInfo<MuteAwaitConnectionCallback>>
+            mMuteAwaitConnectionListeners;
+
+    @GuardedBy("mMuteAwaitConnectionListenerLock")
+    private MuteAwaitConnectionDispatcherStub mMuteAwaitConnDispatcherStub;
+
+    private final class MuteAwaitConnectionDispatcherStub
+            extends IMuteAwaitConnectionCallback.Stub {
+        public void register(boolean register) {
+            try {
+                getService().registerMuteAwaitConnectionDispatcher(this, register);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        @Override
+        @SuppressLint("GuardedBy") // lock applied inside callListeners method
+        public void dispatchOnMutedUntilConnection(AudioDeviceAttributes device,
+                int[] mutedUsages) {
+            CallbackUtil.callListeners(mMuteAwaitConnectionListeners,
+                    mMuteAwaitConnectionListenerLock,
+                    (listener) -> listener.onMutedUntilConnection(device, mutedUsages));
+        }
+
+        @Override
+        @SuppressLint("GuardedBy") // lock applied inside callListeners method
+        public void dispatchOnUnmutedEvent(int event, AudioDeviceAttributes device,
+                int[] mutedUsages) {
+            CallbackUtil.callListeners(mMuteAwaitConnectionListeners,
+                    mMuteAwaitConnectionListenerLock,
+                    (listener) -> listener.onUnmutedEvent(event, device, mutedUsages));
         }
     }
 

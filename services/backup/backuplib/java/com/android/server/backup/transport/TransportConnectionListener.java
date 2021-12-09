@@ -18,7 +18,7 @@ package com.android.server.backup.transport;
 
 import android.annotation.Nullable;
 
-import com.android.internal.backup.IBackupTransport;
+import com.android.server.backup.transport.BackupTransportClient;
 
 /**
  * Listener to be called by {@link TransportConnection#connectAsync(TransportConnectionListener,
@@ -26,13 +26,14 @@ import com.android.internal.backup.IBackupTransport;
  */
 public interface TransportConnectionListener {
     /**
-     * Called when {@link TransportConnection} has a transport binder available or that it decided
+     * Called when {@link TransportConnection} has a transport client available or that it decided
      * it couldn't obtain one, in which case {@param transport} is null.
      *
-     * @param transport A {@link IBackupTransport} transport binder or null.
+     * @param transportClient A {@link BackupTransportClient} transport or null.
      * @param transportConnection The {@link TransportConnection} used to retrieve this transport
-     *                            binder.
+     *                            client.
      */
     void onTransportConnectionResult(
-            @Nullable IBackupTransport transport, TransportConnection transportConnection);
+            @Nullable BackupTransportClient transportClient,
+            TransportConnection transportConnection);
 }
