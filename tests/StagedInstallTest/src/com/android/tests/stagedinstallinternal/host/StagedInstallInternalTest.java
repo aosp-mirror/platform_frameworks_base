@@ -112,6 +112,10 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
      * @param files the paths of files which might contain wildcards
      */
     private void deleteFiles(String... files) throws Exception {
+        if (!getDevice().isAdbRoot()) {
+            getDevice().enableAdbRoot();
+        }
+
         boolean found = false;
         for (String file : files) {
             CommandResult result = getDevice().executeShellV2Command("ls " + file);
@@ -122,9 +126,6 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         }
 
         if (found) {
-            if (!getDevice().isAdbRoot()) {
-                getDevice().enableAdbRoot();
-            }
             getDevice().remountSystemWritable();
             for (String file : files) {
                 getDevice().executeShellCommand("rm -rf " + file);

@@ -106,26 +106,26 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      * @param files the paths of files which might contain wildcards
      */
     private void deleteFiles(String... files) throws Exception {
-        boolean found = false;
-        for (String file : files) {
-            CommandResult result = getDevice().executeShellV2Command("ls " + file);
-            if (result.getStatus() == CommandStatus.SUCCESS) {
-                found = true;
-                break;
+        try {
+            getDevice().enableAdbRoot();
+            boolean found = false;
+            for (String file : files) {
+                CommandResult result = getDevice().executeShellV2Command("ls " + file);
+                if (result.getStatus() == CommandStatus.SUCCESS) {
+                    found = true;
+                    break;
+                }
             }
-        }
 
-        if (found) {
-            try {
-                getDevice().enableAdbRoot();
+            if (found) {
                 getDevice().remountSystemWritable();
                 for (String file : files) {
                     getDevice().executeShellCommand("rm -rf " + file);
                 }
-            } finally {
-                getDevice().disableAdbRoot();
+                getDevice().reboot();
             }
-            getDevice().reboot();
+        } finally {
+            getDevice().disableAdbRoot();
         }
     }
 
