@@ -380,54 +380,44 @@
                 android:id="@+id/button_layout"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginBottom="34dp"
+                android:layout_marginStart="@dimen/dialog_side_padding"
+                android:layout_marginEnd="@dimen/dialog_side_padding"
+                android:layout_marginBottom="@dimen/dialog_bottom_padding"
                 android:clickable="false"
                 android:focusable="false">
 
                 <FrameLayout
                     android:id="@+id/apm_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
+                    android:layout_height="wrap_content"
                     android:clickable="true"
                     android:focusable="true"
                     android:layout_gravity="start|center_vertical"
                     android:orientation="vertical">
                     <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:text="@string/turn_off_airplane_mode"
                         android:ellipsize="end"
-                        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-                        android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:layout_gravity="start|center_vertical"
-                        android:textAppearance="@style/TextAppearance.InternetDialog"
-                        android:textSize="14sp"
-                        android:background="@drawable/internet_dialog_footer_background"
+                        style="@style/Widget.Dialog.Button.BorderButton"
                         android:clickable="false"/>
                 </FrameLayout>
 
                 <FrameLayout
                     android:id="@+id/done_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:clickable="true"
-                    android:focusable="true"
                     android:layout_gravity="end|center_vertical"
-                    android:orientation="vertical">
+                    android:clickable="true"
+                    android:focusable="true">
                     <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:text="@string/inline_done_button"
-                        android:ellipsize="end"
-                        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-                        android:layout_width="67dp"
-                        android:layout_height="36dp"
-                        android:layout_gravity="end|center_vertical"
-                        android:textAppearance="@style/TextAppearance.InternetDialog"
-                        android:textSize="14sp"
-                        android:background="@drawable/internet_dialog_footer_background"
+                        style="@style/Widget.Dialog.Button"
                         android:clickable="false"/>
                 </FrameLayout>
             </FrameLayout>
