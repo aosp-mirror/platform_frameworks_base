@@ -2502,4 +2502,7 @@ interface ITelephony {
      */
     CellIdentity getLastKnownCellIdentity(int subId, String callingPackage,
             String callingFeatureId);
+
+    /** Check if telephony new data stack is enabled. */
+    boolean isUsingNewDataStack();
 }
