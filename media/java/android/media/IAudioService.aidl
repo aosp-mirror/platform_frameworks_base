@@ -384,7 +384,7 @@ interface IAudioService {
 
     int requestAudioFocusForTest(in AudioAttributes aa, int durationHint, IBinder cb,
             in IAudioFocusDispatcher fd, in String clientId, in String callingPackageName,
-            int uid, int sdk);
+            int flags, int uid, int sdk);
 
     int abandonAudioFocusForTest(in IAudioFocusDispatcher fd, in String clientId,
             in AudioAttributes aa, in String callingPackageName);
