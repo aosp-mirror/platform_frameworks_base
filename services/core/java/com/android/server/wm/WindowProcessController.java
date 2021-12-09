@@ -37,6 +37,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFI
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
@@ -512,7 +513,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      */
     @HotPath(caller = HotPath.START_SERVICE)
     public boolean areBackgroundFgsStartsAllowed() {
-        return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesAllowed(),
+        return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesState() == APP_SWITCH_ALLOW,
                 true /* isCheckingForFgsStart */);
     }
 
