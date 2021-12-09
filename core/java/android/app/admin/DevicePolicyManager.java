@@ -2904,6 +2904,20 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_RETURN_BEFORE_POLICY_COMPLIANCE";
 
     /**
+     * A {@code boolean} flag that indicates whether the screen should be on throughout the
+     * provisioning flow.
+     *
+     * <p>The default value is {@code false}.
+     *
+     * <p>This extra can either be passed as an extra to the {@link
+     * #ACTION_PROVISION_MANAGED_PROFILE} intent, or it can be returned by the
+     * admin app when performing the admin-integrated provisioning flow as a result of the
+     * {@link #ACTION_GET_PROVISIONING_MODE} activity.
+     */
+    public static final String EXTRA_PROVISIONING_KEEP_SCREEN_ON =
+            "android.app.extra.PROVISIONING_KEEP_SCREEN_ON";
+
+    /**
      * Activity action: Starts the administrator to show policy compliance for the provisioning.
      * This action is used any time that the administrator has an opportunity to show policy
      * compliance before the end of setup wizard. This could happen as part of the admin-integrated
