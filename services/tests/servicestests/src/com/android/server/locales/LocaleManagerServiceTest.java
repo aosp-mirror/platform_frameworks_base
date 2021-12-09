@@ -30,6 +30,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.Manifest;
@@ -60,7 +61,7 @@ public class LocaleManagerServiceTest {
     private static final int DEFAULT_USER_ID = 0;
     private static final int DEFAULT_UID = Binder.getCallingUid() + 100;
     private static final int INVALID_UID = -1;
-    private static final String DEFAULT_LOCALE_TAGS = "en-XC, ar-XB";
+    private static final String DEFAULT_LOCALE_TAGS = "en-XC,ar-XB";
     private static final LocaleList DEFAULT_LOCALES =
             LocaleList.forLanguageTags(DEFAULT_LOCALE_TAGS);
     private static final InstallSourceInfo DEFAULT_INSTALL_SOURCE_INFO = new InstallSourceInfo(
@@ -68,6 +69,7 @@ public class LocaleManagerServiceTest {
             /* originatingPackageName = */ null, /* installingPackageName = */ null);
 
     private LocaleManagerService mLocaleManagerService;
+    private LocaleManagerBackupHelper mMockBackupHelper;
 
     @Mock
     private Context mMockContext;
@@ -104,8 +106,9 @@ public class LocaleManagerServiceTest {
                 .handleIncomingUser(anyInt(), anyInt(), eq(DEFAULT_USER_ID), anyBoolean(), anyInt(),
                         anyString(), anyString());
 
+        mMockBackupHelper = mock(ShadowLocaleManagerBackupHelper.class);
         mLocaleManagerService = new LocaleManagerService(mMockContext, mMockActivityTaskManager,
-                mMockActivityManager, mMockPackageManagerInternal);
+                mMockActivityManager, mMockPackageManagerInternal, mMockBackupHelper);
     }
 
     @Test(expected = SecurityException.class)
@@ -122,6 +125,7 @@ public class LocaleManagerServiceTest {
             verify(mMockContext).enforceCallingOrSelfPermission(
                     eq(android.Manifest.permission.CHANGE_CONFIGURATION),
                     anyString());
+            verify(mMockBackupHelper, times(0)).notifyBackupManager();
             assertNoLocalesStored(mFakePackageConfigurationUpdater.getStoredLocales());
         }
     }
@@ -133,6 +137,7 @@ public class LocaleManagerServiceTest {
                     DEFAULT_USER_ID, LocaleList.getEmptyLocaleList());
             fail("Expected NullPointerException");
         } finally {
+            verify(mMockBackupHelper, times(0)).notifyBackupManager();
             assertNoLocalesStored(mFakePackageConfigurationUpdater.getStoredLocales());
         }
     }
@@ -146,6 +151,7 @@ public class LocaleManagerServiceTest {
                     /* locales = */ null);
             fail("Expected NullPointerException");
         } finally {
+            verify(mMockBackupHelper, times(0)).notifyBackupManager();
             assertNoLocalesStored(mFakePackageConfigurationUpdater.getStoredLocales());
         }
     }
@@ -163,6 +169,7 @@ public class LocaleManagerServiceTest {
                 DEFAULT_LOCALES);
 
         assertEquals(DEFAULT_LOCALES, mFakePackageConfigurationUpdater.getStoredLocales());
+        verify(mMockBackupHelper, times(1)).notifyBackupManager();
 
     }
 
@@ -175,6 +182,7 @@ public class LocaleManagerServiceTest {
                 DEFAULT_LOCALES);
 
         assertEquals(DEFAULT_LOCALES, mFakePackageConfigurationUpdater.getStoredLocales());
+        verify(mMockBackupHelper, times(1)).notifyBackupManager();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -187,6 +195,7 @@ public class LocaleManagerServiceTest {
             fail("Expected IllegalArgumentException");
         } finally {
             assertNoLocalesStored(mFakePackageConfigurationUpdater.getStoredLocales());
+            verify(mMockBackupHelper, times(0)).notifyBackupManager();
         }
     }
 
@@ -217,7 +226,7 @@ public class LocaleManagerServiceTest {
                 .when(mMockActivityTaskManager).getApplicationConfig(anyString(), anyInt());
 
         LocaleList locales = mLocaleManagerService.getApplicationLocales(
-                    DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
 
         assertEquals(LocaleList.getEmptyLocaleList(), locales);
     }
