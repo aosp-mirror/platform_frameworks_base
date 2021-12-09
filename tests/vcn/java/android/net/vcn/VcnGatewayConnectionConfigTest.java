@@ -17,6 +17,8 @@
 package android.net.vcn;
 
 import static android.net.ipsec.ike.IkeSessionParams.IKE_OPTION_MOBIKE;
+import static android.net.vcn.VcnGatewayConnectionConfig.DEFAULT_UNDERLYING_NETWORK_PRIORITIES;
+import static android.net.vcn.VcnGatewayConnectionConfig.UNDERLYING_NETWORK_PRIORITIES_KEY;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -30,6 +32,7 @@ import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.net.vcn.persistablebundleutils.IkeSessionParamsUtilsTest;
 import android.net.vcn.persistablebundleutils.TunnelConnectionParamsUtilsTest;
+import android.os.PersistableBundle;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -228,6 +231,16 @@ public class VcnGatewayConnectionConfigTest {
         final VcnGatewayConnectionConfig config = buildTestConfig();
 
         assertEquals(config, new VcnGatewayConnectionConfig(config.toPersistableBundle()));
+    }
+
+    @Test
+    public void testParsePersistableBundleWithoutVcnUnderlyingNetworkPriorities() {
+        PersistableBundle configBundle = buildTestConfig().toPersistableBundle();
+        configBundle.putPersistableBundle(UNDERLYING_NETWORK_PRIORITIES_KEY, null);
+
+        final VcnGatewayConnectionConfig config = new VcnGatewayConnectionConfig(configBundle);
+        assertEquals(
+                DEFAULT_UNDERLYING_NETWORK_PRIORITIES, config.getVcnUnderlyingNetworkPriorities());
     }
 
     private static IkeTunnelConnectionParams buildTunnelConnectionParams(String ikePsk) {
