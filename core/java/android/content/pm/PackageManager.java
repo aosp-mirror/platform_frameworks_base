@@ -3981,6 +3981,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
+    @TestApi
     public static final String FEATURE_COMMUNAL_MODE = "android.software.communal_mode";
 
     /** @hide */

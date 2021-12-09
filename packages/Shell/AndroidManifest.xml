@@ -606,6 +606,10 @@
     <!-- Permission required for CTS test - CtsSafetyCenterTestCases -->
     <uses-permission android:name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
 
+    <!-- Permission required for CTS test - CommunalManagerTest -->
+    <uses-permission android:name="android.permission.WRITE_COMMUNAL_STATE" />
+    <uses-permission android:name="android.permission.READ_COMMUNAL_STATE" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
