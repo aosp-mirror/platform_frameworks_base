@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -101,14 +102,21 @@ public class SplitLayoutTests extends ShellTestCase {
 
     @Test
     public void testSetDividePosition() {
-        mSplitLayout.setDividePosition(anyInt());
+        mSplitLayout.setDividePosition(100, false /* applyLayoutChange */);
+        assertThat(mSplitLayout.getDividePosition()).isEqualTo(100);
+        verify(mSplitLayoutHandler, never()).onLayoutSizeChanged(any(SplitLayout.class));
+
+        mSplitLayout.setDividePosition(200, true /* applyLayoutChange */);
+        assertThat(mSplitLayout.getDividePosition()).isEqualTo(200);
         verify(mSplitLayoutHandler).onLayoutSizeChanged(any(SplitLayout.class));
     }
 
     @Test
     public void testSetDivideRatio() {
+        mSplitLayout.setDividePosition(200, false /* applyLayoutChange */);
         mSplitLayout.setDivideRatio(0.5f);
-        verify(mSplitLayoutHandler).onLayoutSizeChanged(any(SplitLayout.class));
+        assertThat(mSplitLayout.getDividePosition()).isEqualTo(
+                mSplitLayout.mDividerSnapAlgorithm.getMiddleTarget().position);
     }
 
     @Test

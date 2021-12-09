@@ -93,7 +93,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private final InsetsState mInsetsState = new InsetsState();
 
     private Context mContext;
-    private DividerSnapAlgorithm mDividerSnapAlgorithm;
+    @VisibleForTesting DividerSnapAlgorithm mDividerSnapAlgorithm;
     private WindowContainerToken mWinToken1;
     private WindowContainerToken mWinToken2;
     private int mDividePosition;
@@ -294,20 +294,22 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mSplitLayoutHandler.onLayoutSizeChanging(this);
     }
 
-    void setDividePosition(int position) {
+    void setDividePosition(int position, boolean applyLayoutChange) {
         mDividePosition = position;
         updateBounds(mDividePosition);
-        mSplitLayoutHandler.onLayoutSizeChanged(this);
+        if (applyLayoutChange) {
+            mSplitLayoutHandler.onLayoutSizeChanged(this);
+        }
     }
 
-    /** Sets divide position base on the ratio within root bounds. */
+    /** Updates divide position and split bounds base on the ratio within root bounds. */
     public void setDivideRatio(float ratio) {
         final int position = isLandscape()
                 ? mRootBounds.left + (int) (mRootBounds.width() * ratio)
                 : mRootBounds.top + (int) (mRootBounds.height() * ratio);
-        DividerSnapAlgorithm.SnapTarget snapTarget =
+        final DividerSnapAlgorithm.SnapTarget snapTarget =
                 mDividerSnapAlgorithm.calculateNonDismissingSnapTarget(position);
-        setDividePosition(snapTarget.position);
+        setDividePosition(snapTarget.position, false /* applyLayoutChange */);
     }
 
     /** Resets divider position. */
@@ -336,7 +338,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 break;
             default:
                 flingDividePosition(currentPosition, snapTarget.position,
-                        () -> setDividePosition(snapTarget.position));
+                        () -> setDividePosition(snapTarget.position, true /* applyLayoutChange */));
                 break;
         }
     }
@@ -389,7 +391,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                setDividePosition(to);
+                setDividePosition(to, true /* applyLayoutChange */);
             }
         });
         animator.start();

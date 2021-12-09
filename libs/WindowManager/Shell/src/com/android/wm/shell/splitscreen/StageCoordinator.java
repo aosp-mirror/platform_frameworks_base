@@ -341,12 +341,12 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         sideOptions = sideOptions != null ? sideOptions : new Bundle();
         setSideStagePosition(sidePosition, wct);
 
+        mSplitLayout.setDivideRatio(splitRatio);
         // Build a request WCT that will launch both apps such that task 0 is on the main stage
         // while task 1 is on the side stage.
         mMainStage.activate(getMainStageBounds(), wct, false /* reparent */);
         mSideStage.setBounds(getSideStageBounds(), wct);
 
-        mSplitLayout.setDivideRatio(splitRatio);
         // Make sure the launch options will put tasks in the corresponding split roots
         addActivityOptions(mainOptions, mMainStage);
         addActivityOptions(sideOptions, mSideStage);
