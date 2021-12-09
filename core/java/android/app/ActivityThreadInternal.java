@@ -28,7 +28,7 @@ import java.util.ArrayList;
 interface ActivityThreadInternal {
     ContextImpl getSystemContext();
 
-    ContextImpl getSystemUiContext();
+    ContextImpl getSystemUiContextNoCreate();
 
     boolean isInDensityCompatMode();
 
