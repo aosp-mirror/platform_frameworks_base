@@ -836,6 +836,11 @@ public class UserSwitcherController implements Dumpable {
         mRootView = notificationShadeWindowView;
     }
 
+    @VisibleForTesting
+    public KeyguardStateController getKeyguardStateController() {
+        return mKeyguardStateController;
+    }
+
     public static abstract class BaseUserAdapter extends BaseAdapter {
 
         final UserSwitcherController mController;
@@ -843,7 +848,7 @@ public class UserSwitcherController implements Dumpable {
 
         protected BaseUserAdapter(UserSwitcherController controller) {
             mController = controller;
-            mKeyguardStateController = controller.mKeyguardStateController;
+            mKeyguardStateController = controller.getKeyguardStateController();
             controller.addAdapter(new WeakReference<>(this));
         }
 

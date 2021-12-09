@@ -50,6 +50,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import org.junit.Before;
@@ -111,6 +112,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     private FalsingCollector mFalsingCollector;
     @Mock
     private GlobalSettings mGlobalSettings;
+    @Mock
+    private UserSwitcherController mUserSwitcherController;
     private Configuration mConfiguration;
 
     private KeyguardSecurityContainerController mKeyguardSecurityContainerController;
@@ -144,8 +147,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 mView, mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
                 mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
                 mKeyguardStateController, mKeyguardSecurityViewFlipperController,
-                mConfigurationController, mFalsingCollector, mGlobalSettings)
-                .create(mSecurityCallback);
+                mConfigurationController, mFalsingCollector, mUserSwitcherController,
+                mGlobalSettings).create(mSecurityCallback);
     }
 
     @Test
@@ -182,13 +185,15 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     public void onResourcesUpdate_callsThroughOnRotationChange() {
         // Rotation is the same, shouldn't cause an update
         mKeyguardSecurityContainerController.updateResources();
-        verify(mView, never()).initMode(MODE_DEFAULT, mGlobalSettings);
+        verify(mView, never()).initMode(MODE_DEFAULT, mGlobalSettings, mFalsingCollector,
+                mUserSwitcherController);
 
         // Update rotation. Should trigger update
         mConfiguration.orientation = Configuration.ORIENTATION_LANDSCAPE;
 
         mKeyguardSecurityContainerController.updateResources();
-        verify(mView).initMode(MODE_DEFAULT, mGlobalSettings);
+        verify(mView).initMode(MODE_DEFAULT, mGlobalSettings, mFalsingCollector,
+                mUserSwitcherController);
     }
 
     private void touchDownLeftSide() {
@@ -245,7 +250,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
 
         mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Pattern);
-        verify(mView).initMode(MODE_DEFAULT, mGlobalSettings);
+        verify(mView).initMode(MODE_DEFAULT, mGlobalSettings, mFalsingCollector,
+                mUserSwitcherController);
     }
 
     @Test
@@ -256,7 +262,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
 
         mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Pattern);
-        verify(mView).initMode(MODE_ONE_HANDED, mGlobalSettings);
+        verify(mView).initMode(MODE_ONE_HANDED, mGlobalSettings, mFalsingCollector,
+                mUserSwitcherController);
     }
 
     @Test
@@ -267,6 +274,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
 
         mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Password);
-        verify(mView).initMode(MODE_DEFAULT, mGlobalSettings);
+        verify(mView).initMode(MODE_DEFAULT, mGlobalSettings, mFalsingCollector,
+                mUserSwitcherController);
     }
 }
