@@ -2191,14 +2191,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     TaskFragmentInfo getTaskFragmentInfo() {
         List<IBinder> childActivities = new ArrayList<>();
         for (int i = 0; i < getChildCount(); i++) {
-            WindowContainer wc = getChildAt(i);
-            if (mTaskFragmentOrganizerUid != INVALID_UID
-                    && wc.asActivityRecord() != null
-                    && wc.asActivityRecord().info.processName.equals(
-                            mTaskFragmentOrganizerProcessName)
-                    && wc.asActivityRecord().getUid() == mTaskFragmentOrganizerUid) {
+            final WindowContainer wc = getChildAt(i);
+            final ActivityRecord ar = wc.asActivityRecord();
+            if (mTaskFragmentOrganizerUid != INVALID_UID && ar != null
+                    && ar.info.processName.equals(mTaskFragmentOrganizerProcessName)
+                    && ar.getUid() == mTaskFragmentOrganizerUid && !ar.finishing) {
                 // Only includes Activities that belong to the organizer process for security.
-                childActivities.add(wc.asActivityRecord().appToken);
+                childActivities.add(ar.appToken);
             }
         }
         final Point positionInParent = new Point();

@@ -6565,6 +6565,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_ICON) {
                 return false;
             }
+            // Choose the default behavior for Launcher and SystemUI when the SplashScreen style is
+            // not specified in the ActivityOptions.
+            if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME) {
+                return false;
+            } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
+                return true;
+            }
         }
         if (sourceRecord == null) {
             sourceRecord = searchCandidateLaunchingActivity();
@@ -6574,14 +6581,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return sourceRecord.mSplashScreenStyleEmpty;
         }
 
-        // If this activity was launched from a system surface, never use an empty splash screen
+        // If this activity was launched from Launcher or System for first start, never use an
+        // empty splash screen.
         // Need to check sourceRecord before in case this activity is launched from service.
-        if (launchedFromSystemSurface()) {
-            return false;
-        }
-
-        // Otherwise use empty.
-        return true;
+        return !startActivity || !(mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEM
+                || mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME);
     }
 
     private int getSplashscreenTheme() {

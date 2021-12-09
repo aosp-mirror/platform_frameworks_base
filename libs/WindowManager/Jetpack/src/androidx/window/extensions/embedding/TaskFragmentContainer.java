@@ -103,7 +103,7 @@ class TaskFragmentContainer {
         ActivityThread activityThread = ActivityThread.currentActivityThread();
         for (IBinder token : mInfo.getActivities()) {
             Activity activity = activityThread.getActivity(token);
-            if (activity != null && !allActivities.contains(activity)) {
+            if (activity != null && !activity.isFinishing() && !allActivities.contains(activity)) {
                 allActivities.add(activity);
             }
         }

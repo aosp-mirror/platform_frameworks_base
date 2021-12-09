@@ -1634,21 +1634,21 @@ public class AppTransition implements Dump {
     }
 
     @TransitionType int getKeyguardTransition() {
-        // In case we unocclude Keyguard and occlude it again, meaning that we never actually
-        // unoccclude/occlude Keyguard, but just run a normal transition.
-        final int occludeIndex = mNextAppTransitionRequests.indexOf(TRANSIT_KEYGUARD_UNOCCLUDE);
-        if (occludeIndex != -1
-                && occludeIndex < mNextAppTransitionRequests.indexOf(TRANSIT_KEYGUARD_OCCLUDE)) {
+        if (mNextAppTransitionRequests.indexOf(TRANSIT_KEYGUARD_GOING_AWAY) != -1) {
+            return TRANSIT_KEYGUARD_GOING_AWAY;
+        }
+        final int unoccludeIndex = mNextAppTransitionRequests.indexOf(TRANSIT_KEYGUARD_UNOCCLUDE);
+        final int occludeIndex = mNextAppTransitionRequests.indexOf(TRANSIT_KEYGUARD_OCCLUDE);
+        // No keyguard related transition requests.
+        if (unoccludeIndex == -1 && occludeIndex == -1) {
             return TRANSIT_NONE;
         }
-
-        for (int i = 0; i < mNextAppTransitionRequests.size(); ++i) {
-            final @TransitionType int transit = mNextAppTransitionRequests.get(i);
-            if (isKeyguardTransit(transit)) {
-                return transit;
-            }
+        // In case we unocclude Keyguard and occlude it again, meaning that we never actually
+        // unoccclude/occlude Keyguard, but just run a normal transition.
+        if (unoccludeIndex != -1 && unoccludeIndex < occludeIndex) {
+            return TRANSIT_NONE;
         }
-        return TRANSIT_NONE;
+        return unoccludeIndex != -1 ? TRANSIT_KEYGUARD_UNOCCLUDE : TRANSIT_KEYGUARD_OCCLUDE;
     }
 
     @TransitionType int getFirstAppTransition() {

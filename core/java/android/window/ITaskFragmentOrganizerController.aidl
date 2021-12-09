@@ -44,4 +44,10 @@ interface ITaskFragmentOrganizerController {
      * Unregisters remote animations per transition type for the organizer.
      */
     void unregisterRemoteAnimations(in ITaskFragmentOrganizer organizer);
+
+    /**
+      * Checks if an activity organized by a {@link android.window.TaskFragmentOrganizer} and
+      * only occupies a portion of Task bounds.
+      */
+    boolean isActivityEmbedded(in IBinder activityToken);
 }

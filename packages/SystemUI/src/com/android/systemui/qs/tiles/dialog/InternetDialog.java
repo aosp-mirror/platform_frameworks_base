@@ -78,7 +78,7 @@ public class InternetDialog extends SystemUIDialog implements
     private static final String TAG = "InternetDialog";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    static final long PROGRESS_DELAY_MS = 2000L;
+    static final long PROGRESS_DELAY_MS = 1500L;
 
     private final Handler mHandler;
     private final Executor mBackgroundExecutor;
@@ -137,6 +137,8 @@ public class InternetDialog extends SystemUIDialog implements
     protected WifiEntry mConnectedWifiEntry;
     @VisibleForTesting
     protected int mWifiEntriesCount;
+    @VisibleForTesting
+    protected boolean mHasMoreEntry;
 
     // Wi-Fi scanning progress bar
     protected boolean mIsProgressBarVisible;
@@ -464,8 +466,7 @@ public class InternetDialog extends SystemUIDialog implements
         }
         mWifiRecyclerView.setMinimumHeight(mWifiNetworkHeight * getWifiListMaxCount());
         mWifiRecyclerView.setVisibility(View.VISIBLE);
-        final boolean showSeeAll = mConnectedWifiEntry != null || mWifiEntriesCount > 0;
-        mSeeAllLayout.setVisibility(showSeeAll ? View.VISIBLE : View.INVISIBLE);
+        mSeeAllLayout.setVisibility(mHasMoreEntry ? View.VISIBLE : View.INVISIBLE);
     }
 
     @VisibleForTesting
@@ -549,9 +550,13 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     private void setProgressBarVisible(boolean visible) {
+        if (mIsProgressBarVisible == visible) {
+            return;
+        }
         mIsProgressBarVisible = visible;
-        mProgressBar.setVisibility(mIsProgressBarVisible ? View.VISIBLE : View.GONE);
-        mDivider.setVisibility(mIsProgressBarVisible ? View.GONE : View.VISIBLE);
+        mProgressBar.setVisibility(visible ? View.VISIBLE : View.GONE);
+        mProgressBar.setIndeterminate(visible);
+        mDivider.setVisibility(visible ? View.GONE : View.VISIBLE);
         mInternetDialogSubTitle.setText(getSubtitleText());
     }
 
@@ -651,13 +656,14 @@ public class InternetDialog extends SystemUIDialog implements
     @Override
     @WorkerThread
     public void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
-            @Nullable WifiEntry connectedEntry) {
+            @Nullable WifiEntry connectedEntry, boolean hasMoreEntry) {
         // Should update the carrier network layout when it is connected under airplane mode ON.
         boolean shouldUpdateCarrierNetwork = mMobileNetworkLayout.getVisibility() == View.VISIBLE
                 && mInternetDialogController.isAirplaneModeEnabled();
         mHandler.post(() -> {
             mConnectedWifiEntry = connectedEntry;
             mWifiEntriesCount = wifiEntries == null ? 0 : wifiEntries.size();
+            mHasMoreEntry = hasMoreEntry;
             updateDialog(shouldUpdateCarrierNetwork /* shouldUpdateMobileNetwork */);
             mAdapter.setWifiEntries(wifiEntries, mWifiEntriesCount);
             mAdapter.notifyDataSetChanged();
