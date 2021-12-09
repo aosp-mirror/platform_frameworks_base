@@ -32055,6 +32055,7 @@ package android.os {
     method public boolean isDemoUser();
     method public static boolean isHeadlessSystemUserMode();
     method public boolean isManagedProfile();
+    method public boolean isProfile();
     method public boolean isQuietModeEnabled(android.os.UserHandle);
     method public boolean isSystemUser();
     method public boolean isUserAGoat();
