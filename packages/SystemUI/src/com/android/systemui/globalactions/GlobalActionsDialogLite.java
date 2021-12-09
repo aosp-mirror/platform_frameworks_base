@@ -121,6 +121,7 @@ import com.android.systemui.scrim.ScrimDrawable;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.telephony.TelephonyListenerManager;
@@ -236,6 +237,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     protected Handler mMainHandler;
     private int mSmallestScreenWidthDp;
     private final Optional<StatusBar> mStatusBarOptional;
+    private final SystemUIDialogManager mDialogManager;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
 
@@ -346,7 +348,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             PackageManager packageManager,
             Optional<StatusBar> statusBarOptional,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DialogLaunchAnimator dialogLaunchAnimator) {
+            DialogLaunchAnimator dialogLaunchAnimator,
+            SystemUIDialogManager dialogManager) {
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -378,6 +381,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mStatusBarOptional = statusBarOptional;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDialogLaunchAnimator = dialogLaunchAnimator;
+        mDialogManager = dialogManager;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -677,7 +681,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mAdapter, mOverflowAdapter, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
                 mSysUiState, this::onRefresh, mKeyguardShowing, mPowerAdapter, mUiEventLogger,
-                mStatusBarOptional, mKeyguardUpdateMonitor, mLockPatternUtils);
+                mStatusBarOptional, mKeyguardUpdateMonitor, mLockPatternUtils,
+                mDialogManager);
 
         dialog.setOnDismissListener(this);
         dialog.setOnShowListener(this);
@@ -2219,10 +2224,12 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 SysUiState sysuiState, Runnable onRefreshCallback, boolean keyguardShowing,
                 MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger,
                 Optional<StatusBar> statusBarOptional,
-                KeyguardUpdateMonitor keyguardUpdateMonitor, LockPatternUtils lockPatternUtils) {
+                KeyguardUpdateMonitor keyguardUpdateMonitor, LockPatternUtils lockPatternUtils,
+                SystemUIDialogManager systemUiDialogManager) {
             // We set dismissOnDeviceLock to false because we have a custom broadcast receiver to
             // dismiss this dialog when the device is locked.
-            super(context, themeRes, false /* dismissOnDeviceLock */);
+            super(context, themeRes, false /* dismissOnDeviceLock */,
+                    systemUiDialogManager);
             mContext = context;
             mAdapter = adapter;
             mOverflowAdapter = overflowAdapter;
