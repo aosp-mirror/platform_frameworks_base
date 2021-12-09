@@ -26,6 +26,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -94,6 +95,21 @@ public final class TransportDiscoveryData implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        TransportDiscoveryData other = (TransportDiscoveryData) obj;
+        return Arrays.equals(toByteArray(), other.toByteArray());
     }
 
     @Override
