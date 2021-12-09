@@ -394,6 +394,7 @@ package android {
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
     field public static final int config_systemActivityRecognizer = 17039416; // 0x1040038
     field public static final int config_systemAmbientAudioIntelligence = 17039411; // 0x1040033
+    field public static final int config_systemAppProtectionService;
     field public static final int config_systemAudioIntelligence = 17039412; // 0x1040034
     field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
     field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
