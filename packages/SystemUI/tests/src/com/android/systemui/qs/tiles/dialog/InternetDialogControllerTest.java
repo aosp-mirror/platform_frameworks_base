@@ -235,10 +235,18 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getSubtitleText_withAirplaneModeOn_returnNull() {
+    public void getSubtitleText_withApmOnAndWifiOff_returnWifiIsOff() {
         fakeAirplaneModeEnabled(true);
+        when(mWifiManager.isWifiEnabled()).thenReturn(false);
 
-        assertThat(mInternetDialogController.getSubtitleText(false)).isNull();
+        assertThat(mInternetDialogController.getSubtitleText(false))
+                .isEqualTo(getResourcesString("wifi_is_off"));
+
+        // if the Wi-Fi disallow config, then don't return Wi-Fi related string.
+        mInternetDialogController.mCanConfigWifi = false;
+
+        assertThat(mInternetDialogController.getSubtitleText(false))
+                .isNotEqualTo(getResourcesString("wifi_is_off"));
     }
 
     @Test
