@@ -28,10 +28,10 @@ import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
+import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 
 import java.io.File;
@@ -128,7 +128,8 @@ public class PerformInitializeTask implements Runnable {
                 EventLog.writeEvent(EventLogTags.BACKUP_START, transportDirName);
                 long startRealtime = SystemClock.elapsedRealtime();
 
-                IBackupTransport transport = transportConnection.connectOrThrow(callerLogString);
+                BackupTransportClient transport = transportConnection.connectOrThrow(
+                        callerLogString);
                 int status = transport.initializeDevice();
                 if (status != BackupTransport.TRANSPORT_OK) {
                     Slog.e(TAG, "Transport error in initializeDevice()");

@@ -923,6 +923,7 @@ static void android_location_gnss_hal_GnssNative_class_init_once(JNIEnv* env, jc
     gnss::GnssAntennaInfo_class_init_once(env, clazz);
     gnss::GnssBatching_class_init_once(env, clazz);
     gnss::GnssConfiguration_class_init_once(env);
+    gnss::GnssGeofence_class_init_once(env, clazz);
     gnss::GnssMeasurement_class_init_once(env, clazz);
     gnss::GnssNavigationMessage_class_init_once(env, clazz);
     gnss::AGnss_class_init_once(env, clazz);

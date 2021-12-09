@@ -21,6 +21,7 @@ import android.app.backup.RestoreDescription;
 import android.app.backup.RestoreSet;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
@@ -35,6 +36,10 @@ public class BackupTransportClient {
 
     BackupTransportClient(IBackupTransport transportBinder) {
         mTransportBinder = transportBinder;
+
+        // This is a temporary fix to allow blocking calls.
+        // TODO: b/147702043. Redesign IBackupTransport so as to make the calls non-blocking.
+        Binder.allowBlocking(mTransportBinder.asBinder());
     }
 
     /**

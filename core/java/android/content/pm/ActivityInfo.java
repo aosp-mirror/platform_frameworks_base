@@ -1017,12 +1017,12 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * This change id restricts treatments that force a given min aspect ratio to activities
      * whose orientation is fixed to portrait.
      *
-     * This treatment only takes effect if OVERRIDE_MIN_ASPECT_RATIO is also enabled.
+     * This treatment is enabled by default and only takes effect if OVERRIDE_MIN_ASPECT_RATIO is
+     * also enabled.
      * @hide
      */
     @ChangeId
     @Overridable
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S_V2)
     @TestApi
     public static final long OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY = 203647190L; // buganizer id
 

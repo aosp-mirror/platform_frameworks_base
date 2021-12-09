@@ -62,12 +62,15 @@ public class SystemConfigTest {
     private static final String LOG_TAG = "SystemConfigTest";
 
     private SystemConfig mSysConfig;
+    private File mFooJar;
 
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 
     @Before
     public void setUp() throws Exception {
         mSysConfig = new SystemConfigTestClass();
+        mFooJar = createTempFile(
+                mTemporaryFolder.getRoot().getCanonicalFile(), "foo.jar", "JAR");
     }
 
     /**
@@ -340,7 +343,7 @@ public class SystemConfigTest {
                 "<permissions>\n"
                 + "    <library \n"
                 + "        name=\"foo\"\n"
-                + "        file=\"foo.jar\"\n"
+                + "        file=\"" + mFooJar + "\"\n"
                 + "        on-bootclasspath-before=\"10\"\n"
                 + "        on-bootclasspath-since=\"20\"\n"
                 + "     />\n\n"
@@ -362,7 +365,7 @@ public class SystemConfigTest {
                 "<permissions>\n"
                         + "    <updatable-library \n"
                         + "        name=\"foo\"\n"
-                        + "        file=\"foo.jar\"\n"
+                        + "        file=\"" + mFooJar + "\"\n"
                         + "        on-bootclasspath-before=\"10\"\n"
                         + "        on-bootclasspath-since=\"20\"\n"
                         + "     />\n\n"
@@ -384,7 +387,7 @@ public class SystemConfigTest {
                 "<permissions>\n"
                 + "    <library \n"
                 + "        name=\"foo\"\n"
-                + "        file=\"foo.jar\"\n"
+                + "        file=\"" + mFooJar + "\"\n"
                 + "        min-device-sdk=\"30\"\n"
                 + "     />\n\n"
                 + " </permissions>";
@@ -402,7 +405,7 @@ public class SystemConfigTest {
                 "<permissions>\n"
                 + "    <library \n"
                 + "        name=\"foo\"\n"
-                + "        file=\"foo.jar\"\n"
+                + "        file=\"" + mFooJar + "\"\n"
                 + "        min-device-sdk=\"" + Build.VERSION.SDK_INT + "\"\n"
                 + "     />\n\n"
                 + " </permissions>";
@@ -420,7 +423,7 @@ public class SystemConfigTest {
                 "<permissions>\n"
                 + "    <library \n"
                 + "        name=\"foo\"\n"
-                + "        file=\"foo.jar\"\n"
+                + "        file=\"" + mFooJar + "\"\n"
                 + "        min-device-sdk=\"" + (Build.VERSION.SDK_INT + 1) + "\"\n"
                 + "     />\n\n"
                 + " </permissions>";
@@ -438,7 +441,7 @@ public class SystemConfigTest {
                 "<permissions>\n"
                 + "    <library \n"
                 + "        name=\"foo\"\n"
-                + "        file=\"foo.jar\"\n"
+                + "        file=\"" + mFooJar + "\"\n"
                 + "        max-device-sdk=\"30\"\n"
                 + "     />\n\n"
                 + " </permissions>";
@@ -456,7 +459,7 @@ public class SystemConfigTest {
                 "<permissions>\n"
                 + "    <library \n"
                 + "        name=\"foo\"\n"
-                + "        file=\"foo.jar\"\n"
+                + "        file=\"" + mFooJar + "\"\n"
                 + "        max-device-sdk=\"" + Build.VERSION.SDK_INT + "\"\n"
                 + "     />\n\n"
                 + " </permissions>";
@@ -474,7 +477,7 @@ public class SystemConfigTest {
                 "<permissions>\n"
                 + "    <library \n"
                 + "        name=\"foo\"\n"
-                + "        file=\"foo.jar\"\n"
+                + "        file=\"" + mFooJar + "\"\n"
                 + "        max-device-sdk=\"" + (Build.VERSION.SDK_INT + 1) + "\"\n"
                 + "     />\n\n"
                 + " </permissions>";
@@ -507,7 +510,7 @@ public class SystemConfigTest {
      * @param folder   pre-existing subdirectory of mTemporaryFolder to put the file
      * @param fileName name of the file (e.g. filename.xml) to create
      * @param contents contents to write to the file
-     * @return the folder containing the newly created file (not the file itself!)
+     * @return the newly created file
      */
     private File createTempFile(File folder, String fileName, String contents)
             throws IOException {
@@ -523,13 +526,13 @@ public class SystemConfigTest {
             Log.d(LOG_TAG, input.nextLine());
         }
 
-        return folder;
+        return file;
     }
 
     private void assertFooIsOnlySharedLibrary() {
         assertThat(mSysConfig.getSharedLibraries().size()).isEqualTo(1);
         SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
         assertThat(entry.name).isEqualTo("foo");
-        assertThat(entry.filename).isEqualTo("foo.jar");
+        assertThat(entry.filename).isEqualTo(mFooJar.toString());
     }
 }

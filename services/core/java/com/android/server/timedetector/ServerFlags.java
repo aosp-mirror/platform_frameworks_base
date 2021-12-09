@@ -35,6 +35,7 @@ import java.lang.annotation.Target;
 import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -179,8 +180,13 @@ public final class ServerFlags {
     public static final @DeviceConfigKey String KEY_ENHANCED_METRICS_COLLECTION_ENABLED =
             "enhanced_metrics_collection_enabled";
 
+    /**
+     * The registered listeners and the keys to trigger on. The value is explicitly a HashSet to
+     * ensure O(1) lookup performance when working out whether a listener should trigger.
+     */
     @GuardedBy("mListeners")
-    private final ArrayMap<ConfigurationChangeListener, Set<String>> mListeners = new ArrayMap<>();
+    private final ArrayMap<ConfigurationChangeListener, HashSet<String>> mListeners =
+            new ArrayMap<>();
 
     private static final Object SLOCK = new Object();
 
@@ -207,18 +213,29 @@ public final class ServerFlags {
 
     private void handlePropertiesChanged(@NonNull DeviceConfig.Properties properties) {
         synchronized (mListeners) {
-            for (Map.Entry<ConfigurationChangeListener, Set<String>> listenerEntry
+            for (Map.Entry<ConfigurationChangeListener, HashSet<String>> listenerEntry
                     : mListeners.entrySet()) {
-                if (intersects(listenerEntry.getValue(), properties.getKeyset())) {
+                // It's unclear which set of the following two Sets is going to be larger in the
+                // average case: monitoredKeys will be a subset of the set of possible keys, but
+                // only changed keys are reported. Because we guarantee the type / lookup behavior
+                // of the monitoredKeys by making that a HashSet, that is used as the haystack Set,
+                // while the changed keys is treated as the needles Iterable. At the time of
+                // writing, properties.getKeyset() actually returns a HashSet, so iteration isn't
+                // super efficient and the use of HashSet for monitoredKeys may be redundant, but
+                // neither set will be enormous.
+                HashSet<String> monitoredKeys = listenerEntry.getValue();
+                Iterable<String> modifiedKeys = properties.getKeyset();
+                if (containsAny(monitoredKeys, modifiedKeys)) {
                     listenerEntry.getKey().onChange();
                 }
             }
         }
     }
 
-    private static boolean intersects(@NonNull Set<String> one, @NonNull Set<String> two) {
-        for (String toFind : one) {
-            if (two.contains(toFind)) {
+    private static boolean containsAny(
+            @NonNull Set<String> haystack, @NonNull Iterable<String> needles) {
+        for (String needle : needles) {
+            if (haystack.contains(needle)) {
                 return true;
             }
         }
@@ -237,8 +254,11 @@ public final class ServerFlags {
         Objects.requireNonNull(listener);
         Objects.requireNonNull(keys);
 
+        // Make a defensive copy and use a well-defined Set implementation to provide predictable
+        // performance on the lookup.
+        HashSet<String> keysCopy = new HashSet<>(keys);
         synchronized (mListeners) {
-            mListeners.put(listener, keys);
+            mListeners.put(listener, keysCopy);
         }
     }
 

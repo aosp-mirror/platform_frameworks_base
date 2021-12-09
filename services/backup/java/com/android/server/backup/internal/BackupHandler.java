@@ -31,7 +31,6 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
@@ -51,6 +50,7 @@ import com.android.server.backup.params.RestoreGetSetsParams;
 import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.restore.PerformAdbRestoreTask;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
+import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 
 import java.util.ArrayList;
@@ -149,7 +149,7 @@ public class BackupHandler extends Handler {
                 String callerLogString = "BH/MSG_RUN_BACKUP";
                 TransportConnection transportConnection =
                         transportManager.getCurrentTransportClient(callerLogString);
-                IBackupTransport transport =
+                BackupTransportClient transport =
                         transportConnection != null
                                 ? transportConnection.connect(callerLogString)
                                 : null;
@@ -364,7 +364,7 @@ public class BackupHandler extends Handler {
                 RestoreGetSetsParams params = (RestoreGetSetsParams) msg.obj;
                 String callerLogString = "BH/MSG_RUN_GET_RESTORE_SETS";
                 try {
-                    IBackupTransport transport =
+                    BackupTransportClient transport =
                             params.mTransportConnection.connectOrThrow(callerLogString);
                     sets = transport.getAvailableRestoreSets();
                     // cache the result in the active session

@@ -348,6 +348,10 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             return mContext.getText(SUBTITLE_TEXT_SEARCHING_FOR_NETWORKS);
         }
 
+        if (isCarrierNetworkActive()) {
+            return mContext.getText(SUBTITLE_TEXT_NON_CARRIER_NETWORK_UNAVAILABLE);
+        }
+
         // Sub-Title:
         // show non_carrier_network_unavailable
         //   - while Wi-Fi on + no Wi-Fi item
@@ -879,20 +883,25 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             mConnectedEntry = null;
             mWifiEntriesCount = 0;
             if (mCallback != null) {
-                mCallback.onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry */);
+                mCallback.onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry */,
+                        false /* hasMoreEntry */);
             }
             return;
         }
 
+        boolean hasMoreEntry = false;
         int count = MAX_WIFI_ENTRY_COUNT;
         if (mHasEthernet) {
             count -= 1;
         }
-        if (hasActiveSubId()) {
+        if (hasActiveSubId() || isCarrierNetworkActive()) {
             count -= 1;
         }
-        if (count > accessPoints.size()) {
-            count = accessPoints.size();
+        final int wifiTotalCount = accessPoints.size();
+        if (count > wifiTotalCount) {
+            count = wifiTotalCount;
+        } else if (count < wifiTotalCount) {
+            hasMoreEntry = true;
         }
 
         WifiEntry connectedEntry = null;
@@ -909,7 +918,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mWifiEntriesCount = wifiEntries.size();
 
         if (mCallback != null) {
-            mCallback.onAccessPointsChanged(wifiEntries, mConnectedEntry);
+            mCallback.onAccessPointsChanged(wifiEntries, mConnectedEntry, hasMoreEntry);
         }
     }
 
@@ -1060,7 +1069,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         void dismissDialog();
 
         void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
-                @Nullable WifiEntry connectedEntry);
+                @Nullable WifiEntry connectedEntry, boolean hasMoreEntry);
     }
 
     void makeOverlayToast(int stringId) {

@@ -66,11 +66,7 @@ public class NotificationListenerWithPlugins extends NotificationListenerService
 
     @Override
     public RankingMap getCurrentRanking() {
-        RankingMap currentRanking = super.getCurrentRanking();
-        for (NotificationListenerController plugin : mPlugins) {
-            currentRanking = plugin.getCurrentRanking(currentRanking);
-        }
-        return currentRanking;
+        return onPluginRankingUpdate(super.getCurrentRanking());
     }
 
     public void onPluginConnected() {
@@ -120,8 +116,11 @@ public class NotificationListenerWithPlugins extends NotificationListenerService
         return false;
     }
 
-    public RankingMap onPluginRankingUpdate(RankingMap rankingMap) {
-        return getCurrentRanking();
+    protected RankingMap onPluginRankingUpdate(RankingMap rankingMap) {
+        for (NotificationListenerController plugin : mPlugins) {
+            rankingMap = plugin.getCurrentRanking(rankingMap);
+        }
+        return rankingMap;
     }
 
     @Override

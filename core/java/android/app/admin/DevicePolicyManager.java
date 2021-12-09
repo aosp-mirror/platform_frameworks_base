@@ -2158,13 +2158,24 @@ public class DevicePolicyManager {
     /**
      * Result code for {@link #checkProvisioningPreCondition}.
      *
+     * <p>Unknown error code returned  for {@link #ACTION_PROVISION_MANAGED_DEVICE},
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} and {@link #ACTION_PROVISION_MANAGED_USER}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CODE_UNKNOWN_ERROR = -1;
+
+    /**
+     * Result code for {@link #checkProvisioningPreCondition}.
+     *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_PROFILE} and {@link #ACTION_PROVISION_MANAGED_USER}
      * when provisioning is allowed.
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_OK = 0;
 
     /**
@@ -2175,7 +2186,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_HAS_DEVICE_OWNER = 1;
 
     /**
@@ -2186,7 +2197,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_USER_HAS_PROFILE_OWNER = 2;
 
     /**
@@ -2196,7 +2207,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_USER_NOT_RUNNING = 3;
 
     /**
@@ -2207,7 +2218,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_USER_SETUP_COMPLETED = 4;
 
     /**
@@ -2215,7 +2226,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_NONSYSTEM_USER_EXISTS = 5;
 
     /**
@@ -2223,7 +2234,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_ACCOUNTS_NOT_EMPTY = 6;
 
     /**
@@ -2233,7 +2244,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_NOT_SYSTEM_USER = 7;
 
     /**
@@ -2244,7 +2255,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_HAS_PAIRED = 8;
 
     /**
@@ -2256,7 +2267,7 @@ public class DevicePolicyManager {
      * @see {@link PackageManager#FEATURE_MANAGED_USERS}
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_MANAGED_USERS_NOT_SUPPORTED = 9;
 
     /**
@@ -2268,7 +2279,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_SYSTEM_USER = 10;
 
     /**
@@ -2279,7 +2290,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11;
 
     /**
@@ -2289,7 +2300,6 @@ public class DevicePolicyManager {
      * @deprecated not used anymore but can't be removed since it's a @TestApi.
      **/
     @Deprecated
-    @TestApi
     public static final int CODE_NOT_SYSTEM_USER_SPLIT = 12;
 
     /**
@@ -2301,7 +2311,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13;
 
     /**
@@ -2323,7 +2333,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS = 15;
 
     /**
@@ -2334,8 +2344,8 @@ public class DevicePolicyManager {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "CODE_" }, value = {
-            CODE_OK, CODE_HAS_DEVICE_OWNER, CODE_USER_HAS_PROFILE_OWNER, CODE_USER_NOT_RUNNING,
-            CODE_USER_SETUP_COMPLETED, CODE_NOT_SYSTEM_USER, CODE_HAS_PAIRED,
+            CODE_UNKNOWN_ERROR, CODE_OK, CODE_HAS_DEVICE_OWNER, CODE_USER_HAS_PROFILE_OWNER,
+            CODE_USER_NOT_RUNNING, CODE_USER_SETUP_COMPLETED, CODE_NOT_SYSTEM_USER, CODE_HAS_PAIRED,
             CODE_MANAGED_USERS_NOT_SUPPORTED, CODE_SYSTEM_USER, CODE_CANNOT_ADD_MANAGED_PROFILE,
             CODE_NOT_SYSTEM_USER_SPLIT, CODE_DEVICE_ADMIN_NOT_SUPPORTED,
             CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER,
@@ -11413,9 +11423,9 @@ public class DevicePolicyManager {
      * @return A {@link ProvisioningPreCondition} value indicating whether provisioning is allowed.
      * @hide
      */
-    @TestApi
+    @SystemApi
     public @ProvisioningPreCondition int checkProvisioningPreCondition(
-            @Nullable String action, @NonNull String packageName) {
+            @NonNull String action, @NonNull String packageName) {
         try {
             return mService.checkProvisioningPreCondition(action, packageName);
         } catch (RemoteException re) {
@@ -12135,8 +12145,10 @@ public class DevicePolicyManager {
      *
      * @param state to store
      * @param userHandle for user
+     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
     public void setUserProvisioningState(@UserProvisioningState int state, int userHandle) {
         if (mService != null) {
             try {
@@ -12145,6 +12157,34 @@ public class DevicePolicyManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Set the {@link UserProvisioningState} for the supplied user. The supplied user has to be
+     * manged, otherwise it will throw an {@link IllegalStateException}.
+     *
+     * <p> For managed users/profiles/devices, only the following state changes are allowed:
+     * <ul>
+     *     <li>{@link #STATE_USER_UNMANAGED} can change to any other state except itself
+     *     <li>{@link #STATE_USER_SETUP_INCOMPLETE} and {@link #STATE_USER_SETUP_COMPLETE} can only
+     *     change to {@link #STATE_USER_SETUP_FINALIZED}</li>
+     *     <li>{@link #STATE_USER_PROFILE_COMPLETE} can only change to
+     *     {@link #STATE_USER_PROFILE_FINALIZED}</li>
+     *     <li>{@link #STATE_USER_SETUP_FINALIZED} can't be changed to any other state</li>
+     *     <li>{@link #STATE_USER_PROFILE_FINALIZED} can only change to
+     *     {@link #STATE_USER_UNMANAGED}</li>
+     * </ul>
+     * @param state to store
+     * @param userHandle for user
+     * @throws IllegalStateException if called with an invalid state change.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void setUserProvisioningState(
+            @UserProvisioningState int state, @NonNull UserHandle userHandle) {
+        setUserProvisioningState(state, userHandle.getIdentifier());
     }
 
     /**

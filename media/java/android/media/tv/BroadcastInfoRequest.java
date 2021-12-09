@@ -23,19 +23,35 @@ import android.annotation.NonNull;
 
 /** @hide */
 public abstract class BroadcastInfoRequest implements Parcelable {
-    protected static final int PARCEL_TOKEN_TS_REQUEST = 1;
+
+    // todo: change const declaration to intdef
+    public static final int REQUEST_OPTION_REPEAT = 11;
+    public static final int REQUEST_OPTION_AUTO_UPDATE = 12;
 
     public static final @NonNull Parcelable.Creator<BroadcastInfoRequest> CREATOR =
             new Parcelable.Creator<BroadcastInfoRequest>() {
                 @Override
                 public BroadcastInfoRequest createFromParcel(Parcel source) {
-                    int token = source.readInt();
-                    switch (token) {
-                        case PARCEL_TOKEN_TS_REQUEST:
+                    int type = source.readInt();
+                    switch (type) {
+                        case BroadcastInfoType.TS:
                             return TsRequest.createFromParcelBody(source);
+                        case BroadcastInfoType.TABLE:
+                            return TableRequest.createFromParcelBody(source);
+                        case BroadcastInfoType.SECTION:
+                            return SectionRequest.createFromParcelBody(source);
+                        case BroadcastInfoType.PES:
+                            return PesRequest.createFromParcelBody(source);
+                        case BroadcastInfoType.STREAM_EVENT:
+                            return StreamEventRequest.createFromParcelBody(source);
+                        case BroadcastInfoType.DSMCC:
+                            return DsmccRequest.createFromParcelBody(source);
+                        case BroadcastInfoType.TV_PROPRIETARY_FUNCTION:
+                            return TvProprietaryFunctionRequest.createFromParcelBody(source);
                         default:
                             throw new IllegalStateException(
-                                    "Unexpected broadcast info request type token in parcel.");
+                                    "Unexpected broadcast info request type (value "
+                                            + type + ") in parcel.");
                     }
                 }
 
@@ -45,18 +61,32 @@ public abstract class BroadcastInfoRequest implements Parcelable {
                 }
             };
 
-    int requestId;
+    protected final int mType;
+    protected final int mRequestId;
+    protected final int mOption;
 
-    public BroadcastInfoRequest(int requestId) {
-        this.requestId = requestId;
+    protected BroadcastInfoRequest(int type, int requestId, int option) {
+        mType = type;
+        mRequestId = requestId;
+        mOption = option;
     }
 
-    protected BroadcastInfoRequest(Parcel source) {
-        requestId = source.readInt();
+    protected BroadcastInfoRequest(int type, Parcel source) {
+        mType = type;
+        mRequestId = source.readInt();
+        mOption = source.readInt();
+    }
+
+    public int getType() {
+        return mType;
     }
 
     public int getRequestId() {
-        return requestId;
+        return mRequestId;
+    }
+
+    public int getOption() {
+        return mOption;
     }
 
     @Override
@@ -66,6 +96,8 @@ public abstract class BroadcastInfoRequest implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(requestId);
+        dest.writeInt(mType);
+        dest.writeInt(mRequestId);
+        dest.writeInt(mOption);
     }
 }

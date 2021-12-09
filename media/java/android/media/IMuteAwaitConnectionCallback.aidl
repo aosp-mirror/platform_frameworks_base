@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-package android.media.tv;
+package android.media;
 
-parcelable TsRequest;
+import android.media.AudioDeviceAttributes;
+
+/**
+ * AIDL for the AudioService to signal mute events tied to audio device connections.
+ *
+ * {@hide}
+ */
+oneway interface IMuteAwaitConnectionCallback {
+
+    void dispatchOnMutedUntilConnection(in AudioDeviceAttributes device, in int[] mutedUsages);
+
+    void dispatchOnUnmutedEvent(int event, in AudioDeviceAttributes device, in int[] mutedUsages);
+}
