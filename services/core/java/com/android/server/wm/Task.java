@@ -3159,14 +3159,6 @@ class Task extends TaskFragment {
     }
 
     @Override
-    boolean fillsParent() {
-        // From the perspective of policy, we still want to report that this task fills parent
-        // in fullscreen windowing mode even it doesn't match parent bounds because there will be
-        // letterbox around its real content.
-        return getWindowingMode() == WINDOWING_MODE_FULLSCREEN || matchParentBounds();
-    }
-
-    @Override
     void forAllLeafTasks(Consumer<Task> callback, boolean traverseTopToBottom) {
         final int count = mChildren.size();
         boolean isLeafTask = true;
