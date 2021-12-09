@@ -16,12 +16,16 @@
 
 package android.bluetooth;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -29,6 +33,7 @@ import android.os.UserHandle;
 import android.util.CloseGuard;
 import android.util.Log;
 
+import java.util.List;
 /**
  * Connector for Bluetooth profile proxies to bind manager service and
  * profile services
@@ -56,6 +61,30 @@ public abstract class BluetoothProfileConnector<T> {
             }
         }
     };
+
+    private @Nullable ComponentName resolveSystemService(@NonNull Intent intent,
+            @NonNull PackageManager pm) {
+        List<ResolveInfo> results = pm.queryIntentServices(intent,
+                PackageManager.ResolveInfoFlags.of(0));
+        if (results == null) {
+            return null;
+        }
+        ComponentName comp = null;
+        for (int i = 0; i < results.size(); i++) {
+            ResolveInfo ri = results.get(i);
+            if ((ri.serviceInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                continue;
+            }
+            ComponentName foundComp = new ComponentName(ri.serviceInfo.applicationInfo.packageName,
+                    ri.serviceInfo.name);
+            if (comp != null) {
+                throw new IllegalStateException("Multiple system services handle " + intent
+                        + ": " + comp + ", " + foundComp);
+            }
+            comp = foundComp;
+        }
+        return comp;
+    }
 
     private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -99,8 +128,7 @@ public abstract class BluetoothProfileConnector<T> {
                 mCloseGuard.open("doUnbind");
                 try {
                     Intent intent = new Intent(mServiceName);
-                    ComponentName comp = intent.resolveSystemService(
-                            mContext.getPackageManager(), 0);
+                    ComponentName comp = resolveSystemService(intent, mContext.getPackageManager());
                     intent.setComponent(comp);
                     if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
                             UserHandle.CURRENT)) {
