@@ -26,14 +26,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.plugins.FalsingManager;
 
 /**
  * Custom user-switcher for use on the bouncer.
  */
 public class KeyguardUserSwitcherPopupMenu extends ListPopupWindow {
     private Context mContext;
-    private FalsingCollector mFalsingCollector;
+    private FalsingManager mFalsingManager;
     private int mLastHeight = -1;
     private View.OnLayoutChangeListener mLayoutListener = (v, l, t, r, b, ol, ot, or, ob) -> {
         int height = -v.getMeasuredHeight() + getAnchorView().getHeight();
@@ -45,10 +45,10 @@ public class KeyguardUserSwitcherPopupMenu extends ListPopupWindow {
     };
 
     public KeyguardUserSwitcherPopupMenu(@NonNull Context context,
-            @NonNull FalsingCollector falsingCollector) {
+            @NonNull FalsingManager falsingManager) {
         super(context);
         mContext = context;
-        mFalsingCollector = falsingCollector;
+        mFalsingManager = falsingManager;
         Resources res = mContext.getResources();
         setBackgroundDrawable(
                 res.getDrawable(R.drawable.keyguard_user_switcher_popup_bg, context.getTheme()));
@@ -76,7 +76,7 @@ public class KeyguardUserSwitcherPopupMenu extends ListPopupWindow {
 
         listView.setOnTouchListener((v, ev) -> {
             if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                mFalsingCollector.avoidGesture();
+                return mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY);
             }
             return false;
         });

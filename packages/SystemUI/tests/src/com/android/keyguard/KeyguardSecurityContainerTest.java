@@ -47,7 +47,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.UserSwitcherController.UserRecord;
@@ -83,7 +83,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     @Mock
     private GlobalSettings mGlobalSettings;
     @Mock
-    private FalsingCollector mFalsingCollector;
+    private FalsingManager mFalsingManager;
     @Mock
     private UserSwitcherController mUserSwitcherController;
     @Mock
@@ -117,7 +117,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
     @Test
     public void onMeasure_usesHalfWidthWithOneHandedModeEnabled() {
-        mKeyguardSecurityContainer.initMode(MODE_ONE_HANDED, mGlobalSettings, mFalsingCollector,
+        mKeyguardSecurityContainer.initMode(MODE_ONE_HANDED, mGlobalSettings, mFalsingManager,
                 mUserSwitcherController);
 
         int halfWidthMeasureSpec =
@@ -129,7 +129,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
     @Test
     public void onMeasure_usesFullWidthWithOneHandedModeDisabled() {
-        mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingCollector,
+        mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
                 mUserSwitcherController);
 
         mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
@@ -141,7 +141,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         int imeInsetAmount = 100;
         int systemBarInsetAmount = 10;
 
-        mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingCollector,
+        mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
                 mUserSwitcherController);
 
         Insets imeInset = Insets.of(0, 0, 0, imeInsetAmount);
@@ -166,7 +166,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         int imeInsetAmount = 0;
         int systemBarInsetAmount = 10;
 
-        mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingCollector,
+        mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
                 mUserSwitcherController);
 
         Insets imeInset = Insets.of(0, 0, 0, imeInsetAmount);
@@ -187,7 +187,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
     private void setupForUpdateKeyguardPosition(boolean oneHandedMode) {
         int mode = oneHandedMode ? MODE_ONE_HANDED : MODE_DEFAULT;
-        mKeyguardSecurityContainer.initMode(mode, mGlobalSettings, mFalsingCollector,
+        mKeyguardSecurityContainer.initMode(mode, mGlobalSettings, mFalsingManager,
                 mUserSwitcherController);
 
         mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
@@ -298,7 +298,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
     private void setupUserSwitcher() {
         mKeyguardSecurityContainer.initMode(KeyguardSecurityContainer.MODE_USER_SWITCHER,
-                mGlobalSettings, mFalsingCollector, mUserSwitcherController);
+                mGlobalSettings, mFalsingManager, mUserSwitcherController);
     }
 
     private ArrayList<UserRecord> buildUserRecords(int count) {
