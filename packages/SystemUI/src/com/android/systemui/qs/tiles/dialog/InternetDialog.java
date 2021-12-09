@@ -16,6 +16,7 @@
 package com.android.systemui.qs.tiles.dialog;
 
 import static com.android.systemui.Prefs.Key.QS_HAS_TURNED_OFF_MOBILE_DATA;
+import static com.android.systemui.qs.tiles.dialog.InternetDialogController.MAX_WIFI_ENTRY_COUNT;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -79,6 +80,7 @@ public class InternetDialog extends SystemUIDialog implements
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     static final long PROGRESS_DELAY_MS = 1500L;
+    static final int MAX_NETWORK_COUNT = 4;
 
     private final Handler mHandler;
     private final Executor mBackgroundExecutor;
@@ -478,12 +480,19 @@ public class InternetDialog extends SystemUIDialog implements
     @VisibleForTesting
     @MainThread
     int getWifiListMaxCount() {
-        int count = InternetDialogController.MAX_WIFI_ENTRY_COUNT;
+        // Use the maximum count of networks to calculate the remaining count for Wi-Fi networks.
+        int count = MAX_NETWORK_COUNT;
         if (mEthernetLayout.getVisibility() == View.VISIBLE) {
             count -= 1;
         }
         if (mMobileNetworkLayout.getVisibility() == View.VISIBLE) {
             count -= 1;
+        }
+
+        // If the remaining count is greater than the maximum count of the Wi-Fi network, the
+        // maximum count of the Wi-Fi network is used.
+        if (count > MAX_WIFI_ENTRY_COUNT) {
+            count = MAX_WIFI_ENTRY_COUNT;
         }
         if (mConnectedWifListLayout.getVisibility() == View.VISIBLE) {
             count -= 1;

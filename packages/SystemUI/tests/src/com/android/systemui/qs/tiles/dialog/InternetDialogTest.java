@@ -518,45 +518,46 @@ public class InternetDialogTest extends SysuiTestCase {
 
     @Test
     public void getWifiListMaxCount_returnCountCorrectly() {
-        // Ethernet, MobileData, ConnectedWiFi are all hidden.
+        // Both of the Ethernet, MobileData is hidden.
         // Then the maximum count is equal to MAX_WIFI_ENTRY_COUNT.
         setNetworkVisible(false, false, false);
 
         assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT);
 
-        // Only one of Ethernet, MobileData, ConnectedWiFi is displayed.
-        // Then the maximum count  is equal to MAX_WIFI_ENTRY_COUNT - 1.
-        setNetworkVisible(true, false, false);
-
-        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 1);
-
-        setNetworkVisible(false, true, false);
-
-        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 1);
-
+        // If the Connected Wi-Fi is displayed then reduce one of the Wi-Fi list max count.
         setNetworkVisible(false, false, true);
 
         assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 1);
 
-        // Only one of Ethernet, MobileData, ConnectedWiFi is hidden.
-        // Then the maximum count  is equal to MAX_WIFI_ENTRY_COUNT - 2.
-        setNetworkVisible(true, true, false);
+        // Only one of Ethernet, MobileData is displayed.
+        // Then the maximum count is equal to MAX_WIFI_ENTRY_COUNT.
+        setNetworkVisible(true, false, false);
 
-        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 2);
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT);
 
+        setNetworkVisible(false, true, false);
+
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT);
+
+        // If the Connected Wi-Fi is displayed then reduce one of the Wi-Fi list max count.
         setNetworkVisible(true, false, true);
 
-        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 2);
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 1);
 
         setNetworkVisible(false, true, true);
 
-        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 2);
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 1);
 
-        // Ethernet, MobileData, ConnectedWiFi are all displayed.
-        // Then the maximum count  is equal to MAX_WIFI_ENTRY_COUNT - 3.
+        // Both of Ethernet, MobileData, ConnectedWiFi is displayed.
+        // Then the maximum count is equal to MAX_WIFI_ENTRY_COUNT - 1.
+        setNetworkVisible(true, true, false);
+
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 1);
+
+        // If the Connected Wi-Fi is displayed then reduce one of the Wi-Fi list max count.
         setNetworkVisible(true, true, true);
 
-        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 3);
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 2);
     }
 
     private void setNetworkVisible(boolean ethernetVisible, boolean mobileDataVisible,

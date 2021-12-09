@@ -125,7 +125,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             R.string.all_network_unavailable;
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    static final int MAX_WIFI_ENTRY_COUNT = 4;
+    static final int MAX_WIFI_ENTRY_COUNT = 3;
 
     private WifiManager mWifiManager;
     private Context mContext;
@@ -143,8 +143,6 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     private AccessPointController mAccessPointController;
     private IntentFilter mConnectionStateFilter;
     private InternetDialogCallback mCallback;
-    private WifiEntry mConnectedEntry;
-    private int mWifiEntriesCount;
     private UiEventLogger mUiEventLogger;
     private BroadcastDispatcher mBroadcastDispatcher;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -156,6 +154,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     private SignalDrawable mSignalDrawable;
     private LocationController mLocationController;
     private DialogLaunchAnimator mDialogLaunchAnimator;
+    private boolean mHasWifiEntries;
 
     @VisibleForTesting
     static final float TOAST_PARAMS_HORIZONTAL_WEIGHT = 1.0f;
@@ -334,7 +333,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             return mContext.getText(SUBTITLE_TEXT_UNLOCK_TO_VIEW_NETWORKS);
         }
 
-        if (mConnectedEntry != null || mWifiEntriesCount > 0) {
+        if (mHasWifiEntries) {
             return mCanConfigWifi ? mContext.getText(SUBTITLE_TEXT_TAP_A_NETWORK_TO_CONNECT) : null;
         }
 
@@ -875,46 +874,28 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             return;
         }
 
-        if (accessPoints == null || accessPoints.size() == 0) {
-            mConnectedEntry = null;
-            mWifiEntriesCount = 0;
-            mCallback.onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry */,
-                    false /* hasMoreEntry */);
-            return;
-        }
-
-        boolean hasMoreWifiEntries = false;
-        int count = MAX_WIFI_ENTRY_COUNT;
-        // TODO: (b/206807144) Plan to remove the design of calculating WiFi list here, and
-        //  calculate the number of WiFi list by referring to the Visibility of each network in
-        //  InternetDialog.
-        if (mHasEthernet) {
-            count -= 1;
-        }
-        if (hasActiveSubId() || isCarrierNetworkActive()) {
-            count -= 1;
-        }
-        final int wifiTotalCount = accessPoints.size();
-        if (count > wifiTotalCount) {
-            count = wifiTotalCount;
-        } else if (count < wifiTotalCount) {
-            hasMoreWifiEntries = true;
-        }
-
         WifiEntry connectedEntry = null;
-        final List<WifiEntry> wifiEntries = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            WifiEntry entry = accessPoints.get(i);
-            if (connectedEntry == null && entry.isDefaultNetwork() && entry.hasInternetAccess()) {
-                connectedEntry = entry;
-            } else {
-                wifiEntries.add(entry);
+        List<WifiEntry> wifiEntries = null;
+        final int accessPointsSize = (accessPoints == null) ? 0 : accessPoints.size();
+        final boolean hasMoreWifiEntries = (accessPointsSize > MAX_WIFI_ENTRY_COUNT);
+        if (accessPointsSize > 0) {
+            wifiEntries = new ArrayList<>();
+            final int count = hasMoreWifiEntries ? MAX_WIFI_ENTRY_COUNT : accessPointsSize;
+            for (int i = 0; i < count; i++) {
+                WifiEntry entry = accessPoints.get(i);
+                if (connectedEntry == null && entry.isDefaultNetwork()
+                        && entry.hasInternetAccess()) {
+                    connectedEntry = entry;
+                } else {
+                    wifiEntries.add(entry);
+                }
             }
+            mHasWifiEntries = true;
+        } else {
+            mHasWifiEntries = false;
         }
-        mConnectedEntry = connectedEntry;
-        mWifiEntriesCount = wifiEntries.size();
 
-        mCallback.onAccessPointsChanged(wifiEntries, mConnectedEntry, hasMoreWifiEntries);
+        mCallback.onAccessPointsChanged(wifiEntries, connectedEntry, hasMoreWifiEntries);
     }
 
     @Override
