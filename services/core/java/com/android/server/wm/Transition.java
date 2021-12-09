@@ -25,6 +25,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
@@ -70,6 +71,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.window.RemoteTransition;
 import android.window.TransitionInfo;
@@ -82,6 +84,8 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Represents a logical transition.
@@ -89,6 +93,9 @@ import java.util.ArrayList;
  */
 class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListener {
     private static final String TAG = "Transition";
+
+    /** The default package for resources */
+    private static final String DEFAULT_PACKAGE = "android";
 
     /** The transition has been created and is collecting, but hasn't formally started. */
     private static final int STATE_COLLECTING = 0;
@@ -537,7 +544,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // Resolve the animating targets from the participants
         mTargets = calculateTargets(mParticipants, mChanges);
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, mChanges);
-        info.setAnimationOptions(mOverrideOptions);
+        if (mOverrideOptions != null) {
+            info.setAnimationOptions(mOverrideOptions);
+        }
 
         // TODO(b/188669821): Move to animation impl in shell.
         handleLegacyRecentsStartBehavior(dc, info);
@@ -1238,7 +1247,78 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             out.addChange(change);
         }
 
+        final WindowManager.LayoutParams animLp =
+                getLayoutParamsForAnimationsStyle(type, sortedTargets);
+        if (animLp != null && animLp.type != TYPE_APPLICATION_STARTING
+                && animLp.windowAnimations != 0) {
+            // Don't send animation options if no windowAnimations have been set or if the we are
+            // running an app starting animation, in which case we don't want the app to be able to
+            // change its animation directly.
+            TransitionInfo.AnimationOptions animOptions =
+                    TransitionInfo.AnimationOptions.makeAnimOptionsFromLayoutParameters(animLp);
+            out.setAnimationOptions(animOptions);
+        }
+
         return out;
+    }
+
+    private static WindowManager.LayoutParams getLayoutParamsForAnimationsStyle(int type,
+            ArrayList<WindowContainer> sortedTargets) {
+        // Find the layout params of the top-most application window that is part of the
+        // transition, which is what will control the animation theme.
+        final ArraySet<Integer> activityTypes = new ArraySet<>();
+        for (WindowContainer target : sortedTargets) {
+            if (target.asActivityRecord() != null) {
+                activityTypes.add(target.getActivityType());
+            } else if (target.asWindowToken() == null && target.asWindowState() == null) {
+                // We don't want app to customize animations that are not activity to activity.
+                // Activity-level transitions can only include activities, wallpaper and subwindows.
+                // Anything else is not a WindowToken nor a WindowState and is "higher" in the
+                // hierarchy which means we are no longer in an activity transition.
+                return null;
+            }
+        }
+        if (activityTypes.isEmpty()) {
+            // We don't want app to be able to customize transitions that are not activity to
+            // activity through the layout parameter animation style.
+            return null;
+        }
+        final ActivityRecord animLpActivity =
+                findAnimLayoutParamsActivityRecord(sortedTargets, type, activityTypes);
+        final WindowState mainWindow = animLpActivity != null
+                ? animLpActivity.findMainWindow() : null;
+        return mainWindow != null ? mainWindow.mAttrs : null;
+    }
+
+    private static ActivityRecord findAnimLayoutParamsActivityRecord(
+            List<WindowContainer> sortedTargets,
+            @TransitionType int transit, ArraySet<Integer> activityTypes) {
+        // Remote animations always win, but fullscreen windows override non-fullscreen windows.
+        ActivityRecord result = lookForTopWindowWithFilter(sortedTargets,
+                w -> w.getRemoteAnimationDefinition() != null
+                    && w.getRemoteAnimationDefinition().hasTransition(transit, activityTypes));
+        if (result != null) {
+            return result;
+        }
+        result = lookForTopWindowWithFilter(sortedTargets,
+                w -> w.fillsParent() && w.findMainWindow() != null);
+        if (result != null) {
+            return result;
+        }
+        return lookForTopWindowWithFilter(sortedTargets, w -> w.findMainWindow() != null);
+    }
+
+    private static ActivityRecord lookForTopWindowWithFilter(List<WindowContainer> sortedTargets,
+            Predicate<ActivityRecord> filter) {
+        for (WindowContainer target : sortedTargets) {
+            final ActivityRecord activityRecord = target.asTaskFragment() != null
+                    ? target.asTaskFragment().getTopNonFinishingActivity()
+                    : target.asActivityRecord();
+            if (activityRecord != null && filter.test(activityRecord)) {
+                return activityRecord;
+            }
+        }
+        return null;
     }
 
     private static int getTaskRotationAnimation(@NonNull Task task) {
