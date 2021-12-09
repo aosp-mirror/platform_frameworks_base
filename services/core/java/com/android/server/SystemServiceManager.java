@@ -21,18 +21,16 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.UserInfo;
-import android.os.Build;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.ClassLoaderFactory;
+import com.android.internal.os.SystemServerClassLoaderFactory;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService.TargetUser;
 import com.android.server.am.EventLogTags;
@@ -77,9 +75,6 @@ public final class SystemServiceManager implements Dumpable {
     // Services that should receive lifecycle events.
     private final ArrayList<SystemService> mServices = new ArrayList<SystemService>();
 
-    // Map of paths to PathClassLoader, so we don't load the same path multiple times.
-    private final ArrayMap<String, PathClassLoader> mLoadedPaths = new ArrayMap<>();
-
     private int mCurrentPhase = -1;
 
     private UserManagerInternal mUserManagerInternal;
@@ -119,16 +114,8 @@ public final class SystemServiceManager implements Dumpable {
      * @return The service instance.
      */
     public SystemService startServiceFromJar(String className, String path) {
-        PathClassLoader pathClassLoader = mLoadedPaths.get(path);
-        if (pathClassLoader == null) {
-            // NB: the parent class loader should always be the system server class loader.
-            // Changing it has implications that require discussion with the mainline team.
-            pathClassLoader = (PathClassLoader) ClassLoaderFactory.createClassLoader(
-                    path, null /* librarySearchPath */, null /* libraryPermittedPath */,
-                    this.getClass().getClassLoader(), Build.VERSION.SDK_INT,
-                    true /* isNamespaceShared */, null /* classLoaderName */);
-            mLoadedPaths.put(path, pathClassLoader);
-        }
+        PathClassLoader pathClassLoader = SystemServerClassLoaderFactory.getOrCreateClassLoader(
+                path, this.getClass().getClassLoader());
         final Class<SystemService> serviceClass = loadClassFromLoader(className, pathClassLoader);
         return startService(serviceClass);
     }
