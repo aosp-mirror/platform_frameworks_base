@@ -243,21 +243,24 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
         @Override
         public boolean requestFrontend(@NonNull TunerFrontendRequest request,
-                @NonNull int[] frontendHandle) throws RemoteException {
+                @NonNull int[] frontendHandle) {
             enforceTunerAccessPermission("requestFrontend");
             enforceTrmAccessPermission("requestFrontend");
             if (frontendHandle == null) {
-                throw new RemoteException("frontendHandle can't be null");
+                Slog.e(TAG, "frontendHandle can't be null");
+                return false;
             }
             synchronized (mLock) {
                 if (!checkClientExists(request.clientId)) {
-                    throw new RemoteException("Request frontend from unregistered client: "
+                    Slog.e(TAG, "Request frontend from unregistered client: "
                             + request.clientId);
+                    return false;
                 }
                 // If the request client is holding or sharing a frontend, throw an exception.
                 if (!getClientProfile(request.clientId).getInUseFrontendHandles().isEmpty()) {
-                    throw new RemoteException("Release frontend before requesting another one. "
-                            + "Client id: " + request.clientId);
+                    Slog.e(TAG, "Release frontend before requesting another one. Client id: "
+                            + request.clientId);
+                    return false;
                 }
                 return requestFrontendInternal(request, frontendHandle);
             }
@@ -1153,7 +1156,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             ClientProfile ownerClient = getClientProfile(fe.getOwnerClientId());
             if (ownerClient != null) {
                 for (int shareOwnerId : ownerClient.getShareFeClientIds()) {
-                    clearFrontendAndClientMapping(getClientProfile(shareOwnerId));
+                    reclaimResource(shareOwnerId,
+                            TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND);
                 }
             }
         }
