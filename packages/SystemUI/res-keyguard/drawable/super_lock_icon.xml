@@ -50,6 +50,11 @@
         android:state_first="true"
         android:state_single="true"
         android:drawable="@drawable/ic_lock_aod" />
+    <item
+        android:id="@+id/unlocked_aod"
+        android:state_last="true"
+        android:state_single="true"
+        android:drawable="@drawable/ic_unlocked_aod" />
 
     <item
         android:id="@+id/no_icon"
@@ -79,4 +84,14 @@
         android:fromId="@id/locked"
         android:toId="@id/locked_aod"
         android:drawable="@drawable/lock_ls_to_aod" />
+
+    <transition
+        android:fromId="@id/unlocked_aod"
+        android:toId="@id/unlocked"
+        android:drawable="@drawable/unlocked_aod_to_ls" />
+
+    <transition
+        android:fromId="@id/unlocked"
+        android:toId="@id/unlocked_aod"
+        android:drawable="@drawable/unlocked_ls_to_aod" />
 </animated-selector>
