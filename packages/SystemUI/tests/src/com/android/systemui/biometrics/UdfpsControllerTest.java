@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -169,6 +170,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private TypedArray mBrightnessValues;
     @Mock
     private TypedArray mBrightnessBacklight;
+    @Mock
+    private SystemUIDialogManager mSystemUIDialogManager;
 
     // Capture listeners so that they can be used to send events
     @Captor private ArgumentCaptor<IUdfpsOverlayController> mOverlayCaptor;
@@ -177,8 +180,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Captor private ArgumentCaptor<Runnable> mOnIlluminatedRunnableCaptor;
     @Captor private ArgumentCaptor<ScreenLifecycle.Observer> mScreenObserverCaptor;
     private ScreenLifecycle.Observer mScreenObserver;
-
-    @Captor private ArgumentCaptor<UdfpsAnimationViewController> mAnimViewControllerCaptor;
 
     @Before
     public void setUp() {
@@ -237,7 +238,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mHandler,
                 mConfigurationController,
                 mSystemClock,
-                mUnlockedScreenOffAnimationController);
+                mUnlockedScreenOffAnimationController,
+                mSystemUIDialogManager);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
