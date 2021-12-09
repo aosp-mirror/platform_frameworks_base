@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Runs the day-to-day operations of which tiles should be bound and when.
@@ -178,6 +179,13 @@ public class TileServices extends IQSService.Stub {
                 return;
             }
             TileServiceManager service = mServices.get(customTile);
+            if (service == null) {
+                Log.e(
+                        TAG,
+                        "No TileServiceManager found in requestListening for tile "
+                                + customTile.getTileSpec());
+                return;
+            }
             if (!service.isActiveTile()) {
                 return;
             }
@@ -236,7 +244,7 @@ public class TileServices extends IQSService.Stub {
             verifyCaller(customTile);
             customTile.onDialogShown();
             mHost.forceCollapsePanels();
-            mServices.get(customTile).setShowingDialog(true);
+            Objects.requireNonNull(mServices.get(customTile)).setShowingDialog(true);
         }
     }
 
@@ -245,7 +253,7 @@ public class TileServices extends IQSService.Stub {
         CustomTile customTile = getTileForToken(token);
         if (customTile != null) {
             verifyCaller(customTile);
-            mServices.get(customTile).setShowingDialog(false);
+            Objects.requireNonNull(mServices.get(customTile)).setShowingDialog(false);
             customTile.onDialogHidden();
         }
     }
