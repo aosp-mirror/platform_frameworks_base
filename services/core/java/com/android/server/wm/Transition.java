@@ -365,6 +365,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 t.setPosition(targetLeash, tmpPos.x, tmpPos.y);
                 t.setCornerRadius(targetLeash, 0);
                 t.setShadowRadius(targetLeash, 0);
+                // The bounds sent to the transition is always a real bounds. This means we lose
+                // information about "null" bounds (inheriting from parent). Core will fix-up
+                // non-organized window surface bounds; however, since Core can't touch organized
+                // surfaces, add the "inherit from parent" restoration here.
+                if (target.isOrganized() && target.matchParentBounds()) {
+                    t.setWindowCrop(targetLeash, -1, -1);
+                }
                 displays.add(target.getDisplayContent());
             }
         }
