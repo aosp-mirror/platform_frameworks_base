@@ -3262,12 +3262,6 @@ public class NotificationPanelViewController extends PanelViewController {
                     mStatusBarStateController.setState(KEYGUARD);
                 }
                 return true;
-            case StatusBarState.SHADE:
-
-                // This gets called in the middle of the touch handling, where the state is still
-                // that we are tracking the panel. Collapse the panel after this is done.
-                mView.post(mPostCollapseRunnable);
-                return false;
             default:
                 return true;
         }
