@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.wm.shell.pip.Pip;
 
 import org.junit.After;
 import org.junit.Before;
@@ -54,6 +55,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 /** atest NavigationBarControllerTest */
 @RunWith(AndroidTestingRunner.class)
@@ -88,7 +91,8 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         mNavigationBarFactory,
                         mock(DumpManager.class),
                         mock(AutoHideController.class),
-                        mock(LightBarController.class)));
+                        mock(LightBarController.class),
+                        Optional.of(mock(Pip.class))));
         initializeNavigationBars();
     }
 

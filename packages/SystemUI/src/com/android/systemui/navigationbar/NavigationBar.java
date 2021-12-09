@@ -628,7 +628,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
         mSplitScreenOptional.ifPresent(mNavigationBarView::registerDockedListener);
-        mPipOptional.ifPresent(mNavigationBarView::registerPipExclusionBoundsChangeListener);
+        mPipOptional.ifPresent(mNavigationBarView::addPipExclusionBoundsChangeListener);
 
         prepareNavigationBarView();
         checkNavBarModes();
@@ -699,6 +699,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mHandler.removeCallbacks(mOnVariableDurationHomeLongClick);
         mHandler.removeCallbacks(mEnableLayoutTransitions);
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
+        mPipOptional.ifPresent(mNavigationBarView::removePipExclusionBoundsChangeListener);
         mFrame = null;
         mNavigationBarView = null;
         mOrientationHandle = null;
