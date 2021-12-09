@@ -660,14 +660,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
     // --------------------- NotificationEntryManager/NotifPipeline methods ------------------------
 
-    private int getVisibleNotificationsCount() {
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-            return mNotifPipeline.getShadeListCount();
-        } else {
-            return mEntryManager.getActiveNotificationsCount();
-        }
-    }
-
     /**
      * Public builder for {@link StatusBarNotificationActivityStarter}.
      */

@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
-import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
+import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import javax.inject.Inject
@@ -49,10 +49,12 @@ class StackCoordinator @Inject internal constructor(
         var hasNonClearableSilentNotifs = false
         var hasClearableSilentNotifs = false
         entries.forEach {
-            val isSilent = it.section!!.bucket == BUCKET_SILENT
+            val section = checkNotNull(it.section) { "Null section for ${it.key}" }
+            val entry = checkNotNull(it.representativeEntry) { "Null notif entry for ${it.key}" }
+            val isSilent = section.bucket == BUCKET_SILENT
             // NOTE: NotificationEntry.isClearable will internally check group children to ensure
             //  the group itself definitively clearable.
-            val isClearable = it.representativeEntry!!.isClearable
+            val isClearable = entry.isClearable
             when {
                 isSilent && isClearable -> hasClearableSilentNotifs = true
                 isSilent && !isClearable -> hasNonClearableSilentNotifs = true
@@ -60,13 +62,12 @@ class StackCoordinator @Inject internal constructor(
                 !isSilent && !isClearable -> hasNonClearableAlertingNotifs = true
             }
         }
-        val stats = NotifStats(
+        return NotifStats(
             numActiveNotifs = entries.size,
             hasNonClearableAlertingNotifs = hasNonClearableAlertingNotifs,
             hasClearableAlertingNotifs = hasClearableAlertingNotifs,
             hasNonClearableSilentNotifs = hasNonClearableSilentNotifs,
             hasClearableSilentNotifs = hasClearableSilentNotifs
         )
-        return stats
     }
 }
