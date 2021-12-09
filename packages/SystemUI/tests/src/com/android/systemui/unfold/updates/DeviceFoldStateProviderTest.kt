@@ -18,7 +18,9 @@ package com.android.systemui.unfold.updates
 
 import android.hardware.devicestate.DeviceStateManager
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener
+import android.os.Handler
 import android.testing.AndroidTestingRunner
+import androidx.core.util.Consumer
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
@@ -31,9 +33,12 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import java.lang.Exception
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -48,16 +53,28 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Mock
     private lateinit var deviceStateManager: DeviceStateManager
 
-    private lateinit var foldStateProvider: FoldStateProvider
+    @Mock
+    private lateinit var handler: Handler
+
+    @Captor
+    private lateinit var foldStateListenerCaptor: ArgumentCaptor<FoldStateListener>
+
+    @Captor
+    private lateinit var screenOnListenerCaptor: ArgumentCaptor<ScreenListener>
+
+    @Captor
+    private lateinit var hingeAngleCaptor: ArgumentCaptor<Consumer<Float>>
+
+    private lateinit var foldStateProvider: DeviceFoldStateProvider
 
     private val foldUpdates: MutableList<Int> = arrayListOf()
     private val hingeAngleUpdates: MutableList<Float> = arrayListOf()
 
-    private val foldStateListenerCaptor = ArgumentCaptor.forClass(FoldStateListener::class.java)
     private var foldedDeviceState: Int = 0
     private var unfoldedDeviceState: Int = 0
 
-    private val screenOnListenerCaptor = ArgumentCaptor.forClass(ScreenListener::class.java)
+    private var scheduledRunnable: Runnable? = null
+    private var scheduledRunnableDelay: Long? = null
 
     @Before
     fun setUp() {
@@ -75,7 +92,8 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
             hingeAngleProvider,
             screenStatusProvider,
             deviceStateManager,
-            context.mainExecutor
+            context.mainExecutor,
+            handler
         )
 
         foldStateProvider.addCallback(object : FoldStateProvider.FoldUpdatesListener {
@@ -91,6 +109,22 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
         verify(deviceStateManager).registerCallback(any(), foldStateListenerCaptor.capture())
         verify(screenStatusProvider).addCallback(screenOnListenerCaptor.capture())
+        verify(hingeAngleProvider).addCallback(hingeAngleCaptor.capture())
+
+        whenever(handler.postDelayed(any<Runnable>(), any())).then { invocationOnMock ->
+            scheduledRunnable = invocationOnMock.getArgument<Runnable>(0)
+            scheduledRunnableDelay = invocationOnMock.getArgument<Long>(1)
+            null
+        }
+
+        whenever(handler.removeCallbacks(any<Runnable>())).then { invocationOnMock ->
+            val removedRunnable = invocationOnMock.getArgument<Runnable>(0)
+            if (removedRunnable == scheduledRunnable) {
+                scheduledRunnableDelay = null
+                scheduledRunnable = null
+            }
+            null
+        }
     }
 
     @Test
@@ -167,6 +201,86 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         assertThat(foldUpdates).isEmpty()
     }
 
+    @Test
+    fun startClosingEvent_afterTimeout_abortEmitted() {
+        sendHingeAngleEvent(90)
+        sendHingeAngleEvent(80)
+
+        simulateTimeout(ABORT_CLOSING_MILLIS)
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING, FOLD_UPDATE_ABORTED)
+    }
+
+    @Test
+    fun startClosingEvent_beforeTimeout_abortNotEmitted() {
+        sendHingeAngleEvent(90)
+        sendHingeAngleEvent(80)
+
+        simulateTimeout(ABORT_CLOSING_MILLIS - 1)
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
+    }
+
+    @Test
+    fun startClosingEvent_eventBeforeTimeout_oneEventEmitted() {
+        sendHingeAngleEvent(180)
+        sendHingeAngleEvent(90)
+
+        simulateTimeout(ABORT_CLOSING_MILLIS - 1)
+        sendHingeAngleEvent(80)
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
+    }
+
+    @Test
+    fun startClosingEvent_timeoutAfterTimeoutRescheduled_abortEmitted() {
+        sendHingeAngleEvent(180)
+        sendHingeAngleEvent(90)
+
+        simulateTimeout(ABORT_CLOSING_MILLIS - 1) // The timeout should not trigger here.
+        sendHingeAngleEvent(80)
+        simulateTimeout(ABORT_CLOSING_MILLIS) // The timeout should trigger here.
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING, FOLD_UPDATE_ABORTED)
+    }
+
+    @Test
+    fun startClosingEvent_shortTimeBetween_emitsOnlyOneEvents() {
+        sendHingeAngleEvent(180)
+
+        sendHingeAngleEvent(90)
+        sendHingeAngleEvent(80)
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
+    }
+
+    @Test
+    fun startClosingEvent_whileClosing_emittedDespiteInitialAngle() {
+        val maxAngle = 180 - FULLY_OPEN_THRESHOLD_DEGREES.toInt()
+        for (i in 1..maxAngle) {
+            foldUpdates.clear()
+
+            simulateFolding(startAngle = i)
+
+            assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
+            simulateTimeout() // Timeout to set the state to aborted.
+        }
+    }
+
+    private fun simulateTimeout(waitTime: Long = ABORT_CLOSING_MILLIS) {
+        val runnableDelay = scheduledRunnableDelay ?: throw Exception("No runnable scheduled.")
+        if (waitTime >= runnableDelay) {
+            scheduledRunnable?.run()
+            scheduledRunnable = null
+            scheduledRunnableDelay = null
+        }
+    }
+
+    private fun simulateFolding(startAngle: Int) {
+        sendHingeAngleEvent(startAngle)
+        sendHingeAngleEvent(startAngle - 1)
+    }
+
     private fun setFoldState(folded: Boolean) {
         val state = if (folded) foldedDeviceState else unfoldedDeviceState
         foldStateListenerCaptor.value.onStateChanged(state)
@@ -174,5 +288,9 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     private fun fireScreenOnEvent() {
         screenOnListenerCaptor.value.onScreenTurnedOn()
+    }
+
+    private fun sendHingeAngleEvent(angle: Int) {
+        hingeAngleCaptor.value.accept(angle.toFloat())
     }
 }

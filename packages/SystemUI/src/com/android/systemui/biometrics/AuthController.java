@@ -31,6 +31,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PointF;
+import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
@@ -89,6 +90,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     private static final String TAG = "AuthController";
     private static final boolean DEBUG = true;
+    private static final int SENSOR_PRIVACY_DELAY = 500;
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final CommandQueue mCommandQueue;
@@ -122,6 +124,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Nullable private List<FingerprintSensorPropertiesInternal> mSidefpsProps;
 
     @NonNull private final SparseBooleanArray mUdfpsEnrolledForUser;
+    private SensorPrivacyManager mSensorPrivacyManager;
 
     private class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -492,6 +495,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
 
         context.registerReceiver(mBroadcastReceiver, filter);
+        mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
     }
 
     private void updateFingerprintLocation() {
@@ -642,10 +646,16 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         final boolean isLockout = (error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT)
                 || (error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT);
 
+        boolean isCameraPrivacyEnabled = false;
+        if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE
+                && mSensorPrivacyManager.isSensorPrivacyEnabled(SensorPrivacyManager.Sensors.CAMERA,
+                mCurrentDialogArgs.argi1 /* userId */)) {
+            isCameraPrivacyEnabled = true;
+        }
         // TODO(b/141025588): Create separate methods for handling hard and soft errors.
         final boolean isSoftError = (error == BiometricConstants.BIOMETRIC_PAUSED_REJECTED
-                || error == BiometricConstants.BIOMETRIC_ERROR_TIMEOUT);
-
+                || error == BiometricConstants.BIOMETRIC_ERROR_TIMEOUT
+                || isCameraPrivacyEnabled);
         if (mCurrentDialog != null) {
             if (mCurrentDialog.isAllowDeviceCredentials() && isLockout) {
                 if (DEBUG) Log.d(TAG, "onBiometricError, lockout");
@@ -655,12 +665,23 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                         ? mContext.getString(R.string.biometric_not_recognized)
                         : getErrorString(modality, error, vendorCode);
                 if (DEBUG) Log.d(TAG, "onBiometricError, soft error: " + errorMessage);
-                mCurrentDialog.onAuthenticationFailed(modality, errorMessage);
+                // The camera privacy error can return before the prompt initializes its state,
+                // causing the prompt to appear to endlessly authenticate. Add a small delay
+                // to stop this.
+                if (isCameraPrivacyEnabled) {
+                    mHandler.postDelayed(() -> {
+                        mCurrentDialog.onAuthenticationFailed(modality,
+                                mContext.getString(R.string.face_sensor_privacy_enabled));
+                    }, SENSOR_PRIVACY_DELAY);
+                } else {
+                    mCurrentDialog.onAuthenticationFailed(modality, errorMessage);
+                }
             } else {
                 final String errorMessage = getErrorString(modality, error, vendorCode);
                 if (DEBUG) Log.d(TAG, "onBiometricError, hard error: " + errorMessage);
                 mCurrentDialog.onError(modality, errorMessage);
             }
+
         } else {
             Log.w(TAG, "onBiometricError callback but dialog is gone");
         }
