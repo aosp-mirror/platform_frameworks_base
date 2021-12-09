@@ -71,6 +71,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -119,6 +120,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final KeyguardStateController mKeyguardStateController;
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final DumpManager mDumpManager;
+    @NonNull private final SystemUIDialogManager mDialogManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Nullable private final Vibrator mVibrator;
     @NonNull private final FalsingManager mFalsingManager;
@@ -558,7 +560,8 @@ public class UdfpsController implements DozeReceiver {
             @Main Handler mainHandler,
             @NonNull ConfigurationController configurationController,
             @NonNull SystemClock systemClock,
-            @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            @NonNull SystemUIDialogManager dialogManager) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -573,6 +576,7 @@ public class UdfpsController implements DozeReceiver {
         mKeyguardStateController = keyguardStateController;
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mDumpManager = dumpManager;
+        mDialogManager = dialogManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mFalsingManager = falsingManager;
         mPowerManager = powerManager;
@@ -863,6 +867,7 @@ public class UdfpsController implements DozeReceiver {
                         mServerRequest.mEnrollHelper,
                         mStatusBarStateController,
                         mPanelExpansionStateManager,
+                        mDialogManager,
                         mDumpManager
                 );
             case BiometricOverlayConstants.REASON_AUTH_KEYGUARD:
@@ -881,6 +886,7 @@ public class UdfpsController implements DozeReceiver {
                         mSystemClock,
                         mKeyguardStateController,
                         mUnlockedScreenOffAnimationController,
+                        mDialogManager,
                         this
                 );
             case BiometricOverlayConstants.REASON_AUTH_BP:
@@ -891,6 +897,7 @@ public class UdfpsController implements DozeReceiver {
                         bpView,
                         mStatusBarStateController,
                         mPanelExpansionStateManager,
+                        mDialogManager,
                         mDumpManager
                 );
             case BiometricOverlayConstants.REASON_AUTH_OTHER:
@@ -902,6 +909,7 @@ public class UdfpsController implements DozeReceiver {
                         authOtherView,
                         mStatusBarStateController,
                         mPanelExpansionStateManager,
+                        mDialogManager,
                         mDumpManager
                 );
             default:

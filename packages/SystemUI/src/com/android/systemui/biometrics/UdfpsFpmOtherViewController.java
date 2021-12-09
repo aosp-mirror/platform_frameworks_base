@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 
 /**
@@ -33,8 +34,10 @@ class UdfpsFpmOtherViewController extends UdfpsAnimationViewController<UdfpsFpmO
             @NonNull UdfpsFpmOtherView view,
             @NonNull StatusBarStateController statusBarStateController,
             @NonNull PanelExpansionStateManager panelExpansionStateManager,
+            @NonNull SystemUIDialogManager systemUIDialogManager,
             @NonNull DumpManager dumpManager) {
-        super(view, statusBarStateController, panelExpansionStateManager, dumpManager);
+        super(view, statusBarStateController, panelExpansionStateManager, systemUIDialogManager,
+                dumpManager);
     }
 
     @Override

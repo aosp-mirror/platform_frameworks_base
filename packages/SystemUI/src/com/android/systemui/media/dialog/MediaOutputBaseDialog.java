@@ -45,6 +45,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 /**
  * Base dialog for media output UI
@@ -83,8 +84,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
     };
 
-    public MediaOutputBaseDialog(Context context, MediaOutputController mediaOutputController) {
-        super(context, R.style.Theme_SystemUI_Dialog_Media);
+    public MediaOutputBaseDialog(Context context, MediaOutputController mediaOutputController,
+            SystemUIDialogManager dialogManager) {
+        super(context, R.style.Theme_SystemUI_Dialog_Media, dialogManager);
 
         // Save the context that is wrapped with our theme.
         mContext = getContext();

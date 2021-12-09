@@ -22,6 +22,7 @@ import android.graphics.PointF;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 
 /**
@@ -54,8 +55,10 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
             @NonNull UdfpsEnrollHelper enrollHelper,
             @NonNull StatusBarStateController statusBarStateController,
             @NonNull PanelExpansionStateManager panelExpansionStateManager,
+            @NonNull SystemUIDialogManager systemUIDialogManager,
             @NonNull DumpManager dumpManager) {
-        super(view, statusBarStateController, panelExpansionStateManager, dumpManager);
+        super(view, statusBarStateController, panelExpansionStateManager, systemUIDialogManager,
+                dumpManager);
         mEnrollProgressBarRadius = getContext().getResources()
                 .getInteger(R.integer.config_udfpsEnrollProgressBar);
         mEnrollHelper = enrollHelper;

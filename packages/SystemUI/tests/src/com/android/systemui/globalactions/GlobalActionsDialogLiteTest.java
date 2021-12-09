@@ -62,6 +62,7 @@ import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.telephony.TelephonyListenerManager;
@@ -117,6 +118,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private StatusBar mStatusBar;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock private SystemUIDialogManager mDialogManager;
 
     private TestableLooper mTestableLooper;
 
@@ -162,7 +164,8 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mPackageManager,
                 Optional.of(mStatusBar),
                 mKeyguardUpdateMonitor,
-                mDialogLaunchAnimator);
+                mDialogLaunchAnimator,
+                mDialogManager);
         mGlobalActionsDialogLite.setZeroDialogPressDelayForTesting();
 
         ColorExtractor.GradientColors backdropColors = new ColorExtractor.GradientColors();
