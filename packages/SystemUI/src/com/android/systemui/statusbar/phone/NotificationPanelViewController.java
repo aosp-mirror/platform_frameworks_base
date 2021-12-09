@@ -519,8 +519,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private WeakReference<CommunalSource> mCommunalSource;
 
-    private final CommunalSource.Callback mCommunalSourceCallback;
-
     private final CommandQueue mCommandQueue;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final UserManager mUserManager;
@@ -906,9 +904,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
         mMaxKeyguardNotifications = resources.getInteger(R.integer.keyguard_max_notification_count);
         mKeyguardUnfoldTransition = unfoldComponent.map(c -> c.getKeyguardUnfoldTransition());
-        mCommunalSourceCallback = () -> {
-            mUiExecutor.execute(() -> setCommunalSource(null /*source*/));
-        };
 
         mCommunalSourceMonitorCallback = (source) -> {
             mUiExecutor.execute(() -> setCommunalSource(source));
@@ -4713,7 +4708,6 @@ public class NotificationPanelViewController extends PanelViewController {
         CommunalSource existingSource = mCommunalSource != null ? mCommunalSource.get() : null;
 
         if (existingSource != null) {
-            existingSource.removeCallback(mCommunalSourceCallback);
             mCommunalViewController.show(null /*source*/);
         }
 
@@ -4722,7 +4716,6 @@ public class NotificationPanelViewController extends PanelViewController {
         CommunalSource currentSource = mCommunalSource != null ? mCommunalSource.get() : null;
         // Set source and register callback
         if (currentSource != null && mCommunalViewController != null) {
-            currentSource.addCallback(mCommunalSourceCallback);
             mCommunalViewController.show(source);
         }
 
