@@ -346,6 +346,15 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             }
 
             if (change.getMode() == TRANSIT_CHANGE) {
+                // If task is child task, only set position in parent.
+                if (isTask && change.getParent() != null
+                        && info.getChange(change.getParent()).getTaskInfo() != null) {
+                    final Point positionInParent = change.getTaskInfo().positionInParent;
+                    startTransaction.setPosition(change.getLeash(),
+                            positionInParent.x, positionInParent.y);
+                    continue;
+                }
+
                 // No default animation for this, so just update bounds/position.
                 startTransaction.setPosition(change.getLeash(),
                         change.getEndAbsBounds().left - change.getEndRelOffset().x,
