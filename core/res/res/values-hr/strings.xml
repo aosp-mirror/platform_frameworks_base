@@ -35,7 +35,7 @@
     <string name="mmiError" msgid="2862759606579822246">"Problem s vezom ili nevažeći MMI kôd."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operacija je ograničena samo na brojeve s fiksnim biranjem."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Nije moguće promijeniti postavke preusmjeravanja poziva na telefonu dok ste u roamingu."</string>
-    <string name="serviceEnabled" msgid="7549025003394765639">"Usluga nije omogućena."</string>
+    <string name="serviceEnabled" msgid="7549025003394765639">"Usluga je omogućena."</string>
     <string name="serviceEnabledFor" msgid="1463104778656711613">"Usluga je omogućena za korisnika:"</string>
     <string name="serviceDisabled" msgid="641878791205871379">"Usluga je onemogućena."</string>
     <string name="serviceRegistered" msgid="3856192211729577482">"Registracija je uspješna."</string>
