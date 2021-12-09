@@ -566,7 +566,7 @@ public class ChooserActivityTest {
         assertEquals(mActivityRule.getActivityResult().getResultCode(), RESULT_OK);
     }
 
-    @Test @Ignore
+    @Test
     public void copyTextToClipboardLogging() throws Exception {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -587,17 +587,15 @@ public class ChooserActivityTest {
         onView(withId(R.id.chooser_copy_button)).perform(click());
 
         verify(mockLogger, atLeastOnce()).write(logMakerCaptor.capture());
-        // First is  Activity shown, Second is "with preview"
-        assertThat(logMakerCaptor.getAllValues().get(2).getCategory(),
+
+        // The last captured event is the selection of the target.
+        assertThat(logMakerCaptor.getValue().getCategory(),
                 is(MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_SYSTEM_TARGET));
-        assertThat(logMakerCaptor
-                        .getAllValues().get(2)
-                        .getSubtype(),
-                is(1));
+        assertThat(logMakerCaptor.getValue().getSubtype(), is(1));
     }
 
 
-    @Test @Ignore
+    @Test
     public void testNearbyShareLogging() throws Exception {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -616,12 +614,12 @@ public class ChooserActivityTest {
 
         ChooserActivityLoggerFake logger =
                 (ChooserActivityLoggerFake) activity.getChooserActivityLogger();
-        assertThat(logger.numCalls(), is(6));
-        // first one should be SHARESHEET_TRIGGERED uievent
-        assertThat(logger.get(0).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(0).event.getId(),
+
+        // SHARESHEET_TRIGGERED:
+        assertThat(logger.event(0).getId(),
                 is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_TRIGGERED.getId()));
-        // second one should be SHARESHEET_STARTED event
+
+        // SHARESHEET_STARTED:
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is("text/plain"));
@@ -630,22 +628,37 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));
         assertThat(logger.get(1).previewType, is(3));
-        // third one should be SHARESHEET_APP_LOAD_COMPLETE uievent
-        assertThat(logger.get(2).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(2).event.getId(),
+
+        // SHARESHEET_APP_LOAD_COMPLETE:
+        assertThat(logger.event(2).getId(),
                 is(ChooserActivityLogger
                         .SharesheetStandardEvent.SHARESHEET_APP_LOAD_COMPLETE.getId()));
-        // fourth and fifth are just artifacts of test set-up
-        // sixth one should be ranking atom with SHARESHEET_NEARBY_TARGET_SELECTED event
-        assertThat(logger.get(5).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
-        assertThat(logger.get(5).targetType,
+
+        // SHARESHEET_DIRECT_LOAD_COMPLETE:
+        assertThat(logger.event(3).getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_DIRECT_LOAD_COMPLETE.getId()));
+
+        // Fifth and sixth are just artifacts of test set-up:
+        assertThat(logger.event(4).getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_EMPTY_DIRECT_SHARE_ROW.getId()));
+        assertThat(logger.event(5).getId(),
+                is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_EXPANDED.getId()));
+
+        // SHARESHEET_EDIT_TARGET_SELECTED:
+        assertThat(logger.get(6).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
+        assertThat(logger.get(6).targetType,
                 is(ChooserActivityLogger
                         .SharesheetTargetSelectedEvent.SHARESHEET_NEARBY_TARGET_SELECTED.getId()));
+
+        // No more events.
+        assertThat(logger.numCalls(), is(7));
     }
 
 
 
-    @Test @Ignore
+    @Test
     public void testEditImageLogs() throws Exception {
         Intent sendIntent = createSendImageIntent(
                 Uri.parse("android.resource://com.android.frameworks.coretests/"
@@ -670,11 +683,12 @@ public class ChooserActivityTest {
 
         ChooserActivityLoggerFake logger =
                 (ChooserActivityLoggerFake) activity.getChooserActivityLogger();
-        // first one should be SHARESHEET_TRIGGERED uievent
-        assertThat(logger.get(0).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(0).event.getId(),
+
+        // SHARESHEET_TRIGGERED:
+        assertThat(logger.event(0).getId(),
                 is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_TRIGGERED.getId()));
-        // second one should be SHARESHEET_STARTED event
+
+        // SHARESHEET_STARTED:
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is("image/png"));
@@ -683,17 +697,32 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));
         assertThat(logger.get(1).previewType, is(1));
-        // third one should be SHARESHEET_APP_LOAD_COMPLETE uievent
-        assertThat(logger.get(2).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(2).event.getId(),
+
+        // SHARESHEET_APP_LOAD_COMPLETE:
+        assertThat(logger.event(2).getId(),
                 is(ChooserActivityLogger
                         .SharesheetStandardEvent.SHARESHEET_APP_LOAD_COMPLETE.getId()));
-        // fourth and fifth are just artifacts of test set-up
-        // sixth one should be ranking atom with SHARESHEET_EDIT_TARGET_SELECTED event
-        assertThat(logger.get(5).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
-        assertThat(logger.get(5).targetType,
+
+        // SHARESHEET_DIRECT_LOAD_COMPLETE:
+        assertThat(logger.event(3).getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_DIRECT_LOAD_COMPLETE.getId()));
+
+        // Fifth and sixth are just artifacts of test set-up:
+        assertThat(logger.event(4).getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_EMPTY_DIRECT_SHARE_ROW.getId()));
+        assertThat(logger.event(5).getId(),
+                is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_EXPANDED.getId()));
+
+        // SHARESHEET_EDIT_TARGET_SELECTED:
+        assertThat(logger.get(6).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
+        assertThat(logger.get(6).targetType,
                 is(ChooserActivityLogger
                         .SharesheetTargetSelectedEvent.SHARESHEET_EDIT_TARGET_SELECTED.getId()));
+
+        // No more events.
+        assertThat(logger.numCalls(), is(7));
     }
 
 
@@ -1716,7 +1745,7 @@ public class ChooserActivityTest {
                 .check(matches(isDisplayed()));
     }
 
-    @Test @Ignore
+    @Test
     public void testAppTargetLogging() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -1745,12 +1774,12 @@ public class ChooserActivityTest {
 
         ChooserActivityLoggerFake logger =
                 (ChooserActivityLoggerFake) activity.getChooserActivityLogger();
-        assertThat(logger.numCalls(), is(6));
-        // first one should be SHARESHEET_TRIGGERED uievent
-        assertThat(logger.get(0).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(0).event.getId(),
+
+        // SHARESHEET_TRIGGERED:
+        assertThat(logger.event(0).getId(),
                 is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_TRIGGERED.getId()));
-        // second one should be SHARESHEET_STARTED event
+
+        // SHARESHEET_STARTED:
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is("text/plain"));
@@ -1759,17 +1788,32 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));
         assertThat(logger.get(1).previewType, is(3));
-        // third one should be SHARESHEET_APP_LOAD_COMPLETE uievent
-        assertThat(logger.get(2).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(2).event.getId(),
+
+        // SHARESHEET_APP_LOAD_COMPLETE:
+        assertThat(logger.event(2).getId(),
                 is(ChooserActivityLogger
                         .SharesheetStandardEvent.SHARESHEET_APP_LOAD_COMPLETE.getId()));
-        // fourth and fifth are just artifacts of test set-up
-        // sixth one should be ranking atom with SHARESHEET_APP_TARGET_SELECTED event
-        assertThat(logger.get(5).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
-        assertThat(logger.get(5).targetType,
+
+        // SHARESHEET_DIRECT_LOAD_COMPLETE:
+        assertThat(logger.event(3).getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_DIRECT_LOAD_COMPLETE.getId()));
+
+        // Fifth and sixth are just artifacts of test set-up:
+        assertThat(logger.event(4).getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_EMPTY_DIRECT_SHARE_ROW.getId()));
+        assertThat(logger.event(5).getId(),
+                is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_EXPANDED.getId()));
+
+        // SHARESHEET_EDIT_TARGET_SELECTED:
+        assertThat(logger.get(6).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
+        assertThat(logger.get(6).targetType,
                 is(ChooserActivityLogger
                         .SharesheetTargetSelectedEvent.SHARESHEET_APP_TARGET_SELECTED.getId()));
+
+        // No more events.
+        assertThat(logger.numCalls(), is(7));
     }
 
     @Test @Ignore
@@ -1852,7 +1896,7 @@ public class ChooserActivityTest {
                         .SharesheetTargetSelectedEvent.SHARESHEET_SERVICE_TARGET_SELECTED.getId()));
     }
 
-    @Test @Ignore
+    @Test
     public void testEmptyDirectRowLogging() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         // We need app targets for direct targets to get displayed
@@ -1876,12 +1920,12 @@ public class ChooserActivityTest {
 
         ChooserActivityLoggerFake logger =
                 (ChooserActivityLoggerFake) activity.getChooserActivityLogger();
-        assertThat(logger.numCalls(), is(6));
-        // first one should be SHARESHEET_TRIGGERED uievent
-        assertThat(logger.get(0).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(0).event.getId(),
+
+        // SHARESHEET_TRIGGERED:
+        assertThat(logger.event(0).getId(),
                 is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_TRIGGERED.getId()));
-        // second one should be SHARESHEET_STARTED event
+
+        // SHARESHEET_STARTED:
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is("text/plain"));
@@ -1890,20 +1934,30 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));
         assertThat(logger.get(1).previewType, is(3));
-        // third one should be SHARESHEET_APP_LOAD_COMPLETE uievent
-        assertThat(logger.get(2).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(2).event.getId(),
+
+        // SHARESHEET_APP_LOAD_COMPLETE:
+        assertThat(logger.event(2).getId(),
                 is(ChooserActivityLogger
                         .SharesheetStandardEvent.SHARESHEET_APP_LOAD_COMPLETE.getId()));
-        // fourth and fifth are just artifacts of test set-up
-        // sixth one should be ranking atom with SHARESHEET_EMPTY_DIRECT_SHARE_ROW event
-        assertThat(logger.get(5).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(5).event.getId(),
+
+        // SHARESHEET_DIRECT_LOAD_COMPLETE:
+        assertThat(logger.event(3).getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_DIRECT_LOAD_COMPLETE.getId()));
+
+        // SHARESHEET_EMPTY_DIRECT_SHARE_ROW:
+        assertThat(logger.event(4).getId(),
                 is(ChooserActivityLogger
                         .SharesheetStandardEvent.SHARESHEET_EMPTY_DIRECT_SHARE_ROW.getId()));
+
+        // Sixth is just an artifact of test set-up:
+        assertThat(logger.event(5).getId(),
+                is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_EXPANDED.getId()));
+
+        assertThat(logger.numCalls(), is(6));
     }
 
-    @Test @Ignore
+    @Test
     public void testCopyTextToClipboardLogging() throws Exception {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -1922,12 +1976,12 @@ public class ChooserActivityTest {
 
         ChooserActivityLoggerFake logger =
                 (ChooserActivityLoggerFake) activity.getChooserActivityLogger();
-        assertThat(logger.numCalls(), is(6));
-        // first one should be SHARESHEET_TRIGGERED uievent
-        assertThat(logger.get(0).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(0).event.getId(),
+
+        // SHARESHEET_TRIGGERED:
+        assertThat(logger.event(0).getId(),
                 is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_TRIGGERED.getId()));
-        // second one should be SHARESHEET_STARTED event
+
+        // SHARESHEET_STARTED:
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is("text/plain"));
@@ -1936,20 +1990,35 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));
         assertThat(logger.get(1).previewType, is(3));
-        // third one should be SHARESHEET_APP_LOAD_COMPLETE uievent
-        assertThat(logger.get(2).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(2).event.getId(),
+
+        // SHARESHEET_APP_LOAD_COMPLETE:
+        assertThat(logger.event(2).getId(),
                 is(ChooserActivityLogger
                         .SharesheetStandardEvent.SHARESHEET_APP_LOAD_COMPLETE.getId()));
-        // fourth and fifth are just artifacts of test set-up
-        // sixth one should be ranking atom with SHARESHEET_COPY_TARGET_SELECTED event
-        assertThat(logger.get(5).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
-        assertThat(logger.get(5).targetType,
+
+        // SHARESHEET_DIRECT_LOAD_COMPLETE:
+        assertThat(logger.event(3).getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_DIRECT_LOAD_COMPLETE.getId()));
+
+        // Fifth and sixth are just artifacts of test set-up:
+        assertThat(logger.event(4).getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_EMPTY_DIRECT_SHARE_ROW.getId()));
+        assertThat(logger.event(5).getId(),
+                is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_EXPANDED.getId()));
+
+        // SHARESHEET_EDIT_TARGET_SELECTED:
+        assertThat(logger.get(6).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
+        assertThat(logger.get(6).targetType,
                 is(ChooserActivityLogger
                         .SharesheetTargetSelectedEvent.SHARESHEET_COPY_TARGET_SELECTED.getId()));
+
+        // No more events.
+        assertThat(logger.numCalls(), is(7));
     }
 
-    @Test @Ignore
+    @Test
     public void testSwitchProfileLogging() throws InterruptedException {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
@@ -1973,12 +2042,12 @@ public class ChooserActivityTest {
 
         ChooserActivityLoggerFake logger =
                 (ChooserActivityLoggerFake) activity.getChooserActivityLogger();
-        assertThat(logger.numCalls(), is(8));
-        // first one should be SHARESHEET_TRIGGERED uievent
-        assertThat(logger.get(0).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(0).event.getId(),
+
+        // SHARESHEET_TRIGGERED:
+        assertThat(logger.event(0).getId(),
                 is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_TRIGGERED.getId()));
-        // second one should be SHARESHEET_STARTED event
+
+        // SHARESHEET_STARTED:
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is(TEST_MIME_TYPE));
@@ -1987,28 +2056,51 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));
         assertThat(logger.get(1).previewType, is(3));
-        // third one should be SHARESHEET_APP_LOAD_COMPLETE uievent
-        assertThat(logger.get(2).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(2).event.getId(),
+
+        // SHARESHEET_APP_LOAD_COMPLETE:
+        assertThat(logger.event(2).getId(),
                 is(ChooserActivityLogger
                         .SharesheetStandardEvent.SHARESHEET_APP_LOAD_COMPLETE.getId()));
-        // fourth one is artifact of test setup
-        // fifth one is switch to work profile
-        assertThat(logger.get(4).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(4).event.getId(),
+
+        // SHARESHEET_DIRECT_LOAD_COMPLETE:
+        assertThat(logger.event(3).getId(),
                 is(ChooserActivityLogger
-                        .SharesheetStandardEvent.SHARESHEET_PROFILE_CHANGED.getId()));
-        // sixth one should be SHARESHEET_APP_LOAD_COMPLETE uievent
-        assertThat(logger.get(5).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(5).event.getId(),
+                        .SharesheetStandardEvent.SHARESHEET_DIRECT_LOAD_COMPLETE.getId()));
+
+        // Fifth is just an artifact of test set-up:
+        assertThat(logger.event(4).getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_EMPTY_DIRECT_SHARE_ROW.getId()));
+
+        // SHARESHEET_PROFILE_CHANGED:
+        assertThat(logger.event(5).getId(),
+                is(ChooserActivityLogger.SharesheetStandardEvent
+                        .SHARESHEET_PROFILE_CHANGED.getId()));
+
+        // Repeat the loading steps in the new profile:
+
+        // SHARESHEET_APP_LOAD_COMPLETE:
+        assertThat(logger.event(6).getId(),
                 is(ChooserActivityLogger
                         .SharesheetStandardEvent.SHARESHEET_APP_LOAD_COMPLETE.getId()));
-        // seventh one is artifact of test setup
-        // eigth one is switch to work profile
-        assertThat(logger.get(7).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
-        assertThat(logger.get(7).event.getId(),
+
+        // SHARESHEET_DIRECT_LOAD_COMPLETE:
+        assertThat(logger.event(7).getId(),
                 is(ChooserActivityLogger
-                        .SharesheetStandardEvent.SHARESHEET_PROFILE_CHANGED.getId()));
+                        .SharesheetStandardEvent.SHARESHEET_DIRECT_LOAD_COMPLETE.getId()));
+
+        // Ninth is again an artifact of test set-up:
+        assertThat(logger.event(8).getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_EMPTY_DIRECT_SHARE_ROW.getId()));
+
+        // SHARESHEET_PROFILE_CHANGED:
+        assertThat(logger.event(9).getId(),
+                is(ChooserActivityLogger.SharesheetStandardEvent
+                        .SHARESHEET_PROFILE_CHANGED.getId()));
+
+        // No more events (this profile was already loaded).
+        assertThat(logger.numCalls(), is(10));
     }
 
     @Test
