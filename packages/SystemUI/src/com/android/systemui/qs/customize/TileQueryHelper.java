@@ -146,6 +146,10 @@ public class TileQueryHelper {
     }
 
     private static class TilePair {
+        private TilePair(QSTile tile) {
+            mTile = tile;
+        }
+
         QSTile mTile;
         boolean mReady = false;
     }
@@ -157,8 +161,7 @@ public class TileQueryHelper {
 
         TileCollector(List<QSTile> tilesToAdd, QSTileHost host) {
             for (QSTile tile: tilesToAdd) {
-                TilePair pair = new TilePair();
-                pair.mTile = tile;
+                TilePair pair = new TilePair(tile);
                 mQSTileList.add(pair);
             }
             mQSTileHost = host;
@@ -288,15 +291,11 @@ public class TileQueryHelper {
         if (mSpecs.contains(spec)) {
             return;
         }
-        TileInfo info = new TileInfo();
-        info.state = state;
-        info.state.dualTarget = false; // No dual targets in edit.
-        info.state.expandedAccessibilityClassName =
-                Button.class.getName();
-        info.spec = spec;
-        info.state.secondaryLabel = (isSystem || TextUtils.equals(state.label, appLabel))
+        state.dualTarget = false; // No dual targets in edit.
+        state.expandedAccessibilityClassName = Button.class.getName();
+        state.secondaryLabel = (isSystem || TextUtils.equals(state.label, appLabel))
                 ? null : appLabel;
-        info.isSystem = isSystem;
+        TileInfo info = new TileInfo(spec, state, isSystem);
         mTiles.add(info);
         mSpecs.add(spec);
     }
@@ -312,6 +311,12 @@ public class TileQueryHelper {
     }
 
     public static class TileInfo {
+        public TileInfo(String spec, QSTile.State state, boolean isSystem) {
+            this.spec = spec;
+            this.state = state;
+            this.isSystem = isSystem;
+        }
+
         public String spec;
         public QSTile.State state;
         public boolean isSystem;
