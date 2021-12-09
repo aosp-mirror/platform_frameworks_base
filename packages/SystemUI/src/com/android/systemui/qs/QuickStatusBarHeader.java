@@ -33,6 +33,7 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.policy.SystemBarUtils;
 import com.android.settingslib.Utils;
@@ -44,7 +45,6 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconMa
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.VariableDateView;
-import com.android.systemui.statusbar.window.StatusBarWindowView;
 
 import java.util.List;
 
@@ -57,8 +57,11 @@ public class QuickStatusBarHeader extends FrameLayout {
     private boolean mExpanded;
     private boolean mQsDisabled;
 
+    @Nullable
     private TouchAnimator mAlphaAnimator;
+    @Nullable
     private TouchAnimator mTranslationAnimator;
+    @Nullable
     private TouchAnimator mIconsAlphaAnimator;
     private TouchAnimator mIconsAlphaAnimatorFixed;
 
@@ -85,7 +88,9 @@ public class QuickStatusBarHeader extends FrameLayout {
     private StatusIconContainer mIconContainer;
     private View mPrivacyChip;
 
+    @Nullable
     private TintedIconManager mTintedIconManager;
+    @Nullable
     private QSExpansionPathInterpolator mQSExpansionPathInterpolator;
     private StatusBarContentInsetsProvider mInsetsProvider;
 

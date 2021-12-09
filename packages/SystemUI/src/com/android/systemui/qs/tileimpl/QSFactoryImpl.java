@@ -18,6 +18,8 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSIconView;
@@ -173,6 +175,8 @@ public class QSFactoryImpl implements QSFactory {
         mColorCorrectionTileProvider = colorCorrectionTileProvider;
     }
 
+    /** Creates a tile with a type based on {@code tileSpec} */
+    @Nullable
     public final QSTile createTile(String tileSpec) {
         QSTileImpl tile = createTileInternal(tileSpec);
         if (tile != null) {
@@ -182,6 +186,7 @@ public class QSFactoryImpl implements QSFactory {
         return tile;
     }
 
+    @Nullable
     protected QSTileImpl createTileInternal(String tileSpec) {
         // Stock tiles.
         switch (tileSpec) {

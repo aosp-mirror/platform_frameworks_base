@@ -31,6 +31,8 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.widget.Button;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -79,7 +81,7 @@ public class TileQueryHelper {
         mUserTracker = userTracker;
     }
 
-    public void setListener(TileStateListener listener) {
+    public void setListener(@Nullable TileStateListener listener) {
         mListener = listener;
     }
 
@@ -269,6 +271,7 @@ public class TileQueryHelper {
         });
     }
 
+    @Nullable
     private State getState(Collection<QSTile> tiles, String spec) {
         for (QSTile tile : tiles) {
             if (spec.equals(tile.getTileSpec())) {
@@ -278,7 +281,8 @@ public class TileQueryHelper {
         return null;
     }
 
-    private void addTile(String spec, CharSequence appLabel, State state, boolean isSystem) {
+    private void addTile(
+            String spec, @Nullable CharSequence appLabel, State state, boolean isSystem) {
         if (mSpecs.contains(spec)) {
             return;
         }

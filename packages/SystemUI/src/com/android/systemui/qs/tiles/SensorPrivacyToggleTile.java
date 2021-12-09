@@ -134,6 +134,7 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
         return new Intent(Settings.ACTION_PRIVACY_SETTINGS);
     }
 
+    @Nullable
     @Override
     public DetailAdapter getDetailAdapter() {
         return super.getDetailAdapter();

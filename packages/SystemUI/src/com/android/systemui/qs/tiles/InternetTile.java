@@ -145,13 +145,15 @@ public class InternetTile extends QSTileImpl<SignalState> {
                         && mHost.getUserContext().getUserId() == UserHandle.USER_SYSTEM);
     }
 
-    private CharSequence getSecondaryLabel(boolean isTransient, String statusLabel) {
+    @Nullable
+    private CharSequence getSecondaryLabel(boolean isTransient, @Nullable String statusLabel) {
         return isTransient
                 ? mContext.getString(R.string.quick_settings_wifi_secondary_label_transient)
                 : statusLabel;
     }
 
-    private static String removeDoubleQuotes(String string) {
+    @Nullable
+    private static String removeDoubleQuotes(@Nullable String string) {
         if (string == null) return null;
         final int length = string.length();
         if ((length > 1) && (string.charAt(0) == '"') && (string.charAt(length - 1) == '"')) {
@@ -163,6 +165,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
     private static final class EthernetCallbackInfo {
         boolean mConnected;
         int mEthernetSignalIconId;
+        @Nullable
         String mEthernetContentDescription;
 
         @Override
@@ -180,11 +183,14 @@ public class InternetTile extends QSTileImpl<SignalState> {
         boolean mEnabled;
         boolean mConnected;
         int mWifiSignalIconId;
+        @Nullable
         String mSsid;
         boolean mActivityIn;
         boolean mActivityOut;
+        @Nullable
         String mWifiSignalContentDescription;
         boolean mIsTransient;
+        @Nullable
         public String mStatusLabel;
         boolean mNoDefaultNetwork;
         boolean mNoValidatedNetwork;
@@ -211,7 +217,9 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
     private static final class CellularCallbackInfo {
         boolean mAirplaneModeEnabled;
+        @Nullable
         CharSequence mDataSubscriptionName;
+        @Nullable
         CharSequence mDataContentDescription;
         int mMobileSignalIconId;
         int mQsTypeIcon;
@@ -540,7 +548,8 @@ public class InternetTile extends QSTileImpl<SignalState> {
         }
     }
 
-    private CharSequence appendMobileDataType(CharSequence current, CharSequence dataType) {
+    private CharSequence appendMobileDataType(
+            @Nullable CharSequence current, @Nullable CharSequence dataType) {
         if (TextUtils.isEmpty(dataType)) {
             return Html.fromHtml((current == null ? "" : current.toString()), 0);
         }
@@ -551,6 +560,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
         return Html.fromHtml(concat, 0);
     }
 
+    @Nullable
     private CharSequence getMobileDataContentName(CellularCallbackInfo cb) {
         if (cb.mRoaming && !TextUtils.isEmpty(cb.mDataContentDescription)) {
             String roaming = mContext.getString(R.string.data_connection_roaming);

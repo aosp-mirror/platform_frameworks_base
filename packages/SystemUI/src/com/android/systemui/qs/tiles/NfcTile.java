@@ -54,6 +54,7 @@ public class NfcTile extends QSTileImpl<BooleanState> {
     private static final String NFC = "nfc";
     private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_nfc);
 
+    @Nullable
     private NfcAdapter mAdapter;
     private BroadcastDispatcher mBroadcastDispatcher;
 

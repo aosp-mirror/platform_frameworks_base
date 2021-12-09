@@ -52,6 +52,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
     private static final String EXTRA_CONNECT_FOR_CALLER = "connect_for_caller";
 
     private final InternetDialogController mInternetDialogController;
+    @Nullable
     private List<WifiEntry> mWifiEntries;
     @VisibleForTesting
     protected int mWifiEntriesCount;
@@ -189,6 +190,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
             mWifiSummaryText.setText(summary);
         }
 
+        @Nullable
         Drawable getWifiDrawable(int level, boolean hasNoInternet) {
             // If the Wi-Fi level is equal to WIFI_LEVEL_UNREACHABLE(-1), then a null drawable
             // will be returned.

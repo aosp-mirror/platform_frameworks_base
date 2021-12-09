@@ -26,6 +26,8 @@ import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnLayoutChangeListener;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSTile;
@@ -88,6 +90,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private final View mQSFooterActions;
     private final View mQQSFooterActions;
 
+    @Nullable
     private PagedTileLayout mPagedLayout;
 
     private boolean mOnFirstPage = true;
@@ -95,6 +98,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private final QSExpansionPathInterpolator mQSExpansionPathInterpolator;
     // Animator for elements in the first page, including secondary labels and qqs brightness
     // slider, as well as animating the alpha of the QS tile layout (as we are tracking QQS tiles)
+    @Nullable
     private TouchAnimator mFirstPageAnimator;
     // TranslationX animator for QQS/QS tiles
     private TouchAnimator mTranslationXAnimator;
@@ -109,13 +113,16 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     // This animates fading of SecurityFooter and media divider
     private TouchAnimator mAllPagesDelayedAnimator;
     // Animator for brightness slider(s)
+    @Nullable
     private TouchAnimator mBrightnessAnimator;
     // Animator for Footer actions in QQS
     private TouchAnimator mQQSFooterActionsAnimator;
     // Height animator for QQS tiles (height changing from QQS size to QS size)
+    @Nullable
     private HeightExpansionAnimator mQQSTileHeightAnimator;
     // Height animator for QS tile in first page but not in QQS, to present the illusion that they
     // are expanding alongside the QQS tiles
+    @Nullable
     private HeightExpansionAnimator mOtherFirstPageTilesHeightAnimator;
     // Pair of animators for each non first page. The creation is delayed until the user first
     // scrolls to that page, in order to get the proper measures and layout.
@@ -215,7 +222,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     }
 
     @Override
-    public void onViewAttachedToWindow(View v) {
+    public void onViewAttachedToWindow(@Nullable View v) {
         mTunerService.addTunable(this, ALLOW_FANCY_ANIMATION,
                 MOVE_FULL_ROWS);
     }

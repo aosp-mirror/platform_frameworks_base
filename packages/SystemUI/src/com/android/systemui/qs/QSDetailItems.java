@@ -33,6 +33,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile;
@@ -50,6 +52,7 @@ public class QSDetailItems extends FrameLayout {
     private final Adapter mAdapter = new Adapter();
 
     private String mTag;
+    @Nullable
     private Callback mCallback;
     private boolean mItemsVisible = true;
     private AutoSizingList mItemList;
@@ -130,7 +133,8 @@ public class QSDetailItems extends FrameLayout {
         mHandler.obtainMessage(H.SET_CALLBACK, callback).sendToTarget();
     }
 
-    public void setItems(Item[] items) {
+    /** Set items. */
+    public void setItems(@Nullable Item[] items) {
         mHandler.removeMessages(H.SET_ITEMS);
         mHandler.obtainMessage(H.SET_ITEMS, items).sendToTarget();
     }
@@ -266,9 +270,12 @@ public class QSDetailItems extends FrameLayout {
         }
 
         public int iconResId;
+        @Nullable
         public QSTile.Icon icon;
+        @Nullable
         public Drawable overlay;
         public CharSequence line1;
+        @Nullable
         public CharSequence line2;
         public Object tag;
         public boolean canDisconnect;

@@ -117,6 +117,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private QSPanelController mQSPanelController;
     private QuickQSPanelController mQuickQSPanelController;
     private QSCustomizerController mQSCustomizerController;
+    @Nullable
     private ScrollListener mScrollListener;
     /**
      * When true, QS will translate from outside the screen. It will be clipped with parallax

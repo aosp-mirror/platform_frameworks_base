@@ -159,9 +159,9 @@ public interface QSTile {
         public Supplier<Icon> iconSupplier;
         public int state = DEFAULT_STATE;
         public CharSequence label;
-        public CharSequence secondaryLabel;
+        @Nullable public CharSequence secondaryLabel;
         public CharSequence contentDescription;
-        public CharSequence stateDescription;
+        @Nullable public CharSequence stateDescription;
         public CharSequence dualLabelContentDescription;
         public boolean disabledByPolicy;
         public boolean dualTarget = false;
@@ -170,6 +170,7 @@ public interface QSTile {
         public SlashState slash;
         public boolean handlesLongClick = true;
         public boolean showRippleEffect = true;
+        @Nullable
         public Drawable sideViewCustomDrawable;
         public String spec;
 
