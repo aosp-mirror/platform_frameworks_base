@@ -601,6 +601,49 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
+     * Set priority of the profile
+     *
+     * <p> The device should already be paired.
+     * Priority can be one of {@link BluetoothProfile#PRIORITY_ON} or
+     * {@link BluetoothProfile#PRIORITY_OFF}
+     *
+     * @param device Paired bluetooth device
+     * @param priority
+     * @return true if priority is set, false on error
+     * @hide
+     * @deprecated Replaced with {@link #setConnectionPolicy(BluetoothDevice, int)}
+     * @removed
+     */
+    @Deprecated
+    @SystemApi
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+    })
+    public boolean setPriority(BluetoothDevice device, int priority) {
+        if (DBG) log("setPriority(" + device + ", " + priority + ")");
+        final IBluetoothHeadset service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
+            if (priority != BluetoothProfile.PRIORITY_OFF
+                    && priority != BluetoothProfile.PRIORITY_ON) {
+                return false;
+            }
+            try {
+                return service.setPriority(
+                        device, BluetoothAdapter.priorityToConnectionPolicy(priority),
+                        mAttributionSource);
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+                return false;
+            }
+        }
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
+    }
+
+    /**
      * Set connection policy of the profile
      *
      * <p> The device should already be paired.
