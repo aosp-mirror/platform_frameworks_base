@@ -8252,6 +8252,9 @@ public class AudioService extends IAudioService.Stub
     public int requestAudioFocus(AudioAttributes aa, int durationHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName,
             String attributionTag, int flags, IAudioPolicyCallback pcb, int sdk) {
+        if ((flags & AudioManager.AUDIOFOCUS_FLAG_TEST) != 0) {
+            throw new IllegalArgumentException("Invalid test flag");
+        }
         final int uid = Binder.getCallingUid();
         MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId + "focus")
                 .setUid(uid)
@@ -8310,7 +8313,7 @@ public class AudioService extends IAudioService.Stub
     /** see {@link AudioManager#requestAudioFocusForTest(AudioFocusRequest, String, int, int)} */
     public int requestAudioFocusForTest(AudioAttributes aa, int durationHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName,
-            int fakeUid, int sdk) {
+            int flags, int fakeUid, int sdk) {
         if (!enforceQueryAudioStateForTest("focus request")) {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
@@ -8320,7 +8323,7 @@ public class AudioService extends IAudioService.Stub
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
         return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
-                clientId, callingPackageName, null, AudioManager.AUDIOFOCUS_FLAG_TEST,
+                clientId, callingPackageName, null, flags,
                 sdk, false /*forceDuck*/, fakeUid);
     }
 
