@@ -561,10 +561,17 @@ public class BubbleData {
         overflowBubble(reason, bubbleToRemove);
 
         if (mBubbles.size() == 1) {
-            setExpandedInternal(false);
-            // Don't use setSelectedBubbleInternal because we don't want to trigger an
-            // applyUpdate
-            mSelectedBubble = null;
+            if (hasOverflowBubbles() && (mPositioner.showingInTaskbar() || isExpanded())) {
+                // No more active bubbles but we have stuff in the overflow -- select that view
+                // if we're already expanded or always showing.
+                setShowingOverflow(true);
+                setSelectedBubbleInternal(mOverflow);
+            } else {
+                setExpandedInternal(false);
+                // Don't use setSelectedBubbleInternal because we don't want to trigger an
+                // applyUpdate
+                mSelectedBubble = null;
+            }
         }
         if (indexToRemove < mBubbles.size() - 1) {
             // Removing anything but the last bubble means positions will change.
