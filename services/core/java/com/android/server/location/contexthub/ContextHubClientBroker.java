@@ -427,6 +427,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         onClientExit();
     }
 
+    @Override
+    public int getId() {
+        return mHostEndPointId;
+    }
+
     /**
      * Invoked when the underlying binder of this broker has died at the client process.
      */
