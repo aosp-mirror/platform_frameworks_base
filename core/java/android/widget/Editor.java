@@ -1073,7 +1073,7 @@ public class Editor {
                 com.android.internal.R.dimen.textview_error_popup_default_width);
         final StaticLayout l = StaticLayout.Builder.obtain(text, 0, text.length(), tv.getPaint(),
                 defaultWidthInPixels)
-                .setUseLineSpacingFromFallbacks(tv.mUseFallbackLineSpacing)
+                .setUseLineSpacingFromFallbacks(tv.isFallbackLineSpacingForStaticLayout())
                 .build();
 
         float max = 0;

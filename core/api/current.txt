@@ -15973,6 +15973,8 @@ package android.graphics {
     method public String getFontFeatureSettings();
     method public float getFontMetrics(android.graphics.Paint.FontMetrics);
     method public android.graphics.Paint.FontMetrics getFontMetrics();
+    method public void getFontMetricsInt(@NonNull CharSequence, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0) int, boolean, @NonNull android.graphics.Paint.FontMetricsInt);
+    method public void getFontMetricsInt(@NonNull char[], @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0) int, boolean, @NonNull android.graphics.Paint.FontMetricsInt);
     method public int getFontMetricsInt(android.graphics.Paint.FontMetricsInt);
     method public android.graphics.Paint.FontMetricsInt getFontMetricsInt();
     method public float getFontSpacing();
@@ -44649,6 +44651,7 @@ package android.text {
   public class BoringLayout extends android.text.Layout implements android.text.TextUtils.EllipsizeCallback {
     ctor public BoringLayout(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
     ctor public BoringLayout(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
+    ctor public BoringLayout(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, float, float, @NonNull android.text.BoringLayout.Metrics, boolean, @NonNull android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
     method public void ellipsized(int, int);
     method public int getBottomPadding();
     method public int getEllipsisCount(int);
@@ -44663,9 +44666,12 @@ package android.text {
     method public int getTopPadding();
     method public static android.text.BoringLayout.Metrics isBoring(CharSequence, android.text.TextPaint);
     method public static android.text.BoringLayout.Metrics isBoring(CharSequence, android.text.TextPaint, android.text.BoringLayout.Metrics);
+    method @Nullable public static android.text.BoringLayout.Metrics isBoring(@NonNull CharSequence, @NonNull android.text.TextPaint, @NonNull android.text.TextDirectionHeuristic, boolean, @Nullable android.text.BoringLayout.Metrics);
     method public static android.text.BoringLayout make(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
     method public static android.text.BoringLayout make(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
+    method @NonNull public static android.text.BoringLayout make(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, @NonNull android.text.BoringLayout.Metrics, boolean, @NonNull android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
     method public android.text.BoringLayout replaceOrMake(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
+    method @NonNull public android.text.BoringLayout replaceOrMake(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, @NonNull android.text.BoringLayout.Metrics, boolean, @NonNull android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
     method public android.text.BoringLayout replaceOrMake(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
   }
 
@@ -44874,6 +44880,7 @@ package android.text {
     method public abstract int getTopPadding();
     method public final int getWidth();
     method public final void increaseWidthTo(int);
+    method public boolean isFallbackLineSpacingEnabled();
     method public boolean isRtlCharAt(int);
     method protected final boolean isSpanned();
     field public static final int BREAK_STRATEGY_BALANCED = 2; // 0x2
