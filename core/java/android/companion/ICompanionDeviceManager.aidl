@@ -65,5 +65,10 @@ interface ICompanionDeviceManager {
     void dispatchMessage(in int messageId, in int associationId, in byte[] message);
 
     void addOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
+
     void removeOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
+
+    void notifyDeviceAppeared(int associationId);
+
+    void notifyDeviceDisappeared(int associationId);
 }

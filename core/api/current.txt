@@ -10127,8 +10127,10 @@ package android.companion {
     ctor public CompanionDeviceService();
     method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public final void dispatchMessage(int, int, @NonNull byte[]);
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method @MainThread public abstract void onDeviceAppeared(@NonNull String);
-    method @MainThread public abstract void onDeviceDisappeared(@NonNull String);
+    method @Deprecated @MainThread public void onDeviceAppeared(@NonNull String);
+    method @MainThread public void onDeviceAppeared(@NonNull android.companion.AssociationInfo);
+    method @Deprecated @MainThread public void onDeviceDisappeared(@NonNull String);
+    method @MainThread public void onDeviceDisappeared(@NonNull android.companion.AssociationInfo);
     method @MainThread public void onDispatchMessage(int, int, @NonNull byte[]);
     field public static final String SERVICE_INTERFACE = "android.companion.CompanionDeviceService";
   }
