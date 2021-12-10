@@ -62,6 +62,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -297,6 +298,9 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
 //    @DataClass.ParcelWith(ParsingUtils.StringPairListParceler.class)
     private List<Pair<String, ParsedIntentInfo>> preferredActivityFilters = emptyList();
 
+    /**
+     * Map from a process name to a {@link ParsedProcess}.
+     */
     @NonNull
     private Map<String, ParsedProcess> processes = emptyMap();
 
@@ -1131,8 +1135,44 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         appInfo.setSplitCodePaths(splitCodePaths);
         appInfo.setSplitResourcePaths(splitCodePaths);
         appInfo.setVersionCode(mLongVersionCode);
+        appInfo.setAppClassNamesByProcess(buildAppClassNamesByProcess());
 
         return appInfo;
+    }
+
+    /**
+     * Create a map from a process name to the custom application class for this process,
+     * which comes from <processes><process android:name="xxx">.
+     *
+     * The original information is stored in {@link #processes}, but it's stored in
+     * a form of: [process name] -[1:N]-> [package name] -[1:N]-> [class name].
+     * We scan it and collect the process names and their app class names, only for this package.
+     *
+     * The resulting map only contains processes with a custom application class set.
+     */
+    @Nullable
+    private ArrayMap<String, String> buildAppClassNamesByProcess() {
+        if (processes == null) {
+            return null;
+        }
+        final ArrayMap<String, String> ret = new ArrayMap<>(4);
+        for (String processName : processes.keySet()) {
+            final ParsedProcess process = processes.get(processName);
+            final ArrayMap<String, String> appClassesByPackage =
+                    process.getAppClassNamesByPackage();
+
+            for (int i = 0; i < appClassesByPackage.size(); i++) {
+                final String packageName = appClassesByPackage.keyAt(i);
+
+                if (this.packageName.equals(packageName)) {
+                    final String appClassName = appClassesByPackage.valueAt(i);
+                    if (!TextUtils.isEmpty(appClassName)) {
+                        ret.put(processName, appClassName);
+                    }
+                }
+            }
+        }
+        return ret;
     }
 
     @Override

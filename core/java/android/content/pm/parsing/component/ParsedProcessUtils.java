@@ -97,7 +97,12 @@ public class ParsedProcessUtils {
                 return input.error(processNameResult);
             }
 
+            String packageName = pkg.getPackageName();
+            String className = ParsingUtils.buildClassName(packageName,
+                    sa.getNonConfigurationString(R.styleable.AndroidManifestProcess_name, 0));
+
             proc.setName(processNameResult.getResult());
+            proc.putAppClassNameForPackage(packageName, className);
             proc.setGwpAsanMode(sa.getInt(R.styleable.AndroidManifestProcess_gwpAsanMode, -1));
             proc.setMemtagMode(sa.getInt(R.styleable.AndroidManifestProcess_memtagMode, -1));
             if (sa.hasValue(R.styleable.AndroidManifestProcess_nativeHeapZeroInitialized)) {
