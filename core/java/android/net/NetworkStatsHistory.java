@@ -526,6 +526,13 @@ public class NetworkStatsHistory implements Parcelable {
     /**
      * Return interpolated data usage across the requested range. Interpolates
      * across buckets, so values may be rounded slightly.
+     *
+     * <p>If the active bucket is not completed yet, it returns the proportional value of it
+     * based on its duration and the {@code end} param.
+     *
+     * @param start - start of the range, timestamp in milliseconds since the epoch.
+     * @param end - end of the range, timestamp in milliseconds since the epoch.
+     * @param recycle - entry instance for performance, could be null.
      */
     @UnsupportedAppUsage
     public Entry getValues(long start, long end, Entry recycle) {
@@ -535,6 +542,11 @@ public class NetworkStatsHistory implements Parcelable {
     /**
      * Return interpolated data usage across the requested range. Interpolates
      * across buckets, so values may be rounded slightly.
+     *
+     * @param start - start of the range, timestamp in milliseconds since the epoch.
+     * @param end - end of the range, timestamp in milliseconds since the epoch.
+     * @param now - current timestamp in milliseconds since the epoch (wall clock).
+     * @param recycle - entry instance for performance, could be null.
      */
     @UnsupportedAppUsage
     public Entry getValues(long start, long end, long now, Entry recycle) {
