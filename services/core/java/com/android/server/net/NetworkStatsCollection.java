@@ -59,16 +59,15 @@ import com.android.internal.util.FastDataOutput;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 
-import libcore.io.IoUtils;
-
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
+
+import libcore.io.IoUtils;
 
 import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -335,7 +334,13 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
     /**
      * Summarize all {@link NetworkStatsHistory} in this collection which match
-     * the requested parameters.
+     * the requested parameters across the requested range.
+     *
+     * @param template - a predicate for filtering netstats.
+     * @param start - start of the range, timestamp in milliseconds since the epoch.
+     * @param end - end of the range, timestamp in milliseconds since the epoch.
+     * @param accessLevel - caller access level.
+     * @param callerUid - caller UID.
      */
     public NetworkStats getSummary(NetworkTemplate template, long start, long end,
             @NetworkStatsAccess.Level int accessLevel, int callerUid) {
