@@ -303,15 +303,11 @@ public class InternetDialog extends SystemUIDialog implements
         if (DEBUG) {
             Log.d(TAG, "updateDialog");
         }
-        if (mInternetDialogController.isAirplaneModeEnabled()) {
-            mInternetDialogSubTitle.setVisibility(View.GONE);
-            mAirplaneModeLayout.setVisibility(View.VISIBLE);
-        } else {
-            mInternetDialogTitle.setText(getDialogTitleText());
-            mInternetDialogSubTitle.setVisibility(View.VISIBLE);
-            mInternetDialogSubTitle.setText(getSubtitleText());
-            mAirplaneModeLayout.setVisibility(View.GONE);
-        }
+        mInternetDialogTitle.setText(getDialogTitleText());
+        mInternetDialogSubTitle.setText(getSubtitleText());
+        mAirplaneModeLayout.setVisibility(
+                mInternetDialogController.isAirplaneModeEnabled() ? View.VISIBLE : View.GONE);
+
         updateEthernet();
         if (shouldUpdateMobileNetwork) {
             setMobileDataLayout(mInternetDialogController.activeNetworkIsCellular(),

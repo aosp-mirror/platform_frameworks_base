@@ -140,7 +140,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog.updateDialog(true);
 
-        assertThat(mSubTitle.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mSubTitle.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
