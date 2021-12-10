@@ -25,6 +25,7 @@ import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.media.MediaHostStatesManager;
 import com.android.systemui.media.taptotransfer.MediaTttChipController;
+import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 
@@ -78,11 +79,23 @@ public interface MediaModule {
     static Optional<MediaTttChipController> providesMediaTttChipController(
             MediaTttFlags mediaTttFlags,
             Context context,
-            CommandRegistry commandRegistry,
             WindowManager windowManager) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(new MediaTttChipController(commandRegistry, context, windowManager));
+        return Optional.of(new MediaTttChipController(context, windowManager));
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static Optional<MediaTttCommandLineHelper> providesMediaTttCommandLineHelper(
+            MediaTttFlags mediaTttFlags,
+            CommandRegistry commandRegistry,
+            MediaTttChipController mediaTttChipController) {
+        if (!mediaTttFlags.isMediaTttEnabled()) {
+            return Optional.empty();
+        }
+        return Optional.of(new MediaTttCommandLineHelper(commandRegistry, mediaTttChipController));
     }
 }
