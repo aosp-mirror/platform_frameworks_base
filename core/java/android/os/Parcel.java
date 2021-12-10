@@ -4210,8 +4210,7 @@ public final class Parcel {
      * trying to instantiate an element.
      */
     @Nullable
-    public <T extends Parcelable> T readParcelable(@Nullable ClassLoader loader,
-            @NonNull Class<T> clazz) {
+    public <T> T readParcelable(@Nullable ClassLoader loader, @NonNull Class<T> clazz) {
         Objects.requireNonNull(clazz);
         return readParcelableInternal(loader, clazz);
     }
@@ -4222,10 +4221,6 @@ public final class Parcel {
     @SuppressWarnings("unchecked")
     @Nullable
     private <T> T readParcelableInternal(@Nullable ClassLoader loader, @Nullable Class<T> clazz) {
-        if (clazz != null && !Parcelable.class.isAssignableFrom(clazz)) {
-            throw new BadParcelableException("About to unparcel a parcelable object "
-                    + " but class required " + clazz.getName() + " is not Parcelable");
-        }
         Parcelable.Creator<?> creator = readParcelableCreatorInternal(loader, clazz);
         if (creator == null) {
             return null;
@@ -4461,8 +4456,7 @@ public final class Parcel {
      * deserializing the object.
      */
     @Nullable
-    public <T extends Serializable> T readSerializable(@Nullable ClassLoader loader,
-            @NonNull Class<T> clazz) {
+    public <T> T readSerializable(@Nullable ClassLoader loader, @NonNull Class<T> clazz) {
         Objects.requireNonNull(clazz);
         return readSerializableInternal(
                 loader == null ? getClass().getClassLoader() : loader, clazz);
@@ -4474,11 +4468,6 @@ public final class Parcel {
     @Nullable
     private <T> T readSerializableInternal(@Nullable final ClassLoader loader,
             @Nullable Class<T> clazz) {
-        if (clazz != null && !Serializable.class.isAssignableFrom(clazz)) {
-            throw new BadParcelableException("About to unparcel a serializable object "
-                    + " but class required " + clazz.getName() + " is not Serializable");
-        }
-
         String name = readString();
         if (name == null) {
             // For some reason we were unable to read the name of the Serializable (either there
