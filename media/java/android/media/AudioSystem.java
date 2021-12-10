@@ -1768,12 +1768,33 @@ public class AudioSystem
 
     /**
      * @hide
+     * Direct playback modes supported by audio HAL implementation.
+     */
+    public static final int DIRECT_NOT_SUPPORTED = 0;
+    public static final int DIRECT_OFFLOAD_SUPPORTED = 1;
+    public static final int DIRECT_OFFLOAD_GAPLESS_SUPPORTED = 3;
+    public static final int DIRECT_BITSTREAM_SUPPORTED = 4;
+
+    /**
+     * @hide
      * Compressed audio offload decoding modes supported by audio HAL implementation.
      * Keep in sync with system/media/include/media/audio.h.
      */
-    public static final int OFFLOAD_NOT_SUPPORTED = 0;
-    public static final int OFFLOAD_SUPPORTED = 1;
+    public static final int OFFLOAD_NOT_SUPPORTED = DIRECT_NOT_SUPPORTED;
+    public static final int OFFLOAD_SUPPORTED = DIRECT_OFFLOAD_SUPPORTED;
     public static final int OFFLOAD_GAPLESS_SUPPORTED = 2;
+
+    /**
+     * @hide
+     * Returns how direct playback of an audio format is currently available on the device.
+     * @param format the audio format (codec, sample rate, channels) being checked.
+     * @param attributes the {@link AudioAttributes} to be used for playback
+     * @return the direct playback mode available with given format and attributes. Any combination
+     *         of {@link #DIRECT_NOT_SUPPORTED}, {@link #DIRECT_OFFLOAD_SUPPORTED},
+     *         {@link #DIRECT_OFFLOAD_GAPLESS_SUPPORTED} and {@link #DIRECT_BITSTREAM_SUPPORTED}.
+     */
+    public static native int getDirectPlaybackSupport(
+            @NonNull AudioFormat format, @NonNull AudioAttributes attributes);
 
     static int getOffloadSupport(@NonNull AudioFormat format, @NonNull AudioAttributes attr) {
         return native_get_offload_support(format.getEncoding(), format.getSampleRate(),

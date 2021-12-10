@@ -20749,11 +20749,12 @@ package android.media {
     method @NonNull public java.util.List<android.media.AudioDeviceInfo> getAvailableCommunicationDevices();
     method @Nullable public android.media.AudioDeviceInfo getCommunicationDevice();
     method public android.media.AudioDeviceInfo[] getDevices(int);
+    method public static int getDirectPlaybackSupport(@NonNull android.media.AudioFormat, @NonNull android.media.AudioAttributes);
     method public int getEncodedSurroundMode();
     method public java.util.List<android.media.MicrophoneInfo> getMicrophones() throws java.io.IOException;
     method public int getMode();
     method public String getParameters(String);
-    method public static int getPlaybackOffloadSupport(@NonNull android.media.AudioFormat, @NonNull android.media.AudioAttributes);
+    method @Deprecated public static int getPlaybackOffloadSupport(@NonNull android.media.AudioFormat, @NonNull android.media.AudioAttributes);
     method public String getProperty(String);
     method public int getRingerMode();
     method @Deprecated public int getRouting(int);
@@ -20844,6 +20845,10 @@ package android.media {
     field public static final int AUDIOFOCUS_REQUEST_FAILED = 0; // 0x0
     field public static final int AUDIOFOCUS_REQUEST_GRANTED = 1; // 0x1
     field public static final int AUDIO_SESSION_ID_GENERATE = 0; // 0x0
+    field public static final int DIRECT_PLAYBACK_BITSTREAM_SUPPORTED = 4; // 0x4
+    field public static final int DIRECT_PLAYBACK_NOT_SUPPORTED = 0; // 0x0
+    field public static final int DIRECT_PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED = 3; // 0x3
+    field public static final int DIRECT_PLAYBACK_OFFLOAD_SUPPORTED = 1; // 0x1
     field public static final int ENCODED_SURROUND_OUTPUT_ALWAYS = 2; // 0x2
     field public static final int ENCODED_SURROUND_OUTPUT_AUTO = 0; // 0x0
     field public static final int ENCODED_SURROUND_OUTPUT_MANUAL = 3; // 0x3
@@ -21234,7 +21239,7 @@ package android.media {
     method public int getStreamType();
     method public boolean getTimestamp(android.media.AudioTimestamp);
     method public int getUnderrunCount();
-    method public static boolean isDirectPlaybackSupported(@NonNull android.media.AudioFormat, @NonNull android.media.AudioAttributes);
+    method @Deprecated public static boolean isDirectPlaybackSupported(@NonNull android.media.AudioFormat, @NonNull android.media.AudioAttributes);
     method public boolean isOffloadedPlayback();
     method public void pause() throws java.lang.IllegalStateException;
     method public void play() throws java.lang.IllegalStateException;

@@ -1275,8 +1275,8 @@ public class AudioTrack extends PlayerBase
                     throw new UnsupportedOperationException(
                             "Offload and low latency modes are incompatible");
                 }
-                if (AudioSystem.getOffloadSupport(mFormat, mAttributes)
-                        == AudioSystem.OFFLOAD_NOT_SUPPORTED) {
+                if (AudioSystem.getDirectPlaybackSupport(mFormat, mAttributes)
+                        == AudioSystem.DIRECT_NOT_SUPPORTED) {
                     throw new UnsupportedOperationException(
                             "Cannot create AudioTrack, offload format / attributes not supported");
                 }
@@ -1438,7 +1438,10 @@ public class AudioTrack extends PlayerBase
      *   the audio data.
      * @param attributes a non-null {@link AudioAttributes} instance.
      * @return true if the given audio format can be played directly.
+     * @deprecated Use {@link AudioManager#getDirectPlaybackSupport(AudioFormat, AudioAttributes)}
+     *             instead.
      */
+    @Deprecated
     public static boolean isDirectPlaybackSupported(@NonNull AudioFormat format,
             @NonNull AudioAttributes attributes) {
         if (format == null) {

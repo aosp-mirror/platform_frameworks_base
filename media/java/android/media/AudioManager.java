@@ -2398,6 +2398,77 @@ public class AudioManager {
     }
 
     //====================================================================
+    // Direct playback query
+
+    /** Return value for {@link #getDirectPlaybackSupport(AudioFormat, AudioAttributes)}:
+        direct playback not supported. */
+    public static final int DIRECT_PLAYBACK_NOT_SUPPORTED = AudioSystem.DIRECT_NOT_SUPPORTED;
+    /** Return value for {@link #getDirectPlaybackSupport(AudioFormat, AudioAttributes)}:
+        direct offload playback supported. Compressed offload is a variant of direct playback.
+        It is the feature that allows audio processing tasks to be done on the Android device but
+        not on the application processor, instead, it is handled by dedicated hardware such as audio
+        DSPs. That will allow the application processor to be idle as much as possible, which is
+        good for power saving. Compressed offload playback supports
+        {@link AudioTrack.StreamEventCallback} for event notifications. */
+    public static final int DIRECT_PLAYBACK_OFFLOAD_SUPPORTED =
+            AudioSystem.DIRECT_OFFLOAD_SUPPORTED;
+    /** Return value for {@link #getDirectPlaybackSupport(AudioFormat, AudioAttributes)}:
+        direct offload playback supported with gapless transitions. Compressed offload is a variant
+        of direct playback. It is the feature that allows audio processing tasks to be done on the
+        Android device but not on the application processor, instead, it is handled by dedicated
+        hardware such as audio DSPs. That will allow the application processor to be idle as much as
+        possible, which is good for power saving. Compressed offload playback supports
+        {@link AudioTrack.StreamEventCallback} for event notifications. Gapless transitions
+        indicates the ability to play consecutive audio tracks without an audio silence in
+        between. */
+    public static final int DIRECT_PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED =
+            AudioSystem.DIRECT_OFFLOAD_GAPLESS_SUPPORTED;
+    /** Return value for {@link #getDirectPlaybackSupport(AudioFormat, AudioAttributes)}:
+        direct playback supported. This value covers direct playback that is bitstream pass-through
+        such as compressed pass-through. */
+    public static final int DIRECT_PLAYBACK_BITSTREAM_SUPPORTED =
+            AudioSystem.DIRECT_BITSTREAM_SUPPORTED;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = "DIRECT_PLAYBACK_", value = {
+            DIRECT_PLAYBACK_NOT_SUPPORTED,
+            DIRECT_PLAYBACK_OFFLOAD_SUPPORTED,
+            DIRECT_PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED,
+            DIRECT_PLAYBACK_BITSTREAM_SUPPORTED}
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioDirectPlaybackMode {}
+
+    /**
+     * Returns a bitfield representing the different forms of direct playback currently available
+     * for a given audio format.
+     * <p>Direct playback means that the audio stream is not altered by the framework. The audio
+     * stream will not be resampled, volume scaled, downmixed or mixed with other content by
+     * the framework. But it may be wrapped in a higher level protocol such as IEC61937 for
+     * passthrough.
+     * <p>Checking for direct support can help the app select the representation of audio content
+     * that most closely matches the capabilities of the device and peripherals (e.g. A/V receiver)
+     * connected to it. Note that the provided stream can still be re-encoded or mixed with other
+     * streams, if needed.
+     * @param format the audio format (codec, sample rate, channels) being checked.
+     * @param attributes the {@link AudioAttributes} to be used for playback
+     * @return the direct playback mode available with given format and attributes. The returned
+     *         value will be {@link #DIRECT_PLAYBACK_NOT_SUPPORTED} or a combination of
+     *         {@link #DIRECT_PLAYBACK_OFFLOAD_SUPPORTED},
+     *         {@link #DIRECT_PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED} and
+     *         {@link #DIRECT_PLAYBACK_BITSTREAM_SUPPORTED}. Note that if
+     *         {@link #DIRECT_PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED} is present in the returned value,
+     *         then {@link #DIRECT_PLAYBACK_OFFLOAD_SUPPORTED} will be too.
+     */
+    @AudioDirectPlaybackMode
+    public static int getDirectPlaybackSupport(@NonNull AudioFormat format,
+                                               @NonNull AudioAttributes attributes) {
+        Objects.requireNonNull(format);
+        Objects.requireNonNull(attributes);
+        return AudioSystem.getDirectPlaybackSupport(format, attributes);
+    }
+
+    //====================================================================
     // Offload query
     /**
      * Returns whether offloaded playback of an audio format is supported on the device.
@@ -2457,7 +2528,9 @@ public class AudioManager {
      *         {@link #PLAYBACK_OFFLOAD_SUPPORTED} if offload playback is supported or
      *         {@link #PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED} if gapless transitions are
      *         also supported.
+     * @deprecated Use {@link #getDirectPlaybackSupport(AudioFormat, AudioAttributes)} instead
      */
+    @Deprecated
     @AudioOffloadMode
     public static int getPlaybackOffloadSupport(@NonNull AudioFormat format,
             @NonNull AudioAttributes attributes) {
