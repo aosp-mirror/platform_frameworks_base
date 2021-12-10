@@ -323,7 +323,8 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @UnsupportedAppUsage
     private ContextImpl mSystemContext;
-    private final SparseArray<ContextImpl> mDisplaySystemUiContexts = new SparseArray<>();
+    @GuardedBy("this")
+    private SparseArray<ContextImpl> mDisplaySystemUiContexts;
 
     @UnsupportedAppUsage
     static volatile IPackageManager sPackageManager;
@@ -2658,7 +2659,6 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
-    @Override
     @NonNull
     public ContextImpl getSystemUiContext() {
         return getSystemUiContext(DEFAULT_DISPLAY);
@@ -2672,12 +2672,24 @@ public final class ActivityThread extends ClientTransactionHandler
     @NonNull
     public ContextImpl getSystemUiContext(int displayId) {
         synchronized (this) {
+            if (mDisplaySystemUiContexts == null) {
+                mDisplaySystemUiContexts = new SparseArray<>();
+            }
             ContextImpl systemUiContext = mDisplaySystemUiContexts.get(displayId);
             if (systemUiContext == null) {
                 systemUiContext = ContextImpl.createSystemUiContext(getSystemContext(), displayId);
                 mDisplaySystemUiContexts.put(displayId, systemUiContext);
             }
             return systemUiContext;
+        }
+    }
+
+    @Nullable
+    @Override
+    public ContextImpl getSystemUiContextNoCreate() {
+        synchronized (this) {
+            if (mDisplaySystemUiContexts == null) return null;
+            return mDisplaySystemUiContexts.get(DEFAULT_DISPLAY);
         }
     }
 
