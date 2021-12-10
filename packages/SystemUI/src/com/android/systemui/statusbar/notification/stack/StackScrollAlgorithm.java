@@ -29,6 +29,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
+import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -60,6 +61,7 @@ public class StackScrollAlgorithm {
     @VisibleForTesting float mHeadsUpInset;
     private int mPinnedZTranslationExtra;
     private float mNotificationScrimPadding;
+    private int mCloseHandleUnderlapHeight;
 
     public StackScrollAlgorithm(
             Context context,
@@ -85,6 +87,7 @@ public class StackScrollAlgorithm {
                 R.dimen.heads_up_pinned_elevation);
         mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
         mNotificationScrimPadding = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
+        mCloseHandleUnderlapHeight = res.getDimensionPixelSize(R.dimen.close_handle_underlap);
     }
 
     /**
@@ -459,13 +462,17 @@ public class StackScrollAlgorithm {
                                 && !hasOngoingNotifs(algorithmState));
             }
         } else {
-            if (view != ambientState.getTrackedHeadsUpRow()) {
+            if (view instanceof EmptyShadeView) {
+                float fullHeight = ambientState.getLayoutMaxHeight() + mCloseHandleUnderlapHeight
+                        - ambientState.getStackY();
+                viewState.yTranslation = (fullHeight - getMaxAllowedChildHeight(view)) / 2f;
+            } else if (view != ambientState.getTrackedHeadsUpRow()) {
                 if (ambientState.isExpansionChanging()) {
                     // We later update shelf state, then hide views below the shelf.
                     viewState.hidden = false;
                     viewState.inShelf = algorithmState.firstViewInShelf != null
                             && i >= algorithmState.visibleChildren.indexOf(
-                                    algorithmState.firstViewInShelf);
+                            algorithmState.firstViewInShelf);
                 } else if (ambientState.getShelf() != null) {
                     // When pulsing (incoming notification on AOD), innerHeight is 0; clamp all
                     // to shelf start, thereby hiding all notifications (except the first one, which
