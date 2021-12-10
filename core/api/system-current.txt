@@ -3899,6 +3899,127 @@ package android.hardware.hdmi {
 
 }
 
+package android.hardware.input {
+
+  public final class VirtualKeyEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAction();
+    method public int getKeyCode();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACTION_DOWN = 0; // 0x0
+    field public static final int ACTION_UP = 1; // 0x1
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualKeyEvent> CREATOR;
+  }
+
+  public static final class VirtualKeyEvent.Builder {
+    ctor public VirtualKeyEvent.Builder();
+    method @NonNull public android.hardware.input.VirtualKeyEvent build();
+    method @NonNull public android.hardware.input.VirtualKeyEvent.Builder setAction(int);
+    method @NonNull public android.hardware.input.VirtualKeyEvent.Builder setKeyCode(int);
+  }
+
+  public class VirtualKeyboard implements java.io.Closeable {
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendKeyEvent(@NonNull android.hardware.input.VirtualKeyEvent);
+  }
+
+  public class VirtualMouse implements java.io.Closeable {
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendButtonEvent(@NonNull android.hardware.input.VirtualMouseButtonEvent);
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendRelativeEvent(@NonNull android.hardware.input.VirtualMouseRelativeEvent);
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendScrollEvent(@NonNull android.hardware.input.VirtualMouseScrollEvent);
+  }
+
+  public final class VirtualMouseButtonEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAction();
+    method public int getButtonCode();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACTION_BUTTON_PRESS = 11; // 0xb
+    field public static final int ACTION_BUTTON_RELEASE = 12; // 0xc
+    field public static final int BUTTON_BACK = 8; // 0x8
+    field public static final int BUTTON_FORWARD = 16; // 0x10
+    field public static final int BUTTON_PRIMARY = 1; // 0x1
+    field public static final int BUTTON_SECONDARY = 2; // 0x2
+    field public static final int BUTTON_TERTIARY = 4; // 0x4
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualMouseButtonEvent> CREATOR;
+  }
+
+  public static final class VirtualMouseButtonEvent.Builder {
+    ctor public VirtualMouseButtonEvent.Builder();
+    method @NonNull public android.hardware.input.VirtualMouseButtonEvent build();
+    method @NonNull public android.hardware.input.VirtualMouseButtonEvent.Builder setAction(int);
+    method @NonNull public android.hardware.input.VirtualMouseButtonEvent.Builder setButtonCode(int);
+  }
+
+  public final class VirtualMouseRelativeEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public float getRelativeX();
+    method public float getRelativeY();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualMouseRelativeEvent> CREATOR;
+  }
+
+  public static final class VirtualMouseRelativeEvent.Builder {
+    ctor public VirtualMouseRelativeEvent.Builder();
+    method @NonNull public android.hardware.input.VirtualMouseRelativeEvent build();
+    method @NonNull public android.hardware.input.VirtualMouseRelativeEvent.Builder setRelativeX(float);
+    method @NonNull public android.hardware.input.VirtualMouseRelativeEvent.Builder setRelativeY(float);
+  }
+
+  public final class VirtualMouseScrollEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public float getXAxisMovement();
+    method public float getYAxisMovement();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualMouseScrollEvent> CREATOR;
+  }
+
+  public static final class VirtualMouseScrollEvent.Builder {
+    ctor public VirtualMouseScrollEvent.Builder();
+    method @NonNull public android.hardware.input.VirtualMouseScrollEvent build();
+    method @NonNull public android.hardware.input.VirtualMouseScrollEvent.Builder setXAxisMovement(@FloatRange(from=-1.0F, to=1.0f) float);
+    method @NonNull public android.hardware.input.VirtualMouseScrollEvent.Builder setYAxisMovement(@FloatRange(from=-1.0F, to=1.0f) float);
+  }
+
+  public final class VirtualTouchEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAction();
+    method public float getMajorAxisSize();
+    method public int getPointerId();
+    method public float getPressure();
+    method public int getToolType();
+    method public float getX();
+    method public float getY();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACTION_CANCEL = 3; // 0x3
+    field public static final int ACTION_DOWN = 0; // 0x0
+    field public static final int ACTION_MOVE = 2; // 0x2
+    field public static final int ACTION_UP = 1; // 0x1
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualTouchEvent> CREATOR;
+    field public static final int TOOL_TYPE_FINGER = 1; // 0x1
+    field public static final int TOOL_TYPE_PALM = 5; // 0x5
+  }
+
+  public static final class VirtualTouchEvent.Builder {
+    ctor public VirtualTouchEvent.Builder();
+    method @NonNull public android.hardware.input.VirtualTouchEvent build();
+    method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setAction(int);
+    method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setMajorAxisSize(@FloatRange(from=0.0f) float);
+    method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setPointerId(int);
+    method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setPressure(@FloatRange(from=0.0f) float);
+    method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setToolType(int);
+    method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setX(float);
+    method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setY(float);
+  }
+
+  public class VirtualTouchscreen implements java.io.Closeable {
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendTouchEvent(@NonNull android.hardware.input.VirtualTouchEvent);
+  }
+
+}
+
 package android.hardware.lights {
 
   public final class LightState implements android.os.Parcelable {
