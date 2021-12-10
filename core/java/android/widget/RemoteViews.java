@@ -3696,18 +3696,21 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private void initializeFrom(@NonNull RemoteViews src, @Nullable RemoteViews hierarchyRoot) {
+        if (hierarchyRoot == null) {
+            mBitmapCache = src.mBitmapCache;
+            mApplicationInfoCache = src.mApplicationInfoCache;
+        } else {
+            mBitmapCache = hierarchyRoot.mBitmapCache;
+            mApplicationInfoCache = hierarchyRoot.mApplicationInfoCache;
+        }
         if (hierarchyRoot == null || src.mIsRoot) {
             // If there's no provided root, or if src was itself a root, then this RemoteViews is
             // the root of the new hierarchy.
             mIsRoot = true;
-            mBitmapCache = new BitmapCache();
-            mApplicationInfoCache = new ApplicationInfoCache();
             hierarchyRoot = this;
         } else {
             // Otherwise, we're a descendant in the hierarchy.
             mIsRoot = false;
-            mBitmapCache = hierarchyRoot.mBitmapCache;
-            mApplicationInfoCache = hierarchyRoot.mApplicationInfoCache;
         }
         mApplication = src.mApplication;
         mLayoutId = src.mLayoutId;

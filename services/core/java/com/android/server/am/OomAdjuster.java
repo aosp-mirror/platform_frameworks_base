@@ -1633,7 +1633,7 @@ public class OomAdjuster {
         int schedGroup;
         int procState;
         int cachedAdjSeq;
-        int capability = 0;
+        int capability = cycleReEval ? app.mState.getCurCapability() : 0;
 
         boolean foregroundActivities = false;
         boolean hasVisibleActivities = false;
@@ -2018,10 +2018,6 @@ public class OomAdjuster {
                     }
 
                     if ((cr.flags & Context.BIND_WAIVE_PRIORITY) == 0) {
-                        if (shouldSkipDueToCycle(app, cstate, procState, adj, cycleReEval)) {
-                            continue;
-                        }
-
                         if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
                             capability |= cstate.getCurCapability();
                         }
@@ -2040,6 +2036,10 @@ public class OomAdjuster {
                             } else {
                                 capability |= PROCESS_CAPABILITY_NETWORK;
                             }
+                        }
+
+                        if (shouldSkipDueToCycle(app, cstate, procState, adj, cycleReEval)) {
+                            continue;
                         }
 
                         if (clientProcState >= PROCESS_STATE_CACHED_ACTIVITY) {

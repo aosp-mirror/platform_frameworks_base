@@ -504,7 +504,27 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * Whether normal application switches are allowed; a call to {@link #stopAppSwitches()
      * disables this.
      */
-    private volatile boolean mAppSwitchesAllowed = true;
+    private volatile int mAppSwitchesState = APP_SWITCH_ALLOW;
+
+    // The duration of resuming foreground app switch from disallow.
+    private static final long RESUME_FG_APP_SWITCH_MS = 500;
+
+    /** App switch is not allowed. */
+    static final int APP_SWITCH_DISALLOW = 0;
+
+    /** App switch is allowed only if the activity launch was requested by a foreground app. */
+    static final int APP_SWITCH_FG_ONLY = 1;
+
+    /** App switch is allowed. */
+    static final int APP_SWITCH_ALLOW = 2;
+
+    @IntDef({
+            APP_SWITCH_DISALLOW,
+            APP_SWITCH_FG_ONLY,
+            APP_SWITCH_ALLOW,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface AppSwitchState {}
 
     /**
      * Last stop app switches time, apps finished before this time cannot start background activity
@@ -1247,7 +1267,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (topFocusedRootTask != null && topFocusedRootTask.getTopResumedActivity() != null
                     && topFocusedRootTask.getTopResumedActivity().info.applicationInfo.uid
                     == Binder.getCallingUid()) {
-                mAppSwitchesAllowed = true;
+                mAppSwitchesState = APP_SWITCH_ALLOW;
             }
         }
         return pir.sendInner(0, fillInIntent, resolvedType, allowlistToken, null, null,
@@ -2158,8 +2178,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /**
      * Return true if app switching is allowed.
      */
-    boolean getBalAppSwitchesAllowed() {
-        return mAppSwitchesAllowed;
+    @AppSwitchState int getBalAppSwitchesState() {
+        return mAppSwitchesState;
     }
 
     /** Register an {@link AnrController} to control the ANR dialog behavior */
@@ -3680,8 +3700,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void stopAppSwitches() {
         mAmInternal.enforceCallingPermission(STOP_APP_SWITCHES, "stopAppSwitches");
         synchronized (mGlobalLock) {
-            mAppSwitchesAllowed = false;
+            mAppSwitchesState = APP_SWITCH_DISALLOW;
             mLastStopAppSwitchesTime = SystemClock.uptimeMillis();
+            mH.removeMessages(H.RESUME_FG_APP_SWITCH_MSG);
+            mH.sendEmptyMessageDelayed(H.RESUME_FG_APP_SWITCH_MSG, RESUME_FG_APP_SWITCH_MS);
         }
     }
 
@@ -3689,7 +3711,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void resumeAppSwitches() {
         mAmInternal.enforceCallingPermission(STOP_APP_SWITCHES, "resumeAppSwitches");
         synchronized (mGlobalLock) {
-            mAppSwitchesAllowed = true;
+            mAppSwitchesState = APP_SWITCH_ALLOW;
+            mH.removeMessages(H.RESUME_FG_APP_SWITCH_MSG);
         }
     }
 
@@ -5170,6 +5193,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         static final int REPORT_TIME_TRACKER_MSG = 1;
         static final int UPDATE_PROCESS_ANIMATING_STATE = 2;
         static final int END_POWER_MODE_UNKNOWN_VISIBILITY_MSG = 3;
+        static final int RESUME_FG_APP_SWITCH_MSG = 4;
 
         static final int FIRST_ACTIVITY_TASK_MSG = 100;
         static final int FIRST_SUPERVISOR_TASK_MSG = 200;
@@ -5203,6 +5227,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             mTopApp.updateProcessInfo(false /* updateServiceConnection */,
                                     false /* activityChange */, true /* updateOomAdj */,
                                     false /* addPendingTopUid */);
+                        }
+                    }
+                }
+                break;
+                case RESUME_FG_APP_SWITCH_MSG: {
+                    synchronized (mGlobalLock) {
+                        if (mAppSwitchesState == APP_SWITCH_DISALLOW) {
+                            mAppSwitchesState = APP_SWITCH_FG_ONLY;
                         }
                     }
                 }
