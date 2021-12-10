@@ -110,7 +110,7 @@ public final class AudioDeviceAttributes implements Parcelable {
             mNativeType = AudioDeviceInfo.convertDeviceTypeToInternalDevice(type);
         } else if (role == ROLE_INPUT) {
             AudioDeviceInfo.enforceValidAudioDeviceTypeIn(type);
-            mNativeType = AudioDeviceInfo.convertDeviceTypeToInternalInputDevice(type);
+            mNativeType = AudioDeviceInfo.convertDeviceTypeToInternalInputDevice(type, address);
         } else {
             mNativeType = AudioSystem.DEVICE_NONE;
         }
