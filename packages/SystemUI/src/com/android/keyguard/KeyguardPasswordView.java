@@ -156,8 +156,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
         setAlpha(0f);
         animate()
             .alpha(1f)
-            .setDuration(500)
-            .setStartDelay(300)
+            .setDuration(300)
             .start();
 
         setTranslationY(0f);
@@ -217,15 +216,6 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                     }
                 });
         return true;
-    }
-
-
-    @Override
-    public void animateForIme(float interpolatedFraction, boolean appearingAnim) {
-        animate().cancel();
-        setAlpha(appearingAnim
-                ? Math.max(interpolatedFraction, getAlpha())
-                : 1 - interpolatedFraction);
     }
 
     @Override

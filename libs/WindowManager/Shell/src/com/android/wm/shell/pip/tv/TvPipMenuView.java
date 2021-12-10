@@ -24,9 +24,7 @@ import android.animation.Animator;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -55,13 +53,13 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private static final String TAG = "TvPipMenuView";
     private static final boolean DEBUG = TvPipController.DEBUG;
 
-    private static final float DISABLED_ACTION_ALPHA = 0.54f;
-
     private final Animator mFadeInAnimation;
     private final Animator mFadeOutAnimation;
-    @Nullable private Listener mListener;
+    @Nullable
+    private Listener mListener;
 
     private final LinearLayout mActionButtonsContainer;
+    private final View mMenuFrameView;
     private final List<TvPipMenuActionButton> mAdditionalButtons = new ArrayList<>();
 
     public TvPipMenuView(@NonNull Context context) {
@@ -88,11 +86,12 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         mActionButtonsContainer.findViewById(R.id.tv_pip_menu_close_button)
                 .setOnClickListener(this);
 
+        mMenuFrameView = findViewById(R.id.tv_pip_menu_frame);
         mFadeInAnimation = loadAnimator(mContext, R.anim.tv_pip_menu_fade_in_animation);
-        mFadeInAnimation.setTarget(mActionButtonsContainer);
+        mFadeInAnimation.setTarget(mMenuFrameView);
 
         mFadeOutAnimation = loadAnimator(mContext, R.anim.tv_pip_menu_fade_out_animation);
-        mFadeOutAnimation.setTarget(mActionButtonsContainer);
+        mFadeOutAnimation.setTarget(mMenuFrameView);
     }
 
     void setListener(@Nullable Listener listener) {
@@ -103,7 +102,6 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         if (DEBUG) Log.d(TAG, "show()");
 
         mFadeInAnimation.start();
-        setAlpha(1.0f);
         grantWindowFocus(true);
     }
 
@@ -111,12 +109,11 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         if (DEBUG) Log.d(TAG, "hide()");
 
         mFadeOutAnimation.start();
-        setAlpha(0.0f);
         grantWindowFocus(false);
     }
 
     boolean isVisible() {
-        return getAlpha() == 1.0f;
+        return mMenuFrameView != null && mMenuFrameView.getAlpha() != 0.0f;
     }
 
     private void grantWindowFocus(boolean grantFocus) {
@@ -140,9 +137,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
             final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
             // Add buttons until we have enough to display all of the actions.
             while (actionsNumber > buttonsNumber) {
-                final TvPipMenuActionButton button = (TvPipMenuActionButton) layoutInflater.inflate(
-                        R.layout.tv_pip_menu_additional_action_button, mActionButtonsContainer,
-                        false);
+                TvPipMenuActionButton button = new TvPipMenuActionButton(mContext);
                 button.setOnClickListener(this);
 
                 mActionButtonsContainer.addView(button);
@@ -168,13 +163,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
             button.setVisibility(View.VISIBLE); // Ensure the button is visible.
             button.setTextAndDescription(action.getContentDescription());
             button.setEnabled(action.isEnabled());
-            button.setAlpha(action.isEnabled() ? 1f : DISABLED_ACTION_ALPHA);
             button.setTag(action);
-
-            action.getIcon().loadDrawableAsync(mContext, drawable -> {
-                drawable.setTint(Color.WHITE);
-                button.setImageDrawable(drawable);
-            }, mainHandler);
+            action.getIcon().loadDrawableAsync(mContext, button::setImageDrawable, mainHandler);
         }
     }
 

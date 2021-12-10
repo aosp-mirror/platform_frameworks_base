@@ -35,6 +35,7 @@ interface NotifCoordinators : Coordinator, Dumpable
 class NotifCoordinatorsImpl @Inject constructor(
     dumpManager: DumpManager,
     notifPipelineFlags: NotifPipelineFlags,
+    dataStoreCoordinator: DataStoreCoordinator,
     hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
     hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
     keyguardCoordinator: KeyguardCoordinator,
@@ -44,10 +45,11 @@ class NotifCoordinatorsImpl @Inject constructor(
     bubbleCoordinator: BubbleCoordinator,
     headsUpCoordinator: HeadsUpCoordinator,
     gutsCoordinator: GutsCoordinator,
+    communalCoordinator: CommunalCoordinator,
     conversationCoordinator: ConversationCoordinator,
-    preparationCoordinator: PreparationCoordinator,
     groupCountCoordinator: GroupCountCoordinator,
     mediaCoordinator: MediaCoordinator,
+    preparationCoordinator: PreparationCoordinator,
     remoteInputCoordinator: RemoteInputCoordinator,
     rowAppearanceCoordinator: RowAppearanceCoordinator,
     stackCoordinator: StackCoordinator,
@@ -55,7 +57,6 @@ class NotifCoordinatorsImpl @Inject constructor(
     smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
     viewConfigCoordinator: ViewConfigCoordinator,
     visualStabilityCoordinator: VisualStabilityCoordinator,
-    communalCoordinator: CommunalCoordinator,
     sensitiveContentCoordinator: SensitiveContentCoordinator
 ) : NotifCoordinators {
 
@@ -67,6 +68,16 @@ class NotifCoordinatorsImpl @Inject constructor(
      */
     init {
         dumpManager.registerDumpable(TAG, this)
+
+        // TODO(b/208866714): formalize the system by which some coordinators may be required by the
+        //  pipeline, such as this DataStoreCoordinator which cannot be removed, as it's a critical
+        //  glue between the pipeline and parts of SystemUI which depend on pipeline output via the
+        //  NotifLiveDataStore.
+        if (notifPipelineFlags.isNewPipelineEnabled()) {
+            mCoordinators.add(dataStoreCoordinator)
+        }
+
+        // Attach normal coordinators.
         mCoordinators.add(hideLocallyDismissedNotifsCoordinator)
         mCoordinators.add(hideNotifsForOtherUsersCoordinator)
         mCoordinators.add(keyguardCoordinator)
@@ -74,6 +85,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(appOpsCoordinator)
         mCoordinators.add(deviceProvisionedCoordinator)
         mCoordinators.add(bubbleCoordinator)
+        mCoordinators.add(communalCoordinator)
         mCoordinators.add(conversationCoordinator)
         mCoordinators.add(groupCountCoordinator)
         mCoordinators.add(mediaCoordinator)
@@ -83,7 +95,6 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(shadeEventCoordinator)
         mCoordinators.add(viewConfigCoordinator)
         mCoordinators.add(visualStabilityCoordinator)
-        mCoordinators.add(communalCoordinator)
         mCoordinators.add(sensitiveContentCoordinator)
         if (notifPipelineFlags.isSmartspaceDedupingEnabled()) {
             mCoordinators.add(smartspaceDedupingCoordinator)

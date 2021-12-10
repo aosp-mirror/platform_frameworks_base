@@ -119,6 +119,7 @@ import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -274,6 +275,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     @Mock private ActivityLaunchAnimator mActivityLaunchAnimator;
     @Mock private NotifPipelineFlags mNotifPipelineFlags;
+    @Mock private NotifLiveDataStore mNotifLiveDataStore;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
@@ -306,6 +308,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationListener,
                 mUiBgExecutor,
                 mNotifPipelineFlags,
+                mNotifLiveDataStore,
                 mVisibilityProvider,
                 mock(NotificationEntryManager.class),
                 mock(NotifPipeline.class),

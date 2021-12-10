@@ -2342,6 +2342,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return true;
     }
 
+    @Override
+    boolean fillsParent() {
+        // From the perspective of policy, we still want to report that this task fills parent
+        // in fullscreen windowing mode even it doesn't match parent bounds because there will be
+        // letterbox around its real content.
+        return getWindowingMode() == WINDOWING_MODE_FULLSCREEN || matchParentBounds();
+    }
+
     boolean dump(String prefix, FileDescriptor fd, PrintWriter pw, boolean dumpAll,
             boolean dumpClient, String dumpPackage, final boolean needSep, Runnable header) {
         boolean printed = false;

@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Point;
 import android.hardware.SensorManager;
-import android.media.projection.IMediaProjection;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -379,31 +378,6 @@ public abstract class DisplayManagerInternal {
      * @param interactive The interactive state that the device is moving into.
      */
     public abstract void onEarlyInteractivityChange(boolean interactive);
-
-    /**
-     * A special API for creates a virtual display with a DisplayPolicyController in system_server.
-     * <p>
-     * If this method is called without original calling uid, the caller must enforce the
-     * corresponding permissions according to the flags.
-     *   {@link android.Manifest.permission#CAPTURE_VIDEO_OUTPUT}
-     *   {@link android.Manifest.permission#CAPTURE_SECURE_VIDEO_OUTPUT}
-     *   {@link android.Manifest.permission#ADD_TRUSTED_DISPLAY}
-     *   {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW}
-     * </p>
-     *
-     * @param virtualDisplayConfig The arguments for the virtual display configuration. See
-     *                             {@link VirtualDisplayConfig} for using it.
-     * @param callback Callback to call when the virtual display's state changes, or null if none.
-     * @param projection MediaProjection token.
-     * @param packageName The package name of the app.
-     * @param controller The DisplayWindowPolicyControl that can control what contents are
-     *                   allowed to be displayed.
-     * @return The newly created virtual display id , or {@link Display#INVALID_DISPLAY} if the
-     * virtual display cannot be created.
-     */
-    public abstract int createVirtualDisplay(VirtualDisplayConfig virtualDisplayConfig,
-            IVirtualDisplayCallback callback, IMediaProjection projection, String packageName,
-            DisplayWindowPolicyController controller);
 
     /**
      * Get {@link DisplayWindowPolicyController} associated to the {@link DisplayInfo#displayId}

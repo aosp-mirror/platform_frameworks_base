@@ -279,7 +279,7 @@ public class NetworkPriorityClassifierTest {
         final String networkPriorityPlmnId = useMatchedPlmnId ? PLMN_ID : PLMN_ID_OTHER;
         final VcnCellUnderlyingNetworkPriority networkPriority =
                 getCellNetworkPriorityBuilder()
-                        .setAllowedPlmnIds(Set.of(networkPriorityPlmnId))
+                        .setAllowedOperatorPlmnIds(Set.of(networkPriorityPlmnId))
                         .build();
 
         assertEquals(

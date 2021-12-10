@@ -18,35 +18,54 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:id="@+id/tv_pip_menu"
              android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:background="#CC000000">
+             android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/tv_pip_menu_action_buttons"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="350dp"
-        android:orientation="horizontal"
-        android:alpha="0">
+    <FrameLayout
+        android:id="@+id/tv_pip_menu_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0" >
 
-        <com.android.wm.shell.pip.tv.TvPipMenuActionButton
-            android:id="@+id/tv_pip_menu_fullscreen_button"
-            android:layout_width="@dimen/picture_in_picture_button_width"
-            android:layout_height="wrap_content"
-            android:src="@drawable/pip_ic_fullscreen_white"
-            android:text="@string/pip_fullscreen" />
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:scrollbars="none"
+            android:requiresFadingEdge="vertical"
+            android:fadingEdgeLength="30dp">
 
-        <com.android.wm.shell.pip.tv.TvPipMenuActionButton
-            android:id="@+id/tv_pip_menu_close_button"
-            android:layout_width="@dimen/picture_in_picture_button_width"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/picture_in_picture_button_start_margin"
-            android:src="@drawable/pip_ic_close_white"
-            android:text="@string/pip_close" />
+            <LinearLayout
+                android:id="@+id/tv_pip_menu_action_buttons"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingStart="@dimen/pip_menu_button_wrapper_margin"
+                android:paddingEnd="@dimen/pip_menu_button_wrapper_margin"
+                android:gravity="center"
+                android:orientation="horizontal">
 
-        <!-- More TvPipMenuActionButtons may be added here at runtime. -->
+                <com.android.wm.shell.pip.tv.TvPipMenuActionButton
+                    android:id="@+id/tv_pip_menu_fullscreen_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/pip_ic_fullscreen_white"
+                    android:text="@string/pip_fullscreen" />
 
-    </LinearLayout>
+                <com.android.wm.shell.pip.tv.TvPipMenuActionButton
+                    android:id="@+id/tv_pip_menu_close_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/pip_ic_close_white"
+                    android:text="@string/pip_close" />
 
+                <!-- More TvPipMenuActionButtons may be added here at runtime. -->
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/tv_pip_menu_border"/>
+    </FrameLayout>
 </FrameLayout>

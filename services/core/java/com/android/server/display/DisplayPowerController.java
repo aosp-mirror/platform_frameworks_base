@@ -386,18 +386,19 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private Sensor mLightSensor;
 
-    // The mapper between ambient lux, display backlight values, and display brightness.
-    // This mapper holds the current one that is being used. We will switch between the idle
-    // mapper and active mapper here.
-    @Nullable
-    private BrightnessMappingStrategy mCurrentBrightnessMapper;
-
+    // The mappers between ambient lux, display backlight values, and display brightness.
+    // We will switch between the idle mapper and active mapper in AutomaticBrightnessController.
     // Mapper used for active (normal) screen brightness mode
     @Nullable
     private BrightnessMappingStrategy mInteractiveModeBrightnessMapper;
     // Mapper used for idle screen brightness mode
     @Nullable
     private BrightnessMappingStrategy mIdleModeBrightnessMapper;
+
+    // If these are both true, and mIdleModeBrightnessMapper != null,
+    // then we are in idle screen brightness mode.
+    private boolean mIsDreaming;
+    private boolean mIsDocked;
 
     // The current brightness configuration.
     @Nullable
@@ -610,8 +611,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void handleRbcChanged(boolean strengthChanged, boolean justActivated) {
-        if (mCurrentBrightnessMapper == null) {
-            Log.w(TAG, "No brightness mapping available to recalculate splines");
+        if (mAutomaticBrightnessController == null) {
+            return;
+        }
+        if ((!mAutomaticBrightnessController.isInIdleMode()
+                && mInteractiveModeBrightnessMapper == null)
+                || (mAutomaticBrightnessController.isInIdleMode()
+                && mIdleModeBrightnessMapper == null)) {
+            Log.w(TAG, "No brightness mapping available to recalculate splines for this mode");
             return;
         }
 
@@ -619,7 +626,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         for (int i = 0; i < mNitsRange.length; i++) {
             adjustedNits[i] = mCdsi.getReduceBrightColorsAdjustedBrightnessNits(mNitsRange[i]);
         }
-        mCurrentBrightnessMapper.recalculateSplines(mCdsi.isReduceBrightColorsActivated(),
+        mAutomaticBrightnessController.recalculateSplines(mCdsi.isReduceBrightColorsActivated(),
                 adjustedNits);
 
         mPendingRbcOnOrChanged = strengthChanged || justActivated;
@@ -886,9 +893,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mIdleModeBrightnessMapper = BrightnessMappingStrategy.createForIdleMode(resources,
                     mDisplayDeviceConfig);
         }
-        mCurrentBrightnessMapper = mInteractiveModeBrightnessMapper;
 
-        if (mCurrentBrightnessMapper != null) {
+        if (mInteractiveModeBrightnessMapper != null) {
             final float dozeScaleFactor = resources.getFraction(
                     com.android.internal.R.fraction.config_screenAutoBrightnessDozeScaleFactor,
                     1, 1);
@@ -939,12 +945,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mAutomaticBrightnessController.stop();
             }
             mAutomaticBrightnessController = new AutomaticBrightnessController(this,
-                    handler.getLooper(), mSensorManager, mLightSensor, mCurrentBrightnessMapper,
-                    lightSensorWarmUpTimeConfig, PowerManager.BRIGHTNESS_MIN,
-                    PowerManager.BRIGHTNESS_MAX, dozeScaleFactor, lightSensorRate,
-                    initialLightSensorRate, brighteningLightDebounce, darkeningLightDebounce,
-                    autoBrightnessResetAmbientLuxAfterWarmUp, ambientBrightnessThresholds,
-                    screenBrightnessThresholds, mContext, mHbmController);
+                    handler.getLooper(), mSensorManager, mLightSensor,
+                    mInteractiveModeBrightnessMapper, lightSensorWarmUpTimeConfig,
+                    PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, dozeScaleFactor,
+                    lightSensorRate, initialLightSensorRate, brighteningLightDebounce,
+                    darkeningLightDebounce, autoBrightnessResetAmbientLuxAfterWarmUp,
+                    ambientBrightnessThresholds, screenBrightnessThresholds, mContext,
+                    mHbmController, mIdleModeBrightnessMapper);
         } else {
             mUseSoftwareAutoBrightnessConfig = false;
         }
@@ -971,6 +978,16 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mCdsi != null && mCdsi.isReduceBrightColorsActivated()) {
             applyReduceBrightColorsSplineAdjustment(
                     /* rbcStrengthChanged= */ false, /* justActivated= */ false);
+        }
+    }
+
+    public void setAutomaticScreenBrightnessMode(boolean isIdle) {
+        if (mAutomaticBrightnessController != null) {
+            if (isIdle) {
+                mAutomaticBrightnessController.switchToIdleMode();
+            } else {
+                mAutomaticBrightnessController.switchToInteractiveScreenBrightnessMode();
+            }
         }
     }
 
@@ -1422,9 +1439,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 }
             }
 
-            if (!brightnessIsTemporary) {
+            // Report brightness to brightnesstracker:
+            // If brightness is not temporary (ie the slider has been released)
+            // AND if we are not in idle screen brightness mode.
+            if (!brightnessIsTemporary
+                    && (mAutomaticBrightnessController != null
+                            && !mAutomaticBrightnessController.isInIdleMode())) {
                 if (userInitiatedChange && (mAutomaticBrightnessController == null
-                        || !mAutomaticBrightnessController.hasValidAmbientLux())) {
+                            || !mAutomaticBrightnessController.hasValidAmbientLux())) {
                     // If we don't have a valid lux reading we can't report a valid
                     // slider event so notify as if the system changed the brightness.
                     userInitiatedChange = false;
@@ -2162,11 +2184,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private float convertToNits(float brightness) {
-        if (mCurrentBrightnessMapper != null) {
-            return mCurrentBrightnessMapper.convertToNits(brightness);
-        } else {
-            return -1.0f;
+        if (mAutomaticBrightnessController == null) {
+            return -1f;
         }
+        return mAutomaticBrightnessController.convertToNits(brightness);
     }
 
     private void updatePendingProximityRequestsLocked() {
@@ -2314,11 +2335,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mPendingScreenOff=" + mPendingScreenOff);
         pw.println("  mReportedToPolicy=" +
                 reportedToPolicyToString(mReportedScreenStateToPolicy));
-
-        if (mIdleModeBrightnessMapper != null) {
-            pw.println("  mIdleModeBrightnessMapper= ");
-            mIdleModeBrightnessMapper.dump(pw);
-        }
 
         if (mScreenBrightnessRampAnimator != null) {
             pw.println("  mScreenBrightnessRampAnimator.isAnimating()=" +

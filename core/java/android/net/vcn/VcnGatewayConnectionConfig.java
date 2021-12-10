@@ -198,7 +198,10 @@ public final class VcnGatewayConnectionConfig {
     private static final String EXPOSED_CAPABILITIES_KEY = "mExposedCapabilities";
     @NonNull private final SortedSet<Integer> mExposedCapabilities;
 
-    private static final String UNDERLYING_NETWORK_PRIORITIES_KEY = "mUnderlyingNetworkPriorities";
+    /** @hide */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static final String UNDERLYING_NETWORK_PRIORITIES_KEY = "mUnderlyingNetworkPriorities";
+
     @NonNull private final LinkedHashSet<VcnUnderlyingNetworkPriority> mUnderlyingNetworkPriorities;
 
     private static final String MAX_MTU_KEY = "mMaxMtu";
@@ -229,6 +232,8 @@ public final class VcnGatewayConnectionConfig {
         validate();
     }
 
+    // Null check MUST be done for all new fields added to VcnGatewayConnectionConfig, to avoid
+    // crashes when parsing PersistableBundle built on old platforms.
     /** @hide */
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public VcnGatewayConnectionConfig(@NonNull PersistableBundle in) {
@@ -239,19 +244,30 @@ public final class VcnGatewayConnectionConfig {
 
         final PersistableBundle exposedCapsBundle =
                 in.getPersistableBundle(EXPOSED_CAPABILITIES_KEY);
-        final PersistableBundle networkPrioritiesBundle =
-                in.getPersistableBundle(UNDERLYING_NETWORK_PRIORITIES_KEY);
-
         mGatewayConnectionName = in.getString(GATEWAY_CONNECTION_NAME_KEY);
         mTunnelConnectionParams =
                 TunnelConnectionParamsUtils.fromPersistableBundle(tunnelConnectionParamsBundle);
         mExposedCapabilities = new TreeSet<>(PersistableBundleUtils.toList(
                 exposedCapsBundle, PersistableBundleUtils.INTEGER_DESERIALIZER));
-        mUnderlyingNetworkPriorities =
-                new LinkedHashSet<>(
-                        PersistableBundleUtils.toList(
-                                networkPrioritiesBundle,
-                                VcnUnderlyingNetworkPriority::fromPersistableBundle));
+
+        final PersistableBundle networkPrioritiesBundle =
+                in.getPersistableBundle(UNDERLYING_NETWORK_PRIORITIES_KEY);
+
+        if (networkPrioritiesBundle == null) {
+            // UNDERLYING_NETWORK_PRIORITIES_KEY was added in Android T. Thus
+            // VcnGatewayConnectionConfig created on old platforms will not have this data and will
+            // be assigned with the default value
+            mUnderlyingNetworkPriorities =
+                    new LinkedHashSet<>(DEFAULT_UNDERLYING_NETWORK_PRIORITIES);
+
+        } else {
+            mUnderlyingNetworkPriorities =
+                    new LinkedHashSet<>(
+                            PersistableBundleUtils.toList(
+                                    networkPrioritiesBundle,
+                                    VcnUnderlyingNetworkPriority::fromPersistableBundle));
+        }
+
         mRetryIntervalsMs = in.getLongArray(RETRY_INTERVAL_MS_KEY);
         mMaxMtu = in.getInt(MAX_MTU_KEY);
 
@@ -420,6 +436,7 @@ public final class VcnGatewayConnectionConfig {
                 mGatewayConnectionName,
                 mTunnelConnectionParams,
                 mExposedCapabilities,
+                mUnderlyingNetworkPriorities,
                 Arrays.hashCode(mRetryIntervalsMs),
                 mMaxMtu);
     }
@@ -434,6 +451,7 @@ public final class VcnGatewayConnectionConfig {
         return mGatewayConnectionName.equals(rhs.mGatewayConnectionName)
                 && mTunnelConnectionParams.equals(rhs.mTunnelConnectionParams)
                 && mExposedCapabilities.equals(rhs.mExposedCapabilities)
+                && mUnderlyingNetworkPriorities.equals(rhs.mUnderlyingNetworkPriorities)
                 && Arrays.equals(mRetryIntervalsMs, rhs.mRetryIntervalsMs)
                 && mMaxMtu == rhs.mMaxMtu;
     }

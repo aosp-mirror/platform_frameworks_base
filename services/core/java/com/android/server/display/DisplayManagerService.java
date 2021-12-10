@@ -42,6 +42,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.compat.CompatChanges;
+import android.companion.virtual.IVirtualDevice;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.Context;
@@ -126,6 +127,7 @@ import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.display.DisplayDeviceConfig.SensorData;
 import com.android.server.display.utils.SensorUtils;
 import com.android.server.wm.SurfaceAnimationThread;
@@ -244,9 +246,12 @@ public final class DisplayManagerService extends SystemService {
     public final SparseArray<CallbackRecord> mCallbacks =
             new SparseArray<CallbackRecord>();
 
-    /** All {@link DisplayWindowPolicyController}s indexed by {@link DisplayInfo#displayId}. */
-    final SparseArray<DisplayWindowPolicyController> mDisplayWindowPolicyController =
-            new SparseArray<>();
+    /**
+     *  All {@link IVirtualDevice} and {@link DisplayWindowPolicyController}s indexed by
+     *  {@link DisplayInfo#displayId}.
+     */
+    final SparseArray<Pair<IVirtualDevice, DisplayWindowPolicyController>>
+            mDisplayWindowPolicyControllers = new SparseArray<>();
 
     // List of all currently registered display adapters.
     private final ArrayList<DisplayAdapter> mDisplayAdapters = new ArrayList<DisplayAdapter>();
@@ -1180,8 +1185,8 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private int createVirtualDisplayInternal(VirtualDisplayConfig virtualDisplayConfig,
-            IVirtualDisplayCallback callback, IMediaProjection projection, String packageName,
-            DisplayWindowPolicyController controller) {
+            IVirtualDisplayCallback callback, IMediaProjection projection,
+            IVirtualDevice virtualDevice, String packageName) {
         final int callingUid = Binder.getCallingUid();
         if (!validatePackageName(callingUid, packageName)) {
             throw new SecurityException("packageName must match the calling uid");
@@ -1223,6 +1228,14 @@ public final class DisplayManagerService extends SystemService {
                 flags = projection.applyVirtualDisplayFlags(flags);
             } catch (RemoteException e) {
                 throw new SecurityException("unable to validate media projection or flags");
+            }
+        }
+
+        if (virtualDevice != null) {
+            final VirtualDeviceManagerInternal vdm =
+                    getLocalService(VirtualDeviceManagerInternal.class);
+            if (!vdm.isValidVirtualDevice(virtualDevice)) {
+                throw new SecurityException("Invalid virtual device");
             }
         }
 
@@ -1306,8 +1319,8 @@ public final class DisplayManagerService extends SystemService {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
-                return createVirtualDisplayLocked(callback, projection, callingUid, packageName,
-                        surface, flags, virtualDisplayConfig, controller);
+                return createVirtualDisplayLocked(callback, projection, virtualDevice, callingUid,
+                        packageName, surface, flags, virtualDisplayConfig);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -1315,9 +1328,9 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private int createVirtualDisplayLocked(IVirtualDisplayCallback callback,
-            IMediaProjection projection, int callingUid, String packageName, Surface surface,
-            int flags, VirtualDisplayConfig virtualDisplayConfig,
-            DisplayWindowPolicyController controller) {
+            IMediaProjection projection, IVirtualDevice virtualDevice,
+            int callingUid, String packageName, Surface surface,
+            int flags, VirtualDisplayConfig virtualDisplayConfig) {
         if (mVirtualDisplayAdapter == null) {
             Slog.w(TAG, "Rejecting request to create private virtual display "
                     + "because the virtual display adapter is not available.");
@@ -1344,10 +1357,16 @@ public final class DisplayManagerService extends SystemService {
 
         final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(device);
         if (display != null) {
-            if (controller != null) {
-                mDisplayWindowPolicyController.put(display.getDisplayIdLocked(), controller);
+            final int displayId = display.getDisplayIdLocked();
+            if (virtualDevice != null) {
+                final VirtualDeviceManagerInternal vdm =
+                        getLocalService(VirtualDeviceManagerInternal.class);
+                final DisplayWindowPolicyController controller =
+                        vdm.onVirtualDisplayCreated(virtualDevice, displayId);
+                mDisplayWindowPolicyControllers.put(displayId,
+                        Pair.create(virtualDevice, controller));
             }
-            return display.getDisplayIdLocked();
+            return displayId;
         }
 
         // Something weird happened and the logical display was not created.
@@ -1391,7 +1410,13 @@ public final class DisplayManagerService extends SystemService {
             if (device != null) {
                 final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(device);
                 if (display != null) {
-                    mDisplayWindowPolicyController.delete(display.getDisplayIdLocked());
+                    final int displayId = display.getDisplayIdLocked();
+                    if (mDisplayWindowPolicyControllers.contains(displayId)) {
+                        Pair<IVirtualDevice, DisplayWindowPolicyController> pair =
+                                mDisplayWindowPolicyControllers.removeReturnOld(displayId);
+                        getLocalService(VirtualDeviceManagerInternal.class)
+                                .onVirtualDisplayRemoved(pair.first, displayId);
+                    }
                 }
                 // TODO: multi-display - handle virtual displays the same as other display adapters.
                 mDisplayDeviceRepo.onDisplayDeviceEvent(device,
@@ -2345,13 +2370,13 @@ public final class DisplayManagerService extends SystemService {
             pw.println();
             mPersistentDataStore.dump(pw);
 
-            final int displayWindowPolicyControllerCount = mDisplayWindowPolicyController.size();
+            final int displayWindowPolicyControllerCount = mDisplayWindowPolicyControllers.size();
             pw.println();
             pw.println("Display Window Policy Controllers: size="
                     + displayWindowPolicyControllerCount);
             for (int i = 0; i < displayWindowPolicyControllerCount; i++) {
-                pw.print("Display " + mDisplayWindowPolicyController.keyAt(i) + ":");
-                mDisplayWindowPolicyController.valueAt(i).dump("  ", pw);
+                pw.print("Display " + mDisplayWindowPolicyControllers.keyAt(i) + ":");
+                mDisplayWindowPolicyControllers.valueAt(i).second.dump("  ", pw);
             }
         }
         pw.println();
@@ -2922,9 +2947,10 @@ public final class DisplayManagerService extends SystemService {
 
         @Override // Binder call
         public int createVirtualDisplay(VirtualDisplayConfig virtualDisplayConfig,
-                IVirtualDisplayCallback callback, IMediaProjection projection, String packageName) {
+                IVirtualDisplayCallback callback, IMediaProjection projection,
+                IVirtualDevice virtualDeviceToken, String packageName) {
             return createVirtualDisplayInternal(virtualDisplayConfig, callback, projection,
-                    packageName, null /* controller */);
+                    virtualDeviceToken, packageName);
         }
 
         @Override // Binder call
@@ -3690,17 +3716,12 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public int createVirtualDisplay(VirtualDisplayConfig virtualDisplayConfig,
-                IVirtualDisplayCallback callback, IMediaProjection projection, String packageName,
-                DisplayWindowPolicyController controller) {
-            return createVirtualDisplayInternal(virtualDisplayConfig, callback, projection,
-                    packageName, controller);
-        }
-
-        @Override
         public DisplayWindowPolicyController getDisplayWindowPolicyController(int displayId) {
             synchronized (mSyncRoot) {
-                return mDisplayWindowPolicyController.get(displayId);
+                if (mDisplayWindowPolicyControllers.contains(displayId)) {
+                    return mDisplayWindowPolicyControllers.get(displayId).second;
+                }
+                return null;
             }
         }
     }

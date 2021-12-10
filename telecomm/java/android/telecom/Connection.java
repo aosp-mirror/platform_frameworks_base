@@ -837,6 +837,17 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.extra.AUDIO_CODEC_BANDWIDTH_KHZ";
 
     /**
+     * Last known cell identity key to be used to fill geo location header in case of an emergency
+     * call. This entry will not be filled if call is not identified as an emergency call.
+     * {@link Connection}. Only provided to the {@link ConnectionService} for the purpose
+     * of placing an emergency call; will not be present in the {@link InCallService} layer.
+     * The {@link ConnectionService}'s implementation will be logged for fine location access
+     * when an outgoing call is placed in this case.
+     */
+    public static final String EXTRA_LAST_KNOWN_CELL_IDENTITY =
+            "android.telecom.extra.LAST_KNOWN_CELL_IDENTITY";
+
+    /**
      * Boolean connection extra key used to indicate whether device to device communication is
      * available for the current call.
      * @hide

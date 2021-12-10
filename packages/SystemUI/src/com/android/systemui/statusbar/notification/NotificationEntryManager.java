@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
+import com.android.systemui.statusbar.notification.collection.NotifLiveDataStoreImpl;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.legacy.LegacyNotificationRanker;
@@ -107,6 +108,7 @@ public class NotificationEntryManager implements
     private final LeakDetector mLeakDetector;
     private final ForegroundServiceDismissalFeatureController mFgsFeatureController;
     private final IStatusBarService mStatusBarService;
+    private final NotifLiveDataStoreImpl mNotifLiveDataStore;
     private final DumpManager mDumpManager;
 
     private final Set<NotificationEntry> mAllNotifications = new ArraySet<>();
@@ -154,6 +156,7 @@ public class NotificationEntryManager implements
             LeakDetector leakDetector,
             ForegroundServiceDismissalFeatureController fgsFeatureController,
             IStatusBarService statusBarService,
+            NotifLiveDataStoreImpl notifLiveDataStore,
             DumpManager dumpManager
     ) {
         mLogger = logger;
@@ -164,6 +167,7 @@ public class NotificationEntryManager implements
         mLeakDetector = leakDetector;
         mFgsFeatureController = fgsFeatureController;
         mStatusBarService = statusBarService;
+        mNotifLiveDataStore = notifLiveDataStore;
         mDumpManager = dumpManager;
     }
 
@@ -725,9 +729,10 @@ public class NotificationEntryManager implements
             return;
         }
         reapplyFilterAndSort(reason);
-        if (mPresenter != null && !mNotifPipelineFlags.isNewPipelineEnabled()) {
+        if (mPresenter != null) {
             mPresenter.updateNotificationViews(reason);
         }
+        mNotifLiveDataStore.setActiveNotifList(getVisibleNotifications());
     }
 
     public void updateNotificationRanking(RankingMap rankingMap) {

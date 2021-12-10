@@ -16,12 +16,17 @@
 
 package android.app.communal;
 
+import android.app.communal.ICommunalModeListener;
+
 /**
  * System private API for talking with the communal manager service that handles communal mode
  * state.
  *
  * @hide
  */
-oneway interface ICommunalManager {
-    void setCommunalViewShowing(boolean isShowing);
+interface ICommunalManager {
+    oneway void setCommunalViewShowing(boolean isShowing);
+    boolean isCommunalMode();
+    void addCommunalModeListener(in ICommunalModeListener listener);
+    void removeCommunalModeListener(in ICommunalModeListener listener);
 }

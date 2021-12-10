@@ -1374,18 +1374,18 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Returns if the activity should never be sandboxed to the activity window bounds.
      * @hide
      */
-    public boolean neverSandboxDisplayApis() {
+    public boolean neverSandboxDisplayApis(ConstrainDisplayApisConfig constrainDisplayApisConfig) {
         return isChangeEnabled(NEVER_SANDBOX_DISPLAY_APIS)
-                || ConstrainDisplayApisConfig.neverConstrainDisplayApis(applicationInfo);
+                || constrainDisplayApisConfig.getNeverConstrainDisplayApis(applicationInfo);
     }
 
     /**
      * Returns if the activity should always be sandboxed to the activity window bounds.
      * @hide
      */
-    public boolean alwaysSandboxDisplayApis() {
+    public boolean alwaysSandboxDisplayApis(ConstrainDisplayApisConfig constrainDisplayApisConfig) {
         return isChangeEnabled(ALWAYS_SANDBOX_DISPLAY_APIS)
-                || ConstrainDisplayApisConfig.alwaysConstrainDisplayApis(applicationInfo);
+                || constrainDisplayApisConfig.getAlwaysConstrainDisplayApis(applicationInfo);
     }
 
     /** @hide */

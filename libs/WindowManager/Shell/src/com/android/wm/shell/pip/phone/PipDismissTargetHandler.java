@@ -122,7 +122,7 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
 
         if (mTargetViewContainer != null) {
             // init can be called multiple times, remove the old one from view hierarchy first.
-            mWindowManager.removeViewImmediate(mTargetViewContainer);
+            cleanUpDismissTarget();
         }
 
         mTargetView = new DismissCircleView(mContext);

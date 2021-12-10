@@ -3267,6 +3267,8 @@
     <public name="config_systemSupervision" />
     <!-- @hide @SystemApi -->
     <public name="config_deviceManager" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemAppProtectionService" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01db0000">

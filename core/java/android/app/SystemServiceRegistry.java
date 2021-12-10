@@ -1513,7 +1513,7 @@ public final class SystemServiceRegistry {
                     }
                 });
 
-        registerService(Context.COMMUNAL_MANAGER_SERVICE, CommunalManager.class,
+        registerService(Context.COMMUNAL_SERVICE, CommunalManager.class,
                 new CachedServiceFetcher<CommunalManager>() {
                     @Override
                     public CommunalManager createService(ContextImpl ctx) {
@@ -1522,7 +1522,7 @@ public final class SystemServiceRegistry {
                             return null;
                         }
                         IBinder iBinder =
-                                ServiceManager.getService(Context.COMMUNAL_MANAGER_SERVICE);
+                                ServiceManager.getService(Context.COMMUNAL_SERVICE);
                         return iBinder != null ? new CommunalManager(
                                 ICommunalManager.Stub.asInterface(iBinder)) : null;
                     }

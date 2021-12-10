@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.flags;
+package android.app.communal;
 
 /**
- * Class to manage simple DeviceConfig-based feature flags.
+ * System private API to be notified about communal mode changes.
  *
- * See {@link Flags} for instructions on defining new flags.
+ * @hide
  */
-public interface FeatureFlags extends FlagReader {
+oneway interface ICommunalModeListener {
+    void onCommunalModeChanged(boolean isCommunalMode);
 }

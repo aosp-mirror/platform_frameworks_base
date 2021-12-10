@@ -836,6 +836,11 @@ public class UserSwitcherController implements Dumpable {
         mRootView = notificationShadeWindowView;
     }
 
+    @VisibleForTesting
+    public KeyguardStateController getKeyguardStateController() {
+        return mKeyguardStateController;
+    }
+
     public static abstract class BaseUserAdapter extends BaseAdapter {
 
         final UserSwitcherController mController;
@@ -843,7 +848,7 @@ public class UserSwitcherController implements Dumpable {
 
         protected BaseUserAdapter(UserSwitcherController controller) {
             mController = controller;
-            mKeyguardStateController = controller.mKeyguardStateController;
+            mKeyguardStateController = controller.getKeyguardStateController();
             controller.addAdapter(new WeakReference<>(this));
         }
 
@@ -1161,7 +1166,7 @@ public class UserSwitcherController implements Dumpable {
                     ? com.android.settingslib.R.string.guest_reset_guest_dialog_title
                     : R.string.guest_exit_guest_dialog_title);
             setMessage(context.getString(R.string.guest_exit_guest_dialog_message));
-            setButton(DialogInterface.BUTTON_NEGATIVE,
+            setButton(DialogInterface.BUTTON_NEUTRAL,
                     context.getString(android.R.string.cancel), this);
             setButton(DialogInterface.BUTTON_POSITIVE,
                     context.getString(mGuestUserAutoCreated
@@ -1180,7 +1185,7 @@ public class UserSwitcherController implements Dumpable {
             if (mFalsingManager.isFalseTap(penalty)) {
                 return;
             }
-            if (which == BUTTON_NEGATIVE) {
+            if (which == BUTTON_NEUTRAL) {
                 cancel();
             } else {
                 mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE);
@@ -1198,7 +1203,7 @@ public class UserSwitcherController implements Dumpable {
             super(context);
             setTitle(R.string.user_add_user_title);
             setMessage(context.getString(R.string.user_add_user_message_short));
-            setButton(DialogInterface.BUTTON_NEGATIVE,
+            setButton(DialogInterface.BUTTON_NEUTRAL,
                     context.getString(android.R.string.cancel), this);
             setButton(DialogInterface.BUTTON_POSITIVE,
                     context.getString(android.R.string.ok), this);
@@ -1212,7 +1217,7 @@ public class UserSwitcherController implements Dumpable {
             if (mFalsingManager.isFalseTap(penalty)) {
                 return;
             }
-            if (which == BUTTON_NEGATIVE) {
+            if (which == BUTTON_NEUTRAL) {
                 cancel();
             } else {
                 mDialogLaunchAnimator.dismissStack(this);

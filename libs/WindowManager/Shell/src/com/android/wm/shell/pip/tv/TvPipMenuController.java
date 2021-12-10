@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceControl;
@@ -122,19 +123,19 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         if (DEBUG) Log.d(TAG, "showMenu()");
 
         if (mMenuView != null) {
-            mSystemWindows.updateViewLayout(mMenuView, getPipMenuLayoutParams(MENU_WINDOW_TITLE,
-                    mPipBoundsState.getDisplayBounds().width(),
-                    mPipBoundsState.getDisplayBounds().height()));
+            Rect pipBounds = mPipBoundsState.getBounds();
+            mSystemWindows.updateViewLayout(mMenuView, getPipMenuLayoutParams(
+                    MENU_WINDOW_TITLE, pipBounds.width(), pipBounds.height()));
             maybeUpdateMenuViewActions();
-            mMenuView.show();
 
-            // By default, SystemWindows views are above everything else.
-            // Set the relative z-order so the menu is below PiP.
-            if (mMenuView.getWindowSurfaceControl() != null && mLeash != null) {
+            SurfaceControl menuSurfaceControl = mSystemWindows.getViewSurface(mMenuView);
+            if (menuSurfaceControl != null) {
                 SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                t.setRelativeLayer(mMenuView.getWindowSurfaceControl(), mLeash, -1);
+                t.setRelativeLayer(mMenuView.getWindowSurfaceControl(), mLeash, 1);
+                t.setPosition(menuSurfaceControl, pipBounds.left, pipBounds.top);
                 t.apply();
             }
+            mMenuView.show();
         }
     }
 
@@ -181,7 +182,15 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     private void onMediaActionsChanged(List<RemoteAction> actions) {
         if (DEBUG) Log.d(TAG, "onMediaActionsChanged()");
-        updateAdditionalActionsList(mMediaActions, actions);
+
+        // Hide disabled actions.
+        List<RemoteAction> enabledActions = new ArrayList<>();
+        for (RemoteAction remoteAction : actions) {
+            if (remoteAction.isEnabled()) {
+                enabledActions.add(remoteAction);
+            }
+        }
+        updateAdditionalActionsList(mMediaActions, enabledActions);
     }
 
     private void updateAdditionalActionsList(

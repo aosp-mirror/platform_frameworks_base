@@ -224,6 +224,7 @@ package android {
     field public static final String READ_APP_SPECIFIC_LOCALES = "android.permission.READ_APP_SPECIFIC_LOCALES";
     field public static final String READ_CARRIER_APP_INFO = "android.permission.READ_CARRIER_APP_INFO";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
+    field public static final String READ_COMMUNAL_STATE = "android.permission.READ_COMMUNAL_STATE";
     field public static final String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
     field public static final String READ_DEVICE_CONFIG = "android.permission.READ_DEVICE_CONFIG";
     field public static final String READ_DREAM_STATE = "android.permission.READ_DREAM_STATE";
@@ -393,6 +394,7 @@ package android {
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
     field public static final int config_systemActivityRecognizer = 17039416; // 0x1040038
     field public static final int config_systemAmbientAudioIntelligence = 17039411; // 0x1040033
+    field public static final int config_systemAppProtectionService;
     field public static final int config_systemAudioIntelligence = 17039412; // 0x1040034
     field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
     field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
@@ -1305,6 +1307,20 @@ package android.app.backup {
     ctor public SelectBackupTransportCallback();
     method public void onFailure(int);
     method public void onSuccess(String);
+  }
+
+}
+
+package android.app.communal {
+
+  public final class CommunalManager {
+    method @RequiresPermission(android.Manifest.permission.READ_COMMUNAL_STATE) public void addCommunalModeListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.communal.CommunalManager.CommunalModeListener);
+    method @RequiresPermission(android.Manifest.permission.READ_COMMUNAL_STATE) public boolean isCommunalMode();
+    method @RequiresPermission(android.Manifest.permission.READ_COMMUNAL_STATE) public void removeCommunalModeListener(@NonNull android.app.communal.CommunalManager.CommunalModeListener);
+  }
+
+  @java.lang.FunctionalInterface public static interface CommunalManager.CommunalModeListener {
+    method public void onCommunalModeChanged(boolean);
   }
 
 }
@@ -2491,6 +2507,7 @@ package android.content {
     field public static final String BATTERY_STATS_SERVICE = "batterystats";
     field @Deprecated public static final int BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS = 1048576; // 0x100000
     field public static final int BIND_ALLOW_FOREGROUND_SERVICE_STARTS_FROM_BACKGROUND = 262144; // 0x40000
+    field public static final String COMMUNAL_SERVICE = "communal";
     field public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
     field public static final String CONTEXTHUB_SERVICE = "contexthub";
     field public static final String ETHERNET_SERVICE = "ethernet";

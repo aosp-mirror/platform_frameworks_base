@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone
 
 import android.view.View
 import androidx.constraintlayout.motion.widget.MotionLayout
+import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
@@ -49,7 +50,7 @@ class SplitShadeHeaderController @Inject constructor(
 
     private val combinedHeaders = featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)
     // TODO(b/194178072) Handle RSSI hiding when multi carrier
-    private val iconManager: StatusBarIconController.IconManager
+    private val iconManager: StatusBarIconController.TintedIconManager
     private val qsCarrierGroupController: QSCarrierGroupController
     private var visible = false
         set(value) {
@@ -117,7 +118,9 @@ class SplitShadeHeaderController @Inject constructor(
         batteryIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
 
         val iconContainer: StatusIconContainer = statusBar.findViewById(R.id.statusIcons)
-        iconManager = StatusBarIconController.IconManager(iconContainer, featureFlags)
+        iconManager = StatusBarIconController.TintedIconManager(iconContainer, featureFlags)
+        iconManager.setTint(Utils.getColorAttrDefaultColor(statusBar.context,
+                android.R.attr.textColorPrimary))
         qsCarrierGroupController = qsCarrierGroupControllerBuilder
                 .setQSCarrierGroup(statusBar.findViewById(R.id.carrier_group))
                 .build()

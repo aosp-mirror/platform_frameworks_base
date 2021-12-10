@@ -1098,8 +1098,6 @@
     <dimen name="media_output_dialog_header_icon_padding">16dp</dimen>
     <dimen name="media_output_dialog_icon_corner_radius">16dp</dimen>
     <dimen name="media_output_dialog_title_anim_y_delta">12.5dp</dimen>
-    <dimen name="media_output_dialog_button_padding_horizontal">16dp</dimen>
-    <dimen name="media_output_dialog_button_padding_vertical">8dp</dimen>
 
     <!-- Distance that the full shade transition takes in order for qs to fully transition to the
          shade -->

@@ -135,7 +135,7 @@ public abstract class BrightnessMappingStrategy {
             builder.setShortTermModelLowerLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             builder.setShortTermModelUpperLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             return new PhysicalMappingStrategy(builder.build(), nitsRange, brightnessRange,
-                    autoBrightnessAdjustmentMaxGamma);
+                    autoBrightnessAdjustmentMaxGamma, isForIdleMode);
         } else if (isValidMapping(luxLevels, brightnessLevelsBacklight) && !isForIdleMode) {
             return new SimpleMappingStrategy(luxLevels, brightnessLevelsBacklight,
                     autoBrightnessAdjustmentMaxGamma, shortTermModelTimeout);
@@ -353,6 +353,12 @@ public abstract class BrightnessMappingStrategy {
     public abstract long getShortTermModelTimeout();
 
     public abstract void dump(PrintWriter pw);
+
+    /**
+     * We can designate a mapping strategy to be used for idle screen brightness mode.
+     * @return whether this mapping strategy is to be used for idle screen brightness mode.
+     */
+    public abstract boolean isForIdleMode();
 
     /**
      * Check if the short term model should be reset given the anchor lux the last
@@ -711,6 +717,11 @@ public abstract class BrightnessMappingStrategy {
             pw.println("  mUserBrightness=" + mUserBrightness);
         }
 
+        @Override
+        public boolean isForIdleMode() {
+            return false;
+        }
+
         private void computeSpline() {
             Pair<float[], float[]> curve = getAdjustedCurve(mLux, mBrightness, mUserLux,
                     mUserBrightness, mAutoBrightnessAdjustment, mMaxGamma);
@@ -758,9 +769,10 @@ public abstract class BrightnessMappingStrategy {
         private float mAutoBrightnessAdjustment;
         private float mUserLux;
         private float mUserBrightness;
+        private final boolean mIsForIdleMode;
 
         public PhysicalMappingStrategy(BrightnessConfiguration config, float[] nits,
-                float[] brightness, float maxGamma) {
+                float[] brightness, float maxGamma, boolean isForIdleMode) {
 
             Preconditions.checkArgument(nits.length != 0 && brightness.length != 0,
                     "Nits and brightness arrays must not be empty!");
@@ -772,6 +784,7 @@ public abstract class BrightnessMappingStrategy {
             Preconditions.checkArrayElementsInRange(brightness,
                     PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, "brightness");
 
+            mIsForIdleMode = isForIdleMode;
             mMaxGamma = maxGamma;
             mAutoBrightnessAdjustment = 0;
             mUserLux = -1;
@@ -931,6 +944,11 @@ public abstract class BrightnessMappingStrategy {
             pw.println("  mUserBrightness=" + mUserBrightness);
             pw.println("  mDefaultConfig=" + mDefaultConfig);
             pw.println("  mBrightnessRangeAdjustmentApplied=" + mBrightnessRangeAdjustmentApplied);
+        }
+
+        @Override
+        public boolean isForIdleMode() {
+            return mIsForIdleMode;
         }
 
         private void computeNitsBrightnessSplines(float[] nits) {

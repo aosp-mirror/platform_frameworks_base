@@ -2715,9 +2715,6 @@ public class StatusBar extends CoreStartable implements
             mStatusBarWindowController.refreshStatusBarHeight();
         }
 
-        if (mStatusBarView != null) {
-            mStatusBarView.updateResources();
-        }
         if (mNotificationPanelViewController != null) {
             mNotificationPanelViewController.updateResources();
         }
@@ -4192,7 +4189,7 @@ public class StatusBar extends CoreStartable implements
 
             if (userSetup != mUserSetup) {
                 mUserSetup = userSetup;
-                if (!mUserSetup && mStatusBarView != null) {
+                if (!mUserSetup) {
                     animateCollapseQuickSettings();
                 }
                 if (mNotificationPanelViewController != null) {
@@ -4307,7 +4304,7 @@ public class StatusBar extends CoreStartable implements
                     updateTheme();
                     mNavigationBarController.touchAutoDim(mDisplayId);
                     Trace.beginSection("StatusBar#updateKeyguardState");
-                    if (mState == StatusBarState.KEYGUARD && mStatusBarView != null) {
+                    if (mState == StatusBarState.KEYGUARD) {
                         mNotificationPanelViewController.cancelPendingPanelCollapse();
                     }
                     updateDozingState();

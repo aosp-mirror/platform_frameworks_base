@@ -15,12 +15,14 @@
  */
 package com.android.systemui.statusbar.phone
 
+import android.content.res.Configuration
 import android.graphics.Point
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import com.android.systemui.R
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.UNFOLD_STATUS_BAR
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
@@ -35,8 +37,15 @@ class PhoneStatusBarViewController private constructor(
     view: PhoneStatusBarView,
     @Named(UNFOLD_STATUS_BAR) private val progressProvider: ScopedUnfoldTransitionProgressProvider?,
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
-    touchEventHandler: PhoneStatusBarView.TouchEventHandler
+    touchEventHandler: PhoneStatusBarView.TouchEventHandler,
+    private val configurationController: ConfigurationController
 ) : ViewController<PhoneStatusBarView>(view) {
+
+    private val configurationListener = object : ConfigurationController.ConfigurationListener {
+        override fun onConfigChanged(newConfig: Configuration?) {
+            mView.updateResources()
+        }
+    }
 
     override fun onViewAttached() {
         moveFromCenterAnimationController?.let { animationController ->
@@ -66,11 +75,13 @@ class PhoneStatusBarViewController private constructor(
         }
 
         progressProvider?.setReadyToHandleTransition(true)
+        configurationController.addCallback(configurationListener)
     }
 
     override fun onViewDetached() {
         progressProvider?.setReadyToHandleTransition(false)
         moveFromCenterAnimationController?.onViewDetached()
+        configurationController.removeCallback(configurationListener)
     }
 
     init {
@@ -116,7 +127,8 @@ class PhoneStatusBarViewController private constructor(
     class Factory @Inject constructor(
         private val unfoldComponent: Optional<SysUIUnfoldComponent>,
         @Named(UNFOLD_STATUS_BAR)
-        private val progressProvider: Optional<ScopedUnfoldTransitionProgressProvider>
+        private val progressProvider: Optional<ScopedUnfoldTransitionProgressProvider>,
+        private val configurationController: ConfigurationController
     ) {
         fun create(
             view: PhoneStatusBarView,
@@ -128,7 +140,8 @@ class PhoneStatusBarViewController private constructor(
                 unfoldComponent.map {
                     it.getStatusBarMoveFromCenterAnimationController()
                 }.getOrNull(),
-                touchEventHandler
+                touchEventHandler,
+                configurationController
             )
     }
 }

@@ -2736,7 +2736,7 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     @Override
-    public void onListRebuilt(ResolverListAdapter listAdapter) {
+    public void onListRebuilt(ResolverListAdapter listAdapter, boolean rebuildComplete) {
         setupScrollListener();
         maybeSetupGlobalLayoutListener();
 
@@ -2756,15 +2756,20 @@ public class ChooserActivity extends ResolverActivity implements
             chooserListAdapter.updateAlphabeticalList();
         }
 
+        if (rebuildComplete) {
+            getChooserActivityLogger().logSharesheetAppLoadComplete();
+            maybeQueryAdditionalPostProcessingTargets(chooserListAdapter);
+        }
+    }
+
+    private void maybeQueryAdditionalPostProcessingTargets(ChooserListAdapter chooserListAdapter) {
         // don't support direct share on low ram devices
         if (ActivityManager.isLowRamDeviceStatic()) {
-            getChooserActivityLogger().logSharesheetAppLoadComplete();
             return;
         }
 
         // no need to query direct share for work profile when its locked or disabled
         if (!shouldQueryShortcutManager(chooserListAdapter.getUserHandle())) {
-            getChooserActivityLogger().logSharesheetAppLoadComplete();
             return;
         }
 
@@ -2775,8 +2780,6 @@ public class ChooserActivity extends ResolverActivity implements
 
             queryDirectShareTargets(chooserListAdapter, false);
         }
-
-        getChooserActivityLogger().logSharesheetAppLoadComplete();
     }
 
     @VisibleForTesting

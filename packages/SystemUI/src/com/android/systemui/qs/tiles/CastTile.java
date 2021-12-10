@@ -402,11 +402,12 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 // if we are connected, simply show that device
                 for (CastDevice device : devices) {
                     if (device.state == CastDevice.STATE_CONNECTED) {
-                        final Item item = new Item();
-                        item.iconResId = R.drawable.ic_cast_connected;
-                        item.line1 = getDeviceName(device);
+                        final Item item =
+                                new Item(
+                                        R.drawable.ic_cast_connected,
+                                        getDeviceName(device),
+                                        device);
                         item.line2 = mContext.getString(R.string.quick_settings_connected);
-                        item.tag = device;
                         item.canDisconnect = true;
                         items = new Item[] { item };
                         break;
@@ -422,13 +423,11 @@ public class CastTile extends QSTileImpl<BooleanState> {
                     for (String id : mVisibleOrder.keySet()) {
                         final CastDevice device = mVisibleOrder.get(id);
                         if (!devices.contains(device)) continue;
-                        final Item item = new Item();
-                        item.iconResId = R.drawable.ic_cast;
-                        item.line1 = getDeviceName(device);
+                        final Item item =
+                                new Item(R.drawable.ic_cast, getDeviceName(device), device);
                         if (device.state == CastDevice.STATE_CONNECTING) {
                             item.line2 = mContext.getString(R.string.quick_settings_connecting);
                         }
-                        item.tag = device;
                         items[i++] = item;
                     }
                 }

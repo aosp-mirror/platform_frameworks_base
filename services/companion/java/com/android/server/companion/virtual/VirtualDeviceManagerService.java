@@ -16,6 +16,9 @@
 
 package com.android.server.companion.virtual;
 
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -31,6 +34,7 @@ import android.os.RemoteException;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.window.DisplayWindowPolicyController;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
@@ -38,11 +42,11 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-/** @hide */
 @SuppressLint("LongLogTag")
 public class VirtualDeviceManagerService extends SystemService {
 
@@ -81,6 +85,16 @@ public class VirtualDeviceManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.VIRTUAL_DEVICE_SERVICE, mImpl);
+        publishLocalService(VirtualDeviceManagerInternal.class, new LocalService());
+    }
+
+    @GuardedBy("mVirtualDeviceManagerLock")
+    private boolean isValidVirtualDeviceLocked(IVirtualDevice virtualDevice) {
+        try {
+            return mVirtualDevices.contains(virtualDevice.getAssociationId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @Override
@@ -119,9 +133,15 @@ public class VirtualDeviceManagerService extends SystemService {
     private class VirtualDeviceImpl extends IVirtualDevice.Stub implements IBinder.DeathRecipient {
 
         private final AssociationInfo mAssociationInfo;
+        private final int mOwnerUid;
+        private final GenericWindowPolicyController mGenericWindowPolicyController;
+        private final ArrayList<Integer> mDisplayIds = new ArrayList<>();
 
-        private VirtualDeviceImpl(IBinder token, AssociationInfo associationInfo) {
+        private VirtualDeviceImpl(int ownerUid, IBinder token, AssociationInfo associationInfo) {
+            mOwnerUid = ownerUid;
             mAssociationInfo = associationInfo;
+            mGenericWindowPolicyController = new GenericWindowPolicyController(FLAG_SECURE,
+                    SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
             try {
                 token.linkToDeath(this, 0);
             } catch (RemoteException e) {
@@ -146,6 +166,23 @@ public class VirtualDeviceManagerService extends SystemService {
         public void binderDied() {
             close();
         }
+
+        DisplayWindowPolicyController onVirtualDisplayCreatedLocked(int displayId) {
+            if (mDisplayIds.contains(displayId)) {
+                throw new IllegalStateException(
+                        "Virtual device already have a virtual display with ID " + displayId);
+            }
+            mDisplayIds.add(displayId);
+            return mGenericWindowPolicyController;
+        }
+
+        void onVirtualDisplayRemovedLocked(int displayId) {
+            if (!mDisplayIds.contains(displayId)) {
+                throw new IllegalStateException(
+                        "Virtual device doesn't have a virtual display with ID " + displayId);
+            }
+            mDisplayIds.remove(displayId);
+        }
     }
 
     class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub {
@@ -156,10 +193,11 @@ public class VirtualDeviceManagerService extends SystemService {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                     "createVirtualDevice");
-            if (!PermissionUtils.validatePackageName(getContext(), packageName, getCallingUid())) {
+            final int callingUid = getCallingUid();
+            if (!PermissionUtils.validatePackageName(getContext(), packageName, callingUid)) {
                 throw new SecurityException(
                         "Package name " + packageName + " does not belong to calling uid "
-                                + getCallingUid());
+                                + callingUid);
             }
             AssociationInfo associationInfo = getAssociationInfo(packageName, associationId);
             if (associationInfo == null) {
@@ -171,7 +209,7 @@ public class VirtualDeviceManagerService extends SystemService {
                             "Virtual device for association ID " + associationId
                                     + " already exists");
                 }
-                return new VirtualDeviceImpl(token, associationInfo);
+                return new VirtualDeviceImpl(callingUid, token, associationInfo);
             }
         }
 
@@ -220,6 +258,50 @@ public class VirtualDeviceManagerService extends SystemService {
                     fout.printf("%d: %s\n", mVirtualDevices.keyAt(i), virtualDevice);
                 }
             }
+        }
+    }
+
+    private final class LocalService extends VirtualDeviceManagerInternal {
+
+        @Override
+        public boolean isValidVirtualDevice(IVirtualDevice virtualDevice) {
+            synchronized (mVirtualDeviceManagerLock) {
+                return isValidVirtualDeviceLocked(virtualDevice);
+            }
+        }
+
+        @Override
+        public DisplayWindowPolicyController onVirtualDisplayCreated(IVirtualDevice virtualDevice,
+                int displayId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                return ((VirtualDeviceImpl) virtualDevice).onVirtualDisplayCreatedLocked(displayId);
+            }
+        }
+
+        @Override
+        public void onVirtualDisplayRemoved(IVirtualDevice virtualDevice, int displayId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                ((VirtualDeviceImpl) virtualDevice).onVirtualDisplayRemovedLocked(displayId);
+            }
+        }
+
+        @Override
+        public boolean isAppOwnerOfAnyVirtualDevice(int uid) {
+            synchronized (mVirtualDeviceManagerLock) {
+                int size = mVirtualDevices.size();
+                for (int i = 0; i < size; i++) {
+                    if (mVirtualDevices.valueAt(i).mOwnerUid == uid) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        @Override
+        public boolean isAppRunningOnAnyVirtualDevice(int uid) {
+            // TODO(yukl): Implement this using DWPC.onRunningAppsChanged
+            return false;
         }
     }
 }
