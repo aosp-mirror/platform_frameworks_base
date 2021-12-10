@@ -8649,10 +8649,10 @@ package android.bluetooth {
     method public android.bluetooth.BluetoothDevice getRemoteDevice(byte[]);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public int getScanMode();
     method public int getState();
-    method public int isCisCentralSupported();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public boolean isDiscovering();
     method public boolean isEnabled();
     method public boolean isLe2MPhySupported();
+    method public int isLeAudioSupported();
     method public boolean isLeCodedPhySupported();
     method public boolean isLeExtendedAdvertisingSupported();
     method public boolean isLePeriodicAdvertisingSupported();
