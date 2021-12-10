@@ -728,9 +728,9 @@ class MediaDataManager(
                     PlaybackState.ACTION_SKIP_TO_NEXT)
 
             // Then, check for custom actions
-            val customActions = MutableList<MediaAction?>(4) { null }
+            val customActions = MutableList<MediaAction?>(MAX_CUSTOM_ACTIONS) { null }
             var customCount = 0
-            for (i in 0..MAX_CUSTOM_ACTIONS) {
+            for (i in 0..(MAX_CUSTOM_ACTIONS - 1)) {
                 getCustomAction(state, packageName, controller, customCount)?.let {
                     customActions[customCount++] = it
                 }
