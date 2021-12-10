@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.server.net;
+package android.net;
 
-import android.net.NetworkIdentity;
+import static android.net.ConnectivityManager.TYPE_MOBILE;
+
 import android.service.NetworkIdentitySetProto;
 import android.util.proto.ProtoOutputStream;
 
@@ -24,8 +25,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashSet;
-
-import static android.net.ConnectivityManager.TYPE_MOBILE;
 
 /**
  * Identity of a {@code iface}, defined by the set of {@link NetworkIdentity}
@@ -97,6 +96,9 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
         }
     }
 
+    /**
+     * Method to serialize this object into a {@code DataOutput}.
+     */
     public void writeToStream(DataOutput out) throws IOException {
         out.writeInt(VERSION_ADD_OEM_MANAGED_NETWORK);
         out.writeInt(size());
@@ -179,6 +181,9 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
         return ident.compareTo(anotherIdent);
     }
 
+    /**
+     * Method to dump this object into proto debug file.
+     */
     public void dumpDebug(ProtoOutputStream proto, long tag) {
         final long start = proto.start(tag);
 

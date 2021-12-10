@@ -21,8 +21,11 @@ import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.text.format.DateUtils.YEAR_IN_MILLIS;
 
+import android.net.NetworkIdentitySet;
 import android.net.NetworkStats;
 import android.net.NetworkStats.NonMonotonicObserver;
+import android.net.NetworkStatsAccess;
+import android.net.NetworkStatsCollection;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
