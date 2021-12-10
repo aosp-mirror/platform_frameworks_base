@@ -1148,6 +1148,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int versionCode;
 
     /**
+     * The timestamp of when this ApplicationInfo was created.
+     * @hide
+     */
+    public long createTimestamp;
+
+    /**
      * The user-visible SDK version (ex. 26) of the framework against which the application claims
      * to have been compiled, or {@code 0} if not specified.
      * <p>
@@ -1639,6 +1645,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                         + requestRawExternalStorageAccess);
             }
         }
+        pw.println(prefix + "createTimestamp=" + createTimestamp);
         super.dumpBack(pw, prefix);
     }
 
@@ -1796,6 +1803,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     public ApplicationInfo() {
+        createTimestamp = System.currentTimeMillis();
     }
     
     public ApplicationInfo(ApplicationInfo orig) {
@@ -1867,6 +1875,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         memtagMode = orig.memtagMode;
         nativeHeapZeroInitialized = orig.nativeHeapZeroInitialized;
         requestRawExternalStorageAccess = orig.requestRawExternalStorageAccess;
+        createTimestamp = System.currentTimeMillis();
     }
 
     public String toString() {
@@ -1957,6 +1966,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(memtagMode);
         dest.writeInt(nativeHeapZeroInitialized);
         sForBoolean.parcel(requestRawExternalStorageAccess, dest, parcelableFlags);
+        dest.writeLong(createTimestamp);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ApplicationInfo> CREATOR
@@ -2044,6 +2054,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         memtagMode = source.readInt();
         nativeHeapZeroInitialized = source.readInt();
         requestRawExternalStorageAccess = sForBoolean.unparcel(source);
+        createTimestamp = source.readLong();
     }
 
     /**
