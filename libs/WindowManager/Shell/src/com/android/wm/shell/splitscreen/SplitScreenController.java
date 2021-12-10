@@ -102,6 +102,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     static final int EXIT_REASON_ROOT_TASK_VANISHED = 6;
     static final int EXIT_REASON_SCREEN_LOCKED = 7;
     static final int EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP = 8;
+    static final int EXIT_REASON_CHILD_TASK_ENTER_PIP = 9;
     @IntDef(value = {
             EXIT_REASON_UNKNOWN,
             EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW,
@@ -112,6 +113,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             EXIT_REASON_ROOT_TASK_VANISHED,
             EXIT_REASON_SCREEN_LOCKED,
             EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP,
+            EXIT_REASON_CHILD_TASK_ENTER_PIP,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ExitReason{}
@@ -406,6 +408,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 return "APP_FINISHED";
             case EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW:
                 return "APP_DOES_NOT_SUPPORT_MULTIWINDOW";
+            case EXIT_REASON_CHILD_TASK_ENTER_PIP:
+                return "CHILD_TASK_ENTER_PIP";
             default:
                 return "unknown reason, reason int = " + exitReason;
         }
