@@ -320,7 +320,7 @@ public class InternetDialog extends SystemUIDialog implements
 
         showProgressBar();
         final boolean isDeviceLocked = mInternetDialogController.isDeviceLocked();
-        final boolean isWifiEnabled = mWifiManager.isWifiEnabled();
+        final boolean isWifiEnabled = mWifiManager != null && mWifiManager.isWifiEnabled();
         final boolean isWifiScanEnabled = mInternetDialogController.isWifiScanEnabled();
         updateWifiToggle(isWifiEnabled, isDeviceLocked);
         updateConnectedWifi(isWifiEnabled, isDeviceLocked);
@@ -350,6 +350,7 @@ public class InternetDialog extends SystemUIDialog implements
         mSeeAllLayout.setOnClickListener(v -> onClickSeeMoreButton());
         mWiFiToggle.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {
+                    if (mWifiManager == null) return;
                     buttonView.setChecked(isChecked);
                     mWifiManager.setWifiEnabled(isChecked);
                 });
@@ -375,8 +376,9 @@ public class InternetDialog extends SystemUIDialog implements
             Log.d(TAG, "setMobileDataLayout, isCarrierNetworkActive = " + isCarrierNetworkActive);
         }
 
+        boolean isWifiEnabled = mWifiManager != null && mWifiManager.isWifiEnabled();
         if (!mInternetDialogController.hasActiveSubId()
-                && (!mWifiManager.isWifiEnabled() || !isCarrierNetworkActive)) {
+                && (!isWifiEnabled || !isCarrierNetworkActive)) {
             mMobileNetworkLayout.setVisibility(View.GONE);
         } else {
             mMobileNetworkLayout.setVisibility(View.VISIBLE);

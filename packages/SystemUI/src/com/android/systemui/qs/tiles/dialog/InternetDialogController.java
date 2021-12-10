@@ -826,7 +826,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         if (!mLocationController.isLocationEnabled()) {
             return false;
         }
-        return mWifiManager.isScanAlwaysAvailable();
+        return mWifiManager != null && mWifiManager.isScanAlwaysAvailable();
     }
 
     static class WifiEntryConnectCallback implements WifiEntry.ConnectCallback {
