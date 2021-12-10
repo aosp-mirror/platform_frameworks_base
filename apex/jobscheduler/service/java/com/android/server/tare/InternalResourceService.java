@@ -567,20 +567,23 @@ public class InternalResourceService extends SystemService {
         final String pkgName = event.getPackageName();
         if (DEBUG) {
             Slog.d(TAG, "Processing event " + event.getEventType()
+                    + " (" + event.mInstanceId + ")"
                     + " for " + appToString(userId, pkgName));
         }
         final long nowElapsed = SystemClock.elapsedRealtime();
         switch (event.getEventType()) {
             case UsageEvents.Event.ACTIVITY_RESUMED:
                 mAgent.noteOngoingEventLocked(userId, pkgName,
-                        EconomicPolicy.REWARD_TOP_ACTIVITY, null, nowElapsed);
+                        EconomicPolicy.REWARD_TOP_ACTIVITY, String.valueOf(event.mInstanceId),
+                        nowElapsed);
                 break;
             case UsageEvents.Event.ACTIVITY_PAUSED:
             case UsageEvents.Event.ACTIVITY_STOPPED:
             case UsageEvents.Event.ACTIVITY_DESTROYED:
                 final long now = getCurrentTimeMillis();
                 mAgent.stopOngoingActionLocked(userId, pkgName,
-                        EconomicPolicy.REWARD_TOP_ACTIVITY, null, nowElapsed, now);
+                        EconomicPolicy.REWARD_TOP_ACTIVITY, String.valueOf(event.mInstanceId),
+                        nowElapsed, now);
                 break;
             case UsageEvents.Event.USER_INTERACTION:
             case UsageEvents.Event.CHOOSER_ACTION:
