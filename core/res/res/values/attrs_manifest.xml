@@ -2808,6 +2808,22 @@
         <attr name="attributionTags" />
     </declare-styleable>
 
+    <!-- @hide The <code>apex-system-service</code> tag declares an apex system service
+         that is contained within an application.
+
+         The apex system service tag appears as a child tag of the
+         {@link #AndroidManifestApplication application} tag. -->
+    <declare-styleable name="AndroidManifestApexSystemService"
+                       parent="AndroidManifestApplication">
+        <!-- The fully qualified class name of the system service. -->
+        <attr name="name" />
+        <!-- The filepath to the .jar that contains the system service. If this is not provided, it
+             is assumed that the system service exists in SYSTEMSERVERCLASSPATH. -->
+        <attr name="path" />
+        <attr name="minSdkVersion" />
+        <attr name="maxSdkVersion" />
+    </declare-styleable>
+
     <!-- The <code>receiver</code> tag declares an
          {@link android.content.BroadcastReceiver} class that is available
          as part of the package's application components, allowing the
@@ -3051,6 +3067,7 @@
     <declare-styleable name="AndroidManifestMetaData"
          parent="AndroidManifestApplication
                  AndroidManifestActivity
+                 AndroidManifestApexSystemService
                  AndroidManifestReceiver
                  AndroidManifestProvider
                  AndroidManifestService
@@ -3085,6 +3102,7 @@
     <declare-styleable name="AndroidManifestProperty"
          parent="AndroidManifestApplication
                  AndroidManifestActivity
+                 AndroidManifestApexSystemService
                  AndroidManifestReceiver
                  AndroidManifestProvider
                  AndroidManifestService">

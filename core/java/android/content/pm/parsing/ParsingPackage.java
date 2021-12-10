@@ -27,6 +27,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedApexSystemService;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
@@ -55,6 +56,8 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage addActivity(ParsedActivity parsedActivity);
 
     ParsingPackage addAdoptPermission(String adoptPermission);
+
+    ParsingPackage addApexSystemService(ParsedApexSystemService parsedApexSystemService);
 
     ParsingPackage addConfigPreference(ConfigurationInfo configPreference);
 

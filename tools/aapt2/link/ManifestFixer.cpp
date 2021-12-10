@@ -544,6 +544,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   application_action["activity-alias"] = component_action;
   application_action["service"] = component_action;
   application_action["receiver"] = component_action;
+  application_action["apex-system-service"] = component_action;
 
   // Provider actions.
   application_action["provider"] = component_action;
