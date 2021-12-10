@@ -19,6 +19,8 @@ import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
+import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
+
 import static java.lang.Integer.max;
 
 import android.animation.Animator;
@@ -71,7 +73,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdapter;
@@ -124,7 +126,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
     @VisibleForTesting
     KeyguardSecurityViewFlipper mSecurityViewFlipper;
     private GlobalSettings mGlobalSettings;
-    private FalsingCollector mFalsingCollector;
+    private FalsingManager mFalsingManager;
     private UserSwitcherController mUserSwitcherController;
     private AlertDialog mAlertDialog;
     private boolean mSwipeUpToRetry;
@@ -300,7 +302,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         setupViewMode();
     }
 
-    void initMode(@Mode int mode, GlobalSettings globalSettings, FalsingCollector falsingCollector,
+    void initMode(@Mode int mode, GlobalSettings globalSettings, FalsingManager falsingManager,
             UserSwitcherController userSwitcherController) {
         if (mCurrentMode == mode) return;
         Log.i(TAG, "Switching mode from " + modeToString(mCurrentMode) + " to "
@@ -318,7 +320,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mViewMode = new DefaultViewMode();
         }
         mGlobalSettings = globalSettings;
-        mFalsingCollector = falsingCollector;
+        mFalsingManager = falsingManager;
         mUserSwitcherController = userSwitcherController;
         setupViewMode();
     }
@@ -338,11 +340,11 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
     private void setupViewMode() {
         if (mSecurityViewFlipper == null || mGlobalSettings == null
-                || mFalsingCollector == null || mUserSwitcherController == null) {
+                || mFalsingManager == null || mUserSwitcherController == null) {
             return;
         }
 
-        mViewMode.init(this, mGlobalSettings, mSecurityViewFlipper, mFalsingCollector,
+        mViewMode.init(this, mGlobalSettings, mSecurityViewFlipper, mFalsingManager,
                 mUserSwitcherController);
     }
 
@@ -695,7 +697,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
         default void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
-                @NonNull FalsingCollector falsingCollector,
+                @NonNull FalsingManager falsingManager,
                 @NonNull UserSwitcherController userSwitcherController) {};
 
         /** Reinitialize the location */
@@ -732,7 +734,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         @Override
         public void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
-                @NonNull FalsingCollector falsingCollector,
+                @NonNull FalsingManager falsingManager,
                 @NonNull UserSwitcherController userSwitcherController) {
             mView = v;
             mViewFlipper = viewFlipper;
@@ -760,18 +762,18 @@ public class KeyguardSecurityContainer extends FrameLayout {
         private KeyguardSecurityViewFlipper mViewFlipper;
         private ImageView mUserIconView;
         private TextView mUserSwitcher;
-        private FalsingCollector mFalsingCollector;
+        private FalsingManager mFalsingManager;
         private UserSwitcherController mUserSwitcherController;
         private KeyguardUserSwitcherPopupMenu mPopup;
 
         @Override
         public void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
-                @NonNull FalsingCollector falsingCollector,
+                @NonNull FalsingManager falsingManager,
                 @NonNull UserSwitcherController userSwitcherController) {
             mView = v;
             mViewFlipper = viewFlipper;
-            mFalsingCollector = falsingCollector;
+            mFalsingManager = falsingManager;
             mUserSwitcherController = userSwitcherController;
 
             if (mUserSwitcherViewGroup == null) {
@@ -865,30 +867,26 @@ public class KeyguardSecurityContainer extends FrameLayout {
             }
 
             anchor.setClickable(true);
-            anchor.setOnTouchListener((v, ev) -> {
-                if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                    mFalsingCollector.avoidGesture();
-                    mPopup = new KeyguardUserSwitcherPopupMenu(v.getContext(),
-                            mFalsingCollector);
-                    mPopup.setAnchorView(anchor);
-                    mPopup.setAdapter(adapter);
-                    mPopup.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            public void onItemClick(AdapterView parent, View view, int pos,
-                                    long id) {
-                                mFalsingCollector.avoidGesture();
+            anchor.setOnClickListener((v) -> {
+                if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
 
-                                // - 1 to account for the header view
-                                UserRecord user = adapter.getItem(pos - 1);
-                                if (!user.isCurrent) {
-                                    adapter.onUserListItemClicked(user);
-                                }
-                                mPopup.dismiss();
-                                mPopup = null;
+                mPopup = new KeyguardUserSwitcherPopupMenu(v.getContext(), mFalsingManager);
+                mPopup.setAnchorView(anchor);
+                mPopup.setAdapter(adapter);
+                mPopup.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        public void onItemClick(AdapterView parent, View view, int pos, long id) {
+                            if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
+
+                            // - 1 to account for the header view
+                            UserRecord user = adapter.getItem(pos - 1);
+                            if (!user.isCurrent) {
+                                adapter.onUserListItemClicked(user);
                             }
-                        });
-                    mPopup.show();
-                }
-                return true;
+                            mPopup.dismiss();
+                            mPopup = null;
+                        }
+                    });
+                mPopup.show();
             });
         }
 
@@ -935,7 +933,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         @Override
         public void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
-                @NonNull FalsingCollector falsingCollector,
+                @NonNull FalsingManager falsingManager,
                 @NonNull UserSwitcherController userSwitcherController) {
             mView = v;
             mViewFlipper = viewFlipper;
