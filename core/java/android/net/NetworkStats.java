@@ -220,8 +220,10 @@ public final class NetworkStats implements Parcelable {
     // TODO: move fields to "mVariable" notation
 
     /**
-     * {@link SystemClock#elapsedRealtime()} timestamp when this data was
+     * {@link SystemClock#elapsedRealtime()} timestamp in milliseconds when this data was
      * generated.
+     * It's a timestamps delta when {@link #subtract()},
+     * {@code INetworkStatsSession#getSummaryForAllUid()} methods are used.
      */
     private long elapsedRealtime;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
