@@ -156,11 +156,11 @@ public class CpuPowerCalculator extends PowerCalculator {
     private void calculateMeasuredPowerPerProcessState(UidBatteryConsumer.Builder app,
             BatteryStats.Uid u, BatteryConsumer.Key[] keys) {
         for (BatteryConsumer.Key key : keys) {
-            // The key for "PROCESS_STATE_ANY" has already been populated with the
-            // full energy across all states.  We don't want to override it with
+            // The key for PROCESS_STATE_UNSPECIFIED aka PROCESS_STATE_ANY has already been
+            // populated with the full energy across all states.  We don't want to override it with
             // the energy for "other" states, which excludes the tracked states like
             // foreground, background etc.
-            if (key.processState == BatteryConsumer.PROCESS_STATE_ANY) {
+            if (key.processState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
                 continue;
             }
 
@@ -184,7 +184,7 @@ public class CpuPowerCalculator extends PowerCalculator {
                 uidProcState++) {
             @BatteryConsumer.ProcessState int procState =
                     BatteryStats.mapUidProcessStateToBatteryConsumerProcessState(uidProcState);
-            if (procState == BatteryConsumer.PROCESS_STATE_ANY) {
+            if (procState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
                 continue;
             }
 
@@ -199,7 +199,7 @@ public class CpuPowerCalculator extends PowerCalculator {
         }
 
         for (BatteryConsumer.Key key : keys) {
-            if (key.processState == BatteryConsumer.PROCESS_STATE_ANY) {
+            if (key.processState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
                 continue;
             }
 
