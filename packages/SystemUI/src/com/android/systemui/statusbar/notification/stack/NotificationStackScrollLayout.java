@@ -3986,6 +3986,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             updateChronometers();
             requestChildrenUpdate();
             updateUseRoundedRectClipping();
+            updateDismissBehavior();
         }
     }
 
@@ -4932,6 +4933,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         StringBuilder sb = new StringBuilder("[")
                 .append(this.getClass().getSimpleName()).append(":")
                 .append(" pulsing=").append(mPulsing ? "T" : "f")
+                .append(" expanded=").append(mIsExpanded ? "T" : "f")
+                .append(" headsUpPinned=").append(mInHeadsUpPinnedMode ? "T" : "f")
+                .append(" qsClipping=").append(mShouldUseRoundedRectClipping ? "T" : "f")
+                .append(" qsClipDismiss=").append(mDismissUsingRowTranslationX ? "T" : "f")
                 .append(" visibility=").append(DumpUtilsKt.visibilityString(getVisibility()))
                 .append(" alpha=").append(getAlpha())
                 .append(" scrollY=").append(mAmbientState.getScrollY())
@@ -5459,7 +5464,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         // On the split keyguard, dismissing with clipping without a visual boundary looks odd,
         // so let's use the content dismiss behavior instead.
         boolean dismissUsingRowTranslationX = !mShouldUseSplitNotificationShade
-                || mStatusBarState != StatusBarState.KEYGUARD;
+                || (mStatusBarState != StatusBarState.KEYGUARD && mIsExpanded);
         if (mDismissUsingRowTranslationX != dismissUsingRowTranslationX) {
             mDismissUsingRowTranslationX = dismissUsingRowTranslationX;
             for (int i = 0; i < getChildCount(); i++) {
