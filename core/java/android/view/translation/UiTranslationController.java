@@ -623,7 +623,7 @@ public class UiTranslationController {
 
     private void addViewIfNeeded(IntArray sourceViewIds, View view) {
         final AutofillId autofillId = view.getAutofillId();
-        if ((sourceViewIds.indexOf(autofillId.getViewId()) >= 0)
+        if (autofillId != null && (sourceViewIds.indexOf(autofillId.getViewId()) >= 0)
                 && !mViews.containsKey(autofillId)) {
             mViews.put(autofillId, new WeakReference<>(view));
         }
