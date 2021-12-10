@@ -41,8 +41,10 @@ import android.util.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -320,9 +322,8 @@ public abstract class IContextHubWrapper {
     private static class ContextHubWrapperAidl extends IContextHubWrapper {
         private android.hardware.contexthub.IContextHub mHub;
 
-        private ICallback mCallback = null;
-
-        private ContextHubAidlCallback mAidlCallback = new ContextHubAidlCallback();
+        private final Map<Integer, ContextHubAidlCallback> mAidlCallbackMap =
+                    new HashMap<>();
 
         // Use this thread in case where the execution requires to be on a service thread.
         // For instance, AppOpsManager.noteOp requires the UPDATE_APP_OPS_STATS permission.
@@ -332,6 +333,14 @@ public abstract class IContextHubWrapper {
 
         private class ContextHubAidlCallback extends
                 android.hardware.contexthub.IContextHubCallback.Stub {
+            private final int mContextHubId;
+            private final ICallback mCallback;
+
+            ContextHubAidlCallback(int contextHubId, ICallback callback) {
+                mContextHubId = contextHubId;
+                mCallback = callback;
+            }
+
             public void handleNanoappInfo(android.hardware.contexthub.NanoappInfo[] appInfo) {
                 List<NanoAppState> nanoAppStateList =
                         ContextHubServiceUtil.createNanoAppStateList(appInfo);
@@ -481,8 +490,8 @@ public abstract class IContextHubWrapper {
         }
 
         public void registerCallback(int contextHubId, ICallback callback) throws RemoteException {
-            mCallback = callback;
-            mHub.registerCallback(contextHubId, mAidlCallback);
+            mAidlCallbackMap.put(contextHubId, new ContextHubAidlCallback(contextHubId, callback));
+            mHub.registerCallback(contextHubId, mAidlCallbackMap.get(contextHubId));
         }
 
         @ContextHubTransaction.Result
@@ -508,10 +517,18 @@ public abstract class IContextHubWrapper {
 
         protected ICallback mCallback = null;
 
-        protected final ContextHubWrapperHidlCallback mHidlCallback =
-                new ContextHubWrapperHidlCallback();
+        protected final Map<Integer, ContextHubWrapperHidlCallback> mHidlCallbackMap =
+                    new HashMap<>();
 
         protected class ContextHubWrapperHidlCallback extends IContexthubCallback.Stub {
+            private final int mContextHubId;
+            private final ICallback mCallback;
+
+            ContextHubWrapperHidlCallback(int contextHubId, ICallback callback) {
+                mContextHubId = contextHubId;
+                mCallback = callback;
+            }
+
             @Override
             public void handleClientMsg(ContextHubMsg message) {
                 mCallback.handleNanoappMessage(
@@ -612,8 +629,9 @@ public abstract class IContextHubWrapper {
         }
 
         public void registerCallback(int contextHubId, ICallback callback) throws RemoteException {
-            mCallback = callback;
-            mHub.registerCallback(contextHubId, mHidlCallback);
+            mHidlCallbackMap.put(contextHubId,
+                        new ContextHubWrapperHidlCallback(contextHubId, callback));
+            mHub.registerCallback(contextHubId, mHidlCallbackMap.get(contextHubId));
         }
 
         public void onWifiMainSettingChanged(boolean enabled) {}
@@ -779,8 +797,9 @@ public abstract class IContextHubWrapper {
         }
 
         public void registerCallback(int contextHubId, ICallback callback) throws RemoteException {
-            mCallback = callback;
-            mHub.registerCallback_1_2(contextHubId, mHidlCallback);
+            mHidlCallbackMap.put(contextHubId,
+                        new ContextHubWrapperHidlCallback(contextHubId, callback));
+            mHub.registerCallback_1_2(contextHubId, mHidlCallbackMap.get(contextHubId));
         }
 
         private void sendSettingChanged(byte setting, byte newValue) {
