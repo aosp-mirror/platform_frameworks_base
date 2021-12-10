@@ -189,7 +189,10 @@ public final class RequiresPermissionChecker extends BugChecker
         if (!actualPerm.containsAll(expectedPerm)) {
             return buildDescription(tree)
                     .setMessage("Method " + method.name.toString() + "() annotated " + expectedPerm
-                            + " but too wide; only invokes methods requiring " + actualPerm)
+                            + " but too wide; only invokes methods requiring " + actualPerm
+                            + "\n  If calling an AIDL interface, it can be annotated by adding:"
+                            + "\n  @JavaPassthrough(annotation=\""
+                            + "@android.annotation.RequiresPermission(...)\")")
                     .build();
         }
 

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2021 The Android Open Source Project
   ~
@@ -13,19 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-       android:insetBottom="6dp"
-       android:insetTop="6dp">
-    <shape android:shape="rectangle">
-        <stroke
-            android:color="@color/media_dialog_outlined_button"
-            android:width="1dp"/>
-        <corners android:radius="20dp"/>
-        <padding
-            android:left="16dp"
-            android:right="16dp"
-            android:top="8dp"
-            android:bottom="8dp"/>
-        <solid android:color="@android:color/transparent"/>
-    </shape>
-</inset>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true"
+          android:color="@color/tv_pip_menu_icon_bg_focused" />
+    <item android:color="@color/tv_pip_menu_icon_bg_unfocused" />
+</selector>

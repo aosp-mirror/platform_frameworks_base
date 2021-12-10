@@ -503,10 +503,14 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     protected int getShowOverlayReason() {
         if (isKeyguard()) {
             return BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
-        } else if (isSettings()) {
-            return BiometricOverlayConstants.REASON_AUTH_SETTINGS;
         } else if (isBiometricPrompt()) {
+            // BP reason always takes precedent over settings, since callers from within
+            // settings can always invoke BP.
             return BiometricOverlayConstants.REASON_AUTH_BP;
+        } else if (isSettings()) {
+            // This is pretty much only for FingerprintManager#authenticate usage from
+            // FingerprintSettings.
+            return BiometricOverlayConstants.REASON_AUTH_SETTINGS;
         } else {
             return BiometricOverlayConstants.REASON_AUTH_OTHER;
         }

@@ -5862,13 +5862,14 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.app.CommunalManager} for interacting with the global system state.
+     * {@link android.app.communal.CommunalManager} for interacting with the global system state.
      *
      * @see #getSystemService(String)
-     * @see android.app.CommunalManager
+     * @see android.app.communal.CommunalManager
      * @hide
      */
-    public static final String COMMUNAL_MANAGER_SERVICE = "communal_manager";
+    @SystemApi
+    public static final String COMMUNAL_SERVICE = "communal";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

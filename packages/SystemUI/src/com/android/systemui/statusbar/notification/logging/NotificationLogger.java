@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
@@ -76,7 +77,7 @@ public class NotificationLogger implements StateListener {
     // Dependencies:
     private final NotificationListenerService mNotificationListener;
     private final Executor mUiBgExecutor;
-    private final NotifPipelineFlags mNotifPipelineFlags;
+    private final NotifLiveDataStore mNotifLiveDataStore;
     private final NotificationVisibilityProvider mVisibilityProvider;
     private final NotificationEntryManager mEntryManager;
     private final NotifPipeline mNotifPipeline;
@@ -179,11 +180,7 @@ public class NotificationLogger implements StateListener {
     };
 
     private List<NotificationEntry> getVisibleNotifications() {
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-            return mNotifPipeline.getFlatShadeList();
-        } else {
-            return mEntryManager.getVisibleNotifications();
-        }
+        return mNotifLiveDataStore.getActiveNotifList().getValue();
     }
 
     /**
@@ -223,6 +220,7 @@ public class NotificationLogger implements StateListener {
     public NotificationLogger(NotificationListener notificationListener,
             @UiBackground Executor uiBgExecutor,
             NotifPipelineFlags notifPipelineFlags,
+            NotifLiveDataStore notifLiveDataStore,
             NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
@@ -231,7 +229,7 @@ public class NotificationLogger implements StateListener {
             NotificationPanelLogger notificationPanelLogger) {
         mNotificationListener = notificationListener;
         mUiBgExecutor = uiBgExecutor;
-        mNotifPipelineFlags = notifPipelineFlags;
+        mNotifLiveDataStore = notifLiveDataStore;
         mVisibilityProvider = visibilityProvider;
         mEntryManager = entryManager;
         mNotifPipeline = notifPipeline;
@@ -242,7 +240,7 @@ public class NotificationLogger implements StateListener {
         // Not expected to be destroyed, don't need to unsubscribe
         statusBarStateController.addCallback(this);
 
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
+        if (notifPipelineFlags.isNewPipelineEnabled()) {
             registerNewPipelineListener();
         } else {
             registerLegacyListener();

@@ -65,6 +65,7 @@ import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.Preconditions;
@@ -380,18 +381,16 @@ public class PreferencesHelper implements RankingConfig {
                             }
 
                             if (migrateToPermission) {
-                                boolean hasChangedChannel = false;
-                                for (NotificationChannel channel : r.channels.values()) {
-                                    if (channel.getUserLockedFields() != 0) {
-                                        hasChangedChannel = true;
-                                        break;
-                                    }
+                                r.importance = appImportance;
+                                if (r.uid != UNKNOWN_UID) {
+                                    // Don't call into permission system until we have a valid uid
+                                    PackagePermission pkgPerm = new PackagePermission(
+                                            r.pkg, UserHandle.getUserId(r.uid),
+                                            r.importance != IMPORTANCE_NONE,
+                                            hasUserConfiguredSettings(r));
+                                    pkgPerms.add(pkgPerm);
                                 }
-                                PackagePermission pkgPerm = new PackagePermission(
-                                        r.pkg, userId, appImportance != IMPORTANCE_NONE,
-                                        hasChangedChannel  || appImportance == IMPORTANCE_NONE);
-                                pkgPerms.add(pkgPerm);
-                            } else {
+                            } else if (!mPermissionHelper.isMigrationEnabled()) {
                                 r.importance = appImportance;
                             }
                         }
@@ -401,9 +400,25 @@ public class PreferencesHelper implements RankingConfig {
         }
         if (migrateToPermission) {
             for (PackagePermission p : pkgPerms) {
-                mPermissionHelper.setNotificationPermission(p);
+                try {
+                    mPermissionHelper.setNotificationPermission(p);
+                } catch (Exception e) {
+                    Slog.e(TAG, "could not migrate setting for " + p.packageName, e);
+                }
             }
         }
+    }
+
+    @GuardedBy("mPackagePreferences")
+    private boolean hasUserConfiguredSettings(PackagePreferences p){
+        boolean hasChangedChannel = false;
+        for (NotificationChannel channel : p.channels.values()) {
+            if (channel.getUserLockedFields() != 0) {
+                hasChangedChannel = true;
+                break;
+            }
+        }
+        return hasChangedChannel || p.importance == IMPORTANCE_NONE;
     }
 
     private boolean isShortcutOk(NotificationChannel channel) {
@@ -2525,6 +2540,17 @@ public class PreferencesHelper implements RankingConfig {
                         mRestoredWithoutUids.remove(unrestoredPackageKey(pkg, changeUserId));
                         synchronized (mPackagePreferences) {
                             mPackagePreferences.put(packagePreferencesKey(r.pkg, r.uid), r);
+                        }
+                        if (mPermissionHelper.isMigrationEnabled()) {
+                            try {
+                                PackagePermission p = new PackagePermission(
+                                        r.pkg, UserHandle.getUserId(r.uid),
+                                        r.importance != IMPORTANCE_NONE,
+                                        hasUserConfiguredSettings(r));
+                                mPermissionHelper.setNotificationPermission(p);
+                            } catch (Exception e) {
+                                Slog.e(TAG, "could not migrate setting for " + r.pkg, e);
+                            }
                         }
                         updated = true;
                     } catch (PackageManager.NameNotFoundException e) {

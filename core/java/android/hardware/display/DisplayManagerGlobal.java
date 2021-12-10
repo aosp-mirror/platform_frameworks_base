@@ -24,6 +24,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PropertyInvalidatedCache;
+import android.companion.virtual.IVirtualDevice;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -582,14 +583,14 @@ public final class DisplayManagerGlobal {
     }
 
     public VirtualDisplay createVirtualDisplay(@NonNull Context context, MediaProjection projection,
-            @NonNull VirtualDisplayConfig virtualDisplayConfig, VirtualDisplay.Callback callback,
-            Handler handler, @Nullable Context windowContext) {
+            IVirtualDevice virtualDevice, @NonNull VirtualDisplayConfig virtualDisplayConfig,
+            VirtualDisplay.Callback callback, Handler handler, @Nullable Context windowContext) {
         VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, handler);
         IMediaProjection projectionToken = projection != null ? projection.getProjection() : null;
         int displayId;
         try {
             displayId = mDm.createVirtualDisplay(virtualDisplayConfig, callbackWrapper,
-                    projectionToken, context.getPackageName());
+                    projectionToken, virtualDevice, context.getPackageName());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

@@ -23,6 +23,7 @@ import com.android.systemui.util.settings.SettingsUtilModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import java.util.function.Supplier
 
 @Module(includes = [
     SettingsUtilModule::class
@@ -38,5 +39,9 @@ abstract class FlagsModule {
         fun provideFlagManager(context: Context, @Main handler: Handler): FlagManager {
             return FlagManager(context, handler)
         }
+
+        @JvmStatic
+        @Provides
+        fun providesFlagCollector(): Supplier<Map<Int, Flag<*>>>? = null
     }
 }

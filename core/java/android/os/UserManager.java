@@ -327,6 +327,43 @@ public class UserManager {
             "no_sharing_admin_configured_wifi";
 
     /**
+     * Specifies if a user is disallowed from using Wi-Fi Direct.
+     *
+     * <p>This restriction can only be set by a device owner,
+     * a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by any of these owners, it prevents all users from using
+     * Wi-Fi Direct.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_WIFI_DIRECT = "no_wifi_direct";
+
+    /**
+     * Specifies if a user is disallowed from adding a new Wi-Fi configuration.
+     *
+     * <p>This restriction can only be set by a device owner,
+     * a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by any of these owners, it prevents all users from adding
+     * a new Wi-Fi configuration. This does not limit the owner and carrier's ability
+     * to add a new configuration.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_ADD_WIFI_CONFIG = "no_add_wifi_config";
+
+    /**
      * Specifies if a user is disallowed from changing the device
      * language. The default value is <code>false</code>.
      *
@@ -1500,6 +1537,8 @@ public class UserManager {
             DISALLOW_CHANGE_WIFI_STATE,
             DISALLOW_WIFI_TETHERING,
             DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI,
+            DISALLOW_WIFI_DIRECT,
+            DISALLOW_ADD_WIFI_CONFIG,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}

@@ -45,7 +45,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCRE
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
@@ -846,20 +845,6 @@ public class DisplayPolicy {
     }
 
     /**
-     * Only trusted overlays are allowed to use FLAG_SLIPPERY.
-     */
-    static int sanitizeFlagSlippery(int flags, int privateFlags, String name) {
-        if ((flags & FLAG_SLIPPERY) == 0) {
-            return flags;
-        }
-        if ((privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0) {
-            return flags;
-        }
-        Slog.w(TAG, "Removing FLAG_SLIPPERY for non-trusted overlay " + name);
-        return flags & ~FLAG_SLIPPERY;
-    }
-
-    /**
      * Sanitize the layout parameters coming from a client.  Allows the policy
      * to do things like ensure that windows of a specific type can't take
      * input focus.
@@ -942,8 +927,6 @@ public class DisplayPolicy {
         } else if (mRoundedCornerWindow == win) {
             mRoundedCornerWindow = null;
         }
-
-        attrs.flags = sanitizeFlagSlippery(attrs.flags, attrs.privateFlags, win.getName());
     }
 
     /**

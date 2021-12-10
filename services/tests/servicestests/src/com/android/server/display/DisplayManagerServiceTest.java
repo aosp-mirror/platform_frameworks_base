@@ -219,7 +219,7 @@ public class DisplayManagerServiceTest {
         builder.setUniqueId(uniqueId);
         builder.setFlags(flags);
         int displayId = bs.createVirtualDisplay(builder.build(), mMockAppToken /* callback */,
-                null /* projection */, PACKAGE_NAME);
+                null /* projection */, null /* virtualDeviceToken */, PACKAGE_NAME);
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
@@ -341,7 +341,7 @@ public class DisplayManagerServiceTest {
         builder.setFlags(flags);
         builder.setUniqueId(uniqueId);
         int displayId = bs.createVirtualDisplay(builder.build(), mMockAppToken /* callback */,
-                null /* projection */, PACKAGE_NAME);
+                null /* projection */, null /* virtualDeviceToken */, PACKAGE_NAME);
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
@@ -580,7 +580,8 @@ public class DisplayManagerServiceTest {
                 VIRTUAL_DISPLAY_NAME, width, height, dpi);
         builder.setUniqueId(uniqueId);
         final int firstDisplayId = binderService.createVirtualDisplay(builder.build(),
-                mMockAppToken /* callback */, null /* projection */, PACKAGE_NAME);
+                mMockAppToken /* callback */, null /* projection */, null /* virtualDeviceToken */,
+                PACKAGE_NAME);
 
         // The second virtual display requests to mirror the first virtual display.
         final String uniqueId2 = "uniqueId --- displayIdToMirrorTest #2";
@@ -590,7 +591,8 @@ public class DisplayManagerServiceTest {
         builder2.setUniqueId(uniqueId2);
         builder2.setDisplayIdToMirror(firstDisplayId);
         final int secondDisplayId = binderService.createVirtualDisplay(builder2.build(),
-                mMockAppToken2 /* callback */, null /* projection */, PACKAGE_NAME);
+                mMockAppToken2 /* callback */, null /* projection */,
+                null /* virtualDeviceToken */, PACKAGE_NAME);
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
         // flush the handler
@@ -628,7 +630,8 @@ public class DisplayManagerServiceTest {
         builder.setSurface(surface);
         builder.setUniqueId(uniqueId);
         final int displayId = binderService.createVirtualDisplay(builder.build(),
-                mMockAppToken /* callback */, null /* projection */, PACKAGE_NAME);
+                mMockAppToken /* callback */, null /* projection */, null /* virtualDeviceToken */,
+                PACKAGE_NAME);
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
@@ -1108,7 +1111,7 @@ public class DisplayManagerServiceTest {
         builder.setUniqueId(uniqueId);
 
         int displayId = bs.createVirtualDisplay(builder.build(), mMockAppToken /* callback */,
-                null /* projection */, PACKAGE_NAME);
+                null /* projection */, null /* virtualDeviceToken */, PACKAGE_NAME);
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
         DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);

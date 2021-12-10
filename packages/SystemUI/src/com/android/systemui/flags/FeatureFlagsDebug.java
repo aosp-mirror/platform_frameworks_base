@@ -18,11 +18,12 @@ package com.android.systemui.flags;
 
 import static com.android.systemui.flags.FlagManager.ACTION_GET_FLAGS;
 import static com.android.systemui.flags.FlagManager.ACTION_SET_FLAG;
-import static com.android.systemui.flags.FlagManager.FIELD_FLAGS;
-import static com.android.systemui.flags.FlagManager.FIELD_ID;
-import static com.android.systemui.flags.FlagManager.FIELD_VALUE;
+import static com.android.systemui.flags.FlagManager.EXTRA_FLAGS;
+import static com.android.systemui.flags.FlagManager.EXTRA_ID;
+import static com.android.systemui.flags.FlagManager.EXTRA_VALUE;
 
-import android.annotation.Nullable;
+import static java.util.Objects.requireNonNull;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +33,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
@@ -39,14 +41,13 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.settings.SecureSettings;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -66,7 +67,9 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     private final FlagManager mFlagManager;
     private final SecureSettings mSecureSettings;
     private final Resources mResources;
-    private final Map<Integer, Boolean> mBooleanFlagCache = new HashMap<>();
+    private final Supplier<Map<Integer, Flag<?>>> mFlagsCollector;
+    private final Map<Integer, Boolean> mBooleanFlagCache = new TreeMap<>();
+    private final Map<Integer, String> mStringFlagCache = new TreeMap<>();
 
     @Inject
     public FeatureFlagsDebug(
@@ -74,99 +77,135 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             Context context,
             SecureSettings secureSettings,
             @Main Resources resources,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            @Nullable Supplier<Map<Integer, Flag<?>>> flagsCollector) {
         mFlagManager = flagManager;
         mSecureSettings = secureSettings;
         mResources = resources;
+        mFlagsCollector = flagsCollector != null ? flagsCollector : Flags::collectFlags;
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_SET_FLAG);
         filter.addAction(ACTION_GET_FLAGS);
+        flagManager.setRestartAction(this::restartSystemUI);
+        flagManager.setClearCacheAction(this::removeFromCache);
         context.registerReceiver(mReceiver, filter, null, null);
         dumpManager.registerDumpable(TAG, this);
     }
 
     @Override
-    public boolean isEnabled(BooleanFlag flag) {
+    public boolean isEnabled(@NonNull BooleanFlag flag) {
         int id = flag.getId();
         if (!mBooleanFlagCache.containsKey(id)) {
-            mBooleanFlagCache.put(id, isEnabled(id, flag.getDefault()));
+            mBooleanFlagCache.put(id,
+                    readFlagValue(id, flag.getDefault(), BooleanFlagSerializer.INSTANCE));
         }
 
         return mBooleanFlagCache.get(id);
     }
 
     @Override
-    public boolean isEnabled(ResourceBooleanFlag flag) {
+    public boolean isEnabled(@NonNull ResourceBooleanFlag flag) {
         int id = flag.getId();
         if (!mBooleanFlagCache.containsKey(id)) {
-            mBooleanFlagCache.put(
-                    id, isEnabled(id, mResources.getBoolean(flag.getResourceId())));
+            mBooleanFlagCache.put(id,
+                    readFlagValue(id, mResources.getBoolean(flag.getResourceId()),
+                            BooleanFlagSerializer.INSTANCE));
         }
 
         return mBooleanFlagCache.get(id);
     }
 
-    /** Return a {@link BooleanFlag}'s value. */
+    @NonNull
     @Override
-    public boolean isEnabled(int id, boolean defaultValue) {
-        Boolean result = isEnabledInternal(id);
+    public String getString(@NonNull StringFlag flag) {
+        int id = flag.getId();
+        if (!mStringFlagCache.containsKey(id)) {
+            mStringFlagCache.put(id,
+                    readFlagValue(id, flag.getDefault(), StringFlagSerializer.INSTANCE));
+        }
+
+        return mStringFlagCache.get(id);
+    }
+
+    @NonNull
+    @Override
+    public String getString(@NonNull ResourceStringFlag flag) {
+        int id = flag.getId();
+        if (!mStringFlagCache.containsKey(id)) {
+            mStringFlagCache.put(id,
+                    readFlagValue(id, mResources.getString(flag.getResourceId()),
+                            StringFlagSerializer.INSTANCE));
+        }
+
+        return mStringFlagCache.get(id);
+    }
+
+    @NonNull
+    private <T> T readFlagValue(int id, @NonNull T defaultValue, FlagSerializer<T> serializer) {
+        requireNonNull(defaultValue, "defaultValue");
+        T result = readFlagValueInternal(id, serializer);
         return result == null ? defaultValue : result;
     }
 
 
     /** Returns the stored value or null if not set. */
-    private Boolean isEnabledInternal(int id) {
+    @Nullable
+    private <T> T readFlagValueInternal(int id, FlagSerializer<T> serializer) {
         try {
-            return mFlagManager.isEnabled(id);
+            return mFlagManager.readFlagValue(id, serializer);
         } catch (Exception e) {
             eraseInternal(id);
         }
         return null;
     }
 
-    /** Set whether a given {@link BooleanFlag} is enabled or not. */
-    public void setEnabled(int id, boolean value) {
-        Boolean currentValue = isEnabledInternal(id);
-        if (currentValue != null && currentValue == value) {
+    private <T> void setFlagValue(int id, @NonNull T value, FlagSerializer<T> serializer) {
+        requireNonNull(value, "Cannot set a null value");
+        T currentValue = readFlagValueInternal(id, serializer);
+        if (Objects.equals(currentValue, value)) {
+            Log.i(TAG, "Flag id " + id + " is already " + value);
             return;
         }
-
-        JSONObject json = new JSONObject();
-        try {
-            json.put(FlagManager.FIELD_TYPE, FlagManager.TYPE_BOOLEAN);
-            json.put(FIELD_VALUE, value);
-            mSecureSettings.putString(mFlagManager.keyToSettingsPrefix(id), json.toString());
-            Log.i(TAG, "Set id " + id + " to " + value);
-            restartSystemUI();
-        } catch (JSONException e) {
-            // no-op
+        final String data = serializer.toSettingsData(value);
+        if (data == null) {
+            Log.w(TAG, "Failed to set id " + id + " to " + value);
+            return;
         }
+        mSecureSettings.putString(mFlagManager.idToSettingsKey(id), data);
+        Log.i(TAG, "Set id " + id + " to " + value);
+        removeFromCache(id);
+        mFlagManager.dispatchListenersAndMaybeRestart(id);
     }
 
     /** Erase a flag's overridden value if there is one. */
     public void eraseFlag(int id) {
         eraseInternal(id);
-        restartSystemUI();
+        removeFromCache(id);
+        mFlagManager.dispatchListenersAndMaybeRestart(id);
     }
 
     /** Works just like {@link #eraseFlag(int)} except that it doesn't restart SystemUI. */
     private void eraseInternal(int id) {
         // We can't actually "erase" things from sysprops, but we can set them to empty!
-        mSecureSettings.putString(mFlagManager.keyToSettingsPrefix(id), "");
+        mSecureSettings.putString(mFlagManager.idToSettingsKey(id), "");
         Log.i(TAG, "Erase id " + id);
     }
 
     @Override
-    public void addListener(Listener run) {
-        mFlagManager.addListener(run);
+    public void addListener(@NonNull Flag<?> flag, @NonNull Listener listener) {
+        mFlagManager.addListener(flag, listener);
     }
 
     @Override
-    public void removeListener(Listener run) {
-        mFlagManager.removeListener(run);
+    public void removeListener(@NonNull Listener listener) {
+        mFlagManager.removeListener(listener);
     }
 
-    private void restartSystemUI() {
+    private void restartSystemUI(boolean requestSuppress) {
+        if (requestSuppress) {
+            Log.i(TAG, "SystemUI Restart Suppressed");
+            return;
+        }
         Log.i(TAG, "Restarting SystemUI");
         // SysUI starts back when up exited. Is there a better way to do this?
         System.exit(0);
@@ -175,14 +214,14 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
+            String action = intent == null ? null : intent.getAction();
             if (action == null) {
                 return;
             }
             if (ACTION_SET_FLAG.equals(action)) {
                 handleSetFlag(intent.getExtras());
             } else if (ACTION_GET_FLAGS.equals(action)) {
-                Map<Integer, Flag<?>> knownFlagMap = Flags.collectFlags();
+                Map<Integer, Flag<?>> knownFlagMap = mFlagsCollector.get();
                 ArrayList<Flag<?>> flags = new ArrayList<>(knownFlagMap.values());
 
                 // Convert all flags to parcelable flags.
@@ -196,32 +235,47 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
 
                 Bundle extras =  getResultExtras(true);
                 if (extras != null) {
-                    extras.putParcelableArrayList(FIELD_FLAGS, pFlags);
+                    extras.putParcelableArrayList(EXTRA_FLAGS, pFlags);
                 }
             }
         }
 
         private void handleSetFlag(Bundle extras) {
-            int id = extras.getInt(FIELD_ID);
+            if (extras == null) {
+                Log.w(TAG, "No extras");
+                return;
+            }
+            int id = extras.getInt(EXTRA_ID);
             if (id <= 0) {
                 Log.w(TAG, "ID not set or less than  or equal to 0: " + id);
                 return;
             }
 
-            Map<Integer, Flag<?>> flagMap = Flags.collectFlags();
+            Map<Integer, Flag<?>> flagMap = mFlagsCollector.get();
             if (!flagMap.containsKey(id)) {
                 Log.w(TAG, "Tried to set unknown id: " + id);
                 return;
             }
             Flag<?> flag = flagMap.get(id);
 
-            if (!extras.containsKey(FIELD_VALUE)) {
+            if (!extras.containsKey(EXTRA_VALUE)) {
                 eraseFlag(id);
                 return;
             }
 
-            if (flag instanceof BooleanFlag) {
-                setEnabled(id, extras.getBoolean(FIELD_VALUE));
+            Object value = extras.get(EXTRA_VALUE);
+            if (flag instanceof BooleanFlag && value instanceof Boolean) {
+                setFlagValue(id, (Boolean) value, BooleanFlagSerializer.INSTANCE);
+            } else  if (flag instanceof ResourceBooleanFlag && value instanceof Boolean) {
+                setFlagValue(id, (Boolean) value, BooleanFlagSerializer.INSTANCE);
+            } else if (flag instanceof StringFlag && value instanceof String) {
+                setFlagValue(id, (String) value, StringFlagSerializer.INSTANCE);
+            } else if (flag instanceof ResourceStringFlag && value instanceof String) {
+                setFlagValue(id, (String) value, StringFlagSerializer.INSTANCE);
+            } else {
+                Log.w(TAG,
+                        "Unable to set " + id + " of type " + flag.getClass() + " to value of type "
+                                + (value == null ? null : value.getClass()));
             }
         }
 
@@ -245,16 +299,18 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         }
     };
 
+    private void removeFromCache(int id) {
+        mBooleanFlagCache.remove(id);
+        mStringFlagCache.remove(id);
+    }
+
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("can override: true");
-        ArrayList<String> flagStrings = new ArrayList<>(mBooleanFlagCache.size());
-        for (Map.Entry<Integer, Boolean> entry : mBooleanFlagCache.entrySet()) {
-            flagStrings.add("  sysui_flag_" + entry.getKey() + ": " + entry.getValue());
-        }
-        flagStrings.sort(String.CASE_INSENSITIVE_ORDER);
-        for (String flagString : flagStrings) {
-            pw.println(flagString);
-        }
+        pw.println("booleans: " + mBooleanFlagCache.size());
+        mBooleanFlagCache.forEach((key, value) -> pw.println("  sysui_flag_" + key + ": " + value));
+        pw.println("Strings: " + mStringFlagCache.size());
+        mStringFlagCache.forEach((key, value) -> pw.println("  sysui_flag_" + key
+                + ": [length=" + value.length() + "] \"" + value + "\""));
     }
 }

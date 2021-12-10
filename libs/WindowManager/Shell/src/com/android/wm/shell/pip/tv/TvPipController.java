@@ -253,9 +253,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         final Rect newBounds;
         switch (mState) {
             case STATE_PIP_MENU:
-                newBounds = mPipBoundsState.getExpandedBounds();
-                break;
-
             case STATE_PIP:
                 // Let PipBoundsAlgorithm figure out what the correct bounds are at the moment.
                 // Internally, it will get the "default" bounds from PipBoundsState and adjust them
@@ -336,11 +333,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     private void loadConfigurations() {
         final Resources res = mContext.getResources();
         mResizeAnimationDuration = res.getInteger(R.integer.config_pipResizeAnimationDuration);
-        // "Cache" bounds for the Pip menu as "expanded" bounds in PipBoundsState. We'll refer back
-        // to this value in resizePinnedStack(), when we are adjusting Pip task/window position for
-        // the menu.
-        mPipBoundsState.setExpandedBounds(
-                Rect.unflattenFromString(res.getString(R.string.pip_menu_bounds)));
     }
 
     private DisplayInfo getDisplayInfo() {

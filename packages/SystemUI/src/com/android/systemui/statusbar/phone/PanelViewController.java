@@ -933,7 +933,6 @@ public abstract class PanelViewController {
 
     private void abortAnimations() {
         cancelHeightAnimator();
-        mView.removeCallbacks(mPostCollapseRunnable);
         mView.removeCallbacks(mFlingCollapseRunnable);
     }
 
@@ -1109,13 +1108,6 @@ public abstract class PanelViewController {
         }
         return onMiddleClicked();
     }
-
-    protected final Runnable mPostCollapseRunnable = new Runnable() {
-        @Override
-        public void run() {
-            collapse(false /* delayed */, 1.0f /* speedUpFactor */);
-        }
-    };
 
     protected abstract boolean onMiddleClicked();
 

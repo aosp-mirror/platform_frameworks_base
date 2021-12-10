@@ -17,6 +17,8 @@
 package android.net.vcn;
 
 import static android.net.ipsec.ike.IkeSessionParams.IKE_OPTION_MOBIKE;
+import static android.net.vcn.VcnGatewayConnectionConfig.DEFAULT_UNDERLYING_NETWORK_PRIORITIES;
+import static android.net.vcn.VcnGatewayConnectionConfig.UNDERLYING_NETWORK_PRIORITIES_KEY;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -30,6 +32,7 @@ import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.net.vcn.persistablebundleutils.IkeSessionParamsUtilsTest;
 import android.net.vcn.persistablebundleutils.TunnelConnectionParamsUtilsTest;
+import android.os.PersistableBundle;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -230,6 +233,16 @@ public class VcnGatewayConnectionConfigTest {
         assertEquals(config, new VcnGatewayConnectionConfig(config.toPersistableBundle()));
     }
 
+    @Test
+    public void testParsePersistableBundleWithoutVcnUnderlyingNetworkPriorities() {
+        PersistableBundle configBundle = buildTestConfig().toPersistableBundle();
+        configBundle.putPersistableBundle(UNDERLYING_NETWORK_PRIORITIES_KEY, null);
+
+        final VcnGatewayConnectionConfig config = new VcnGatewayConnectionConfig(configBundle);
+        assertEquals(
+                DEFAULT_UNDERLYING_NETWORK_PRIORITIES, config.getVcnUnderlyingNetworkPriorities());
+    }
+
     private static IkeTunnelConnectionParams buildTunnelConnectionParams(String ikePsk) {
         final IkeSessionParams ikeParams =
                 IkeSessionParamsUtilsTest.createBuilderMinimum()
@@ -270,5 +283,41 @@ public class VcnGatewayConnectionConfigTest {
 
         assertNotEquals(tunnelParams, anotherTunnelParams);
         assertNotEquals(config, anotherConfig);
+    }
+
+    private static VcnGatewayConnectionConfig buildTestConfigWithVcnUnderlyingNetworkPriorities(
+            LinkedHashSet<VcnUnderlyingNetworkPriority> networkPriorities) {
+        return buildTestConfigWithExposedCaps(
+                new VcnGatewayConnectionConfig.Builder(
+                                "buildTestConfigWithVcnUnderlyingNetworkPriorities",
+                                TUNNEL_CONNECTION_PARAMS)
+                        .setVcnUnderlyingNetworkPriorities(networkPriorities),
+                EXPOSED_CAPS);
+    }
+
+    @Test
+    public void testVcnUnderlyingNetworkPrioritiesEquality() throws Exception {
+        final VcnGatewayConnectionConfig config =
+                buildTestConfigWithVcnUnderlyingNetworkPriorities(UNDERLYING_NETWORK_PRIORITIES);
+
+        final LinkedHashSet<VcnUnderlyingNetworkPriority> networkPrioritiesEqual =
+                new LinkedHashSet();
+        networkPrioritiesEqual.add(VcnCellUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+        networkPrioritiesEqual.add(VcnWifiUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+        final VcnGatewayConnectionConfig configEqual =
+                buildTestConfigWithVcnUnderlyingNetworkPriorities(networkPrioritiesEqual);
+
+        final LinkedHashSet<VcnUnderlyingNetworkPriority> networkPrioritiesNotEqual =
+                new LinkedHashSet();
+        networkPrioritiesNotEqual.add(
+                VcnWifiUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+        final VcnGatewayConnectionConfig configNotEqual =
+                buildTestConfigWithVcnUnderlyingNetworkPriorities(networkPrioritiesNotEqual);
+
+        assertEquals(UNDERLYING_NETWORK_PRIORITIES, networkPrioritiesEqual);
+        assertEquals(config, configEqual);
+
+        assertNotEquals(UNDERLYING_NETWORK_PRIORITIES, networkPrioritiesNotEqual);
+        assertNotEquals(config, configNotEqual);
     }
 }

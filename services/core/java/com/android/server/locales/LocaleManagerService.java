@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.ILocaleManager;
@@ -29,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.LocaleList;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -51,11 +53,14 @@ import java.io.PrintWriter;
  */
 public class LocaleManagerService extends SystemService {
     private static final String TAG = "LocaleManagerService";
-    private final Context mContext;
+    final Context mContext;
     private final LocaleManagerService.LocaleManagerBinderService mBinderService;
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
     private PackageManagerInternal mPackageManagerInternal;
+
+    private LocaleManagerBackupHelper mBackupHelper;
+
     public static final boolean DEBUG = false;
 
     public LocaleManagerService(Context context) {
@@ -65,23 +70,48 @@ public class LocaleManagerService extends SystemService {
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mBackupHelper = new LocaleManagerBackupHelper(this,
+                mPackageManagerInternal);
     }
 
     @VisibleForTesting
     LocaleManagerService(Context context, ActivityTaskManagerInternal activityTaskManagerInternal,
             ActivityManagerInternal activityManagerInternal,
-            PackageManagerInternal packageManagerInternal) {
+            PackageManagerInternal packageManagerInternal,
+            LocaleManagerBackupHelper localeManagerBackupHelper) {
         super(context);
         mContext = context;
         mBinderService = new LocaleManagerBinderService();
         mActivityTaskManagerInternal = activityTaskManagerInternal;
         mActivityManagerInternal = activityManagerInternal;
         mPackageManagerInternal = packageManagerInternal;
+        mBackupHelper = localeManagerBackupHelper;
     }
 
     @Override
     public void onStart() {
         publishBinderService(Context.LOCALE_SERVICE, mBinderService);
+        LocalServices.addService(LocaleManagerInternal.class, new LocaleManagerInternalImpl());
+    }
+
+    private final class LocaleManagerInternalImpl extends LocaleManagerInternal {
+
+        @Override
+        public @Nullable byte[] getBackupPayload(int userId) {
+            checkCallerIsSystem();
+            return mBackupHelper.getBackupPayload(userId);
+        }
+
+        @Override
+        public void stageAndApplyRestoredPayload(byte[] payload, int userId) {
+            mBackupHelper.stageAndApplyRestoredPayload(payload, userId);
+        }
+
+        private void checkCallerIsSystem() {
+            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+                throw new SecurityException("Caller is not system.");
+            }
+        }
     }
 
     private final class LocaleManagerBinderService extends ILocaleManager.Stub {
@@ -110,6 +140,7 @@ public class LocaleManagerService extends SystemService {
             (new LocaleManagerShellCommand(mBinderService))
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
+
     }
 
     /**
@@ -161,6 +192,8 @@ public class LocaleManagerService extends SystemService {
             notifyAppWhoseLocaleChanged(appPackageName, userId, locales);
             notifyInstallerOfAppWhoseLocaleChanged(appPackageName, userId, locales);
             notifyRegisteredReceivers(appPackageName, userId, locales);
+
+            mBackupHelper.notifyBackupManager();
         }
     }
 

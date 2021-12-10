@@ -46,6 +46,8 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotifLiveData;
+import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -65,6 +67,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 
@@ -82,6 +85,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
     // Dependency mocks:
     @Mock private NotifPipelineFlags mNotifPipelineFlags;
+    @Mock private NotifLiveDataStore mNotifLiveDataStore;
+    @Mock private NotifLiveData<List<NotificationEntry>> mActiveNotifEntries;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotifPipeline mNotifPipeline;
@@ -98,6 +103,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(true);
+        when(mNotifLiveDataStore.getActiveNotifList()).thenReturn(mActiveNotifEntries);
 
         mEntry = new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_NAME)
@@ -113,6 +119,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 mListener,
                 mUiBgExecutor,
                 mNotifPipelineFlags,
+                mNotifLiveDataStore,
                 mVisibilityProvider,
                 mEntryManager,
                 mNotifPipeline,
@@ -146,7 +153,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 any(NotificationVisibility[].class));
 
         when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
-        when(mNotifPipeline.getFlatShadeList()).thenReturn(Lists.newArrayList(mEntry));
+        when(mActiveNotifEntries.getValue()).thenReturn(Lists.newArrayList(mEntry));
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
         mUiBgExecutor.runAllReady();
@@ -168,7 +175,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     public void testStoppingNotificationLoggingReportsCurrentNotifications()
             throws Exception {
         when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
-        when(mNotifPipeline.getFlatShadeList()).thenReturn(Lists.newArrayList(mEntry));
+        when(mActiveNotifEntries.getValue()).thenReturn(Lists.newArrayList(mEntry));
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
         mUiBgExecutor.runAllReady();
@@ -197,7 +204,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
     @Test
     public void testLogPanelShownOnWake() {
-        when(mNotifPipeline.getFlatShadeList()).thenReturn(Lists.newArrayList(mEntry));
+        when(mActiveNotifEntries.getValue()).thenReturn(Lists.newArrayList(mEntry));
         setStateAsleep();
         mLogger.onDozingChanged(false);  // Wake to lockscreen
         assertEquals(1, mNotificationPanelLoggerFake.getCalls().size());
@@ -213,7 +220,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
     @Test
     public void testLogPanelShownOnShadePull() {
-        when(mNotifPipeline.getFlatShadeList()).thenReturn(Lists.newArrayList(mEntry));
+        when(mActiveNotifEntries.getValue()).thenReturn(Lists.newArrayList(mEntry));
         setStateAwake();
         // Now expand panel
         mLogger.onPanelExpandedChanged(true);
@@ -241,7 +248,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 .build();
         entry.setRow(mRow);
 
-        when(mNotifPipeline.getFlatShadeList()).thenReturn(Lists.newArrayList(entry));
+        when(mActiveNotifEntries.getValue()).thenReturn(Lists.newArrayList(entry));
         setStateAsleep();
         mLogger.onDozingChanged(false);  // Wake to lockscreen
         assertEquals(1, mNotificationPanelLoggerFake.getCalls().size());
@@ -255,6 +262,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         TestableNotificationLogger(NotificationListener notificationListener,
                 Executor uiBgExecutor,
                 NotifPipelineFlags notifPipelineFlags,
+                NotifLiveDataStore notifLiveDataStore,
                 NotificationVisibilityProvider visibilityProvider,
                 NotificationEntryManager entryManager,
                 NotifPipeline notifPipeline,
@@ -265,6 +273,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                     notificationListener,
                     uiBgExecutor,
                     notifPipelineFlags,
+                    notifLiveDataStore,
                     visibilityProvider,
                     entryManager,
                     notifPipeline,

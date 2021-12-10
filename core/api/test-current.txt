@@ -42,6 +42,7 @@ package android {
     field public static final String TEST_BIOMETRIC = "android.permission.TEST_BIOMETRIC";
     field public static final String TEST_MANAGE_ROLLBACKS = "android.permission.TEST_MANAGE_ROLLBACKS";
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
+    field public static final String WRITE_COMMUNAL_STATE = "android.permission.WRITE_COMMUNAL_STATE";
     field public static final String WRITE_DEVICE_CONFIG = "android.permission.WRITE_DEVICE_CONFIG";
     field @Deprecated public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
@@ -608,6 +609,14 @@ package android.app.blob {
 
 }
 
+package android.app.communal {
+
+  public final class CommunalManager {
+    method @RequiresPermission(android.Manifest.permission.WRITE_COMMUNAL_STATE) public void setCommunalViewShowing(boolean);
+  }
+
+}
+
 package android.app.contentsuggestions {
 
   public final class ContentSuggestionsManager {
@@ -819,6 +828,7 @@ package android.content.pm {
     method public void holdLock(android.os.IBinder, int);
     method @RequiresPermission(android.Manifest.permission.KEEP_UNINSTALLED_PACKAGES) public void setKeepUninstalledPackages(@NonNull java.util.List<java.lang.String>);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
+    field public static final String FEATURE_COMMUNAL_MODE = "android.software.communal_mode";
     field public static final String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
     field public static final String FEATURE_HDMI_CEC = "android.hardware.hdmi.cec";
     field public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED = 128; // 0x80

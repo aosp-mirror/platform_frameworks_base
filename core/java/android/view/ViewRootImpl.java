@@ -533,10 +533,11 @@ public final class ViewRootImpl implements ViewParent,
 
     boolean mReportNextDraw;
     /**
-     * Set if the reportDraw was requested from WM. If just a local report draw was invoked, there's
-     * no need to report back to system server and can just apply immediately on the client.
+     * Set whether the draw should use blast sync. This is in case the draw is canceled,
+     * but will be rescheduled. We still want the next draw to be sync.
      */
-    boolean mReportDrawToWm;
+    boolean mNextDrawUseBlastSync;
+
     boolean mFullRedrawNeeded;
     boolean mNewSurfaceNeeded;
     boolean mForceNextWindowRelayout;
@@ -2761,7 +2762,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
         final boolean wasReportNextDraw = mReportNextDraw;
-        boolean useBlastSync = false;
+        boolean useBlastSync = mNextDrawUseBlastSync;
 
         if (mFirst || windowShouldResize || viewVisibilityChanged || params != null
                 || mForceNextWindowRelayout) {
@@ -3292,9 +3293,11 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingTransitions.clear();
             }
             performDraw(useBlastSync);
+            mNextDrawUseBlastSync = false;
         } else {
             if (isViewVisible) {
                 // Try again
+                mNextDrawUseBlastSync = useBlastSync;
                 scheduleTraversals();
             } else {
                 if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
@@ -3984,17 +3987,8 @@ public final class ViewRootImpl implements ViewParent,
         }
         mDrawsNeededToReport = 0;
 
-        if (!mReportDrawToWm) {
-            if (DEBUG_BLAST) {
-                Log.d(mTag, "No need to report finishDrawing. Apply immediately");
-            }
-            mSurfaceChangedTransaction.apply();
-            return;
-        }
-
         try {
             mWindowSession.finishDrawing(mWindow, mSurfaceChangedTransaction);
-            mReportDrawToWm = false;
         } catch (RemoteException e) {
             Log.e(mTag, "Unable to report draw finished", e);
             mSurfaceChangedTransaction.apply();
@@ -9604,7 +9598,6 @@ public final class ViewRootImpl implements ViewParent,
         if (mReportNextDraw == false) {
             drawPending();
         }
-        mReportDrawToWm = true;
         mReportNextDraw = true;
     }
 

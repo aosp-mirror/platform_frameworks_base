@@ -2762,6 +2762,16 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports FeliCa communication, which is based on
+     * ISO/IEC 18092 and JIS X 6319-4.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_FELICA = "android.hardware.felica";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device's
      * {@link ActivityManager#isLowRamDevice() ActivityManager.isLowRamDevice()} method returns
      * true.
@@ -3971,6 +3981,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
+    @TestApi
     public static final String FEATURE_COMMUNAL_MODE = "android.software.communal_mode";
 
     /** @hide */

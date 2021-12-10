@@ -21,7 +21,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -63,6 +65,7 @@ public class AutomaticBrightnessControllerTest {
 
     @Mock SensorManager mSensorManager;
     @Mock BrightnessMappingStrategy mBrightnessMappingStrategy;
+    @Mock BrightnessMappingStrategy mIdleBrightnessMappingStrategy;
     @Mock HysteresisLevels mAmbientBrightnessThresholds;
     @Mock HysteresisLevels mScreenBrightnessThresholds;
     @Mock Handler mNoOpHandler;
@@ -100,7 +103,7 @@ public class AutomaticBrightnessControllerTest {
                 INITIAL_LIGHT_SENSOR_RATE, BRIGHTENING_LIGHT_DEBOUNCE_CONFIG,
                 DARKENING_LIGHT_DEBOUNCE_CONFIG, RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG,
                 mAmbientBrightnessThresholds, mScreenBrightnessThresholds,
-                mContext, mHbmController
+                mContext, mHbmController, mIdleBrightnessMappingStrategy
         );
 
         when(mHbmController.getCurrentBrightnessMax()).thenReturn(BRIGHTNESS_MAX_FLOAT);
@@ -230,5 +233,45 @@ public class AutomaticBrightnessControllerTest {
 
         // There should be a user data point added to the mapper.
         verify(mBrightnessMappingStrategy).addUserDataPoint(1000f, 0.5f);
+    }
+
+    @Test
+    public void testSwitchToIdleMappingStrategy() throws Exception {
+        Sensor lightSensor = TestUtils.createSensor(Sensor.TYPE_LIGHT, "Light Sensor");
+        mController = setupController(lightSensor);
+
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(lightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Sensor reads 1000 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 1000));
+
+        // User sets brightness to 100
+        mController.configure(true /* enable */, null /* configuration */,
+                0.5f /* brightness */, true /* userChangedBrightness */, 0 /* adjustment */,
+                false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
+
+        // There should be a user data point added to the mapper.
+        verify(mBrightnessMappingStrategy, times(1)).addUserDataPoint(1000f, 0.5f);
+        verify(mBrightnessMappingStrategy, times(2)).setBrightnessConfiguration(any());
+        verify(mBrightnessMappingStrategy, times(3)).getBrightness(anyFloat(), any(), anyInt());
+
+        // Now let's do the same for idle mode
+        mController.switchToIdleMode();
+        // Called once for init, and once when switching
+        verify(mBrightnessMappingStrategy, times(2)).isForIdleMode();
+        // Ensure, after switching, original BMS is not used anymore
+        verifyNoMoreInteractions(mBrightnessMappingStrategy);
+
+        // User sets idle brightness to 0.5
+        mController.configure(true /* enable */, null /* configuration */,
+                0.5f /* brightness */, true /* userChangedBrightness */, 0 /* adjustment */,
+                false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
+
+        // Ensure we use the correct mapping strategy
+        verify(mIdleBrightnessMappingStrategy, times(1)).addUserDataPoint(1000f, 0.5f);
     }
 }
