@@ -634,6 +634,7 @@ public class TvIAppManagerService extends SystemService {
 
         @Override
         public void prepare(String tiasId, int type, int userId) {
+            // TODO: bind service
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, "prepare");
             final long identity = Binder.clearCallingIdentity();
@@ -694,6 +695,40 @@ public class TvIAppManagerService extends SystemService {
                 }
             } catch (RemoteException e) {
                 Slogf.e(TAG, "error in notifyAppLinkInfo", e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void sendAppLinkCommand(String tiasId, Bundle command, int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "sendAppLinkCommand");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    TvIAppState iAppState = userState.mIAppMap.get(tiasId);
+                    if (iAppState == null) {
+                        Slogf.e(TAG, "failed to sendAppLinkCommand - unknown TIAS id "
+                                + tiasId);
+                        return;
+                    }
+                    ComponentName componentName = iAppState.mInfo.getComponent();
+                    ServiceState serviceState = userState.mServiceStateMap.get(componentName);
+                    if (serviceState == null) {
+                        serviceState = new ServiceState(
+                                componentName, tiasId, resolvedUserId);
+                        serviceState.addPendingAppLinkCommand(command);
+                        userState.mServiceStateMap.put(componentName, serviceState);
+                    } else if (serviceState.mService != null) {
+                        serviceState.mService.sendAppLinkCommand(command);
+                    } else {
+                        serviceState.addPendingAppLinkCommand(command);
+                    }
+                }
+            } catch (RemoteException e) {
+                Slogf.e(TAG, "error in sendAppLinkCommand", e);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1274,8 +1309,9 @@ public class TvIAppManagerService extends SystemService {
         private final List<IBinder> mSessionTokens = new ArrayList<>();
         private final ServiceConnection mConnection;
         private final ComponentName mComponent;
-        private final String mIAppSeriviceId;
+        private final String mIAppServiceId;
         private final List<Bundle> mPendingAppLinkInfo = new ArrayList<>();
+        private final List<Bundle> mPendingAppLinkCommand = new ArrayList<>();
 
         private boolean mPendingPrepare = false;
         private Integer mPendingPrepareType = null;
@@ -1294,11 +1330,15 @@ public class TvIAppManagerService extends SystemService {
             mPendingPrepare = pendingPrepare;
             mPendingPrepareType = prepareType;
             mConnection = new IAppServiceConnection(component, userId);
-            mIAppSeriviceId = tias;
+            mIAppServiceId = tias;
         }
 
         private void addPendingAppLink(Bundle info) {
             mPendingAppLinkInfo.add(info);
+        }
+
+        private void addPendingAppLinkCommand(Bundle command) {
+            mPendingAppLinkCommand.add(command);
         }
     }
 
@@ -1349,6 +1389,23 @@ public class TvIAppManagerService extends SystemService {
                             it.remove();
                         } catch (RemoteException e) {
                             Slogf.e(TAG, "error in notifyAppLinkInfo(" + appLinkInfo
+                                    + ") when onServiceConnected", e);
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
+                    }
+                }
+
+                if (!serviceState.mPendingAppLinkCommand.isEmpty()) {
+                    for (Iterator<Bundle> it = serviceState.mPendingAppLinkCommand.iterator();
+                            it.hasNext(); ) {
+                        Bundle command = it.next();
+                        final long identity = Binder.clearCallingIdentity();
+                        try {
+                            serviceState.mService.sendAppLinkCommand(command);
+                            it.remove();
+                        } catch (RemoteException e) {
+                            Slogf.e(TAG, "error in sendAppLinkCommand(" + command
                                     + ") when onServiceConnected", e);
                         } finally {
                             Binder.restoreCallingIdentity(identity);
@@ -1411,7 +1468,7 @@ public class TvIAppManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
-                    String iAppServiceId = serviceState.mIAppSeriviceId;
+                    String iAppServiceId = serviceState.mIAppServiceId;
                     UserState userState = getUserStateLocked(mUserId);
                     notifyStateChangedLocked(userState, iAppServiceId, type, state);
                 }
