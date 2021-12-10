@@ -255,25 +255,27 @@ class PinnedTaskController {
         mDestRotatedBounds = null;
         mPipTransaction = null;
         final Rect areaBounds = taskArea.getBounds();
-        if (pipTx != null) {
+        if (pipTx != null && pipTx.mPosition != null) {
             // The transaction from recents animation is in old rotation. So the position needs to
             // be rotated.
-            float dx = pipTx.mPositionX;
-            float dy = pipTx.mPositionY;
+            float dx = pipTx.mPosition.x;
+            float dy = pipTx.mPosition.y;
             final Matrix matrix = pipTx.getMatrix();
             if (pipTx.mRotation == 90) {
-                dx = pipTx.mPositionY;
-                dy = areaBounds.right - pipTx.mPositionX;
+                dx = pipTx.mPosition.y;
+                dy = areaBounds.right - pipTx.mPosition.x;
                 matrix.postRotate(-90);
             } else if (pipTx.mRotation == -90) {
-                dx = areaBounds.bottom - pipTx.mPositionY;
-                dy = pipTx.mPositionX;
+                dx = areaBounds.bottom - pipTx.mPosition.y;
+                dy = pipTx.mPosition.x;
                 matrix.postRotate(90);
             }
             matrix.postTranslate(dx, dy);
             final SurfaceControl leash = pinnedTask.getSurfaceControl();
-            t.setMatrix(leash, matrix, new float[9])
-                    .setCornerRadius(leash, pipTx.mCornerRadius);
+            t.setMatrix(leash, matrix, new float[9]);
+            if (pipTx.hasCornerRadiusSet()) {
+                t.setCornerRadius(leash, pipTx.mCornerRadius);
+            }
             Slog.i(TAG, "Seamless rotation PiP tx=" + pipTx + " pos=" + dx + "," + dy);
             return;
         }
