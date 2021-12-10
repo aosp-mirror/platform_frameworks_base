@@ -159,7 +159,7 @@ public class ApplicationsStateRoboTest {
         }
 
         public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
-                @PackageManager.ResolveInfoFlags int flags, @UserIdInt int userId) {
+                @PackageManager.ResolveInfoFlagsBits int flags, @UserIdInt int userId) {
             List<ResolveInfo> resolveInfos = new ArrayList<>();
             ResolveInfo resolveInfo = new ResolveInfo();
             resolveInfo.activityInfo = new ActivityInfo();

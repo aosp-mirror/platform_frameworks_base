@@ -210,16 +210,28 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags)
             throws NameNotFoundException {
+        return getPackageInfo(packageName, PackageInfoFlags.of(flags));
+    }
+
+    @Override
+    public PackageInfo getPackageInfo(String packageName, PackageInfoFlags flags)
+            throws NameNotFoundException {
         return getPackageInfoAsUser(packageName, flags, getUserId());
     }
 
     @Override
     public PackageInfo getPackageInfo(VersionedPackage versionedPackage, int flags)
             throws NameNotFoundException {
+        return getPackageInfo(versionedPackage, PackageInfoFlags.of(flags));
+    }
+
+    @Override
+    public PackageInfo getPackageInfo(VersionedPackage versionedPackage, PackageInfoFlags flags)
+            throws NameNotFoundException {
         final int userId = getUserId();
         try {
             PackageInfo pi = mPM.getPackageInfoVersioned(versionedPackage,
-                    updateFlagsForPackage(flags, userId), userId);
+                    updateFlagsForPackage(flags.getValue(), userId), userId);
             if (pi != null) {
                 return pi;
             }
@@ -232,10 +244,16 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
+        return getPackageInfoAsUser(packageName, PackageInfoFlags.of(flags), userId);
+    }
+
+    @Override
+    public PackageInfo getPackageInfoAsUser(String packageName, PackageInfoFlags flags, int userId)
+            throws NameNotFoundException {
         PackageInfo pi =
                 getPackageInfoAsUserCached(
                         packageName,
-                        updateFlagsForPackage(flags, userId),
+                        updateFlagsForPackage(flags.getValue(), userId),
                         userId);
         if (pi == null) {
             throw new NameNotFoundException(packageName);
@@ -334,10 +352,16 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public int[] getPackageGids(String packageName, int flags)
             throws NameNotFoundException {
+        return getPackageGids(packageName, PackageInfoFlags.of(flags));
+    }
+
+    @Override
+    public int[] getPackageGids(String packageName, PackageInfoFlags flags)
+            throws NameNotFoundException {
         final int userId = getUserId();
         try {
             int[] gids = mPM.getPackageGids(packageName,
-                    updateFlagsForPackage(flags, userId), userId);
+                    updateFlagsForPackage(flags.getValue(), userId), userId);
             if (gids != null) {
                 return gids;
             }
@@ -350,6 +374,12 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public int getPackageUid(String packageName, int flags) throws NameNotFoundException {
+        return getPackageUid(packageName, PackageInfoFlags.of(flags));
+    }
+
+    @Override
+    public int getPackageUid(String packageName, PackageInfoFlags flags)
+            throws NameNotFoundException {
         return getPackageUidAsUser(packageName, flags, getUserId());
     }
 
@@ -361,9 +391,15 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public int getPackageUidAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
+        return getPackageUidAsUser(packageName, PackageInfoFlags.of(flags), userId);
+    }
+
+    @Override
+    public int getPackageUidAsUser(String packageName, PackageInfoFlags flags, int userId)
+            throws NameNotFoundException {
         try {
             int uid = mPM.getPackageUid(packageName,
-                    updateFlagsForPackage(flags, userId), userId);
+                    updateFlagsForPackage(flags.getValue(), userId), userId);
             if (uid >= 0) {
                 return uid;
             }
@@ -448,15 +484,27 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public ApplicationInfo getApplicationInfo(String packageName, int flags)
             throws NameNotFoundException {
+        return getApplicationInfo(packageName, ApplicationInfoFlags.of(flags));
+    }
+
+    @Override
+    public ApplicationInfo getApplicationInfo(String packageName, ApplicationInfoFlags flags)
+            throws NameNotFoundException {
         return getApplicationInfoAsUser(packageName, flags, getUserId());
     }
 
     @Override
     public ApplicationInfo getApplicationInfoAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
+        return getApplicationInfoAsUser(packageName, ApplicationInfoFlags.of(flags), userId);
+    }
+
+    @Override
+    public ApplicationInfo getApplicationInfoAsUser(String packageName, ApplicationInfoFlags flags,
+            int userId) throws NameNotFoundException {
         ApplicationInfo ai = getApplicationInfoAsUserCached(
                         packageName,
-                        updateFlagsForApplication(flags, userId),
+                        updateFlagsForApplication(flags.getValue(), userId),
                         userId);
         if (ai == null) {
             throw new NameNotFoundException(packageName);
@@ -505,10 +553,16 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public ActivityInfo getActivityInfo(ComponentName className, int flags)
             throws NameNotFoundException {
+        return getActivityInfo(className, ComponentInfoFlags.of(flags));
+    }
+
+    @Override
+    public ActivityInfo getActivityInfo(ComponentName className, ComponentInfoFlags flags)
+            throws NameNotFoundException {
         final int userId = getUserId();
         try {
             ActivityInfo ai = mPM.getActivityInfo(className,
-                    updateFlagsForComponent(flags, userId, null), userId);
+                    updateFlagsForComponent(flags.getValue(), userId, null), userId);
             if (ai != null) {
                 return ai;
             }
@@ -522,10 +576,16 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public ActivityInfo getReceiverInfo(ComponentName className, int flags)
             throws NameNotFoundException {
+        return getReceiverInfo(className, ComponentInfoFlags.of(flags));
+    }
+
+    @Override
+    public ActivityInfo getReceiverInfo(ComponentName className, ComponentInfoFlags flags)
+            throws NameNotFoundException {
         final int userId = getUserId();
         try {
             ActivityInfo ai = mPM.getReceiverInfo(className,
-                    updateFlagsForComponent(flags, userId, null), userId);
+                    updateFlagsForComponent(flags.getValue(), userId, null), userId);
             if (ai != null) {
                 return ai;
             }
@@ -539,10 +599,16 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public ServiceInfo getServiceInfo(ComponentName className, int flags)
             throws NameNotFoundException {
+        return getServiceInfo(className, ComponentInfoFlags.of(flags));
+    }
+
+    @Override
+    public ServiceInfo getServiceInfo(ComponentName className, ComponentInfoFlags flags)
+            throws NameNotFoundException {
         final int userId = getUserId();
         try {
             ServiceInfo si = mPM.getServiceInfo(className,
-                    updateFlagsForComponent(flags, userId, null), userId);
+                    updateFlagsForComponent(flags.getValue(), userId, null), userId);
             if (si != null) {
                 return si;
             }
@@ -556,10 +622,16 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public ProviderInfo getProviderInfo(ComponentName className, int flags)
             throws NameNotFoundException {
+        return getProviderInfo(className, ComponentInfoFlags.of(flags));
+    }
+
+    @Override
+    public ProviderInfo getProviderInfo(ComponentName className, ComponentInfoFlags flags)
+            throws NameNotFoundException {
         final int userId = getUserId();
         try {
             ProviderInfo pi = mPM.getProviderInfo(className,
-                    updateFlagsForComponent(flags, userId, null), userId);
+                    updateFlagsForComponent(flags.getValue(), userId, null), userId);
             if (pi != null) {
                 return pi;
             }
@@ -582,16 +654,30 @@ public class ApplicationPackageManager extends PackageManager {
     /** @hide */
     @Override
     public @NonNull List<SharedLibraryInfo> getSharedLibraries(int flags) {
+        return this.getSharedLibraries(PackageInfoFlags.of(flags));
+    }
+
+    /** @hide
+     * @param flags */
+    @Override
+    public @NonNull List<SharedLibraryInfo> getSharedLibraries(PackageInfoFlags flags) {
         return getSharedLibrariesAsUser(flags, getUserId());
     }
 
     /** @hide */
     @Override
-    @SuppressWarnings("unchecked")
     public @NonNull List<SharedLibraryInfo> getSharedLibrariesAsUser(int flags, int userId) {
+        return getSharedLibrariesAsUser(PackageInfoFlags.of(flags), userId);
+    }
+
+    /** @hide */
+    @Override
+    @SuppressWarnings("unchecked")
+    public @NonNull List<SharedLibraryInfo> getSharedLibrariesAsUser(PackageInfoFlags flags,
+            int userId) {
         try {
             ParceledListSlice<SharedLibraryInfo> sharedLibs = mPM.getSharedLibraries(
-                    mContext.getOpPackageName(), flags, userId);
+                    mContext.getOpPackageName(), flags.getValue(), userId);
             if (sharedLibs == null) {
                 return Collections.emptyList();
             }
@@ -604,10 +690,18 @@ public class ApplicationPackageManager extends PackageManager {
     @NonNull
     @Override
     public List<SharedLibraryInfo> getDeclaredSharedLibraries(@NonNull String packageName,
-            @InstallFlags int flags) {
+            int flags) {
+        return getDeclaredSharedLibraries(packageName, PackageInfoFlags.of(flags));
+    }
+
+    @NonNull
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<SharedLibraryInfo> getDeclaredSharedLibraries(@NonNull String packageName,
+            PackageInfoFlags flags) {
         try {
             ParceledListSlice<SharedLibraryInfo> sharedLibraries = mPM.getDeclaredSharedLibraries(
-                    packageName, flags, mContext.getUserId());
+                    packageName, flags.getValue(), mContext.getUserId());
             return sharedLibraries != null ? sharedLibraries.getList() : Collections.emptyList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1092,6 +1186,12 @@ public class ApplicationPackageManager extends PackageManager {
     @SuppressWarnings("unchecked")
     @Override
     public List<PackageInfo> getInstalledPackages(int flags) {
+        return getInstalledPackages(PackageInfoFlags.of(flags));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<PackageInfo> getInstalledPackages(PackageInfoFlags flags) {
         return getInstalledPackagesAsUser(flags, getUserId());
     }
 
@@ -1099,9 +1199,17 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     @SuppressWarnings("unchecked")
     public List<PackageInfo> getInstalledPackagesAsUser(int flags, int userId) {
+        return getInstalledPackagesAsUser(PackageInfoFlags.of(flags), userId);
+    }
+
+    /** @hide */
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<PackageInfo> getInstalledPackagesAsUser(PackageInfoFlags flags, int userId) {
         try {
             ParceledListSlice<PackageInfo> parceledList =
-                    mPM.getInstalledPackages(updateFlagsForPackage(flags, userId), userId);
+                    mPM.getInstalledPackages(updateFlagsForPackage(flags.getValue(), userId),
+                            userId);
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -1113,13 +1221,19 @@ public class ApplicationPackageManager extends PackageManager {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<PackageInfo> getPackagesHoldingPermissions(
-            String[] permissions, int flags) {
+    public List<PackageInfo> getPackagesHoldingPermissions(String[] permissions, int flags) {
+        return this.getPackagesHoldingPermissions(permissions, PackageInfoFlags.of(flags));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<PackageInfo> getPackagesHoldingPermissions(String[] permissions,
+            PackageInfoFlags flags) {
         final int userId = getUserId();
         try {
             ParceledListSlice<PackageInfo> parceledList =
                     mPM.getPackagesHoldingPermissions(permissions,
-                            updateFlagsForPackage(flags, userId), userId);
+                            updateFlagsForPackage(flags.getValue(), userId), userId);
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -1135,13 +1249,27 @@ public class ApplicationPackageManager extends PackageManager {
         return getInstalledApplicationsAsUser(flags, getUserId());
     }
 
+    @Override
+    public List<ApplicationInfo> getInstalledApplications(ApplicationInfoFlags flags) {
+        return getInstalledApplicationsAsUser(flags, getUserId());
+    }
+
     /** @hide */
     @SuppressWarnings("unchecked")
     @Override
     public List<ApplicationInfo> getInstalledApplicationsAsUser(int flags, int userId) {
+        return getInstalledApplicationsAsUser(ApplicationInfoFlags.of(flags), userId);
+    }
+
+    /** @hide */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ApplicationInfo> getInstalledApplicationsAsUser(ApplicationInfoFlags flags,
+            int userId) {
         try {
             ParceledListSlice<ApplicationInfo> parceledList =
-                    mPM.getInstalledApplications(updateFlagsForApplication(flags, userId), userId);
+                    mPM.getInstalledApplications(updateFlagsForApplication(
+                            flags.getValue(), userId), userId);
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -1249,16 +1377,26 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public ResolveInfo resolveActivity(Intent intent, int flags) {
+        return resolveActivity(intent, ResolveInfoFlags.of(flags));
+    }
+
+    @Override
+    public ResolveInfo resolveActivity(Intent intent, ResolveInfoFlags flags) {
         return resolveActivityAsUser(intent, flags, getUserId());
     }
 
     @Override
     public ResolveInfo resolveActivityAsUser(Intent intent, int flags, int userId) {
+        return resolveActivityAsUser(intent, ResolveInfoFlags.of(flags), userId);
+    }
+
+    @Override
+    public ResolveInfo resolveActivityAsUser(Intent intent, ResolveInfoFlags flags, int userId) {
         try {
             return mPM.resolveIntent(
                 intent,
                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                updateFlagsForComponent(flags, userId, intent),
+                updateFlagsForComponent(flags.getValue(), userId, intent),
                 userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1266,21 +1404,31 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public List<ResolveInfo> queryIntentActivities(Intent intent,
-                                                   int flags) {
+    public List<ResolveInfo> queryIntentActivities(Intent intent, int flags) {
+        return queryIntentActivities(intent, ResolveInfoFlags.of(flags));
+    }
+
+    @Override
+    public List<ResolveInfo> queryIntentActivities(Intent intent, ResolveInfoFlags flags) {
         return queryIntentActivitiesAsUser(intent, flags, getUserId());
     }
 
     /** @hide Same as above but for a specific user */
     @Override
+    public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent, int flags, int userId) {
+        return queryIntentActivitiesAsUser(intent, ResolveInfoFlags.of(flags), userId);
+    }
+
+    /** @hide Same as above but for a specific user */
+    @Override
     @SuppressWarnings("unchecked")
-    public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
-            int flags, int userId) {
+    public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent, ResolveInfoFlags flags,
+            int userId) {
         try {
             ParceledListSlice<ResolveInfo> parceledList = mPM.queryIntentActivities(
                     intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                    updateFlagsForComponent(flags, userId, intent),
+                    updateFlagsForComponent(flags.getValue(), userId, intent),
                     userId);
             if (parceledList == null) {
                 return Collections.emptyList();
@@ -1292,22 +1440,30 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<ResolveInfo> queryIntentActivityOptions(ComponentName caller, Intent[] specifics,
             Intent intent, int flags) {
+        return queryIntentActivityOptions(caller,
+                specifics == null ? null : new ArrayList<>(Arrays.asList(specifics)),
+                intent, ResolveInfoFlags.of(flags));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<ResolveInfo> queryIntentActivityOptions(ComponentName caller,
+            List<Intent> specifics, Intent intent, ResolveInfoFlags flags) {
         final int userId = getUserId();
         final ContentResolver resolver = mContext.getContentResolver();
 
         String[] specificTypes = null;
         if (specifics != null) {
-            final int N = specifics.length;
-            for (int i=0; i<N; i++) {
-                Intent sp = specifics[i];
+            final int numSpecifics = specifics.size();
+            for (int i = 0; i < numSpecifics; i++) {
+                Intent sp = specifics.get(i);
                 if (sp != null) {
                     String t = sp.resolveTypeIfNeeded(resolver);
                     if (t != null) {
                         if (specificTypes == null) {
-                            specificTypes = new String[N];
+                            specificTypes = new String[numSpecifics];
                         }
                         specificTypes[i] = t;
                     }
@@ -1318,11 +1474,11 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             ParceledListSlice<ResolveInfo> parceledList = mPM.queryIntentActivityOptions(
                     caller,
-                    specifics,
+                    specifics == null ? null : specifics.toArray(new Intent[0]),
                     specificTypes,
                     intent,
                     intent.resolveTypeIfNeeded(resolver),
-                    updateFlagsForComponent(flags, userId, intent),
+                    updateFlagsForComponent(flags.getValue(), userId, intent),
                     userId);
             if (parceledList == null) {
                 return Collections.emptyList();
@@ -1337,13 +1493,22 @@ public class ApplicationPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    @SuppressWarnings("unchecked")
     public List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent, int flags, int userId) {
+        return queryBroadcastReceiversAsUser(intent, ResolveInfoFlags.of(flags), userId);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent, ResolveInfoFlags flags,
+            int userId) {
         try {
             ParceledListSlice<ResolveInfo> parceledList = mPM.queryIntentReceivers(
                     intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                    updateFlagsForComponent(flags, userId, intent),
+                    updateFlagsForComponent(flags.getValue(), userId, intent),
                     userId);
             if (parceledList == null) {
                 return Collections.emptyList();
@@ -1356,17 +1521,27 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags) {
+        return queryBroadcastReceivers(intent, ResolveInfoFlags.of(flags));
+    }
+
+    @Override
+    public List<ResolveInfo> queryBroadcastReceivers(Intent intent, ResolveInfoFlags flags) {
         return queryBroadcastReceiversAsUser(intent, flags, getUserId());
     }
 
     @Override
-    public ResolveInfo resolveServiceAsUser(Intent intent, @ResolveInfoFlags int flags,
+    public ResolveInfo resolveServiceAsUser(Intent intent, int flags, @UserIdInt int userId) {
+        return resolveServiceAsUser(intent, ResolveInfoFlags.of(flags), userId);
+    }
+
+    @Override
+    public ResolveInfo resolveServiceAsUser(Intent intent, ResolveInfoFlags flags,
             @UserIdInt int userId) {
         try {
             return mPM.resolveService(
                 intent,
                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                updateFlagsForComponent(flags, userId, intent),
+                updateFlagsForComponent(flags.getValue(), userId, intent),
                 userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1375,17 +1550,28 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public ResolveInfo resolveService(Intent intent, int flags) {
+        return resolveService(intent, ResolveInfoFlags.of(flags));
+    }
+
+    @Override
+    public ResolveInfo resolveService(Intent intent, ResolveInfoFlags flags) {
         return resolveServiceAsUser(intent, flags, getUserId());
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<ResolveInfo> queryIntentServicesAsUser(Intent intent, int flags, int userId) {
+        return queryIntentServicesAsUser(intent, ResolveInfoFlags.of(flags), userId);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<ResolveInfo> queryIntentServicesAsUser(Intent intent, ResolveInfoFlags flags,
+            int userId) {
         try {
             ParceledListSlice<ResolveInfo> parceledList = mPM.queryIntentServices(
                     intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                    updateFlagsForComponent(flags, userId, intent),
+                    updateFlagsForComponent(flags.getValue(), userId, intent),
                     userId);
             if (parceledList == null) {
                 return Collections.emptyList();
@@ -1398,18 +1584,29 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public List<ResolveInfo> queryIntentServices(Intent intent, int flags) {
+        return queryIntentServices(intent, ResolveInfoFlags.of(flags));
+    }
+
+    @Override
+    public List<ResolveInfo> queryIntentServices(Intent intent, ResolveInfoFlags flags) {
         return queryIntentServicesAsUser(intent, flags, getUserId());
+    }
+
+    @Override
+    public List<ResolveInfo> queryIntentContentProvidersAsUser(
+            Intent intent, int flags, int userId) {
+        return queryIntentContentProvidersAsUser(intent, ResolveInfoFlags.of(flags), userId);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public List<ResolveInfo> queryIntentContentProvidersAsUser(
-            Intent intent, int flags, int userId) {
+            Intent intent, ResolveInfoFlags flags, int userId) {
         try {
             ParceledListSlice<ResolveInfo> parceledList = mPM.queryIntentContentProviders(
                     intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                    updateFlagsForComponent(flags, userId, intent),
+                    updateFlagsForComponent(flags.getValue(), userId, intent),
                     userId);
             if (parceledList == null) {
                 return Collections.emptyList();
@@ -1422,39 +1619,68 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public List<ResolveInfo> queryIntentContentProviders(Intent intent, int flags) {
+        return queryIntentContentProviders(intent, ResolveInfoFlags.of(flags));
+    }
+
+    @Override
+    public List<ResolveInfo> queryIntentContentProviders(Intent intent, ResolveInfoFlags flags) {
         return queryIntentContentProvidersAsUser(intent, flags, getUserId());
     }
 
     @Override
     public ProviderInfo resolveContentProvider(String name, int flags) {
+        return resolveContentProvider(name, ComponentInfoFlags.of(flags));
+    }
+
+    @Override
+    public ProviderInfo resolveContentProvider(String name, ComponentInfoFlags flags) {
         return resolveContentProviderAsUser(name, flags, getUserId());
     }
 
     /** @hide **/
     @Override
     public ProviderInfo resolveContentProviderAsUser(String name, int flags, int userId) {
+        return resolveContentProviderAsUser(name, ComponentInfoFlags.of(flags), userId);
+    }
+
+    /** @hide **/
+    @Override
+    public ProviderInfo resolveContentProviderAsUser(String name, ComponentInfoFlags flags,
+            int userId) {
         try {
             return mPM.resolveContentProvider(name,
-                    updateFlagsForComponent(flags, userId, null), userId);
+                    updateFlagsForComponent(flags.getValue(), userId, null), userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     @Override
-    public List<ProviderInfo> queryContentProviders(String processName,
-            int uid, int flags) {
+    public List<ProviderInfo> queryContentProviders(String processName, int uid, int flags) {
+        return queryContentProviders(processName, uid, ComponentInfoFlags.of(flags));
+    }
+
+    @Override
+    public List<ProviderInfo> queryContentProviders(String processName, int uid,
+            ComponentInfoFlags flags) {
         return queryContentProviders(processName, uid, flags, null);
+    }
+
+    @Override
+    public List<ProviderInfo> queryContentProviders(String processName,
+            int uid, int flags, String metaDataKey) {
+        return queryContentProviders(processName, uid, ComponentInfoFlags.of(flags), metaDataKey);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public List<ProviderInfo> queryContentProviders(String processName,
-            int uid, int flags, String metaDataKey) {
+            int uid, ComponentInfoFlags flags, String metaDataKey) {
         try {
             ParceledListSlice<ProviderInfo> slice = mPM.queryContentProviders(processName, uid,
-                    updateFlagsForComponent(flags, UserHandle.getUserId(uid), null), metaDataKey);
-            return slice != null ? slice.getList() : Collections.<ProviderInfo>emptyList();
+                    updateFlagsForComponent(flags.getValue(), UserHandle.getUserId(uid),
+                            null), metaDataKey);
+            return slice != null ? slice.getList() : Collections.emptyList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1839,7 +2065,7 @@ public class ApplicationPackageManager extends PackageManager {
     /**
      * Update given flags when being used to request {@link PackageInfo}.
      */
-    private int updateFlagsForPackage(int flags, int userId) {
+    private long updateFlagsForPackage(long flags, int userId) {
         if ((flags & (GET_ACTIVITIES | GET_RECEIVERS | GET_SERVICES | GET_PROVIDERS)) != 0) {
             // Caller is asking for component details, so they'd better be
             // asking for specific Direct Boot matching behavior
@@ -1855,14 +2081,15 @@ public class ApplicationPackageManager extends PackageManager {
     /**
      * Update given flags when being used to request {@link ApplicationInfo}.
      */
-    private int updateFlagsForApplication(int flags, int userId) {
+    private long updateFlagsForApplication(long flags, int userId) {
         return updateFlagsForPackage(flags, userId);
     }
 
     /**
      * Update given flags when being used to request {@link ComponentInfo}.
      */
-    private int updateFlagsForComponent(int flags, int userId, Intent intent) {
+    private long updateFlagsForComponent(@ComponentInfoFlagsBits long flags, int userId,
+            Intent intent) {
         if (intent != null) {
             if ((intent.getFlags() & Intent.FLAG_DIRECT_BOOT_AUTO) != 0) {
                 flags |= MATCH_DIRECT_BOOT_AUTO;
@@ -2109,18 +2336,24 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Nullable
+    public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath, int flags) {
+        return getPackageArchiveInfo(archiveFilePath, PackageInfoFlags.of(flags));
+    }
+
+    @Nullable
     public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath,
-            @PackageInfoFlags int flags) {
-        if ((flags & (PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+            PackageInfoFlags flags) {
+        long flagsBits = flags.getValue();
+        if ((flagsBits & (PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                 | PackageManager.MATCH_DIRECT_BOOT_AWARE)) == 0) {
             // Caller expressed no opinion about what encryption
             // aware/unaware components they want to see, so match both
-            flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE
+            flagsBits |= PackageManager.MATCH_DIRECT_BOOT_AWARE
                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
         }
 
-        boolean collectCertificates = (flags & PackageManager.GET_SIGNATURES) != 0
-                || (flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0;
+        boolean collectCertificates = (flagsBits & PackageManager.GET_SIGNATURES) != 0
+                || (flagsBits & PackageManager.GET_SIGNING_CERTIFICATES) != 0;
 
         ParseInput input = ParseTypeImpl.forParsingWithoutPlatformCompat().reset();
         ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefault(input,
@@ -2129,8 +2362,8 @@ public class ApplicationPackageManager extends PackageManager {
         if (result.isError()) {
             return null;
         }
-        return PackageInfoWithoutStateUtils.generate(result.getResult(), null, flags, 0, 0, null,
-                FrameworkPackageUserState.DEFAULT, UserHandle.getCallingUserId());
+        return PackageInfoWithoutStateUtils.generate(result.getResult(), null, flagsBits, 0, 0,
+                null, FrameworkPackageUserState.DEFAULT, UserHandle.getCallingUserId());
     }
 
     @Override

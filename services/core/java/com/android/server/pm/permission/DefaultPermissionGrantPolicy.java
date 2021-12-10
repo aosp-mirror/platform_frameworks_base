@@ -103,12 +103,12 @@ final class DefaultPermissionGrantPolicy {
     private static final String TAG = "DefaultPermGrantPolicy"; // must be <= 23 chars
     private static final boolean DEBUG = false;
 
-    @PackageManager.ResolveInfoFlags
+    @PackageManager.ResolveInfoFlagsBits
     private static final int DEFAULT_INTENT_QUERY_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                     | PackageManager.MATCH_UNINSTALLED_PACKAGES;
 
-    @PackageManager.PackageInfoFlags
+    @PackageManager.PackageInfoFlagsBits
     private static final int DEFAULT_PACKAGE_INFO_QUERY_FLAGS =
             PackageManager.MATCH_UNINSTALLED_PACKAGES
                     | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS

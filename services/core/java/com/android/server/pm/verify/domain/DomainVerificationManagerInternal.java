@@ -391,7 +391,7 @@ public interface DomainVerificationManagerInternal {
      */
     @ApprovalLevel
     int approvalLevelForDomain(@NonNull PackageStateInternal pkgSetting, @NonNull Intent intent,
-            @PackageManager.ResolveInfoFlags long resolveInfoFlags, @UserIdInt int userId);
+            @PackageManager.ResolveInfoFlagsBits long resolveInfoFlags, @UserIdInt int userId);
 
     /**
      * @return the domain verification set ID for the given package, or null if the ID is

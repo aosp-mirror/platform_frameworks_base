@@ -76,8 +76,9 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static PackageInfo generate(ParsingPackageRead pkg, int[] gids,
-            @PackageManager.PackageInfoFlags long flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, FrameworkPackageUserState state, int userId) {
+            @PackageManager.PackageInfoFlagsBits long flags, long firstInstallTime,
+            long lastUpdateTime, Set<String> grantedPermissions, FrameworkPackageUserState state,
+            int userId) {
         return generateWithComponents(pkg, gids, flags, firstInstallTime, lastUpdateTime, grantedPermissions,
                 state, userId, null);
     }
@@ -90,9 +91,9 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     private static PackageInfo generateWithComponents(ParsingPackageRead pkg, int[] gids,
-            @PackageManager.PackageInfoFlags long flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, FrameworkPackageUserState state, int userId,
-            @Nullable ApexInfo apexInfo) {
+            @PackageManager.PackageInfoFlagsBits long flags, long firstInstallTime,
+            long lastUpdateTime, Set<String> grantedPermissions, FrameworkPackageUserState state,
+            int userId, @Nullable ApexInfo apexInfo) {
         ApplicationInfo applicationInfo = generateApplicationInfo(pkg, flags, state, userId);
         if (applicationInfo == null) {
             return null;
@@ -190,9 +191,9 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static PackageInfo generateWithoutComponents(ParsingPackageRead pkg, int[] gids,
-            @PackageManager.PackageInfoFlags long flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, FrameworkPackageUserState state, int userId,
-            @Nullable ApexInfo apexInfo, @NonNull ApplicationInfo applicationInfo) {
+            @PackageManager.PackageInfoFlagsBits long flags, long firstInstallTime,
+            long lastUpdateTime, Set<String> grantedPermissions, FrameworkPackageUserState state,
+            int userId, @Nullable ApexInfo apexInfo, @NonNull ApplicationInfo applicationInfo) {
         if (!checkUseInstalled(pkg, state, flags)) {
             return null;
         }
@@ -210,7 +211,7 @@ public class PackageInfoWithoutStateUtils {
      */
     @NonNull
     public static PackageInfo generateWithoutComponentsUnchecked(ParsingPackageRead pkg, int[] gids,
-            @PackageManager.PackageInfoFlags long flags, long firstInstallTime,
+            @PackageManager.PackageInfoFlagsBits long flags, long firstInstallTime,
             long lastUpdateTime, Set<String> grantedPermissions, FrameworkPackageUserState state,
             int userId, @Nullable ApexInfo apexInfo, @NonNull ApplicationInfo applicationInfo) {
         PackageInfo pi = new PackageInfo();
@@ -365,7 +366,7 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ApplicationInfo generateApplicationInfo(ParsingPackageRead pkg,
-            @PackageManager.ApplicationInfoFlags long flags, FrameworkPackageUserState state,
+            @PackageManager.ApplicationInfoFlagsBits long flags, FrameworkPackageUserState state,
             int userId) {
         if (pkg == null) {
             return null;
@@ -393,7 +394,7 @@ public class PackageInfoWithoutStateUtils {
      */
     @NonNull
     public static ApplicationInfo generateApplicationInfoUnchecked(@NonNull ParsingPackageRead pkg,
-            @PackageManager.ApplicationInfoFlags long flags,
+            @PackageManager.ApplicationInfoFlagsBits long flags,
             @NonNull FrameworkPackageUserState state, int userId, boolean assignUserFields) {
         // Make shallow copy so we can store the metadata/libraries safely
         ApplicationInfo ai = ((ParsingPackageHidden) pkg).toAppInfoWithoutState();
@@ -453,7 +454,7 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ApplicationInfo generateDelegateApplicationInfo(@Nullable ApplicationInfo ai,
-            @PackageManager.ApplicationInfoFlags long flags,
+            @PackageManager.ApplicationInfoFlagsBits long flags,
             @NonNull FrameworkPackageUserState state, int userId) {
         if (ai == null || !checkUseInstalledOrHidden(flags, state, ai)) {
             return null;
@@ -470,8 +471,8 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ActivityInfo generateDelegateActivityInfo(@Nullable ActivityInfo a,
-            @PackageManager.ComponentInfoFlags long flags, @NonNull FrameworkPackageUserState state,
-            int userId) {
+            @PackageManager.ComponentInfoFlagsBits long flags,
+            @NonNull FrameworkPackageUserState state, int userId) {
         if (a == null || !checkUseInstalledOrHidden(flags, state, a.applicationInfo)) {
             return null;
         }
@@ -485,7 +486,7 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ActivityInfo generateActivityInfo(ParsingPackageRead pkg, ParsedActivity a,
-            @PackageManager.ComponentInfoFlags long flags, FrameworkPackageUserState state,
+            @PackageManager.ComponentInfoFlagsBits long flags, FrameworkPackageUserState state,
             @Nullable ApplicationInfo applicationInfo, int userId) {
         if (a == null) return null;
         if (!checkUseInstalled(pkg, state, flags)) {
@@ -510,7 +511,7 @@ public class PackageInfoWithoutStateUtils {
      */
     @NonNull
     public static ActivityInfo generateActivityInfoUnchecked(@NonNull ParsedActivity a,
-            @PackageManager.ComponentInfoFlags long flags,
+            @PackageManager.ComponentInfoFlagsBits long flags,
             @NonNull ApplicationInfo applicationInfo) {
         // Make shallow copies so we can store the metadata safely
         ActivityInfo ai = new ActivityInfo();
@@ -551,14 +552,14 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ActivityInfo generateActivityInfo(ParsingPackageRead pkg, ParsedActivity a,
-            @PackageManager.ComponentInfoFlags long flags, FrameworkPackageUserState state,
+            @PackageManager.ComponentInfoFlagsBits long flags, FrameworkPackageUserState state,
             int userId) {
         return generateActivityInfo(pkg, a, flags, state, null, userId);
     }
 
     @Nullable
     public static ServiceInfo generateServiceInfo(ParsingPackageRead pkg, ParsedService s,
-            @PackageManager.ComponentInfoFlags long flags, FrameworkPackageUserState state,
+            @PackageManager.ComponentInfoFlagsBits long flags, FrameworkPackageUserState state,
             @Nullable ApplicationInfo applicationInfo, int userId) {
         if (s == null) return null;
         if (!checkUseInstalled(pkg, state, flags)) {
@@ -583,7 +584,7 @@ public class PackageInfoWithoutStateUtils {
      */
     @NonNull
     public static ServiceInfo generateServiceInfoUnchecked(@NonNull ParsedService s,
-            @PackageManager.ComponentInfoFlags long flags,
+            @PackageManager.ComponentInfoFlagsBits long flags,
             @NonNull ApplicationInfo applicationInfo) {
         // Make shallow copies so we can store the metadata safely
         ServiceInfo si = new ServiceInfo();
@@ -602,14 +603,14 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ServiceInfo generateServiceInfo(ParsingPackageRead pkg, ParsedService s,
-            @PackageManager.ComponentInfoFlags long flags, FrameworkPackageUserState state,
+            @PackageManager.ComponentInfoFlagsBits long flags, FrameworkPackageUserState state,
             int userId) {
         return generateServiceInfo(pkg, s, flags, state, null, userId);
     }
 
     @Nullable
     public static ProviderInfo generateProviderInfo(ParsingPackageRead pkg, ParsedProvider p,
-            @PackageManager.ComponentInfoFlags long flags, FrameworkPackageUserState state,
+            @PackageManager.ComponentInfoFlagsBits long flags, FrameworkPackageUserState state,
             @Nullable ApplicationInfo applicationInfo, int userId) {
         if (p == null) return null;
         if (!checkUseInstalled(pkg, state, flags)) {
@@ -634,7 +635,7 @@ public class PackageInfoWithoutStateUtils {
      */
     @NonNull
     public static ProviderInfo generateProviderInfoUnchecked(@NonNull ParsedProvider p,
-            @PackageManager.ComponentInfoFlags long flags,
+            @PackageManager.ComponentInfoFlagsBits long flags,
             @NonNull ApplicationInfo applicationInfo) {
         // Make shallow copies so we can store the metadata safely
         ProviderInfo pi = new ProviderInfo();
@@ -664,7 +665,7 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ProviderInfo generateProviderInfo(ParsingPackageRead pkg, ParsedProvider p,
-            @PackageManager.ComponentInfoFlags long flags, FrameworkPackageUserState state,
+            @PackageManager.ComponentInfoFlagsBits long flags, FrameworkPackageUserState state,
             int userId) {
         return generateProviderInfo(pkg, p, flags, state, null, userId);
     }
@@ -675,7 +676,7 @@ public class PackageInfoWithoutStateUtils {
      */
     @Nullable
     public static InstrumentationInfo generateInstrumentationInfo(ParsedInstrumentation i,
-            ParsingPackageRead pkg, @PackageManager.ComponentInfoFlags long flags, int userId,
+            ParsingPackageRead pkg, @PackageManager.ComponentInfoFlagsBits long flags, int userId,
             boolean assignUserFields) {
         if (i == null) return null;
 
@@ -706,7 +707,7 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static PermissionInfo generatePermissionInfo(ParsedPermission p,
-            @PackageManager.ComponentInfoFlags long flags) {
+            @PackageManager.ComponentInfoFlagsBits long flags) {
         if (p == null) return null;
 
         PermissionInfo pi = new PermissionInfo(p.getBackgroundPermission());
@@ -729,7 +730,7 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static PermissionGroupInfo generatePermissionGroupInfo(ParsedPermissionGroup pg,
-            @PackageManager.ComponentInfoFlags long flags) {
+            @PackageManager.ComponentInfoFlagsBits long flags) {
         if (pg == null) return null;
 
         PermissionGroupInfo pgi = new PermissionGroupInfo(
@@ -887,7 +888,7 @@ public class PackageInfoWithoutStateUtils {
     }
 
     private static boolean checkUseInstalled(ParsingPackageRead pkg,
-            FrameworkPackageUserState state, @PackageManager.PackageInfoFlags long flags) {
+            FrameworkPackageUserState state, @PackageManager.PackageInfoFlagsBits long flags) {
         // If available for the target user
         return PackageUserStateUtils.isAvailable(state, flags);
     }

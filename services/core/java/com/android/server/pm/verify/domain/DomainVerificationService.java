@@ -1721,7 +1721,7 @@ public class DomainVerificationService extends SystemService
 
     @Override
     public int approvalLevelForDomain(@NonNull PackageStateInternal pkgSetting,
-            @NonNull Intent intent, @PackageManager.ResolveInfoFlags long resolveInfoFlags,
+            @NonNull Intent intent, @PackageManager.ResolveInfoFlagsBits long resolveInfoFlags,
             @UserIdInt int userId) {
         String packageName = pkgSetting.getPackageName();
         if (!DomainVerificationUtils.isDomainVerificationIntent(intent, resolveInfoFlags)) {

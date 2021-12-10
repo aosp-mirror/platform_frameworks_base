@@ -41,7 +41,7 @@ import android.content.LocusId;
 import android.content.pm.PackageInstaller.SessionCallback;
 import android.content.pm.PackageInstaller.SessionCallbackDelegate;
 import android.content.pm.PackageInstaller.SessionInfo;
-import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.content.pm.PackageManager.ApplicationInfoFlagsBits;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -1012,7 +1012,7 @@ public class LauncherApps {
      *         isn't enabled.
      */
     public ApplicationInfo getApplicationInfo(@NonNull String packageName,
-            @ApplicationInfoFlags int flags, @NonNull UserHandle user)
+            @ApplicationInfoFlagsBits int flags, @NonNull UserHandle user)
             throws PackageManager.NameNotFoundException {
         Objects.requireNonNull(packageName, "packageName");
         Objects.requireNonNull(user, "user");
