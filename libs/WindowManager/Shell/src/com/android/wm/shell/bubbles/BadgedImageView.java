@@ -15,23 +15,22 @@
  */
 package com.android.wm.shell.bubbles;
 
-import static android.graphics.Paint.ANTI_ALIAS_FLAG;
-import static android.graphics.Paint.DITHER_FLAG;
-import static android.graphics.Paint.FILTER_BITMAP_FLAG;
-
+import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Outline;
-import android.graphics.Paint;
-import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.PathParser;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.android.launcher3.icons.DotRenderer;
@@ -47,7 +46,7 @@ import java.util.EnumSet;
  * Badge = the icon associated with the app that created this bubble, this will show work profile
  * badge if appropriate.
  */
-public class BadgedImageView extends ImageView {
+public class BadgedImageView extends FrameLayout {
 
     /** Same value as Launcher3 dot code */
     public static final float WHITE_SCRIM_ALPHA = 0.54f;
@@ -74,6 +73,9 @@ public class BadgedImageView extends ImageView {
     private final EnumSet<SuppressionFlag> mDotSuppressionFlags =
             EnumSet.of(SuppressionFlag.FLYOUT_VISIBLE);
 
+    private final ImageView mBubbleIcon;
+    private final ImageView mAppIcon;
+
     private float mDotScale = 0f;
     private float mAnimatingToDotScale = 0f;
     private boolean mDotIsAnimating = false;
@@ -86,7 +88,6 @@ public class BadgedImageView extends ImageView {
     private DotRenderer.DrawParams mDrawParams;
     private int mDotColor;
 
-    private Paint mPaint = new Paint(ANTI_ALIAS_FLAG);
     private Rect mTempBounds = new Rect();
 
     public BadgedImageView(Context context) {
@@ -104,6 +105,17 @@ public class BadgedImageView extends ImageView {
     public BadgedImageView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        mBubbleIcon = new ImageView(context);
+        addView(mBubbleIcon);
+        mAppIcon = new ImageView(context);
+        addView(mAppIcon);
+
+        final TypedArray ta = mContext.obtainStyledAttributes(attrs, new int[]{android.R.attr.src},
+                defStyleAttr, defStyleRes);
+        mBubbleIcon.setImageResource(ta.getResourceId(0, 0));
+        ta.recycle();
+
         mDrawParams = new DotRenderer.DrawParams();
 
         setFocusable(true);
@@ -135,7 +147,6 @@ public class BadgedImageView extends ImageView {
     public void showDotAndBadge(boolean onLeft) {
         removeDotSuppressionFlag(BadgedImageView.SuppressionFlag.BEHIND_STACK);
         animateDotBadgePositions(onLeft);
-
     }
 
     public void hideDotAndBadge(boolean onLeft) {
@@ -149,6 +160,7 @@ public class BadgedImageView extends ImageView {
      */
     public void setRenderedBubble(BubbleViewProvider bubble) {
         mBubble = bubble;
+        mBubbleIcon.setImageBitmap(bubble.getBubbleIcon());
         if (mDotSuppressionFlags.contains(SuppressionFlag.BEHIND_STACK)) {
             hideBadge();
         } else {
@@ -174,6 +186,20 @@ public class BadgedImageView extends ImageView {
         mDrawParams.scale = mDotScale;
 
         mDotRenderer.draw(canvas, mDrawParams);
+    }
+
+    /**
+     * Set drawable resource shown as the icon
+     */
+    public void setIconImageResource(@DrawableRes int drawable) {
+        mBubbleIcon.setImageResource(drawable);
+    }
+
+    /**
+     * Get icon drawable
+     */
+    public Drawable getIconDrawable() {
+        return mBubbleIcon.getDrawable();
     }
 
     /** Adds a dot suppression flag, updating dot visibility if needed. */
@@ -279,7 +305,6 @@ public class BadgedImageView extends ImageView {
         showBadge();
     }
 
-
     /** Whether to draw the dot in onDraw(). */
     private boolean shouldDrawDot() {
         // Always render the dot if it's animating, since it could be animating out. Otherwise, show
@@ -325,29 +350,28 @@ public class BadgedImageView extends ImageView {
     void showBadge() {
         Bitmap badge = mBubble.getAppBadge();
         if (badge == null) {
-            setImageBitmap(mBubble.getBubbleIcon());
+            mAppIcon.setVisibility(GONE);
             return;
         }
-        Canvas bubbleCanvas = new Canvas();
-        Bitmap noBadgeBubble = mBubble.getBubbleIcon();
-        Bitmap bubble = noBadgeBubble.copy(noBadgeBubble.getConfig(), /* isMutable */ true);
 
-        bubbleCanvas.setDrawFilter(new PaintFlagsDrawFilter(DITHER_FLAG, FILTER_BITMAP_FLAG));
-        bubbleCanvas.setBitmap(bubble);
-        final int bubbleSize = bubble.getWidth();
+        final int bubbleSize = mBubble.getBubbleIcon().getWidth();
         final int badgeSize = (int) (ICON_BADGE_SCALE * bubbleSize);
-        Rect dest = new Rect();
+
+        FrameLayout.LayoutParams appIconParams = (LayoutParams) mAppIcon.getLayoutParams();
+        appIconParams.height = badgeSize;
+        appIconParams.width = badgeSize;
         if (mOnLeft) {
-            dest.set(0, bubbleSize - badgeSize, badgeSize, bubbleSize);
+            appIconParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
         } else {
-            dest.set(bubbleSize - badgeSize, bubbleSize - badgeSize, bubbleSize, bubbleSize);
+            appIconParams.gravity = Gravity.BOTTOM | Gravity.RIGHT;
         }
-        bubbleCanvas.drawBitmap(badge, null /* src */, dest, mPaint);
-        bubbleCanvas.setBitmap(null);
-        setImageBitmap(bubble);
+        mAppIcon.setLayoutParams(appIconParams);
+
+        mAppIcon.setImageBitmap(badge);
+        mAppIcon.setVisibility(VISIBLE);
     }
 
     void hideBadge() {
-        setImageBitmap(mBubble.getBubbleIcon());
+        mAppIcon.setVisibility(GONE);
     }
 }
