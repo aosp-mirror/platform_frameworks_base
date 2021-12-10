@@ -108,6 +108,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleData;
@@ -246,6 +247,8 @@ public class BubblesTest extends SysuiTestCase {
     private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock
     private AuthController mAuthController;
+    @Mock
+    private TaskViewTransitions mTaskViewTransitions;
 
     private TestableBubblePositioner mPositioner;
 
@@ -344,6 +347,7 @@ public class BubblesTest extends SysuiTestCase {
                 mock(DisplayController.class),
                 syncExecutor,
                 mock(Handler.class),
+                mTaskViewTransitions,
                 mock(SyncTransactionQueue.class));
         mBubbleController.setExpandListener(mBubbleExpandListener);
         spyOn(mBubbleController);
