@@ -19,10 +19,42 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+// NetworkStats related libraries.
+
+filegroup {
+    name: "services.connectivity-netstats-sources",
+    srcs: [
+        "src/com/android/server/net/NetworkIdentity*.java",
+        "src/com/android/server/net/NetworkStats*.java",
+    ],
+    path: "src",
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
+// Nsd related libraries.
+
 filegroup {
     name: "services.connectivity-nsd-sources",
     srcs: [
-        "src/**/*.java",
+        "src/com/android/server/INativeDaemon*.java",
+        "src/com/android/server/NativeDaemon*.java",
+        "src/com/android/server/Nsd*.java",
+    ],
+    path: "src",
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
+// Connectivity-T common libraries.
+
+filegroup {
+    name: "services.connectivity-tiramisu-sources",
+    srcs: [
+        ":services.connectivity-netstats-sources",
+        ":services.connectivity-nsd-sources",
     ],
     path: "src",
     visibility: [
