@@ -57,6 +57,10 @@ static inline SkImageInfo createImageInfo(int32_t width, int32_t height, int32_t
             colorType = kRGBA_F16_SkColorType;
             alphaType = kPremul_SkAlphaType;
             break;
+        case AHARDWAREBUFFER_FORMAT_R8_UNORM:
+            colorType = kAlpha_8_SkColorType;
+            alphaType = kPremul_SkAlphaType;
+            break;
         default:
             ALOGV("Unsupported format: %d, return unknown by default", format);
             break;
@@ -90,6 +94,8 @@ uint32_t ColorTypeToBufferFormat(SkColorType colorType) {
             // Hardcoding the value from android::PixelFormat
             static constexpr uint64_t kRGBA4444 = 7;
             return kRGBA4444;
+        case kAlpha_8_SkColorType:
+              return AHARDWAREBUFFER_FORMAT_R8_UNORM;
         default:
             ALOGV("Unsupported colorType: %d, return RGBA_8888 by default", (int)colorType);
             return AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
