@@ -18,6 +18,7 @@ package com.android.wm.shell.draganddrop;
 
 import static android.app.StatusBarManager.DISABLE_NONE;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 
 import android.animation.Animator;
@@ -165,40 +166,39 @@ public class DragLayout extends LinearLayout {
         mHasDropped = false;
         mCurrentTarget = null;
 
-        List<ActivityManager.RunningTaskInfo> tasks = null;
-        // Figure out the splashscreen info for the existing task(s).
-        try {
-            tasks = ActivityTaskManager.getService().getTasks(2,
-                            false /* filterOnlyVisibleRecents */,
-                            false /* keepIntentExtra */);
-        } catch (RemoteException e) {
-            // don't show an icon / will just use the defaults
-        }
-        if (tasks != null && !tasks.isEmpty()) {
-            ActivityManager.RunningTaskInfo taskInfo1 = tasks.get(0);
-            Drawable icon1 = mIconProvider.getIcon(taskInfo1.topActivityInfo);
-            int bgColor1 = getResizingBackgroundColor(taskInfo1);
-
-            boolean alreadyInSplit = mSplitScreenController != null
-                    && mSplitScreenController.isSplitScreenVisible();
-            if (alreadyInSplit && tasks.size() > 1) {
-                ActivityManager.RunningTaskInfo taskInfo2 = tasks.get(1);
-                Drawable icon2 = mIconProvider.getIcon(taskInfo2.topActivityInfo);
-                int bgColor2 = getResizingBackgroundColor(taskInfo2);
-
-                // figure out which task is on which side
-                int splitPosition1 = mSplitScreenController.getSplitPosition(taskInfo1.taskId);
-                boolean isTask1TopOrLeft = splitPosition1 == SPLIT_POSITION_TOP_OR_LEFT;
-                if (isTask1TopOrLeft) {
-                    mDropZoneView1.setAppInfo(bgColor1, icon1);
-                    mDropZoneView2.setAppInfo(bgColor2, icon2);
-                } else {
-                    mDropZoneView2.setAppInfo(bgColor1, icon1);
-                    mDropZoneView1.setAppInfo(bgColor2, icon2);
-                }
-            } else {
+        boolean alreadyInSplit = mSplitScreenController != null
+                && mSplitScreenController.isSplitScreenVisible();
+        if (!alreadyInSplit) {
+            List<ActivityManager.RunningTaskInfo> tasks = null;
+            // Figure out the splashscreen info for the existing task.
+            try {
+                tasks = ActivityTaskManager.getService().getTasks(1,
+                        false /* filterOnlyVisibleRecents */,
+                        false /* keepIntentExtra */);
+            } catch (RemoteException e) {
+                // don't show an icon / will just use the defaults
+            }
+            if (tasks != null && !tasks.isEmpty()) {
+                ActivityManager.RunningTaskInfo taskInfo1 = tasks.get(0);
+                Drawable icon1 = mIconProvider.getIcon(taskInfo1.topActivityInfo);
+                int bgColor1 = getResizingBackgroundColor(taskInfo1);
                 mDropZoneView1.setAppInfo(bgColor1, icon1);
                 mDropZoneView2.setAppInfo(bgColor1, icon1);
+            }
+        } else {
+            // We're already in split so get taskInfo from the controller to populate icon / color.
+            ActivityManager.RunningTaskInfo topOrLeftTask =
+                    mSplitScreenController.getTaskInfo(SPLIT_POSITION_TOP_OR_LEFT);
+            ActivityManager.RunningTaskInfo bottomOrRightTask =
+                    mSplitScreenController.getTaskInfo(SPLIT_POSITION_BOTTOM_OR_RIGHT);
+            if (topOrLeftTask != null && bottomOrRightTask != null) {
+                Drawable topOrLeftIcon = mIconProvider.getIcon(topOrLeftTask.topActivityInfo);
+                int topOrLeftColor = getResizingBackgroundColor(topOrLeftTask);
+                Drawable bottomOrRightIcon = mIconProvider.getIcon(
+                        bottomOrRightTask.topActivityInfo);
+                int bottomOrRightColor = getResizingBackgroundColor(bottomOrRightTask);
+                mDropZoneView1.setAppInfo(topOrLeftColor, topOrLeftIcon);
+                mDropZoneView2.setAppInfo(bottomOrRightColor, bottomOrRightIcon);
             }
         }
     }

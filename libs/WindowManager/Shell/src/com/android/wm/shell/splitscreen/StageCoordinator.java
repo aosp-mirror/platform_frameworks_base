@@ -521,6 +521,14 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return SplitLayout.reversePosition(mSideStagePosition);
     }
 
+    int getTaskId(@SplitPosition int splitPosition) {
+        if (mSideStagePosition == splitPosition) {
+            return mSideStage.getTopVisibleChildTaskId();
+        } else {
+            return mMainStage.getTopVisibleChildTaskId();
+        }
+    }
+
     void setSideStagePosition(@SplitPosition int sideStagePosition,
             @Nullable WindowContainerTransaction wct) {
         setSideStagePosition(sideStagePosition, true /* updateBounds */, wct);
