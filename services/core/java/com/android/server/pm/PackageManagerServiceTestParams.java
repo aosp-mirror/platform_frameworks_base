@@ -104,6 +104,7 @@ public final class PackageManagerServiceTestParams {
     public final String incrementalVersion = Build.VERSION.INCREMENTAL;
     public BroadcastHelper broadcastHelper;
     public AppDataHelper appDataHelper;
+    public InstallPackageHelper installPackageHelper;
     public RemovePackageHelper removePackageHelper;
     public InitAndSystemPackageHelper initAndSystemPackageHelper;
     public DeletePackageHelper deletePackageHelper;

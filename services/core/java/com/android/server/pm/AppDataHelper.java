@@ -74,13 +74,6 @@ final class AppDataHelper {
         mArtManagerService = mInjector.getArtManagerService();
     }
 
-    AppDataHelper(PackageManagerService pm, PackageManagerServiceInjector injector) {
-        mPm = pm;
-        mInjector = injector;
-        mInstaller = injector.getInstaller();
-        mArtManagerService = injector.getArtManagerService();
-    }
-
     /**
      * Prepare app data for the given app just after it was installed or
      * upgraded. This method carefully only touches users that it's installed

@@ -582,13 +582,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /** Directory where installed applications are stored */
     private final File mAppInstallDir;
-    /** Directory where installed application's 32-bit native libraries are copied. */
-    @VisibleForTesting
-    final File mAppLib32InstallDir;
-
-    static File getAppLib32InstallDir() {
-        return new File(Environment.getDataDirectory(), "app-lib");
-    }
 
     // ----------------------------------------------------------------
 
@@ -975,6 +968,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private final DeletePackageHelper mDeletePackageHelper;
     private final InitAndSystemPackageHelper mInitAndSystemPackageHelper;
     private final AppDataHelper mAppDataHelper;
+    private final InstallPackageHelper mInstallPackageHelper;
     private final PreferredActivityHelper mPreferredActivityHelper;
     private final ResolveIntentHelper mResolveIntentHelper;
     private final DexOptHelper mDexOptHelper;
@@ -1697,7 +1691,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mEnableFreeCacheV2 = testParams.enableFreeCacheV2;
         mSdkVersion = testParams.sdkVersion;
         mAppInstallDir = testParams.appInstallDir;
-        mAppLib32InstallDir = testParams.appLib32InstallDir;
         mIsEngBuild = testParams.isEngBuild;
         mIsUserDebugBuild = testParams.isUserDebugBuild;
         mIncrementalVersion = testParams.incrementalVersion;
@@ -1705,6 +1698,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mBroadcastHelper = testParams.broadcastHelper;
         mAppDataHelper = testParams.appDataHelper;
+        mInstallPackageHelper = testParams.installPackageHelper;
         mRemovePackageHelper = testParams.removePackageHelper;
         mInitAndSystemPackageHelper = testParams.initAndSystemPackageHelper;
         mDeletePackageHelper = testParams.deletePackageHelper;
@@ -1837,7 +1831,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mInstantAppRegistry = new InstantAppRegistry(this, mPermissionManager, mPmInternal);
 
         mAppInstallDir = new File(Environment.getDataDirectory(), "app");
-        mAppLib32InstallDir = getAppLib32InstallDir();
 
         mDomainVerificationConnection = new DomainVerificationConnection(this);
         mDomainVerificationManager = injector.getDomainVerificationManagerInternal();
@@ -1845,6 +1838,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mBroadcastHelper = new BroadcastHelper(mInjector);
         mAppDataHelper = new AppDataHelper(this);
+        mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper);
         mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
         mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this);
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
@@ -2006,7 +2000,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // the rest of the commands above) because there's precious little we
                 // can do about it. A settings error is reported, though.
                 final List<String> changedAbiCodePath =
-                        ScanPackageHelper.applyAdjustedAbiToSharedUser(
+                        ScanPackageUtils.applyAdjustedAbiToSharedUser(
                                 setting, null /*scannedPackage*/,
                                 mInjector.getAbiHelper().getAdjustedAbiForSharedUser(
                                 setting.packages, null /*scannedPackage*/));
@@ -4698,33 +4692,8 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
             int installReason, List<String> whiteListedPermissions) {
-        final InstallPackageHelper installPackageHelper = new InstallPackageHelper(
-                this, mAppDataHelper);
-        return installPackageHelper.installExistingPackageAsUser(packageName, userId, installFlags,
+        return mInstallPackageHelper.installExistingPackageAsUser(packageName, userId, installFlags,
                 installReason, whiteListedPermissions, null);
-    }
-
-    static void setInstantAppForUser(PackageManagerServiceInjector injector,
-            PackageSetting pkgSetting, int userId, boolean instantApp, boolean fullApp) {
-        // no state specified; do nothing
-        if (!instantApp && !fullApp) {
-            return;
-        }
-        if (userId != UserHandle.USER_ALL) {
-            if (instantApp && !pkgSetting.getInstantApp(userId)) {
-                pkgSetting.setInstantApp(true /*instantApp*/, userId);
-            } else if (fullApp && pkgSetting.getInstantApp(userId)) {
-                pkgSetting.setInstantApp(false /*instantApp*/, userId);
-            }
-        } else {
-            for (int currentUserId : injector.getUserManagerInternal().getUserIds()) {
-                if (instantApp && !pkgSetting.getInstantApp(currentUserId)) {
-                    pkgSetting.setInstantApp(true /*instantApp*/, currentUserId);
-                } else if (fullApp && pkgSetting.getInstantApp(currentUserId)) {
-                    pkgSetting.setInstantApp(false /*instantApp*/, currentUserId);
-                }
-            }
-        }
     }
 
     boolean isUserRestricted(int userId, String restrictionKey) {
@@ -6733,8 +6702,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                     || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
-                if (!new InstallPackageHelper(this).enableCompressedPackage(deletedPkg,
-                        pkgSetting)) {
+                if (!mInstallPackageHelper.enableCompressedPackage(deletedPkg, pkgSetting)) {
                     Slog.w(TAG, "Failed setApplicationEnabledSetting: failed to enable "
                             + "commpressed package " + setting.getPackageName());
                     updateAllowed[i] = false;
