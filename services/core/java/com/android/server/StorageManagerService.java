@@ -3698,16 +3698,29 @@ class StorageManagerService extends IStorageManager.Stub
     @Nullable
     public PendingIntent getManageSpaceActivityIntent(
             @NonNull String packageName, int requestCode) {
-        // Only Apps with MANAGE_EXTERNAL_STORAGE permission should be able to call this API.
-        enforcePermission(android.Manifest.permission.MANAGE_EXTERNAL_STORAGE);
-
-        // We want to call the manageSpaceActivity as a SystemService and clear identity
-        // of the calling App
+        // Only Apps with MANAGE_EXTERNAL_STORAGE permission which have package visibility for
+        // packageName should be able to call this API.
         int originalUid = Binder.getCallingUidOrThrow();
-        final long token = Binder.clearCallingIdentity();
-
         try {
-            ApplicationInfo appInfo = mIPackageManager.getApplicationInfo(packageName, 0,
+            // Get package name for calling app and verify it has MANAGE_EXTERNAL_STORAGE permission
+            final String[] packagesFromUid = mIPackageManager.getPackagesForUid(originalUid);
+            if (packagesFromUid == null) {
+                throw new SecurityException("Unknown uid " + originalUid);
+            }
+            // Checking first entry in packagesFromUid is enough as using "sharedUserId"
+            // mechanism is rare and discouraged. Also, Apps that share same UID share the same
+            // permissions.
+            if (!mStorageManagerInternal.hasExternalStorageAccess(originalUid,
+                    packagesFromUid[0])) {
+                throw new SecurityException("Only File Manager Apps permitted");
+            }
+        } catch (RemoteException re) {
+            throw new SecurityException("Unknown uid " + originalUid, re);
+        }
+
+        ApplicationInfo appInfo;
+        try {
+            appInfo = mIPackageManager.getApplicationInfo(packageName, 0,
                     UserHandle.getUserId(originalUid));
             if (appInfo == null) {
                 throw new IllegalArgumentException(
@@ -3717,8 +3730,15 @@ class StorageManagerService extends IStorageManager.Stub
                 Log.i(TAG, packageName + " doesn't have a manageSpaceActivity");
                 return null;
             }
-            Context targetAppContext = mContext.createPackageContext(packageName, 0);
+        } catch (RemoteException e) {
+            throw new SecurityException("Only File Manager Apps permitted");
+        }
 
+        // We want to call the manageSpaceActivity as a SystemService and clear identity
+        // of the calling App
+        final long token = Binder.clearCallingIdentity();
+        try {
+            Context targetAppContext = mContext.createPackageContext(packageName, 0);
             Intent intent = new Intent(Intent.ACTION_DEFAULT);
             intent.setClassName(packageName,
                     appInfo.manageSpaceActivityName);
@@ -3728,8 +3748,6 @@ class StorageManagerService extends IStorageManager.Stub
                     intent,
                     FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE);
             return activity;
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
         } catch (PackageManager.NameNotFoundException e) {
             throw new IllegalArgumentException(
                     "packageName not found");
