@@ -2584,6 +2584,9 @@
     <declare-styleable name="AndroidManifestProcess" parent="AndroidManifestProcesses">
         <!-- Required name of the process that is allowed -->
         <attr name="process" />
+        <!-- custom Application class name. We use call it "name", not "className", to be
+             consistent with the Application tag. -->
+        <attr name="name" />
         <attr name="gwpAsanMode" />
         <attr name="memtagMode" />
         <attr name="nativeHeapZeroInitialized" />
