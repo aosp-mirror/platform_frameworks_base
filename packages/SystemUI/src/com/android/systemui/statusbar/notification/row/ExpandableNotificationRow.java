@@ -2130,15 +2130,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void setExpandAnimationRunning(boolean expandAnimationRunning) {
-        View contentView;
-        if (mIsSummaryWithChildren) {
-            contentView =  mChildrenContainer;
-        } else {
-            contentView = getShowingLayout();
-        }
-        if (mGuts != null && mGuts.isExposed()) {
-            contentView = mGuts;
-        }
         if (expandAnimationRunning) {
             setAboveShelf(true);
             mExpandAnimationRunning = true;
@@ -2151,9 +2142,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             if (mGuts != null) {
                 mGuts.setAlpha(1.0f);
             }
-            if (contentView != null) {
-                contentView.setAlpha(1.0f);
-            }
+            resetAllContentAlphas();
             setExtraWidthForClipping(0.0f);
             if (mNotificationParent != null) {
                 mNotificationParent.setExtraWidthForClipping(0.0f);
@@ -2601,10 +2590,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mPrivateLayout.animate().cancel();
             if (mChildrenContainer != null) {
                 mChildrenContainer.animate().cancel();
-                mChildrenContainer.setAlpha(1f);
             }
-            mPublicLayout.setAlpha(1f);
-            mPrivateLayout.setAlpha(1f);
+            resetAllContentAlphas();
             mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
             updateChildrenVisibility();
         } else {
@@ -2631,7 +2618,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     .alpha(0f)
                     .setStartDelay(delay)
                     .setDuration(duration)
-                    .withEndAction(() -> hiddenView.setVisibility(View.INVISIBLE));
+                    .withEndAction(() -> {
+                        hiddenView.setVisibility(View.INVISIBLE);
+                        resetAllContentAlphas();
+                    });
         }
         for (View showView : shownChildren) {
             showView.setVisibility(View.VISIBLE);
@@ -2754,12 +2744,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (wasAppearing) {
             // During the animation the visible view might have changed, so let's make sure all
             // alphas are reset
-            if (mChildrenContainer != null) {
-                mChildrenContainer.setAlpha(1.0f);
-            }
-            for (NotificationContentView l : mLayouts) {
-                l.setAlpha(1.0f);
-            }
+            resetAllContentAlphas();
             if (FADE_LAYER_OPTIMIZATION_ENABLED) {
                 setNotificationFaded(false);
             } else {
@@ -2767,6 +2752,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             }
         } else {
             setHeadsUpAnimatingAway(false);
+        }
+    }
+
+    @Override
+    protected void resetAllContentAlphas() {
+        mPrivateLayout.setAlpha(1f);
+        mPrivateLayout.setLayerType(LAYER_TYPE_NONE, null);
+        mPublicLayout.setAlpha(1f);
+        mPublicLayout.setLayerType(LAYER_TYPE_NONE, null);
+        if (mChildrenContainer != null) {
+            mChildrenContainer.setAlpha(1f);
+            mChildrenContainer.setLayerType(LAYER_TYPE_NONE, null);
         }
     }
 
