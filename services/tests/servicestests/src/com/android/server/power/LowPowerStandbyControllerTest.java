@@ -228,6 +228,7 @@ public class LowPowerStandbyControllerTest {
         setLowPowerStandbySupportedConfig(true);
         mController.systemReady();
         mController.setEnabled(true);
+        mController.setActiveDuringMaintenance(false);
         setNonInteractive();
         setDeviceIdleMode(true);
         awaitStandbyTimeoutAlarm();
@@ -237,6 +238,23 @@ public class LowPowerStandbyControllerTest {
 
         assertThat(mController.isActive()).isFalse();
         verify(mPowerManagerInternalMock, times(1)).setLowPowerStandbyActive(false);
+    }
+
+    @Test
+    public void testOnDozeMaintenance_activeDuringMaintenance_staysActive() throws Exception {
+        setLowPowerStandbySupportedConfig(true);
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setActiveDuringMaintenance(true);
+        setNonInteractive();
+        setDeviceIdleMode(true);
+        awaitStandbyTimeoutAlarm();
+
+        setDeviceIdleMode(false);
+        mTestLooper.dispatchAll();
+
+        assertThat(mController.isActive()).isTrue();
+        verify(mPowerManagerInternalMock, never()).setLowPowerStandbyActive(false);
     }
 
     @Test

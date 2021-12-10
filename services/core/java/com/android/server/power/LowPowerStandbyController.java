@@ -70,6 +70,7 @@ import java.util.Arrays;
 public final class LowPowerStandbyController {
     private static final String TAG = "LowPowerStandbyController";
     private static final boolean DEBUG = false;
+    private static final boolean DEFAULT_ACTIVE_DURING_MAINTENANCE = false;
 
     private static final int MSG_STANDBY_TIMEOUT = 0;
     private static final int MSG_NOTIFY_ACTIVE_CHANGED = 1;
@@ -149,6 +150,10 @@ public final class LowPowerStandbyController {
     @GuardedBy("mLock")
     private boolean mIdleSinceNonInteractive;
 
+    /** Whether Low Power Standby restrictions should be active during doze maintenance mode. */
+    @GuardedBy("mLock")
+    private boolean mActiveDuringMaintenance;
+
     /** Force Low Power Standby to be active. */
     @GuardedBy("mLock")
     private boolean mForceActive;
@@ -190,6 +195,9 @@ public final class LowPowerStandbyController {
             mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.LOW_POWER_STANDBY_ENABLED),
                     false, mSettingsObserver, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.LOW_POWER_STANDBY_ACTIVE_DURING_MAINTENANCE),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             updateSettingsLocked();
 
             if (mIsEnabled) {
@@ -206,6 +214,11 @@ public final class LowPowerStandbyController {
         mIsEnabled = mSupportedConfig && Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_STANDBY_ENABLED,
                 mEnabledByDefaultConfig ? 1 : 0) != 0;
+        mActiveDuringMaintenance = Settings.Global.getInt(resolver,
+                Settings.Global.LOW_POWER_STANDBY_ACTIVE_DURING_MAINTENANCE,
+                DEFAULT_ACTIVE_DURING_MAINTENANCE ? 1 : 0) != 0;
+
+        updateActiveLocked();
     }
 
     @GuardedBy("mLock")
@@ -216,13 +229,14 @@ public final class LowPowerStandbyController {
         final boolean maintenanceMode = mIdleSinceNonInteractive && !mIsDeviceIdle;
         final boolean newActive =
                 mForceActive || (mIsEnabled && !mIsInteractive && standbyTimeoutExpired
-                        && !maintenanceMode);
+                        && (!maintenanceMode || mActiveDuringMaintenance));
         if (DEBUG) {
             Slog.d(TAG, "updateActiveLocked: mIsEnabled=" + mIsEnabled + ", mIsInteractive="
                     + mIsInteractive + ", standbyTimeoutExpired=" + standbyTimeoutExpired
                     + ", mIdleSinceNonInteractive=" + mIdleSinceNonInteractive + ", mIsDeviceIdle="
-                    + mIsDeviceIdle + ", mForceActive=" + mForceActive + ", mIsActive=" + mIsActive
-                    + ", newActive=" + newActive);
+                    + mIsDeviceIdle + ", mActiveDuringMaintenance=" + mActiveDuringMaintenance
+                    + ", mForceActive=" + mForceActive + ", mIsActive=" + mIsActive + ", newActive="
+                    + newActive);
         }
         if (mIsActive != newActive) {
             mIsActive = newActive;
@@ -412,6 +426,21 @@ public final class LowPowerStandbyController {
 
             Settings.Global.putInt(mContext.getContentResolver(),
                     Settings.Global.LOW_POWER_STANDBY_ENABLED, enabled ? 1 : 0);
+            onSettingsChanged();
+        }
+    }
+
+    void setActiveDuringMaintenance(boolean activeDuringMaintenance) {
+        synchronized (mLock) {
+            if (!mSupportedConfig) {
+                Slog.w(TAG, "Low Power Standby settings cannot be changed "
+                        + "because it is not supported on this device");
+                return;
+            }
+
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.LOW_POWER_STANDBY_ACTIVE_DURING_MAINTENANCE,
+                    activeDuringMaintenance ? 1 : 0);
             onSettingsChanged();
         }
     }

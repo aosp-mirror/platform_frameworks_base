@@ -2215,6 +2215,27 @@ public final class PowerManager {
     }
 
     /**
+     * Set whether Low Power Standby should be active during doze maintenance mode.
+     * Does nothing if Low Power Standby is not supported.
+     *
+     * @see #isLowPowerStandbySupported()
+     * @see #isLowPowerStandbyEnabled()
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+            android.Manifest.permission.DEVICE_POWER
+    })
+    public void setLowPowerStandbyActiveDuringMaintenance(boolean activeDuringMaintenance) {
+        try {
+            mService.setLowPowerStandbyActiveDuringMaintenance(activeDuringMaintenance);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Force Low Power Standby restrictions to be active.
      * Does nothing if Low Power Standby is not supported.
      *

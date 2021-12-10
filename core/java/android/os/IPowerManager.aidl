@@ -68,6 +68,7 @@ interface IPowerManager
     boolean isLowPowerStandbySupported();
     boolean isLowPowerStandbyEnabled();
     void setLowPowerStandbyEnabled(boolean enabled);
+    void setLowPowerStandbyActiveDuringMaintenance(boolean activeDuringMaintenance);
     void forceLowPowerStandbyActive(boolean active);
 
     @UnsupportedAppUsage

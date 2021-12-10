@@ -5907,6 +5907,27 @@ public final class PowerManagerService extends SystemService
                 android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
                 android.Manifest.permission.DEVICE_POWER
         })
+        public void setLowPowerStandbyActiveDuringMaintenance(boolean activeDuringMaintenance) {
+            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
+                    != PackageManager.PERMISSION_GRANTED) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+                        "setLowPowerStandbyActiveDuringMaintenance");
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mLowPowerStandbyController.setActiveDuringMaintenance(activeDuringMaintenance);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        @RequiresPermission(anyOf = {
+                android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+                android.Manifest.permission.DEVICE_POWER
+        })
         public void forceLowPowerStandbyActive(boolean active) {
             if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
                     != PackageManager.PERMISSION_GRANTED) {
