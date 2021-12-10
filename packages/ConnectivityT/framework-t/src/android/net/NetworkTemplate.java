@@ -44,16 +44,10 @@ import android.os.Parcelable;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.BackupUtils;
-import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.net.module.util.NetworkIdentityUtils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -68,19 +62,6 @@ import java.util.Objects;
  */
 public class NetworkTemplate implements Parcelable {
     private static final String TAG = "NetworkTemplate";
-
-    /**
-     * Initial Version of the backup serializer.
-     */
-    public static final int BACKUP_VERSION_1_INIT = 1;
-    /**
-     * Version of the backup serializer that added carrier template support.
-     */
-    public static final int BACKUP_VERSION_2_SUPPORT_CARRIER_TEMPLATE = 2;
-    /**
-     * Current Version of the Backup Serializer.
-     */
-    private static final int BACKUP_VERSION = BACKUP_VERSION_2_SUPPORT_CARRIER_TEMPLATE;
 
     public static final int MATCH_MOBILE = 1;
     public static final int MATCH_WIFI = 4;
@@ -849,58 +830,4 @@ public class NetworkTemplate implements Parcelable {
             return new NetworkTemplate[size];
         }
     };
-
-    public byte[] getBytesForBackup() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream out = new DataOutputStream(baos);
-
-        if (!isPersistable()) {
-            Log.wtf(TAG, "Trying to backup non-persistable template: " + this);
-        }
-
-        out.writeInt(BACKUP_VERSION);
-
-        out.writeInt(mMatchRule);
-        BackupUtils.writeString(out, mSubscriberId);
-        BackupUtils.writeString(out, mNetworkId);
-        out.writeInt(mMetered);
-        out.writeInt(mSubscriberIdMatchRule);
-
-        return baos.toByteArray();
-    }
-
-    public static NetworkTemplate getNetworkTemplateFromBackup(DataInputStream in)
-            throws IOException, BackupUtils.BadVersionException {
-        int version = in.readInt();
-        if (version < BACKUP_VERSION_1_INIT || version > BACKUP_VERSION) {
-            throw new BackupUtils.BadVersionException("Unknown Backup Serialization Version");
-        }
-
-        int matchRule = in.readInt();
-        String subscriberId = BackupUtils.readString(in);
-        String networkId = BackupUtils.readString(in);
-
-        final int metered;
-        final int subscriberIdMatchRule;
-        if (version >= BACKUP_VERSION_2_SUPPORT_CARRIER_TEMPLATE) {
-            metered = in.readInt();
-            subscriberIdMatchRule = in.readInt();
-        } else {
-            // For backward compatibility, fill the missing filters from match rules.
-            metered = (matchRule == MATCH_MOBILE || matchRule == MATCH_MOBILE_WILDCARD
-                    || matchRule == MATCH_CARRIER) ? METERED_YES : METERED_ALL;
-            subscriberIdMatchRule = SUBSCRIBER_ID_MATCH_RULE_EXACT;
-        }
-
-        try {
-            return new NetworkTemplate(matchRule,
-                    subscriberId, new String[] { subscriberId },
-                    networkId, metered, NetworkStats.ROAMING_ALL,
-                    NetworkStats.DEFAULT_NETWORK_ALL, NetworkTemplate.NETWORK_TYPE_ALL,
-                    NetworkTemplate.OEM_MANAGED_ALL, subscriberIdMatchRule);
-        } catch (IllegalArgumentException e) {
-            throw new BackupUtils.BadVersionException(
-                    "Restored network template contains unknown match rule " + matchRule, e);
-        }
-    }
 }
