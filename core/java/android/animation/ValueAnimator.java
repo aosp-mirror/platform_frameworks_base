@@ -23,6 +23,7 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
@@ -74,6 +75,8 @@ import java.util.HashMap;
 public class ValueAnimator extends Animator implements AnimationHandler.AnimationFrameCallback {
     private static final String TAG = "ValueAnimator";
     private static final boolean DEBUG = false;
+    private static final boolean TRACE_ANIMATION_FRACTION = SystemProperties.getBoolean(
+            "persist.debug.animator.trace_fraction", false);
 
     /**
      * Internal constants
@@ -1554,6 +1557,10 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     @CallSuper
     @UnsupportedAppUsage
     void animateValue(float fraction) {
+        if (TRACE_ANIMATION_FRACTION) {
+            Trace.traceCounter(Trace.TRACE_TAG_VIEW, getNameForTrace() + hashCode(),
+                    (int) (fraction * 1000));
+        }
         fraction = mInterpolator.getInterpolation(fraction);
         mCurrentFraction = fraction;
         int numValues = mValues.length;
