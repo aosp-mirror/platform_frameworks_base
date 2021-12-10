@@ -38,7 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយ៉ាង​ឆាប់រហ័ស"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយឺត"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • បានដាក់កម្រិត​ការសាកថ្ម​ជាបណ្ដោះអាសន្ន"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • បានដាក់កំហិតលើ​ការសាកថ្មជា​បណ្ដោះអាសន្ន"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"សូមសាក​ថ្ម​របស់​អ្នក។"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ចុចម៉ឺនុយ ​ដើម្បី​ដោះ​សោ។"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"បណ្ដាញ​ជាប់​សោ"</string>

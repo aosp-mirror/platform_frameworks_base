@@ -44,12 +44,12 @@
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ကွန်ရက်ကို လော့ခ်ချထားသည်"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"ဆင်းမ်ကတ် မရှိပါ"</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"ဆင်းမ်ကတ် ထည့်ပါ။"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"ဆင်းမ်ကဒ်မရှိပါ သို့မဟုတ် အသုံးပြု၍မရပါ။ ဆင်းမ်ကဒ်တစ်ခု ထည့်ပါ။"</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"ဆင်းမ်ကတ်မရှိပါ သို့မဟုတ် အသုံးပြု၍မရပါ။ ဆင်းမ်ကတ်တစ်ခု ထည့်ပါ။"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"အသုံးပြု၍ မရတော့သော ဆင်းမ်ကတ်။"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"သင့်ဆင်းမ်ကဒ်ကို အပြီးအပိုင် ပိတ်လိုက်ပါပြီ။\n နောက်ထပ်ဆင်းမ်ကဒ်တစ်ခု ရယူရန်အတွက် သင်၏ ကြိုးမဲ့ဝန်ဆောင်မှုပေးသူထံ ဆက်သွယ်ပါ။"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"သင့်ဆင်းမ်ကတ်ကို အပြီးအပိုင် ပိတ်လိုက်ပါပြီ။\n နောက်ထပ်ဆင်းမ်ကတ်တစ်ခု ရယူရန်အတွက် သင်၏ ကြိုးမဲ့ဝန်ဆောင်မှုပေးသူထံ ဆက်သွယ်ပါ။"</string>
     <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"ဆင်းမ်ကတ် လော့ခ်ကျနေပါသည်။"</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"ဆင်းမ်ကဒ်သည် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် လော့ခ်ကျနေပါသည်။"</string>
-    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"ဆင်းမ်ကဒ်ကို လော့ခ်ဖွင့်နေပါသည်…"</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"ဆင်းမ်ကတ်သည် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် လော့ခ်ကျနေပါသည်။"</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"ဆင်းမ်ကတ်ကို လော့ခ်ဖွင့်နေပါသည်…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"ပင်နံပါတ်နေရာ"</string>
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"စက်စကားဝှက်"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"ဆင်းမ်ပင်နံပါတ်နေရာ"</string>
@@ -78,7 +78,7 @@
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" ဆင်းမ်ကို ယခု ပိတ်လိုက်ပါပြီ။ ရှေ့ဆက်ရန် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ်ကို ထည့်ပါ။ အသေးစိတ် အချက်အလက်များအတွက် မိုဘိုင်းဝန်ဆောင်မှုပေးသူထံ ဆက်သွယ်ပါ။"</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"မိမိလိုလားသော ပင်နံပါတ်ကို ထည့်ပါ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"မိမိလိုလားသော ပင်နံပါတ်ကို အတည်ပြုပါ"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"ဆင်းမ်ကဒ်ကို လော့ခ်ဖွင့်နေပါသည်…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"ဆင်းမ်ကတ်ကို လော့ခ်ဖွင့်နေပါသည်…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"ဂဏန်း ၄ လုံးမှ ၈ လုံးအထိ ရှိသော ပင်နံပါတ်ကို ထည့်ပါ။"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ်သည် ဂဏန်း ၈ လုံးနှင့် အထက် ဖြစ်ရပါမည်။"</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"မှန်ကန်သည့် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ်ကို ပြန်ထည့်ပါ။ ထပ်ခါထပ်ခါမှားယွင်းနေလျှင် ဆင်းမ်ကဒ်ကို အပြီးအပိုင် ပိတ်လိုက်ပါမည်။"</string>

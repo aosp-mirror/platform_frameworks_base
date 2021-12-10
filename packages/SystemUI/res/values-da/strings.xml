@@ -274,10 +274,10 @@
     <string name="accessibility_quick_settings_bluetooth_connected" msgid="5237625393869747261">"Der er oprettet forbindelse til Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"Bluetooth er slået fra."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"Bluetooth er slået til."</string>
-    <string name="accessibility_quick_settings_location_off" msgid="6122523378294740598">"Placeringsrapportering er slået fra."</string>
-    <string name="accessibility_quick_settings_location_on" msgid="6869947200325467243">"Placeringsrapportering er slået til."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"Placeringsrapportering er slået fra."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"Placeringsrapportering er slået til."</string>
+    <string name="accessibility_quick_settings_location_off" msgid="6122523378294740598">"Lokationsrapportering er slået fra."</string>
+    <string name="accessibility_quick_settings_location_on" msgid="6869947200325467243">"Lokationsrapportering er slået til."</string>
+    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"Lokationsrapportering er slået fra."</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"Lokationsrapportering er slået til."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Alarmen er indstillet til <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_close" msgid="2974895537860082341">"Luk panelet."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Mere tid."</string>
@@ -308,7 +308,7 @@
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Genoptag"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"Søger efter GPS"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Placeringen er angivet ved hjælp af GPS"</string>
-    <string name="accessibility_location_active" msgid="2845747916764660369">"Aktive placeringsanmodninger"</string>
+    <string name="accessibility_location_active" msgid="2845747916764660369">"Aktive lokationsanmodninger"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Sensorer er slået fra"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Ryd alle notifikationer."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"<xliff:g id="NUMBER">%s</xliff:g> mere"</string>
@@ -351,8 +351,8 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Stående"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Liggende"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Inputmetode"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"Placering"</string>
-    <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Placering fra"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"Lokation"</string>
+    <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Lokation fra"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Kameraadgang"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Mikrofonadgang"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Tilgængelig"</string>
@@ -383,7 +383,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Manglende Wi-Fi-forbindelse"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Lysstyrke"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTO"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Byt om på farver"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Ombyt farver"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Farvekorrigeringstilstand"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Flere indstillinger"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Brugerindstillinger"</string>
@@ -554,9 +554,9 @@
     <string name="disconnect_vpn" msgid="26286850045344557">"Afbryd VPN-forbindelse"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Se politikker"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Se indstillinger"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Denne enhed tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nDin it-administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er tilknyttet din enhed, og din enheds placeringsdata.\n\nKontakt din it-administrator for at få mere at vide."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Denne enhed tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nDin it-administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er tilknyttet din enhed, og din enheds lokationsdata.\n\nKontakt din it-administrator for at få mere at vide."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> kan muligvis administrere apps, få adgang til data, der er tilknyttet denne enhed, og ændre enhedens indstillinger.\n\nKontakt <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>, hvis du har spørgsmål."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Denne enhed tilhører din organisation.\n\nDin it-administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er tilknyttet din enhed, og din enheds placeringsdata.\n\nKontakt din it-administrator for at få mere at vide."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Denne enhed tilhører din organisation.\n\nDin it-administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er tilknyttet din enhed, og din enheds lokationsdata.\n\nKontakt din it-administrator for at få mere at vide."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Din organisation har installeret et nøglecenter på denne enhed. Din sikre netværkstrafik kan overvåges eller ændres."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Din organisation har installeret et nøglecenter på din arbejdsprofil. Din sikre netværkstrafik kan overvåges eller ændres."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Der er installeret et nøglecenter på denne enhed. Din sikre netværkstrafik kan overvåges eller ændres."</string>
@@ -568,7 +568,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Din personlige profil har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"Din enhed administreres af <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> bruger <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> til at administrere din enhed."</string>
-    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Din administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps og data, der er knyttet til denne enhed, samt enhedens placeringsoplysninger."</string>
+    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Din administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps og data, der er knyttet til denne enhed, samt enhedens lokationsoplysninger."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Få flere oplysninger"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Du har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. e-mails, apps og websites."</string>
@@ -579,7 +579,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Din administrator har aktiveret netværksregistrering, som overvåger trafik på din enhed.\n\nKontakt din administrator for at få flere oplysninger."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Du gav en app tilladelse til at konfigurere en VPN-forbindelse.\n\nDenne app kan overvåge din enhed og netværksaktivitet, bl.a. e-mails, apps og websites."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Din arbejdsprofil administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nDin administrator kan overvåge din netværksaktivitet, bl.a. e-mails, apps og websites.\n\nKontakt din administrator for at få flere oplysninger.\n\nDu har også forbindelse til et VPN, som kan overvåge din netværksaktivitet."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Denne enhed administreres af din forælder. Din forælder kan se og administrere oplysninger såsom de apps, du bruger, din placering og din skærmtid."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Denne enhed administreres af din forælder. Din forælder kan se og administrere oplysninger såsom de apps, du bruger, din lokation og din skærmtid."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Du har forbindelse til <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Du har forbindelse til <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan overvåge din private netværksaktivitet, bl.a. e-mails, apps og websites."</string>
@@ -677,8 +677,8 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Lås skærmindstillinger"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Arbejdsprofil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flytilstand"</string>
-    <string name="add_tile" msgid="6239678623873086686">"Tilføj et felt"</string>
-    <string name="broadcast_tile" msgid="5224010633596487481">"Broadcast-ikon"</string>
+    <string name="add_tile" msgid="6239678623873086686">"Tilføj felt"</string>
+    <string name="broadcast_tile" msgid="5224010633596487481">"Broadcast-felt"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>, medmindre du slår funktionen fra inden da"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -910,15 +910,15 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Vis ikoner for notifikationer med lav prioritet"</string>
     <string name="other" msgid="429768510980739978">"Andet"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjern kortet"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"føj kortet til slutningen"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Flyt kortet"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Tilføj et kort"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjern felt"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"føj feltet til slutningen"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Flyt felt"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Tilføj felt"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Flyt til <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Føj til placering <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Placering <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Kortet blev tilføjet"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Kortet blev fjernet"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Føj til lokation <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Lokation <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Feltet blev tilføjet"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Feltet blev fjernet"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Redigeringsværktøj til Kvikmenu."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>-notifikation: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Åbn Indstillinger."</string>
@@ -1014,7 +1014,7 @@
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonopkald"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(via <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"kameraet"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"placering"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"lokation"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofonen"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Deaktiver sensorer"</string>
     <string name="device_services" msgid="1549944177856658705">"Enhedstjenester"</string>
@@ -1132,8 +1132,8 @@
     <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"<xliff:g id="NAME">%1$s</xliff:g> har snart fødselsdag"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Årsdag"</string>
     <string name="anniversary_status_content_description" msgid="8212171790843327442">"<xliff:g id="NAME">%1$s</xliff:g> har jubilæum i dag"</string>
-    <string name="location_status" msgid="1294990572202541812">"Deler placering"</string>
-    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> deler sin placering"</string>
+    <string name="location_status" msgid="1294990572202541812">"Deler lokation"</string>
+    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> deler sin lokation"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Ny historie"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> har delt en ny historie"</string>
     <string name="video_status" msgid="4548544654316843225">"Ser"</string>

@@ -177,6 +177,13 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     }
 
     /**
+     * Called when the IME has drawn on the organized task.
+     */
+    public void onImeDrawnOnTask(int taskId) {
+        mSplashScreenExecutor.execute(() -> mStartingSurfaceDrawer.onImeDrawnOnTask(taskId));
+    }
+
+    /**
      * Called when the content of a task is ready to show, starting window can be removed.
      */
     public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,

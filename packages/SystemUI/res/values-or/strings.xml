@@ -132,7 +132,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ଆକ୍ସେସିବିଲିଟୀ"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"ସ୍କ୍ରୀନ୍‌କୁ ଘୁରାନ୍ତୁ"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ଓଭରଭିଉ"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"କ୍ୟାମେରା"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ଫୋନ୍‍"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ଭଏସ୍‌ ସହାୟକ"</string>
@@ -247,7 +247,7 @@
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"ବିଜ୍ଞପ୍ତି ଖାରଜ କରାଗଲା।"</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"ବିଜ୍ଞପ୍ତି ଶେଡ୍‍।"</string>
-    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ଦ୍ରୁତ ସେଟିଂସ୍।"</string>
+    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"କ୍ୱିକ୍ ସେଟିଂସ୍।"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ଲକ୍‌ ସ୍କ୍ରୀନ୍‌।"</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"ସେଟିଂସ୍"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"ସଂକ୍ଷିପ୍ତ ବିବରଣୀ"</string>
@@ -441,7 +441,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"ପୂର୍ଣ୍ଣ ଚାର୍ଜ ହେବାକୁ ଆଉ <xliff:g id="CHARGING_TIME">%s</xliff:g> ଅଛି"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ଚାର୍ଜ ହେଉନାହିଁ"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"ନେଟ୍‍ୱର୍କ\nମନିଟର୍‍ କରାଯାଇପାରେ"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ପାଇଁ ଉପରକୁ ସ୍ଲାଇଡ୍‍ କରନ୍ତୁ।"</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ପାଇଁ ବାମକୁ ସ୍ଲାଇଡ୍ କରନ୍ତୁ"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ଆଲାର୍ମ, ରିମାଇଣ୍ଡର୍‌, ଇଭେଣ୍ଟ ଏବଂ ଆପଣ ନିର୍ଦ୍ଦିଷ୍ଟ କରିଥିବା କଲର୍‌ଙ୍କ ବ୍ୟତୀତ ଆପଣଙ୍କ ଧ୍ୟାନ ଅନ୍ୟ କୌଣସି ଧ୍ୱନୀ ଏବଂ ଭାଇବ୍ରେଶନ୍‌ରେ ଆକର୍ଷଣ କରାଯିବନାହିଁ। ମ୍ୟୁଜିକ୍‍, ଭିଡିଓ ଏବଂ ଗେମ୍‌ ସମେତ ନିଜେ ଚଲାଇବାକୁ ବାଛିଥିବା ଅନ୍ୟ ସବୁକିଛି ଆପଣ ଶୁଣିପାରିବେ।"</string>
@@ -658,7 +658,7 @@
     <string name="system_ui_tuner" msgid="1471348823289954729">"ସିଷ୍ଟମ୍ UI ଟ୍ୟୁନର୍‍"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"ଏମ୍ବେଡ୍‍ ହୋଇଥିବା ବ୍ୟାଟେରୀ ଶତକଡ଼ା ଦେଖାନ୍ତୁ"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"ଚାର୍ଜ ହେଉନଥିବାବେଳେ ଷ୍ଟାଟସ୍‍ ବାର୍‍ ଆଇକନ୍‍ ଭିତରେ ବ୍ୟାଟେରୀ ସ୍ତର ଶତକଡ଼ା ଦେଖାନ୍ତୁ"</string>
-    <string name="quick_settings" msgid="6211774484997470203">"ଦ୍ରୁତ ସେଟିଂସ୍"</string>
+    <string name="quick_settings" msgid="6211774484997470203">"କ୍ୱିକ୍ ସେଟିଂସ୍"</string>
     <string name="status_bar" msgid="4357390266055077437">"ଷ୍ଟାଟସ୍‍ ବାର୍‍"</string>
     <string name="overview" msgid="3522318590458536816">"ଅବଲୋକନ"</string>
     <string name="demo_mode" msgid="263484519766901593">"ସିଷ୍ଟମ୍‌ UI ଡେମୋ ମୋଡ୍‌"</string>
@@ -683,7 +683,7 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>ବେଳେ ଆପଣ ନିଜର ପରବର୍ତ୍ତୀ ଆଲାର୍ମ ଶୁଣିପାରିବେ ନାହିଁ"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> ହେଲେ"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> ବେଳେ"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"ଦ୍ରୁତ ସେଟିଙ୍ଗ, <xliff:g id="TITLE">%s</xliff:g>।"</string>
+    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"କ୍ୱିକ୍ ସେଟିଂସ୍, <xliff:g id="TITLE">%s</xliff:g>।"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"ହଟସ୍ପଟ୍‌"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"କେତେକଙ୍କ ପାଇଁ ମଜାଦାର, କିନ୍ତୁ ସମସ୍ତଙ୍କ ପାଇଁ ନୁହେଁ"</string>

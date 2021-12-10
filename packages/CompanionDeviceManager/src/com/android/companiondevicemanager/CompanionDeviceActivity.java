@@ -93,9 +93,9 @@ public class CompanionDeviceActivity extends Activity {
             final DeviceFilterPair selectedDevice = getService().mDevicesFound.get(0);
             setTitle(Html.fromHtml(getString(
                     R.string.confirmation_title,
-                    getCallingAppName(),
-                    profileName,
-                    selectedDevice.getDisplayName()), 0));
+                    Html.escapeHtml(getCallingAppName()),
+                    Html.escapeHtml(selectedDevice.getDisplayName())), 0));
+
             mPairButton = findViewById(R.id.button_pair);
             mPairButton.setOnClickListener(v -> onDeviceConfirmed(getService().mSelectedDevice));
             getService().mSelectedDevice = selectedDevice;
@@ -108,8 +108,8 @@ public class CompanionDeviceActivity extends Activity {
             mPairButton = findViewById(R.id.button_pair);
             mPairButton.setVisibility(View.GONE);
             setTitle(Html.fromHtml(getString(R.string.chooser_title,
-                    profileName,
-                    getCallingAppName()), 0));
+                    Html.escapeHtml(profileName),
+                    Html.escapeHtml(getCallingAppName())), 0));
             mDeviceListView = findViewById(R.id.device_list);
             mDevicesAdapter = new DevicesAdapter();
             mDeviceListView.setAdapter(mDevicesAdapter);

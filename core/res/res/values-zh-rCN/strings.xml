@@ -327,17 +327,17 @@
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"身体传感器"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"访问与您的生命体征相关的传感器数据"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"检索窗口内容"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"检测您正访问的窗口的内容。"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"检测您与之互动的窗口的内容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"启用触摸浏览"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"设备将大声读出您点按的内容，同时您可以通过手势来浏览屏幕。"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"监测您输入的文字"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"包含个人数据，例如信用卡号和密码。"</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"控制显示内容放大功能"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"控制显示内容的缩放级别和位置。"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"包括信用卡号和密码等个人数据。"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"控制屏幕内容放大功能"</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"控制屏幕内容的缩放级别和位置。"</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"执行手势"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"可执行点按、滑动、双指张合等手势。"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"指纹手势"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"可以捕获在设备指纹传感器上执行的手势。"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"可以捕捉在设备指纹传感器上执行的手势。"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"截取屏幕截图"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"可截取显示画面的屏幕截图。"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"停用或修改状态栏"</string>
@@ -1216,8 +1216,8 @@
     <string name="noApplications" msgid="1186909265235544019">"没有应用可执行此操作。"</string>
     <string name="aerr_application" msgid="4090916809370389109">"<xliff:g id="APPLICATION">%1$s</xliff:g>已停止运行"</string>
     <string name="aerr_process" msgid="4268018696970966407">"<xliff:g id="PROCESS">%1$s</xliff:g>已停止运行"</string>
-    <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g>屡次停止运行"</string>
-    <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g>屡次停止运行"</string>
+    <string name="aerr_application_repeated" msgid="7804378743218496566">"“<xliff:g id="APPLICATION">%1$s</xliff:g>”屡次停止运行"</string>
+    <string name="aerr_process_repeated" msgid="1153152413537954974">"“<xliff:g id="PROCESS">%1$s</xliff:g>”屡次停止运行"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"重新打开应用"</string>
     <string name="aerr_report" msgid="3095644466849299308">"发送反馈"</string>
     <string name="aerr_close" msgid="3398336821267021852">"关闭"</string>

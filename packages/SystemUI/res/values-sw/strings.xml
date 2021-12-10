@@ -81,7 +81,7 @@
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Inahifadhi picha ya skrini..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Inahifadhi picha ya skrini..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Imehifadhi picha ya skrini"</string>
-    <string name="screenshot_saved_text" msgid="7778833104901642442">"Gusa ili utazame picha ya skrini uliyohifadhi"</string>
+    <string name="screenshot_saved_text" msgid="7778833104901642442">"Gusa ili uone picha ya skrini uliyohifadhi"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Imeshindwa kuhifadhi picha ya skrini"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Ni sharti ufungue kifaa kabla ya kuhifadhi picha ya skrini"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Jaribu kupiga picha ya skrini tena"</string>

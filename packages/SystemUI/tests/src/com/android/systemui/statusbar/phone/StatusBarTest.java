@@ -812,6 +812,30 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
+    public void testTransitionLaunch_goesToUnlocked() {
+        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        mStatusBar.showKeyguardImpl();
+
+        // Starting a pulse should change the scrim controller to the pulsing state
+        when(mNotificationPanelViewController.isLaunchTransitionRunning()).thenReturn(true);
+        when(mNotificationPanelViewController.isLaunchingAffordanceWithPreview()).thenReturn(true);
+        mStatusBar.updateScrimController();
+        verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
+    }
+
+    @Test
+    public void testTransitionLaunch_noPreview_doesntGoUnlocked() {
+        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        mStatusBar.showKeyguardImpl();
+
+        // Starting a pulse should change the scrim controller to the pulsing state
+        when(mNotificationPanelViewController.isLaunchTransitionRunning()).thenReturn(true);
+        when(mNotificationPanelViewController.isLaunchingAffordanceWithPreview()).thenReturn(false);
+        mStatusBar.updateScrimController();
+        verify(mScrimController).transitionTo(eq(ScrimState.KEYGUARD));
+    }
+
+    @Test
     public void testSetOccluded_propagatesToScrimController() {
         mStatusBar.setOccluded(true);
         verify(mScrimController).setKeyguardOccluded(eq(true));

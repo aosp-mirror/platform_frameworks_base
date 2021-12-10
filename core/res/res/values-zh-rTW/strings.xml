@@ -978,7 +978,7 @@
     <string name="factorytest_reboot" msgid="2050147445567257365">"重新開機"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"「<xliff:g id="TITLE">%s</xliff:g>」網頁指出："</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
-    <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"確認瀏覽"</string>
+    <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"確認離開網頁"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"離開這一頁"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"停留在這一頁"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\n你確定要前往其他網頁瀏覽嗎？"</string>

@@ -48,7 +48,7 @@ import java.util.Vector;
  * in Object Oriented programming and are used to perform initialization and
  * cleanup of the state respectively. The <code>getName</code> method returns the
  * name of the state; the default implementation returns the class name. It may be
- * desirable to have <code>getName</code> return the the state instance name instead,
+ * desirable to have <code>getName</code> return the state instance name instead,
  * in particular if a particular state class has multiple instances.</p>
  *
  * <p>When a state machine is created, <code>addState</code> is used to build the
@@ -433,14 +433,14 @@ public class StateMachine {
 
     /**
      * Convenience constant that maybe returned by processMessage
-     * to indicate the the message was processed and is not to be
+     * to indicate the message was processed and is not to be
      * processed by parent states
      */
     public static final boolean HANDLED = true;
 
     /**
      * Convenience constant that maybe returned by processMessage
-     * to indicate the the message was NOT processed and is to be
+     * to indicate the message was NOT processed and is to be
      * processed by parent states
      */
     public static final boolean NOT_HANDLED = false;

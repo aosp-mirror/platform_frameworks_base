@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+** Copyright 2020, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="config_pdp_reject_dialog_title" msgid="41208110171880430"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4683454131283459978">"ପ୍ରାମାଣିକତା ବିଫଳ ହୋଇଛି -29-"</string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="9021140729932308119">"ସେବା ପାଇଁ ସଦସ୍ୟତା ନିଆଯାଇନାହିଁ -33-"</string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="3838388706348367865">"ଦିଆଯାଇଥିବା ଏକ APN ପାଇଁ ଏକାଧିକ PDN ସଂଯୋଗକୁ ଅନୁମତି ଦିଆଯାଇନାହିଁ -55-"</string>
+</resources>

@@ -22,7 +22,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -121,7 +120,6 @@ public final class MediaTranscodingManager {
     private final String mPackageName;
     private final int mPid;
     private final int mUid;
-    private final boolean mIsLowRamDevice;
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final HashMap<Integer, TranscodingSession> mPendingTranscodingSessions = new HashMap();
     private final Object mLock = new Object();
@@ -208,10 +206,7 @@ public final class MediaTranscodingManager {
         if (!SdkLevel.isAtLeastS()) {
             return null;
         }
-        // Do not try to get the service on AndroidGo (low-ram) devices.
-        if (mIsLowRamDevice) {
-            return null;
-        }
+
         int retryCount = !retry ? 1 :  CONNECT_SERVICE_RETRY_COUNT;
         Log.i(TAG, "get service with retry " + retryCount);
         for (int count = 1;  count <= retryCount; count++) {
@@ -429,7 +424,6 @@ public final class MediaTranscodingManager {
         mPackageName = mContext.getPackageName();
         mUid = Os.getuid();
         mPid = Os.getpid();
-        mIsLowRamDevice = mContext.getSystemService(ActivityManager.class).isLowRamDevice();
     }
 
     /**
@@ -952,6 +946,8 @@ public final class MediaTranscodingManager {
              *
              * @return the video track format to be used if transcoding should be performed,
              *         and null otherwise.
+             * @throws IllegalArgumentException if the hinted source video format contains invalid
+             *         parameters.
              */
             @Nullable
             public MediaFormat resolveVideoFormat() {
@@ -962,20 +958,19 @@ public final class MediaTranscodingManager {
                 MediaFormat videoTrackFormat = new MediaFormat(mSrcVideoFormatHint);
                 videoTrackFormat.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_VIDEO_AVC);
 
-                int width = mSrcVideoFormatHint.getInteger(MediaFormat.KEY_WIDTH);
-                int height = mSrcVideoFormatHint.getInteger(MediaFormat.KEY_HEIGHT);
+                int width = mSrcVideoFormatHint.getInteger(MediaFormat.KEY_WIDTH, -1);
+                int height = mSrcVideoFormatHint.getInteger(MediaFormat.KEY_HEIGHT, -1);
                 if (width <= 0 || height <= 0) {
                     throw new IllegalArgumentException(
                             "Source Width and height must be larger than 0");
                 }
 
-                float frameRate = 30.0f; // default to 30fps.
-                if (mSrcVideoFormatHint.containsKey(MediaFormat.KEY_FRAME_RATE)) {
-                    frameRate = mSrcVideoFormatHint.getFloat(MediaFormat.KEY_FRAME_RATE);
-                    if (frameRate <= 0) {
-                        throw new IllegalArgumentException(
-                                "frameRate must be larger than 0");
-                    }
+                float frameRate =
+                        mSrcVideoFormatHint.getNumber(MediaFormat.KEY_FRAME_RATE, 30.0)
+                        .floatValue();
+                if (frameRate <= 0) {
+                    throw new IllegalArgumentException(
+                            "frameRate must be larger than 0");
                 }
 
                 int bitrate = getAVCBitrate(width, height, frameRate);

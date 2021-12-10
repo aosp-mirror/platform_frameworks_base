@@ -1058,7 +1058,7 @@
     <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"收藏"</string>
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"取消收藏"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"移至位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="controls_favorite_default_title" msgid="967742178688938137">"控件"</string>
+    <string name="controls_favorite_default_title" msgid="967742178688938137">"控制"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"选择要从“快捷设置”菜单访问的控制项"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控制器"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控制器"</string>
