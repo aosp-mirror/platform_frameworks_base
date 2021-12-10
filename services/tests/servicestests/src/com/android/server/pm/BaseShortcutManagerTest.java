@@ -579,7 +579,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        public void verifyCallingPackage(String callingPackage) {
+        public void verifyCallingPackage(String callingPackage, int callerUid) {
             // SKIP
         }
 
