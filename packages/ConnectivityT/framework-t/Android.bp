@@ -19,11 +19,58 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+// NetworkStats related libraries.
+
+filegroup {
+    name: "framework-connectivity-netstats-internal-sources",
+    srcs: [
+        "src/android/app/usage/*.java",
+        "src/android/net/DataUsage*.*",
+        "src/android/net/INetworkStats*.*",
+        "src/android/net/NetworkIdentity*.java",
+        "src/android/net/NetworkStateSnapshot.*",
+        "src/android/net/NetworkStats*.*",
+        "src/android/net/NetworkTemplate.*",
+        "src/android/net/TrafficStats.java",
+        "src/android/net/UnderlyingNetworkInfo.*",
+        "src/android/net/netstats/**/*.*",
+    ],
+    path: "src",
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
+filegroup {
+    name: "framework-connectivity-netstats-aidl-export-sources",
+    srcs: [
+        "aidl-export/android/net/NetworkStats.aidl",
+        "aidl-export/android/net/NetworkTemplate.aidl",
+    ],
+    path: "aidl-export",
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
+filegroup {
+    name: "framework-connectivity-netstats-sources",
+    srcs: [
+        ":framework-connectivity-netstats-internal-sources",
+        ":framework-connectivity-netstats-aidl-export-sources",
+    ],
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
+// Nsd related libraries.
+
 filegroup {
     name: "framework-connectivity-nsd-internal-sources",
     srcs: [
-        "src/**/*.java",
-        "src/**/*.aidl",
+        "src/android/net/nsd/*.aidl",
+        "src/android/net/nsd/*.java",
     ],
     path: "src",
     visibility: [
@@ -34,7 +81,7 @@ filegroup {
 filegroup {
     name: "framework-connectivity-nsd-aidl-export-sources",
     srcs: [
-        "aidl-export/**/*.aidl",
+        "aidl-export/android/net/nsd/*.aidl",
     ],
     path: "aidl-export",
     visibility: [
@@ -47,6 +94,19 @@ filegroup {
     srcs: [
         ":framework-connectivity-nsd-internal-sources",
         ":framework-connectivity-nsd-aidl-export-sources",
+    ],
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
+// Connectivity-T common libraries.
+
+filegroup {
+    name: "framework-connectivity-tiramisu-sources",
+    srcs: [
+        ":framework-connectivity-netstats-sources",
+        ":framework-connectivity-nsd-sources",
     ],
     visibility: [
         "//frameworks/base",

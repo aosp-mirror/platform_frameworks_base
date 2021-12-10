@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.server.net;
+package android.net;
 
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.net.NetworkStats.UID_ALL;
@@ -37,7 +37,11 @@ import com.android.server.LocalServices;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-/** Utility methods for controlling access to network stats APIs. */
+/**
+ * Utility methods for controlling access to network stats APIs.
+ *
+ * @hide
+ */
 public final class NetworkStatsAccess {
     private NetworkStatsAccess() {}
 
