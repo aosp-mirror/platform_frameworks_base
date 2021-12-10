@@ -595,17 +595,6 @@
         280
     </integer>
 
-    <!-- Haptic feedback intensity for ticks used for the udfps dwell time -->
-    <item name="config_udfpsTickIntensity" translatable="false" format="float"
-          type="dimen">.5</item>
-
-    <!-- Haptic feedback delay between ticks used for udfps dwell time -->
-    <integer name="config_udfpsTickDelay" translatable="false">25</integer>
-
-    <!-- Haptic feedback tick type - if true, uses VibrationEffect.Composition.PRIMITIVE_LOW_TICK
-         else uses VibrationEffect.Composition.PRIMITIVE_TICK -->
-    <bool name="config_udfpsUseLowTick">true</bool>
-
     <!-- package name of a built-in camera app to use to restrict implicit intent resolution
          when the double-press power gesture is used. Ignored if empty. -->
     <string translatable="false" name="config_cameraGesturePackage"></string>
