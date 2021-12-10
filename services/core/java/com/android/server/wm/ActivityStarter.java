@@ -1672,7 +1672,8 @@ class ActivityStarter {
                 }
                 if (newTransition != null) {
                     transitionController.requestStartTransition(newTransition,
-                            mTargetTask, remoteTransition, null /* displayChange */);
+                            mTargetTask == null ? r.getTask() : mTargetTask,
+                            remoteTransition, null /* displayChange */);
                 } else if (started) {
                     // Make the collecting transition wait until this request is ready.
                     transitionController.setReady(r, false);
