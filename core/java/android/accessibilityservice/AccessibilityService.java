@@ -518,7 +518,9 @@ public abstract class AccessibilityService extends Service {
     public static final int GLOBAL_ACTION_POWER_DIALOG = 6;
 
     /**
-     * Action to toggle docking the current app's window
+     * Action to toggle docking the current app's window.
+     * <p>
+     * <strong>Note:</strong>  It is effective only if it appears in {@link #getSystemActions()}.
      */
     public static final int GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN = 7;
 
