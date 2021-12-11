@@ -887,7 +887,13 @@ public class KeyguardIndicationController {
                 mStatusBarKeyguardViewManager.showBouncerMessage(message, mInitialTextColorState);
             }
         } else {
-            showBiometricMessage(mContext.getString(R.string.keyguard_unlock));
+            if (mKeyguardUpdateMonitor.isUdfpsSupported()
+                    && mKeyguardUpdateMonitor.getUserCanSkipBouncer(
+                    KeyguardUpdateMonitor.getCurrentUser())) {
+                showBiometricMessage(mContext.getString(R.string.keyguard_unlock_press));
+            } else {
+                showBiometricMessage(mContext.getString(R.string.keyguard_unlock));
+            }
         }
     }
 

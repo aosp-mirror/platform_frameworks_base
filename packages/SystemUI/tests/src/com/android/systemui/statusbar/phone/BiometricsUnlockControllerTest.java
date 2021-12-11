@@ -381,16 +381,15 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onUdfpsConsecutivelyFailedThreeTimes_showBouncer() {
+    public void onUdfpsConsecutivelyFailedTwoTimes_showBouncer() {
         // GIVEN UDFPS is supported
         when(mUpdateMonitor.isUdfpsSupported()).thenReturn(true);
 
-        // WHEN udfps fails twice - then don't show the bouncer
-        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+        // WHEN udfps fails once - then don't show the bouncer
         mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
         verify(mStatusBarKeyguardViewManager, never()).showBouncer(anyBoolean());
 
-        // WHEN udfps fails the third time
+        // WHEN udfps fails the second time
         mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
 
         // THEN show the bouncer
