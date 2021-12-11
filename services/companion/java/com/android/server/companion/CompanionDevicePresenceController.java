@@ -49,8 +49,10 @@ public class CompanionDevicePresenceController {
     private static final String LOG_TAG = "CompanionDevicePresenceController";
     PerUser<ArrayMap<String, List<BoundService>>> mBoundServices;
     private static final String META_DATA_KEY_PRIMARY = "primary";
+    private final CompanionDeviceManagerService mService;
 
-    public CompanionDevicePresenceController() {
+    public CompanionDevicePresenceController(CompanionDeviceManagerService service) {
+        mService = service;
         mBoundServices = new PerUser<ArrayMap<String, List<BoundService>>>() {
             @NonNull
             @Override
@@ -61,24 +63,45 @@ public class CompanionDevicePresenceController {
     }
 
     void onDeviceNotifyAppeared(AssociationInfo association, Context context, Handler handler) {
-        ServiceConnector<ICompanionDeviceService> primaryConnector =
-                getPrimaryServiceConnector(association, context, handler);
-        if (primaryConnector != null) {
-            Slog.i(LOG_TAG,
-                    "Sending onDeviceAppeared to " + association.getPackageName() + ")");
-            primaryConnector.run(
-                    s -> s.onDeviceAppeared(association.getDeviceMacAddressAsString()));
+        for (BoundService boundService : getDeviceListenerServiceConnector(
+                association, context,  handler)) {
+            if (boundService.mIsPrimary) {
+                Slog.i(LOG_TAG,
+                        "Sending onDeviceAppeared to " + association.getPackageName() + ")");
+                boundService.mServiceConnector.run(
+                        service -> service.onDeviceAppeared(association));
+            } else {
+                Slog.i(LOG_TAG, "Connecting to " + boundService.mComponentName);
+                boundService.mServiceConnector.connect();
+            }
         }
     }
 
     void onDeviceNotifyDisappeared(AssociationInfo association, Context context, Handler handler) {
-        ServiceConnector<ICompanionDeviceService> primaryConnector =
-                getPrimaryServiceConnector(association, context, handler);
-        if (primaryConnector != null) {
-            Slog.i(LOG_TAG,
-                    "Sending onDeviceDisappeared to " + association.getPackageName() + ")");
-            primaryConnector.run(
-                    s -> s.onDeviceDisappeared(association.getDeviceMacAddressAsString()));
+        for (BoundService boundService : getDeviceListenerServiceConnector(
+                association, context,  handler)) {
+            if (boundService.mIsPrimary) {
+                Slog.i(LOG_TAG,
+                        "Sending onDeviceDisappeared to " + association.getPackageName() + ")");
+                boundService.mServiceConnector.run(service ->
+                        service.onDeviceDisappeared(association));
+            }
+        }
+    }
+
+    void onDeviceNotifyDisappearedAndUnbind(AssociationInfo association,
+            Context context, Handler handler) {
+        for (BoundService boundService : getDeviceListenerServiceConnector(
+                association, context, handler)) {
+            if (boundService.mIsPrimary) {
+                Slog.i(LOG_TAG,
+                        "Sending onDeviceDisappeared to " + association.getPackageName() + ")");
+                boundService.mServiceConnector.post(
+                        service -> {
+                            service.onDeviceDisappeared(association);
+                        }).thenRun(() -> unbindDevicePresenceListener(
+                                        association.getPackageName(), association.getUserId()));
+            }
         }
     }
 
@@ -91,17 +114,6 @@ public class CompanionDevicePresenceController {
                 boundService.mServiceConnector.unbind();
             }
         }
-    }
-
-    private ServiceConnector<ICompanionDeviceService> getPrimaryServiceConnector(
-            AssociationInfo association, Context context, Handler handler) {
-        for (BoundService boundService: getDeviceListenerServiceConnector(association, context,
-                handler)) {
-            if (boundService.mIsPrimary) {
-                return boundService.mServiceConnector;
-            }
-        }
-        return null;
     }
 
     private List<BoundService> getDeviceListenerServiceConnector(AssociationInfo a, Context context,
@@ -140,18 +152,22 @@ public class CompanionDevicePresenceController {
                         protected long getAutoDisconnectTimeoutMs() {
                             // Service binding is managed manually based on corresponding device
                             // being nearby
-                            return Long.MAX_VALUE;
+                            return -1;
                         }
 
                         @Override
                         public void binderDied() {
                             super.binderDied();
-
-                            // Re-connect to the service if process gets killed
-                            handler.postDelayed(
-                                    this::connect,
-                                    CompanionDeviceManagerService
-                                            .DEVICE_LISTENER_DIED_REBIND_TIMEOUT_MS);
+                            if (a.isSelfManaged()) {
+                                mBoundServices.forUser(a.getUserId()).remove(a.getPackageName());
+                                mService.mPresentSelfManagedDevices.remove(a.getId());
+                            } else {
+                                // Re-connect to the service if process gets killed
+                                handler.postDelayed(
+                                        this::connect,
+                                        CompanionDeviceManagerService
+                                                .DEVICE_LISTENER_DIED_REBIND_TIMEOUT_MS);
+                            }
                         }
                     };
 
@@ -189,6 +205,13 @@ public class CompanionDevicePresenceController {
                     return false;
                 }
             }
+        }
+
+        if (packageResolveInfos.size() > 1 && primaryCount == 0) {
+            Slog.e(LOG_TAG, "Must have exactly one primary CompanionDeviceService "
+                    + "to be bound when declare more than one CompanionDeviceService but "
+                    + association.getPackageName() + " has " + primaryCount);
+            return false;
         }
 
         if (packageResolveInfos.size() == 1 && primaryCount != 0) {

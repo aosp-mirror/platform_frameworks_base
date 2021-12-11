@@ -19,6 +19,7 @@ package com.android.server.power;
 import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.view.Display;
 
 /**
  * Used to store power related requests to every display in a
@@ -33,9 +34,10 @@ public class PowerGroup {
 
     private final DisplayPowerRequest mDisplayPowerRequest;
     private final boolean mSupportsSandman;
+    private final int mGroupId;
 
-    // True if DisplayManagerService has applied all the latest display states that were
-    // requested for this group
+    // True if DisplayManagerService has applied all the latest display states that were requested
+    // for this group
     private boolean mReady;
     // True if this group is in the process of powering on
     private boolean mPoweringOn;
@@ -49,8 +51,9 @@ public class PowerGroup {
     private long mLastUserActivityTime;
     private long mLastUserActivityTimeNoChangeLights;
 
-    PowerGroup(DisplayPowerRequest displayPowerRequest, int wakefulness, boolean ready,
+    PowerGroup(int groupId, DisplayPowerRequest displayPowerRequest, int wakefulness, boolean ready,
             boolean supportsSandman) {
+        this.mGroupId = groupId;
         this.mDisplayPowerRequest = displayPowerRequest;
         this.mWakefulness = wakefulness;
         this.mReady = ready;
@@ -58,6 +61,7 @@ public class PowerGroup {
     }
 
     PowerGroup() {
+        this.mGroupId = Display.DEFAULT_DISPLAY_GROUP;
         this.mDisplayPowerRequest = new DisplayPowerRequest();
         this.mWakefulness = WAKEFULNESS_AWAKE;
         this.mReady = false;
@@ -70,6 +74,10 @@ public class PowerGroup {
 
     int getWakefulnessLocked() {
         return mWakefulness;
+    }
+
+    int getGroupId() {
+        return mGroupId;
     }
 
     /**

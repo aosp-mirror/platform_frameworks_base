@@ -154,9 +154,12 @@ class ConfigurationController {
         int configDiff;
         boolean equivalent;
 
+        // Get theme outside of synchronization to avoid nested lock.
+        final Resources.Theme systemTheme = mActivityThread.getSystemContext().getTheme();
+        final ContextImpl systemUiContext = mActivityThread.getSystemUiContextNoCreate();
+        final Resources.Theme systemUiTheme =
+                systemUiContext != null ? systemUiContext.getTheme() : null;
         synchronized (mResourcesManager) {
-            final Resources.Theme systemTheme = mActivityThread.getSystemContext().getTheme();
-            final Resources.Theme systemUiTheme = mActivityThread.getSystemUiContext().getTheme();
             if (mPendingConfiguration != null) {
                 if (!mPendingConfiguration.isOtherSeqNewer(config)) {
                     config = mPendingConfiguration;
@@ -207,7 +210,8 @@ class ConfigurationController {
                 systemTheme.rebase();
             }
 
-            if ((systemUiTheme.getChangingConfigurations() & configDiff) != 0) {
+            if (systemUiTheme != null
+                    && (systemUiTheme.getChangingConfigurations() & configDiff) != 0) {
                 systemUiTheme.rebase();
             }
         }

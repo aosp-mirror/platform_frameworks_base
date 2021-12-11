@@ -2073,7 +2073,8 @@ public class UserManager {
     @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.CREATE_USERS})
+            android.Manifest.permission.CREATE_USERS,
+            android.Manifest.permission.QUERY_USERS})
     @UserHandleAware
     public @NonNull String getUserType() {
         UserInfo userInfo = getUserInfo(mUserId);
@@ -2082,15 +2083,21 @@ public class UserManager {
 
     /**
      * Returns the user name of the context user. This call is only available to applications on
-     * the system image; it requires the {@code android.permission.MANAGE_USERS} or {@code
-     * android.permission.GET_ACCOUNTS_PRIVILEGED} permissions.
+     * the system image.
      *
      * @return the user name
      */
-    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED,
-            android.Manifest.permission.CREATE_USERS}, conditional = true)
-    @UserHandleAware
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS,
+            android.Manifest.permission.QUERY_USERS,
+            android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED})
+
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCaller = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.CREATE_USERS,
+                    android.Manifest.permission.QUERY_USERS})
     public @NonNull String getUserName() {
         if (UserHandle.myUserId() == mUserId) {
             try {
@@ -2153,8 +2160,10 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS})
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public boolean isPrimaryUser() {
         final UserInfo user = getUserInfo(getContextUserIfAppropriate());
@@ -2184,7 +2193,8 @@ public class UserManager {
     @SystemApi
     @RequiresPermission(anyOf = {
             Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS})
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public boolean isAdminUser() {
         return isUserAdmin(getContextUserIfAppropriate());
@@ -2196,8 +2206,10 @@ public class UserManager {
      * user.
      */
     @UnsupportedAppUsage
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS})
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
     public boolean isUserAdmin(@UserIdInt int userId) {
         UserInfo user = getUserInfo(userId);
         return user != null && user.isAdmin();
@@ -2394,8 +2406,10 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS})
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
     @UserHandleAware
     public @Nullable UserHandle getRestrictedProfileParent() {
         final UserInfo info = getUserInfo(mUserId);
@@ -2412,8 +2426,10 @@ public class UserManager {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS})
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
     public boolean isGuestUser(@UserIdInt int userId) {
         UserInfo user = getUserInfo(userId);
         return user != null && user.isGuest();
@@ -2426,8 +2442,10 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS})
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public boolean isGuestUser() {
         UserInfo user = getUserInfo(getContextUserIfAppropriate());
@@ -2456,17 +2474,15 @@ public class UserManager {
     /**
      * Checks if the calling context user is running in a profile.
      *
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} or
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission, otherwise the
-     * caller must be in the same profile group of specified user.
-     *
      * @return whether the caller is in a profile.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
-    @UserHandleAware
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.QUERY_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
     public boolean isProfile() {
         return isProfile(mUserId);
     }
@@ -2502,8 +2518,8 @@ public class UserManager {
             enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
             requiresAnyOfPermissionsIfNotCallerProfileGroup = {
                     android.Manifest.permission.MANAGE_USERS,
-                    android.Manifest.permission.INTERACT_ACROSS_USERS}
-    )
+                    android.Manifest.permission.QUERY_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
     public boolean isManagedProfile() {
         return isManagedProfile(getContextUserIfAppropriate());
     }
@@ -2511,15 +2527,18 @@ public class UserManager {
     /**
      * Checks if the specified user is a managed profile.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} or
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission, otherwise the caller
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} or
+     * {@link android.Manifest.permission#QUERY_USERS} permission, otherwise the caller
      * must be in the same profile group of specified user.
      *
      * @return whether the specified user is a managed profile.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isManagedProfile(@UserIdInt int userId) {
         if (userId == mUserId) {
             // No need for synchronization.  Once it becomes non-null, it'll be non-null forever.
@@ -2573,8 +2592,10 @@ public class UserManager {
      * @return whether the context user is an ephemeral user.
      * @hide
      */
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS})
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
     @UserHandleAware
     public boolean isEphemeralUser() {
         return isUserEphemeral(mUserId);
@@ -2584,8 +2605,10 @@ public class UserManager {
      * Returns whether the specified user is ephemeral.
      * @hide
      */
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS})
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
     public boolean isUserEphemeral(@UserIdInt int userId) {
         final UserInfo user = getUserInfo(userId);
         return user != null && user.isEphemeral();
@@ -2853,8 +2876,10 @@ public class UserManager {
      * @hide
      */
     @UnsupportedAppUsage
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS})
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
     public UserInfo getUserInfo(@UserIdInt int userId) {
         try {
             return mService.getUserInfo(userId);
@@ -2877,7 +2902,9 @@ public class UserManager {
     @Deprecated
     @SystemApi
     @UserRestrictionSource
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.QUERY_USERS})
     public int getUserRestrictionSource(@UserRestrictionKey String restrictionKey,
             UserHandle userHandle) {
         try {
@@ -2896,7 +2923,9 @@ public class UserManager {
      * @return a list of user ids enforcing this restriction.
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_USERS})
     public List<EnforcingUser> getUserRestrictionSources(
             @UserRestrictionKey String restrictionKey, UserHandle userHandle) {
         try {
@@ -3963,15 +3992,17 @@ public class UserManager {
     }
 
     /**
-     * Checks whether it's possible to add more managed profiles. Caller must hold the MANAGE_USERS
-     * permission.
+     * Checks whether it's possible to add more managed profiles.
      * if allowedToRemoveOne is true and if the user already has a managed profile, then return if
      * we could add a new managed profile to this user after removing the existing one.
      *
      * @return true if more managed profiles can be added, false if limit has been reached.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_USERS
+    })
     public boolean canAddMoreManagedProfiles(@UserIdInt int userId, boolean allowedToRemoveOne) {
         try {
             return mService.canAddMoreManagedProfiles(userId, allowedToRemoveOne);
@@ -3987,7 +4018,10 @@ public class UserManager {
      * @return true if more profiles can be added, false if limit has been reached.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_USERS
+    })
     public boolean canAddMoreProfilesToUser(@NonNull String userType, @UserIdInt int userId) {
         try {
             return mService.canAddMoreProfilesToUser(userType, userId, false);
@@ -4022,14 +4056,17 @@ public class UserManager {
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or
-     * {@link android.Manifest.permission#CREATE_USERS} if userId is not the calling user.
+     * {@link android.Manifest.permission#CREATE_USERS} or
+     * {@link android.Manifest.permission#QUERY_USERS} if userId is not the calling user.
      * @param userId profiles of this user will be returned.
      * @return the list of profiles.
      * @hide
      */
     @UnsupportedAppUsage
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS}, conditional = true)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS}, conditional = true)
     public List<UserInfo> getProfiles(@UserIdInt int userId) {
         try {
             return mService.getProfiles(userId, false /* enabledOnly */);
@@ -4048,7 +4085,9 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_USERS})
     public boolean isSameProfileGroup(@NonNull UserHandle user, @NonNull UserHandle otherUser) {
         return isSameProfileGroup(user.getIdentifier(), otherUser.getIdentifier());
     }
@@ -4060,7 +4099,9 @@ public class UserManager {
      * @return true if the two user ids are in the same profile group.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_USERS})
     public boolean isSameProfileGroup(@UserIdInt int userId, int otherUserId) {
         try {
             return mService.isSameProfileGroup(userId, otherUserId);
@@ -4075,14 +4116,20 @@ public class UserManager {
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or
-     * {@link android.Manifest.permission#CREATE_USERS} if userId is not the calling user.
+     * {@link android.Manifest.permission#CREATE_USERS} or
+     * {@link android.Manifest.permission#QUERY_USERS} if userId is not the calling user.
      * @param userId profiles of this user will be returned.
      * @return the list of profiles.
+     * @deprecated use {@link #getUserProfiles()} instead.
+     *
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS}, conditional = true)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS}, conditional = true)
     public List<UserInfo> getEnabledProfiles(@UserIdInt int userId) {
         try {
             return mService.getProfiles(userId, true /* enabledOnly */);
@@ -4102,8 +4149,8 @@ public class UserManager {
             enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
             requiresAnyOfPermissionsIfNotCaller = {
                     Manifest.permission.MANAGE_USERS,
-                    Manifest.permission.CREATE_USERS}
-    )
+                    Manifest.permission.CREATE_USERS,
+                    Manifest.permission.QUERY_USERS})
     public List<UserHandle> getUserProfiles() {
         int[] userIds = getProfileIds(getContextUserIfAppropriate(), true /* enabledOnly */);
         return convertUserIdsToUserHandles(userIds);
@@ -4118,9 +4165,11 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS}, conditional = true)
-    @UserHandleAware
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCaller = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.CREATE_USERS,
+                    Manifest.permission.QUERY_USERS})
     public @NonNull List<UserHandle> getEnabledProfiles() {
         return getProfiles(true);
     }
@@ -4134,9 +4183,11 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS}, conditional = true)
-    @UserHandleAware
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCaller = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.CREATE_USERS,
+                    Manifest.permission.QUERY_USERS})
     public @NonNull List<UserHandle> getAllProfiles() {
         return getProfiles(false);
     }
@@ -4149,9 +4200,11 @@ public class UserManager {
      * @param enabledOnly whether to return only {@link UserInfo#isEnabled() enabled} profiles
      * @return A non-empty list of UserHandles associated with the context user.
      */
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS}, conditional = true)
-    @UserHandleAware
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCaller = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.CREATE_USERS,
+                    Manifest.permission.QUERY_USERS})
     private @NonNull List<UserHandle> getProfiles(boolean enabledOnly) {
         final int[] userIds = getProfileIds(mUserId, enabledOnly);
         return convertUserIdsToUserHandles(userIds);
@@ -4177,8 +4230,10 @@ public class UserManager {
      *
      * @hide
      */
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS}, conditional = true)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS}, conditional = true)
     public @NonNull int[] getProfileIds(@UserIdInt int userId, boolean enabledOnly) {
         try {
             return mService.getProfileIds(userId, enabledOnly);
@@ -4192,8 +4247,10 @@ public class UserManager {
      * @hide
      */
     @UnsupportedAppUsage
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS}, conditional = true)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS}, conditional = true)
     public int[] getProfileIdsWithDisabled(@UserIdInt int userId) {
         return getProfileIds(userId, false /* enabledOnly */);
     }
@@ -4202,8 +4259,10 @@ public class UserManager {
      * @see #getProfileIds(int, boolean)
      * @hide
      */
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS}, conditional = true)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS}, conditional = true)
     public int[] getEnabledProfileIds(@UserIdInt int userId) {
         return getProfileIds(userId, true /* enabledOnly */);
     }

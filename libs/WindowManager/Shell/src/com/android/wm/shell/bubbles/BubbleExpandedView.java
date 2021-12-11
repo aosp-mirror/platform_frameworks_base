@@ -335,7 +335,7 @@ public class BubbleExpandedView extends LinearLayout {
             mManageButton.setVisibility(GONE);
         } else {
             mTaskView = new TaskView(mContext, mController.getTaskOrganizer(),
-                    mController.getSyncTransactionQueue());
+                    mController.getTaskViewTransitions(), mController.getSyncTransactionQueue());
             mTaskView.setListener(mController.getMainExecutor(), mTaskViewListener);
             mExpandedViewContainer.addView(mTaskView);
             bringChildToFront(mTaskView);

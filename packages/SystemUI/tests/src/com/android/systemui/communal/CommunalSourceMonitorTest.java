@@ -32,6 +32,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.communal.conditions.CommunalConditionsMonitor;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,11 +54,12 @@ public class CommunalSourceMonitorTest extends SysuiTestCase {
     @Captor private ArgumentCaptor<CommunalConditionsMonitor.Callback> mConditionsCallbackCaptor;
 
     private CommunalSourceMonitor mCommunalSourceMonitor;
+    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mCommunalSourceMonitor = new CommunalSourceMonitor(mCommunalConditionsMonitor);
+        mCommunalSourceMonitor = new CommunalSourceMonitor(mExecutor, mCommunalConditionsMonitor);
     }
 
     @Test
@@ -64,7 +67,7 @@ public class CommunalSourceMonitorTest extends SysuiTestCase {
         final CommunalSourceMonitor.Callback callback = mock(CommunalSourceMonitor.Callback.class);
         final CommunalSource source = mock(CommunalSource.class);
 
-        mCommunalSourceMonitor.setSource(source);
+        setSource(source);
         mCommunalSourceMonitor.addCallback(callback);
         setConditionsMet(true);
 
@@ -78,7 +81,7 @@ public class CommunalSourceMonitorTest extends SysuiTestCase {
 
         mCommunalSourceMonitor.addCallback(callback);
         mCommunalSourceMonitor.removeCallback(callback);
-        mCommunalSourceMonitor.setSource(source);
+        setSource(source);
 
         verify(callback, never()).onSourceAvailable(any());
     }
@@ -91,7 +94,7 @@ public class CommunalSourceMonitorTest extends SysuiTestCase {
         mCommunalSourceMonitor.addCallback(callback);
         setConditionsMet(true);
         clearInvocations(callback);
-        mCommunalSourceMonitor.setSource(source);
+        setSource(source);
 
         verifyOnSourceAvailableCalledWith(callback, source);
     }
@@ -103,7 +106,7 @@ public class CommunalSourceMonitorTest extends SysuiTestCase {
 
         mCommunalSourceMonitor.addCallback(callback);
         setConditionsMet(false);
-        mCommunalSourceMonitor.setSource(source);
+        setSource(source);
 
         verify(callback, never()).onSourceAvailable(any());
     }
@@ -114,7 +117,7 @@ public class CommunalSourceMonitorTest extends SysuiTestCase {
         final CommunalSource source = mock(CommunalSource.class);
 
         mCommunalSourceMonitor.addCallback(callback);
-        mCommunalSourceMonitor.setSource(source);
+        setSource(source);
 
         // The callback should not have executed since communal is disabled.
         verify(callback, never()).onSourceAvailable(any());
@@ -130,7 +133,7 @@ public class CommunalSourceMonitorTest extends SysuiTestCase {
         final CommunalSource source = mock(CommunalSource.class);
 
         mCommunalSourceMonitor.addCallback(callback);
-        mCommunalSourceMonitor.setSource(source);
+        setSource(source);
         setConditionsMet(true);
         verifyOnSourceAvailableCalledWith(callback, source);
 
@@ -151,9 +154,16 @@ public class CommunalSourceMonitorTest extends SysuiTestCase {
     // Pushes an update on whether the communal conditions are met, assuming that a callback has
     // been registered with the communal conditions monitor.
     private void setConditionsMet(boolean value) {
+        mExecutor.runAllReady();
         verify(mCommunalConditionsMonitor).addCallback(mConditionsCallbackCaptor.capture());
         final CommunalConditionsMonitor.Callback conditionsCallback =
                 mConditionsCallbackCaptor.getValue();
         conditionsCallback.onConditionsChanged(value);
+        mExecutor.runAllReady();
+    }
+
+    private void setSource(CommunalSource source) {
+        mCommunalSourceMonitor.setSource(source);
+        mExecutor.runAllReady();
     }
 }

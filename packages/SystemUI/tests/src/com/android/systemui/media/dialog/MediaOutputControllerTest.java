@@ -55,6 +55,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -94,6 +95,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
             mock(NotificationEntryManager.class);
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
+    private final SystemUIDialogManager mDialogManager = mock(SystemUIDialogManager.class);
 
     private Context mSpyContext;
     private MediaOutputController mMediaOutputController;
@@ -116,7 +118,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
         mMediaOutputController = new MediaOutputController(mSpyContext, TEST_PACKAGE_NAME, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager, mUiEventLogger, mDialogLaunchAnimator);
+                mNotificationEntryManager, mUiEventLogger, mDialogLaunchAnimator, mDialogManager);
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         MediaDescription.Builder builder = new MediaDescription.Builder();
@@ -160,7 +162,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     public void start_withoutPackageName_verifyMediaControllerInit() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager, mUiEventLogger, mDialogLaunchAnimator);
+                mNotificationEntryManager, mUiEventLogger, mDialogLaunchAnimator, mDialogManager);
 
         mMediaOutputController.start(mCb);
 
@@ -181,7 +183,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     public void stop_withoutPackageName_verifyMediaControllerDeinit() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager, mUiEventLogger, mDialogLaunchAnimator);
+                mNotificationEntryManager, mUiEventLogger, mDialogLaunchAnimator, mDialogManager);
 
         mMediaOutputController.start(mCb);
 
@@ -452,7 +454,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     public void getNotificationLargeIcon_withoutPackageName_returnsNull() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager, mUiEventLogger, mDialogLaunchAnimator);
+                mNotificationEntryManager, mUiEventLogger, mDialogLaunchAnimator, mDialogManager);
 
         assertThat(mMediaOutputController.getNotificationIcon()).isNull();
     }

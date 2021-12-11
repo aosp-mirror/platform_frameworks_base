@@ -669,7 +669,7 @@ class MediaDataManagerTest : SysuiTestCase() {
 
     @Test
     fun testPlaybackActions_noPrevNext_usesCustom() {
-        val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
+        val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4", "custom 5")
         whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
         val stateActions = PlaybackState.ACTION_PLAY
         val stateBuilder = PlaybackState.Builder()

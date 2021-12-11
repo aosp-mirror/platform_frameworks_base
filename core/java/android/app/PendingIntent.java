@@ -39,7 +39,7 @@ import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.PackageManager.ResolveInfoFlags;
+import android.content.pm.PackageManager.ResolveInfoFlagsBits;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
@@ -1296,7 +1296,7 @@ public final class PendingIntent implements Parcelable {
     @RequiresPermission(permission.GET_INTENT_SENDER_INTENT)
     @SystemApi(client = Client.MODULE_LIBRARIES)
     @TestApi
-    public @NonNull List<ResolveInfo> queryIntentComponents(@ResolveInfoFlags int flags) {
+    public @NonNull List<ResolveInfo> queryIntentComponents(@ResolveInfoFlagsBits int flags) {
         try {
             ParceledListSlice<ResolveInfo> parceledList = ActivityManager.getService()
                     .queryIntentComponentsForIntentSender(mTarget, flags);

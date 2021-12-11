@@ -20,6 +20,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
@@ -72,6 +73,8 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         void onStatusChanged(boolean visible, boolean hasChildren);
 
         void onChildTaskStatusChanged(int taskId, boolean present, boolean visible);
+
+        void onChildTaskEnterPip(int taskId);
 
         void onRootTaskVanished();
 
@@ -256,6 +259,9 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mChildrenTaskInfo.remove(taskId);
             mChildrenLeashes.remove(taskId);
             mCallbacks.onChildTaskStatusChanged(taskId, false /* present */, taskInfo.isVisible);
+            if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
+                mCallbacks.onChildTaskEnterPip(taskId);
+            }
             if (ENABLE_SHELL_TRANSITIONS) {
                 // Status is managed/synchronized by the transition lifecycle.
                 return;

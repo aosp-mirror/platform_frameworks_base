@@ -121,6 +121,7 @@ public class LauncherAppsService extends SystemService {
     public void onStart() {
         publishBinderService(Context.LAUNCHER_APPS_SERVICE, mLauncherAppsImpl);
         mLauncherAppsImpl.registerLoadingProgressForIncrementalApps();
+        LocalServices.addService(LauncherAppsServiceInternal.class, mLauncherAppsImpl.mInternal);
     }
 
     static class BroadcastCookie {
@@ -135,6 +136,17 @@ public class LauncherAppsService extends SystemService {
             this.callingUid = callingUid;
             this.callingPid = callingPid;
         }
+    }
+
+    /**
+     * Local system service interface.
+     * @hide Only for use within system server
+     */
+    public abstract static class LauncherAppsServiceInternal {
+        /** Same as startShortcut except supports forwarding of caller uid/pid. */
+        public abstract boolean startShortcut(int callerUid, int callerPid, String callingPackage,
+                String packageName, String featureId, String shortcutId, Rect sourceBounds,
+                Bundle startActivityOptions, int targetUserId);
     }
 
     @VisibleForTesting
@@ -168,6 +180,8 @@ public class LauncherAppsService extends SystemService {
 
         private PackageInstallerService mPackageInstallerService;
 
+        final LauncherAppsServiceInternal mInternal;
+
         public LauncherAppsImpl(Context context) {
             mContext = context;
             mIPM = AppGlobals.getPackageManager();
@@ -189,6 +203,7 @@ public class LauncherAppsService extends SystemService {
             mShortcutServiceInternal.addShortcutChangeCallback(mShortcutChangeHandler);
             mCallbackHandler = BackgroundThread.getHandler();
             mDpm = (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            mInternal = new LocalService();
         }
 
         @VisibleForTesting
@@ -359,11 +374,15 @@ public class LauncherAppsService extends SystemService {
          * group.
          */
         private boolean canAccessProfile(int targetUserId, String message) {
-            final int callingUserId = injectCallingUserId();
+            return canAccessProfile(injectBinderCallingUid(), injectCallingUserId(),
+                    injectBinderCallingPid(), targetUserId, message);
+        }
+
+        private boolean canAccessProfile(int callingUid, int callingUserId, int callingPid,
+                int targetUserId, String message) {
 
             if (targetUserId == callingUserId) return true;
-            if (injectHasInteractAcrossUsersFullPermission(injectBinderCallingPid(),
-                    injectBinderCallingUid())) {
+            if (injectHasInteractAcrossUsersFullPermission(callingPid, callingUid)) {
                 return true;
             }
 
@@ -379,25 +398,29 @@ public class LauncherAppsService extends SystemService {
                 injectRestoreCallingIdentity(ident);
             }
 
-            return mUserManagerInternal.isProfileAccessible(injectCallingUserId(), targetUserId,
+            return mUserManagerInternal.isProfileAccessible(callingUserId, targetUserId,
                     message, true);
         }
 
+        private void verifyCallingPackage(String callingPackage) {
+            verifyCallingPackage(callingPackage, injectBinderCallingUid());
+        }
+
         @VisibleForTesting // We override it in unit tests
-        void verifyCallingPackage(String callingPackage) {
+        void verifyCallingPackage(String callingPackage, int callerUid) {
             int packageUid = -1;
             try {
                 packageUid = mIPM.getPackageUid(callingPackage,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                                 | PackageManager.MATCH_UNINSTALLED_PACKAGES,
-                        UserHandle.getUserId(getCallingUid()));
+                        UserHandle.getUserId(callerUid));
             } catch (RemoteException ignore) {
             }
             if (packageUid < 0) {
                 Log.e(TAG, "Package not found: " + callingPackage);
             }
-            if (packageUid != injectBinderCallingUid()) {
+            if (packageUid != callerUid) {
                 throw new SecurityException("Calling package name mismatch");
             }
         }
@@ -797,9 +820,15 @@ public class LauncherAppsService extends SystemService {
         }
 
         private void ensureShortcutPermission(@NonNull String callingPackage) {
-            verifyCallingPackage(callingPackage);
-            if (!mShortcutServiceInternal.hasShortcutHostPermission(getCallingUserId(),
-                    callingPackage, injectBinderCallingPid(), injectBinderCallingUid())) {
+            ensureShortcutPermission(injectBinderCallingUid(), injectBinderCallingPid(),
+                    callingPackage);
+        }
+
+        private void ensureShortcutPermission(int callerUid, int callerPid,
+                @NonNull String callingPackage) {
+            verifyCallingPackage(callingPackage, callerUid);
+            if (!mShortcutServiceInternal.hasShortcutHostPermission(UserHandle.getUserId(callerUid),
+                    callingPackage, callerPid, callerUid)) {
                 throw new SecurityException("Caller can't access shortcut information");
             }
         }
@@ -989,20 +1018,28 @@ public class LauncherAppsService extends SystemService {
         public boolean startShortcut(String callingPackage, String packageName, String featureId,
                 String shortcutId, Rect sourceBounds, Bundle startActivityOptions,
                 int targetUserId) {
-            verifyCallingPackage(callingPackage);
+            return startShortcutInner(injectBinderCallingUid(), injectBinderCallingPid(),
+                    injectCallingUserId(), callingPackage, packageName, featureId, shortcutId,
+                    sourceBounds, startActivityOptions, targetUserId);
+        }
+
+        private boolean startShortcutInner(int callerUid, int callerPid, int callingUserId,
+                String callingPackage, String packageName, String featureId, String shortcutId,
+                Rect sourceBounds, Bundle startActivityOptions, int targetUserId) {
+            verifyCallingPackage(callingPackage, callerUid);
             if (!canAccessProfile(targetUserId, "Cannot start activity")) {
                 return false;
             }
 
             // Even without the permission, pinned shortcuts are always launchable.
-            if (!mShortcutServiceInternal.isPinnedByCaller(getCallingUserId(),
+            if (!mShortcutServiceInternal.isPinnedByCaller(callingUserId,
                     callingPackage, packageName, shortcutId, targetUserId)) {
-                ensureShortcutPermission(callingPackage);
+                ensureShortcutPermission(callerUid, callerPid, callingPackage);
             }
 
             final Intent[] intents = mShortcutServiceInternal.createShortcutIntents(
-                    getCallingUserId(), callingPackage, packageName, shortcutId, targetUserId,
-                    injectBinderCallingPid(), injectBinderCallingUid());
+                    callingUserId, callingPackage, packageName, shortcutId, targetUserId,
+                    callerPid, callerUid);
             if (intents == null || intents.length == 0) {
                 return false;
             }
@@ -1023,7 +1060,7 @@ public class LauncherAppsService extends SystemService {
 
             // Replace theme for splash screen
             final String splashScreenThemeResName =
-                    mShortcutServiceInternal.getShortcutStartingThemeResName(getCallingUserId(),
+                    mShortcutServiceInternal.getShortcutStartingThemeResName(callingUserId,
                             callingPackage, packageName, shortcutId, targetUserId);
             if (splashScreenThemeResName != null && !splashScreenThemeResName.isEmpty()) {
                 if (startActivityOptions == null) {
@@ -1807,6 +1844,17 @@ public class LauncherAppsService extends SystemService {
                 } finally {
                     mListeners.finishBroadcast();
                 }
+            }
+        }
+
+        final class LocalService extends LauncherAppsServiceInternal {
+            @Override
+            public boolean startShortcut(int callerUid, int callerPid, String callingPackage,
+                    String packageName, String featureId, String shortcutId, Rect sourceBounds,
+                    Bundle startActivityOptions, int targetUserId) {
+                return LauncherAppsImpl.this.startShortcutInner(callerUid, callerPid,
+                        UserHandle.getUserId(callerUid), callingPackage, packageName, featureId,
+                        shortcutId, sourceBounds, startActivityOptions, targetUserId);
             }
         }
     }

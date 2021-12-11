@@ -25,7 +25,6 @@ import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.compat.CompatChanges;
-import android.app.TaskStackListener;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.Overridable;
@@ -35,6 +34,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.hardware.CameraSessionStats;
 import android.hardware.CameraStreamStats;
@@ -84,7 +84,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -309,8 +308,6 @@ public class CameraServiceProxy extends SystemService
 
     private final DisplayWindowListener mDisplayWindowListener = new DisplayWindowListener();
 
-    private final TaskStateHandler mTaskStackListener = new TaskStateHandler();
-
     public static final class TaskInfo {
         public int frontTaskId;
         public boolean isResizeable;
@@ -318,54 +315,6 @@ public class CameraServiceProxy extends SystemService
         public boolean isFixedOrientationPortrait;
         public int displayId;
         public int userId;
-    }
-
-    private final class TaskStateHandler extends TaskStackListener {
-        private final Object mMapLock = new Object();
-
-        // maps the package name to its corresponding current top level task id
-        @GuardedBy("mMapLock")
-        private final ArrayMap<String, TaskInfo> mTaskInfoMap = new ArrayMap<>();
-
-        @Override
-        public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
-            synchronized (mMapLock) {
-                TaskInfo info = new TaskInfo();
-                info.frontTaskId = taskInfo.taskId;
-                info.isResizeable =
-                        (taskInfo.topActivityInfo.resizeMode != RESIZE_MODE_UNRESIZEABLE);
-                info.displayId = taskInfo.displayId;
-                info.userId = taskInfo.userId;
-                info.isFixedOrientationLandscape = ActivityInfo.isFixedOrientationLandscape(
-                        taskInfo.topActivityInfo.screenOrientation);
-                info.isFixedOrientationPortrait = ActivityInfo.isFixedOrientationPortrait(
-                        taskInfo.topActivityInfo.screenOrientation);
-                mTaskInfoMap.put(taskInfo.topActivityInfo.packageName, info);
-            }
-        }
-
-        @Override
-        public void onTaskRemoved(int taskId) {
-            synchronized (mMapLock) {
-                for (Map.Entry<String, TaskInfo> entry : mTaskInfoMap.entrySet()){
-                    if (entry.getValue().frontTaskId == taskId) {
-                        mTaskInfoMap.remove(entry.getKey());
-                        break;
-                    }
-                }
-            }
-        }
-
-        public @Nullable TaskInfo getFrontTaskInfo(String packageName) {
-            synchronized (mMapLock) {
-                if (mTaskInfoMap.containsKey(packageName)) {
-                    return mTaskInfoMap.get(packageName);
-                }
-            }
-
-            Log.e(TAG, "Top task with package name: " + packageName + " not found!");
-            return null;
-        }
     }
 
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
@@ -490,10 +439,46 @@ public class CameraServiceProxy extends SystemService
 
     private final ICameraServiceProxy.Stub mCameraServiceProxy = new ICameraServiceProxy.Stub() {
         @Override
-        public int getRotateAndCropOverride(String packageName, int lensFacing) {
+        public int getRotateAndCropOverride(String packageName, int lensFacing, int userId) {
             if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
                 Slog.e(TAG, "Calling UID: " + Binder.getCallingUid() + " doesn't match expected " +
                         " camera service UID!");
+                return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+            }
+
+            TaskInfo taskInfo = null;
+            ParceledListSlice<ActivityManager.RecentTaskInfo> recentTasks = null;
+
+            try {
+                recentTasks = ActivityTaskManager.getService().getRecentTasks(/*maxNum*/1,
+                        /*flags*/ 0, userId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to query recent tasks!");
+                return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+            }
+
+            if ((recentTasks != null) && (!recentTasks.getList().isEmpty())) {
+                ActivityManager.RecentTaskInfo task = recentTasks.getList().get(0);
+                if (packageName.equals(task.topActivityInfo.packageName)) {
+                    taskInfo = new TaskInfo();
+                    taskInfo.frontTaskId = task.taskId;
+                    taskInfo.isResizeable =
+                            (task.topActivityInfo.resizeMode != RESIZE_MODE_UNRESIZEABLE);
+                    taskInfo.displayId = task.displayId;
+                    taskInfo.userId = task.userId;
+                    taskInfo.isFixedOrientationLandscape =
+                            ActivityInfo.isFixedOrientationLandscape(
+                                    task.topActivityInfo.screenOrientation);
+                    taskInfo.isFixedOrientationPortrait =
+                            ActivityInfo.isFixedOrientationPortrait(
+                                    task.topActivityInfo.screenOrientation);
+                } else {
+                    Log.e(TAG, "Recent task package name: " + task.topActivityInfo.packageName
+                            + " doesn't match with camera client package name: " + packageName);
+                    return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+                }
+            } else {
+                Log.e(TAG, "Recent task list is empty!");
                 return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
             }
 
@@ -501,7 +486,6 @@ public class CameraServiceProxy extends SystemService
             //  regions in capture requests/results to account for thea physical rotation. The
             //  former is somewhat tricky as it assumes that camera clients always check for the
             //  current value by retrieving the camera characteristics from the camera device.
-            TaskInfo taskInfo = mTaskStackListener.getFrontTaskInfo(packageName);
             if ((taskInfo != null) && (CompatChanges.isChangeEnabled(
                         OVERRIDE_CAMERA_ROTATE_AND_CROP_DEFAULTS, packageName,
                         UserHandle.getUserHandleForUid(taskInfo.userId)))) {
@@ -671,12 +655,6 @@ public class CameraServiceProxy extends SystemService
     public void onBootPhase(int phase) {
         if (phase == PHASE_BOOT_COMPLETED) {
             CameraStatsJobService.schedule(mContext);
-
-            try {
-                ActivityTaskManager.getService().registerTaskStackListener(mTaskStackListener);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to register task stack listener!");
-            }
 
             try {
                 int[] displayIds = WindowManagerGlobal.getWindowManagerService()

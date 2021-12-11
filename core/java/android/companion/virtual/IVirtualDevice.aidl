@@ -16,6 +16,13 @@
 
 package android.companion.virtual;
 
+import android.graphics.Point;
+import android.hardware.input.VirtualKeyEvent;
+import android.hardware.input.VirtualMouseButtonEvent;
+import android.hardware.input.VirtualMouseRelativeEvent;
+import android.hardware.input.VirtualMouseScrollEvent;
+import android.hardware.input.VirtualTouchEvent;
+
 /**
  * Interface for a virtual device.
  *
@@ -34,4 +41,29 @@ interface IVirtualDevice {
      * Closes the virtual device and frees all associated resources.
      */
     void close();
+    void createVirtualKeyboard(
+            int displayId,
+            String inputDeviceName,
+            int vendorId,
+            int productId,
+            IBinder token);
+    void createVirtualMouse(
+            int displayId,
+            String inputDeviceName,
+            int vendorId,
+            int productId,
+            IBinder token);
+    void createVirtualTouchscreen(
+            int displayId,
+            String inputDeviceName,
+            int vendorId,
+            int productId,
+            IBinder token,
+            in Point screenSize);
+    void unregisterInputDevice(IBinder token);
+    boolean sendKeyEvent(IBinder token, in VirtualKeyEvent event);
+    boolean sendButtonEvent(IBinder token, in VirtualMouseButtonEvent event);
+    boolean sendRelativeEvent(IBinder token, in VirtualMouseRelativeEvent event);
+    boolean sendScrollEvent(IBinder token, in VirtualMouseScrollEvent event);
+    boolean sendTouchEvent(IBinder token, in VirtualTouchEvent event);
 }

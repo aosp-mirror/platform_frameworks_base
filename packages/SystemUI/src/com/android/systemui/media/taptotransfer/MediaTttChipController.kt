@@ -24,13 +24,8 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.commandline.Command
-import com.android.systemui.statusbar.commandline.CommandRegistry
-import java.io.PrintWriter
 import javax.inject.Inject
 
 /**
@@ -41,14 +36,9 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class MediaTttChipController @Inject constructor(
-    commandRegistry: CommandRegistry,
     private val context: Context,
     private val windowManager: WindowManager,
 ) {
-    init {
-        commandRegistry.registerCommand(ADD_CHIP_COMMAND_TAG) { AddChipCommand() }
-        commandRegistry.registerCommand(REMOVE_CHIP_COMMAND_TAG) { RemoveChipCommand() }
-    }
 
     private val windowLayoutParams = WindowManager.LayoutParams().apply {
         width = WindowManager.LayoutParams.WRAP_CONTENT
@@ -65,7 +55,8 @@ class MediaTttChipController @Inject constructor(
     /** The chip view currently being displayed. Null if the chip is not being displayed. */
     private var chipView: LinearLayout? = null
 
-    private fun displayChip(chipType: ChipType, otherDeviceName: String) {
+    /** Displays the chip view for the given state. */
+    fun displayChip(chipState: MediaTttChipState) {
         val oldChipView = chipView
         if (chipView == null) {
             chipView = LayoutInflater
@@ -76,16 +67,16 @@ class MediaTttChipController @Inject constructor(
 
         // Text
         currentChipView.requireViewById<TextView>(R.id.text).apply {
-            text = context.getString(chipType.chipText, otherDeviceName)
+            text = context.getString(chipState.chipText, chipState.otherDeviceName)
         }
 
         // Loading
-        val showLoading = chipType == ChipType.TRANSFER_INITIATED
+        val showLoading = chipState is TransferInitiated
         currentChipView.requireViewById<View>(R.id.loading).visibility =
             if (showLoading) { View.VISIBLE } else { View.GONE }
 
         // Undo
-        val showUndo = chipType == ChipType.TRANSFER_SUCCEEDED
+        val showUndo = chipState is TransferSucceeded
         currentChipView.requireViewById<View>(R.id.undo).visibility =
             if (showUndo) { View.VISIBLE } else { View.GONE }
 
@@ -94,53 +85,10 @@ class MediaTttChipController @Inject constructor(
         }
     }
 
-    private fun removeChip() {
+    /** Hides the chip. */
+    fun removeChip() {
         if (chipView == null) { return }
         windowManager.removeView(chipView)
         chipView = null
-    }
-
-    @VisibleForTesting
-    enum class ChipType(
-        @StringRes internal val chipText: Int
-    ) {
-        MOVE_CLOSER_TO_TRANSFER(R.string.media_move_closer_to_transfer),
-        TRANSFER_INITIATED(R.string.media_transfer_playing),
-        TRANSFER_SUCCEEDED(R.string.media_transfer_playing),
-    }
-
-    inner class AddChipCommand : Command {
-        override fun execute(pw: PrintWriter, args: List<String>) {
-            val chipTypeArg = args[1]
-            ChipType.values().forEach {
-                if (it.name == chipTypeArg) {
-                    displayChip(it, otherDeviceName = args[0])
-                    return
-                }
-            }
-
-            pw.println("Chip type must be one of " +
-                    ChipType.values().map { it.name }.reduce { acc, s -> "$acc, $s" })
-        }
-
-        override fun help(pw: PrintWriter) {
-            pw.println(
-                "Usage: adb shell cmd statusbar $ADD_CHIP_COMMAND_TAG <deviceName> <chipType>"
-            )
-        }
-    }
-
-    inner class RemoveChipCommand : Command {
-        override fun execute(pw: PrintWriter, args: List<String>) = removeChip()
-        override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar $REMOVE_CHIP_COMMAND_TAG")
-        }
-    }
-
-    companion object {
-        @VisibleForTesting
-        const val ADD_CHIP_COMMAND_TAG = "media-ttt-chip-add"
-        @VisibleForTesting
-        const val REMOVE_CHIP_COMMAND_TAG = "media-ttt-chip-remove"
     }
 }

@@ -25,6 +25,7 @@ import android.view.WindowManager;
 import androidx.core.graphics.drawable.IconCompat;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 /**
  * Dialog for media output group.
@@ -33,8 +34,8 @@ import com.android.systemui.R;
 public class MediaOutputGroupDialog extends MediaOutputBaseDialog {
 
     MediaOutputGroupDialog(Context context, boolean aboveStatusbar, MediaOutputController
-            mediaOutputController) {
-        super(context, mediaOutputController);
+            mediaOutputController, SystemUIDialogManager dialogManager) {
+        super(context, mediaOutputController, dialogManager);
         mMediaOutputController.resetGroupMediaDevices();
         mAdapter = new MediaOutputGroupAdapter(mMediaOutputController);
         if (!aboveStatusbar) {

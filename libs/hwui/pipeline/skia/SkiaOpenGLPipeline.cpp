@@ -91,6 +91,8 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
         fboInfo.fFormat = GL_RGBA8;
     } else if (colorType == kRGBA_1010102_SkColorType) {
         fboInfo.fFormat = GL_RGB10_A2;
+    } else if (colorType == kAlpha_8_SkColorType) {
+        fboInfo.fFormat = GL_R8;
     } else {
         LOG_ALWAYS_FATAL("Unsupported color type.");
     }

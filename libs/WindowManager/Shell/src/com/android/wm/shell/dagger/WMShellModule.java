@@ -27,6 +27,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.bubbles.BubbleController;
@@ -108,11 +109,13 @@ public class WMShellModule {
             DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
+            TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
         return BubbleController.create(context, null /* synchronizer */,
                 floatingContentCoordinator, statusBarService, windowManager,
                 windowManagerShellWrapper, launcherApps, taskStackListener,
-                uiEventLogger, organizer, displayController, mainExecutor, mainHandler, syncQueue);
+                uiEventLogger, organizer, displayController, mainExecutor, mainHandler,
+                taskViewTransitions, syncQueue);
     }
 
     //

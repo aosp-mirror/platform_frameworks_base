@@ -23,6 +23,7 @@ import android.graphics.RectF;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.util.ViewController;
@@ -44,6 +45,7 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
         extends ViewController<T> implements Dumpable {
     @NonNull final StatusBarStateController mStatusBarStateController;
     @NonNull final PanelExpansionStateManager mPanelExpansionStateManager;
+    @NonNull final SystemUIDialogManager mDialogManager;
     @NonNull final DumpManager mDumpManger;
 
     boolean mNotificationShadeVisible;
@@ -52,10 +54,12 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
             T view,
             @NonNull StatusBarStateController statusBarStateController,
             @NonNull PanelExpansionStateManager panelExpansionStateManager,
+            @NonNull SystemUIDialogManager dialogManager,
             @NonNull DumpManager dumpManager) {
         super(view);
         mStatusBarStateController = statusBarStateController;
         mPanelExpansionStateManager = panelExpansionStateManager;
+        mDialogManager = dialogManager;
         mDumpManger = dumpManager;
     }
 
@@ -64,12 +68,14 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
     @Override
     protected void onViewAttached() {
         mPanelExpansionStateManager.addExpansionListener(mPanelExpansionListener);
+        mDialogManager.registerListener(mDialogListener);
         mDumpManger.registerDumpable(getDumpTag(), this);
     }
 
     @Override
     protected void onViewDetached() {
         mPanelExpansionStateManager.removeExpansionListener(mPanelExpansionListener);
+        mDialogManager.registerListener(mDialogListener);
         mDumpManger.unregisterDumpable(getDumpTag());
     }
 
@@ -95,7 +101,8 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
      * authentication.
      */
     boolean shouldPauseAuth() {
-        return mNotificationShadeVisible;
+        return mNotificationShadeVisible
+                || mDialogManager.shouldHideAffordance();
     }
 
     /**
@@ -189,4 +196,7 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
             updatePauseAuth();
         }
     };
+
+    private final SystemUIDialogManager.Listener mDialogListener =
+            (shouldHide) -> updatePauseAuth();
 }

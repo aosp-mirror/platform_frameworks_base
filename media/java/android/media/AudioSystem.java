@@ -1915,7 +1915,7 @@ public class AudioSystem
             types[i] = devices.get(i).getInternalType();
             if (types[i] == AudioSystem.DEVICE_NONE) {
                 types[i] = AudioDeviceInfo.convertDeviceTypeToInternalInputDevice(
-                        devices.get(i).getType());
+                        devices.get(i).getType(), devices.get(i).getAddress());
             }
             addresses[i] = devices.get(i).getAddress();
         }

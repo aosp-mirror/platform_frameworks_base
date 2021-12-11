@@ -33,6 +33,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_SHORTCUT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
@@ -79,6 +80,8 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.LocalServices;
+import com.android.server.pm.LauncherAppsService.LauncherAppsServiceInternal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -783,6 +786,22 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         hop.getPendingIntent().getWhitelistToken(), 0 /* code */,
                         hop.getActivityIntent(), resolvedType, null /* finishReceiver */,
                         null /* requiredPermission */, options);
+                break;
+            }
+            case HIERARCHY_OP_TYPE_START_SHORTCUT: {
+                final Bundle launchOpts = hop.getLaunchOptions();
+                final String callingPackage = launchOpts.getString(
+                        WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_SHORTCUT_CALLING_PACKAGE);
+                launchOpts.remove(
+                        WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_SHORTCUT_CALLING_PACKAGE);
+
+                final LauncherAppsServiceInternal launcherApps = LocalServices.getService(
+                        LauncherAppsServiceInternal.class);
+
+                launcherApps.startShortcut(caller.mUid, caller.mPid, callingPackage,
+                        hop.getShortcutInfo().getPackage(), null /* default featureId */,
+                        hop.getShortcutInfo().getId(), null /* sourceBounds */, launchOpts,
+                        hop.getShortcutInfo().getUserId());
                 break;
             }
             case HIERARCHY_OP_TYPE_REPARENT_CHILDREN: {

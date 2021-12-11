@@ -31,13 +31,24 @@ public class TaskViewFactoryController {
     private final ShellTaskOrganizer mTaskOrganizer;
     private final ShellExecutor mShellExecutor;
     private final SyncTransactionQueue mSyncQueue;
+    private final TaskViewTransitions mTaskViewTransitions;
     private final TaskViewFactory mImpl = new TaskViewFactoryImpl();
+
+    public TaskViewFactoryController(ShellTaskOrganizer taskOrganizer,
+            ShellExecutor shellExecutor, SyncTransactionQueue syncQueue,
+            TaskViewTransitions taskViewTransitions) {
+        mTaskOrganizer = taskOrganizer;
+        mShellExecutor = shellExecutor;
+        mSyncQueue = syncQueue;
+        mTaskViewTransitions = taskViewTransitions;
+    }
 
     public TaskViewFactoryController(ShellTaskOrganizer taskOrganizer,
             ShellExecutor shellExecutor, SyncTransactionQueue syncQueue) {
         mTaskOrganizer = taskOrganizer;
         mShellExecutor = shellExecutor;
         mSyncQueue = syncQueue;
+        mTaskViewTransitions = null;
     }
 
     public TaskViewFactory asTaskViewFactory() {
@@ -46,7 +57,7 @@ public class TaskViewFactoryController {
 
     /** Creates an {@link TaskView} */
     public void create(@UiContext Context context, Executor executor, Consumer<TaskView> onCreate) {
-        TaskView taskView = new TaskView(context, mTaskOrganizer, mSyncQueue);
+        TaskView taskView = new TaskView(context, mTaskOrganizer, mTaskViewTransitions, mSyncQueue);
         executor.execute(() -> {
             onCreate.accept(taskView);
         });

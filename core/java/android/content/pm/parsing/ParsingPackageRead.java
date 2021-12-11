@@ -23,6 +23,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
 import android.content.pm.SigningDetails;
+import android.content.pm.parsing.component.ParsedApexSystemService;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
@@ -54,6 +55,12 @@ public interface ParsingPackageRead extends PkgWithoutStateAppInfo, PkgWithoutSt
      */
     @NonNull
     List<String> getAdoptPermissions();
+
+    /**
+     * @see R.styleable#AndroidManifestApexSystemService
+     */
+    @NonNull
+    List<ParsedApexSystemService> getApexSystemServices();
 
     @NonNull
     List<ParsedAttribution> getAttributions();

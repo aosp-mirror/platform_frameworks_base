@@ -133,7 +133,7 @@ public interface Computer {
     }
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent, String resolvedType,
-            @PackageManager.ResolveInfoFlags long flags,
+            @PackageManager.ResolveInfoFlagsBits long flags,
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags,
             int filterCallingUid, int userId, boolean resolveForStart, boolean allowDynamicSplits);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
@@ -338,8 +338,8 @@ public interface Computer {
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
-    int[] getPackageGids(@NonNull String packageName, @PackageManager.PackageInfoFlags long flags,
-            @UserIdInt int userId);
+    int[] getPackageGids(@NonNull String packageName,
+            @PackageManager.PackageInfoFlagsBits long flags, @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     int getTargetSdkVersion(@NonNull String packageName);
@@ -351,12 +351,12 @@ public interface Computer {
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ActivityInfo getReceiverInfo(@NonNull ComponentName component,
-            @PackageManager.ComponentInfoFlags long flags, @UserIdInt int userId);
+            @PackageManager.ComponentInfoFlagsBits long flags, @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ParceledListSlice<SharedLibraryInfo> getSharedLibraries(@NonNull String packageName,
-            @PackageManager.PackageInfoFlags long flags, @UserIdInt int userId);
+            @PackageManager.PackageInfoFlagsBits long flags, @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean canRequestPackageInstalls(@NonNull String packageName, int callingUid,
@@ -369,18 +369,18 @@ public interface Computer {
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     List<VersionedPackage> getPackagesUsingSharedLibrary(@NonNull SharedLibraryInfo libInfo,
-            @PackageManager.PackageInfoFlags long flags, int callingUid, @UserIdInt int userId);
+            @PackageManager.PackageInfoFlagsBits long flags, int callingUid, @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ParceledListSlice<SharedLibraryInfo> getDeclaredSharedLibraries(
-            @NonNull String packageName, @PackageManager.PackageInfoFlags long flags,
+            @NonNull String packageName, @PackageManager.PackageInfoFlagsBits long flags,
             @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ProviderInfo getProviderInfo(@NonNull ComponentName component,
-            @PackageManager.ComponentInfoFlags long flags, @UserIdInt int userId);
+            @PackageManager.ComponentInfoFlagsBits long flags, @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
@@ -439,17 +439,18 @@ public interface Computer {
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(@NonNull String[] permissions,
-            @PackageManager.PackageInfoFlags long flags, @UserIdInt int userId);
+            @PackageManager.PackageInfoFlagsBits long flags, @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
-    List<ApplicationInfo> getInstalledApplications(@PackageManager.ApplicationInfoFlags long flags,
-            @UserIdInt int userId, int callingUid);
+    List<ApplicationInfo> getInstalledApplications(
+            @PackageManager.ApplicationInfoFlagsBits long flags, @UserIdInt int userId,
+            int callingUid);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ProviderInfo resolveContentProvider(@NonNull String name,
-            @PackageManager.ResolveInfoFlags long flags, @UserIdInt int userId, int callingUid);
+            @PackageManager.ResolveInfoFlagsBits long flags, @UserIdInt int userId, int callingUid);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
@@ -463,7 +464,7 @@ public interface Computer {
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ParceledListSlice<ProviderInfo> queryContentProviders(@Nullable String processName, int uid,
-            @PackageManager.ComponentInfoFlags long flags, @Nullable String metaDataKey);
+            @PackageManager.ComponentInfoFlagsBits long flags, @Nullable String metaDataKey);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
@@ -560,7 +561,7 @@ public interface Computer {
     boolean canQueryPackage(int callingUid, @Nullable String targetPackageName);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
-    int getPackageUid(@NonNull String packageName, @PackageManager.PackageInfoFlags long flags,
+    int getPackageUid(@NonNull String packageName, @PackageManager.PackageInfoFlagsBits long flags,
             @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)

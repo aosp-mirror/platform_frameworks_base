@@ -35,12 +35,10 @@ import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Process;
 import android.os.VibrationAttributes;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -67,8 +65,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
-
-import com.airbnb.lottie.LottieAnimationView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -101,10 +97,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final AccessibilityManager mAccessibilityManager;
     @NonNull private final ConfigurationController mConfigurationController;
     @NonNull private final DelayableExecutor mExecutor;
-    @NonNull private final LayoutInflater mLayoutInflater;
     private boolean mUdfpsEnrolled;
 
-    @Nullable private LottieAnimationView mAodFp;
     @NonNull private final AnimatedStateListDrawable mIcon;
 
     @NonNull private CharSequence mUnlockedLabel;
@@ -116,7 +110,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private VelocityTracker mVelocityTracker;
     // The ID of the pointer for which ACTION_DOWN has occurred. -1 means no pointer is active.
     private int mActivePointerId = -1;
-    private VibrationEffect mTick;
 
     private boolean mIsDozing;
     private boolean mIsBouncerShowing;
@@ -140,7 +133,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     // for udfps when strong auth is required or unlocked on AOD
     private boolean mShowAodLockIcon;
-    private boolean mShowAODFpIcon;
+    private boolean mShowAodUnlockedIcon;
     private final int mMaxBurnInOffsetX;
     private final int mMaxBurnInOffsetY;
     private float mInterpolatedDarkAmount;
@@ -163,8 +156,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             @NonNull @Main DelayableExecutor executor,
             @Nullable Vibrator vibrator,
             @Nullable AuthRippleController authRippleController,
-            @NonNull @Main Resources resources,
-            @NonNull LayoutInflater inflater
+            @NonNull @Main Resources resources
     ) {
         super(view);
         mStatusBarStateController = statusBarStateController;
@@ -178,7 +170,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mExecutor = executor;
         mVibrator = vibrator;
         mAuthRippleController = authRippleController;
-        mLayoutInflater = inflater;
 
         mMaxBurnInOffsetX = resources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_x);
         mMaxBurnInOffsetY = resources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
@@ -260,11 +251,12 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
 
         boolean wasShowingUnlock = mShowUnlockIcon;
-        boolean wasShowingFpIcon = mUdfpsEnrolled && !mShowUnlockIcon && !mShowLockIcon;
+        boolean wasShowingFpIcon = mUdfpsEnrolled && !mShowUnlockIcon && !mShowLockIcon
+                && !mShowAodUnlockedIcon && !mShowAodLockIcon;
         mShowLockIcon = !mCanDismissLockScreen && !mUserUnlockedWithBiometric && isLockScreen()
                 && (!mUdfpsEnrolled || !mRunningFPS);
         mShowUnlockIcon = (mCanDismissLockScreen || mUserUnlockedWithBiometric) && isLockScreen();
-        mShowAODFpIcon = mIsDozing && mUdfpsEnrolled && !mRunningFPS && mCanDismissLockScreen;
+        mShowAodUnlockedIcon = mIsDozing && mUdfpsEnrolled && !mRunningFPS && mCanDismissLockScreen;
         mShowAodLockIcon = mIsDozing && mUdfpsEnrolled && !mRunningFPS && !mCanDismissLockScreen;
 
         final CharSequence prevContentDescription = mView.getContentDescription();
@@ -281,14 +273,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mView.updateIcon(ICON_UNLOCK, false);
             mView.setContentDescription(mUnlockedLabel);
             mView.setVisibility(View.VISIBLE);
-        } else if (mShowAODFpIcon) {
-            // AOD fp icon is special cased as a lottie view (it updates for each burn-in offset),
-            // this state shows a transparent view
-            mView.setContentDescription(null);
-            mAodFp.setVisibility(View.VISIBLE);
-            mAodFp.setContentDescription(mCanDismissLockScreen ? mUnlockedLabel : mLockedLabel);
-
-            mView.updateIcon(ICON_FINGERPRINT, true); // this shows no icon
+        } else if (mShowAodUnlockedIcon) {
+            mView.updateIcon(ICON_UNLOCK, true);
+            mView.setContentDescription(mUnlockedLabel);
             mView.setVisibility(View.VISIBLE);
         } else if (mShowAodLockIcon) {
             if (wasShowingUnlock) {
@@ -302,11 +289,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mView.clearIcon();
             mView.setVisibility(View.INVISIBLE);
             mView.setContentDescription(null);
-        }
-
-        if (!mShowAODFpIcon && mAodFp != null) {
-            mAodFp.setVisibility(View.INVISIBLE);
-            mAodFp.setContentDescription(null);
         }
 
         if (!Objects.equals(prevContentDescription, mView.getContentDescription())
@@ -396,7 +378,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println();
         pw.println(" mShowUnlockIcon: " + mShowUnlockIcon);
         pw.println(" mShowLockIcon: " + mShowLockIcon);
-        pw.println(" mShowAODFpIcon: " + mShowAODFpIcon);
+        pw.println(" mShowAodUnlockedIcon: " + mShowAodUnlockedIcon);
         pw.println("  mIsDozing: " + mIsDozing);
         pw.println("  mIsBouncerShowing: " + mIsBouncerShowing);
         pw.println("  mUserUnlockedWithBiometric: " + mUserUnlockedWithBiometric);
@@ -425,13 +407,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                         - mMaxBurnInOffsetY, mInterpolatedDarkAmount);
         float progress = MathUtils.lerp(0f, getBurnInProgressOffset(), mInterpolatedDarkAmount);
 
-        if (mAodFp != null) {
-            mAodFp.setTranslationX(offsetX);
-            mAodFp.setTranslationY(offsetY);
-            mAodFp.setProgress(progress);
-            mAodFp.setAlpha(255 * mInterpolatedDarkAmount);
-        }
-
         mView.setTranslationX(offsetX);
         mView.setTranslationY(offsetY);
     }
@@ -444,10 +419,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mView.setUseBackground(mUdfpsSupported);
 
         mUdfpsEnrolled = mKeyguardUpdateMonitor.isUdfpsEnrolled();
-        if (!wasUdfpsEnrolled && mUdfpsEnrolled && mAodFp == null) {
-            mLayoutInflater.inflate(R.layout.udfps_aod_lock_icon, mView);
-            mAodFp = mView.findViewById(R.id.lock_udfps_aod_fp);
-        }
         if (wasUdfpsSupported != mUdfpsSupported || wasUdfpsEnrolled != mUdfpsEnrolled) {
             updateVisibility();
         }
@@ -594,15 +565,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_HOVER_ENTER:
                 if (mVibrator != null && !mDownDetected) {
-                    if (mTick == null) {
-                        mTick = UdfpsController.lowTick(getContext(), true,
-                                LONG_PRESS_TIMEOUT);
-                    }
                     mVibrator.vibrate(
                             Process.myUid(),
                             getContext().getOpPackageName(),
-                            mTick,
-                            "lock-icon-tick",
+                            UdfpsController.EFFECT_CLICK,
+                            "lock-icon-down",
                             TOUCH_VIBRATION_ATTRIBUTES);
                 }
 
@@ -715,8 +682,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     private boolean inLockIconArea(MotionEvent event) {
         return mSensorTouchLocation.contains((int) event.getX(), (int) event.getY())
-                && (mView.getVisibility() == View.VISIBLE
-                || (mAodFp != null && mAodFp.getVisibility() == View.VISIBLE));
+                && mView.getVisibility() == View.VISIBLE;
     }
 
     private boolean isActionable() {

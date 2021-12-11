@@ -21,12 +21,14 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.communal.conditions.CommunalConditionsMonitor;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import com.google.android.collect.Lists;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -41,6 +43,7 @@ public class CommunalSourceMonitor {
     // A list of {@link Callback} that have registered to receive updates.
     private final ArrayList<WeakReference<Callback>> mCallbacks = Lists.newArrayList();
     private final CommunalConditionsMonitor mConditionsMonitor;
+    private final Executor mExecutor;
 
     private CommunalSource mCurrentSource;
 
@@ -49,14 +52,6 @@ public class CommunalSourceMonitor {
 
     // Whether the class is currently listening for condition changes.
     private boolean mListeningForConditions = false;
-
-    private CommunalSource.Callback mSourceCallback = new CommunalSource.Callback() {
-        @Override
-        public void onDisconnected() {
-            // Clear source reference.
-            setSource(null /* source */);
-        }
-    };
 
     private final CommunalConditionsMonitor.Callback mConditionsCallback =
             allConditionsMet -> {
@@ -70,7 +65,9 @@ public class CommunalSourceMonitor {
 
     @VisibleForTesting
     @Inject
-    public CommunalSourceMonitor(CommunalConditionsMonitor communalConditionsMonitor) {
+    public CommunalSourceMonitor(@Main Executor executor,
+            CommunalConditionsMonitor communalConditionsMonitor) {
+        mExecutor = executor;
         mConditionsMonitor = communalConditionsMonitor;
     }
 
@@ -81,35 +78,28 @@ public class CommunalSourceMonitor {
      * @param source The new {@link CommunalSource}.
      */
     public void setSource(CommunalSource source) {
-        if (mCurrentSource != null) {
-            mCurrentSource.removeCallback(mSourceCallback);
-        }
-
         mCurrentSource = source;
 
         if (mAllCommunalConditionsMet) {
             executeOnSourceAvailableCallbacks();
         }
-
-        // Add callback to be informed when the source disconnects.
-        if (mCurrentSource != null) {
-            mCurrentSource.addCallback(mSourceCallback);
-        }
     }
 
     private void executeOnSourceAvailableCallbacks() {
-        // If the new source is valid, inform registered Callbacks of its presence.
-        Iterator<WeakReference<Callback>> itr = mCallbacks.iterator();
-        while (itr.hasNext()) {
-            Callback cb = itr.next().get();
-            if (cb == null) {
-                itr.remove();
-            } else {
-                cb.onSourceAvailable(
-                        (mAllCommunalConditionsMet && mCurrentSource != null) ? new WeakReference<>(
-                                mCurrentSource) : null);
+        mExecutor.execute(() -> {
+            // If the new source is valid, inform registered Callbacks of its presence.
+            Iterator<WeakReference<Callback>> itr = mCallbacks.iterator();
+            while (itr.hasNext()) {
+                Callback cb = itr.next().get();
+                if (cb == null) {
+                    itr.remove();
+                } else {
+                    cb.onSourceAvailable(
+                            (mAllCommunalConditionsMet && mCurrentSource != null)
+                                    ? new WeakReference<>(mCurrentSource) : null);
+                }
             }
-        }
+        });
     }
 
     /**
@@ -118,17 +108,19 @@ public class CommunalSourceMonitor {
      * @param callback The {@link Callback} to add.
      */
     public void addCallback(Callback callback) {
-        mCallbacks.add(new WeakReference<>(callback));
+        mExecutor.execute(() -> {
+            mCallbacks.add(new WeakReference<>(callback));
 
-        // Inform the callback of any already present CommunalSource.
-        if (mAllCommunalConditionsMet && mCurrentSource != null) {
-            callback.onSourceAvailable(new WeakReference<>(mCurrentSource));
-        }
+            // Inform the callback of any already present CommunalSource.
+            if (mAllCommunalConditionsMet && mCurrentSource != null) {
+                callback.onSourceAvailable(new WeakReference<>(mCurrentSource));
+            }
 
-        if (!mListeningForConditions) {
-            mConditionsMonitor.addCallback(mConditionsCallback);
-            mListeningForConditions = true;
-        }
+            if (!mListeningForConditions) {
+                mConditionsMonitor.addCallback(mConditionsCallback);
+                mListeningForConditions = true;
+            }
+        });
     }
 
     /**
@@ -137,12 +129,14 @@ public class CommunalSourceMonitor {
      * @param callback The {@link Callback} to add.
      */
     public void removeCallback(Callback callback) {
-        mCallbacks.removeIf(el -> el.get() == callback);
+        mExecutor.execute(() -> {
+            mCallbacks.removeIf(el -> el.get() == callback);
 
-        if (mCallbacks.isEmpty() && mListeningForConditions) {
-            mConditionsMonitor.removeCallback(mConditionsCallback);
-            mListeningForConditions = false;
-        }
+            if (mCallbacks.isEmpty() && mListeningForConditions) {
+                mConditionsMonitor.removeCallback(mConditionsCallback);
+                mListeningForConditions = false;
+            }
+        });
     }
 
     /**

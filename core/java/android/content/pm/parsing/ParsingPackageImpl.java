@@ -35,6 +35,8 @@ import android.content.pm.PackageManager.Property;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedActivityImpl;
+import android.content.pm.parsing.component.ParsedApexSystemService;
+import android.content.pm.parsing.component.ParsedApexSystemServiceImpl;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedAttributionImpl;
 import android.content.pm.parsing.component.ParsedComponent;
@@ -266,6 +268,9 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
 
     @NonNull
     protected List<ParsedActivity> activities = emptyList();
+
+    @NonNull
+    protected List<ParsedApexSystemService> apexSystemServices = emptyList();
 
     @NonNull
     protected List<ParsedActivity> receivers = emptyList();
@@ -764,6 +769,14 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     }
 
     @Override
+    public final ParsingPackageImpl addApexSystemService(
+            ParsedApexSystemService parsedApexSystemService) {
+        this.apexSystemServices = CollectionUtils.add(
+                this.apexSystemServices, parsedApexSystemService);
+        return this;
+    }
+
+    @Override
     public ParsingPackageImpl addReceiver(ParsedActivity parsedReceiver) {
         this.receivers = CollectionUtils.add(this.receivers, parsedReceiver);
         addMimeGroupsFromComponent(parsedReceiver);
@@ -831,7 +844,6 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
                 TextUtils.safeIntern(libraryName));
         return this;
     }
-
 
     @Override public ParsingPackageImpl removeUsesOptionalNativeLibrary(String libraryName) {
         this.usesOptionalNativeLibraries = CollectionUtils.remove(this.usesOptionalNativeLibraries,
@@ -1198,6 +1210,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         ParsingPackageUtils.writeKeySetMapping(dest, this.keySetMapping);
         sForInternedStringList.parcel(this.protectedBroadcasts, dest, flags);
         dest.writeTypedList(this.activities);
+        dest.writeTypedList(this.apexSystemServices);
         dest.writeTypedList(this.receivers);
         dest.writeTypedList(this.services);
         dest.writeTypedList(this.providers);
@@ -1339,6 +1352,8 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         this.protectedBroadcasts = sForInternedStringList.unparcel(in);
 
         this.activities = ParsingUtils.createTypedInterfaceList(in, ParsedActivityImpl.CREATOR);
+        this.apexSystemServices = ParsingUtils.createTypedInterfaceList(in,
+                ParsedApexSystemServiceImpl.CREATOR);
         this.receivers = ParsingUtils.createTypedInterfaceList(in, ParsedActivityImpl.CREATOR);
         this.services = ParsingUtils.createTypedInterfaceList(in, ParsedServiceImpl.CREATOR);
         this.providers = ParsingUtils.createTypedInterfaceList(in, ParsedProviderImpl.CREATOR);
@@ -1702,6 +1717,12 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     @Override
     public List<ParsedActivity> getActivities() {
         return activities;
+    }
+
+    @NonNull
+    @Override
+    public List<ParsedApexSystemService> getApexSystemServices() {
+        return apexSystemServices;
     }
 
     @NonNull

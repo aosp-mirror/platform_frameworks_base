@@ -21,11 +21,13 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+
 
 import com.android.internal.util.function.pooled.PooledLambda;
 
@@ -34,8 +36,9 @@ import java.util.Objects;
 /**
  * Service to be implemented by apps that manage a companion device.
  *
- * System will keep this service bound whenever an associated device is nearby,
- * ensuring app stays alive.
+ * System will keep this service bound whenever an associated device is nearby for Bluetooth
+ * devices or companion app manages the connectivity and reports disappeared, ensuring app stays
+ * alive
  *
  * An app must be {@link CompanionDeviceManager#associate associated} with at leas one device,
  * before it can take advantage of this service.
@@ -43,6 +46,17 @@ import java.util.Objects;
  * You must declare this service in your manifest with an
  * intent-filter action of {@link #SERVICE_INTERFACE} and
  * permission of {@link android.Manifest.permission#BIND_COMPANION_DEVICE_SERVICE}
+ *
+ * <p>If you want to declare more than one of these services, you must declare the meta-data in the
+ * service of your manifest with the corresponding name and value to true to indicate the
+ * primary service.
+ * Only the primary one will get the callback from
+ * {@link #onDeviceAppeared(AssociationInfo associationInfo)}.</p>
+ *
+ * Example:
+ * <meta-data
+ *   android:name="primary"
+ *   android:value="true" />
  */
 public abstract class CompanionDeviceService extends Service {
 
@@ -52,13 +66,14 @@ public abstract class CompanionDeviceService extends Service {
      * An intent action for a service to be bound whenever this app's companion device(s)
      * are nearby.
      *
-     * <p>The app will be kept alive for as long as the device is nearby.
+     * <p>The app will be kept alive for as long as the device is nearby or companion app reports
+     * appeared.
      * If the app is not running at the time device gets connected, the app will be woken up.</p>
      *
-     * <p>Shortly after the device goes out of range, the service will be unbound, and the
-     * app will be eligible for cleanup, unless any other user-visible components are running.</p>
+     * <p>Shortly after the device goes out of range or the companion app reports disappeared,
+     * the service will be unbound, and the app will be eligible for cleanup, unless any other
+     * user-visible components are running.</p>
      *
-     * <p>An app shouldn't declare more than one of these services.
      * If running in background is not essential for the devices that this app can manage,
      * app should avoid declaring this service.</p>
      *
@@ -73,9 +88,13 @@ public abstract class CompanionDeviceService extends Service {
      * Called by system whenever a device associated with this app is available.
      *
      * @param address the MAC address of the device
+     * @deprecated please override {@link #onDeviceAppeared(AssociationInfo)} instead.
      */
+    @Deprecated
     @MainThread
-    public abstract void onDeviceAppeared(@NonNull String address);
+    public void onDeviceAppeared(@NonNull String address) {
+        // Do nothing. Companion apps can override this function.
+    }
 
     /**
      * Called by system whenever a device associated with this app stops being available.
@@ -83,9 +102,13 @@ public abstract class CompanionDeviceService extends Service {
      * Usually this means the device goes out of range or is turned off.
      *
      * @param address the MAC address of the device
+     * @deprecated please override {@link #onDeviceDisappeared(AssociationInfo)} instead.
      */
+    @Deprecated
     @MainThread
-    public abstract void onDeviceDisappeared(@NonNull String address);
+    public void onDeviceDisappeared(@NonNull String address) {
+        // Do nothing. Companion apps can override this function.
+    }
 
     /**
      * Called by system whenever the system dispatches a message to the app to send it to
@@ -118,10 +141,35 @@ public abstract class CompanionDeviceService extends Service {
         companionDeviceManager.dispatchMessage(messageId, associationId, message);
     }
 
+    /**
+     * Called by system whenever a device associated with this app is connected.
+     *
+     * @param associationInfo A record for the companion device.
+     */
+    @MainThread
+    public void onDeviceAppeared(@NonNull AssociationInfo associationInfo) {
+        if (!associationInfo.isSelfManaged()) {
+            onDeviceAppeared(associationInfo.getDeviceMacAddressAsString());
+        }
+    }
+
+    /**
+     * Called by system whenever a device associated with this app is disconnected.
+     *
+     * @param associationInfo A record for the companion device.
+     */
+    @MainThread
+    public void onDeviceDisappeared(@NonNull AssociationInfo associationInfo) {
+        if (!associationInfo.isSelfManaged()) {
+            onDeviceDisappeared(associationInfo.getDeviceMacAddressAsString());
+        }
+    }
+
     @Nullable
     @Override
     public final IBinder onBind(@NonNull Intent intent) {
         if (Objects.equals(intent.getAction(), SERVICE_INTERFACE)) {
+            onBindCompanionDeviceService(intent);
             return mRemote;
         }
         Log.w(LOG_TAG,
@@ -129,20 +177,26 @@ public abstract class CompanionDeviceService extends Service {
         return null;
     }
 
+    /**
+     * Used to track the state of Binder connection in CTS tests.
+     * @hide
+     */
+    @TestApi
+    public void onBindCompanionDeviceService(@NonNull Intent intent) {
+    }
+
     class Stub extends ICompanionDeviceService.Stub {
 
         @Override
-        public void onDeviceAppeared(String address) {
-            Handler.getMain().sendMessage(PooledLambda.obtainMessage(
-                    CompanionDeviceService::onDeviceAppeared,
-                    CompanionDeviceService.this, address));
+        public void onDeviceAppeared(AssociationInfo associationInfo) {
+            Handler.getMain().post(
+                    () -> CompanionDeviceService.this.onDeviceAppeared(associationInfo));
         }
 
         @Override
-        public void onDeviceDisappeared(String address) {
-            Handler.getMain().sendMessage(PooledLambda.obtainMessage(
-                    CompanionDeviceService::onDeviceDisappeared,
-                    CompanionDeviceService.this, address));
+        public void onDeviceDisappeared(AssociationInfo associationInfo) {
+            Handler.getMain().post(
+                    () -> CompanionDeviceService.this.onDeviceDisappeared(associationInfo));
         }
 
         public void onDispatchMessage(int messageId, int associationId, @NonNull byte[] message) {

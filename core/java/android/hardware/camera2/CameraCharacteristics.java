@@ -2669,7 +2669,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </tbody>
      * </table>
      * <p>For applications targeting SDK version 31 or newer, if the mobile device declares to be
-     * {@link android.os.Build.VERSION_CDOES.MEDIA_PERFORMANCE_CLASS media performance class} S,
+     * media performance class 12 or higher by setting
+     * {@link android.os.Build.VERSION_CDOES.MEDIA_PERFORMANCE_CLASS } to be 31 or larger,
      * the primary camera devices (first rear/front camera in the camera ID list) will not
      * support JPEG sizes smaller than 1080p. If the application configures a JPEG stream
      * smaller than 1080p, the camera device will round up the JPEG image size to at least
@@ -2742,9 +2743,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </tbody>
      * </table>
      * <p>For applications targeting SDK version 31 or newer, if the mobile device doesn't declare
-     * to be media performance class S, or if the camera device isn't a primary rear/front
-     * camera, the minimum required output stream configurations are the same as for applications
-     * targeting SDK version older than 31.</p>
+     * to be media performance class 12 or better by setting
+     * {@link android.os.Build.VERSION_CDOES.MEDIA_PERFORMANCE_CLASS } to be 31 or larger,
+     * or if the camera device isn't a primary rear/front camera, the minimum required output
+     * stream configurations are the same as for applications targeting SDK version older than
+     * 31.</p>
      * <p>Refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} for additional
      * mandatory stream configurations on a per-capability basis.</p>
      * <p>Exception on 176x144 (QCIF) resolution: camera devices usually have a fixed capability for
