@@ -121,7 +121,7 @@ java_library_static {
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/wm/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
-        ":services.connectivity-nsd-sources",
+        ":services.connectivity-tiramisu-sources",
     ],
 
     libs: [

@@ -4003,8 +4003,7 @@ public class AudioManager {
      * @hide
      * flag set on test API calls,
      * see {@link #requestAudioFocusForTest(AudioFocusRequest, String, int, int)},
-     * note that it isn't used in conjunction with other flags, it is passed as the single
-     * value for flags */
+     */
     public static final int AUDIOFOCUS_FLAG_TEST = 0x1 << 3;
     /** @hide */
     public static final int AUDIOFOCUS_FLAGS_APPS = AUDIOFOCUS_FLAG_DELAY_OK
@@ -4187,7 +4186,9 @@ public class AudioManager {
                     afr.getFocusGain(),
                     mICallBack,
                     mAudioFocusDispatcher,
-                    clientFakeId, "com.android.test.fakeclient", clientFakeUid, clientTargetSdk);
+                    clientFakeId, "com.android.test.fakeclient",
+                    afr.getFlags() | AudioManager.AUDIOFOCUS_FLAG_TEST,
+                    clientFakeUid, clientTargetSdk);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

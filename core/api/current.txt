@@ -8757,10 +8757,10 @@ package android.bluetooth {
     method public android.bluetooth.BluetoothDevice getRemoteDevice(byte[]);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public int getScanMode();
     method public int getState();
-    method public int isCisCentralSupported();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public boolean isDiscovering();
     method public boolean isEnabled();
     method public boolean isLe2MPhySupported();
+    method public int isLeAudioSupported();
     method public boolean isLeCodedPhySupported();
     method public boolean isLeExtendedAdvertisingSupported();
     method public boolean isLePeriodicAdvertisingSupported();
@@ -10127,8 +10127,10 @@ package android.companion {
     ctor public CompanionDeviceService();
     method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public final void dispatchMessage(int, int, @NonNull byte[]);
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method @MainThread public abstract void onDeviceAppeared(@NonNull String);
-    method @MainThread public abstract void onDeviceDisappeared(@NonNull String);
+    method @Deprecated @MainThread public void onDeviceAppeared(@NonNull String);
+    method @MainThread public void onDeviceAppeared(@NonNull android.companion.AssociationInfo);
+    method @Deprecated @MainThread public void onDeviceDisappeared(@NonNull String);
+    method @MainThread public void onDeviceDisappeared(@NonNull android.companion.AssociationInfo);
     method @MainThread public void onDispatchMessage(int, int, @NonNull byte[]);
     field public static final String SERVICE_INTERFACE = "android.companion.CompanionDeviceService";
   }
@@ -12804,7 +12806,8 @@ package android.content.pm {
     method @Nullable public abstract android.graphics.drawable.Drawable getActivityBanner(@NonNull android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract android.graphics.drawable.Drawable getActivityIcon(@NonNull android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract android.graphics.drawable.Drawable getActivityIcon(@NonNull android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @NonNull public abstract android.content.pm.ActivityInfo getActivityInfo(@NonNull android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated @NonNull public abstract android.content.pm.ActivityInfo getActivityInfo(@NonNull android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.content.pm.ActivityInfo getActivityInfo(@NonNull android.content.ComponentName, @NonNull android.content.pm.PackageManager.ComponentInfoFlags) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Nullable public abstract android.graphics.drawable.Drawable getActivityLogo(@NonNull android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Nullable public abstract android.graphics.drawable.Drawable getActivityLogo(@NonNull android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract java.util.List<android.content.pm.PermissionGroupInfo> getAllPermissionGroups(int);
@@ -12813,7 +12816,8 @@ package android.content.pm {
     method public abstract int getApplicationEnabledSetting(@NonNull String);
     method @NonNull public abstract android.graphics.drawable.Drawable getApplicationIcon(@NonNull android.content.pm.ApplicationInfo);
     method @NonNull public abstract android.graphics.drawable.Drawable getApplicationIcon(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @NonNull public abstract android.content.pm.ApplicationInfo getApplicationInfo(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated @NonNull public abstract android.content.pm.ApplicationInfo getApplicationInfo(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.content.pm.ApplicationInfo getApplicationInfo(@NonNull String, @NonNull android.content.pm.PackageManager.ApplicationInfoFlags) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract CharSequence getApplicationLabel(@NonNull android.content.pm.ApplicationInfo);
     method @Nullable public abstract android.graphics.drawable.Drawable getApplicationLogo(@NonNull android.content.pm.ApplicationInfo);
     method @Nullable public abstract android.graphics.drawable.Drawable getApplicationLogo(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -12824,9 +12828,11 @@ package android.content.pm {
     method @Nullable public abstract android.graphics.drawable.Drawable getDrawable(@NonNull String, @DrawableRes int, @Nullable android.content.pm.ApplicationInfo);
     method public void getGroupOfPlatformPermission(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.String>);
     method @NonNull public android.content.pm.InstallSourceInfo getInstallSourceInfo(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplications(int);
+    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplications(int);
+    method @NonNull public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplications(@NonNull android.content.pm.PackageManager.ApplicationInfoFlags);
     method @NonNull public java.util.List<android.content.pm.ModuleInfo> getInstalledModules(int);
-    method @NonNull public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
+    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
+    method @NonNull public java.util.List<android.content.pm.PackageInfo> getInstalledPackages(@NonNull android.content.pm.PackageManager.PackageInfoFlags);
     method @Deprecated @Nullable public abstract String getInstallerPackageName(@NonNull String);
     method @NonNull public abstract byte[] getInstantAppCookie();
     method public abstract int getInstantAppCookieMaxBytes();
@@ -12837,15 +12843,21 @@ package android.content.pm {
     method @NonNull public java.util.Set<java.lang.String> getMimeGroup(@NonNull String);
     method @NonNull public android.content.pm.ModuleInfo getModuleInfo(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Nullable public abstract String getNameForUid(int);
-    method @Nullable public android.content.pm.PackageInfo getPackageArchiveInfo(@NonNull String, int);
+    method @Deprecated @Nullable public android.content.pm.PackageInfo getPackageArchiveInfo(@NonNull String, int);
+    method @Nullable public android.content.pm.PackageInfo getPackageArchiveInfo(@NonNull String, @NonNull android.content.pm.PackageManager.PackageInfoFlags);
     method public abstract int[] getPackageGids(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public abstract int[] getPackageGids(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public abstract android.content.pm.PackageInfo getPackageInfo(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public abstract android.content.pm.PackageInfo getPackageInfo(@NonNull android.content.pm.VersionedPackage, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated public abstract int[] getPackageGids(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Nullable public int[] getPackageGids(@NonNull String, @NonNull android.content.pm.PackageManager.PackageInfoFlags) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated public abstract android.content.pm.PackageInfo getPackageInfo(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.content.pm.PackageInfo getPackageInfo(@NonNull String, @NonNull android.content.pm.PackageManager.PackageInfoFlags) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated public abstract android.content.pm.PackageInfo getPackageInfo(@NonNull android.content.pm.VersionedPackage, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.content.pm.PackageInfo getPackageInfo(@NonNull android.content.pm.VersionedPackage, @NonNull android.content.pm.PackageManager.PackageInfoFlags) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract android.content.pm.PackageInstaller getPackageInstaller();
-    method public abstract int getPackageUid(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated public abstract int getPackageUid(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public int getPackageUid(@NonNull String, @NonNull android.content.pm.PackageManager.PackageInfoFlags) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Nullable public abstract String[] getPackagesForUid(int);
-    method @NonNull public abstract java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(@NonNull String[], int);
+    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(@NonNull String[], int);
+    method @NonNull public java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(@NonNull String[], @NonNull android.content.pm.PackageManager.PackageInfoFlags);
     method @NonNull public abstract android.content.pm.PermissionGroupInfo getPermissionGroupInfo(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.PermissionInfo getPermissionInfo(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public void getPlatformPermissionsForGroup(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<java.lang.String>>);
@@ -12853,14 +12865,18 @@ package android.content.pm {
     method @Deprecated @NonNull public abstract java.util.List<android.content.pm.PackageInfo> getPreferredPackages(int);
     method @NonNull public android.content.pm.PackageManager.Property getProperty(@NonNull String, @NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.content.pm.PackageManager.Property getProperty(@NonNull String, @NonNull android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @NonNull public abstract android.content.pm.ProviderInfo getProviderInfo(@NonNull android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @NonNull public abstract android.content.pm.ActivityInfo getReceiverInfo(@NonNull android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated @NonNull public abstract android.content.pm.ProviderInfo getProviderInfo(@NonNull android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.content.pm.ProviderInfo getProviderInfo(@NonNull android.content.ComponentName, @NonNull android.content.pm.PackageManager.ComponentInfoFlags) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated @NonNull public abstract android.content.pm.ActivityInfo getReceiverInfo(@NonNull android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.content.pm.ActivityInfo getReceiverInfo(@NonNull android.content.ComponentName, @NonNull android.content.pm.PackageManager.ComponentInfoFlags) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract android.content.res.Resources getResourcesForActivity(@NonNull android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract android.content.res.Resources getResourcesForApplication(@NonNull android.content.pm.ApplicationInfo) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.content.res.Resources getResourcesForApplication(@NonNull android.content.pm.ApplicationInfo, @Nullable android.content.res.Configuration) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract android.content.res.Resources getResourcesForApplication(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @NonNull public abstract android.content.pm.ServiceInfo getServiceInfo(@NonNull android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @NonNull public abstract java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraries(int);
+    method @Deprecated @NonNull public abstract android.content.pm.ServiceInfo getServiceInfo(@NonNull android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.content.pm.ServiceInfo getServiceInfo(@NonNull android.content.ComponentName, @NonNull android.content.pm.PackageManager.ComponentInfoFlags) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraries(int);
+    method @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraries(@NonNull android.content.pm.PackageManager.PackageInfoFlags);
     method @Nullable public android.os.Bundle getSuspendedPackageAppExtras();
     method public boolean getSyntheticAppDetailsActivityEnabled(@NonNull String);
     method @NonNull public abstract android.content.pm.FeatureInfo[] getSystemAvailableFeatures();
@@ -12888,13 +12904,19 @@ package android.content.pm {
     method public abstract boolean isSafeMode();
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryActivityProperty(@NonNull String);
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryApplicationProperty(@NonNull String);
-    method @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(@NonNull android.content.Intent, int);
-    method @NonNull public abstract java.util.List<android.content.pm.ProviderInfo> queryContentProviders(@Nullable String, int, int);
+    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(@NonNull android.content.Intent, int);
+    method @NonNull public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(@NonNull android.content.Intent, @NonNull android.content.pm.PackageManager.ResolveInfoFlags);
+    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.ProviderInfo> queryContentProviders(@Nullable String, int, int);
+    method @NonNull public java.util.List<android.content.pm.ProviderInfo> queryContentProviders(@Nullable String, int, @NonNull android.content.pm.PackageManager.ComponentInfoFlags);
     method @NonNull public abstract java.util.List<android.content.pm.InstrumentationInfo> queryInstrumentation(@NonNull String, int);
-    method @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentActivities(@NonNull android.content.Intent, int);
-    method @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentActivityOptions(@Nullable android.content.ComponentName, @Nullable android.content.Intent[], @NonNull android.content.Intent, int);
-    method @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentContentProviders(@NonNull android.content.Intent, int);
-    method @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentServices(@NonNull android.content.Intent, int);
+    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentActivities(@NonNull android.content.Intent, int);
+    method @NonNull public java.util.List<android.content.pm.ResolveInfo> queryIntentActivities(@NonNull android.content.Intent, @NonNull android.content.pm.PackageManager.ResolveInfoFlags);
+    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentActivityOptions(@Nullable android.content.ComponentName, @Nullable android.content.Intent[], @NonNull android.content.Intent, int);
+    method @NonNull public java.util.List<android.content.pm.ResolveInfo> queryIntentActivityOptions(@Nullable android.content.ComponentName, @Nullable java.util.List<android.content.Intent>, @NonNull android.content.Intent, @NonNull android.content.pm.PackageManager.ResolveInfoFlags);
+    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentContentProviders(@NonNull android.content.Intent, int);
+    method @NonNull public java.util.List<android.content.pm.ResolveInfo> queryIntentContentProviders(@NonNull android.content.Intent, @NonNull android.content.pm.PackageManager.ResolveInfoFlags);
+    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentServices(@NonNull android.content.Intent, int);
+    method @NonNull public java.util.List<android.content.pm.ResolveInfo> queryIntentServices(@NonNull android.content.Intent, @NonNull android.content.pm.PackageManager.ResolveInfoFlags);
     method @NonNull public abstract java.util.List<android.content.pm.PermissionInfo> queryPermissionsByGroup(@Nullable String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryProviderProperty(@NonNull String);
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryReceiverProperty(@NonNull String);
@@ -12903,9 +12925,12 @@ package android.content.pm {
     method public abstract void removePermission(@NonNull String);
     method @RequiresPermission(value="android.permission.WHITELIST_RESTRICTED_PERMISSIONS", conditional=true) public boolean removeWhitelistedRestrictedPermission(@NonNull String, @NonNull String, int);
     method public void requestChecksums(@NonNull String, boolean, int, @NonNull java.util.List<java.security.cert.Certificate>, @NonNull android.content.pm.PackageManager.OnChecksumsReadyListener) throws java.security.cert.CertificateEncodingException, android.content.pm.PackageManager.NameNotFoundException;
-    method @Nullable public abstract android.content.pm.ResolveInfo resolveActivity(@NonNull android.content.Intent, int);
-    method @Nullable public abstract android.content.pm.ProviderInfo resolveContentProvider(@NonNull String, int);
-    method @Nullable public abstract android.content.pm.ResolveInfo resolveService(@NonNull android.content.Intent, int);
+    method @Deprecated @Nullable public abstract android.content.pm.ResolveInfo resolveActivity(@NonNull android.content.Intent, int);
+    method @Nullable public android.content.pm.ResolveInfo resolveActivity(@NonNull android.content.Intent, @NonNull android.content.pm.PackageManager.ResolveInfoFlags);
+    method @Deprecated @Nullable public abstract android.content.pm.ProviderInfo resolveContentProvider(@NonNull String, int);
+    method @Nullable public android.content.pm.ProviderInfo resolveContentProvider(@NonNull String, @NonNull android.content.pm.PackageManager.ComponentInfoFlags);
+    method @Deprecated @Nullable public abstract android.content.pm.ResolveInfo resolveService(@NonNull android.content.Intent, int);
+    method @Nullable public android.content.pm.ResolveInfo resolveService(@NonNull android.content.Intent, @NonNull android.content.pm.PackageManager.ResolveInfoFlags);
     method public abstract void setApplicationCategoryHint(@NonNull String, int);
     method @RequiresPermission(value=android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE, conditional=true) public abstract void setApplicationEnabledSetting(@NonNull String, int, int);
     method @RequiresPermission(value="android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS", conditional=true) public boolean setAutoRevokeWhitelisted(@NonNull String, boolean);
@@ -13107,6 +13132,11 @@ package android.content.pm {
     field public static final int VERSION_CODE_HIGHEST = -1; // 0xffffffff
   }
 
+  public static final class PackageManager.ApplicationInfoFlags {
+    method public long getValue();
+    method @NonNull public static android.content.pm.PackageManager.ApplicationInfoFlags of(long);
+  }
+
   public static final class PackageManager.ComponentEnabledSetting implements android.os.Parcelable {
     ctor public PackageManager.ComponentEnabledSetting(@NonNull android.content.ComponentName, int, int);
     method public int describeContents();
@@ -13117,6 +13147,11 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.PackageManager.ComponentEnabledSetting> CREATOR;
   }
 
+  public static final class PackageManager.ComponentInfoFlags {
+    method public long getValue();
+    method @NonNull public static android.content.pm.PackageManager.ComponentInfoFlags of(long);
+  }
+
   public static class PackageManager.NameNotFoundException extends android.util.AndroidException {
     ctor public PackageManager.NameNotFoundException();
     ctor public PackageManager.NameNotFoundException(String);
@@ -13124,6 +13159,11 @@ package android.content.pm {
 
   @java.lang.FunctionalInterface public static interface PackageManager.OnChecksumsReadyListener {
     method public void onChecksumsReady(@NonNull java.util.List<android.content.pm.ApkChecksum>);
+  }
+
+  public static final class PackageManager.PackageInfoFlags {
+    method public long getValue();
+    method @NonNull public static android.content.pm.PackageManager.PackageInfoFlags of(long);
   }
 
   public static final class PackageManager.Property implements android.os.Parcelable {
@@ -13143,6 +13183,11 @@ package android.content.pm {
     method public boolean isString();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.PackageManager.Property> CREATOR;
+  }
+
+  public static final class PackageManager.ResolveInfoFlags {
+    method public long getValue();
+    method @NonNull public static android.content.pm.PackageManager.ResolveInfoFlags of(long);
   }
 
   @Deprecated public class PackageStats implements android.os.Parcelable {
@@ -31934,7 +31979,7 @@ package android.os {
     method @Deprecated public void readMap(@NonNull java.util.Map, @Nullable ClassLoader);
     method public <K, V> void readMap(@NonNull java.util.Map<? super K,? super V>, @Nullable ClassLoader, @NonNull Class<K>, @NonNull Class<V>);
     method @Deprecated @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader);
-    method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader, @NonNull Class<T>);
+    method @Nullable public <T> T readParcelable(@Nullable ClassLoader, @NonNull Class<T>);
     method @Deprecated @Nullable public android.os.Parcelable[] readParcelableArray(@Nullable ClassLoader);
     method @Nullable public <T> T[] readParcelableArray(@Nullable ClassLoader, @NonNull Class<T>);
     method @Deprecated @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
@@ -31944,7 +31989,7 @@ package android.os {
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
     method @Deprecated @Nullable public java.io.Serializable readSerializable();
-    method @Nullable public <T extends java.io.Serializable> T readSerializable(@Nullable ClassLoader, @NonNull Class<T>);
+    method @Nullable public <T> T readSerializable(@Nullable ClassLoader, @NonNull Class<T>);
     method @NonNull public android.util.Size readSize();
     method @NonNull public android.util.SizeF readSizeF();
     method @Deprecated @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader);
@@ -32477,7 +32522,7 @@ package android.os {
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.CREATE_USERS"}) public int getUserCount();
     method public long getUserCreationTime(android.os.UserHandle);
     method public android.os.UserHandle getUserForSerialNumber(long);
-    method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, "android.permission.CREATE_USERS"}, conditional=true) public String getUserName();
+    method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.CREATE_USERS", "android.permission.QUERY_USERS", android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public String getUserName();
     method public java.util.List<android.os.UserHandle> getUserProfiles();
     method public android.os.Bundle getUserRestrictions();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public android.os.Bundle getUserRestrictions(android.os.UserHandle);
@@ -43237,6 +43282,7 @@ package android.telephony {
     method public int getPhoneType();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PHONE_STATE}) public int getPreferredOpportunisticDataSubscription();
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState();
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState(boolean, boolean);
     method @Nullable public android.telephony.SignalStrength getSignalStrength();
     method public int getSimCarrierId();
     method @Nullable public CharSequence getSimCarrierIdName();
@@ -43289,8 +43335,10 @@ package android.telephony {
     method public boolean isWorldPhone();
     method @Deprecated public void listen(android.telephony.PhoneStateListener, int);
     method public void registerTelephonyCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
+    method public void registerTelephonyCallback(boolean, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void requestCellInfoUpdate(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
     method @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(android.telephony.NetworkScanRequest, java.util.concurrent.Executor, android.telephony.TelephonyScanManager.NetworkScanCallback);
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(boolean, @NonNull android.telephony.NetworkScanRequest, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyScanManager.NetworkScanCallback);
     method public void sendDialerSpecialCode(String);
     method public String sendEnvelopeWithStatus(String);
     method @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void sendUssdRequest(String, android.telephony.TelephonyManager.UssdResponseCallback, android.os.Handler);

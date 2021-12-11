@@ -671,6 +671,14 @@ public final class DeviceConfig {
     @TestApi
     public static final String NAMESPACE_APP_COMPAT_OVERRIDES = "app_compat_overrides";
 
+    /**
+     * Namespace for all ultra wideband (uwb) related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_UWB = "uwb";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =

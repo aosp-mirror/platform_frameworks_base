@@ -80,6 +80,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
@@ -136,6 +137,7 @@ public class BubbleController {
     private final TaskStackListenerImpl mTaskStackListener;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final DisplayController mDisplayController;
+    private final TaskViewTransitions mTaskViewTransitions;
     private final SyncTransactionQueue mSyncQueue;
 
     // Used to post to main UI thread
@@ -212,6 +214,7 @@ public class BubbleController {
             DisplayController displayController,
             ShellExecutor mainExecutor,
             Handler mainHandler,
+            TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
         BubbleLogger logger = new BubbleLogger(uiEventLogger);
         BubblePositioner positioner = new BubblePositioner(context, windowManager);
@@ -220,7 +223,7 @@ public class BubbleController {
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
                 logger, taskStackListener, organizer, positioner, displayController, mainExecutor,
-                mainHandler, syncQueue);
+                mainHandler, taskViewTransitions, syncQueue);
     }
 
     /**
@@ -243,6 +246,7 @@ public class BubbleController {
             DisplayController displayController,
             ShellExecutor mainExecutor,
             Handler mainHandler,
+            TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
         mContext = context;
         mLauncherApps = launcherApps;
@@ -266,6 +270,7 @@ public class BubbleController {
         mSavedBubbleKeysPerUser = new SparseSetArray<>();
         mBubbleIconFactory = new BubbleIconFactory(context);
         mDisplayController = displayController;
+        mTaskViewTransitions = taskViewTransitions;
         mSyncQueue = syncQueue;
     }
 
@@ -568,6 +573,10 @@ public class BubbleController {
 
     SyncTransactionQueue getSyncTransactionQueue() {
         return mSyncQueue;
+    }
+
+    TaskViewTransitions getTaskViewTransitions() {
+        return mTaskViewTransitions;
     }
 
     /** Contains information to help position things on the screen.  */

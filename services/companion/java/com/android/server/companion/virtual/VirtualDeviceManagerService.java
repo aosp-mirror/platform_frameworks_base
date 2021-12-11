@@ -16,9 +16,6 @@
 
 package com.android.server.companion.virtual;
 
-import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
-import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -42,7 +39,6 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,6 +48,7 @@ public class VirtualDeviceManagerService extends SystemService {
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "VirtualDeviceManagerService";
+
     private final Object mVirtualDeviceManagerLock = new Object();
     private final VirtualDeviceManagerImpl mImpl;
 
@@ -130,64 +127,9 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
-    private class VirtualDeviceImpl extends IVirtualDevice.Stub implements IBinder.DeathRecipient {
-
-        private final AssociationInfo mAssociationInfo;
-        private final int mOwnerUid;
-        private final GenericWindowPolicyController mGenericWindowPolicyController;
-        private final ArrayList<Integer> mDisplayIds = new ArrayList<>();
-
-        private VirtualDeviceImpl(int ownerUid, IBinder token, AssociationInfo associationInfo) {
-            mOwnerUid = ownerUid;
-            mAssociationInfo = associationInfo;
-            mGenericWindowPolicyController = new GenericWindowPolicyController(FLAG_SECURE,
-                    SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
-            try {
-                token.linkToDeath(this, 0);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-            mVirtualDevices.put(associationInfo.getId(), this);
-        }
-
-        @Override
-        public int getAssociationId() {
-            return mAssociationInfo.getId();
-        }
-
-        @Override
-        public void close() {
-            synchronized (mVirtualDeviceManagerLock) {
-                mVirtualDevices.remove(mAssociationInfo.getId());
-            }
-        }
-
-        @Override
-        public void binderDied() {
-            close();
-        }
-
-        DisplayWindowPolicyController onVirtualDisplayCreatedLocked(int displayId) {
-            if (mDisplayIds.contains(displayId)) {
-                throw new IllegalStateException(
-                        "Virtual device already have a virtual display with ID " + displayId);
-            }
-            mDisplayIds.add(displayId);
-            return mGenericWindowPolicyController;
-        }
-
-        void onVirtualDisplayRemovedLocked(int displayId) {
-            if (!mDisplayIds.contains(displayId)) {
-                throw new IllegalStateException(
-                        "Virtual device doesn't have a virtual display with ID " + displayId);
-            }
-            mDisplayIds.remove(displayId);
-        }
-    }
-
     class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub {
 
-        @Override
+        @Override // Binder call
         public IVirtualDevice createVirtualDevice(
                 IBinder token, String packageName, int associationId) {
             getContext().enforceCallingOrSelfPermission(
@@ -209,7 +151,18 @@ public class VirtualDeviceManagerService extends SystemService {
                             "Virtual device for association ID " + associationId
                                     + " already exists");
                 }
-                return new VirtualDeviceImpl(callingUid, token, associationInfo);
+                VirtualDeviceImpl virtualDevice = new VirtualDeviceImpl(getContext(),
+                        associationInfo, token, callingUid,
+                        new VirtualDeviceImpl.OnDeviceCloseListener() {
+                            @Override
+                            public void onClose(int associationId) {
+                                synchronized (mVirtualDeviceManagerLock) {
+                                    mVirtualDevices.remove(associationId);
+                                }
+                            }
+                        });
+                mVirtualDevices.put(associationInfo.getId(), virtualDevice);
+                return virtualDevice;
             }
         }
 
@@ -254,8 +207,7 @@ public class VirtualDeviceManagerService extends SystemService {
             fout.println("Created virtual devices: ");
             synchronized (mVirtualDeviceManagerLock) {
                 for (int i = 0; i < mVirtualDevices.size(); i++) {
-                    VirtualDeviceImpl virtualDevice = mVirtualDevices.valueAt(i);
-                    fout.printf("%d: %s\n", mVirtualDevices.keyAt(i), virtualDevice);
+                    mVirtualDevices.valueAt(i).dump(fd, fout, args);
                 }
             }
         }
@@ -290,7 +242,7 @@ public class VirtualDeviceManagerService extends SystemService {
             synchronized (mVirtualDeviceManagerLock) {
                 int size = mVirtualDevices.size();
                 for (int i = 0; i < size; i++) {
-                    if (mVirtualDevices.valueAt(i).mOwnerUid == uid) {
+                    if (mVirtualDevices.valueAt(i).getOwnerUid() == uid) {
                         return true;
                     }
                 }

@@ -461,13 +461,19 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      *                 at the top of the focus stack
      * Push the focus requester onto the audio focus stack at the first position immediately
      * following the locked focus owners.
+     * Propagate through the stack the changes that the new (future) focus owner causes.
+     * @param nfr the future focus owner that will gain focus when the locked focus owners are
+     *            removed from the stack
      * @return {@link AudioManager#AUDIOFOCUS_REQUEST_GRANTED} or
      *     {@link AudioManager#AUDIOFOCUS_REQUEST_DELAYED}
      */
     @GuardedBy("mAudioFocusLock")
-    private int pushBelowLockedFocusOwners(FocusRequester nfr) {
+    private int pushBelowLockedFocusOwnersAndPropagate(FocusRequester nfr) {
+        if (DEBUG) {
+            Log.v(TAG, "pushBelowLockedFocusOwnersAndPropagate client=" + nfr.getClientId());
+        }
         int lastLockedFocusOwnerIndex = mFocusStack.size();
-        for (int index = mFocusStack.size()-1; index >= 0; index--) {
+        for (int index = mFocusStack.size() - 1; index >= 0; index--) {
             if (isLockedFocusOwner(mFocusStack.elementAt(index))) {
                 lastLockedFocusOwnerIndex = index;
             }
@@ -480,10 +486,33 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             propagateFocusLossFromGain_syncAf(nfr.getGainRequest(), nfr, false /*forceDuck*/);
             mFocusStack.push(nfr);
             return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
-        } else {
-            mFocusStack.insertElementAt(nfr, lastLockedFocusOwnerIndex);
-            return AudioManager.AUDIOFOCUS_REQUEST_DELAYED;
         }
+
+        if (DEBUG) {
+            Log.v(TAG, "> lastLockedFocusOwnerIndex=" + lastLockedFocusOwnerIndex);
+        }
+        mFocusStack.insertElementAt(nfr, lastLockedFocusOwnerIndex);
+
+        // propagate potential focus loss (and removal from stack) after the newly
+        // inserted FocusRequester (at index lastLockedFocusOwnerIndex-1)
+        final List<String> clientsToRemove = new LinkedList<String>();
+        for (int index = lastLockedFocusOwnerIndex - 1; index >= 0; index--) {
+            final boolean isDefinitiveLoss =
+                    mFocusStack.elementAt(index).handleFocusLossFromGain(
+                            nfr.getGainRequest(), nfr, false /*forceDuck*/);
+            if (isDefinitiveLoss) {
+                clientsToRemove.add(mFocusStack.elementAt(index).getClientId());
+            }
+        }
+        for (String clientToRemove : clientsToRemove) {
+            if (DEBUG) {
+                Log.v(TAG, "> removing focus client " + clientToRemove);
+            }
+            removeFocusStackEntry(clientToRemove, false /*signal*/,
+                    true /*notifyFocusFollowers*/);
+        }
+
+        return AudioManager.AUDIOFOCUS_REQUEST_DELAYED;
     }
 
     /**
@@ -868,7 +897,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * @param forceDuck only true if
      *     {@link android.media.AudioFocusRequest.Builder#setFocusGain(int)} was set to true for
      *                  accessibility.
-     * @param testUid ignored if flags is not AudioManager.AUDIOFOCUS_FLAG_TEST (strictly equals to)
+     * @param testUid ignored if flags doesn't contain AudioManager.AUDIOFOCUS_FLAG_TEST
      *                otherwise the UID being injected for testing
      * @return
      */
@@ -1029,7 +1058,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             if (focusGrantDelayed) {
                 // focusGrantDelayed being true implies we can't reassign focus right now
                 // which implies the focus stack is not empty.
-                final int requestResult = pushBelowLockedFocusOwners(nfr);
+                final int requestResult = pushBelowLockedFocusOwnersAndPropagate(nfr);
                 if (requestResult != AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
                     notifyExtPolicyFocusGrant_syncAf(nfr.toAudioFocusInfo(), requestResult);
                 }

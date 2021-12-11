@@ -4,6 +4,7 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.EmptyShadeView
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider
@@ -54,5 +55,25 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         // top margin presence should decrease heads up translation up to minHeadsUpTranslation
         assertThat(expandableViewState.yTranslation).isEqualTo(minHeadsUpTranslation)
+    }
+
+    @Test
+    fun resetViewStates_childIsEmptyShadeView_viewIsCenteredVertically() {
+        stackScrollAlgorithm.initView(context)
+        val emptyShadeView = EmptyShadeView(context, /* attrs= */ null).apply {
+            layout(/* l= */ 0, /* t= */ 0, /* r= */ 100, /* b= */ 100)
+        }
+        hostView.removeAllViews()
+        hostView.addView(emptyShadeView)
+        ambientState.layoutMaxHeight = 1280
+
+        stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
+
+        val closeHandleUnderlapHeight =
+            context.resources.getDimensionPixelSize(R.dimen.close_handle_underlap)
+        val fullHeight =
+            ambientState.layoutMaxHeight + closeHandleUnderlapHeight - ambientState.stackY
+        val centeredY = ambientState.stackY + fullHeight / 2f - emptyShadeView.height / 2f
+        assertThat(emptyShadeView.viewState?.yTranslation).isEqualTo(centeredY)
     }
 }

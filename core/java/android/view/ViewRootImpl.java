@@ -4910,13 +4910,14 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void updateColorModeIfNeeded(int colorMode) {
+    private void updateColorModeIfNeeded(@ActivityInfo.ColorMode int colorMode) {
         if (mAttachInfo.mThreadedRenderer == null) {
             return;
         }
         // TODO: Centralize this sanitization? Why do we let setting bad modes?
         // Alternatively, can we just let HWUI figure it out? Do we need to care here?
-        if (!getConfiguration().isScreenWideColorGamut()) {
+        if (colorMode != ActivityInfo.COLOR_MODE_A8
+                && !getConfiguration().isScreenWideColorGamut()) {
             colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
         }
         mAttachInfo.mThreadedRenderer.setColorMode(colorMode);

@@ -45,6 +45,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 /**
  * Base dialog for media output UI
@@ -53,6 +54,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         MediaOutputController.Callback, Window.Callback {
 
     private static final String TAG = "MediaOutputDialog";
+    private static final String EMPTY_TITLE = " ";
 
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final RecyclerView.LayoutManager mLayoutManager;
@@ -83,8 +85,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
     };
 
-    public MediaOutputBaseDialog(Context context, MediaOutputController mediaOutputController) {
-        super(context, R.style.Theme_SystemUI_Dialog_Media);
+    public MediaOutputBaseDialog(Context context, MediaOutputController mediaOutputController,
+            SystemUIDialogManager dialogManager) {
+        super(context, R.style.Theme_SystemUI_Dialog_Media, dialogManager);
 
         // Save the context that is wrapped with our theme.
         mContext = getContext();
@@ -108,6 +111,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         lp.setFitInsetsIgnoringVisibility(true);
         window.setAttributes(lp);
         window.setContentView(mDialogView);
+        // Sets window to a blank string to avoid talkback announce app label first when pop up,
+        // which doesn't make sense.
+        window.setTitle(EMPTY_TITLE);
 
         mHeaderTitle = mDialogView.requireViewById(R.id.header_title);
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);

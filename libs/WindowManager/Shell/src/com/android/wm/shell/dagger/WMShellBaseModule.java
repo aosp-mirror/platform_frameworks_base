@@ -36,6 +36,7 @@ import com.android.wm.shell.ShellInitImpl;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.TaskViewFactoryController;
+import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.apppairs.AppPairsController;
@@ -463,6 +464,12 @@ public abstract class WMShellBaseModule {
                 animExecutor);
     }
 
+    @WMSingleton
+    @Provides
+    static TaskViewTransitions provideTaskViewTransitions(Transitions transitions) {
+        return new TaskViewTransitions(transitions);
+    }
+
     //
     // Display areas
     //
@@ -594,8 +601,10 @@ public abstract class WMShellBaseModule {
     static TaskViewFactoryController provideTaskViewFactoryController(
             ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor,
-            SyncTransactionQueue syncQueue) {
-        return new TaskViewFactoryController(shellTaskOrganizer, mainExecutor, syncQueue);
+            SyncTransactionQueue syncQueue,
+            TaskViewTransitions taskViewTransitions) {
+        return new TaskViewFactoryController(shellTaskOrganizer, mainExecutor, syncQueue,
+                taskViewTransitions);
     }
 
     //

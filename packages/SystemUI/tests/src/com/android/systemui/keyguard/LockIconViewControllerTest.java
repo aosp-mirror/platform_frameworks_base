@@ -26,7 +26,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,7 +42,6 @@ import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Pair;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -68,8 +66,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
-
-import com.airbnb.lottie.LottieAnimationView;
 
 import org.junit.After;
 import org.junit.Before;
@@ -110,8 +106,6 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     private @Mock ConfigurationController mConfigurationController;
     private @Mock Vibrator mVibrator;
     private @Mock AuthRippleController mAuthRippleController;
-    private @Mock LottieAnimationView mAodFp;
-    private @Mock LayoutInflater mLayoutInflater;
     private FakeExecutor mDelayableExecutor = new FakeExecutor(new FakeSystemClock());
 
     private LockIconViewController mLockIconViewController;
@@ -149,7 +143,6 @@ public class LockIconViewControllerTest extends SysuiTestCase {
 
         when(mLockIconView.getResources()).thenReturn(mResources);
         when(mLockIconView.getContext()).thenReturn(mContext);
-        when(mLockIconView.findViewById(R.layout.udfps_aod_lock_icon)).thenReturn(mAodFp);
         when(mContext.getResources()).thenReturn(mResources);
         when(mContext.getSystemService(WindowManager.class)).thenReturn(mWindowManager);
         Rect windowBounds = new Rect(0, 0, 800, 1200);
@@ -176,43 +169,13 @@ public class LockIconViewControllerTest extends SysuiTestCase {
                 mDelayableExecutor,
                 mVibrator,
                 mAuthRippleController,
-                mResources,
-                mLayoutInflater
+                mResources
         );
     }
 
     @After
     public void tearDown() {
         mStaticMockSession.finishMocking();
-    }
-
-    @Test
-    public void testIgnoreUdfpsWhenNotSupported() {
-        // GIVEN Udpfs sensor is NOT available
-        mLockIconViewController.init();
-        captureAttachListener();
-
-        // WHEN the view is attached
-        mAttachListener.onViewAttachedToWindow(mLockIconView);
-
-        // THEN lottie animation should NOT be inflated
-        verify(mLayoutInflater, never()).inflate(eq(R.layout.udfps_aod_lock_icon), any());
-    }
-
-    @Test
-    public void testInflateUdfpsWhenSupported() {
-        // GIVEN Udpfs sensor is available
-        setupUdfps();
-        when(mKeyguardUpdateMonitor.isUdfpsEnrolled()).thenReturn(true);
-
-        mLockIconViewController.init();
-        captureAttachListener();
-
-        // WHEN the view is attached
-        mAttachListener.onViewAttachedToWindow(mLockIconView);
-
-        // THEN lottie animation should be inflated
-        verify(mLayoutInflater).inflate(eq(R.layout.udfps_aod_lock_icon), any());
     }
 
     @Test

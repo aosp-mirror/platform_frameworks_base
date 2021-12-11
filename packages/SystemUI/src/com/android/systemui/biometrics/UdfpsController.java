@@ -47,7 +47,6 @@ import android.os.Trace;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -71,6 +70,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -119,6 +119,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final KeyguardStateController mKeyguardStateController;
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final DumpManager mDumpManager;
+    @NonNull private final SystemUIDialogManager mDialogManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Nullable private final Vibrator mVibrator;
     @NonNull private final FalsingManager mFalsingManager;
@@ -164,9 +165,6 @@ public class UdfpsController implements DozeReceiver {
     private boolean mOnFingerDown;
     private boolean mAttemptedToDismissKeyguard;
     private Set<Callback> mCallbacks = new HashSet<>();
-
-    private static final int DEFAULT_TICK = VibrationEffect.Composition.PRIMITIVE_LOW_TICK;
-    private final VibrationEffect mTick;
 
     @VisibleForTesting
     public static final VibrationAttributes VIBRATION_ATTRIBUTES =
@@ -281,9 +279,6 @@ public class UdfpsController implements DozeReceiver {
                     return;
                 }
                 mGoodCaptureReceived = true;
-                if (mVibrator != null) {
-                    mVibrator.cancel();
-                }
                 mView.stopIllumination();
                 if (mServerRequest != null) {
                     mServerRequest.onAcquiredGood();
@@ -558,7 +553,8 @@ public class UdfpsController implements DozeReceiver {
             @Main Handler mainHandler,
             @NonNull ConfigurationController configurationController,
             @NonNull SystemClock systemClock,
-            @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            @NonNull SystemUIDialogManager dialogManager) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -573,6 +569,7 @@ public class UdfpsController implements DozeReceiver {
         mKeyguardStateController = keyguardStateController;
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mDumpManager = dumpManager;
+        mDialogManager = dialogManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mFalsingManager = falsingManager;
         mPowerManager = powerManager;
@@ -585,7 +582,6 @@ public class UdfpsController implements DozeReceiver {
         mConfigurationController = configurationController;
         mSystemClock = systemClock;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
-        mTick = lowTick(context, false /* useShortRampup */, DEFAULT_VIBRATION_DURATION);
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -621,47 +617,6 @@ public class UdfpsController implements DozeReceiver {
     }
 
     /**
-     * Returns the continuous low tick effect that starts playing on the udfps finger-down event.
-     */
-    public static VibrationEffect lowTick(
-            Context context,
-            boolean useShortRampUp,
-            long duration
-    ) {
-        boolean useLowTickDefault = context.getResources()
-                .getBoolean(R.bool.config_udfpsUseLowTick);
-        int primitiveTick = DEFAULT_TICK;
-        if (Settings.Global.getFloat(
-                context.getContentResolver(),
-                "tick-low", useLowTickDefault ? 1 : 0) == 0) {
-            primitiveTick = VibrationEffect.Composition.PRIMITIVE_TICK;
-        }
-        float tickIntensity = Settings.Global.getFloat(
-                context.getContentResolver(),
-                "tick-intensity",
-                context.getResources().getFloat(R.dimen.config_udfpsTickIntensity));
-        int tickDelay = Settings.Global.getInt(
-                context.getContentResolver(),
-                "tick-delay",
-                context.getResources().getInteger(R.integer.config_udfpsTickDelay));
-
-        VibrationEffect.Composition composition = VibrationEffect.startComposition();
-        composition.addPrimitive(primitiveTick, tickIntensity, 0);
-        int primitives = (int) (duration / tickDelay);
-        float[] rampUp = new float[]{.48f, .58f, .69f, .83f};
-        if (useShortRampUp) {
-            rampUp = new float[]{.5f, .7f};
-        }
-        for (int i = 0; i < rampUp.length; i++) {
-            composition.addPrimitive(primitiveTick, tickIntensity * rampUp[i], tickDelay);
-        }
-        for (int i = rampUp.length; i < primitives; i++) {
-            composition.addPrimitive(primitiveTick, tickIntensity, tickDelay);
-        }
-        return composition.compose();
-    }
-
-    /**
      * Play haptic to signal udfps scanning started.
      */
     @VisibleForTesting
@@ -670,8 +625,8 @@ public class UdfpsController implements DozeReceiver {
             mVibrator.vibrate(
                     Process.myUid(),
                     mContext.getOpPackageName(),
-                    mTick,
-                    "udfps-onStart-tick",
+                    EFFECT_CLICK,
+                    "udfps-onStart-click",
                     VIBRATION_ATTRIBUTES);
         }
     }
@@ -863,6 +818,7 @@ public class UdfpsController implements DozeReceiver {
                         mServerRequest.mEnrollHelper,
                         mStatusBarStateController,
                         mPanelExpansionStateManager,
+                        mDialogManager,
                         mDumpManager
                 );
             case BiometricOverlayConstants.REASON_AUTH_KEYGUARD:
@@ -881,6 +837,7 @@ public class UdfpsController implements DozeReceiver {
                         mSystemClock,
                         mKeyguardStateController,
                         mUnlockedScreenOffAnimationController,
+                        mDialogManager,
                         this
                 );
             case BiometricOverlayConstants.REASON_AUTH_BP:
@@ -891,6 +848,7 @@ public class UdfpsController implements DozeReceiver {
                         bpView,
                         mStatusBarStateController,
                         mPanelExpansionStateManager,
+                        mDialogManager,
                         mDumpManager
                 );
             case BiometricOverlayConstants.REASON_AUTH_OTHER:
@@ -902,6 +860,7 @@ public class UdfpsController implements DozeReceiver {
                         authOtherView,
                         mStatusBarStateController,
                         mPanelExpansionStateManager,
+                        mDialogManager,
                         mDumpManager
                 );
             default:
@@ -1058,7 +1017,6 @@ public class UdfpsController implements DozeReceiver {
             }
         }
         mOnFingerDown = false;
-        mVibrator.cancel();
         if (mView.isIlluminationRequested()) {
             mView.stopIllumination();
         }

@@ -29,6 +29,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.communal.conditions.CommunalConditionsMonitor;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +47,8 @@ public class CommunalManagerUpdaterTest extends SysuiTestCase {
     @Mock
     private CommunalConditionsMonitor mCommunalConditionsMonitor;
 
+    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -56,7 +60,7 @@ public class CommunalManagerUpdaterTest extends SysuiTestCase {
             return null;
         }).when(mCommunalConditionsMonitor).addCallback(any());
 
-        mMonitor = new CommunalSourceMonitor(mCommunalConditionsMonitor);
+        mMonitor = new CommunalSourceMonitor(mExecutor, mCommunalConditionsMonitor);
         final CommunalManagerUpdater updater = new CommunalManagerUpdater(mContext, mMonitor);
         updater.start();
         clearInvocations(mCommunalManager);
@@ -65,6 +69,7 @@ public class CommunalManagerUpdaterTest extends SysuiTestCase {
     @Test
     public void testUpdateSystemService_false() {
         mMonitor.setSource(null);
+        mExecutor.runAllReady();
         verify(mCommunalManager).setCommunalViewShowing(false);
     }
 
@@ -72,6 +77,7 @@ public class CommunalManagerUpdaterTest extends SysuiTestCase {
     public void testUpdateSystemService_true() {
         final CommunalSource source = mock(CommunalSource.class);
         mMonitor.setSource(source);
+        mExecutor.runAllReady();
         verify(mCommunalManager).setCommunalViewShowing(true);
     }
 }

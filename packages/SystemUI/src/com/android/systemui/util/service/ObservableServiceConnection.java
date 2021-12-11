@@ -16,15 +16,15 @@
 
 package com.android.systemui.util.service;
 
-import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
+
+import com.android.systemui.dagger.qualifiers.Main;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+
+import javax.inject.Inject;
 
 /**
  * {@link ObservableServiceConnection} is a concrete implementation of {@link ServiceConnection}
@@ -119,17 +121,17 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
      * Default constructor for {@link ObservableServiceConnection}.
      * @param context The context from which the service will be bound with.
      * @param serviceIntent The intent to  bind service with.
-     * @param flags The flags to use during the binding
      * @param executor The executor for connection callbacks to be delivered on
      * @param transformer A {@link ServiceTransformer} for transforming the resulting service
      *                    into a desired type.
      */
+    @Inject
     public ObservableServiceConnection(Context context, Intent serviceIntent,
-            @Context.BindServiceFlags int flags, @NonNull @CallbackExecutor Executor executor,
+            @Main Executor executor,
             ServiceTransformer<T> transformer) {
         mContext = context;
         mServiceIntent = serviceIntent;
-        mFlags = flags;
+        mFlags = Context.BIND_AUTO_CREATE;
         mExecutor = executor;
         mTransformer = transformer;
         mCallbacks = new ArrayList<>();

@@ -53,6 +53,8 @@ import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedActivityUtils;
+import android.content.pm.parsing.component.ParsedApexSystemService;
+import android.content.pm.parsing.component.ParsedApexSystemServiceUtils;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedAttributionUtils;
 import android.content.pm.parsing.component.ParsedComponent;
@@ -2204,6 +2206,18 @@ public class ParsingPackageUtils {
                     }
 
                     result = activityResult;
+                    break;
+                case "apex-system-service":
+                    ParseResult<ParsedApexSystemService> systemServiceResult =
+                            ParsedApexSystemServiceUtils.parseApexSystemService(res,
+                                    parser, input);
+                    if (systemServiceResult.isSuccess()) {
+                        ParsedApexSystemService systemService =
+                                systemServiceResult.getResult();
+                        pkg.addApexSystemService(systemService);
+                    }
+
+                    result = systemServiceResult;
                     break;
                 default:
                     result = parseBaseAppChildTag(input, tagName, pkg, res, parser, flags);

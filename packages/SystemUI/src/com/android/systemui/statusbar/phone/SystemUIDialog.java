@@ -45,6 +45,10 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 /**
  * Base class for dialogs that should appear over panels and keyguard.
+ *
+ * Optionally provide a {@link SystemUIDialogManager} to its constructor to send signals to
+ * listeners on whether this dialog is showing.
+ *
  * The SystemUIDialog registers a listener for the screen off / close system dialogs broadcast,
  * and dismisses itself when it receives the broadcast.
  */
@@ -54,8 +58,9 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             "persist.systemui.flag_tablet_dialog_width";
 
     private final Context mContext;
-    private final DismissReceiver mDismissReceiver;
+    @Nullable private final DismissReceiver mDismissReceiver;
     private final Handler mHandler = new Handler();
+    @Nullable private final SystemUIDialogManager mDialogManager;
 
     private int mLastWidth = Integer.MIN_VALUE;
     private int mLastHeight = Integer.MIN_VALUE;
@@ -66,11 +71,27 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         this(context, R.style.Theme_SystemUI_Dialog);
     }
 
+    public SystemUIDialog(Context context, SystemUIDialogManager dialogManager) {
+        this(context, R.style.Theme_SystemUI_Dialog, true, dialogManager);
+    }
+
     public SystemUIDialog(Context context, int theme) {
         this(context, theme, true /* dismissOnDeviceLock */);
     }
 
+    public SystemUIDialog(Context context, int theme, SystemUIDialogManager dialogManager) {
+        this(context, theme, true /* dismissOnDeviceLock */, dialogManager);
+    }
+
     public SystemUIDialog(Context context, int theme, boolean dismissOnDeviceLock) {
+        this(context, theme, dismissOnDeviceLock, null);
+    }
+
+    /**
+     * @param udfpsDialogManager If set, UDFPS will hide if this dialog is showing.
+     */
+    public SystemUIDialog(Context context, int theme, boolean dismissOnDeviceLock,
+            SystemUIDialogManager dialogManager) {
         super(context, theme);
         mContext = context;
 
@@ -80,6 +101,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         getWindow().setAttributes(attrs);
 
         mDismissReceiver = dismissOnDeviceLock ? new DismissReceiver(this) : null;
+        mDialogManager = dialogManager;
     }
 
     @Override
@@ -145,6 +167,10 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             mDismissReceiver.register();
         }
 
+        if (mDialogManager != null) {
+            mDialogManager.setShowing(this, true);
+        }
+
         // Listen for configuration changes to resize this dialog window. This is mostly necessary
         // for foldables that often go from large <=> small screen when folding/unfolding.
         ViewRootImpl.addConfigCallback(this);
@@ -156,6 +182,10 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
 
         if (mDismissReceiver != null) {
             mDismissReceiver.unregister();
+        }
+
+        if (mDialogManager != null) {
+            mDialogManager.setShowing(this, false);
         }
 
         ViewRootImpl.removeConfigCallback(this);

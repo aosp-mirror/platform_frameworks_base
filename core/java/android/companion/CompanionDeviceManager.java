@@ -776,6 +776,51 @@ public final class CompanionDeviceManager {
         }
     }
 
+    /**
+     * Notify the system that the given self-managed association has just 'appeared'.
+     * This causes the system to bind to the companion app to keep it running until the association
+     * is reported as 'disappeared'
+     *
+     * <p>This API is only available for the companion apps that manage the connectivity by
+     * themselves.</p>
+     *
+     * @param associationId the unique {@link AssociationInfo#getId ID} assigned to the Association
+     * recorded by CompanionDeviceManager
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED)
+    public void notifyDeviceAppeared(int associationId) {
+        try {
+            mService.notifyDeviceAppeared(associationId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify the system that the given self-managed association has just 'disappeared'.
+     * This causes the system to unbind to the companion app.
+     *
+     * <p>This API is only available for the companion apps that manage the connectivity by
+     * themselves.</p>
+     *
+     * @param associationId the unique {@link AssociationInfo#getId ID} assigned to the Association
+     * recorded by CompanionDeviceManager
+
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED)
+    public void notifyDeviceDisappeared(int associationId) {
+        try {
+            mService.notifyDeviceDisappeared(associationId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private boolean checkFeaturePresent() {
         boolean featurePresent = mService != null;
         if (!featurePresent && DEBUG) {

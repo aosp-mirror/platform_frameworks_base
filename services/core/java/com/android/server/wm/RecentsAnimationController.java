@@ -263,13 +263,6 @@ public class RecentsAnimationController implements DeathRecipient {
                     "finish(%b): mCanceled=%b", moveHomeToTop, mCanceled);
             final long token = Binder.clearCallingIdentity();
             try {
-                synchronized (mService.getWindowManagerLock()) {
-                    // Remove all new task targets.
-                    for (int i = mPendingNewTaskTargets.size() - 1; i >= 0; i--) {
-                        removeTaskInternal(mPendingNewTaskTargets.get(i));
-                    }
-                }
-
                 // Note, the callback will handle its own synchronization, do not lock on WM lock
                 // prior to calling the callback
                 mCallbacks.onAnimationFinished(moveHomeToTop
@@ -759,7 +752,7 @@ public class RecentsAnimationController implements DeathRecipient {
         // the task-id with the leaf id.
         final Task leafTask = task.getTopLeafTask();
         int taskId = leafTask.mTaskId;
-        TaskAnimationAdapter adapter = (TaskAnimationAdapter) addAnimation(task,
+        TaskAnimationAdapter adapter = addAnimation(task,
                 !recentTaskIds.get(taskId), true /* hidden */, finishedCallback);
         mPendingNewTaskTargets.add(taskId);
         return adapter.createRemoteAnimationTarget(taskId);
@@ -1012,6 +1005,7 @@ public class RecentsAnimationController implements DeathRecipient {
             taskAdapter.onCleanup();
         }
         // Should already be empty, but clean-up pending task-appears in-case they weren't sent.
+        mPendingNewTaskTargets.clear();
         mPendingTaskAppears.clear();
 
         for (int i = mPendingWallpaperAnimations.size() - 1; i >= 0; i--) {
