@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
@@ -86,8 +87,10 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             @NonNull SystemClock systemClock,
             @NonNull KeyguardStateController keyguardStateController,
             @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            @NonNull SystemUIDialogManager systemUIDialogManager,
             @NonNull UdfpsController udfpsController) {
-        super(view, statusBarStateController, panelExpansionStateManager, dumpManager);
+        super(view, statusBarStateController, panelExpansionStateManager, systemUIDialogManager,
+                dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockScreenShadeTransitionController = transitionController;
@@ -215,6 +218,10 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 && (!mIsBouncerVisible
                 || mInputBouncerHiddenAmount != KeyguardBouncer.EXPANSION_VISIBLE)) {
             return false;
+        }
+
+        if (mDialogManager.shouldHideAffordance()) {
+            return true;
         }
 
         if (mLaunchTransitionFadingAway) {

@@ -18,7 +18,6 @@ package com.android.settingslib.activityembedding;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ResolveInfo;
 
 import com.android.settingslib.utils.BuildCompatUtils;
 
@@ -37,11 +36,10 @@ public class ActivityEmbeddingUtils {
         if (BuildCompatUtils.isAtLeastS()) {
             final Intent intent = new Intent(ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY);
             intent.setPackage(PACKAGE_NAME_SETTINGS);
-            final ResolveInfo resolveInfo =
-                    context.getPackageManager().resolveActivity(intent, 0 /* flags */);
-            return resolveInfo != null
-                    && resolveInfo.activityInfo != null
-                    && resolveInfo.activityInfo.enabled;
+            final boolean isEmbeddingActivityEnabled =
+                    intent.resolveActivity(context.getPackageManager()) != null;
+
+            return isEmbeddingActivityEnabled;
         }
         return false;
     }

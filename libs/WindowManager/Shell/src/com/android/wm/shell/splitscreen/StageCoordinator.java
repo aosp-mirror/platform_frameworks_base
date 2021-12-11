@@ -35,6 +35,7 @@ import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.stageTypeToString;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_FINISHED;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_CHILD_TASK_ENTER_PIP;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DEVICE_FOLDED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
@@ -629,8 +630,12 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         });
         mShouldUpdateRecents = false;
 
-        mSideStage.removeAllTasks(wct, childrenToTop == mSideStage);
-        mMainStage.deactivate(wct, childrenToTop == mMainStage);
+        // When the exit split-screen is caused by one of the task enters auto pip,
+        // we want the tasks to be put to bottom instead of top, otherwise it will end up
+        // a fullscreen plus a pinned task instead of pinned only at the end of the transition.
+        final boolean fromEnteringPip = exitReason == EXIT_REASON_CHILD_TASK_ENTER_PIP;
+        mSideStage.removeAllTasks(wct, !fromEnteringPip && childrenToTop == mSideStage);
+        mMainStage.deactivate(wct, !fromEnteringPip && childrenToTop == mMainStage);
         mTaskOrganizer.applyTransaction(wct);
         mSyncQueue.runInSync(t -> t
                 .setWindowCrop(mMainStage.mRootLeash, null)
@@ -660,6 +665,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             case EXIT_REASON_DRAG_DIVIDER:
             // Either of the split apps have finished
             case EXIT_REASON_APP_FINISHED:
+            // One of the children enters PiP
+            case EXIT_REASON_CHILD_TASK_ENTER_PIP:
                 return true;
             default:
                 return false;
@@ -747,6 +754,11 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onTaskStageChanged(taskId, stage, visible);
         }
+    }
+
+    private void onStageChildTaskEnterPip(StageListenerImpl stageListener, int taskId) {
+        exitSplitScreen(stageListener == mMainStageListener ? mMainStage : mSideStage,
+                EXIT_REASON_CHILD_TASK_ENTER_PIP);
     }
 
     private void updateRecentTasksSplitPair() {
@@ -1434,6 +1446,11 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         @Override
         public void onChildTaskStatusChanged(int taskId, boolean present, boolean visible) {
             StageCoordinator.this.onStageChildTaskStatusChanged(this, taskId, present, visible);
+        }
+
+        @Override
+        public void onChildTaskEnterPip(int taskId) {
+            StageCoordinator.this.onStageChildTaskEnterPip(this, taskId);
         }
 
         @Override
