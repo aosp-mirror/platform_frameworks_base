@@ -878,10 +878,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         if (accessPoints == null || accessPoints.size() == 0) {
             mConnectedEntry = null;
             mWifiEntriesCount = 0;
-            if (mCallback != null) {
-                mCallback.onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry */,
-                        false /* hasMoreEntry */);
-            }
+            mCallback.onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry */,
+                    false /* hasMoreEntry */);
             return;
         }
 
@@ -913,9 +911,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mConnectedEntry = connectedEntry;
         mWifiEntriesCount = wifiEntries.size();
 
-        if (mCallback != null) {
-            mCallback.onAccessPointsChanged(wifiEntries, mConnectedEntry, hasMoreEntry);
-        }
+        mCallback.onAccessPointsChanged(wifiEntries, mConnectedEntry, hasMoreEntry);
     }
 
     @Override

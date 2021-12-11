@@ -328,7 +328,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
 
         boolean isBtScoRequested = isBluetoothScoRequested();
-        if (isBtScoRequested && !wasBtScoRequested) {
+        if (isBtScoRequested && (!wasBtScoRequested || !isBluetoothScoActive())) {
             if (!mBtHelper.startBluetoothSco(scoAudioMode, eventSource)) {
                 Log.w(TAG, "setCommunicationRouteForClient: failure to start BT SCO for pid: "
                         + pid);

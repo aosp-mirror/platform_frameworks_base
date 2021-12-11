@@ -89,7 +89,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardBypassController mBypassController;
 
-    private int mLargeClockTopMargin = 0;
     private int mKeyguardClockTopMargin = 0;
 
     /**
@@ -276,16 +275,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void updateClockLayout() {
+        int largeClockTopMargin = 0;
         if (mSmartspaceController.isEnabled()) {
-            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(MATCH_PARENT,
-                    MATCH_PARENT);
-            mLargeClockTopMargin = getContext().getResources().getDimensionPixelSize(
+            largeClockTopMargin = getContext().getResources().getDimensionPixelSize(
                     R.dimen.keyguard_large_clock_top_margin);
-            lp.topMargin = mLargeClockTopMargin;
-            mLargeClockFrame.setLayoutParams(lp);
-        } else {
-            mLargeClockTopMargin = 0;
         }
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(MATCH_PARENT,
+                MATCH_PARENT);
+        lp.topMargin = largeClockTopMargin;
+        mLargeClockFrame.setLayoutParams(lp);
     }
 
     /**
