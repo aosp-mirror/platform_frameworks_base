@@ -676,6 +676,7 @@ public class SystemSensorManager extends SensorManager {
         private long mNativeSensorEventQueue;
         private final SparseBooleanArray mActiveSensors = new SparseBooleanArray();
         protected final SparseIntArray mSensorAccuracies = new SparseIntArray();
+        protected final SparseIntArray mSensorDiscontinuityCounts = new SparseIntArray();
         private final CloseGuard mCloseGuard = CloseGuard.get();
         protected final SystemSensorManager mManager;
 
@@ -875,10 +876,21 @@ public class SystemSensorManager extends SensorManager {
 
             // call onAccuracyChanged() only if the value changes
             final int accuracy = mSensorAccuracies.get(handle);
-            if ((t.accuracy >= 0) && (accuracy != t.accuracy)) {
+            if (t.accuracy >= 0 && accuracy != t.accuracy) {
                 mSensorAccuracies.put(handle, t.accuracy);
                 mListener.onAccuracyChanged(t.sensor, t.accuracy);
             }
+
+            // call onSensorDiscontinuity() if the discontinuity counter changed
+            if (t.sensor.getType() == Sensor.TYPE_HEAD_TRACKER
+                    && mListener instanceof SensorEventCallback) {
+                final int lastCount = mSensorDiscontinuityCounts.get(handle);
+                final int curCount = Float.floatToIntBits(values[6]);
+                if (lastCount >= 0 && lastCount != curCount) {
+                    ((SensorEventCallback) mListener).onSensorDiscontinuity(t.sensor);
+                }
+            }
+
             mListener.onSensorChanged(t);
         }
 
