@@ -90,6 +90,30 @@ public interface CapabilityExchangeEventListener {
     void onUnpublish() throws ImsException;
 
     /**
+     * Notify the framework that the ImsService has refreshed the PUBLISH
+     * internally, which has resulted in a new PUBLISH result.
+     * <p>
+     * This method must return both SUCCESS (200 OK) and FAILURE (300+) codes in order to
+     * keep the AOSP stack up to date.
+     * @param reasonCode The SIP response code sent from the network.
+     * @param reasonPhrase The optional reason response from the network. If the
+     * network provided no reason with the sip code, the string should be empty.
+     * @param reasonHeaderCause The “cause” parameter of the “reason” header
+     * included in the SIP message.
+     * @param reasonHeaderText The “text” parameter of the “reason” header
+     * included in the SIP message.
+     * @throws ImsException If this {@link RcsCapabilityExchangeImplBase} instance is not
+     * currently connected to the framework. This can happen if the {@link RcsFeature} is not
+     * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received
+     * the {@link ImsFeature#onFeatureReady()} callback. This may also happen in rare
+     * cases when the Telephony stack has crashed.
+     *
+     */
+    default void onPublishUpdated(int reasonCode, @NonNull String reasonPhrase,
+            int reasonHeaderCause, @NonNull String reasonHeaderText) throws ImsException {
+    }
+
+    /**
      * Inform the framework of an OPTIONS query from a remote device for this device's UCE
      * capabilities.
      * <p>
