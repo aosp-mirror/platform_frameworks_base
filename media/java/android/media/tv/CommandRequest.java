@@ -21,20 +21,21 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class TvProprietaryFunctionRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.TV_PROPRIETARY_FUNCTION;
+public final class CommandRequest extends BroadcastInfoRequest implements Parcelable {
+    public static final @TvInputManager.BroadcastInfoType int requestType =
+            TvInputManager.BROADCAST_INFO_TYPE_TV_PROPRIETARY_FUNCTION;
 
-    public static final @NonNull Parcelable.Creator<TvProprietaryFunctionRequest> CREATOR =
-            new Parcelable.Creator<TvProprietaryFunctionRequest>() {
+    public static final @NonNull Parcelable.Creator<CommandRequest> CREATOR =
+            new Parcelable.Creator<CommandRequest>() {
                 @Override
-                public TvProprietaryFunctionRequest createFromParcel(Parcel source) {
+                public CommandRequest createFromParcel(Parcel source) {
                     source.readInt();
                     return createFromParcelBody(source);
                 }
 
                 @Override
-                public TvProprietaryFunctionRequest[] newArray(int size) {
-                    return new TvProprietaryFunctionRequest[size];
+                public CommandRequest[] newArray(int size) {
+                    return new CommandRequest[size];
                 }
             };
 
@@ -42,11 +43,11 @@ public class TvProprietaryFunctionRequest extends BroadcastInfoRequest implement
     private final String mName;
     private final String mArguments;
 
-    public static TvProprietaryFunctionRequest createFromParcelBody(Parcel in) {
-        return new TvProprietaryFunctionRequest(in);
+    public static CommandRequest createFromParcelBody(Parcel in) {
+        return new CommandRequest(in);
     }
 
-    public TvProprietaryFunctionRequest(int requestId, int option, String nameSpace,
+    public CommandRequest(int requestId, @RequestOption int option, String nameSpace,
             String name, String arguments) {
         super(requestType, requestId, option);
         mNameSpace = nameSpace;
@@ -54,7 +55,7 @@ public class TvProprietaryFunctionRequest extends BroadcastInfoRequest implement
         mArguments = arguments;
     }
 
-    protected TvProprietaryFunctionRequest(Parcel source) {
+    protected CommandRequest(Parcel source) {
         super(requestType, source);
         mNameSpace = source.readString();
         mName = source.readString();

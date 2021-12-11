@@ -22,8 +22,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class DsmccRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.DSMCC;
+public final class DsmccRequest extends BroadcastInfoRequest implements Parcelable {
+    public static final @TvInputManager.BroadcastInfoType int requestType =
+            TvInputManager.BROADCAST_INFO_TYPE_DSMCC;
 
     public static final @NonNull Parcelable.Creator<DsmccRequest> CREATOR =
             new Parcelable.Creator<DsmccRequest>() {
@@ -45,7 +46,7 @@ public class DsmccRequest extends BroadcastInfoRequest implements Parcelable {
         return new DsmccRequest(in);
     }
 
-    public DsmccRequest(int requestId, int option, Uri uri) {
+    public DsmccRequest(int requestId, @RequestOption int option, Uri uri) {
         super(requestType, requestId, option);
         mUri = uri;
     }

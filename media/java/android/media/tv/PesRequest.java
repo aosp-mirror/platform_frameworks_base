@@ -21,8 +21,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class PesRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.PES;
+public final class PesRequest extends BroadcastInfoRequest implements Parcelable {
+    public static final @TvInputManager.BroadcastInfoType int requestType =
+            TvInputManager.BROADCAST_INFO_TYPE_PES;
 
     public static final @NonNull Parcelable.Creator<PesRequest> CREATOR =
             new Parcelable.Creator<PesRequest>() {
@@ -45,7 +46,7 @@ public class PesRequest extends BroadcastInfoRequest implements Parcelable {
         return new PesRequest(in);
     }
 
-    public PesRequest(int requestId, int option, int tsPid, int streamId) {
+    public PesRequest(int requestId, @RequestOption int option, int tsPid, int streamId) {
         super(requestType, requestId, option);
         mTsPid = tsPid;
         mStreamId = streamId;

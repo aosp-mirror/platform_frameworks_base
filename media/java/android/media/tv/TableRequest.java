@@ -16,17 +16,25 @@
 
 package android.media.tv;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
-public class TableRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.TABLE;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-    // todo: change const declaration to intdef
-    public static final int PAT = 1;
-    public static final int PMT = 2;
+/** @hide */
+public final class TableRequest extends BroadcastInfoRequest implements Parcelable {
+    public static final @TvInputManager.BroadcastInfoType int requestType =
+            TvInputManager.BROADCAST_INFO_TYPE_TABLE;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({TABLE_NAME_PAT, TABLE_NAME_PMT})
+    public @interface TableName {}
+
+    public static final int TABLE_NAME_PAT = 0;
+    public static final int TABLE_NAME_PMT = 1;
 
     public static final @NonNull Parcelable.Creator<TableRequest> CREATOR =
             new Parcelable.Creator<TableRequest>() {
@@ -43,14 +51,15 @@ public class TableRequest extends BroadcastInfoRequest implements Parcelable {
             };
 
     private final int mTableId;
-    private final int mTableName;
+    private final @TableName int mTableName;
     private final int mVersion;
 
     public static TableRequest createFromParcelBody(Parcel in) {
         return new TableRequest(in);
     }
 
-    public TableRequest(int requestId, int option, int tableId, int tableName, int version) {
+    public TableRequest(int requestId, @RequestOption int option, int tableId,
+            @TableName int tableName, int version) {
         super(requestType, requestId, option);
         mTableId = tableId;
         mTableName = tableName;
@@ -68,7 +77,7 @@ public class TableRequest extends BroadcastInfoRequest implements Parcelable {
         return mTableId;
     }
 
-    public int getTableName() {
+    public @TableName int getTableName() {
         return mTableName;
     }
 

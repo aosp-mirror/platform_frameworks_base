@@ -16,38 +16,42 @@
 
 package android.media.tv;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import android.annotation.NonNull;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /** @hide */
 public abstract class BroadcastInfoResponse implements Parcelable {
-    // todo: change const declaration to intdef
-    public static final int ERROR = 1;
-    public static final int OK = 2;
-    public static final int CANCEL = 3;
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({RESPONSE_RESULT_ERROR, RESPONSE_RESULT_OK, RESPONSE_RESULT_CANCEL})
+    public @interface ResponseResult {}
+
+    public static final int RESPONSE_RESULT_ERROR = 1;
+    public static final int RESPONSE_RESULT_OK = 2;
+    public static final int RESPONSE_RESULT_CANCEL = 3;
 
     public static final @NonNull Parcelable.Creator<BroadcastInfoResponse> CREATOR =
             new Parcelable.Creator<BroadcastInfoResponse>() {
                 @Override
                 public BroadcastInfoResponse createFromParcel(Parcel source) {
-                    int type = source.readInt();
+                    @TvInputManager.BroadcastInfoType int type = source.readInt();
                     switch (type) {
-                        case BroadcastInfoType.TS:
+                        case TvInputManager.BROADCAST_INFO_TYPE_TS:
                             return TsResponse.createFromParcelBody(source);
-                        case BroadcastInfoType.TABLE:
-                            return TableResponse.createFromParcelBody(source);
-                        case BroadcastInfoType.SECTION:
+                        case TvInputManager.BROADCAST_INFO_TYPE_SECTION:
                             return SectionResponse.createFromParcelBody(source);
-                        case BroadcastInfoType.PES:
+                        case TvInputManager.BROADCAST_INFO_TYPE_PES:
                             return PesResponse.createFromParcelBody(source);
-                        case BroadcastInfoType.STREAM_EVENT:
+                        case TvInputManager.BROADCAST_INFO_STREAM_EVENT:
                             return StreamEventResponse.createFromParcelBody(source);
-                        case BroadcastInfoType.DSMCC:
+                        case TvInputManager.BROADCAST_INFO_TYPE_DSMCC:
                             return DsmccResponse.createFromParcelBody(source);
-                        case BroadcastInfoType.TV_PROPRIETARY_FUNCTION:
-                            return TvProprietaryFunctionResponse.createFromParcelBody(source);
+                        case TvInputManager.BROADCAST_INFO_TYPE_TV_PROPRIETARY_FUNCTION:
+                            return CommandResponse.createFromParcelBody(source);
                         default:
                             throw new IllegalStateException(
                                     "Unexpected broadcast info response type (value "
@@ -61,26 +65,27 @@ public abstract class BroadcastInfoResponse implements Parcelable {
                 }
             };
 
-    protected final int mType;
+    protected final @TvInputManager.BroadcastInfoType int mType;
     protected final int mRequestId;
     protected final int mSequence;
-    protected final int mResponseResult;
+    protected final @ResponseResult int mResponseResult;
 
-    protected BroadcastInfoResponse(int type, int requestId, int sequence, int responseResult) {
+    protected BroadcastInfoResponse(@TvInputManager.BroadcastInfoType int type, int requestId,
+            int sequence, @ResponseResult int responseResult) {
         mType = type;
         mRequestId = requestId;
         mSequence = sequence;
         mResponseResult = responseResult;
     }
 
-    protected BroadcastInfoResponse(int type, Parcel source) {
+    protected BroadcastInfoResponse(@TvInputManager.BroadcastInfoType int type, Parcel source) {
         mType = type;
         mRequestId = source.readInt();
         mSequence = source.readInt();
         mResponseResult = source.readInt();
     }
 
-    public int getType() {
+    public @TvInputManager.BroadcastInfoType int getType() {
         return mType;
     }
 
@@ -92,7 +97,7 @@ public abstract class BroadcastInfoResponse implements Parcelable {
         return mSequence;
     }
 
-    public int getResponseResult() {
+    public @ResponseResult int getResponseResult() {
         return mResponseResult;
     }
 

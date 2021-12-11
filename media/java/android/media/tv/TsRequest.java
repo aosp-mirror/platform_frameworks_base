@@ -21,8 +21,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class TsRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.TS;
+public final class TsRequest extends BroadcastInfoRequest implements Parcelable {
+    public static final @TvInputManager.BroadcastInfoType int requestType =
+            TvInputManager.BROADCAST_INFO_TYPE_TS;
 
     public static final @NonNull Parcelable.Creator<TsRequest> CREATOR =
             new Parcelable.Creator<TsRequest>() {
@@ -44,7 +45,7 @@ public class TsRequest extends BroadcastInfoRequest implements Parcelable {
         return new TsRequest(in);
     }
 
-    public TsRequest(int requestId, int option, int tsPid) {
+    public TsRequest(int requestId, @RequestOption int option, int tsPid) {
         super(requestType, requestId, option);
         mTsPid = tsPid;
     }

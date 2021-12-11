@@ -21,8 +21,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class SectionRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.SECTION;
+public final class SectionRequest extends BroadcastInfoRequest implements Parcelable {
+    public static final @TvInputManager.BroadcastInfoType int requestType =
+            TvInputManager.BROADCAST_INFO_TYPE_SECTION;
 
     public static final @NonNull Parcelable.Creator<SectionRequest> CREATOR =
             new Parcelable.Creator<SectionRequest>() {
@@ -40,13 +41,14 @@ public class SectionRequest extends BroadcastInfoRequest implements Parcelable {
 
     private final int mTsPid;
     private final int mTableId;
-    private final int mVersion;
+    private final Integer mVersion;
 
     public static SectionRequest createFromParcelBody(Parcel in) {
         return new SectionRequest(in);
     }
 
-    public SectionRequest(int requestId, int option, int tsPid, int tableId, int version) {
+    public SectionRequest(int requestId, @RequestOption int option, int tsPid, int tableId,
+            Integer version) {
         super(requestType, requestId, option);
         mTsPid = tsPid;
         mTableId = tableId;
@@ -57,7 +59,7 @@ public class SectionRequest extends BroadcastInfoRequest implements Parcelable {
         super(requestType, source);
         mTsPid = source.readInt();
         mTableId = source.readInt();
-        mVersion = source.readInt();
+        mVersion = (Integer) source.readValue(Integer.class.getClassLoader());
     }
 
     public int getTsPid() {
@@ -68,7 +70,7 @@ public class SectionRequest extends BroadcastInfoRequest implements Parcelable {
         return mTableId;
     }
 
-    public int getVersion() {
+    public Integer getVersion() {
         return mVersion;
     }
 
@@ -77,6 +79,6 @@ public class SectionRequest extends BroadcastInfoRequest implements Parcelable {
         super.writeToParcel(dest, flags);
         dest.writeInt(mTsPid);
         dest.writeInt(mTableId);
-        dest.writeInt(mVersion);
+        dest.writeValue(mVersion);
     }
 }

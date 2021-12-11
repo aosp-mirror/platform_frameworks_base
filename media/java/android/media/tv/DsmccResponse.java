@@ -22,8 +22,9 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 
 /** @hide */
-public class DsmccResponse extends BroadcastInfoResponse implements Parcelable {
-    public static final int responseType = BroadcastInfoType.DSMCC;
+public final class DsmccResponse extends BroadcastInfoResponse implements Parcelable {
+    public static final @TvInputManager.BroadcastInfoType int responseType =
+            TvInputManager.BROADCAST_INFO_TYPE_DSMCC;
 
     public static final @NonNull Parcelable.Creator<DsmccResponse> CREATOR =
             new Parcelable.Creator<DsmccResponse>() {
@@ -39,30 +40,30 @@ public class DsmccResponse extends BroadcastInfoResponse implements Parcelable {
                 }
             };
 
-    private final ParcelFileDescriptor mFile;
+    private final ParcelFileDescriptor mFileDescriptor;
 
     public static DsmccResponse createFromParcelBody(Parcel in) {
         return new DsmccResponse(in);
     }
 
-    public DsmccResponse(int requestId, int sequence, int responseResult,
+    public DsmccResponse(int requestId, int sequence, @ResponseResult int responseResult,
             ParcelFileDescriptor file) {
         super(responseType, requestId, sequence, responseResult);
-        mFile = file;
+        mFileDescriptor = file;
     }
 
     protected DsmccResponse(Parcel source) {
         super(responseType, source);
-        mFile = source.readFileDescriptor();
+        mFileDescriptor = source.readFileDescriptor();
     }
 
     public ParcelFileDescriptor getFile() {
-        return mFile;
+        return mFileDescriptor;
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        mFile.writeToParcel(dest, flags);
+        mFileDescriptor.writeToParcel(dest, flags);
     }
 }
