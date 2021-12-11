@@ -874,6 +874,18 @@ public class StaticLayout extends Layout {
                             ? Math.max(fmDescent, Math.round(descents[breakIndex]))
                             : fmDescent;
 
+                    // The fallback ascent/descent may be larger than top/bottom of the default font
+                    // metrics. Adjust top/bottom with ascent/descent for avoiding unexpected
+                    // clipping.
+                    if (fallbackLineSpacing) {
+                        if (ascent < fmTop) {
+                            fmTop = ascent;
+                        }
+                        if (descent > fmBottom) {
+                            fmBottom = descent;
+                        }
+                    }
+
                     v = out(source, here, endPos,
                             ascent, descent, fmTop, fmBottom,
                             v, spacingmult, spacingadd, chooseHt, chooseHtv, fm,
