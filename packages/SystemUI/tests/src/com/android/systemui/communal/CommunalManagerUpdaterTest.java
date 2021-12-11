@@ -28,8 +28,8 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.communal.conditions.CommunalConditionsMonitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.condition.Monitor;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
@@ -45,7 +45,7 @@ public class CommunalManagerUpdaterTest extends SysuiTestCase {
     @Mock
     private CommunalManager mCommunalManager;
     @Mock
-    private CommunalConditionsMonitor mCommunalConditionsMonitor;
+    private Monitor mCommunalConditionsMonitor;
 
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -55,7 +55,7 @@ public class CommunalManagerUpdaterTest extends SysuiTestCase {
         mContext.addMockSystemService(CommunalManager.class, mCommunalManager);
 
         doAnswer(invocation -> {
-            final CommunalConditionsMonitor.Callback callback = invocation.getArgument(0);
+            final Monitor.Callback callback = invocation.getArgument(0);
             callback.onConditionsChanged(true);
             return null;
         }).when(mCommunalConditionsMonitor).addCallback(any());

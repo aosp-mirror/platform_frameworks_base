@@ -16,12 +16,14 @@
 
 package com.android.systemui.communal;
 
+import static com.android.systemui.communal.dagger.CommunalModule.COMMUNAL_CONDITIONS;
+
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.communal.conditions.CommunalConditionsMonitor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.util.condition.Monitor;
 
 import com.google.android.collect.Lists;
 
@@ -31,6 +33,7 @@ import java.util.Iterator;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * A Monitor for reporting a {@link CommunalSource} presence.
@@ -42,7 +45,7 @@ public class CommunalSourceMonitor {
 
     // A list of {@link Callback} that have registered to receive updates.
     private final ArrayList<WeakReference<Callback>> mCallbacks = Lists.newArrayList();
-    private final CommunalConditionsMonitor mConditionsMonitor;
+    private final Monitor mConditionsMonitor;
     private final Executor mExecutor;
 
     private CommunalSource mCurrentSource;
@@ -53,7 +56,7 @@ public class CommunalSourceMonitor {
     // Whether the class is currently listening for condition changes.
     private boolean mListeningForConditions = false;
 
-    private final CommunalConditionsMonitor.Callback mConditionsCallback =
+    private final Monitor.Callback mConditionsCallback =
             allConditionsMet -> {
                 if (mAllCommunalConditionsMet != allConditionsMet) {
                     if (DEBUG) Log.d(TAG, "communal conditions changed: " + allConditionsMet);
@@ -66,7 +69,7 @@ public class CommunalSourceMonitor {
     @VisibleForTesting
     @Inject
     public CommunalSourceMonitor(@Main Executor executor,
-            CommunalConditionsMonitor communalConditionsMonitor) {
+            @Named(COMMUNAL_CONDITIONS) Monitor communalConditionsMonitor) {
         mExecutor = executor;
         mConditionsMonitor = communalConditionsMonitor;
     }

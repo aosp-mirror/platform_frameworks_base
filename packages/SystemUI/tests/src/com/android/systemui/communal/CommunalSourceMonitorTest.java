@@ -31,8 +31,8 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.communal.conditions.CommunalConditionsMonitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.condition.Monitor;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
@@ -49,9 +49,9 @@ import java.lang.ref.WeakReference;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class CommunalSourceMonitorTest extends SysuiTestCase {
-    @Mock private CommunalConditionsMonitor mCommunalConditionsMonitor;
+    @Mock private Monitor mCommunalConditionsMonitor;
 
-    @Captor private ArgumentCaptor<CommunalConditionsMonitor.Callback> mConditionsCallbackCaptor;
+    @Captor private ArgumentCaptor<Monitor.Callback> mConditionsCallbackCaptor;
 
     private CommunalSourceMonitor mCommunalSourceMonitor;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
@@ -156,7 +156,7 @@ public class CommunalSourceMonitorTest extends SysuiTestCase {
     private void setConditionsMet(boolean value) {
         mExecutor.runAllReady();
         verify(mCommunalConditionsMonitor).addCallback(mConditionsCallbackCaptor.capture());
-        final CommunalConditionsMonitor.Callback conditionsCallback =
+        final Monitor.Callback conditionsCallback =
                 mConditionsCallbackCaptor.getValue();
         conditionsCallback.onConditionsChanged(value);
         mExecutor.runAllReady();
