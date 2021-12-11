@@ -6208,4 +6208,8 @@ ul.</string>
     <string name="notification_content_abusive_bg_apps">
         <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background and draining battery. Tap to review.
     </string>
+    <!-- Content of notification indicating long running foreground service. [CHAR LIMIT=NONE] -->
+    <string name="notification_content_long_running_fgs">
+        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background for a long time. Tap to review.
+    </string>
 </resources>

@@ -755,4 +755,25 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void addAppBackgroundRestrictionListener(
             @NonNull AppBackgroundRestrictionListener listener);
+
+    /**
+     * A listener interface, which will be notified on foreground service state changes.
+     */
+    public interface ForegroundServiceStateListener {
+        /**
+         * Call when the given process's foreground service state changes.
+         *
+         * @param packageName The package name of the process.
+         * @param uid The UID of the process.
+         * @param pid The pid of the process.
+         * @param started {@code true} if the process transits from non-FGS state to FGS state.
+         */
+        void onForegroundServiceStateChanged(String packageName, int uid, int pid, boolean started);
+    }
+
+    /**
+     * Register the foreground service state change listener callback.
+     */
+    public abstract void addForegroundServiceStateListener(
+            @NonNull ForegroundServiceStateListener listener);
 }

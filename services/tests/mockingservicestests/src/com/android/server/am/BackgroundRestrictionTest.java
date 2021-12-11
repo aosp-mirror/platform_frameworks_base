@@ -91,6 +91,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
+import com.android.server.am.AppFGSTracker.AppFGSPolicy;
 import com.android.server.am.AppRestrictionController.NotificationHelper;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
@@ -105,6 +106,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.verification.VerificationMode;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -192,6 +194,7 @@ public final class BackgroundRestrictionTest {
     private TestBgRestrictionInjector mInjector;
     private AppRestrictionController mBgRestrictionController;
     private AppBatteryTracker mAppBatteryTracker;
+    private AppFGSTracker mAppFGSTracker;
 
     @Before
     public void setUp() throws Exception {
@@ -628,7 +631,7 @@ public final class BackgroundRestrictionTest {
                                 eq(testPkgName),
                                 eq(testUid));
                         // Verify we have the notification posted.
-                        checkNotification(testPkgName);
+                        checkNotificationShown(new String[] {testPkgName}, atLeast(1), true);
                     });
 
             // Turn ON the FAS for real.
@@ -668,19 +671,189 @@ public final class BackgroundRestrictionTest {
         }
     }
 
-    private void checkNotification(String packageName) throws Exception {
-        final NotificationManager nm = mInjector.getNotificationManager();
+    @Test
+    public void testLongFGSMonitor() throws Exception {
+        final int testPkgIndex1 = 1;
+        final String testPkgName1 = TEST_PACKAGE_BASE + testPkgIndex1;
+        final int testUser1 = TEST_USER0;
+        final int testUid1 = UserHandle.getUid(testUser1, TEST_PACKAGE_APPID_BASE + testPkgIndex1);
+        final int testPid1 = 1234;
+
+        final int testPkgIndex2 = 2;
+        final String testPkgName2 = TEST_PACKAGE_BASE + testPkgIndex2;
+        final int testUser2 = TEST_USER0;
+        final int testUid2 = UserHandle.getUid(testUser2, TEST_PACKAGE_APPID_BASE + testPkgIndex2);
+        final int testPid2 = 1235;
+
+        final long windowMs = 2_000;
+        final long thresholdMs = 1_000;
+        final long shortMs = 100;
+
+        DeviceConfigSession<Boolean> longRunningFGSMonitor = null;
+        DeviceConfigSession<Long> longRunningFGSWindow = null;
+        DeviceConfigSession<Long> longRunningFGSThreshold = null;
+
+        try {
+            longRunningFGSMonitor = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppFGSPolicy.KEY_BG_FGS_MONITOR_ENABLED,
+                    DeviceConfig::getBoolean,
+                    AppFGSPolicy.DEFAULT_BG_FGS_MONITOR_ENABLED);
+            longRunningFGSMonitor.set(true);
+
+            longRunningFGSWindow = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppFGSPolicy.KEY_BG_FGS_LONG_RUNNING_WINDOW,
+                    DeviceConfig::getLong,
+                    AppFGSPolicy.DEFAULT_BG_FGS_LONG_RUNNING_WINDOW);
+            longRunningFGSWindow.set(windowMs);
+
+            longRunningFGSThreshold = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppFGSPolicy.KEY_BG_FGS_LONG_RUNNING_THRESHOLD,
+                    DeviceConfig::getLong,
+                    AppFGSPolicy.DEFAULT_BG_FGS_LONG_RUNNING_THRESHOLD);
+            longRunningFGSThreshold.set(thresholdMs);
+
+            // Basic case
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
+                    testPid1, true);
+            // Verify we have the notification, it'll include the summary notification though.
+            int notificationId = checkNotificationShown(
+                    new String[] {testPkgName1}, timeout(windowMs * 2).times(2), true)[0];
+
+            clearInvocations(mInjector.getNotificationManager());
+            // Sleep a while, verify it won't show another notification.
+            Thread.sleep(windowMs * 2);
+            checkNotificationShown(
+                    new String[] {testPkgName1}, timeout(windowMs * 2).times(0), false);
+
+            // Stop this FGS
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
+                    testPid1, false);
+            checkNotificationGone(testPkgName1, timeout(windowMs), notificationId);
+
+            clearInvocations(mInjector.getNotificationManager());
+            // Start another one and stop it.
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName2, testUid2,
+                    testPid2, true);
+            Thread.sleep(shortMs);
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName2, testUid2,
+                    testPid2, false);
+
+            // Not long enough, it shouldn't show notification in this case.
+            checkNotificationShown(
+                    new String[] {testPkgName2}, timeout(windowMs * 2).times(0), false);
+
+            clearInvocations(mInjector.getNotificationManager());
+            // Start the FGS again.
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName2, testUid2,
+                    testPid2, true);
+            // Verify we have the notification.
+            notificationId = checkNotificationShown(
+                    new String[] {testPkgName2}, timeout(windowMs * 2).times(2), true)[0];
+
+            // Stop this FGS
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName2, testUid2,
+                    testPid2, false);
+            checkNotificationGone(testPkgName2, timeout(windowMs), notificationId);
+
+            // Start over with concurrent cases.
+            clearInvocations(mInjector.getNotificationManager());
+            mBgRestrictionController.resetRestrictionSettings();
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName2, testUid2,
+                    testPid2, true);
+            Thread.sleep(shortMs);
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
+                    testPid1, true);
+
+            // Verify we've seen both notifications, and test pkg2 should be shown before test pkg1.
+            int[] notificationIds = checkNotificationShown(
+                    new String[] {testPkgName2, testPkgName1},
+                    timeout(windowMs * 2).times(4), true);
+
+            // Stop both of them.
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
+                    testPid1, false);
+            checkNotificationGone(testPkgName1, timeout(windowMs), notificationIds[1]);
+            clearInvocations(mInjector.getNotificationManager());
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName2, testUid2,
+                    testPid2, false);
+            checkNotificationGone(testPkgName2, timeout(windowMs), notificationIds[0]);
+
+            // Test the interlaced case.
+            clearInvocations(mInjector.getNotificationManager());
+            mBgRestrictionController.resetRestrictionSettings();
+            mAppFGSTracker.reset();
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
+                    testPid1, true);
+
+            final long initialWaitMs = thresholdMs / 2;
+            Thread.sleep(initialWaitMs);
+
+            for (long remaining = thresholdMs - initialWaitMs; remaining > 0;) {
+                mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
+                        testPid1, false);
+                mAppFGSTracker.onForegroundServiceStateChanged(testPkgName2, testUid2,
+                        testPid2, true);
+                Thread.sleep(shortMs);
+                mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
+                        testPid1, true);
+                mAppFGSTracker.onForegroundServiceStateChanged(testPkgName2, testUid2,
+                        testPid2, false);
+                Thread.sleep(shortMs);
+                remaining -= shortMs;
+            }
+
+            // Verify test pkg1 got the notification, but not test pkg2.
+            notificationId = checkNotificationShown(
+                    new String[] {testPkgName1}, timeout(windowMs).times(2), true)[0];
+
+            clearInvocations(mInjector.getNotificationManager());
+            // Stop the FGS.
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
+                    testPid1, false);
+            checkNotificationGone(testPkgName1, timeout(windowMs), notificationId);
+        } finally {
+            closeIfNotNull(longRunningFGSMonitor);
+            closeIfNotNull(longRunningFGSWindow);
+            closeIfNotNull(longRunningFGSThreshold);
+        }
+    }
+
+    private int[] checkNotificationShown(String[] packageName, VerificationMode mode,
+            boolean verifyNotification) throws Exception {
         final ArgumentCaptor<Integer> notificationIdCaptor =
                 ArgumentCaptor.forClass(Integer.class);
         final ArgumentCaptor<Notification> notificationCaptor =
                 ArgumentCaptor.forClass(Notification.class);
-        verify(mInjector.getNotificationManager(), atLeast(1)).notifyAsUser(any(),
+        verify(mInjector.getNotificationManager(), mode).notifyAsUser(any(),
                 notificationIdCaptor.capture(), notificationCaptor.capture(), any());
-        final Notification n = notificationCaptor.getValue();
-        assertTrue(NotificationHelper.SUMMARY_NOTIFICATION_ID < notificationIdCaptor.getValue());
-        assertEquals(NotificationHelper.GROUP_KEY, n.getGroup());
-        assertEquals(ABUSIVE_BACKGROUND_APPS, n.getChannelId());
-        assertEquals(packageName, n.extras.getString(Intent.EXTRA_PACKAGE_NAME));
+        final int[] notificationId = new int[packageName.length];
+        if (verifyNotification) {
+            for (int i = 0, j = 0; i < packageName.length; j++) {
+                final int id = notificationIdCaptor.getAllValues().get(j);
+                if (id == NotificationHelper.SUMMARY_NOTIFICATION_ID) {
+                    continue;
+                }
+                final Notification n = notificationCaptor.getAllValues().get(j);
+                notificationId[i] = id;
+                assertTrue(NotificationHelper.SUMMARY_NOTIFICATION_ID < notificationId[i]);
+                assertEquals(NotificationHelper.GROUP_KEY, n.getGroup());
+                assertEquals(ABUSIVE_BACKGROUND_APPS, n.getChannelId());
+                assertEquals(packageName[i], n.extras.getString(Intent.EXTRA_PACKAGE_NAME));
+                i++;
+            }
+        }
+        return notificationId;
+    }
+
+    private void checkNotificationGone(String packageName, VerificationMode mode,
+            int notificationId) throws Exception {
+        final ArgumentCaptor<Integer> notificationIdCaptor =
+                ArgumentCaptor.forClass(Integer.class);
+        verify(mInjector.getNotificationManager(), mode).cancel(notificationIdCaptor.capture());
+        assertEquals(notificationId, notificationIdCaptor.getValue().intValue());
     }
 
     private void closeIfNotNull(DeviceConfigSession<?> config) throws Exception {
@@ -788,6 +961,11 @@ public final class BackgroundRestrictionTest {
                                 BackgroundRestrictionTest.class),
                         BackgroundRestrictionTest.this);
                 controller.addAppStateTracker(mAppBatteryTracker);
+                mAppFGSTracker = new AppFGSTracker(mContext, controller,
+                        TestAppFGSTrackerInjector.class.getDeclaredConstructor(
+                                BackgroundRestrictionTest.class),
+                        BackgroundRestrictionTest.this);
+                controller.addAppStateTracker(mAppFGSTracker);
             } catch (NoSuchMethodException e) {
                 // Won't happen.
             }
@@ -883,5 +1061,8 @@ public final class BackgroundRestrictionTest {
     }
 
     private class TestAppBatteryTrackerInjector extends TestBaseTrackerInjector<AppBatteryPolicy> {
+    }
+
+    private class TestAppFGSTrackerInjector extends TestBaseTrackerInjector<AppFGSPolicy> {
     }
 }

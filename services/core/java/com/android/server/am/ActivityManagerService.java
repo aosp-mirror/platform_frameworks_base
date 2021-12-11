@@ -156,6 +156,7 @@ import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityManager.RestrictionLevel;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.ForegroundServiceStateListener;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.ActivityThread;
 import android.app.AnrController;
@@ -1371,6 +1372,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final ProcessMap<ArrayList<ProcessRecord>> mForegroundPackages
             = new ProcessMap<ArrayList<ProcessRecord>>();
+
+    /**
+     * The list of foreground service state change listeners.
+     */
+    @GuardedBy("this")
+    final ArrayList<ForegroundServiceStateListener> mForegroundServiceStateListeners =
+            new ArrayList<>();
 
     /**
      * Set if the systemServer made a call to enterSafeMode.
@@ -14841,8 +14849,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
             int fgServiceTypes, boolean oomAdj) {
         final ProcessServiceRecord psr = proc.mServices;
-        if (isForeground != psr.hasForegroundServices()
+        final boolean foregroundStateChanged = isForeground != psr.hasForegroundServices();
+        if (foregroundStateChanged
                 || psr.getForegroundServiceTypes() != fgServiceTypes) {
+            if (foregroundStateChanged) {
+                // Notify internal listeners.
+                for (int i = mForegroundServiceStateListeners.size() - 1; i >= 0; i--) {
+                    mForegroundServiceStateListeners.get(i).onForegroundServiceStateChanged(
+                            proc.info.packageName, proc.info.uid, proc.getPid(), isForeground);
+                }
+            }
             psr.setHasForegroundServices(isForeground, fgServiceTypes);
             ArrayList<ProcessRecord> curProcs = mForegroundPackages.get(proc.info.packageName,
                     proc.info.uid);
@@ -16848,6 +16864,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void addAppBackgroundRestrictionListener(
                 @NonNull ActivityManagerInternal.AppBackgroundRestrictionListener listener) {
             mAppRestrictionController.addAppBackgroundRestrictionListener(listener);
+        }
+
+        @Override
+        public void addForegroundServiceStateListener(
+                @NonNull ForegroundServiceStateListener listener) {
+            synchronized (ActivityManagerService.this) {
+                mForegroundServiceStateListeners.add(listener);
+            }
         }
     }
 
