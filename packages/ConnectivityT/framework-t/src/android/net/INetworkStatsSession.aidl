@@ -33,7 +33,17 @@ interface INetworkStatsSession {
     @UnsupportedAppUsage
     NetworkStatsHistory getHistoryForNetwork(in NetworkTemplate template, int fields);
 
-    /** Return network layer usage summary per UID for traffic that matches template. */
+    /**
+     * Return network layer usage summary per UID for traffic that matches template.
+     *
+     * <p>The resulting {@code NetworkStats#getElapsedRealtime()} contains time delta between
+     * {@code start} and {@code end}.
+     *
+     * @param template - a predicate to filter netstats.
+     * @param start - start of the range, timestamp in milliseconds since the epoch.
+     * @param end - end of the range, timestamp in milliseconds since the epoch.
+     * @param includeTags - includes data usage tags if true.
+     */
     @UnsupportedAppUsage
     NetworkStats getSummaryForAllUid(in NetworkTemplate template, long start, long end, boolean includeTags);
     /** Return historical network layer stats for specific UID traffic that matches template. */

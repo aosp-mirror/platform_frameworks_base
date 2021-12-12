@@ -103,7 +103,7 @@ public abstract class BluetoothProfileConnector<T> {
                             mContext.getPackageManager(), 0);
                     intent.setComponent(comp);
                     if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
-                            UserHandle.CURRENT_OR_SELF)) {
+                            UserHandle.CURRENT)) {
                         logError("Could not bind to Bluetooth Service with " + intent);
                         return false;
                     }
