@@ -67,8 +67,7 @@ void ClearDirectory(const android::StringPiece& path) {
 }
 
 void TestDirectoryFixture::SetUp() {
-  temp_dir_ = file::BuildPath({android::base::GetExecutableDirectory(),
-                               "_temp",
+  temp_dir_ = file::BuildPath({testing::TempDir(), "_temp",
                                testing::UnitTest::GetInstance()->current_test_case()->name(),
                                testing::UnitTest::GetInstance()->current_test_info()->name()});
   ASSERT_TRUE(file::mkdirs(temp_dir_));
@@ -236,4 +235,4 @@ std::vector<std::string> LinkCommandBuilder::Build(const std::string& out_apk) {
   return args_;
 }
 
-} // namespace aapt
+}  // namespace aapt
