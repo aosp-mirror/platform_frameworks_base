@@ -29,6 +29,7 @@ import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.util.ArrayList;
@@ -150,7 +151,7 @@ public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetwork
 
     /** Retrieve the allowed PLMN IDs, or an empty set if any PLMN ID is acceptable. */
     @NonNull
-    public Set<String> getAllowedPlmnIds() {
+    public Set<String> getAllowedOperatorPlmnIds() {
         return Collections.unmodifiableSet(mAllowedNetworkPlmnIds);
     }
 
@@ -200,8 +201,17 @@ public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetwork
                 && mRequireOpportunistic == rhs.mRequireOpportunistic;
     }
 
+    /** @hide */
+    @Override
+    void dumpTransportSpecificFields(IndentingPrintWriter pw) {
+        pw.println("mAllowedNetworkPlmnIds: " + mAllowedNetworkPlmnIds.toString());
+        pw.println("mAllowedSpecificCarrierIds: " + mAllowedSpecificCarrierIds.toString());
+        pw.println("mAllowRoaming: " + mAllowRoaming);
+        pw.println("mRequireOpportunistic: " + mRequireOpportunistic);
+    }
+
     /** This class is used to incrementally build WifiNetworkPriority objects. */
-    public static class Builder extends VcnUnderlyingNetworkPriority.Builder<Builder> {
+    public static final class Builder extends VcnUnderlyingNetworkPriority.Builder<Builder> {
         @NonNull private final Set<String> mAllowedNetworkPlmnIds = new ArraySet<>();
         @NonNull private final Set<Integer> mAllowedSpecificCarrierIds = new ArraySet<>();
 
@@ -223,7 +233,7 @@ public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetwork
          *     and {@link SubscriptionInfo#getMncString()}.
          */
         @NonNull
-        public Builder setAllowedPlmnIds(@NonNull Set<String> allowedNetworkPlmnIds) {
+        public Builder setAllowedOperatorPlmnIds(@NonNull Set<String> allowedNetworkPlmnIds) {
             validatePlmnIds(allowedNetworkPlmnIds);
 
             mAllowedNetworkPlmnIds.clear();

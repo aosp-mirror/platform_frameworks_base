@@ -22,7 +22,10 @@ import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.app.usage.NetworkStatsManager;
 import android.net.DataUsageRequest;
+import android.net.NetworkIdentitySet;
 import android.net.NetworkStats;
+import android.net.NetworkStatsAccess;
+import android.net.NetworkStatsCollection;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.Bundle;

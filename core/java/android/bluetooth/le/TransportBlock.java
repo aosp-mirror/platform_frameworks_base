@@ -24,6 +24,7 @@ import android.util.Log;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * Wrapper for Transport Discovery Data Transport Blocks.
@@ -59,8 +60,12 @@ public final class TransportBlock implements Parcelable {
         mOrgId = in.readInt();
         mTdsFlags = in.readInt();
         mTransportDataLength = in.readInt();
-        mTransportData = new byte[mTransportDataLength];
-        in.readByteArray(mTransportData);
+        if (mTransportDataLength > 0) {
+            mTransportData = new byte[mTransportDataLength];
+            in.readByteArray(mTransportData);
+        } else {
+            mTransportData = null;
+        }
     }
 
     @Override
@@ -68,7 +73,9 @@ public final class TransportBlock implements Parcelable {
         dest.writeInt(mOrgId);
         dest.writeInt(mTdsFlags);
         dest.writeInt(mTransportDataLength);
-        dest.writeByteArray(mTransportData);
+        if (mTransportData != null) {
+            dest.writeByteArray(mTransportData);
+        }
     }
 
     /**
@@ -77,6 +84,21 @@ public final class TransportBlock implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        TransportBlock other = (TransportBlock) obj;
+        return Arrays.equals(toByteArray(), other.toByteArray());
     }
 
     public static final @NonNull Creator<TransportBlock> CREATOR = new Creator<TransportBlock>() {

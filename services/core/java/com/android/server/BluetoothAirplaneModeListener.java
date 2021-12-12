@@ -112,9 +112,9 @@ class BluetoothAirplaneModeListener {
     void handleAirplaneModeChange() {
         if (shouldSkipAirplaneModeChange()) {
             Log.i(TAG, "Ignore airplane mode change");
-            // We have to store Bluetooth state here, so if user turns off Bluetooth
-            // after airplane mode is turned on, we don't forget to turn on Bluetooth
-            // when airplane mode turns off.
+            // Airplane mode enabled when Bluetooth is being used for audio/headering aid.
+            // Bluetooth is not disabled in such case, only state is changed to
+            // BLUETOOTH_ON_AIRPLANE mode.
             mAirplaneHelper.setSettingsInt(Settings.Global.BLUETOOTH_ON,
                     BluetoothManagerService.BLUETOOTH_ON_AIRPLANE);
             if (shouldPopToast()) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.net;
+package android.net;
 
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
@@ -31,13 +31,7 @@ import static android.net.TrafficStats.UID_REMOVED;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
 import static com.android.internal.net.NetworkUtilsInternal.multiplySafeByRational;
-import static com.android.server.net.NetworkStatsService.TAG;
 
-import android.net.NetworkIdentity;
-import android.net.NetworkStats;
-import android.net.NetworkStatsHistory;
-import android.net.NetworkTemplate;
-import android.net.TrafficStats;
 import android.os.Binder;
 import android.service.NetworkStatsCollectionKeyProto;
 import android.service.NetworkStatsCollectionProto;
@@ -59,16 +53,15 @@ import com.android.internal.util.FastDataOutput;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 
-import libcore.io.IoUtils;
-
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
+
+import libcore.io.IoUtils;
 
 import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -86,8 +79,11 @@ import java.util.Objects;
 /**
  * Collection of {@link NetworkStatsHistory}, stored based on combined key of
  * {@link NetworkIdentitySet}, UID, set, and tag. Knows how to persist itself.
+ *
+ * @hide
  */
 public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.Writer {
+    private static final String TAG = NetworkStatsCollection.class.getSimpleName();
     /** File header magic number: "ANET" */
     private static final int FILE_MAGIC = 0x414E4554;
 
@@ -335,7 +331,13 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
     /**
      * Summarize all {@link NetworkStatsHistory} in this collection which match
-     * the requested parameters.
+     * the requested parameters across the requested range.
+     *
+     * @param template - a predicate for filtering netstats.
+     * @param start - start of the range, timestamp in milliseconds since the epoch.
+     * @param end - end of the range, timestamp in milliseconds since the epoch.
+     * @param accessLevel - caller access level.
+     * @param callerUid - caller UID.
      */
     public NetworkStats getSummary(NetworkTemplate template, long start, long end,
             @NetworkStatsAccess.Level int accessLevel, int callerUid) {
@@ -361,8 +363,8 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
                 entry.uid = key.uid;
                 entry.set = key.set;
                 entry.tag = key.tag;
-                entry.defaultNetwork = key.ident.areAllMembersOnDefaultNetwork() ?
-                        DEFAULT_NETWORK_YES : DEFAULT_NETWORK_NO;
+                entry.defaultNetwork = key.ident.areAllMembersOnDefaultNetwork()
+                        ? DEFAULT_NETWORK_YES : DEFAULT_NETWORK_NO;
                 entry.metered = key.ident.isAnyMemberMetered() ? METERED_YES : METERED_NO;
                 entry.roaming = key.ident.isAnyMemberRoaming() ? ROAMING_YES : ROAMING_NO;
                 entry.rxBytes = historyEntry.rxBytes;
@@ -516,6 +518,12 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         }
     }
 
+    /**
+     * Read legacy network summary statistics file format into the collection,
+     * See {@code NetworkStatsService#maybeUpgradeLegacyStatsLocked}.
+     *
+     * @deprecated
+     */
     @Deprecated
     public void readLegacyNetwork(File file) throws IOException {
         final AtomicFile inputFile = new AtomicFile(file);
@@ -555,6 +563,12 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         }
     }
 
+    /**
+     * Read legacy Uid statistics file format into the collection,
+     * See {@code NetworkStatsService#maybeUpgradeLegacyStatsLocked}.
+     *
+     * @deprecated
+     */
     @Deprecated
     public void readLegacyUid(File file, boolean onlyTags) throws IOException {
         final AtomicFile inputFile = new AtomicFile(file);
@@ -769,19 +783,19 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         public final int set;
         public final int tag;
 
-        private final int hashCode;
+        private final int mHashCode;
 
-        public Key(NetworkIdentitySet ident, int uid, int set, int tag) {
+        Key(NetworkIdentitySet ident, int uid, int set, int tag) {
             this.ident = ident;
             this.uid = uid;
             this.set = set;
             this.tag = tag;
-            hashCode = Objects.hash(ident, uid, set, tag);
+            mHashCode = Objects.hash(ident, uid, set, tag);
         }
 
         @Override
         public int hashCode() {
-            return hashCode;
+            return mHashCode;
         }
 
         @Override

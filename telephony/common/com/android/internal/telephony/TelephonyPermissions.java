@@ -565,6 +565,17 @@ public final class TelephonyPermissions {
     }
 
     /**
+     * Check if the caller (or self, if not processing an IPC) has ACCESS_LAST_KNOWN_CELL_ID
+     * permission
+     *
+     * @return true if caller has ACCESS_LAST_KNOWN_CELL_ID permission else false.
+     */
+    public static boolean checkLastKnownCellIdAccessPermission(Context context) {
+        return context.checkCallingOrSelfPermission("android.permission.ACCESS_LAST_KNOWN_CELL_ID")
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
      * Ensure the caller (or self, if not processing an IPC) has
      * {@link android.Manifest.permission#READ_PHONE_STATE} or carrier privileges.
      *
