@@ -102,12 +102,17 @@ class PrivacyDotViewController @Inject constructor(
 
         configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
             override fun onLayoutDirectionChanged(isRtl: Boolean) {
-                synchronized(this) {
-                    val corner = selectDesignatedCorner(nextViewState.rotation, isRtl)
-                    nextViewState = nextViewState.copy(
-                            layoutRtl = isRtl,
-                            designatedCorner = corner
-                    )
+                uiExecutor?.execute {
+                    // If rtl changed, hide all dotes until the next state resolves
+                    setCornerVisibilities(View.INVISIBLE)
+
+                    synchronized(this) {
+                        val corner = selectDesignatedCorner(nextViewState.rotation, isRtl)
+                        nextViewState = nextViewState.copy(
+                                layoutRtl = isRtl,
+                                designatedCorner = corner
+                        )
+                    }
                 }
             }
         })
