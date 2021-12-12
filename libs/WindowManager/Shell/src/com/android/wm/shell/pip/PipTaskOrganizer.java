@@ -778,8 +778,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     @Override
-    public boolean supportSizeCompatUI() {
-        // PIP doesn't support size compat.
+    public boolean supportCompatUI() {
+        // PIP doesn't support compat.
         return false;
     }
 

@@ -14,12 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="@dimen/size_compat_hint_point_width"
-        android:height="8dp"
-        android:viewportWidth="10"
-        android:viewportHeight="8">
-    <path
-        android:fillColor="@color/size_compat_background"
-        android:pathData="M10,0 l-4.1875,6.6875 a1,1 0 0,1 -1.625,0 l-4.1875,-6.6875z"/>
-</vector>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    <solid android:color="@color/compat_controls_background"/>
+    <corners android:radius="@dimen/compat_hint_corner_radius"/>
+</shape>
