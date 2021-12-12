@@ -31,6 +31,7 @@ import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.compatui.CompatUI;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
@@ -38,7 +39,6 @@ import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
-import com.android.wm.shell.sizecompatui.SizeCompatUI;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelper;
@@ -110,7 +110,7 @@ public interface SysUIComponent {
         Builder setRecentTasks(Optional<RecentTasks> r);
 
         @BindsInstance
-        Builder setSizeCompatUI(Optional<SizeCompatUI> s);
+        Builder setCompatUI(Optional<CompatUI> s);
 
         @BindsInstance
         Builder setDragAndDrop(Optional<DragAndDrop> d);

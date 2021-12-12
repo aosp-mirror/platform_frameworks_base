@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.sizecompatui;
+package com.android.wm.shell.compatui;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 
 /**
- * Interface to engage size compat UI.
+ * Interface to engage compat UI.
  */
 @ExternalThread
-public interface SizeCompatUI {
+public interface CompatUI {
     /**
-     * Called when the keyguard occluded state changes. Removes all size compat UIs if the
+     * Called when the keyguard occluded state changes. Removes all compat UIs if the
      * keyguard is now occluded.
      * @param occluded indicates if the keyguard is now occluded.
      */
