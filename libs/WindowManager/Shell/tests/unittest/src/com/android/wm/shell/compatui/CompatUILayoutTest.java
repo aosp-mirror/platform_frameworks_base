@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.sizecompatui;
+package com.android.wm.shell.compatui;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
 import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
+import android.view.SurfaceControlViewHost;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
 import androidx.test.filters.SmallTest;
 
@@ -41,55 +44,68 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Tests for {@link SizeCompatRestartButton}.
+ * Tests for {@link CompatUILayout}.
  *
  * Build/Install/Run:
- *  atest WMShellUnitTests:SizeCompatRestartButtonTest
+ *  atest WMShellUnitTests:CompatUILayoutTest
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class SizeCompatRestartButtonTest extends ShellTestCase {
+public class CompatUILayoutTest extends ShellTestCase {
 
     private static final int TASK_ID = 1;
 
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
-    @Mock private SizeCompatUIController.SizeCompatUICallback mCallback;
+    @Mock private CompatUIController.CompatUICallback mCallback;
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
-    @Mock private DisplayLayout mDisplayLayout;
+    @Mock private SurfaceControlViewHost mViewHost;
 
-    private SizeCompatUILayout mLayout;
-    private SizeCompatRestartButton mButton;
+    private CompatUIWindowManager mWindowManager;
+    private CompatUILayout mCompatUILayout;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mLayout = new SizeCompatUILayout(mSyncTransactionQueue, mCallback, mContext,
-                new Configuration(), TASK_ID, mTaskListener, mDisplayLayout,
+        mWindowManager = new CompatUIWindowManager(mContext, new Configuration(),
+                mSyncTransactionQueue, mCallback, TASK_ID, mTaskListener, new DisplayLayout(),
                 false /* hasShownHint */);
-        mButton = (SizeCompatRestartButton)
-                LayoutInflater.from(mContext).inflate(R.layout.size_compat_ui, null);
-        mButton.inject(mLayout);
 
-        spyOn(mLayout);
+        mCompatUILayout = (CompatUILayout)
+                LayoutInflater.from(mContext).inflate(R.layout.compat_ui_layout, null);
+        mCompatUILayout.inject(mWindowManager);
+
+        spyOn(mWindowManager);
+        spyOn(mCompatUILayout);
+        doReturn(mViewHost).when(mWindowManager).createSurfaceViewHost();
     }
 
     @Test
-    public void testOnClick() {
-        final ImageButton button = mButton.findViewById(R.id.size_compat_restart_button);
+    public void testOnClickForRestartButton() {
+        final ImageButton button = mCompatUILayout.findViewById(R.id.size_compat_restart_button);
         button.performClick();
 
-        verify(mLayout).onRestartButtonClicked();
+        verify(mWindowManager).onRestartButtonClicked();
+        doReturn(mCompatUILayout).when(mWindowManager).inflateCompatUILayout();
         verify(mCallback).onSizeCompatRestartButtonClicked(TASK_ID);
     }
 
     @Test
-    public void testOnLongClick() {
-        doNothing().when(mLayout).onRestartButtonLongClicked();
+    public void testOnLongClickForRestartButton() {
+        doNothing().when(mWindowManager).onRestartButtonLongClicked();
 
-        final ImageButton button = mButton.findViewById(R.id.size_compat_restart_button);
+        final ImageButton button = mCompatUILayout.findViewById(R.id.size_compat_restart_button);
         button.performLongClick();
 
-        verify(mLayout).onRestartButtonLongClicked();
+        verify(mWindowManager).onRestartButtonLongClicked();
+    }
+
+    @Test
+    public void testOnClickForSizeCompatHint() {
+        mWindowManager.createLayout(true /* show */);
+        final LinearLayout sizeCompatHint = mCompatUILayout.findViewById(R.id.size_compat_hint);
+        sizeCompatHint.performClick();
+
+        verify(mCompatUILayout).setSizeCompatHintVisibility(/* show= */ false);
     }
 }
