@@ -14,10 +14,15 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.wm.shell.sizecompatui.SizeCompatRestartButton
+<com.android.wm.shell.compatui.CompatUILayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="bottom|end">
+
+    <include android:id="@+id/size_compat_hint"
+         layout="@layout/compat_mode_hint"/>
 
     <FrameLayout
         android:layout_width="@dimen/size_compat_button_width"
@@ -36,4 +41,4 @@
 
     </FrameLayout>
 
-</com.android.wm.shell.sizecompatui.SizeCompatRestartButton>
+</com.android.wm.shell.compatui.CompatUILayout>

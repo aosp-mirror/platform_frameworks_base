@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.ShellCommandHandler;
+import com.android.wm.shell.compatui.CompatUI;
 import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
@@ -66,7 +67,6 @@ import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
-import com.android.wm.shell.sizecompatui.SizeCompatUI;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;
@@ -114,7 +114,7 @@ public final class WMShell extends CoreStartable
     private final Optional<OneHanded> mOneHandedOptional;
     private final Optional<HideDisplayCutout> mHideDisplayCutoutOptional;
     private final Optional<ShellCommandHandler> mShellCommandHandler;
-    private final Optional<SizeCompatUI> mSizeCompatUIOptional;
+    private final Optional<CompatUI> mCompatUIOptional;
     private final Optional<DragAndDrop> mDragAndDropOptional;
 
     private final CommandQueue mCommandQueue;
@@ -132,7 +132,7 @@ public final class WMShell extends CoreStartable
     private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
     private KeyguardUpdateMonitorCallback mPipKeyguardCallback;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
-    private KeyguardUpdateMonitorCallback mSizeCompatUIKeyguardCallback;
+    private KeyguardUpdateMonitorCallback mCompatUIKeyguardCallback;
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
 
     @Inject
@@ -143,7 +143,7 @@ public final class WMShell extends CoreStartable
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutoutOptional,
             Optional<ShellCommandHandler> shellCommandHandler,
-            Optional<SizeCompatUI> sizeCompatUIOptional,
+            Optional<CompatUI> sizeCompatUIOptional,
             Optional<DragAndDrop> dragAndDropOptional,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
@@ -169,7 +169,7 @@ public final class WMShell extends CoreStartable
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mProtoTracer = protoTracer;
         mShellCommandHandler = shellCommandHandler;
-        mSizeCompatUIOptional = sizeCompatUIOptional;
+        mCompatUIOptional = sizeCompatUIOptional;
         mDragAndDropOptional = dragAndDropOptional;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
@@ -185,7 +185,7 @@ public final class WMShell extends CoreStartable
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
         mHideDisplayCutoutOptional.ifPresent(this::initHideDisplayCutout);
-        mSizeCompatUIOptional.ifPresent(this::initSizeCompatUi);
+        mCompatUIOptional.ifPresent(this::initCompatUi);
         mDragAndDropOptional.ifPresent(this::initDragAndDrop);
     }
 
@@ -391,14 +391,14 @@ public final class WMShell extends CoreStartable
     }
 
     @VisibleForTesting
-    void initSizeCompatUi(SizeCompatUI sizeCompatUI) {
-        mSizeCompatUIKeyguardCallback = new KeyguardUpdateMonitorCallback() {
+    void initCompatUi(CompatUI sizeCompatUI) {
+        mCompatUIKeyguardCallback = new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardOccludedChanged(boolean occluded) {
                 sizeCompatUI.onKeyguardOccludedChanged(occluded);
             }
         };
-        mKeyguardUpdateMonitor.registerCallback(mSizeCompatUIKeyguardCallback);
+        mKeyguardUpdateMonitor.registerCallback(mCompatUIKeyguardCallback);
     }
 
     void initDragAndDrop(DragAndDrop dragAndDrop) {
