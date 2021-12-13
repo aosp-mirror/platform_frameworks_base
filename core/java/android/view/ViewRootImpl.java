@@ -195,6 +195,7 @@ import android.view.contentcapture.MainContentCaptureSession;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 import android.window.ClientWindowFrames;
+import android.window.SurfaceSyncer;
 import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
@@ -10880,4 +10881,71 @@ public final class ViewRootImpl implements ViewParent,
     IWindowSession getWindowSession() {
         return mWindowSession;
     }
+
+    private void registerCallbacksForSync(
+            final SurfaceSyncer.SyncBufferCallback syncBufferCallback) {
+        if (!isHardwareEnabled()) {
+            // TODO: correctly handle when hardware disabled
+            syncBufferCallback.onBufferReady(null);
+            return;
+        }
+
+        mAttachInfo.mThreadedRenderer.registerRtFrameCallback(new FrameDrawingCallback() {
+            @Override
+            public void onFrameDraw(long frame) {
+            }
+
+            @Override
+            public HardwareRenderer.FrameCommitCallback onFrameDraw(int syncResult, long frame) {
+                if (DEBUG_BLAST) {
+                    Log.d(mTag,
+                            "Received frameDrawingCallback syncResult=" + syncResult + " frameNum="
+                                    + frame + ".");
+                }
+
+                final Transaction t = new Transaction();
+
+                // If the syncResults are SYNC_LOST_SURFACE_REWARD_IF_FOUND or
+                // SYNC_CONTEXT_IS_STOPPED it means nothing will draw. There's no need to set up
+                // any blast sync or commit callback, and the code should directly call
+                // pendingDrawFinished.
+                if ((syncResult
+                        & (SYNC_LOST_SURFACE_REWARD_IF_FOUND | SYNC_CONTEXT_IS_STOPPED)) != 0) {
+                    t.merge(mBlastBufferQueue.gatherPendingTransactions(frame));
+                    syncBufferCallback.onBufferReady(t);
+                    return null;
+                }
+
+                mBlastBufferQueue.setSyncTransaction(t);
+                if (DEBUG_BLAST) {
+                    Log.d(mTag, "Setting up sync and frameCommitCallback");
+                }
+
+                return didProduceBuffer -> {
+                    if (DEBUG_BLAST) {
+                        Log.d(mTag, "Received frameCommittedCallback"
+                                + " lastAttemptedDrawFrameNum=" + frame
+                                + " didProduceBuffer=" + didProduceBuffer);
+                    }
+
+                    // If frame wasn't drawn, clear out the next transaction so it doesn't affect
+                    // the next draw attempt. The next transaction and transaction complete callback
+                    // were only set for the current draw attempt.
+                    if (!didProduceBuffer) {
+                        mBlastBufferQueue.setSyncTransaction(null);
+                        // Gather the transactions that were sent to mergeWithNextTransaction
+                        // since the frame didn't draw on this vsync. It's possible the frame will
+                        // draw later, but it's better to not be sync than to block on a frame that
+                        // may never come.
+                        t.merge(mBlastBufferQueue.gatherPendingTransactions(frame));
+                    }
+
+                    syncBufferCallback.onBufferReady(t);
+                };
+            }
+        });
+    }
+
+    public final SurfaceSyncer.SyncTarget mSyncTarget =
+            syncBufferCallback -> registerCallbacksForSync(syncBufferCallback);
 }
