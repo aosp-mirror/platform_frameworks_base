@@ -77,7 +77,7 @@ public:
 
     void run();
 
-    void setFrameCallback(std::function<void(int64_t)>&& callback) {
+    void setFrameCallback(std::function<std::function<void(bool)>(int32_t, int64_t)>&& callback) {
         mFrameCallback = std::move(callback);
     }
 
@@ -126,7 +126,7 @@ private:
 
     int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
 
-    std::function<void(int64_t)> mFrameCallback;
+    std::function<std::function<void(bool)>(int32_t, int64_t)> mFrameCallback;
     std::function<void(bool)> mFrameCommitCallback;
     std::function<void()> mFrameCompleteCallback;
 
