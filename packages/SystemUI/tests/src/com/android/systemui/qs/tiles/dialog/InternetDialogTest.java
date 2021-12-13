@@ -312,6 +312,7 @@ public class InternetDialogTest extends SysuiTestCase {
         assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
         // Show a blank block to fix the dialog height even if there is no WiFi list
         assertThat(mWifiList.getVisibility()).isEqualTo(View.VISIBLE);
+        verify(mInternetAdapter).setMaxEntriesCount(3);
         assertThat(mSeeAll.getVisibility()).isEqualTo(View.INVISIBLE);
     }
 
@@ -326,6 +327,7 @@ public class InternetDialogTest extends SysuiTestCase {
         assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
         // Show a blank block to fix the dialog height even if there is no WiFi list
         assertThat(mWifiList.getVisibility()).isEqualTo(View.VISIBLE);
+        verify(mInternetAdapter).setMaxEntriesCount(3);
         assertThat(mSeeAll.getVisibility()).isEqualTo(View.INVISIBLE);
     }
 
@@ -339,6 +341,7 @@ public class InternetDialogTest extends SysuiTestCase {
         assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.VISIBLE);
         // Show a blank block to fix the dialog height even if there is no WiFi list
         assertThat(mWifiList.getVisibility()).isEqualTo(View.VISIBLE);
+        verify(mInternetAdapter).setMaxEntriesCount(2);
         assertThat(mSeeAll.getVisibility()).isEqualTo(View.INVISIBLE);
     }
 
@@ -353,6 +356,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
         assertThat(mWifiList.getVisibility()).isEqualTo(View.VISIBLE);
+        verify(mInternetAdapter).setMaxEntriesCount(3);
         assertThat(mSeeAll.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
@@ -366,6 +370,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mWifiList.getVisibility()).isEqualTo(View.VISIBLE);
+        verify(mInternetAdapter).setMaxEntriesCount(2);
         assertThat(mSeeAll.getVisibility()).isEqualTo(View.VISIBLE);
     }
 

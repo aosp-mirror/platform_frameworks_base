@@ -466,9 +466,9 @@ public class InternetDialog extends SystemUIDialog implements
         }
         final int wifiListMaxCount = getWifiListMaxCount();
         if (mAdapter.getItemCount() > wifiListMaxCount) {
-            mAdapter.setMaxEntriesCount(wifiListMaxCount);
             mHasMoreWifiEntries = true;
         }
+        mAdapter.setMaxEntriesCount(wifiListMaxCount);
         final int wifiListMinHeight = mWifiNetworkHeight * wifiListMaxCount;
         if (mWifiRecyclerView.getMinimumHeight() != wifiListMinHeight) {
             mWifiRecyclerView.setMinimumHeight(wifiListMinHeight);

@@ -545,6 +545,37 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onAccessPointsChanged_connectedWifiNoInternetAccess_shouldSetListener() {
+        reset(mWifiEntry1);
+        mAccessPoints.clear();
+        when(mWifiEntry1.getConnectedState()).thenReturn(WifiEntry.CONNECTED_STATE_CONNECTED);
+        when(mWifiEntry1.isDefaultNetwork()).thenReturn(true);
+        when(mWifiEntry1.hasInternetAccess()).thenReturn(false);
+        mAccessPoints.add(mWifiEntry1);
+
+        mInternetDialogController.onAccessPointsChanged(mAccessPoints);
+
+        verify(mWifiEntry1).setListener(mInternetDialogController.mConnectedWifiInternetMonitor);
+    }
+
+    @Test
+    public void onUpdated_connectedWifiHasInternetAccess_shouldScanWifiAccessPoints() {
+        reset(mAccessPointController);
+        when(mWifiEntry1.getConnectedState()).thenReturn(WifiEntry.CONNECTED_STATE_CONNECTED);
+        when(mWifiEntry1.isDefaultNetwork()).thenReturn(true);
+        when(mWifiEntry1.hasInternetAccess()).thenReturn(false);
+        InternetDialogController.ConnectedWifiInternetMonitor mConnectedWifiInternetMonitor =
+                mInternetDialogController.mConnectedWifiInternetMonitor;
+        mConnectedWifiInternetMonitor.registerCallbackIfNeed(mWifiEntry1);
+
+        // When the hasInternetAccess() changed to true, and call back the onUpdated() function.
+        when(mWifiEntry1.hasInternetAccess()).thenReturn(true);
+        mConnectedWifiInternetMonitor.onUpdated();
+
+        verify(mAccessPointController).scanForAccessPoints();
+    }
+
+    @Test
     public void setMergedCarrierWifiEnabledIfNeed_carrierProvisionsEnabled_doNothing() {
         when(mCarrierConfigTracker.getCarrierProvisionsWifiMergedNetworksBool(SUB_ID))
                 .thenReturn(true);

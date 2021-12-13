@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles.dialog;
 
 import static com.android.settingslib.mobile.MobileMappings.getIconKey;
 import static com.android.settingslib.mobile.MobileMappings.mapIconSets;
+import static com.android.wifitrackerlib.WifiEntry.CONNECTED_STATE_CONNECTED;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -176,6 +177,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     protected KeyguardStateController mKeyguardStateController;
     @VisibleForTesting
     protected boolean mHasEthernet = false;
+    @VisibleForTesting
+    protected ConnectedWifiInternetMonitor mConnectedWifiInternetMonitor;
 
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -236,6 +239,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mSignalDrawable = new SignalDrawable(mContext);
         mLocationController = locationController;
         mDialogLaunchAnimator = dialogLaunchAnimator;
+        mConnectedWifiInternetMonitor = new ConnectedWifiInternetMonitor();
     }
 
     void onStart(@NonNull InternetDialogCallback callback, boolean canConfigWifi) {
@@ -276,6 +280,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mAccessPointController.removeAccessPointCallback(this);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
         mConnectivityManager.unregisterNetworkCallback(mConnectivityManagerNetworkCallback);
+        mConnectedWifiInternetMonitor.unregisterCallback();
     }
 
     @VisibleForTesting
@@ -881,8 +886,10 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         if (accessPointsSize > 0) {
             wifiEntries = new ArrayList<>();
             final int count = hasMoreWifiEntries ? MAX_WIFI_ENTRY_COUNT : accessPointsSize;
+            mConnectedWifiInternetMonitor.unregisterCallback();
             for (int i = 0; i < count; i++) {
                 WifiEntry entry = accessPoints.get(i);
+                mConnectedWifiInternetMonitor.registerCallbackIfNeed(entry);
                 if (connectedEntry == null && entry.isDefaultNetwork()
                         && entry.hasInternetAccess()) {
                     connectedEntry = entry;
@@ -967,6 +974,55 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         public void onLost(@NonNull Network network) {
             mHasEthernet = false;
             mCallback.onLost(network);
+        }
+    }
+
+    /**
+     * Helper class for monitoring the Internet access of the connected WifiEntry.
+     */
+    @VisibleForTesting
+    protected class ConnectedWifiInternetMonitor implements WifiEntry.WifiEntryCallback {
+
+        private WifiEntry mWifiEntry;
+
+        public void registerCallbackIfNeed(WifiEntry entry) {
+            if (entry == null || mWifiEntry != null) {
+                return;
+            }
+            // If the Wi-Fi is not connected yet, or it's the connected Wi-Fi with Internet
+            // access. Then we don't need to listen to the callback to update the Wi-Fi entries.
+            if (entry.getConnectedState() != CONNECTED_STATE_CONNECTED
+                    || (entry.isDefaultNetwork() && entry.hasInternetAccess())) {
+                return;
+            }
+            mWifiEntry = entry;
+            entry.setListener(this);
+        }
+
+        public void unregisterCallback() {
+            if (mWifiEntry == null) {
+                return;
+            }
+            mWifiEntry.setListener(null);
+            mWifiEntry = null;
+        }
+
+        @MainThread
+        @Override
+        public void onUpdated() {
+            if (mWifiEntry == null) {
+                return;
+            }
+            WifiEntry entry = mWifiEntry;
+            if (entry.getConnectedState() != CONNECTED_STATE_CONNECTED) {
+                unregisterCallback();
+                return;
+            }
+            if (entry.isDefaultNetwork() && entry.hasInternetAccess()) {
+                unregisterCallback();
+                // Trigger onAccessPointsChanged() to update the Wi-Fi entries.
+                scanWifiAccessPoints();
+            }
         }
     }
 
