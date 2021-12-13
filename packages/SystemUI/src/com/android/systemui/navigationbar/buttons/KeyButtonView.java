@@ -96,6 +96,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         @UiEvent(doc = "The overview button was pressed in the navigation bar.")
         NAVBAR_OVERVIEW_BUTTON_TAP(535),
 
+        @UiEvent(doc = "The ime switcher button was pressed in the navigation bar.")
+        NAVBAR_IME_SWITCHER_BUTTON_TAP(923),
+
         @UiEvent(doc = "The home button was long-pressed in the navigation bar.")
         NAVBAR_HOME_BUTTON_LONGPRESS(536),
 
