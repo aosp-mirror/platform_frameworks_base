@@ -103,10 +103,22 @@ filegroup {
 // Connectivity-T common libraries.
 
 filegroup {
+    name: "framework-connectivity-tiramisu-internal-sources",
+    srcs: [
+        "src/android/net/ConnectivityFrameworkInitializerTiramisu.java",
+    ],
+    path: "src",
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
+filegroup {
     name: "framework-connectivity-tiramisu-sources",
     srcs: [
         ":framework-connectivity-netstats-sources",
         ":framework-connectivity-nsd-sources",
+        ":framework-connectivity-tiramisu-internal-sources",
     ],
     visibility: [
         "//frameworks/base",
