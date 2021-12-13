@@ -277,6 +277,12 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean ENABLE_INPUT_LATENCY_TRACKING = true;
 
     /**
+     * Whether the caption is drawn by the shell.
+     * @hide
+     */
+    public static final boolean CAPTION_ON_SHELL = false;
+
+    /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
      */
@@ -2561,6 +2567,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private boolean updateCaptionInsets() {
+        if (CAPTION_ON_SHELL) {
+            return false;
+        }
         if (!(mView instanceof DecorView)) return false;
         final int captionInsetsHeight = ((DecorView) mView).getCaptionInsetsHeight();
         final Rect captionFrame = new Rect();
