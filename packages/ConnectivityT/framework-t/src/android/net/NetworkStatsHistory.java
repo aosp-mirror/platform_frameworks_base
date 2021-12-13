@@ -28,8 +28,8 @@ import static android.net.NetworkStatsHistory.ParcelUtils.readLongArray;
 import static android.net.NetworkStatsHistory.ParcelUtils.writeLongArray;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
-import static com.android.internal.net.NetworkUtilsInternal.multiplySafeByRational;
 import static com.android.internal.util.ArrayUtils.total;
+import static com.android.net.module.util.NetworkStatsUtils.multiplySafeByRational;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
