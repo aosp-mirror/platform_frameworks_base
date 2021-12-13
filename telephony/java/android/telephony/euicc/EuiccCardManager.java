@@ -66,14 +66,15 @@ public class EuiccCardManager {
 
     /** Reason for canceling a profile download session */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "CANCEL_REASON_" }, value = {
+    @IntDef(prefix = {"CANCEL_REASON_"}, value = {
             CANCEL_REASON_END_USER_REJECTED,
             CANCEL_REASON_POSTPONED,
             CANCEL_REASON_TIMEOUT,
             CANCEL_REASON_PPR_NOT_ALLOWED
     })
     /** @hide */
-    public @interface CancelReason {}
+    public @interface CancelReason {
+    }
 
     /**
      * The end user has rejected the download. The profile will be put into the error state and
@@ -96,13 +97,14 @@ public class EuiccCardManager {
 
     /** Options for resetting eUICC memory */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "RESET_OPTION_" }, value = {
+    @IntDef(flag = true, prefix = {"RESET_OPTION_"}, value = {
             RESET_OPTION_DELETE_OPERATIONAL_PROFILES,
             RESET_OPTION_DELETE_FIELD_LOADED_TEST_PROFILES,
             RESET_OPTION_RESET_DEFAULT_SMDP_ADDRESS
     })
     /** @hide */
-    public @interface ResetOption {}
+    public @interface ResetOption {
+    }
 
     /** Deletes all operational profiles. */
     public static final int RESET_OPTION_DELETE_OPERATIONAL_PROFILES = 1;
@@ -124,6 +126,10 @@ public class EuiccCardManager {
 
     /** Result code indicating the caller is not the active LPA. */
     public static final int RESULT_CALLER_NOT_ALLOWED = -3;
+
+    /** Result code when the requested profile is not found */
+    public static final int RESULT_PROFILE_NOT_FOUND = -4;
+
     /**
      * Callback to receive the result of an eUICC card API.
      *
@@ -134,9 +140,9 @@ public class EuiccCardManager {
          * This method will be called when an eUICC card API call is completed.
          *
          * @param resultCode This can be {@link #RESULT_OK} or other positive values returned by the
-         *     eUICC.
-         * @param result The result object. It can be null if the {@code resultCode} is not
-         *     {@link #RESULT_OK}.
+         *                   eUICC.
+         * @param result     The result object. It can be null if the {@code resultCode} is not
+         *                   {@link #RESULT_OK}.
          */
         void onComplete(int resultCode, T result);
     }
@@ -159,7 +165,7 @@ public class EuiccCardManager {
     /**
      * Requests all the profiles on eUicc.
      *
-     * @param cardId The Id of the eUICC.
+     * @param cardId   The Id of the eUICC.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and all the profiles.
      */
@@ -187,8 +193,8 @@ public class EuiccCardManager {
     /**
      * Requests the profile of the given iccid.
      *
-     * @param cardId The Id of the eUICC.
-     * @param iccid The iccid of the profile.
+     * @param cardId   The Id of the eUICC.
+     * @param iccid    The iccid of the profile.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and profile.
      */
@@ -214,16 +220,47 @@ public class EuiccCardManager {
     }
 
     /**
+     * Requests the enabled profile for a given port on an eUicc.
+     *
+     * @param cardId    The Id of the eUICC.
+     * @param portIndex The portIndex to use. The port may be active or inactive. As long as the
+     *                  ICCID is known, an APDU will be sent through to read the enabled profile.
+     * @param executor  The executor through which the callback should be invoked.
+     * @param callback  The callback to get the result code and the profile.
+     */
+    public void requestEnabledProfileForPort(@NonNull String cardId, int portIndex,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ResultCallback<EuiccProfileInfo> callback) {
+        try {
+            getIEuiccCardController().getEnabledProfile(mContext.getOpPackageName(), cardId,
+                    portIndex,
+                    new IGetProfileCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, EuiccProfileInfo profile) {
+                            final long token = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onComplete(resultCode, profile));
+                            } finally {
+                                Binder.restoreCallingIdentity(token);
+                            }
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling requestEnabledProfileForPort", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Disables the profile of the given iccid.
      *
-     * @param cardId The Id of the eUICC.
-     * @param iccid The iccid of the profile.
-     * @param refresh Whether sending the REFRESH command to modem.
+     * @param cardId   The Id of the eUICC.
+     * @param iccid    The iccid of the profile.
+     * @param refresh  Whether sending the REFRESH command to modem.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
-     *
      * @deprecated instead use {@link #disableProfile(String, String, int, boolean, Executor,
-     *             ResultCallback)}
+     * ResultCallback)}
      */
     @Deprecated
     public void disableProfile(String cardId, String iccid, boolean refresh,
@@ -247,15 +284,16 @@ public class EuiccCardManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
     /**
      * Disables the profile of the given ICCID.
      *
-     * @param cardId The Id of the eUICC.
-     * @param iccid The iccid of the profile.
+     * @param cardId    The Id of the eUICC.
+     * @param iccid     The iccid of the profile.
      * @param portIndex the Port index is the unique index referring to a port.
-     * @param refresh Whether sending the REFRESH command to modem.
-     * @param executor The executor through which the callback should be invoked.
-     * @param callback The callback to get the result code.
+     * @param refresh   Whether sending the REFRESH command to modem.
+     * @param executor  The executor through which the callback should be invoked.
+     * @param callback  The callback to get the result code.
      */
     public void disableProfile(@Nullable String cardId, @Nullable String iccid, int portIndex,
             boolean refresh, @NonNull @CallbackExecutor Executor executor,
@@ -283,14 +321,13 @@ public class EuiccCardManager {
      * Switches from the current profile to another profile. The current profile will be disabled
      * and the specified profile will be enabled.
      *
-     * @param cardId The Id of the eUICC.
-     * @param iccid The iccid of the profile to switch to.
-     * @param refresh Whether sending the REFRESH command to modem.
+     * @param cardId   The Id of the eUICC.
+     * @param iccid    The iccid of the profile to switch to.
+     * @param refresh  Whether sending the REFRESH command to modem.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and the EuiccProfileInfo enabled.
-     *
      * @deprecated instead use {@link #switchToProfile(String, String, int, boolean, Executor,
-     *             ResultCallback)}
+     * ResultCallback)}
      */
     @Deprecated
     public void switchToProfile(String cardId, String iccid, boolean refresh,
@@ -320,12 +357,12 @@ public class EuiccCardManager {
      * and the specified profile will be enabled. Here portIndex specifies on which port the
      * profile is to be enabled.
      *
-     * @param cardId The Id of the eUICC.
-     * @param iccid The iccid of the profile to switch to.
+     * @param cardId    The Id of the eUICC.
+     * @param iccid     The iccid of the profile to switch to.
      * @param portIndex The Port index is the unique index referring to a port.
-     * @param refresh Whether sending the REFRESH command to modem.
-     * @param executor The executor through which the callback should be invoked.
-     * @param callback The callback to get the result code and the EuiccProfileInfo enabled.
+     * @param refresh   Whether sending the REFRESH command to modem.
+     * @param executor  The executor through which the callback should be invoked.
+     * @param callback  The callback to get the result code and the EuiccProfileInfo enabled.
      */
     public void switchToProfile(@Nullable String cardId, @Nullable String iccid, int portIndex,
             boolean refresh, @NonNull @CallbackExecutor Executor executor,
