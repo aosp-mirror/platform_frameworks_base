@@ -866,7 +866,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 ((LayerDrawable) mUserSwitcher.getBackground()).getDrawable(1).setAlpha(255);
             }
 
-            anchor.setClickable(true);
             anchor.setOnClickListener((v) -> {
                 if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
 
@@ -877,8 +876,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                         public void onItemClick(AdapterView parent, View view, int pos, long id) {
                             if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
 
-                            // - 1 to account for the header view
-                            UserRecord user = adapter.getItem(pos - 1);
+                            UserRecord user = adapter.getItem(pos);
                             if (!user.isCurrent) {
                                 adapter.onUserListItemClicked(user);
                             }
@@ -907,9 +905,16 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     == Configuration.ORIENTATION_PORTRAIT) {
                 updateViewGravity(mViewFlipper, Gravity.CENTER_HORIZONTAL);
                 updateViewGravity(mUserSwitcherViewGroup, Gravity.CENTER_HORIZONTAL);
+                mUserSwitcherViewGroup.setTranslationY(0);
             } else {
                 updateViewGravity(mViewFlipper, Gravity.RIGHT | Gravity.BOTTOM);
-                updateViewGravity(mUserSwitcherViewGroup, Gravity.LEFT | Gravity.TOP);
+                updateViewGravity(mUserSwitcherViewGroup, Gravity.LEFT | Gravity.CENTER_VERTICAL);
+
+                // Attempt to reposition a bit higher to make up for this frame being a bit lower
+                // on the device
+                int yTrans = mView.getContext().getResources().getDimensionPixelSize(
+                        R.dimen.status_bar_height);
+                mUserSwitcherViewGroup.setTranslationY(-yTrans);
             }
         }
 
