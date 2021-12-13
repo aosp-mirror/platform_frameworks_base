@@ -278,10 +278,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mView.setContentDescription(mUnlockedLabel);
             mView.setVisibility(View.VISIBLE);
         } else if (mShowAodLockIcon) {
-            if (wasShowingUnlock) {
-                // transition to the unlock icon first
-                mView.updateIcon(ICON_LOCK, false);
-            }
             mView.updateIcon(ICON_LOCK, true);
             mView.setContentDescription(mLockedLabel);
             mView.setVisibility(View.VISIBLE);
