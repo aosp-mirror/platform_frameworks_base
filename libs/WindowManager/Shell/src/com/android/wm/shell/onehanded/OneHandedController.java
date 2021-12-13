@@ -199,8 +199,9 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         OneHandedAccessibilityUtil accessibilityUtil = new OneHandedAccessibilityUtil(context);
         OneHandedTimeoutHandler timeoutHandler = new OneHandedTimeoutHandler(mainExecutor);
         OneHandedState oneHandedState = new OneHandedState();
+        BackgroundWindowManager backgroundWindowManager = new BackgroundWindowManager(context);
         OneHandedTutorialHandler tutorialHandler = new OneHandedTutorialHandler(context,
-                settingsUtil, windowManager);
+                settingsUtil, windowManager, backgroundWindowManager);
         OneHandedAnimationController animationController =
                 new OneHandedAnimationController(context);
         OneHandedTouchHandler touchHandler = new OneHandedTouchHandler(timeoutHandler,
