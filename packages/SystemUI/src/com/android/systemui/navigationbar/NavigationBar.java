@@ -1251,6 +1251,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private void onImeSwitcherClick(View v) {
         mInputMethodManager.showInputMethodPickerFromSystem(
                 true /* showAuxiliarySubtypes */, mDisplayId);
+        mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP);
     };
 
     private boolean onLongPressBackHome(View v) {
