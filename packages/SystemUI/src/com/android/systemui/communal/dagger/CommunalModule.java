@@ -34,6 +34,8 @@ import com.android.systemui.idle.AmbientLightModeMonitor;
 import com.android.systemui.idle.LightSensorEventsDebounceAlgorithm;
 import com.android.systemui.idle.dagger.IdleViewComponent;
 import com.android.systemui.util.condition.Condition;
+import com.android.systemui.util.condition.Monitor;
+import com.android.systemui.util.condition.dagger.MonitorComponent;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -134,5 +136,15 @@ public interface CommunalModule {
         } catch (ClassNotFoundException e) {
             return Optional.empty();
         }
+    }
+
+    /** */
+    @Provides
+    @Named(COMMUNAL_CONDITIONS)
+    static Monitor provideCommunalSourceMonitor(
+            @Named(COMMUNAL_CONDITIONS) Set<Condition> communalConditions,
+            MonitorComponent.Factory factory) {
+        final MonitorComponent component = factory.create(communalConditions, new HashSet<>());
+        return component.getMonitor();
     }
 }

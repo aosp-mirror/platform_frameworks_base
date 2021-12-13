@@ -23,7 +23,6 @@ import com.android.systemui.statusbar.policy.CallbackController;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,7 +37,7 @@ import javax.inject.Inject;
 public class Monitor implements CallbackController<Monitor.Callback> {
     private final String mTag = getClass().getSimpleName();
 
-    private final ArrayList<WeakReference<Callback>> mCallbacks = new ArrayList<>();
+    private final ArrayList<Callback> mCallbacks = new ArrayList<>();
 
     // Set of all conditions that need to be monitored.
     private final Set<Condition> mConditions;
@@ -66,9 +65,9 @@ public class Monitor implements CallbackController<Monitor.Callback> {
         mAllConditionsMet = newAllConditionsMet;
 
         // Updates all callbacks.
-        final Iterator<WeakReference<Callback>> iterator = mCallbacks.iterator();
+        final Iterator<Callback> iterator = mCallbacks.iterator();
         while (iterator.hasNext()) {
-            final Callback callback = iterator.next().get();
+            final Callback callback = iterator.next();
             if (callback == null) {
                 iterator.remove();
             } else {
@@ -78,7 +77,7 @@ public class Monitor implements CallbackController<Monitor.Callback> {
     };
 
     @Inject
-    public Monitor(Set<Condition> conditions) {
+    public Monitor(Set<Condition> conditions, Set<Callback> callbacks) {
         mConditions = conditions;
 
         // If there is no condition, give green pass.
@@ -89,12 +88,20 @@ public class Monitor implements CallbackController<Monitor.Callback> {
 
         // Initializes the conditions map and registers a callback for each condition.
         mConditions.forEach((condition -> mConditionsMap.put(condition, false)));
+
+        if (callbacks == null) {
+            return;
+        }
+
+        for (Callback callback : callbacks) {
+            addCallback(callback);
+        }
     }
 
     @Override
     public void addCallback(@NotNull Callback callback) {
         if (shouldLog()) Log.d(mTag, "adding callback");
-        mCallbacks.add(new WeakReference<>(callback));
+        mCallbacks.add(callback);
 
         // Updates the callback immediately.
         callback.onConditionsChanged(mAllConditionsMet);
@@ -109,9 +116,9 @@ public class Monitor implements CallbackController<Monitor.Callback> {
     @Override
     public void removeCallback(@NotNull Callback callback) {
         if (shouldLog()) Log.d(mTag, "removing callback");
-        final Iterator<WeakReference<Callback>> iterator = mCallbacks.iterator();
+        final Iterator<Callback> iterator = mCallbacks.iterator();
         while (iterator.hasNext()) {
-            final Callback cb = iterator.next().get();
+            final Callback cb = iterator.next();
             if (cb == null || cb == callback) {
                 iterator.remove();
             }
