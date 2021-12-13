@@ -17888,6 +17888,7 @@ package android.hardware {
     field public static final int RGB_565 = 4; // 0x4
     field public static final int RGB_888 = 3; // 0x3
     field public static final int S_UI8 = 53; // 0x35
+    field public static final long USAGE_COMPOSER_OVERLAY = 2048L; // 0x800L
     field public static final long USAGE_CPU_READ_OFTEN = 3L; // 0x3L
     field public static final long USAGE_CPU_READ_RARELY = 2L; // 0x2L
     field public static final long USAGE_CPU_WRITE_OFTEN = 48L; // 0x30L
@@ -49046,6 +49047,7 @@ package android.view {
     method @NonNull public android.view.SurfaceControl build();
     method @NonNull public android.view.SurfaceControl.Builder setBufferSize(@IntRange(from=0) int, @IntRange(from=0) int);
     method @NonNull public android.view.SurfaceControl.Builder setFormat(int);
+    method @NonNull public android.view.SurfaceControl.Builder setHidden(boolean);
     method @NonNull public android.view.SurfaceControl.Builder setName(@NonNull String);
     method @NonNull public android.view.SurfaceControl.Builder setOpaque(boolean);
     method @NonNull public android.view.SurfaceControl.Builder setParent(@Nullable android.view.SurfaceControl);
@@ -49060,11 +49062,18 @@ package android.view {
     method @NonNull public android.view.SurfaceControl.Transaction merge(@NonNull android.view.SurfaceControl.Transaction);
     method @NonNull public android.view.SurfaceControl.Transaction reparent(@NonNull android.view.SurfaceControl, @Nullable android.view.SurfaceControl);
     method @NonNull public android.view.SurfaceControl.Transaction setAlpha(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0, to=1.0) float);
+    method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer);
     method @NonNull public android.view.SurfaceControl.Transaction setBufferSize(@NonNull android.view.SurfaceControl, @IntRange(from=0) int, @IntRange(from=0) int);
+    method @NonNull public android.view.SurfaceControl.Transaction setBufferTransform(@NonNull android.view.SurfaceControl, int);
+    method @NonNull public android.view.SurfaceControl.Transaction setCrop(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Rect);
+    method @NonNull public android.view.SurfaceControl.Transaction setDamageRegion(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Region);
     method @NonNull public android.view.SurfaceControl.Transaction setFrameRate(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0) float, int);
     method @NonNull public android.view.SurfaceControl.Transaction setFrameRate(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0) float, int, int);
     method @NonNull public android.view.SurfaceControl.Transaction setGeometry(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Rect, @Nullable android.graphics.Rect, int);
     method @NonNull public android.view.SurfaceControl.Transaction setLayer(@NonNull android.view.SurfaceControl, @IntRange(from=java.lang.Integer.MIN_VALUE, to=java.lang.Integer.MAX_VALUE) int);
+    method @NonNull public android.view.SurfaceControl.Transaction setOpaque(@NonNull android.view.SurfaceControl, boolean);
+    method @NonNull public android.view.SurfaceControl.Transaction setPosition(@NonNull android.view.SurfaceControl, float, float);
+    method @NonNull public android.view.SurfaceControl.Transaction setScale(@NonNull android.view.SurfaceControl, float, float);
     method @NonNull public android.view.SurfaceControl.Transaction setVisibility(@NonNull android.view.SurfaceControl, boolean);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.SurfaceControl.Transaction> CREATOR;
