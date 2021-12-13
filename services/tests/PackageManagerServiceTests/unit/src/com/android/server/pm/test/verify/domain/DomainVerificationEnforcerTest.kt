@@ -19,6 +19,7 @@ package com.android.server.pm.test.verify.domain
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.SigningDetails
 import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedIntentInfoImpl
 import android.content.pm.verify.domain.DomainVerificationManager
@@ -26,6 +27,7 @@ import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
 import android.os.Process
 import android.util.ArraySet
+import android.util.IndentingPrintWriter
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.pm.parsing.pkg.AndroidPackage
@@ -46,6 +48,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.eq
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verifyNoMoreInteractions
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
@@ -204,6 +207,14 @@ class DomainVerificationEnforcerTest {
                 service(Type.QUERENT, "getInfo") {
                     getDomainVerificationInfo(it.targetPackageName)
                 },
+                service(Type.QUERENT, "printState") {
+                    printState(mock(IndentingPrintWriter::class.java), null, null)
+                },
+                service(Type.QUERENT, "printStateInternal") {
+                    printState(mock(IndentingPrintWriter::class.java), null, null) {
+                        mockPkgState(it, UUID.randomUUID())
+                    }
+                },
                 service(Type.VERIFIER, "setStatus") {
                     setDomainVerificationStatus(
                         it.targetDomainSetId,
@@ -311,6 +322,7 @@ class DomainVerificationEnforcerTest {
                     }
                 )
             }
+            whenever(signingDetails) { SigningDetails.UNKNOWN }
         }
 
         fun mockPkgState(packageName: String, domainSetId: UUID) =
@@ -327,6 +339,7 @@ class DomainVerificationEnforcerTest {
                     }
                 }
                 whenever(isSystem) { false }
+                whenever(signingDetails) { SigningDetails.UNKNOWN }
             }
     }
 
@@ -794,8 +807,12 @@ class DomainVerificationEnforcerTest {
             }
 
             val valueAsInt = value as? Int
-            if (valueAsInt != null && valueAsInt == DomainVerificationManager.STATUS_OK) {
-                throw AssertionError("Expected call to return false, was $value")
+            if (valueAsInt != null) {
+                if (valueAsInt == DomainVerificationManager.STATUS_OK) {
+                    throw AssertionError("Expected call to return false, was $value")
+                }
+            } else {
+                throw AssertionError("Expected call to fail")
             }
         } catch (e: SecurityException) {
         } catch (e: PackageManager.NameNotFoundException) {
