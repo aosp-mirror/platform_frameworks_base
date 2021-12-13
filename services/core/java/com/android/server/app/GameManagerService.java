@@ -385,9 +385,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
 
             public boolean isValid() {
-                return (mGameMode == GameManager.GAME_MODE_PERFORMANCE
-                        || mGameMode == GameManager.GAME_MODE_BATTERY)
-                        && (!mAllowDownscale || getCompatChangeId() != 0);
+                return mGameMode == GameManager.GAME_MODE_PERFORMANCE
+                        || mGameMode == GameManager.GAME_MODE_BATTERY;
             }
 
             /**
@@ -839,7 +838,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
             long scaleId = modeConfig.getCompatChangeId();
             if (scaleId == 0) {
-                Slog.w(TAG, "Invalid downscaling change id " + scaleId + " for "
+                Slog.i(TAG, "Invalid downscaling change id " + scaleId + " for "
                         + packageName);
                 return;
             }
