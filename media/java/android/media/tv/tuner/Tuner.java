@@ -285,7 +285,7 @@ public class Tuner implements AutoCloseable  {
     @Nullable
     private FrontendInfo mFrontendInfo;
     private Integer mFrontendHandle;
-    private Boolean mIsSharedFrontend = false;
+    private Tuner mFeOwnerTuner = null;
     private int mFrontendType = FrontendSettings.TYPE_UNDEFINED;
     private int mUserId;
     private Lnb mLnb;
@@ -442,11 +442,10 @@ public class Tuner implements AutoCloseable  {
         mFrontendLock.lock();
         try {
             mTunerResourceManager.shareFrontend(mClientId, tuner.mClientId);
-            synchronized (mIsSharedFrontend) {
-                mFrontendHandle = tuner.mFrontendHandle;
-                mFrontend = tuner.mFrontend;
-                mIsSharedFrontend = true;
-            }
+            mFeOwnerTuner = tuner;
+            mFeOwnerTuner.registerFrontendCallbackListener(this);
+            mFrontendHandle = mFeOwnerTuner.mFrontendHandle;
+            mFrontend = mFeOwnerTuner.mFrontend;
             nativeShareFrontend(mFrontend.mId);
         } finally {
             releaseTRMSLock();
@@ -513,6 +512,27 @@ public class Tuner implements AutoCloseable  {
     private long mNativeContext; // used by native jMediaTuner
 
     /**
+     * Registers a tuner as a listener for frontend callbacks.
+     */
+    private void registerFrontendCallbackListener(Tuner tuner) {
+        nativeRegisterFeCbListener(tuner.getNativeContext());
+    }
+
+    /**
+     * Unregisters a tuner as a listener for frontend callbacks.
+     */
+    private void unregisterFrontendCallbackListener(Tuner tuner) {
+        nativeUnregisterFeCbListener(tuner.getNativeContext());
+    }
+
+    /**
+     * Returns the pointer to the associated JTuner.
+     */
+    long getNativeContext() {
+        return mNativeContext;
+    }
+
+    /**
      * Releases the Tuner instance.
      */
     @Override
@@ -526,19 +546,21 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
-    private void releaseAll() {
+    private void releaseFrontend() {
         mFrontendLock.lock();
         try {
             if (mFrontendHandle != null) {
-                synchronized (mIsSharedFrontend) {
-                    if (!mIsSharedFrontend) {
-                        int res = nativeCloseFrontend(mFrontendHandle);
-                        if (res != Tuner.RESULT_SUCCESS) {
-                            TunerUtils.throwExceptionForResult(res, "failed to close frontend");
-                        }
-                        mTunerResourceManager.releaseFrontend(mFrontendHandle, mClientId);
+                if (mFeOwnerTuner != null) {
+                    // unregister self from the Frontend callback
+                    mFeOwnerTuner.unregisterFrontendCallbackListener(this);
+                    mFeOwnerTuner = null;
+                } else {
+                    // close resource as owner
+                    int res = nativeCloseFrontend(mFrontendHandle);
+                    if (res != Tuner.RESULT_SUCCESS) {
+                        TunerUtils.throwExceptionForResult(res, "failed to close frontend");
                     }
-                    mIsSharedFrontend = false;
+                    mTunerResourceManager.releaseFrontend(mFrontendHandle, mClientId);
                 }
                 FrameworkStatsLog
                         .write(FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
@@ -549,9 +571,14 @@ public class Tuner implements AutoCloseable  {
         } finally {
             mFrontendLock.unlock();
         }
+    }
+
+    private void releaseAll() {
+        releaseFrontend();
 
         mLnbLock.lock();
         try {
+            // mLnb will be non-null only for owner tuner
             if (mLnb != null) {
                 mLnb.close();
             }
@@ -641,6 +668,8 @@ public class Tuner implements AutoCloseable  {
      */
     private native Frontend nativeOpenFrontendByHandle(int handle);
     private native int nativeShareFrontend(int id);
+    private native void nativeRegisterFeCbListener(long nativeContext);
+    private native void nativeUnregisterFeCbListener(long nativeContext);
     @Result
     private native int nativeTune(int type, FrontendSettings settings);
     private native int nativeStopTune();
@@ -1276,7 +1305,7 @@ public class Tuner implements AutoCloseable  {
     }
 
     private void onFrontendEvent(int eventType) {
-        Log.d(TAG, "Got event from tuning. Event type: " + eventType);
+        Log.d(TAG, "Got event from tuning. Event type: " + eventType + " for " + this);
         synchronized (mOnTuneEventLock) {
             if (mOnTuneEventExecutor != null && mOnTuneEventListener != null) {
                 mOnTuneEventExecutor.execute(() -> {
