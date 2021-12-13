@@ -1165,7 +1165,7 @@
     <string name="person_available" msgid="2318599327472755472">"אונליין"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"בעיה בקריאת מדדי הסוללה"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"יש להקיש כדי להציג מידע נוסף"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"לא הוגדרה התראה"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"לא הוגדרה"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"חיישן טביעות אצבע"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"חיישן טביעות האצבע מושבת"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"אימות"</string>

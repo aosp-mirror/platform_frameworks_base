@@ -123,8 +123,8 @@
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"No se han podido obtener los permisos"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"No se ha podido empezar a grabar la pantalla"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Opciones de transferencia de archivos por USB"</string>
-    <string name="use_mtp_button_title" msgid="5036082897886518086">"Activar como reproductor de medios (MTP)"</string>
-    <string name="use_ptp_button_title" msgid="7676427598943446826">"Activar como cámara (PTP)"</string>
+    <string name="use_mtp_button_title" msgid="5036082897886518086">"Montar como reproductor de medios (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7676427598943446826">"Montar como cámara (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Instalar Android File Transfer para Mac"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Atrás"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Inicio"</string>
@@ -470,7 +470,7 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Silencio\ntotal"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Solo\ncon prioridad"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Solo\nalarmas"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga sin cables • En <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> terminará de cargarse"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga inalámbrica • En <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> terminará de cargarse"</string>
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando • En <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> terminará de cargarse"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga rápida • En <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> terminará de cargarse"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga lenta • En <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> terminará de cargarse"</string>
@@ -662,8 +662,8 @@
     <string name="status_bar" msgid="4357390266055077437">"Barra de estado"</string>
     <string name="overview" msgid="3522318590458536816">"Aplicaciones recientes"</string>
     <string name="demo_mode" msgid="263484519766901593">"Modo de demostración de UI del sistema"</string>
-    <string name="enable_demo_mode" msgid="3180345364745966431">"Habilitar modo de demostración"</string>
-    <string name="show_demo_mode" msgid="3677956462273059726">"Mostrar modo de demostración"</string>
+    <string name="enable_demo_mode" msgid="3180345364745966431">"Habilitar modo demo"</string>
+    <string name="show_demo_mode" msgid="3677956462273059726">"Mostrar modo demo"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>

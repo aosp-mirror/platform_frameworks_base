@@ -90,12 +90,12 @@
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"అలర్ట్‌లు"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"కాల్ ఫార్వార్డింగ్"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"అత్యవసర కాల్‌బ్యాక్ మోడ్"</string>
-    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"మొబైల్ డేటా స్థితి"</string>
+    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"మొబైల్ డేటా స్టేటస్‌"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS మెసేజ్‌లు"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"వాయిస్ మెయిల్ మెసేజ్‌లు"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi కాలింగ్"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"SIM స్టేటస్"</string>
-    <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"అధిక ప్రాధాన్యత గల SIM స్థితి"</string>
+    <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"అధిక ప్రాధాన్యత గల SIM స్టేటస్‌"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"అవతలి వారు FULL TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeHco" msgid="5626377160840915617">"అవతలి వారు HCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"అవతలి వారు VCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
@@ -278,14 +278,14 @@
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"భౌతిక కీబోర్డ్"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"సెక్యూరిటీ"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"కార్‌ మోడ్"</string>
-    <string name="notification_channel_account" msgid="6436294521740148173">"ఖాతా స్థితి"</string>
+    <string name="notification_channel_account" msgid="6436294521740148173">"ఖాతా స్టేటస్‌"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"డెవలపర్ మెసేజ్‌లు"</string>
     <string name="notification_channel_developer_important" msgid="7197281908918789589">"ముఖ్యమైన డెవలపర్ మెసేజ్‌లు"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"అప్‌డేట్‌లు"</string>
-    <string name="notification_channel_network_status" msgid="2127687368725272809">"నెట్‌వర్క్ స్థితి"</string>
+    <string name="notification_channel_network_status" msgid="2127687368725272809">"నెట్‌వర్క్ స్టేటస్‌"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"నెట్‌వర్క్ హెచ్చరికలు"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"నెట్‌వర్క్ అందుబాటులో ఉంది"</string>
-    <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN స్థితి"</string>
+    <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN స్టేటస్‌"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"మీ IT నిర్వాహకుల నుండి వచ్చే హెచ్చరికలు"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"అలర్ట్‌లు"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"రిటైల్ డెమో"</string>
@@ -340,12 +340,12 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"పరికర వేలిముద్ర సెన్సార్‌లో ఉపయోగించిన సంజ్ఞలను క్యాప్చర్ చేయవచ్చు."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"స్క్రీన్‌షాట్‌ను తీయండి"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"డిస్‌ప్లే యొక్క స్క్రీన్‌షాట్ తీసుకోవచ్చు."</string>
-    <string name="permlab_statusBar" msgid="8798267849526214017">"స్థితి బార్‌ను నిలిపివేయడం లేదా సవరించడం"</string>
-    <string name="permdesc_statusBar" msgid="5809162768651019642">"స్థితి బార్‌ను నిలిపివేయడానికి లేదా సిస్టమ్ చిహ్నాలను జోడించడానికి మరియు తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_statusBarService" msgid="2523421018081437981">"స్థితి పట్టీగా ఉండటం"</string>
-    <string name="permdesc_statusBarService" msgid="6652917399085712557">"స్థితి బార్‌ ఉండేలా చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_expandStatusBar" msgid="1184232794782141698">"స్థితి పట్టీని విస్తరింపజేయడం/కుదించడం"</string>
-    <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"స్థితి బార్‌ను విస్తరింపజేయడానికి లేదా కుదించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_statusBar" msgid="8798267849526214017">"స్టేటస్‌ బార్‌ను డిజేబుల్ చేయడం లేదా మార్చడం"</string>
+    <string name="permdesc_statusBar" msgid="5809162768651019642">"స్టేటస్‌ బార్‌ను డిజేబుల్ చేయడానికి లేదా సిస్టమ్ చిహ్నాలను జోడించడానికి మరియు తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_statusBarService" msgid="2523421018081437981">"స్టేటస్‌ పట్టీగా ఉండటం"</string>
+    <string name="permdesc_statusBarService" msgid="6652917399085712557">"స్టేటస్‌ బార్‌ ఉండేలా చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_expandStatusBar" msgid="1184232794782141698">"స్టేటస్‌ పట్టీని విస్తరింపజేయడం/కుదించడం"</string>
+    <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"స్టేటస్‌ బార్‌ను విస్తరింపజేయడానికి లేదా కుదించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"లాక్ చేసి ఉన్న పరికరంలో నోటిఫికేషన్‌లను ఫుల్ స్క్రీన్ యాక్టివిటీలుగా డిస్‌ప్లే చేస్తుంది"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"లాక్ చేసి ఉన్న పరికరంలో నోటిఫికేషన్‌లను ఫుల్ స్క్రీన్ యాక్టివిటీలుగా డిస్‌ప్లే చేయడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"షార్ట్‌కట్‌లను ఇన్‌స్టాల్ చేయడం"</string>
@@ -430,7 +430,7 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ఈ యాప్ మీ టాబ్లెట్‌లో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు మరియు మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ఈ యాప్‌ మీ Android TV పరికరంలో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు, మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"ఈ యాప్ మీ ఫోన్‌లో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు మరియు మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
-    <string name="permlab_writeCalendar" msgid="6422137308329578076">"యజమానికి తెలియకుండానే క్యాలెండర్ ఈవెంట్‌లను జోడించి లేదా సవరించి, అతిథులకు ఇమెయిల్ పంపడం"</string>
+    <string name="permlab_writeCalendar" msgid="6422137308329578076">"యజమానికి తెలియకుండానే క్యాలెండర్ ఈవెంట్‌లను జోడించి లేదా సవరించి, అతిథులకు ఈమెయిల్‌ పంపడం"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"ఈ యాప్ మీ టాబ్లెట్‌లో క్యాలెండర్ ఈవెంట్లను జోడించగలదు, తీసివేయగలదు లేదా మార్చగలదు. ఈ యాప్ క్యాలెండర్ ఓనర్ల నుండి వచ్చినట్లుగా మెసేజ్‌లను పంపగలదు లేదా ఈవెంట్లను వాటి ఓనర్లకు తెలియకుండానే మార్చగలదు."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"ఈ యాప్ మీ Android TV పరికరంలో క్యాలెండర్ ఈవెంట్లను జోడించగలదు, తీసివేయగలదు లేదా మార్చగలదు. ఈ యాప్ క్యాలెండర్ ఓనర్ల నుండి వచ్చినట్లుగా మెసేజ్‌లను పంపగలదు లేదా ఈవెంట్లను వాటి ఓనర్లకు తెలియకుండానే మార్చగలదు."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"ఈ యాప్ మీ ఫోన్‌లో క్యాలెండర్ ఈవెంట్లను జోడించగలదు, తీసివేయగలదు లేదా మార్చగలదు. ఈ యాప్ క్యాలెండర్ ఓనర్ల నుండి వచ్చినట్లుగా మెసేజ్‌లను పంపగలదు, లేదా ఈవెంట్లను వాటి ఓనర్లకు తెలియకుండానే మార్చగలదు."</string>
@@ -467,7 +467,7 @@
     <string name="permdesc_callPhone" msgid="5439809516131609109">"మీ ప్రమేయం లేకుండా ఫోన్ నంబర్‌లకు కాల్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. దీని వలన అనుకోని ఛార్జీలు విధించబడవచ్చు లేదా కాల్స్‌ రావచ్చు. ఇది అత్యవసర నంబర్‌లకు కాల్ చేయడానికి యాప్‌ను అనుమతించదని గుర్తుంచుకోండి. హానికరమైన యాప్‌లు మీ నిర్ధారణ లేకుండానే కాల్స్‌ చేయడం ద్వారా మీకు డబ్బు ఖర్చయ్యేలా చేయవచ్చు."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS కాల్ సేవ యాక్సెస్ అనుమతి"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"మీ ప్రమేయం లేకుండా కాల్స్‌ చేయడం కోసం IMS సేవను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_readPhoneState" msgid="8138526903259297969">"ఫోన్ స్థితి మరియు గుర్తింపుని చదవడం"</string>
+    <string name="permlab_readPhoneState" msgid="8138526903259297969">"ఫోన్ స్టేటస్‌ మరియు గుర్తింపుని చదవడం"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"పరికరం యొక్క ఫోన్ ఫీచర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ సక్రియంగా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"కాల్స్‌ను సిస్టమ్ ద్వారా వెళ్లేలా చేయి"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"కాలింగ్ అనుభవాన్ని మెరుగుపరచడం కోసం తన కాల్స్‌ను సిస్టమ్ ద్వారా వెళ్లేలా చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -546,7 +546,7 @@
     <string name="permlab_nfc" msgid="1904455246837674977">"సమీప క్షేత్ర కమ్యూనికేషన్‌ను నియంత్రించడం"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"సమీప ఫీల్డ్ కమ్యూనికేషన్ (NFC) ట్యాగ్‌లు, కార్డులు మరియు రీడర్‌లతో కమ్యూనికేట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"మీ స్క్రీన్ లాక్‌ను నిలిపివేయడం"</string>
-    <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"కీలాక్ మరియు ఏదైనా అనుబంధించబడిన పాస్‌వర్డ్ భద్రతను నిలిపివేయడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇన్‌కమింగ్ ఫోన్ కాల్ వస్తున్నప్పుడు ఫోన్ కీలాక్‌ను నిలిపివేస్తుంది, ఆపై కాల్ ముగిసిన తర్వాత కీలాక్‌ను మళ్లీ ప్రారంభిస్తుంది."</string>
+    <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"కీలాక్‌ను, అలాగే ఏదైనా అనుబంధించబడిన పాస్‌వర్డ్ సెక్యూరిటీని డిజేబుల్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇన్‌కమింగ్ ఫోన్ కాల్ వస్తున్నప్పుడు ఫోన్ కీలాక్‌ను డిజేబుల్ చేస్తుంది, ఆపై కాల్ ముగిసిన తర్వాత కీలాక్‌ను మళ్లీ ఎనేబుల్ చేస్తుంది."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"స్క్రీన్ లాక్ సంక్లిష్టత రిక్వెస్ట్‌"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ఇది మీ స్క్రీన్ లాక్ పాస్‌వర్డ్‌ సంక్లిష్టత స్థాయి (తీవ్రంగా ఉండాలా, ఓ మోస్తరుగా ఉండాలా, తక్కువ తీవ్రంగా ఉండాలా లేదా అస్సలు తీవ్రత ఉండకూడదా) తెలుసుకోవడానికి యాప్‌ను అనుమతిస్తుంది, అంటే పొడుగు ఎంత ఉండాలి, ఏ రకమైన స్క్రీన్ లాక్ పధ్ధతి అనుసరించాలో సూచిస్తుంది. అలాగే, స్క్రీన్ లాక్‌ పాస్‌వర్డ్‌ సంక్లిష్టతను ఏ స్థాయికి సెట్ చేసుకుంటే బాగుంటుందో కూడా వినియోగదారులకు యాప్ సూచించగలదు, కానీ వినియోగదారులు నిరభ్యంతరంగా ఆ సూచనలను పట్టించుకోకుండా వారి ఇష్టం మేరకు చక్కగా సెట్ చేసుకోవచ్చు. ఇంకో ముఖ్య విషయం, స్క్రీన్ లాక్‌ అన్నది సాదా వచన రూపంలో నిల్వ చేయబడదు, కనుక ఖచ్చితమైన పాస్‌వర్డ్‌ ఏమిటనేది యాప్‌కు తెలియదు."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"బయోమెట్రిక్ హార్డ్‌వేర్‌ని ఉపయోగించు"</string>
@@ -708,7 +708,7 @@
     <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"టచ్ స్క్రీన్ యొక్క క్రమాంకన పరామితులను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"DRM ప్రమాణపత్రాలను యాక్సెస్ చేయడం"</string>
     <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"DRM ప్రమాణపత్రాలను కేటాయించడానికి మరియు ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_handoverStatus" msgid="7620438488137057281">"Android Beam బదిలీ స్థితిని స్వీకరించడం"</string>
+    <string name="permlab_handoverStatus" msgid="7620438488137057281">"Android Beam బదిలీ స్టేటస్‌ని స్వీకరించడం"</string>
     <string name="permdesc_handoverStatus" msgid="3842269451732571070">"ప్రస్తుత Android Beam బదిలీలకు సంబంధించిన సమాచారాన్ని స్వీకరించడానికి ఈ యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"DRM ప్రమాణపత్రాలను తీసివేయడం"</string>
     <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"DRM ప్రమాణపత్రాలను తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండదు."</string>
@@ -927,7 +927,7 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"ఖాతా అన్‌లాక్"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"చాలా ఎక్కువ ఆకృతి ప్రయత్నాలు చేశారు"</string>
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"అన్‌లాక్ చేయడానికి, మీ Google ఖాతాతో సైన్ ఇన్ చేయండి."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"వినియోగదారు పేరు (ఇమెయిల్)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"వినియోగదారు పేరు (ఈమెయిల్‌)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"పాస్‌వర్డ్"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"సైన్ ఇన్ చేయి"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"వినియోగదారు పేరు లేదా పాస్‌వర్డ్ చెల్లదు."</string>
@@ -949,7 +949,7 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"అన్‌లాక్ ప్రాంతం కుదించబడింది."</string>
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> విడ్జెట్."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"వినియోగదారు ఎంపికకర్త"</string>
-    <string name="keyguard_accessibility_status" msgid="6792745049712397237">"స్థితి"</string>
+    <string name="keyguard_accessibility_status" msgid="6792745049712397237">"స్టేటస్‌"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"కెమెరా"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"మీడియా నియంత్రణలు"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"విడ్జెట్ పునఃక్రమం ప్రారంభించబడింది."</string>
@@ -1193,9 +1193,9 @@
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"<xliff:g id="APPLICATION">%1$s</xliff:g>తో లింక్‌లను తెరవండి"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"<xliff:g id="HOST">%1$s</xliff:g> లింక్‌లను <xliff:g id="APPLICATION">%2$s</xliff:g>తో తెరవండి"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"యాక్సెస్ ఇవ్వండి"</string>
-    <string name="whichEditApplication" msgid="6191568491456092812">"దీనితో సవరించు"</string>
-    <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$sతో సవరించు"</string>
-    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"సవరించు"</string>
+    <string name="whichEditApplication" msgid="6191568491456092812">"దీనితో ఎడిట్ చేయండి"</string>
+    <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$sతో ఎడిట్ చేయండి"</string>
+    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"ఎడిట్"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"షేర్ చేయండి"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$sతో షేర్ చేయండి"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"షేర్ చేయి"</string>
@@ -1594,7 +1594,7 @@
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"అధిక మొబైల్ డేటా వినియోగం"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"మీ యాప్‌లు సాధారణం కంటే ఎక్కువ డేటాని ఉపయోగించాయి"</string>
     <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> సాధారణం కంటే ఎక్కువ డేటాని ఉపయోగించింది"</string>
-    <string name="ssl_certificate" msgid="5690020361307261997">"భద్రతా సర్టిఫికెట్"</string>
+    <string name="ssl_certificate" msgid="5690020361307261997">"సెక్యూరిటీ సర్టిఫికెట్"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"ఈ సర్టిఫికెట్ చెల్లుబాటు అవుతుంది."</string>
     <string name="issued_to" msgid="5975877665505297662">"దీనికి జారీ చేయబడింది:"</string>
     <string name="common_name" msgid="1486334593631798443">"సాధారణ పేరు:"</string>
@@ -1666,7 +1666,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"పిన్‌ కోడ్‌లు సరిపోలలేదు"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"చాలా ఎక్కువ ఆకృతి ప్రయత్నాలు చేశారు"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"అన్‌లాక్ చేయడానికి, మీ Google ఖాతాతో సైన్ ఇన్ చేయండి."</string>
-    <string name="kg_login_username_hint" msgid="1765453775467133251">"వినియోగదారు పేరు (ఇమెయిల్)"</string>
+    <string name="kg_login_username_hint" msgid="1765453775467133251">"వినియోగదారు పేరు (ఈమెయిల్‌)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"పాస్‌వర్డ్"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"సైన్ ఇన్ చేయి"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"చెల్లని వినియోగదారు పేరు లేదా పాస్‌వర్డ్."</string>
@@ -1681,9 +1681,9 @@
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> చెల్లని ప్రయత్నాలు చేశారు. టాబ్లెట్ ఇప్పుడు ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"మీరు మీ Android TV పరికరాన్ని అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు విఫల ప్రయత్నాలు చేశారు. మీ Android TV పరికరం ఇప్పుడు ఫ్యాక్టరీ రీసెట్ చేయబడుతుంది."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> చెల్లని ప్రయత్నాలు చేశారు. ఫోన్ ఇప్పుడు ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత మీ Android TV పరికరాన్ని ఇమెయిల్ ఖాతా ద్వారా అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని కోరడం జరుగుతుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈమెయిల్‌ ఖాతాను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత మీ Android TV పరికరాన్ని ఈమెయిల్‌ ఖాతా ద్వారా అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని కోరడం జరుగుతుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈమెయిల్‌ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"తీసివేయి"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
@@ -2049,7 +2049,7 @@
     <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"చెల్లింపు కార్డ్"</string>
     <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"కార్డ్"</string>
     <string name="autofill_save_type_username" msgid="1018816929884640882">"వినియోగదారు పేరు"</string>
-    <string name="autofill_save_type_email_address" msgid="1303262336895591924">"ఇమెయిల్ అడ్రస్‌"</string>
+    <string name="autofill_save_type_email_address" msgid="1303262336895591924">"ఈమెయిల్‌ అడ్రస్‌"</string>
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"ప్రశాంతంగా ఉండండి మరియు దగ్గర్లో తలదాచుకోండి."</string>
     <string name="etws_primary_default_message_tsunami" msgid="5828171463387976279">"వెంటనే తీర ప్రాంతాలు మరియు నదీ పరీవాహక ప్రాంతాలను ఖాళీ చేసి మెట్ట ప్రాంతాలకు తరలి వెళ్లండి."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="4888224011071875068">"ప్రశాంతంగా ఉండండి మరియు దగ్గర్లో తలదాచుకోండి."</string>
