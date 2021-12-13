@@ -206,11 +206,15 @@
     <!-- The height of the size compat restart button including padding. -->
     <dimen name="size_compat_button_height">64dp</dimen>
 
-    <!-- The radius of the corners of the size compat hint bubble. -->
-    <dimen name="size_compat_hint_corner_radius">28dp</dimen>
+    <!-- The radius of the corners of the compat hint bubble. -->
+    <dimen name="compat_hint_corner_radius">28dp</dimen>
 
-    <!-- The width of the size compat hint point. -->
-    <dimen name="size_compat_hint_point_width">10dp</dimen>
+    <!-- The width of the compat hint point. -->
+    <dimen name="compat_hint_point_width">10dp</dimen>
+
+    <!-- The end padding for the compat hint. Computed as (size_compat_button_width / 2
+         - compat_hint_corner_radius - compat_hint_point_width /2). -->
+    <dimen name="compat_hint_padding_end">7dp</dimen>
 
     <!-- The width of the brand image on staring surface. -->
     <dimen name="starting_surface_brand_image_width">200dp</dimen>

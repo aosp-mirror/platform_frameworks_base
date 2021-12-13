@@ -55,6 +55,8 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
+import com.android.wm.shell.compatui.CompatUI;
+import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
 import com.android.wm.shell.draganddrop.DragAndDrop;
@@ -76,8 +78,6 @@ import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
-import com.android.wm.shell.sizecompatui.SizeCompatUI;
-import com.android.wm.shell.sizecompatui.SizeCompatUIController;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingSurface;
@@ -174,25 +174,25 @@ public abstract class WMShellBaseModule {
     @Provides
     static ShellTaskOrganizer provideShellTaskOrganizer(@ShellMainThread ShellExecutor mainExecutor,
             Context context,
-            SizeCompatUIController sizeCompatUI,
+            CompatUIController compatUI,
             Optional<RecentTasksController> recentTasksOptional
     ) {
-        return new ShellTaskOrganizer(mainExecutor, context, sizeCompatUI, recentTasksOptional);
+        return new ShellTaskOrganizer(mainExecutor, context, compatUI, recentTasksOptional);
     }
 
     @WMSingleton
     @Provides
-    static SizeCompatUI provideSizeCompatUI(SizeCompatUIController sizeCompatUIController) {
-        return sizeCompatUIController.asSizeCompatUI();
+    static CompatUI provideCompatUI(CompatUIController compatUIController) {
+        return compatUIController.asCompatUI();
     }
 
     @WMSingleton
     @Provides
-    static SizeCompatUIController provideSizeCompatUIController(Context context,
+    static CompatUIController provideCompatUIController(Context context,
             DisplayController displayController, DisplayInsetsController displayInsetsController,
             DisplayImeController imeController, SyncTransactionQueue syncQueue,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new SizeCompatUIController(context, displayController, displayInsetsController,
+        return new CompatUIController(context, displayController, displayInsetsController,
                 imeController, syncQueue, mainExecutor);
     }
 
