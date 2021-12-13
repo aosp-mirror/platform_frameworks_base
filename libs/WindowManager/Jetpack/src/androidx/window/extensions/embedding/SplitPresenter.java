@@ -112,8 +112,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         secondaryContainer.setLastRequestedBounds(secondaryRectBounds);
 
         // Set adjacent to each other so that the containers below will be invisible.
-        setAdjacentTaskFragments(wct, primaryContainer.getTaskFragmentToken(),
-                secondaryContainer.getTaskFragmentToken(), rule);
+        setAdjacentTaskFragments(wct, primaryContainer, secondaryContainer, rule);
 
         mController.registerSplit(wct, primaryContainer, primaryActivity, secondaryContainer, rule);
 
@@ -149,8 +148,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 secondaryActivity, secondaryRectBounds, primaryContainer);
 
         // Set adjacent to each other so that the containers below will be invisible.
-        setAdjacentTaskFragments(wct, primaryContainer.getTaskFragmentToken(),
-                secondaryContainer.getTaskFragmentToken(), rule);
+        setAdjacentTaskFragments(wct, primaryContainer, secondaryContainer, rule);
 
         mController.registerSplit(wct, primaryContainer, primaryActivity, secondaryContainer, rule);
 
@@ -269,8 +267,22 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final TaskFragmentContainer secondaryContainer = splitContainer.getSecondaryContainer();
         resizeTaskFragmentIfRegistered(wct, secondaryContainer, secondaryRectBounds);
 
-        setAdjacentTaskFragments(wct, primaryContainer.getTaskFragmentToken(),
-                secondaryContainer.getTaskFragmentToken(), rule);
+        setAdjacentTaskFragments(wct, primaryContainer, secondaryContainer, rule);
+    }
+
+    private void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentContainer primaryContainer,
+            @NonNull TaskFragmentContainer secondaryContainer, @NonNull SplitRule splitRule) {
+        final Rect parentBounds = getParentContainerBounds(primaryContainer);
+        // Clear adjacent TaskFragments if the container is shown in fullscreen, or the
+        // secondaryContainer could not be finished.
+        if (!shouldShowSideBySide(parentBounds, splitRule)) {
+            setAdjacentTaskFragments(wct, primaryContainer.getTaskFragmentToken(),
+                    null /* secondary */, null /* splitRule */);
+        } else {
+            setAdjacentTaskFragments(wct, primaryContainer.getTaskFragmentToken(),
+                    secondaryContainer.getTaskFragmentToken(), splitRule);
+        }
     }
 
     /**
