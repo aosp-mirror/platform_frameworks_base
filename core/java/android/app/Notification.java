@@ -5808,6 +5808,7 @@ public class Notification implements Parcelable
                     p, result);
             buildCustomContentIntoTemplate(mContext, standard, customContent,
                     p, result);
+            makeHeaderExpanded(standard);
             return standard;
         }
 
