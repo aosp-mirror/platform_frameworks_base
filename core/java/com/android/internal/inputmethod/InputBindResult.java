@@ -53,7 +53,8 @@ public final class InputBindResult implements Parcelable {
             ResultCode.ERROR_NOT_IME_TARGET_WINDOW,
             ResultCode.ERROR_NO_EDITOR,
             ResultCode.ERROR_DISPLAY_ID_MISMATCH,
-            ResultCode.ERROR_INVALID_DISPLAY_ID
+            ResultCode.ERROR_INVALID_DISPLAY_ID,
+            ResultCode.SUCCESS_WITH_ACCESSIBILITY_SESSION
     })
     public @interface ResultCode {
         /**
@@ -168,6 +169,7 @@ public final class InputBindResult implements Parcelable {
          * display.
          */
         int ERROR_INVALID_DISPLAY_ID = 15;
+        int SUCCESS_WITH_ACCESSIBILITY_SESSION = 16;
     }
 
     @ResultCode
