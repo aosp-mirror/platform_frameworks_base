@@ -19,6 +19,7 @@ package android.media.audiopolicy;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
@@ -230,7 +231,7 @@ public class AudioPolicy {
          * If set to {@code true}, it is mandatory to set an
          * {@link AudioPolicy.AudioPolicyFocusListener} in order to successfully build
          * an {@code AudioPolicy} instance.
-         * @param enforce true if the policy will govern audio focus decisions.
+         * @param isFocusPolicy true if the policy will govern audio focus decisions.
          * @return the same Builder instance.
          */
         @NonNull
@@ -719,6 +720,45 @@ public class AudioPolicy {
                 Log.e(TAG, "Dead object in setFocusPropertiesForPolicy for behavior", e);
                 return AudioManager.ERROR;
             }
+        }
+    }
+
+    /**
+     * Returns the list of entries in the focus stack.
+     * The list is ordered with increasing rank of focus ownership, where the last entry is at the
+     * top of the focus stack and is the current focus owner.
+     * @return the ordered list of focus owners
+     * @see AudioManager#registerAudioPolicy(AudioPolicy)
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @NonNull List<AudioFocusInfo> getFocusStack() {
+        try {
+            return getService().getFocusStack();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Send AUDIOFOCUS_LOSS to a specific stack entry, causing it to be notified of the focus
+     * loss, and for it to exit the focus stack (its focus listener will not be invoked after that).
+     * This operation is only valid for a registered policy (with
+     * {@link AudioManager#registerAudioPolicy(AudioPolicy)}) that is also set as the policy focus
+     * listener (with {@link Builder#setAudioPolicyFocusListener(AudioPolicyFocusListener)}.
+     * @param focusLoser the stack entry that is exiting the stack through a focus loss
+     * @return false if the focusLoser wasn't found in the stack, true otherwise
+     * @throws IllegalStateException if used on an unregistered policy, or a registered policy
+     *     with no {@link AudioPolicyFocusListener} set
+     * @see AudioManager#registerAudioPolicy(AudioPolicy)
+     * @see Builder#setAudioPolicyStatusListener(AudioPolicyStatusListener)
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean sendFocusLoss(@NonNull AudioFocusInfo focusLoser) throws IllegalStateException {
+        Objects.requireNonNull(focusLoser);
+        try {
+            return getService().sendFocusLoss(focusLoser, cb());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

@@ -10142,6 +10142,27 @@ public class AudioService extends IAudioService.Stub
         return AudioManager.SUCCESS;
     }
 
+    /** @see AudioPolicy#getFocusStack() */
+    public List<AudioFocusInfo> getFocusStack() {
+        enforceModifyAudioRoutingPermission();
+        return mMediaFocusControl.getFocusStack();
+    }
+
+    /** @see AudioPolicy#sendFocusLoss */
+    public boolean sendFocusLoss(@NonNull AudioFocusInfo focusLoser,
+            @NonNull IAudioPolicyCallback apcb) {
+        Objects.requireNonNull(focusLoser);
+        Objects.requireNonNull(apcb);
+        enforceModifyAudioRoutingPermission();
+        if (!mAudioPolicies.containsKey(apcb.asBinder())) {
+            throw new IllegalStateException("Only registered AudioPolicy can change focus");
+        }
+        if (!mAudioPolicies.get(apcb.asBinder()).mHasFocusListener) {
+            throw new IllegalStateException("AudioPolicy must have focus listener to change focus");
+        }
+        return mMediaFocusControl.sendFocusLoss(focusLoser);
+    }
+
     /** see AudioManager.hasRegisteredDynamicPolicy */
     public boolean hasRegisteredDynamicPolicy() {
         synchronized (mAudioPolicies) {
