@@ -48,6 +48,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
@@ -562,7 +563,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             return this;
         }
 
-        CustomTile build() {
+        @VisibleForTesting
+        public CustomTile build() {
             if (mUserContext == null) {
                 throw new NullPointerException("UserContext cannot be null");
             }
