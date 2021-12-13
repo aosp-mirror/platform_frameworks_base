@@ -26,6 +26,7 @@ import static androidx.constraintlayout.widget.ConstraintSet.TOP;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
+import static com.android.systemui.animation.Interpolators.EMPHASIZED_DECELERATE;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
@@ -34,6 +35,7 @@ import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
+import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD;
 import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_CLOSED;
 import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_OPEN;
 import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_OPENING;
@@ -1423,11 +1425,12 @@ public class NotificationPanelViewController extends PanelViewController {
                 .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
         boolean splitShadeWithActiveMedia =
                 mShouldUseSplitNotificationShade && mMediaDataManager.hasActiveMedia();
+        boolean shouldAnimateClockChange = mScreenOffAnimationController.shouldAnimateClockChange();
         if ((hasVisibleNotifications && !mShouldUseSplitNotificationShade)
                 || (splitShadeWithActiveMedia && !mDozing)) {
-            mKeyguardStatusViewController.displayClock(SMALL);
+            mKeyguardStatusViewController.displayClock(SMALL, shouldAnimateClockChange);
         } else {
-            mKeyguardStatusViewController.displayClock(LARGE);
+            mKeyguardStatusViewController.displayClock(LARGE, shouldAnimateClockChange);
         }
         updateKeyguardStatusViewAlignment(true /* animate */);
         int userIconHeight = mKeyguardQsUserSwitchController != null
@@ -1463,7 +1466,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 mKeyguardStatusViewController.isClockTopAligned());
         mClockPositionAlgorithm.run(mClockPositionResult);
         boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
-        boolean animateClock = animate || mAnimateNextPositionUpdate;
+        boolean animateClock = (animate || mAnimateNextPositionUpdate) && shouldAnimateClockChange;
         mKeyguardStatusViewController.updatePosition(
                 mClockPositionResult.clockX, mClockPositionResult.clockY,
                 mClockPositionResult.clockScale, animateClock);
@@ -3821,6 +3824,45 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
+    /**
+     * Updates the views to the initial state for the fold to AOD animation
+     */
+    public void prepareFoldToAodAnimation() {
+        // Force show AOD UI even if we are not locked
+        showAodUi();
+
+        // Move the content of the AOD all the way to the left
+        // so we can animate to the initial position
+        final int translationAmount = mView.getResources().getDimensionPixelSize(
+                R.dimen.below_clock_padding_start);
+        mView.setTranslationX(-translationAmount);
+        mView.setAlpha(0);
+    }
+
+    /**
+     * Starts fold to AOD animation
+     */
+    public void startFoldToAodAnimation(Runnable endAction) {
+        mView.animate()
+            .translationX(0)
+            .alpha(1f)
+            .setDuration(ANIMATION_DURATION_FOLD_TO_AOD)
+            .setInterpolator(EMPHASIZED_DECELERATE)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    endAction.run();
+                }
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    endAction.run();
+                }
+            })
+            .start();
+
+        mKeyguardStatusViewController.animateFoldToAod();
+    }
+
     /** */
     public void setImportantForAccessibility(int mode) {
         mView.setImportantForAccessibility(mode);
@@ -3933,6 +3975,10 @@ public class NotificationPanelViewController extends PanelViewController {
 
     public void setAlpha(float alpha) {
         mView.setAlpha(alpha);
+    }
+
+    public void resetTranslation() {
+        mView.setTranslationX(0f);
     }
 
     public ViewPropertyAnimator fadeOut(long startDelayMs, long durationMs, Runnable endAction) {

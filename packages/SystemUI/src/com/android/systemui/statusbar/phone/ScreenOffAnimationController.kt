@@ -19,16 +19,23 @@ import android.view.View
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.LightRevealScrim
+import com.android.systemui.unfold.FoldAodAnimationController
+import com.android.systemui.unfold.SysUIUnfoldComponent
+import java.util.Optional
 import javax.inject.Inject
 
 @SysUISingleton
 class ScreenOffAnimationController @Inject constructor(
+    sysUiUnfoldComponent: Optional<SysUIUnfoldComponent>,
     unlockedScreenOffAnimation: UnlockedScreenOffAnimationController,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
 ) : WakefulnessLifecycle.Observer {
 
-    // TODO(b/202844967) add fold to aod animation here
-    private val animations: List<ScreenOffAnimation> = listOf(unlockedScreenOffAnimation)
+    private val foldToAodAnimation: FoldAodAnimationController? = sysUiUnfoldComponent
+        .orElse(null)?.getFoldAodAnimationController()
+
+    private val animations: List<ScreenOffAnimation> =
+        listOfNotNull(foldToAodAnimation, unlockedScreenOffAnimation)
 
     fun initialize(statusBar: StatusBar, lightRevealScrim: LightRevealScrim) {
         animations.forEach { it.initialize(statusBar, lightRevealScrim) }
@@ -41,6 +48,19 @@ class ScreenOffAnimationController @Inject constructor(
     override fun onStartedGoingToSleep() {
         animations.firstOrNull { it.startAnimation() }
     }
+
+    /**
+     * Called when opaqueness of the light reveal scrim has change
+     * When [isOpaque] is true then scrim is visible and covers the screen
+     */
+    fun onScrimOpaqueChanged(isOpaque: Boolean) =
+        animations.forEach { it.onScrimOpaqueChanged(isOpaque) }
+
+    /**
+     * Called when always on display setting changed
+     */
+    fun onAlwaysOnChanged(alwaysOn: Boolean) =
+        animations.forEach { it.onAlwaysOnChanged(alwaysOn) }
 
     /**
      * If returns true we are taking over the screen off animation from display manager to SysUI.
@@ -103,6 +123,12 @@ class ScreenOffAnimationController @Inject constructor(
         animations.any { it.isAnimationPlaying() }
 
     /**
+     * Return true to ignore requests to hide keyguard
+     */
+    fun isKeyguardHideDelayed(): Boolean =
+        animations.any { it.isKeyguardHideDelayed() }
+
+    /**
      * Return true to make the StatusBar expanded so we can animate [LightRevealScrim]
      */
     fun shouldShowLightRevealScrim(): Boolean =
@@ -145,6 +171,19 @@ class ScreenOffAnimationController @Inject constructor(
      */
     fun shouldAnimateAodIcons(): Boolean =
         animations.all { it.shouldAnimateAodIcons() }
+
+    /**
+     * Return true to animate doze state change, if returns false dozing will be applied without
+     * animation (sends only 0.0f or 1.0f dozing progress)
+     */
+    fun shouldAnimateDozingChange(): Boolean =
+        animations.all { it.shouldAnimateDozingChange() }
+
+    /**
+     * Return true to animate large <-> small clock transition
+     */
+    fun shouldAnimateClockChange(): Boolean =
+        animations.all { it.shouldAnimateClockChange() }
 }
 
 interface ScreenOffAnimation {
@@ -158,11 +197,17 @@ interface ScreenOffAnimation {
     fun shouldPlayAnimation(): Boolean = false
     fun isAnimationPlaying(): Boolean = false
 
+    fun onScrimOpaqueChanged(isOpaque: Boolean) {}
+    fun onAlwaysOnChanged(alwaysOn: Boolean) {}
+
     fun shouldAnimateInKeyguard(): Boolean = false
     fun animateInKeyguard(keyguardView: View, after: Runnable) = after.run()
 
+    fun isKeyguardHideDelayed(): Boolean = false
     fun shouldHideScrimOnWakeUp(): Boolean = false
     fun overrideNotificationsDozeAmount(): Boolean = false
     fun shouldShowAodIconsWhenShade(): Boolean = false
     fun shouldAnimateAodIcons(): Boolean = true
+    fun shouldAnimateDozingChange(): Boolean = true
+    fun shouldAnimateClockChange(): Boolean = true
 }

@@ -1194,6 +1194,8 @@ public class StatusBar extends CoreStartable implements
             Runnable updateOpaqueness = () -> {
                 mNotificationShadeWindowController.setLightRevealScrimOpaque(
                         mLightRevealScrim.isScrimOpaque());
+                mScreenOffAnimationController
+                        .onScrimOpaqueChanged(mLightRevealScrim.isScrimOpaque());
             };
             if (opaque) {
                 // Delay making the view opaque for a frame, because it needs some time to render
@@ -2906,7 +2908,17 @@ public class StatusBar extends CoreStartable implements
                 showKeyguardImpl();
             }
         } else {
-            return hideKeyguardImpl(force);
+            // During folding a foldable device this might be called as a result of
+            // 'onScreenTurnedOff' call for the inner display.
+            // In this case:
+            //  * When phone is locked on folding: it doesn't make sense to hide keyguard as it
+            //    will be immediately locked again
+            //  * When phone is unlocked: we still don't want to execute hiding of the keyguard
+            //    as the animation could prepare 'fake AOD' interface (without actually
+            //    transitioning to keyguard state) and this might reset the view states
+            if (!mScreenOffAnimationController.isKeyguardHideDelayed()) {
+                return hideKeyguardImpl(force);
+            }
         }
         return false;
     }
@@ -3069,6 +3081,7 @@ public class StatusBar extends CoreStartable implements
         mNotificationPanelViewController.onAffordanceLaunchEnded();
         mNotificationPanelViewController.cancelAnimation();
         mNotificationPanelViewController.setAlpha(1f);
+        mNotificationPanelViewController.resetTranslation();
         mNotificationPanelViewController.resetViewGroupFade();
         updateDozingState();
         updateScrimController();

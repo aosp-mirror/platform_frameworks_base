@@ -290,14 +290,21 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * Set which clock should be displayed on the keyguard. The other one will be automatically
      * hidden.
      */
-    public void displayClock(@KeyguardClockSwitch.ClockSize int clockSize) {
+    public void displayClock(@KeyguardClockSwitch.ClockSize int clockSize, boolean animate) {
         if (!mCanShowDoubleLineClock && clockSize == KeyguardClockSwitch.LARGE) {
             return;
         }
 
-        boolean appeared = mView.switchToClock(clockSize);
-        if (appeared && clockSize == LARGE) {
+        boolean appeared = mView.switchToClock(clockSize, animate);
+        if (animate && appeared && clockSize == LARGE) {
             mLargeClockViewController.animateAppear();
+        }
+    }
+
+    public void animateFoldToAod() {
+        if (mClockViewController != null) {
+            mClockViewController.animateFoldAppear();
+            mLargeClockViewController.animateFoldAppear();
         }
     }
 
@@ -443,7 +450,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1) != 0;
 
         if (!mCanShowDoubleLineClock) {
-            mUiExecutor.execute(() -> displayClock(KeyguardClockSwitch.SMALL));
+            mUiExecutor.execute(() -> displayClock(KeyguardClockSwitch.SMALL, /* animate */ true));
         }
     }
 }

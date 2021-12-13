@@ -122,6 +122,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -131,7 +132,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import dagger.Lazy;
 
@@ -439,7 +439,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     private boolean mInGestureNavigationMode;
 
     private boolean mWakeAndUnlocking;
-    private IKeyguardDrawnCallback mDrawnCallback;
+    private Runnable mWakeAndUnlockingDrawnCallback;
     private CharSequence mCustomMessage;
 
     /**
@@ -817,7 +817,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     private DozeParameters mDozeParameters;
 
     private final Optional<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealAnimation;
-    private final AtomicInteger mPendingDrawnTasks = new AtomicInteger();
+    private final Optional<FoldAodAnimationController> mFoldAodAnimationController;
+    private final PendingDrawnTasksContainer mPendingDrawnTasks = new PendingDrawnTasksContainer();
 
     private final KeyguardStateController mKeyguardStateController;
     private final Lazy<KeyguardUnlockAnimationController> mKeyguardUnlockAnimationControllerLazy;
@@ -877,8 +878,12 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                     mInGestureNavigationMode = QuickStepContract.isGesturalMode(mode);
                 }));
         mDozeParameters = dozeParameters;
-        mUnfoldLightRevealAnimation = unfoldComponent.map(
-                c -> c.getUnfoldLightRevealOverlayAnimation());
+
+        mUnfoldLightRevealAnimation = unfoldComponent
+                .map(SysUIUnfoldComponent::getUnfoldLightRevealOverlayAnimation);
+        mFoldAodAnimationController = unfoldComponent
+                .map(SysUIUnfoldComponent::getFoldAodAnimationController);
+
         mStatusBarStateController = statusBarStateController;
         statusBarStateController.addCallback(this);
 
@@ -1069,7 +1074,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             mDeviceInteractive = false;
             mGoingToSleep = false;
             mWakeAndUnlocking = false;
-            mAnimatingScreenOff = mDozeParameters.shouldControlUnlockedScreenOff();
+            mAnimatingScreenOff = mDozeParameters.shouldAnimateDozingChange();
 
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
@@ -2230,14 +2235,14 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             IRemoteAnimationRunner runner = mKeyguardExitAnimationRunner;
             mKeyguardExitAnimationRunner = null;
 
-            if (mWakeAndUnlocking && mDrawnCallback != null) {
+            if (mWakeAndUnlocking && mWakeAndUnlockingDrawnCallback != null) {
 
                 // Hack level over 9000: To speed up wake-and-unlock sequence, force it to report
                 // the next draw from here so we don't have to wait for window manager to signal
                 // this to our ViewRootImpl.
                 mKeyguardViewControllerLazy.get().getViewRootImpl().setReportNextDraw();
-                notifyDrawn(mDrawnCallback);
-                mDrawnCallback = null;
+                mWakeAndUnlockingDrawnCallback.run();
+                mWakeAndUnlockingDrawnCallback = null;
             }
 
             LatencyTracker.getInstance(mContext)
@@ -2573,31 +2578,27 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenTurningOn");
 
-            if (mUnfoldLightRevealAnimation.isPresent()) {
-                mPendingDrawnTasks.set(2); // unfold overlay and keyguard drawn
+            mPendingDrawnTasks.reset();
 
+            if (mUnfoldLightRevealAnimation.isPresent()) {
                 mUnfoldLightRevealAnimation.get()
-                        .onScreenTurningOn(() -> {
-                            if (mPendingDrawnTasks.decrementAndGet() == 0) {
-                                try {
-                                    callback.onDrawn();
-                                } catch (RemoteException e) {
-                                    Slog.w(TAG, "Exception calling onDrawn():", e);
-                                }
-                            }
-                        });
-            } else {
-                mPendingDrawnTasks.set(1); // only keyguard drawn
+                        .onScreenTurningOn(mPendingDrawnTasks.registerTask("unfold-reveal"));
+            }
+
+            if (mFoldAodAnimationController.isPresent()) {
+                mFoldAodAnimationController.get()
+                        .onScreenTurningOn(mPendingDrawnTasks.registerTask("fold-to-aod"));
             }
 
             mKeyguardViewControllerLazy.get().onScreenTurningOn();
             if (callback != null) {
                 if (mWakeAndUnlocking) {
-                    mDrawnCallback = callback;
-                } else {
-                    notifyDrawn(callback);
+                    mWakeAndUnlockingDrawnCallback =
+                            mPendingDrawnTasks.registerTask("wake-and-unlocking");
                 }
             }
+
+            mPendingDrawnTasks.onTasksComplete(() -> notifyDrawn(callback));
         }
         Trace.endSection();
     }
@@ -2606,6 +2607,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         Trace.beginSection("KeyguardViewMediator#handleNotifyScreenTurnedOn");
         synchronized (this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenTurnedOn");
+
+            mPendingDrawnTasks.reset();
             mKeyguardViewControllerLazy.get().onScreenTurnedOn();
         }
         Trace.endSection();
@@ -2614,18 +2617,18 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     private void handleNotifyScreenTurnedOff() {
         synchronized (this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenTurnedOff");
-            mDrawnCallback = null;
+            mWakeAndUnlockingDrawnCallback = null;
         }
     }
 
     private void notifyDrawn(final IKeyguardDrawnCallback callback) {
         Trace.beginSection("KeyguardViewMediator#notifyDrawn");
-        if (mPendingDrawnTasks.decrementAndGet() == 0) {
-            try {
+        try {
+            if (callback != null) {
                 callback.onDrawn();
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Exception calling onDrawn():", e);
             }
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Exception calling onDrawn():", e);
         }
         Trace.endSection();
     }
@@ -2784,9 +2787,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         pw.print("  mHideAnimationRun: "); pw.println(mHideAnimationRun);
         pw.print("  mPendingReset: "); pw.println(mPendingReset);
         pw.print("  mPendingLock: "); pw.println(mPendingLock);
-        pw.print("  mPendingDrawnTasks: "); pw.println(mPendingDrawnTasks.get());
+        pw.print("  mPendingDrawnTasks: "); pw.println(mPendingDrawnTasks.getPendingCount());
         pw.print("  mWakeAndUnlocking: "); pw.println(mWakeAndUnlocking);
-        pw.print("  mDrawnCallback: "); pw.println(mDrawnCallback);
+        pw.print("  mDrawnCallback: "); pw.println(mWakeAndUnlockingDrawnCallback);
     }
 
     /**

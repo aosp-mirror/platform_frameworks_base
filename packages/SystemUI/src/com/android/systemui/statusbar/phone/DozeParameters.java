@@ -243,6 +243,10 @@ public class DozeParameters implements
         return mScreenOffAnimationController.shouldShowLightRevealScrim();
     }
 
+    public boolean shouldAnimateDozingChange() {
+        return mScreenOffAnimationController.shouldAnimateDozingChange();
+    }
+
     /**
      * Whether we're capable of controlling the screen off animation if we want to. This isn't
      * possible if AOD isn't even enabled or if the flag is disabled.
@@ -324,6 +328,7 @@ public class DozeParameters implements
         for (Callback callback : mCallbacks) {
             callback.onAlwaysOnChange();
         }
+        mScreenOffAnimationController.onAlwaysOnChanged(getAlwaysOn());
     }
 
     @Override
