@@ -121,7 +121,7 @@ public class SystemUIFactory {
                     .setDisplayAreaHelper(mWMComponent.getDisplayAreaHelper())
                     .setTaskSurfaceHelper(mWMComponent.getTaskSurfaceHelper())
                     .setRecentTasks(mWMComponent.getRecentTasks())
-                    .setSizeCompatUI(Optional.of(mWMComponent.getSizeCompatUI()))
+                    .setCompatUI(Optional.of(mWMComponent.getCompatUI()))
                     .setDragAndDrop(Optional.of(mWMComponent.getDragAndDrop()));
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
@@ -141,7 +141,7 @@ public class SystemUIFactory {
                     .setStartingSurface(Optional.ofNullable(null))
                     .setTaskSurfaceHelper(Optional.ofNullable(null))
                     .setRecentTasks(Optional.ofNullable(null))
-                    .setSizeCompatUI(Optional.ofNullable(null))
+                    .setCompatUI(Optional.ofNullable(null))
                     .setDragAndDrop(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
