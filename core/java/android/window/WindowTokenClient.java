@@ -15,7 +15,6 @@
  */
 package android.window;
 
-import static android.window.ConfigurationHelper.diffPublicWithSizeBuckets;
 import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
@@ -222,14 +221,7 @@ public class WindowTokenClient extends IWindowToken.Stub {
                         () -> windowContext.dispatchConfigurationChanged(newConfig));
             }
 
-            // Dispatch onConfigurationChanged only if there's a significant public change to
-            // make it compatible with the original behavior.
-            final Configuration[] sizeConfigurations = context.getResources()
-                    .getSizeConfigurations();
-            final SizeConfigurationBuckets buckets = sizeConfigurations != null
-                    ? new SizeConfigurationBuckets(sizeConfigurations) : null;
-            final int diff = diffPublicWithSizeBuckets(mConfiguration, newConfig, buckets);
-
+            final int diff = mConfiguration.diffPublicOnly(newConfig);
             if (shouldReportConfigChange && diff != 0
                     && context instanceof WindowProviderService) {
                 final WindowProviderService windowProviderService = (WindowProviderService) context;
