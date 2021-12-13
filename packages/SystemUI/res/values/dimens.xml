@@ -1303,4 +1303,9 @@
     <dimen name="keyguard_unfold_translation_x">16dp</dimen>
 
     <dimen name="fgs_manager_min_width_minor">100%</dimen>
+
+    <!-- Dream overlay related dimensions -->
+    <dimen name="dream_overlay_status_bar_height">80dp</dimen>
+    <dimen name="dream_overlay_status_bar_margin">40dp</dimen>
+    <dimen name="dream_overlay_status_icon_margin">8dp</dimen>
 </resources>
