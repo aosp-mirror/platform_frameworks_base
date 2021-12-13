@@ -248,7 +248,6 @@ import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.Watched;
 import com.android.server.utils.WatchedArrayMap;
-import com.android.server.utils.WatchedArraySet;
 import com.android.server.utils.WatchedLongSparseArray;
 import com.android.server.utils.WatchedSparseBooleanArray;
 import com.android.server.utils.WatchedSparseIntArray;
@@ -652,15 +651,16 @@ public class PackageManagerService extends IPackageManager.Stub
     final Settings mSettings;
 
     /**
-     * Set of package names that are currently "frozen", which means active
-     * surgery is being done on the code/data for that package. The platform
-     * will refuse to launch frozen packages to avoid race conditions.
+     * Map of package names to frozen counts that are currently "frozen",
+     * which means active surgery is being done on the code/data for that
+     * package. The platform will refuse to launch frozen packages to avoid
+     * race conditions.
      *
      * @see PackageFreezer
      */
     @GuardedBy("mLock")
-    final WatchedArraySet<String> mFrozenPackages = new WatchedArraySet<>();
-    private final SnapshotCache<WatchedArraySet<String>> mFrozenPackagesSnapshot =
+    final WatchedArrayMap<String, Integer> mFrozenPackages = new WatchedArrayMap<>();
+    private final SnapshotCache<WatchedArrayMap<String, Integer>> mFrozenPackagesSnapshot =
             new SnapshotCache.Auto(mFrozenPackages, mFrozenPackages,
                     "PackageManagerService.mFrozenPackages");
 
@@ -1021,7 +1021,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public final AppsFilter appsFilter;
         public final ComponentResolver componentResolver;
         public final PackageManagerService service;
-        public final WatchedArraySet<String> frozenPackages;
+        public final WatchedArrayMap<String, Integer> frozenPackages;
 
         Snapshot(int type) {
             if (type == Snapshot.SNAPPED) {
@@ -7285,7 +7285,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     void checkPackageFrozen(String packageName) {
         synchronized (mLock) {
-            if (!mFrozenPackages.contains(packageName)) {
+            if (!mFrozenPackages.containsKey(packageName)) {
                 Slog.wtf(TAG, "Expected " + packageName + " to be frozen!", new Throwable());
             }
         }
