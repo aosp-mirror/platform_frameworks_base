@@ -545,7 +545,7 @@ public final class BinderProxy implements IBinder {
             }
         }
 
-        final boolean tracingEnabled = Binder.isTracingEnabled();
+        final boolean tracingEnabled = Binder.isStackTrackingEnabled();
         if (tracingEnabled) {
             final Throwable tr = new Throwable();
             Binder.getTransactionTracker().addTrace(tr);

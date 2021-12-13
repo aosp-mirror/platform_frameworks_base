@@ -4103,12 +4103,12 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void handleStartBinderTracking() {
-        Binder.enableTracing();
+        Binder.enableStackTracking();
     }
 
     private void handleStopBinderTrackingAndDump(ParcelFileDescriptor fd) {
         try {
-            Binder.disableTracing();
+            Binder.disableStackTracking();
             Binder.getTransactionTracker().writeTracesToFile(fd);
         } finally {
             IoUtils.closeQuietly(fd);
@@ -6647,7 +6647,7 @@ public final class ActivityThread extends ClientTransactionHandler
         boolean isAppProfileable = isAppDebuggable || data.appInfo.isProfileable();
         Trace.setAppTracingAllowed(isAppProfileable);
         if ((isAppProfileable || Build.IS_DEBUGGABLE) && data.enableBinderTracking) {
-            Binder.enableTracing();
+            Binder.enableStackTracking();
         }
 
         // Initialize heap profiling.
