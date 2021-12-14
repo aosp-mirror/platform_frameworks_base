@@ -1792,7 +1792,7 @@ public final class PowerManagerService extends SystemService
                 mLastInteractivePowerHintTime = eventTime;
             }
 
-            mNotifier.onUserActivity(event, uid);
+            mNotifier.onUserActivity(powerGroup.getGroupId(), event, uid);
             mAttentionDetector.onUserActivity(eventTime, event);
 
             if (mUserInactiveOverrideFromWindowManager) {
@@ -3372,7 +3372,7 @@ public final class PowerManagerService extends SystemService
 
                 final boolean ready = mDisplayManagerInternal.requestPowerState(groupId,
                         displayPowerRequest, mRequestWaitForNegativeProximity);
-                mNotifier.onScreenPolicyUpdate(displayPowerRequest.policy);
+                mNotifier.onScreenPolicyUpdate(groupId, displayPowerRequest.policy);
 
                 if (DEBUG_SPEW) {
                     Slog.d(TAG, "updateDisplayPowerStateLocked: displayReady=" + ready
