@@ -19,6 +19,7 @@ package android.content.pm.parsing.component;
 import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcelable;
+import android.util.ArrayMap;
 
 import java.util.Set;
 
@@ -36,6 +37,15 @@ public interface ParsedProcess extends Parcelable {
 
     @NonNull
     String getName();
+
+    /**
+     * The app class names in this (potentially shared) process, from a package name to
+     * the application class name.
+     * It's a map, because in shared processes, different packages can have different application
+     * classes.
+     */
+    @NonNull
+    ArrayMap<String, String> getAppClassNamesByPackage();
 
     @ApplicationInfo.NativeHeapZeroInitialized
     int getNativeHeapZeroInitialized();

@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -39,6 +40,11 @@ public class ParsedProcessImpl implements ParsedProcess {
 
     @NonNull
     private String name;
+
+    /** @see ParsedProcess#getAppClassNamesByPackage() */
+    @NonNull
+    private ArrayMap<String, String> appClassNamesByPackage = ArrayMap.EMPTY;
+
     @NonNull
     @DataClass.ParcelWith(Parcelling.BuiltIn.ForInternedStringSet.class)
     private Set<String> deniedPermissions = emptySet();
@@ -55,6 +61,8 @@ public class ParsedProcessImpl implements ParsedProcess {
 
     public ParsedProcessImpl(@NonNull ParsedProcess other) {
         name = other.getName();
+        appClassNamesByPackage = (other.getAppClassNamesByPackage().size() == 0)
+                ? ArrayMap.EMPTY : new ArrayMap<>(other.getAppClassNamesByPackage());
         deniedPermissions = new ArraySet<>(other.getDeniedPermissions());
         gwpAsanMode = other.getGwpAsanMode();
         memtagMode = other.getMemtagMode();
@@ -66,6 +74,21 @@ public class ParsedProcessImpl implements ParsedProcess {
         gwpAsanMode = other.getGwpAsanMode();
         memtagMode = other.getMemtagMode();
         nativeHeapZeroInitialized = other.getNativeHeapZeroInitialized();
+
+        final ArrayMap<String, String> oacn = other.getAppClassNamesByPackage();
+        for (int i = 0; i < oacn.size(); i++) {
+            appClassNamesByPackage.put(oacn.keyAt(i), oacn.valueAt(i));
+        }
+    }
+
+    /**
+     * Sets a custom application name used in this process for a given package.
+     */
+    public void putAppClassNameForPackage(String packageName, String className) {
+        if (appClassNamesByPackage.size() == 0) {
+            appClassNamesByPackage = new ArrayMap<>(4);
+        }
+        appClassNamesByPackage.put(packageName, className);
     }
 
 
@@ -83,9 +106,14 @@ public class ParsedProcessImpl implements ParsedProcess {
     //@formatter:off
 
 
+    /**
+     * Creates a new ParsedProcessImpl.
+     *
+     */
     @DataClass.Generated.Member
     public ParsedProcessImpl(
             @NonNull String name,
+            @NonNull ArrayMap<String,String> appClassNamesByPackage,
             @NonNull Set<String> deniedPermissions,
             @ApplicationInfo.GwpAsanMode int gwpAsanMode,
             @ApplicationInfo.MemtagMode int memtagMode,
@@ -93,6 +121,9 @@ public class ParsedProcessImpl implements ParsedProcess {
         this.name = name;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, name);
+        this.appClassNamesByPackage = appClassNamesByPackage;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, appClassNamesByPackage);
         this.deniedPermissions = deniedPermissions;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, deniedPermissions);
@@ -112,6 +143,14 @@ public class ParsedProcessImpl implements ParsedProcess {
     @DataClass.Generated.Member
     public @NonNull String getName() {
         return name;
+    }
+
+    /**
+     * @see ParsedProcess#getAppClassNamesByPackage()
+     */
+    @DataClass.Generated.Member
+    public @NonNull ArrayMap<String,String> getAppClassNamesByPackage() {
+        return appClassNamesByPackage;
     }
 
     @DataClass.Generated.Member
@@ -139,6 +178,17 @@ public class ParsedProcessImpl implements ParsedProcess {
         name = value;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, name);
+        return this;
+    }
+
+    /**
+     * @see ParsedProcess#getAppClassNamesByPackage()
+     */
+    @DataClass.Generated.Member
+    public @NonNull ParsedProcessImpl setAppClassNamesByPackage(@NonNull ArrayMap<String,String> value) {
+        appClassNamesByPackage = value;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, appClassNamesByPackage);
         return this;
     }
 
@@ -192,6 +242,7 @@ public class ParsedProcessImpl implements ParsedProcess {
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
         dest.writeString(name);
+        dest.writeMap(appClassNamesByPackage);
         sParcellingForDeniedPermissions.parcel(deniedPermissions, dest, flags);
         dest.writeInt(gwpAsanMode);
         dest.writeInt(memtagMode);
@@ -210,6 +261,8 @@ public class ParsedProcessImpl implements ParsedProcess {
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
         String _name = in.readString();
+        ArrayMap<String,String> _appClassNamesByPackage = new ArrayMap();
+        in.readMap(_appClassNamesByPackage, String.class.getClassLoader());
         Set<String> _deniedPermissions = sParcellingForDeniedPermissions.unparcel(in);
         int _gwpAsanMode = in.readInt();
         int _memtagMode = in.readInt();
@@ -218,6 +271,9 @@ public class ParsedProcessImpl implements ParsedProcess {
         this.name = _name;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, name);
+        this.appClassNamesByPackage = _appClassNamesByPackage;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, appClassNamesByPackage);
         this.deniedPermissions = _deniedPermissions;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, deniedPermissions);
@@ -249,10 +305,10 @@ public class ParsedProcessImpl implements ParsedProcess {
     };
 
     @DataClass.Generated(
-            time = 1627605368434L,
+            time = 1639076603310L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedProcessImpl.java",
-            inputSignatures = "private @android.annotation.NonNull java.lang.String name\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet.class) java.util.Set<java.lang.String> deniedPermissions\nprivate @android.content.pm.ApplicationInfo.GwpAsanMode int gwpAsanMode\nprivate @android.content.pm.ApplicationInfo.MemtagMode int memtagMode\nprivate @android.content.pm.ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized\npublic  void addStateFrom(android.content.pm.parsing.component.ParsedProcess)\nclass ParsedProcessImpl extends java.lang.Object implements [android.content.pm.parsing.component.ParsedProcess]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genParcelable=true, genAidl=false, genBuilder=false)")
+            inputSignatures = "private @android.annotation.NonNull java.lang.String name\nprivate @android.annotation.NonNull android.util.ArrayMap<java.lang.String,java.lang.String> appClassNamesByPackage\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet.class) java.util.Set<java.lang.String> deniedPermissions\nprivate @android.content.pm.ApplicationInfo.GwpAsanMode int gwpAsanMode\nprivate @android.content.pm.ApplicationInfo.MemtagMode int memtagMode\nprivate @android.content.pm.ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized\npublic  void addStateFrom(android.content.pm.parsing.component.ParsedProcess)\npublic  void putAppClassNameForPackage(java.lang.String,java.lang.String)\nclass ParsedProcessImpl extends java.lang.Object implements [android.content.pm.parsing.component.ParsedProcess]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genParcelable=true, genAidl=false, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 
