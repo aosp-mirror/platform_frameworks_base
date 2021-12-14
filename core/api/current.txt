@@ -27276,6 +27276,23 @@ package android.net.sip {
 
 package android.net.vcn {
 
+  public final class VcnCellUnderlyingNetworkTemplate extends android.net.vcn.VcnUnderlyingNetworkTemplate {
+    method @NonNull public java.util.Set<java.lang.String> getOperatorPlmnIds();
+    method public int getOpportunistic();
+    method public int getRoaming();
+    method @NonNull public java.util.Set<java.lang.Integer> getSimSpecificCarrierIds();
+  }
+
+  public static final class VcnCellUnderlyingNetworkTemplate.Builder {
+    ctor public VcnCellUnderlyingNetworkTemplate.Builder();
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate build();
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMetered(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setOperatorPlmnIds(@NonNull java.util.Set<java.lang.String>);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setOpportunistic(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setRoaming(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setSimSpecificCarrierIds(@NonNull java.util.Set<java.lang.Integer>);
+  }
+
   public final class VcnConfig implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.Set<android.net.vcn.VcnGatewayConnectionConfig> getGatewayConnectionConfigs();
@@ -27294,6 +27311,7 @@ package android.net.vcn {
     method @NonNull public String getGatewayConnectionName();
     method @IntRange(from=0x500) public int getMaxMtu();
     method @NonNull public long[] getRetryIntervalsMillis();
+    method @NonNull public java.util.List<android.net.vcn.VcnUnderlyingNetworkTemplate> getVcnUnderlyingNetworkPriorities();
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
@@ -27303,6 +27321,7 @@ package android.net.vcn {
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=0x500) int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMillis(@NonNull long[]);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setVcnUnderlyingNetworkPriorities(@NonNull java.util.List<android.net.vcn.VcnUnderlyingNetworkTemplate>);
   }
 
   public class VcnManager {
@@ -27324,6 +27343,24 @@ package android.net.vcn {
     ctor public VcnManager.VcnStatusCallback();
     method public abstract void onGatewayConnectionError(@NonNull String, int, @Nullable Throwable);
     method public abstract void onStatusChanged(int);
+  }
+
+  public abstract class VcnUnderlyingNetworkTemplate {
+    method public int getMetered();
+    field public static final int MATCH_ANY = 0; // 0x0
+    field public static final int MATCH_FORBIDDEN = 2; // 0x2
+    field public static final int MATCH_REQUIRED = 1; // 0x1
+  }
+
+  public final class VcnWifiUnderlyingNetworkTemplate extends android.net.vcn.VcnUnderlyingNetworkTemplate {
+    method @NonNull public java.util.Set<java.lang.String> getSsids();
+  }
+
+  public static final class VcnWifiUnderlyingNetworkTemplate.Builder {
+    ctor public VcnWifiUnderlyingNetworkTemplate.Builder();
+    method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate build();
+    method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setMetered(int);
+    method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setSsids(@NonNull java.util.Set<java.lang.String>);
   }
 
 }

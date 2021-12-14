@@ -40,8 +40,6 @@ import java.util.Set;
  * networks.
  *
  * <p>See {@link VcnUnderlyingNetworkTemplate}
- *
- * @hide
  */
 public final class VcnWifiUnderlyingNetworkTemplate extends VcnUnderlyingNetworkTemplate {
     private static final String SSIDS_KEY = "mSsids";
@@ -168,8 +166,13 @@ public final class VcnWifiUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
         /**
          * Set the matching criteria for metered networks.
          *
+         * <p>A template where setMetered(MATCH_REQUIRED) will only match metered networks (one
+         * without NET_CAPABILITY_NOT_METERED). A template where setMetered(MATCH_FORBIDDEN) will
+         * only match a network that is not metered (one with NET_CAPABILITY_NOT_METERED).
+         *
          * @param matchCriteria the matching criteria for metered networks. Defaults to {@link
-         *     #MATCH_ANY}. See {@link NetworkCapabilities#NET_CAPABILITY_NOT_METERED}
+         *     #MATCH_ANY}.
+         * @see NetworkCapabilities#NET_CAPABILITY_NOT_METERED
          */
         // The matching getter is defined in the super class. Please see {@link
         // VcnUnderlyingNetworkTemplate#getMetered()}
@@ -186,7 +189,7 @@ public final class VcnWifiUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
          * Set the SSIDs with which a network can match this priority rule.
          *
          * @param ssids the matching SSIDs. Network with one of the matching SSIDs can match this
-         *     priority rule. Defaults to an empty set, allowing ANY SSID.
+         *     priority rule. If the set is empty, any SSID will match. The default is an empty set.
          */
         @NonNull
         public Builder setSsids(@NonNull Set<String> ssids) {

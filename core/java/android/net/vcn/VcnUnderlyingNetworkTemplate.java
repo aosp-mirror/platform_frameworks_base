@@ -22,7 +22,6 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.net.NetworkCapabilities;
 import android.os.PersistableBundle;
 import android.util.SparseArray;
 
@@ -41,9 +40,7 @@ import java.util.Objects;
  * <p>Apps provisioning a VCN can configure the underlying network priority for each Gateway
  * Connection by setting a list (in priority order, most to least preferred) of the appropriate
  * subclasses in the VcnGatewayConnectionConfig. See {@link
- * VcnGatewayConnectionConfig.Builder#setVcnUnderlyingNetworkTemplates}
- *
- * @hide
+ * VcnGatewayConnectionConfig.Builder#setVcnUnderlyingNetworkPriorities}
  */
 public abstract class VcnUnderlyingNetworkTemplate {
     /** @hide */
@@ -69,22 +66,23 @@ public abstract class VcnUnderlyingNetworkTemplate {
     public @interface NetworkQuality {}
 
     /**
-     * Used to configure the matching criteria of a network capability (See {@link
-     * NetworkCapabilities}). Denotes that networks with or without the capability are both
-     * acceptable to match the template.
+     * Used to configure the matching criteria of a network characteristic. This may include network
+     * capabilities, or cellular subscription information. Denotes that networks with or without the
+     * characteristic are both acceptable to match this template.
      */
     public static final int MATCH_ANY = 0;
 
     /**
-     * Used to configure the matching criteria of a network capability (See {@link
-     * NetworkCapabilities}). Denotes that only network with the capability can match the template.
+     * Used to configure the matching criteria of a network characteristic. This may include network
+     * capabilities, or cellular subscription information. Denotes that a network MUST have the
+     * capability in order to match this template.
      */
     public static final int MATCH_REQUIRED = 1;
 
     /**
-     * Used to configure the matching criteria of a network capability (See {@link
-     * NetworkCapabilities}). Denotes that only network without the capability can match the
-     * template.
+     * Used to configure the matching criteria of a network characteristic. This may include network
+     * capabilities, or cellular subscription information. Denotes that a network MUST NOT have the
+     * capability in order to match this template.
      */
     public static final int MATCH_FORBIDDEN = 2;
 

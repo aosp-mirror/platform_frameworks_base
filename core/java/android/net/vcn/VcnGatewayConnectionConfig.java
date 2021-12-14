@@ -375,11 +375,10 @@ public final class VcnGatewayConnectionConfig {
     /**
      * Retrieve the VcnUnderlyingNetworkTemplate list, or a default list if it is not configured.
      *
-     * @see Builder#setVcnUnderlyingNetworkTemplates(List)
-     * @hide
+     * @see Builder#setVcnUnderlyingNetworkPriorities(List)
      */
     @NonNull
-    public List<VcnUnderlyingNetworkTemplate> getVcnUnderlyingNetworkTemplates() {
+    public List<VcnUnderlyingNetworkTemplate> getVcnUnderlyingNetworkPriorities() {
         return new ArrayList<>(mUnderlyingNetworkTemplates);
     }
 
@@ -543,29 +542,28 @@ public final class VcnGatewayConnectionConfig {
         }
 
         /**
-         * Set the list of templates to match underlying networks against, in priority order.
+         * Set the list of templates to match underlying networks against, in high-to-low priority
+         * order.
          *
-         * <p>To select the VCN underlying network, the VCN gateway will go through all the network
-         * candidates and return a network matching the highest priority rule.
+         * <p>To select the VCN underlying network, the VCN connection will go through all the
+         * network candidates and return a network matching the highest priority rule.
          *
          * <p>If multiple networks match the same rule, the VCN will prefer an already-selected
          * network as opposed to a new/unselected network. However, if both are new/unselected
          * networks, a network will be chosen arbitrarily amongst the networks matching the highest
          * priority rule.
          *
-         * <p>A rule that matches all carrier-owned networks is implicitly added at the end of the
-         * priority list, ensuring that if all networks fail to match the rules provided, an
-         * underlying network will still be selected (at random if necessary).
+         * <p>If all networks fail to match the rules provided, an underlying network will still be
+         * selected (at random if necessary).
          *
          * @param underlyingNetworkTemplates a list of unique VcnUnderlyingNetworkTemplates that are
          *     ordered from most to least preferred, or an empty list to use the default
          *     prioritization. The default network prioritization order is Opportunistic cellular,
          *     Carrier WiFi and then Macro cellular.
          * @return this {@link Builder} instance, for chaining
-         * @hide
          */
         @NonNull
-        public Builder setVcnUnderlyingNetworkTemplates(
+        public Builder setVcnUnderlyingNetworkPriorities(
                 @NonNull List<VcnUnderlyingNetworkTemplate> underlyingNetworkTemplates) {
             validateNetworkTemplateList(underlyingNetworkTemplates);
 

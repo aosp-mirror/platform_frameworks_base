@@ -49,8 +49,6 @@ import java.util.Set;
  * networks.
  *
  * <p>See {@link VcnUnderlyingNetworkTemplate}
- *
- * @hide
  */
 public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetworkTemplate {
     private static final String ALLOWED_NETWORK_PLMN_IDS_KEY = "mAllowedNetworkPlmnIds";
@@ -279,8 +277,13 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
         /**
          * Set the matching criteria for metered networks.
          *
+         * <p>A template where setMetered(MATCH_REQUIRED) will only match metered networks (one
+         * without NET_CAPABILITY_NOT_METERED). A template where setMetered(MATCH_FORBIDDEN) will
+         * only match a network that is not metered (one with NET_CAPABILITY_NOT_METERED).
+         *
          * @param matchCriteria the matching criteria for metered networks. Defaults to {@link
-         *     #MATCH_ANY}. See {@link NetworkCapabilities#NET_CAPABILITY_NOT_METERED}
+         *     #MATCH_ANY}.
+         * @see NetworkCapabilities#NET_CAPABILITY_NOT_METERED
          */
         // The matching getter is defined in the super class. Please see {@link
         // VcnUnderlyingNetworkTemplate#getMetered()}
@@ -300,10 +303,11 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
          * priority from a partner's networks.
          *
          * @param operatorPlmnIds the matching operator PLMN IDs in String. Network with one of the
-         *     matching PLMN IDs can match this template. Defaults to an empty set, allowing ANY
-         *     PLMN ID. A valid PLMN is a concatenation of MNC and MCC, and thus consists of 5 or 6
-         *     decimal digits. See {@link SubscriptionInfo#getMccString()} and {@link
-         *     SubscriptionInfo#getMncString()}.
+         *     matching PLMN IDs can match this template. If the set is empty, any PLMN ID will
+         *     match. The default is an empty set. A valid PLMN is a concatenation of MNC and MCC,
+         *     and thus consists of 5 or 6 decimal digits.
+         * @see SubscriptionInfo#getMccString()
+         * @see SubscriptionInfo#getMncString()
          */
         @NonNull
         public Builder setOperatorPlmnIds(@NonNull Set<String> operatorPlmnIds) {
@@ -318,8 +322,9 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
          * Set sim specific carrier IDs with which a network can match this template.
          *
          * @param simSpecificCarrierIds the matching sim specific carrier IDs. Network with one of
-         *     the sim specific carrier IDs can match this template. Defaults to an empty set,
-         *     allowing ANY carrier ID. See {@link TelephonyManager#getSimSpecificCarrierId()}.
+         *     the sim specific carrier IDs can match this template. If the set is empty, any
+         *     carrier ID will match. The default is an empty set.
+         * @see TelephonyManager#getSimSpecificCarrierId()
          */
         @NonNull
         public Builder setSimSpecificCarrierIds(@NonNull Set<Integer> simSpecificCarrierIds) {
@@ -333,8 +338,13 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
         /**
          * Set the matching criteria for roaming networks.
          *
+         * <p>A template where setRoaming(MATCH_REQUIRED) will only match roaming networks (one
+         * without NET_CAPABILITY_NOT_ROAMING). A template where setRoaming(MATCH_FORBIDDEN) will
+         * only match a network that is not roaming (one with NET_CAPABILITY_NOT_ROAMING).
+         *
          * @param matchCriteria the matching criteria for roaming networks. Defaults to {@link
-         *     #MATCH_ANY}. See {@link NetworkCapabilities#NET_CAPABILITY_NOT_ROAMING}.
+         *     #MATCH_ANY}.
+         * @see NetworkCapabilities#NET_CAPABILITY_NOT_ROAMING
          */
         @NonNull
         public Builder setRoaming(@MatchCriteria int matchCriteria) {
@@ -348,8 +358,8 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
          * Set the matching criteria for opportunistic cellular subscriptions.
          *
          * @param matchCriteria the matching criteria for opportunistic cellular subscriptions.
-         *     Defaults to {@link #MATCH_ANY}. See {@link
-         *     SubscriptionManager#setOpportunistic(boolean, int)}
+         *     Defaults to {@link #MATCH_ANY}.
+         * @see SubscriptionManager#setOpportunistic(boolean, int)
          */
         @NonNull
         public Builder setOpportunistic(@MatchCriteria int matchCriteria) {

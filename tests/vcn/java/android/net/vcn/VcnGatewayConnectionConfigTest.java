@@ -96,7 +96,7 @@ public class VcnGatewayConnectionConfigTest {
     // Public for use in VcnGatewayConnectionTest
     public static VcnGatewayConnectionConfig buildTestConfig() {
         final VcnGatewayConnectionConfig.Builder builder =
-                newBuilder().setVcnUnderlyingNetworkTemplates(UNDERLYING_NETWORK_TEMPLATES);
+                newBuilder().setVcnUnderlyingNetworkPriorities(UNDERLYING_NETWORK_TEMPLATES);
 
         return buildTestConfigWithExposedCaps(builder, EXPOSED_CAPS);
     }
@@ -177,7 +177,7 @@ public class VcnGatewayConnectionConfigTest {
     @Test
     public void testBuilderRequiresNonNullNetworkTemplates() {
         try {
-            newBuilder().setVcnUnderlyingNetworkTemplates(null);
+            newBuilder().setVcnUnderlyingNetworkPriorities(null);
             fail("Expected exception due to invalid underlyingNetworkTemplates");
         } catch (NullPointerException e) {
         }
@@ -220,7 +220,7 @@ public class VcnGatewayConnectionConfigTest {
         Arrays.sort(exposedCaps);
         assertArrayEquals(EXPOSED_CAPS, exposedCaps);
 
-        assertEquals(UNDERLYING_NETWORK_TEMPLATES, config.getVcnUnderlyingNetworkTemplates());
+        assertEquals(UNDERLYING_NETWORK_TEMPLATES, config.getVcnUnderlyingNetworkPriorities());
         assertEquals(TUNNEL_CONNECTION_PARAMS, config.getTunnelConnectionParams());
 
         assertArrayEquals(RETRY_INTERVALS_MS, config.getRetryIntervalsMillis());
@@ -241,7 +241,7 @@ public class VcnGatewayConnectionConfigTest {
 
         final VcnGatewayConnectionConfig config = new VcnGatewayConnectionConfig(configBundle);
         assertEquals(
-                DEFAULT_UNDERLYING_NETWORK_TEMPLATES, config.getVcnUnderlyingNetworkTemplates());
+                DEFAULT_UNDERLYING_NETWORK_TEMPLATES, config.getVcnUnderlyingNetworkPriorities());
     }
 
     private static IkeTunnelConnectionParams buildTunnelConnectionParams(String ikePsk) {
@@ -292,7 +292,7 @@ public class VcnGatewayConnectionConfigTest {
                 new VcnGatewayConnectionConfig.Builder(
                                 "buildTestConfigWithVcnUnderlyingNetworkTemplates",
                                 TUNNEL_CONNECTION_PARAMS)
-                        .setVcnUnderlyingNetworkTemplates(networkTemplates),
+                        .setVcnUnderlyingNetworkPriorities(networkTemplates),
                 EXPOSED_CAPS);
     }
 
