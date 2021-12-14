@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <!--  Padding applied on most UI elements  -->
-    <dimen name="padding">12dp</dimen>
-
-</resources>

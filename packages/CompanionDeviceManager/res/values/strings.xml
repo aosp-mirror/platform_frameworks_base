@@ -19,25 +19,58 @@
     <!-- Title of the CompanionDeviceManager application. [CHAR LIMIT=50] -->
     <string name="app_label">Companion Device Manager</string>
 
-    <!-- Title of the device selection dialog. -->
-    <string name="chooser_title">Choose a <xliff:g id="profile_name" example="watch">%1$s</xliff:g> to be managed by &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%2$s</xliff:g>&lt;/strong&gt;</string>
+    <!-- Title of the device association confirmation dialog. -->
+    <string name="confirmation_title">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to manage your &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;</string>
 
-    <!-- The generic placeholder for a device type when nothing specific is known about it [CHAR LIMIT=30] -->
-    <string name="profile_name_generic">device</string>
+    <!-- ================= DEVICE_PROFILE_WATCH and null profile ================= -->
 
     <!-- The name of the "watch" device type [CHAR LIMIT=30] -->
     <string name="profile_name_watch">watch</string>
 
-    <!-- Title of the device association confirmation dialog. -->
-    <string name="confirmation_title">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to manage your &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;</string>
+    <!-- Title of the device selection dialog. -->
+    <string name="chooser_title">Choose a <xliff:g id="profile_name" example="watch">%1$s</xliff:g> to be managed by &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%2$s</xliff:g>&lt;/strong&gt;</string>
 
-    <!-- Text of the device profile permissions explanation in the association dialog. -->
-    <string name="profile_summary">This app is needed to manage your <xliff:g id="profile_name" example="watch">%1$s</xliff:g>. <xliff:g id="privileges_discplaimer" example="Android Wear will get access to your Notifications, Calendar and Contacts.">%2$s</xliff:g></string>
+    <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_watch" product="default"><xliff:g id="app_name" example="Wear">%1$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts and Calendar permissions.</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_watch" product="tablet"><xliff:g id="app_name" example="Wear">%1$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts and Calendar permissions.</string>
+
+    <!-- ================= DEVICE_PROFILE_APP_STREAMING ================= -->
+
+    <!-- Confirmation for associating an application with a companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
+    <string name="title_app_streaming">Allow &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to stream applications?</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_app_streaming" product="default">Let &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to provide &lt;strong&gt;<xliff:g id="device_name" example="Pixelbook Go">%2$s</xliff:g>&lt;/strong&gt; remote access to access to applications installed on this phone when connected.</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_app_streaming" product="tablet">Let &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to provide &lt;strong&gt;<xliff:g id="device_name" example="Pixelbook Go">%2$s</xliff:g>&lt;/strong&gt; remote access to access to applications installed on this tablet when connected.</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_app_streaming" product="device">Let &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to provide &lt;strong&gt;<xliff:g id="device_name" example="Pixelbook Go">%2$s</xliff:g>&lt;/strong&gt; remote access to access to applications installed on this device when connected.</string>
+
+    <!-- ================= DEVICE_PROFILE_AUTOMOTIVE_PROJECTION ================= -->
+
+    <!-- Confirmation for associating an application with a companion device of AUTOMOTIVE_PROJECTION profile (type) [CHAR LIMIT=NONE] -->
+    <string name="title_automotive_projection"></string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of AUTOMOTIVE_PROJECTION profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_automotive_projection"></string>
+
+    <!-- ================= null profile ================= -->
+
+    <!-- A noun for a companion device with unspecified profile (type) [CHAR LIMIT=30] -->
+    <string name="profile_name_generic">device</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of unspecified profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_generic"></string>
+
+    <!-- ================= Buttons ================= -->
 
     <!-- Positive button for the device-app association consent dialog [CHAR LIMIT=30] -->
     <string name="consent_yes">Allow</string>
 
     <!-- Negative button for the device-app association consent dialog [CHAR LIMIT=30] -->
     <string name="consent_no">Don\u2019t allow</string>
-
 </resources>
