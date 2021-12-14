@@ -89,7 +89,7 @@ class MediaTttChipControllerTest : SysuiTestCase() {
         val chipView = getChipView()
         assertThat(chipView.getChipText()).contains(DEVICE_NAME)
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
-        assertThat(chipView.getUndoButtonVisibility()).isEqualTo(View.GONE)
+        assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
     }
 
     @Test
@@ -99,17 +99,39 @@ class MediaTttChipControllerTest : SysuiTestCase() {
         val chipView = getChipView()
         assertThat(chipView.getChipText()).contains(DEVICE_NAME)
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
-        assertThat(chipView.getUndoButtonVisibility()).isEqualTo(View.GONE)
+        assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
     }
 
     @Test
-    fun transferSucceeded_chipTextContainsDeviceName_noLoadingIcon_undo() {
-        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME))
+    fun transferSucceededNullUndoRunnable_chipTextContainsDeviceName_noLoadingIcon_noUndo() {
+        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME, undoRunnable = null))
 
         val chipView = getChipView()
         assertThat(chipView.getChipText()).contains(DEVICE_NAME)
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
-        assertThat(chipView.getUndoButtonVisibility()).isEqualTo(View.VISIBLE)
+        assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
+    }
+
+    @Test
+    fun transferSucceededWithUndoRunnable_chipTextContainsDeviceName_noLoadingIcon_undoWithClick() {
+        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME) { })
+
+        val chipView = getChipView()
+        assertThat(chipView.getChipText()).contains(DEVICE_NAME)
+        assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
+        assertThat(chipView.getUndoButton().visibility).isEqualTo(View.VISIBLE)
+        assertThat(chipView.getUndoButton().hasOnClickListeners()).isTrue()
+    }
+
+    @Test
+    fun transferSucceededWithUndoRunnable_undoButtonClickRunsRunnable() {
+        var runnableRun = false
+        val runnable = Runnable { runnableRun = true }
+
+        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME, runnable))
+        getChipView().getUndoButton().performClick()
+
+        assertThat(runnableRun).isTrue()
     }
 
     @Test
@@ -131,9 +153,9 @@ class MediaTttChipControllerTest : SysuiTestCase() {
     @Test
     fun changeFromTransferInitiatedToTransferSucceeded_undoButtonAppears() {
         mediaTttChipController.displayChip(TransferInitiated(DEVICE_NAME))
-        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME))
+        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME) { })
 
-        assertThat(getChipView().getUndoButtonVisibility()).isEqualTo(View.VISIBLE)
+        assertThat(getChipView().getUndoButton().visibility).isEqualTo(View.VISIBLE)
     }
 
     @Test
@@ -141,7 +163,7 @@ class MediaTttChipControllerTest : SysuiTestCase() {
         mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME))
         mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
 
-        assertThat(getChipView().getUndoButtonVisibility()).isEqualTo(View.GONE)
+        assertThat(getChipView().getUndoButton().visibility).isEqualTo(View.GONE)
     }
 
     private fun LinearLayout.getChipText(): String =
@@ -150,8 +172,7 @@ class MediaTttChipControllerTest : SysuiTestCase() {
     private fun LinearLayout.getLoadingIconVisibility(): Int =
         this.requireViewById<View>(R.id.loading).visibility
 
-    private fun LinearLayout.getUndoButtonVisibility(): Int =
-        this.requireViewById<View>(R.id.undo).visibility
+    private fun LinearLayout.getUndoButton(): View = this.requireViewById(R.id.undo)
 
     private fun getChipView(): LinearLayout {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
