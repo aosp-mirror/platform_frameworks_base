@@ -695,6 +695,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final static int WINDOWS_FREEZING_SCREENS_TIMEOUT = 2;
     int mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_NONE;
 
+    /** Indicates that the system server is actively demanding the screen be frozen. */
     boolean mClientFreezingScreen = false;
     int mAppsFreezingScreen = 0;
 
@@ -3091,6 +3092,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // Misc IWindowSession methods
     // -------------------------------------------------------------
 
+    /** Freeze the screen during a user-switch event. Called by UserController. */
     @Override
     public void startFreezingScreen(int exitAnim, int enterAnim) {
         if (!checkCallingPermission(android.Manifest.permission.FREEZE_SCREEN,
@@ -3113,6 +3115,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * No longer actively demand that the screen remain frozen.
+     * Called by UserController after a user-switch.
+     * This doesn't necessarily immediately unlock the screen; it just allows it if we're ready.
+     */
     @Override
     public void stopFreezingScreen() {
         if (!checkCallingPermission(android.Manifest.permission.FREEZE_SCREEN,
@@ -5859,6 +5866,13 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.doStartFreezingDisplay");
+        doStartFreezingDisplay(exitAnim, enterAnim, displayContent, overrideOriginalRotation);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    private void doStartFreezingDisplay(int exitAnim, int enterAnim, DisplayContent displayContent,
+            int overrideOriginalRotation) {
         ProtoLog.d(WM_DEBUG_ORIENTATION,
                             "startFreezingDisplayLocked: exitAnim=%d enterAnim=%d called by %s",
                             exitAnim, enterAnim, Debug.getCallers(8));
@@ -5929,9 +5943,15 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.doStopFreezingDisplayLocked-"
+                + mLastFinishedFreezeSource);
+        doStopFreezingDisplayLocked(displayContent);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    private void doStopFreezingDisplayLocked(DisplayContent displayContent) {
         ProtoLog.d(WM_DEBUG_ORIENTATION,
                     "stopFreezingDisplayLocked: Unfreezing now");
-
 
         // We must make a local copy of the displayId as it can be potentially overwritten later on
         // in this method. For example, {@link startFreezingDisplayLocked} may be called as a result
