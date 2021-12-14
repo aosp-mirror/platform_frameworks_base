@@ -112,11 +112,17 @@ public interface Pip {
     default void showPictureInPictureMenu() {}
 
     /**
-     * Called by NavigationBar in order to listen in for PiP bounds change. This is mostly used
-     * for times where the PiP bounds could conflict with SystemUI elements, such as a stashed
-     * PiP and the Back-from-Edge gesture.
+     * Called by NavigationBar and TaskbarDelegate in order to listen in for PiP bounds change. This
+     * is mostly used for times where the PiP bounds could conflict with SystemUI elements, such as
+     * a stashed PiP and the Back-from-Edge gesture.
      */
-    default void setPipExclusionBoundsChangeListener(Consumer<Rect> listener) { }
+    default void addPipExclusionBoundsChangeListener(Consumer<Rect> listener) { }
+
+    /**
+     * Remove a callback added previously. This is used when NavigationBar is removed from the
+     * view hierarchy or destroyed.
+     */
+    default void removePipExclusionBoundsChangeListener(Consumer<Rect> listener) { }
 
     /**
      * Dump the current state and information if need.
