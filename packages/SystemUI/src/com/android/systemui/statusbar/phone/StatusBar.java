@@ -458,6 +458,7 @@ public class StatusBar extends CoreStartable implements
     protected NotificationShadeWindowView mNotificationShadeWindowView;
     protected PhoneStatusBarView mStatusBarView;
     private PhoneStatusBarViewController mPhoneStatusBarViewController;
+    private PhoneStatusBarTransitions mStatusBarTransitions;
     private AuthRippleController mAuthRippleController;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected NotificationShadeWindowController mNotificationShadeWindowController;
@@ -1124,9 +1125,10 @@ public class StatusBar extends CoreStartable implements
         // Set up CollapsedStatusBarFragment and PhoneStatusBarView
         StatusBarInitializer initializer = mStatusBarComponent.getStatusBarInitializer();
         initializer.setStatusBarViewUpdatedListener(
-                (statusBarView, statusBarViewController) -> {
+                (statusBarView, statusBarViewController, statusBarTransitions) -> {
                     mStatusBarView = statusBarView;
                     mPhoneStatusBarViewController = statusBarViewController;
+                    mStatusBarTransitions = statusBarTransitions;
                     mNotificationShadeWindowViewController.setStatusBarView(mStatusBarView);
                     // Ensure we re-propagate panel expansion values to the panel controller and
                     // any listeners it may have, such as PanelBar. This will also ensure we
@@ -2185,14 +2187,10 @@ public class StatusBar extends CoreStartable implements
                 }, false, sUiEventLogger).show(animationDelay);
     }
 
-    protected BarTransitions getStatusBarTransitions() {
-        return mNotificationShadeWindowViewController.getBarTransitions();
-    }
-
     public void checkBarModes() {
         if (mDemoModeController.isInDemoMode()) return;
-        if (mNotificationShadeWindowViewController != null && getStatusBarTransitions() != null) {
-            checkBarMode(mStatusBarMode, mStatusBarWindowState, getStatusBarTransitions());
+        if (mStatusBarTransitions != null) {
+            checkBarMode(mStatusBarMode, mStatusBarWindowState, mStatusBarTransitions);
         }
         mNavigationBarController.checkNavBarModes(mDisplayId);
         mNoAnimationOnNextBarModeChange = false;
@@ -2219,9 +2217,8 @@ public class StatusBar extends CoreStartable implements
     }
 
     private void finishBarAnimations() {
-        if (mNotificationShadeWindowController != null
-                && mNotificationShadeWindowViewController.getBarTransitions() != null) {
-            mNotificationShadeWindowViewController.getBarTransitions().finishAnimations();
+        if (mStatusBarTransitions != null) {
+            mStatusBarTransitions.finishAnimations();
         }
         mNavigationBarController.finishBarAnimations(mDisplayId);
     }
@@ -2275,8 +2272,7 @@ public class StatusBar extends CoreStartable implements
         pw.println("  ShadeWindowView: ");
         if (mNotificationShadeWindowViewController != null) {
             mNotificationShadeWindowViewController.dump(fd, pw, args);
-            dumpBarTransitions(pw, "PhoneStatusBarTransitions",
-                    mNotificationShadeWindowViewController.getBarTransitions());
+            dumpBarTransitions(pw, "PhoneStatusBarTransitions", mStatusBarTransitions);
         }
 
         pw.println("  mMediaManager: ");

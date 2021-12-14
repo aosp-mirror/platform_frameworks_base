@@ -98,7 +98,6 @@ public class NotificationShadeWindowViewController {
     private boolean mExpandAnimationRunning;
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarView mStatusBarView;
-    private PhoneStatusBarTransitions mBarTransitions;
     private StatusBar mService;
     private NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
@@ -497,17 +496,8 @@ public class NotificationShadeWindowViewController {
         }
     }
 
-    public PhoneStatusBarTransitions getBarTransitions() {
-        return mBarTransitions;
-    }
-
     public void setStatusBarView(PhoneStatusBarView statusBarView) {
         mStatusBarView = statusBarView;
-        if (statusBarView != null) {
-            mBarTransitions = new PhoneStatusBarTransitions(
-                    statusBarView,
-                    mStatusBarWindowController.getBackgroundView());
-        }
     }
 
     public void setService(StatusBar statusBar, NotificationShadeWindowController controller) {

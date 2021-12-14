@@ -22,10 +22,12 @@ import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
+import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
 
 import javax.inject.Named;
 
@@ -88,5 +90,15 @@ public interface StatusBarFragmentModule {
         return phoneStatusBarViewControllerFactory.create(
                 phoneStatusBarView,
                 notificationPanelViewController.getStatusBarTouchEventHandler());
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    static PhoneStatusBarTransitions providePhoneStatusBarTransitions(
+            @RootView PhoneStatusBarView view,
+            StatusBarWindowController statusBarWindowController
+    ) {
+        return new PhoneStatusBarTransitions(view, statusBarWindowController.getBackgroundView());
     }
 }
