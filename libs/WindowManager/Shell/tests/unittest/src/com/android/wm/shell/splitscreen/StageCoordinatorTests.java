@@ -51,6 +51,7 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -90,6 +91,8 @@ public class StageCoordinatorTests extends ShellTestCase {
     private StageTaskUnfoldController mSideUnfoldController;
     @Mock
     private SplitLayout mSplitLayout;
+    @Mock
+    private DisplayController mDisplayController;
     @Mock
     private DisplayImeController mDisplayImeController;
     @Mock
@@ -293,7 +296,7 @@ public class StageCoordinatorTests extends ShellTestCase {
     private StageCoordinator createStageCoordinator(SplitLayout splitLayout) {
         return new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
                 mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,
-                mDisplayImeController, mDisplayInsetsController, splitLayout,
+                mDisplayController, mDisplayImeController, mDisplayInsetsController, splitLayout,
                 mTransitions, mTransactionPool, mLogger, Optional.empty(),
                 new UnfoldControllerProvider());
     }

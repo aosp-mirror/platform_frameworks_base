@@ -161,13 +161,14 @@ public class WMShellModule {
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             @ShellMainThread ShellExecutor mainExecutor,
+            DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool, IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks,
             Provider<Optional<StageTaskUnfoldController>> stageTaskUnfoldControllerProvider) {
         return new SplitScreenController(shellTaskOrganizer, syncQueue, context,
-                rootTaskDisplayAreaOrganizer, mainExecutor, displayImeController,
+                rootTaskDisplayAreaOrganizer, mainExecutor, displayController, displayImeController,
                 displayInsetsController, transitions, transactionPool, iconProvider,
                 recentTasks, stageTaskUnfoldControllerProvider);
     }
