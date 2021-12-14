@@ -4899,6 +4899,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 ? ALLOWED_REASON_POWER_SAVE_ALLOWLIST : 0);
         newAllowedReasons |= (isWhitelistedFromPowerSaveExceptIdleUL(uid)
                 ? ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST : 0);
+        newAllowedReasons |= (uidBlockedState.allowedReasons
+                & ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS);
 
         if (LOGV) {
             Log.v(TAG, "updateRulesForPowerRestrictionsUL(" + uid + ")"
