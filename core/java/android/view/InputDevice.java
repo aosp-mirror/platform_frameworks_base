@@ -572,6 +572,8 @@ public final class InputDevice implements Parcelable {
      * @return The identifier object for this device
      * @hide
      */
+    @TestApi
+    @NonNull
     public InputDeviceIdentifier getIdentifier() {
         return mIdentifier;
     }

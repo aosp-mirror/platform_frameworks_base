@@ -638,6 +638,30 @@ public final class InputManager {
     }
 
     /**
+     * Returns the descriptors of all supported keyboard layouts appropriate for the specified
+     * input device.
+     * <p>
+     * The input manager consults the built-in keyboard layouts as well as all keyboard layouts
+     * advertised by applications using a {@link #ACTION_QUERY_KEYBOARD_LAYOUTS} broadcast receiver.
+     * </p>
+     *
+     * @param device The input device to query.
+     * @return The ids of all keyboard layouts which are supported by the specified input device.
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public List<String> getKeyboardLayoutDescriptorsForInputDevice(@NonNull InputDevice device) {
+        KeyboardLayout[] layouts = getKeyboardLayoutsForInputDevice(device.getIdentifier());
+        List<String> res = new ArrayList<>();
+        for (KeyboardLayout kl : layouts) {
+            res.add(kl.getDescriptor());
+        }
+        return res;
+    }
+
+    /**
      * Gets information about all supported keyboard layouts appropriate
      * for a specific input device.
      * <p>
@@ -651,7 +675,9 @@ public final class InputManager {
      *
      * @hide
      */
-    public KeyboardLayout[] getKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
+    @NonNull
+    public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
+            @NonNull InputDeviceIdentifier identifier) {
         try {
             return mIm.getKeyboardLayoutsForInputDevice(identifier);
         } catch (RemoteException ex) {
@@ -681,15 +707,17 @@ public final class InputManager {
     }
 
     /**
-     * Gets the current keyboard layout descriptor for the specified input
-     * device.
+     * Gets the current keyboard layout descriptor for the specified input device.
      *
      * @param identifier Identifier for the input device
-     * @return The keyboard layout descriptor, or null if no keyboard layout has
-     *         been set.
+     * @return The keyboard layout descriptor, or null if no keyboard layout has been set.
+     *
      * @hide
      */
-    public String getCurrentKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier) {
+    @TestApi
+    @Nullable
+    public String getCurrentKeyboardLayoutForInputDevice(
+            @NonNull InputDeviceIdentifier identifier) {
         try {
             return mIm.getCurrentKeyboardLayoutForInputDevice(identifier);
         } catch (RemoteException ex) {
@@ -698,20 +726,21 @@ public final class InputManager {
     }
 
     /**
-     * Sets the current keyboard layout descriptor for the specified input
-     * device.
+     * Sets the current keyboard layout descriptor for the specified input device.
      * <p>
-     * This method may have the side-effect of causing the input device in
-     * question to be reconfigured.
+     * This method may have the side-effect of causing the input device in question to be
+     * reconfigured.
      * </p>
      *
      * @param identifier The identifier for the input device.
-     * @param keyboardLayoutDescriptor The keyboard layout descriptor to use,
-     *            must not be null.
+     * @param keyboardLayoutDescriptor The keyboard layout descriptor to use, must not be null.
+     *
      * @hide
      */
-    public void setCurrentKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor) {
+    @TestApi
+    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
+    public void setCurrentKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
+            @NonNull String keyboardLayoutDescriptor) {
         if (identifier == null) {
             throw new IllegalArgumentException("identifier must not be null");
         }
@@ -728,11 +757,11 @@ public final class InputManager {
     }
 
     /**
-     * Gets all keyboard layout descriptors that are enabled for the specified
-     * input device.
+     * Gets all keyboard layout descriptors that are enabled for the specified input device.
      *
      * @param identifier The identifier for the input device.
      * @return The keyboard layout descriptors.
+     *
      * @hide
      */
     public String[] getEnabledKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
@@ -750,15 +779,16 @@ public final class InputManager {
     /**
      * Adds the keyboard layout descriptor for the specified input device.
      * <p>
-     * This method may have the side-effect of causing the input device in
-     * question to be reconfigured.
+     * This method may have the side-effect of causing the input device in question to be
+     * reconfigured.
      * </p>
      *
      * @param identifier The identifier for the input device.
-     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to
-     *            add.
+     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to add.
+     *
      * @hide
      */
+    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void addKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor) {
         if (identifier == null) {
@@ -778,17 +808,19 @@ public final class InputManager {
     /**
      * Removes the keyboard layout descriptor for the specified input device.
      * <p>
-     * This method may have the side-effect of causing the input device in
-     * question to be reconfigured.
+     * This method may have the side-effect of causing the input device in question to be
+     * reconfigured.
      * </p>
      *
      * @param identifier The identifier for the input device.
-     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to
-     *            remove.
+     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to remove.
+     *
      * @hide
      */
-    public void removeKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor) {
+    @TestApi
+    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
+    public void removeKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
+            @NonNull String keyboardLayoutDescriptor) {
         if (identifier == null) {
             throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
         }
