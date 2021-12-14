@@ -25,6 +25,18 @@
 //
 // READ ME: ########################################################
 
+// TODO(b/21090328): Remove filter after we are ready to.
+soong_config_module_type {
+    name: "java_library_with_nonpublic_deps",
+    module_type: "java_library",
+    config_namespace: "ANDROID",
+    bool_variables: ["include_nonpublic_framework_api"],
+    properties: [
+        "static_libs",
+        "libs",
+    ],
+}
+
 package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
@@ -142,7 +154,7 @@ filegroup {
     ],
 }
 
-java_library {
+java_library_with_nonpublic_deps {
     name: "framework-updatable-stubs-module_libs_api",
     static_libs: [
         "android.net.ipsec.ike.stubs.module_lib",
@@ -161,11 +173,18 @@ java_library {
         "framework-uwb.stubs.module_lib",
         "framework-wifi.stubs.module_lib",
     ],
+    soong_config_variables: {
+        include_nonpublic_framework_api: {
+            static_libs: [
+                "framework-supplementalapi.stubs.module_lib",
+            ],
+        },
+    },
     sdk_version: "module_current",
     visibility: ["//visibility:private"],
 }
 
-java_library {
+java_library_with_nonpublic_deps {
     name: "framework-all",
     installable: false,
     static_libs: [
@@ -186,6 +205,13 @@ java_library {
         "framework-wifi.impl",
         "updatable-media",
     ],
+    soong_config_variables: {
+        include_nonpublic_framework_api: {
+            static_libs: [
+                "framework-supplementalapi.stubs.module_lib",
+            ],
+        },
+    },
     apex_available: ["//apex_available:platform"],
     sdk_version: "core_platform",
     visibility: [
