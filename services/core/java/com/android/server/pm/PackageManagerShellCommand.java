@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
 
-import android.Manifest;
 import android.accounts.IAccountManager;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -171,20 +170,6 @@ class PackageManagerShellCommand extends ShellCommand {
 
     @Override
     public int onCommand(String cmd) {
-        switch (Binder.getCallingUid()) {
-            case Process.ROOT_UID:
-            case Process.SHELL_UID:
-                break;
-            default:
-                // This is called from a test and is allowed as non-shell with the right permission
-                if ("install-incremental".equals(cmd)) {
-                    mContext.enforceCallingPermission(Manifest.permission.USE_SYSTEM_DATA_LOADERS,
-                            "Caller missing USE_SYSTEM_DATA_LOADERS permission to use " + cmd);
-                } else {
-                    throw new IllegalArgumentException("Caller must be root or shell");
-                }
-        }
-
         if (cmd == null) {
             return handleDefaultCommands(cmd);
         }
