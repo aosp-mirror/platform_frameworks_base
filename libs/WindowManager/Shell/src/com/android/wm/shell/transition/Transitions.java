@@ -95,6 +95,7 @@ public class Transitions implements RemoteCallable<Transitions> {
     private final ShellExecutor mAnimExecutor;
     private final TransitionPlayerImpl mPlayerImpl;
     private final RemoteTransitionHandler mRemoteTransitionHandler;
+    private final DisplayController mDisplayController;
     private final ShellTransitionImpl mImpl = new ShellTransitionImpl();
 
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
@@ -122,6 +123,7 @@ public class Transitions implements RemoteCallable<Transitions> {
         mContext = context;
         mMainExecutor = mainExecutor;
         mAnimExecutor = animExecutor;
+        mDisplayController = displayController;
         mPlayerImpl = new TransitionPlayerImpl();
         // The very last handler (0 in the list) should be the default one.
         mHandlers.add(new DefaultTransitionHandler(displayController, pool, context, mainExecutor,
@@ -147,6 +149,7 @@ public class Transitions implements RemoteCallable<Transitions> {
         mContext = null;
         mMainExecutor = null;
         mAnimExecutor = null;
+        mDisplayController = null;
         mPlayerImpl = null;
         mRemoteTransitionHandler = null;
     }
@@ -545,6 +548,17 @@ public class Transitions implements RemoteCallable<Transitions> {
             if (wct != null) {
                 active.mHandler = mHandlers.get(i);
                 break;
+            }
+        }
+        if (request.getDisplayChange() != null) {
+            TransitionRequestInfo.DisplayChange change = request.getDisplayChange();
+            if (change.getEndRotation() != change.getStartRotation()) {
+                // Is a rotation, so dispatch to all displayChange listeners
+                if (wct == null) {
+                    wct = new WindowContainerTransaction();
+                }
+                mDisplayController.getChangeController().dispatchOnRotateDisplay(wct,
+                        change.getDisplayId(), change.getStartRotation(), change.getEndRotation());
             }
         }
         active.mToken = mOrganizer.startTransition(

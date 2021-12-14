@@ -488,7 +488,8 @@ public class TransitionTests extends WindowTestsBase {
         final TestTransitionPlayer player = registerTestTransitionPlayer();
 
         mDisplayContent.getDisplayRotation().setRotation(mDisplayContent.getRotation() + 1);
-        mDisplayContent.requestChangeTransitionIfNeeded(1 /* any changes */);
+        mDisplayContent.requestChangeTransitionIfNeeded(1 /* any changes */,
+                null /* displayChange */);
         final FadeRotationAnimationController fadeController =
                 mDisplayContent.getFadeRotationAnimationController();
         assertNotNull(fadeController);
