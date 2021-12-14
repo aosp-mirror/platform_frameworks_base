@@ -58,6 +58,7 @@ import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.VerifiedInputEvent;
@@ -1042,6 +1043,27 @@ public final class InputManager {
             throw e.rethrowFromSystemServer();
         }
         return ret;
+    }
+
+    /**
+     * Gets the key code produced by the specified location on a US keyboard layout.
+     * Key code as defined in {@link android.view.KeyEvent}.
+     * This API is only functional for devices with {@link InputDevice#SOURCE_KEYBOARD} available
+     * which can alter their key mapping using country specific keyboard layouts.
+     *
+     * @param deviceId The input device id.
+     * @param locationKeyCode The location of a key on a US keyboard layout.
+     * @return The key code produced when pressing the key at the specified location, given the
+     *         active keyboard layout. Returns {@link KeyEvent#KEYCODE_UNKNOWN} if the requested
+     *         mapping could not be determined, or if an error occurred.
+     * @hide
+     */
+    public int getKeyCodeForKeyLocation(int deviceId, int locationKeyCode) {
+        try {
+            return mIm.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
 

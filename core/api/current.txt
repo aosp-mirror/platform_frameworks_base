@@ -48358,6 +48358,7 @@ package android.view {
     method public static int[] getDeviceIds();
     method public int getId();
     method public android.view.KeyCharacterMap getKeyCharacterMap();
+    method public int getKeyCodeForKeyLocation(int);
     method public int getKeyboardType();
     method @NonNull public android.hardware.lights.LightsManager getLightsManager();
     method public android.view.InputDevice.MotionRange getMotionRange(int);
