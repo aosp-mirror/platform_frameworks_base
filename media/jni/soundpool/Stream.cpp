@@ -275,118 +275,104 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
         float leftVolume, float rightVolume, int32_t priority, int32_t loop, float rate,
         std::vector<std::any>& garbage)
 {
-    // oldTrack and newTrack are placeholders to be released by garbage without the lock.
-    sp<AudioTrack> oldTrack;
-    sp<AudioTrack> newTrack;
-    status_t status = NO_ERROR;
+    ALOGV("%s(%p)(soundID=%d, streamID=%d, leftVolume=%f, rightVolume=%f,"
+            " priority=%d, loop=%d, rate=%f)",
+            __func__, this, sound->getSoundID(), nextStreamID, leftVolume, rightVolume,
+            priority, loop, rate);
 
-    {
-        ALOGV("%s(%p)(soundID=%d, streamID=%d, leftVolume=%f, rightVolume=%f,"
-                " priority=%d, loop=%d, rate=%f)",
-                __func__, this, sound->getSoundID(), nextStreamID, leftVolume, rightVolume,
-                priority, loop, rate);
+    // initialize track
+    const audio_stream_type_t streamType =
+            AudioSystem::attributesToStreamType(*mStreamManager->getAttributes());
+    const int32_t channelCount = sound->getChannelCount();
+    const auto sampleRate = (uint32_t)lround(double(sound->getSampleRate()) * rate);
+    size_t frameCount = 0;
 
-        // initialize track
-        const audio_stream_type_t streamType =
-                AudioSystem::attributesToStreamType(*mStreamManager->getAttributes());
-        const int32_t channelCount = sound->getChannelCount();
-        const auto sampleRate = (uint32_t)lround(double(sound->getSampleRate()) * rate);
-        size_t frameCount = 0;
+    if (loop) {
+        const audio_format_t format = sound->getFormat();
+        const size_t frameSize = audio_is_linear_pcm(format)
+                ? channelCount * audio_bytes_per_sample(format) : 1;
+        frameCount = sound->getSizeInBytes() / frameSize;
+    }
 
-        if (loop) {
-            const audio_format_t format = sound->getFormat();
-            const size_t frameSize = audio_is_linear_pcm(format)
-                    ? channelCount * audio_bytes_per_sample(format) : 1;
-            frameCount = sound->getSizeInBytes() / frameSize;
-        }
-
-        // check if the existing track has the same sound id.
-        if (mAudioTrack != nullptr && mSoundID == sound->getSoundID()) {
+    if (mAudioTrack != nullptr) {
+        if (mSoundID == sound->getSoundID()
+                && mAudioTrack->setSampleRate(sampleRate) == NO_ERROR) {
+            // Reuse the old track if the soundID matches.
             // the sample rate may fail to change if the audio track is a fast track.
-            if (mAudioTrack->setSampleRate(sampleRate) == NO_ERROR) {
-                newTrack = mAudioTrack;
-                ALOGV("%s: reusing track %p for sound %d",
-                        __func__, mAudioTrack.get(), sound->getSoundID());
-            }
-        }
-        if (newTrack == nullptr) {
-            // mToggle toggles each time a track is started on a given stream.
-            // The toggle is concatenated with the Stream address and passed to AudioTrack
-            // as callback user data. This enables the detection of callbacks received from the old
-            // audio track while the new one is being started and avoids processing them with
-            // wrong audio audio buffer size  (mAudioBufferSize)
-            auto toggle = mToggle ^ 1;
-            // NOLINTNEXTLINE(performance-no-int-to-ptr)
-            void* userData = reinterpret_cast<void*>((uintptr_t)this | toggle);
-            audio_channel_mask_t soundChannelMask = sound->getChannelMask();
-            // When sound contains a valid channel mask, use it as is.
-            // Otherwise, use stream count to calculate channel mask.
-            audio_channel_mask_t channelMask = soundChannelMask != AUDIO_CHANNEL_NONE
-                    ? soundChannelMask : audio_channel_out_mask_from_count(channelCount);
-
-            // do not create a new audio track if current track is compatible with sound parameters
-
-            android::content::AttributionSourceState attributionSource;
-            attributionSource.packageName = mStreamManager->getOpPackageName();
-            attributionSource.token = sp<BBinder>::make();
-            // TODO b/182469354 make consistent with AudioRecord, add util for native source
-            newTrack = new AudioTrack(streamType, sampleRate, sound->getFormat(),
-                    channelMask, sound->getIMemory(), AUDIO_OUTPUT_FLAG_FAST,
-                    staticCallback, userData,
-                    0 /*default notification frames*/, AUDIO_SESSION_ALLOCATE,
-                    AudioTrack::TRANSFER_DEFAULT,
-                    nullptr /*offloadInfo*/, attributionSource,
-                    mStreamManager->getAttributes(),
-                    false /*doNotReconnect*/, 1.0f /*maxRequiredSpeed*/);
-            // Set caller name so it can be logged in destructor.
-            // MediaMetricsConstants.h: AMEDIAMETRICS_PROP_CALLERNAME_VALUE_SOUNDPOOL
-            newTrack->setCallerName("soundpool");
-            oldTrack = mAudioTrack;
-            status = newTrack->initCheck();
-            if (status != NO_ERROR) {
-                ALOGE("%s: error creating AudioTrack", __func__);
-                // newTrack goes out of scope, so reference count drops to zero
-                goto exit;
-            }
-            // From now on, AudioTrack callbacks received with previous toggle value will be ignored.
-            mToggle = toggle;
-            mAudioTrack = newTrack;
-            ALOGV("%s: using new track %p for sound %d",
-                    __func__, newTrack.get(), sound->getSoundID());
-        }
-        if (mMuted) {
-            newTrack->setVolume(0.0f, 0.0f);
+            ALOGV("%s: reusing track %p for sound %d",
+                    __func__, mAudioTrack.get(), sound->getSoundID());
         } else {
-            newTrack->setVolume(leftVolume, rightVolume);
+            // If reuse not possible, move mAudioTrack to garbage, set to nullptr.
+            garbage.emplace_back(std::move(mAudioTrack));
+            mAudioTrack.clear(); // move should have cleared the sp<>, but we clear just in case.
         }
-        newTrack->setLoop(0, frameCount, loop);
-        mAudioTrack->start();
-        mSound = sound;
-        mSoundID = sound->getSoundID();
-        mPriority = priority;
-        mLoop = loop;
-        mLeftVolume = leftVolume;
-        mRightVolume = rightVolume;
-        mRate = rate;
-        mState = PLAYING;
-        mStopTimeNs = 0;
-        mStreamID = nextStreamID;  // prefer this to be the last, as it is an atomic sync point
     }
+    if (mAudioTrack == nullptr) {
+        // mToggle toggles each time a track is started on a given stream.
+        // The toggle is concatenated with the Stream address and passed to AudioTrack
+        // as callback user data. This enables the detection of callbacks received from the old
+        // audio track while the new one is being started and avoids processing them with
+        // wrong audio audio buffer size  (mAudioBufferSize)
+        auto toggle = mToggle ^ 1;
+        // NOLINTNEXTLINE(performance-no-int-to-ptr)
+        void* userData = reinterpret_cast<void*>((uintptr_t)this | toggle);
+        audio_channel_mask_t soundChannelMask = sound->getChannelMask();
+        // When sound contains a valid channel mask, use it as is.
+        // Otherwise, use stream count to calculate channel mask.
+        audio_channel_mask_t channelMask = soundChannelMask != AUDIO_CHANNEL_NONE
+                ? soundChannelMask : audio_channel_out_mask_from_count(channelCount);
 
-exit:
-    ALOGV("%s: delete oldTrack %p", __func__, oldTrack.get());
-    if (status != NO_ERROR) {
-        // TODO: should we consider keeping the soundID if the old track is OK?
-        // Do not attempt to restart this track (should we remove the stream id?)
-        mState = IDLE;
-        mSoundID = 0;
-        mSound.reset();
-        mAudioTrack.clear();  // actual release from garbage
+        // do not create a new audio track if current track is compatible with sound parameters
+
+        android::content::AttributionSourceState attributionSource;
+        attributionSource.packageName = mStreamManager->getOpPackageName();
+        attributionSource.token = sp<BBinder>::make();
+        // TODO b/182469354 make consistent with AudioRecord, add util for native source
+        mAudioTrack = new AudioTrack(streamType, sampleRate, sound->getFormat(),
+                channelMask, sound->getIMemory(), AUDIO_OUTPUT_FLAG_FAST,
+                staticCallback, userData,
+                0 /*default notification frames*/, AUDIO_SESSION_ALLOCATE,
+                AudioTrack::TRANSFER_DEFAULT,
+                nullptr /*offloadInfo*/, attributionSource,
+                mStreamManager->getAttributes(),
+                false /*doNotReconnect*/, 1.0f /*maxRequiredSpeed*/);
+        // Set caller name so it can be logged in destructor.
+        // MediaMetricsConstants.h: AMEDIAMETRICS_PROP_CALLERNAME_VALUE_SOUNDPOOL
+        mAudioTrack->setCallerName("soundpool");
+
+        if (status_t status = mAudioTrack->initCheck();
+            status != NO_ERROR) {
+            ALOGE("%s: error %d creating AudioTrack", __func__, status);
+            // TODO: should we consider keeping the soundID and reusing the old track?
+            mState = IDLE;
+            mSoundID = 0;
+            mSound.reset();
+            garbage.emplace_back(std::move(mAudioTrack)); // remove mAudioTrack.
+            mAudioTrack.clear(); // move should have cleared the sp<>, but we clear just in case.
+            return;
+        }
+        // From now on, AudioTrack callbacks received with previous toggle value will be ignored.
+        mToggle = toggle;
+        ALOGV("%s: using new track %p for sound %d",
+                __func__, mAudioTrack.get(), sound->getSoundID());
     }
-
-    // move tracks to garbage to be released later outside of lock.
-    if (newTrack) garbage.emplace_back(std::move(newTrack));
-    if (oldTrack) garbage.emplace_back(std::move(oldTrack));
+    if (mMuted) {
+        mAudioTrack->setVolume(0.f, 0.f);
+    } else {
+        mAudioTrack->setVolume(leftVolume, rightVolume);
+    }
+    mAudioTrack->setLoop(0, frameCount, loop);
+    mAudioTrack->start();
+    mSound = sound;
+    mSoundID = sound->getSoundID();
+    mPriority = priority;
+    mLoop = loop;
+    mLeftVolume = leftVolume;
+    mRightVolume = rightVolume;
+    mRate = rate;
+    mState = PLAYING;
+    mStopTimeNs = 0;
+    mStreamID = nextStreamID;  // prefer this to be the last, as it is an atomic sync point
 }
 
 /* static */
