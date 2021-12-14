@@ -38,9 +38,22 @@ import java.util.Objects;
  * when a game session should begin. It is always kept running by the system.
  * Because of this it should be kept as lightweight as possible.
  *
- * Heavy weight operations (such as showing UI) should be implemented in the
+ * <p>Heavyweight operations (such as showing UI) should be implemented in the
  * associated {@link GameSessionService} when a game session is taking place. Its
  * implementation should run in a separate process from the {@link GameService}.
+ *
+ * <p>To extend this class, you must declare the service in your manifest file with
+ * the {@link android.Manifest.permission#BIND_GAME_SERVICE} permission
+ * and include an intent filter with the {@link #SERVICE_INTERFACE} action. For example:
+ * <pre>
+ * &lt;service android:name=".GameService"
+ *          android:label="&#64;string/service_name"
+ *          android:permission="android.permission.BIND_GAME_SERVICE">
+ *     &lt;intent-filter>
+ *         &lt;action android:name="android.service.games.GameService" />
+ *     &lt;/intent-filter>
+ * &lt;/service>
+ * </pre>
  *
  * @hide
  */
