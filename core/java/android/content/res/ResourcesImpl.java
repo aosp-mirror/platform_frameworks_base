@@ -1310,6 +1310,14 @@ public class ResourcesImpl {
             return mThemeResId;
         }
 
+        @StyleRes
+        /*package*/ int getParentThemeIdentifier(@StyleRes int resId) {
+            if (resId > 0) {
+                return mAssets.getParentThemeIdentifier(resId);
+            }
+            return 0;
+        }
+
         void applyStyle(int resId, boolean force) {
             mAssets.applyStyleToTheme(mTheme, resId, force);
             mThemeResId = resId;
