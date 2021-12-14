@@ -77,6 +77,7 @@ import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -132,6 +133,8 @@ import java.util.Optional;
 public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     @Mock
     private NotificationEntryManager mNotificationEntryManager;
+    @Mock
+    private CommonNotifCollection mCommonNotifCollection;
     @Mock
     private NotificationGroupManagerLegacy mNotificationGroupManager;
     @Mock
@@ -336,6 +339,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mLockscreenUserManager,
                 mNotificationGroupManager,
                 mNotificationEntryManager,
+                mCommonNotifCollection,
                 mNotifPipeline,
                 mSysUiState,
                 mNotifPipelineFlags,
@@ -404,8 +408,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     public void testRemoveBubble_withDismissedNotif_notInOverflow() {
         mEntryListener.onEntryAdded(mRow);
         mBubbleController.updateBubble(mBubbleEntry);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow.getKey()))
-                .thenReturn(mRow);
+        when(mCommonNotifCollection.getEntry(mRow.getKey())).thenReturn(mRow);
 
         assertTrue(mBubbleController.hasBubbles());
         assertBubbleNotificationNotSuppressedFromShade(mBubbleEntry);
@@ -887,7 +890,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         ExpandableNotificationRow groupSummary = mNotificationTestHelper.createGroup(0);
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
         mEntryListener.onEntryAdded(groupedBubble.getEntry());
-        when(mNotificationEntryManager.getPendingOrActiveNotif(groupedBubble.getEntry().getKey()))
+        when(mCommonNotifCollection.getEntry(groupedBubble.getEntry().getKey()))
                 .thenReturn(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
         assertTrue(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));
@@ -911,7 +914,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         ExpandableNotificationRow groupSummary = mNotificationTestHelper.createGroup(0);
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
         mEntryListener.onEntryAdded(groupedBubble.getEntry());
-        when(mNotificationEntryManager.getPendingOrActiveNotif(groupedBubble.getEntry().getKey()))
+        when(mCommonNotifCollection.getEntry(groupedBubble.getEntry().getKey()))
                 .thenReturn(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
         assertTrue(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));
@@ -935,7 +938,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         ExpandableNotificationRow groupSummary = mNotificationTestHelper.createGroup(2);
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
         mEntryListener.onEntryAdded(groupedBubble.getEntry());
-        when(mNotificationEntryManager.getPendingOrActiveNotif(groupedBubble.getEntry().getKey()))
+        when(mCommonNotifCollection.getEntry(groupedBubble.getEntry().getKey()))
                 .thenReturn(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
 
@@ -1011,10 +1014,9 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
      */
     @Test
     public void testOverflowLoadedOnce() {
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow.getKey()))
-                .thenReturn(mRow);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow2.getKey()))
-                .thenReturn(mRow2);
+        // XXX
+        when(mCommonNotifCollection.getEntry(mRow.getKey())).thenReturn(mRow);
+        when(mCommonNotifCollection.getEntry(mRow2.getKey())).thenReturn(mRow2);
 
         mEntryListener.onEntryAdded(mRow);
         mEntryListener.onEntryAdded(mRow2);
