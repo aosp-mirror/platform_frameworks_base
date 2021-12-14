@@ -120,7 +120,15 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
         return null;
     }
 
+    public Region getCurrentMagnificationRegion(int displayId) {
+        return null;
+    }
+
     public boolean resetMagnification(int displayId, boolean animate) {
+        return false;
+    }
+
+    public boolean resetCurrentMagnification(int displayId, boolean animate) {
         return false;
     }
 

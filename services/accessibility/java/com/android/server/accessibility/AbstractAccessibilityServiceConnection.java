@@ -1036,6 +1036,30 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+
+    @Override
+    public Region getCurrentMagnificationRegion(int displayId) {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getCurrentMagnificationRegion", "displayId=" + displayId);
+        }
+        synchronized (mLock) {
+            final Region region = Region.obtain();
+            if (!hasRightsToCurrentUserLocked()) {
+                return region;
+            }
+            MagnificationProcessor magnificationProcessor =
+                    mSystemSupport.getMagnificationProcessor();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                magnificationProcessor.getCurrentMagnificationRegion(displayId,
+                        region, mSecurityPolicy.canControlMagnification(this));
+                return region;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
     @Override
     public float getMagnificationCenterX(int displayId) {
         if (svcConnTracingEnabled()) {
@@ -1096,6 +1120,31 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             MagnificationProcessor magnificationProcessor =
                     mSystemSupport.getMagnificationProcessor();
             return (magnificationProcessor.resetFullscreenMagnification(displayId, animate)
+                    || !magnificationProcessor.isMagnifying(displayId));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public boolean resetCurrentMagnification(int displayId, boolean animate) {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("resetCurrentMagnification",
+                    "displayId=" + displayId + ";animate=" + animate);
+        }
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return false;
+            }
+            if (!mSecurityPolicy.canControlMagnification(this)) {
+                return false;
+            }
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            MagnificationProcessor magnificationProcessor =
+                    mSystemSupport.getMagnificationProcessor();
+            return (magnificationProcessor.resetCurrentMagnification(displayId, animate)
                     || !magnificationProcessor.isMagnifying(displayId));
         } finally {
             Binder.restoreCallingIdentity(identity);

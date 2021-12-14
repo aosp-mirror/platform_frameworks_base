@@ -1503,6 +1503,12 @@ public abstract class AccessibilityService extends Service {
          * {@link AccessibilityService#onServiceConnected()} has not yet been
          * called) or the service has been disconnected, this method will
          * return an empty region.
+         * </p>
+         * <p>
+         * <strong>Note:</strong> This legacy API gets the magnification region of full-screen
+         * magnification. To get the magnification region of the current controlling magnifier,
+         * use {@link #getCurrentMagnificationRegion()} instead.
+         * </p>
          *
          * @return the region of the screen currently active for magnification, or an empty region
          * if magnification is not active.
@@ -1524,6 +1530,45 @@ public abstract class AccessibilityService extends Service {
         }
 
         /**
+         * Returns the region of the screen currently active for magnification if the
+         * controlling magnification is {@link MagnificationConfig#MAGNIFICATION_MODE_FULLSCREEN}.
+         * Returns the region of screen projected on the magnification window if the
+         * controlling magnification is {@link MagnificationConfig#MAGNIFICATION_MODE_WINDOW}.
+         *
+         * <p>
+         * If the controlling mode is {@link MagnificationConfig#MAGNIFICATION_MODE_FULLSCREEN},
+         * the returned region will be empty if the magnification is
+         * not active. And the magnification is active if magnification gestures are enabled
+         * or if a service is running that can control magnification.
+         * </p><p>
+         * If the controlling mode is {@link MagnificationConfig#MAGNIFICATION_MODE_WINDOW},
+         * the returned region will be empty if the magnification is not activated.
+         * </p><p>
+         * <strong>Note:</strong> If the service is not yet connected (e.g.
+         * {@link AccessibilityService#onServiceConnected()} has not yet been
+         * called) or the service has been disconnected, this method will
+         * return an empty region.
+         * </p>
+         *
+         * @return the magnification region of the currently controlling magnification
+         */
+        @NonNull
+        public Region getCurrentMagnificationRegion() {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance(mService).getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.getCurrentMagnificationRegion(mDisplayId);
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to obtain the current magnified region", re);
+                    re.rethrowFromSystemServer();
+                }
+            }
+            return Region.obtain();
+        }
+
+        /**
          * Resets magnification scale and center to their default (e.g. no
          * magnification) values.
          * <p>
@@ -1531,6 +1576,11 @@ public abstract class AccessibilityService extends Service {
          * {@link AccessibilityService#onServiceConnected()} has not yet been
          * called) or the service has been disconnected, this method will have
          * no effect and return {@code false}.
+         * <p>
+         * <strong>Note:</strong> This legacy API reset full-screen magnification.
+         * To reset the current controlling magnifier, use
+         * {@link #resetCurrentMagnification(boolean)} ()} instead.
+         * </p>
          *
          * @param animate {@code true} to animate from the current scale and
          *                center or {@code false} to reset the scale and center
@@ -1544,6 +1594,36 @@ public abstract class AccessibilityService extends Service {
             if (connection != null) {
                 try {
                     return connection.resetMagnification(mDisplayId, animate);
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to reset", re);
+                    re.rethrowFromSystemServer();
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Resets magnification scale and center of the controlling magnification
+         * to their default (e.g. no magnification) values.
+         * <p>
+         * <strong>Note:</strong> If the service is not yet connected (e.g.
+         * {@link AccessibilityService#onServiceConnected()} has not yet been
+         * called) or the service has been disconnected, this method will have
+         * no effect and return {@code false}.
+         * </p>
+         *
+         * @param animate {@code true} to animate from the current scale and
+         *                center or {@code false} to reset the scale and center
+         *                immediately
+         * @return {@code true} on success, {@code false} on failure
+         */
+        public boolean resetCurrentMagnification(boolean animate) {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance(mService).getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.resetCurrentMagnification(mDisplayId, animate);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to reset", re);
                     re.rethrowFromSystemServer();

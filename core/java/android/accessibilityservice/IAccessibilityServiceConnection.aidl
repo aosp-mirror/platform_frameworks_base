@@ -88,7 +88,11 @@ interface IAccessibilityServiceConnection {
 
     Region getMagnificationRegion(int displayId);
 
+    Region getCurrentMagnificationRegion(int displayId);
+
     boolean resetMagnification(int displayId, boolean animate);
+
+    boolean resetCurrentMagnification(int displayId, boolean animate);
 
     boolean setMagnificationConfig(int displayId, in MagnificationConfig config, boolean animate);
 
