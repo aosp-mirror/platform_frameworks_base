@@ -89,6 +89,9 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Transition type for entering split by opening an app into side-stage. */
     public static final int TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE = TRANSIT_FIRST_CUSTOM + 5;
 
+    /** Transition type for dismissing split-screen. */
+    public static final int TRANSIT_SPLIT_DISMISS = TRANSIT_FIRST_CUSTOM + 6;
+
     private final WindowOrganizer mOrganizer;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;
