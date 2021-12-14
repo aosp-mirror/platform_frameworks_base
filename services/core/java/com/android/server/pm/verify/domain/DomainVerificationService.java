@@ -1197,7 +1197,6 @@ public class DomainVerificationService extends SystemService
             @Nullable @UserIdInt Integer userId,
             @NonNull Function<String, PackageStateInternal> pkgSettingFunction)
             throws NameNotFoundException {
-        mEnforcer.assertApprovedQuerent(mConnection.getCallingUid(), mProxy);
         synchronized (mLock) {
             mDebug.printState(writer, packageName, userId, pkgSettingFunction, mAttachedPkgStates);
         }
