@@ -5953,6 +5953,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(
                 KEY_OPPORTUNISTIC_TIME_TO_SCAN_AFTER_CAPABILITY_SWITCH_TO_PRIMARY_LONG,
                 120000);
+        sDefaults.putAll(ImsServiceEntitlement.getDefaults());
         sDefaults.putAll(Gps.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
                 new int[] {
