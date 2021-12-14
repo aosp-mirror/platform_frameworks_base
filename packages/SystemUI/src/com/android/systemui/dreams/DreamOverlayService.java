@@ -63,50 +63,52 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     private final DreamOverlayStateController.Callback mOverlayStateCallback =
             new DreamOverlayStateController.Callback() {
-        @Override
-        public void onOverlayChanged() {
-            mExecutor.execute(() -> reloadOverlaysLocked());
-        }
-    };
+                @Override
+                public void onOverlayChanged() {
+                    mExecutor.execute(() -> reloadOverlaysLocked());
+                }
+            };
 
     // The service listens to view changes in order to declare that input occurring in areas outside
     // the overlay should be passed through to the dream underneath.
-    private View.OnAttachStateChangeListener mRootViewAttachListener =
+    private final View.OnAttachStateChangeListener mRootViewAttachListener =
             new View.OnAttachStateChangeListener() {
-        @Override
-        public void onViewAttachedToWindow(View v) {
-            v.getViewTreeObserver()
-                    .addOnComputeInternalInsetsListener(mOnComputeInternalInsetsListener);
-        }
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    v.getViewTreeObserver()
+                            .addOnComputeInternalInsetsListener(mOnComputeInternalInsetsListener);
+                }
 
-        @Override
-        public void onViewDetachedFromWindow(View v) {
-            v.getViewTreeObserver()
-                    .removeOnComputeInternalInsetsListener(mOnComputeInternalInsetsListener);
-        }
-    };
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                    v.getViewTreeObserver()
+                            .removeOnComputeInternalInsetsListener(
+                                    mOnComputeInternalInsetsListener);
+                }
+            };
 
     // A hook into the internal inset calculation where we declare the overlays as the only
     // touchable regions.
-    private ViewTreeObserver.OnComputeInternalInsetsListener mOnComputeInternalInsetsListener  =
+    private final ViewTreeObserver.OnComputeInternalInsetsListener
+            mOnComputeInternalInsetsListener =
             new ViewTreeObserver.OnComputeInternalInsetsListener() {
-        @Override
-        public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
-            if (mDreamOverlayContentView != null) {
-                inoutInfo.setTouchableInsets(
-                        ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-                final Region region = new Region();
-                for (int i = 0; i < mDreamOverlayContentView.getChildCount(); i++) {
-                    View child = mDreamOverlayContentView.getChildAt(i);
-                    final Rect rect = new Rect();
-                    child.getGlobalVisibleRect(rect);
-                    region.op(rect, Region.Op.UNION);
-                }
+                @Override
+                public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
+                    if (mDreamOverlayContentView != null) {
+                        inoutInfo.setTouchableInsets(
+                                ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+                        final Region region = new Region();
+                        for (int i = 0; i < mDreamOverlayContentView.getChildCount(); i++) {
+                            View child = mDreamOverlayContentView.getChildAt(i);
+                            final Rect rect = new Rect();
+                            child.getGlobalVisibleRect(rect);
+                            region.op(rect, Region.Op.UNION);
+                        }
 
-                inoutInfo.touchableRegion.set(region);
-            }
-        }
-    };
+                        inoutInfo.touchableRegion.set(region);
+                    }
+                }
+            };
 
     @Inject
     public DreamOverlayService(
@@ -163,7 +165,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         }
 
         window.setContentView(mDreamOverlayComponent.getDreamOverlayContainerView());
+
         mDreamOverlayContentView = mDreamOverlayComponent.getDreamOverlayContentView();
+        mDreamOverlayContentView.addOnAttachStateChangeListener(mRootViewAttachListener);
 
         mDreamOverlayComponent.getDreamOverlayStatusBarViewController().init();
 
