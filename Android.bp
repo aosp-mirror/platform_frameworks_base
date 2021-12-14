@@ -146,6 +146,7 @@ java_library {
         "framework-minus-apex",
         "framework-appsearch.impl",
         "framework-connectivity.impl",
+        "framework-connectivity-tiramisu.impl",
         "framework-graphics.impl",
         "framework-mediaprovider.impl",
         "framework-permission.impl",

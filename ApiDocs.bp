@@ -117,6 +117,7 @@ stubs_defaults {
 
         ":framework-appsearch-sources",
         ":framework-connectivity-sources",
+        ":framework-connectivity-tiramisu-updatable-sources",
         ":framework-graphics-srcs",
         ":framework-mediaprovider-sources",
         ":framework-permission-sources",
