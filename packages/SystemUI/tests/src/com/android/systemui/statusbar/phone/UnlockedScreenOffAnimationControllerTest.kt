@@ -21,6 +21,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import androidx.test.filters.SmallTest
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -59,6 +60,8 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock
     private lateinit var statusBarStateController: StatusBarStateControllerImpl
+    @Mock
+    private lateinit var interactionJankMonitor: InteractionJankMonitor
 
     @Before
     fun setUp() {
@@ -71,7 +74,8 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
                 dagger.Lazy<KeyguardViewMediator> { keyguardViewMediator },
                 keyguardStateController,
                 dagger.Lazy<DozeParameters> { dozeParameters },
-                globalSettings
+                globalSettings,
+                interactionJankMonitor
         )
         controller.initialize(statusbar, lightRevealScrim)
     }
