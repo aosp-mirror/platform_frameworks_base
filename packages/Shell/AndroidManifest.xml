@@ -165,6 +165,7 @@
     <uses-permission android:name="com.android.permission.USE_INSTALLER_V2" />
     <uses-permission android:name="android.permission.INSTALL_TEST_ONLY_PACKAGE" />
     <uses-permission android:name="com.android.permission.USE_SYSTEM_DATA_LOADERS" />
+    <uses-permission android:name="android.permission.PACKAGE_VERIFICATION_AGENT" />
     <uses-permission android:name="android.permission.MOVE_PACKAGE" />
     <uses-permission android:name="android.permission.KEEP_UNINSTALLED_PACKAGES" />
     <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
