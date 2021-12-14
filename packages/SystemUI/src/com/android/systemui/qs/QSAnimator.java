@@ -20,6 +20,8 @@ import static com.android.systemui.qs.dagger.QSFragmentModule.QS_FOOTER;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.util.Log;
+import android.util.Pair;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnLayoutChangeListener;
@@ -57,11 +59,14 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private static final String ALLOW_FANCY_ANIMATION = "sysui_qs_fancy_anim";
     private static final String MOVE_FULL_ROWS = "sysui_qs_move_whole_rows";
 
-    public static final float EXPANDED_TILE_DELAY = .86f;
+    private static final float EXPANDED_TILE_DELAY = .86f;
+    //Non first page delays
+    private static final float QS_TILE_LABEL_FADE_OUT_START = 0.15f;
+    private static final float QS_TILE_LABEL_FADE_OUT_END = 0.7f;
+    private static final float QQS_FADE_IN_INTERVAL = 0.1f;
+
     public static final float SHORT_PARALLAX_AMOUNT = 0.1f;
-    private static final long QQS_FADE_IN_DURATION = 200L;
-    // Fade out faster than fade in to finish before QQS hides.
-    private static final long QQS_FADE_OUT_DURATION = 50L;
+
 
     /**
      * List of all views that will be reset when clearing animation state
@@ -86,33 +91,54 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private PagedTileLayout mPagedLayout;
 
     private boolean mOnFirstPage = true;
-    private QSExpansionPathInterpolator mQSExpansionPathInterpolator;
+    private int mCurrentPage = 0;
+    private final QSExpansionPathInterpolator mQSExpansionPathInterpolator;
+    // Animator for elements in the first page, including secondary labels and qqs brightness
+    // slider, as well as animating the alpha of the QS tile layout (as we are tracking QQS tiles)
     private TouchAnimator mFirstPageAnimator;
-    private TouchAnimator mFirstPageDelayedAnimator;
+    // TranslationX animator for QQS/QS tiles
     private TouchAnimator mTranslationXAnimator;
+    // TranslationY animator for QS tiles (and their components) in the first page
     private TouchAnimator mTranslationYAnimator;
-    private TouchAnimator mNonfirstPageAnimator;
-    private TouchAnimator mNonfirstPageDelayedAnimator;
+    // TranslationY animator for QQS tiles (and their components)
+    private TouchAnimator mQQSTranslationYAnimator;
+    // Animates alpha of permanent views (QS tile layout, QQS tiles) when not in first page
+    private TouchAnimator mNonfirstPageAlphaAnimator;
+    // TranslatesY the QS Tile layout using QS.getHeightDiff()
+    private TouchAnimator mQSTileLayoutTranslatorAnimator;
     // This animates fading of SecurityFooter and media divider
     private TouchAnimator mAllPagesDelayedAnimator;
+    // Animator for brightness slider(s)
     private TouchAnimator mBrightnessAnimator;
+    // Animator for Footer actions in QQS
     private TouchAnimator mQQSFooterActionsAnimator;
+    // Height animator for QQS tiles (height changing from QQS size to QS size)
     private HeightExpansionAnimator mQQSTileHeightAnimator;
-    private HeightExpansionAnimator mOtherTilesExpandAnimator;
+    // Height animator for QS tile in first page but not in QQS, to present the illusion that they
+    // are expanding alongside the QQS tiles
+    private HeightExpansionAnimator mOtherFirstPageTilesHeightAnimator;
+    // Pair of animators for each non first page. The creation is delayed until the user first
+    // scrolls to that page, in order to get the proper measures and layout.
+    private final SparseArray<Pair<HeightExpansionAnimator, TouchAnimator>>
+            mNonFirstPageQSAnimators = new SparseArray<>();
 
     private boolean mNeedsAnimatorUpdate = false;
-    private boolean mToShowing;
     private boolean mOnKeyguard;
 
     private boolean mAllowFancy;
     private boolean mFullRows;
     private int mNumQuickTiles;
+    private int mLastQQSTileHeight;
     private float mLastPosition;
     private final QSTileHost mHost;
     private final Executor mExecutor;
     private final TunerService mTunerService;
     private boolean mShowCollapsedOnKeyguard;
     private boolean mTranslateWhileExpanding;
+    private int mQQSTop;
+
+    private int[] mTmpLoc1 = new int[2];
+    private int[] mTmpLoc2 = new int[2];
 
     @Inject
     public QSAnimator(QS qs, QuickQSPanel quickPanel, QuickStatusBarHeader quickStatusBarHeader,
@@ -213,8 +239,19 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         updateAnimators();
     }
 
+    private void addNonFirstPageAnimators(int page) {
+        Pair<HeightExpansionAnimator, TouchAnimator> pair = createSecondaryPageAnimators(page);
+        mNonFirstPageQSAnimators.put(page, pair);
+    }
+
     @Override
-    public void onPageChanged(boolean isFirst) {
+    public void onPageChanged(boolean isFirst, int currentPage) {
+        if (currentPage != INVALID_PAGE && mCurrentPage != currentPage) {
+            mCurrentPage = currentPage;
+            if (!isFirst && !mNonFirstPageQSAnimators.contains(currentPage)) {
+                addNonFirstPageAnimators(currentPage);
+            }
+        }
         if (mOnFirstPage == isFirst) return;
         if (!isFirst) {
             clearAnimationState();
@@ -230,7 +267,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             int yOffset,
             int[] temp,
             TouchAnimator.Builder animatorBuilderX,
-            TouchAnimator.Builder animatorBuilderY
+            TouchAnimator.Builder animatorBuilderY,
+            TouchAnimator.Builder qqsAnimatorBuilderY
     ) {
         getRelativePosition(temp, qqsView, commonParent);
         int qqsPosX = temp[0];
@@ -243,7 +281,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         animatorBuilderX.addFloat(qqsView, "translationX", 0, xDiff);
         animatorBuilderX.addFloat(qsView, "translationX", -xDiff, 0);
         int yDiff = qsPosY - qqsPosY - yOffset;
-        animatorBuilderY.addFloat(qqsView, "translationY", 0, yDiff);
+        qqsAnimatorBuilderY.addFloat(qqsView, "translationY", 0, yDiff);
         animatorBuilderY.addFloat(qsView, "translationY", -yDiff, 0);
         mAllViews.add(qqsView);
         mAllViews.add(qsView);
@@ -253,40 +291,47 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         mNeedsAnimatorUpdate = false;
         TouchAnimator.Builder firstPageBuilder = new Builder();
         TouchAnimator.Builder translationYBuilder = new Builder();
+        TouchAnimator.Builder qqsTranslationYBuilder = new Builder();
         TouchAnimator.Builder translationXBuilder = new Builder();
+        TouchAnimator.Builder nonFirstPageAlphaBuilder = new Builder();
 
         Collection<QSTile> tiles = mHost.getTiles();
         int count = 0;
-        int[] loc1 = new int[2];
-        int[] loc2 = new int[2];
 
         clearAnimationState();
+        mNonFirstPageQSAnimators.clear();
         mAllViews.clear();
         mAnimatedQsViews.clear();
         mQQSTileHeightAnimator = null;
-        mOtherTilesExpandAnimator = null;
+        mOtherFirstPageTilesHeightAnimator = null;
 
         mNumQuickTiles = mQuickQsPanel.getNumQuickTiles();
 
         QSTileLayout tileLayout = mQsPanelController.getTileLayout();
         mAllViews.add((View) tileLayout);
-        int height = mQs.getView() != null ? mQs.getView().getMeasuredHeight() : 0;
-        int heightDiff = height - mQs.getHeader().getBottom()
-                + mQs.getHeader().getPaddingBottom();
+        int heightDiff = mQs.getHeightDiff();
         if (!mTranslateWhileExpanding) {
             heightDiff *= SHORT_PARALLAX_AMOUNT;
         }
-        firstPageBuilder.addFloat(tileLayout, "translationY", heightDiff, 0);
+        mQSTileLayoutTranslatorAnimator = new Builder()
+                .addFloat(tileLayout, "translationY", heightDiff, 0)
+                .build();
 
-        int qqsTileHeight = 0;
+        mLastQQSTileHeight = 0;
 
         if (mQsPanelController.areThereTiles()) {
             for (QSTile tile : tiles) {
                 QSTileView tileView = mQsPanelController.getTileView(tile);
+
                 if (tileView == null) {
                     Log.e(TAG, "tileView is null " + tile.getTileSpec());
                     continue;
                 }
+                // Only animate tiles in the first page
+                if (mPagedLayout != null && count >= mPagedLayout.getNumTilesFirstPage()) {
+                    break;
+                }
+
                 final View tileIcon = tileView.getIcon().getIconView();
                 View view = mQs.getView();
 
@@ -297,16 +342,16 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     QSTileView quickTileView = mQuickQSPanelController.getTileView(tile);
                     if (quickTileView == null) continue;
 
-                    getRelativePosition(loc1, quickTileView, view);
-                    getRelativePosition(loc2, tileView, view);
-                    int yOffset = loc2[1] - loc1[1];
-                    int xOffset = loc2[0] - loc1[0];
+                    getRelativePosition(mTmpLoc1, quickTileView, view);
+                    getRelativePosition(mTmpLoc2, tileView, view);
+                    int yOffset = mTmpLoc2[1] - mTmpLoc1[1];
+                    int xOffset = mTmpLoc2[0] - mTmpLoc1[0];
 
                     // Offset the translation animation on the views
                     // (that goes from 0 to getOffsetTranslation)
                     int offsetWithQSBHTranslation =
                             yOffset - mQuickStatusBarHeader.getOffsetTranslation();
-                    translationYBuilder.addFloat(quickTileView, "translationY", 0,
+                    qqsTranslationYBuilder.addFloat(quickTileView, "translationY", 0,
                             offsetWithQSBHTranslation);
                     translationYBuilder.addFloat(tileView, "translationY",
                             -offsetWithQSBHTranslation, 0);
@@ -317,7 +362,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     if (mQQSTileHeightAnimator == null) {
                         mQQSTileHeightAnimator = new HeightExpansionAnimator(this,
                                 quickTileView.getMeasuredHeight(), tileView.getMeasuredHeight());
-                        qqsTileHeight = quickTileView.getMeasuredHeight();
+                        mLastQQSTileHeight = quickTileView.getMeasuredHeight();
                     }
 
                     mQQSTileHeightAnimator.addView(quickTileView);
@@ -329,9 +374,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                             view,
                             xOffset,
                             yOffset,
-                            loc1,
+                            mTmpLoc1,
                             translationXBuilder,
-                            translationYBuilder
+                            translationYBuilder,
+                            qqsTranslationYBuilder
                     );
 
                     // Label containers
@@ -341,9 +387,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                             view,
                             xOffset,
                             yOffset,
-                            loc1,
+                            mTmpLoc1,
                             translationXBuilder,
-                            translationYBuilder
+                            translationYBuilder,
+                            qqsTranslationYBuilder
                     );
 
                     // Secondary icon
@@ -353,12 +400,15 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                             view,
                             xOffset,
                             yOffset,
-                            loc1,
+                            mTmpLoc1,
                             translationXBuilder,
-                            translationYBuilder
+                            translationYBuilder,
+                            qqsTranslationYBuilder
                     );
 
                     firstPageBuilder.addFloat(quickTileView.getSecondaryLabel(), "alpha", 0, 1);
+                    nonFirstPageAlphaBuilder
+                            .addFloat(quickTileView.getSecondaryLabel(), "alpha", 0, 0);
 
                     mAnimatedQsViews.add(tileView);
                     mAllViews.add(quickTileView);
@@ -373,16 +423,17 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     // expanding from.
                     SideLabelTileLayout qqsLayout =
                             (SideLabelTileLayout) mQuickQsPanel.getTileLayout();
-                    getRelativePosition(loc1, qqsLayout, view);
-                    getRelativePosition(loc2, tileView, view);
-                    int diff = loc2[1] - (loc1[1] + qqsLayout.getPhantomTopPosition(count));
+                    getRelativePosition(mTmpLoc1, qqsLayout, view);
+                    mQQSTop = mTmpLoc1[1];
+                    getRelativePosition(mTmpLoc2, tileView, view);
+                    int diff = mTmpLoc2[1] - (mTmpLoc1[1] + qqsLayout.getPhantomTopPosition(count));
                     translationYBuilder.addFloat(tileView, "translationY", -diff, 0);
-                    if (mOtherTilesExpandAnimator == null) {
-                        mOtherTilesExpandAnimator =
+                    if (mOtherFirstPageTilesHeightAnimator == null) {
+                        mOtherFirstPageTilesHeightAnimator =
                                 new HeightExpansionAnimator(
-                                        this, qqsTileHeight, tileView.getMeasuredHeight());
+                                        this, mLastQQSTileHeight, tileView.getMeasuredHeight());
                     }
-                    mOtherTilesExpandAnimator.addView(tileView);
+                    mOtherFirstPageTilesHeightAnimator.addView(tileView);
                     tileView.setClipChildren(true);
                     tileView.setClipToPadding(true);
                     firstPageBuilder.addFloat(tileView.getSecondaryLabel(), "alpha", 0, 1);
@@ -392,18 +443,19 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 mAllViews.add(tileView);
                 count++;
             }
+            if (mCurrentPage != 0) {
+                addNonFirstPageAnimators(mCurrentPage);
+            }
         }
 
         if (mAllowFancy) {
             animateBrightnessSlider(firstPageBuilder);
 
             mFirstPageAnimator = firstPageBuilder
+                    // Fade in the tiles/labels as we reach the final position.
+                    .addFloat(tileLayout, "alpha", 0, 1)
                     .setListener(this)
                     .build();
-            // Fade in the tiles/labels as we reach the final position.
-            Builder builder = new Builder()
-                    .addFloat(tileLayout, "alpha", 0, 1);
-            mFirstPageDelayedAnimator = builder.build();
 
             if (mQQSFooterActions.getVisibility() != View.GONE) {
                 // only when qqs footer is present (which means split shade mode) it needs to
@@ -411,9 +463,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 updateQQSFooterAnimation();
             }
 
-
             // Fade in the security footer and the divider as we reach the final position
-            builder = new Builder().setStartDelay(EXPANDED_TILE_DELAY);
+            Builder builder = new Builder().setStartDelay(EXPANDED_TILE_DELAY);
             builder.addFloat(mSecurityFooter.getView(), "alpha", 0, 1);
             if (mQsPanelController.shouldUseHorizontalLayout()
                     && mQsPanelController.mMediaHost.hostView != null) {
@@ -425,26 +476,100 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             mAllPagesDelayedAnimator = builder.build();
             mAllViews.add(mSecurityFooter.getView());
             translationYBuilder.setInterpolator(mQSExpansionPathInterpolator.getYInterpolator());
+            qqsTranslationYBuilder.setInterpolator(mQSExpansionPathInterpolator.getYInterpolator());
             translationXBuilder.setInterpolator(mQSExpansionPathInterpolator.getXInterpolator());
+            if (mOnFirstPage) {
+                // Only recreate this animator if we're in the first page. That way we know that
+                // the first page is attached and has the proper positions/measures.
+                mQQSTranslationYAnimator = qqsTranslationYBuilder.build();
+            }
             mTranslationYAnimator = translationYBuilder.build();
             mTranslationXAnimator = translationXBuilder.build();
             if (mQQSTileHeightAnimator != null) {
                 mQQSTileHeightAnimator.setInterpolator(
                         mQSExpansionPathInterpolator.getYInterpolator());
             }
-            if (mOtherTilesExpandAnimator != null) {
-                mOtherTilesExpandAnimator.setInterpolator(
+            if (mOtherFirstPageTilesHeightAnimator != null) {
+                mOtherFirstPageTilesHeightAnimator.setInterpolator(
                         mQSExpansionPathInterpolator.getYInterpolator());
             }
         }
-        mNonfirstPageAnimator = new TouchAnimator.Builder()
+        mNonfirstPageAlphaAnimator = nonFirstPageAlphaBuilder
                 .addFloat(mQuickQsPanel, "alpha", 1, 0)
+                .addFloat(tileLayout, "alpha", 0, 1)
                 .setListener(mNonFirstPageListener)
-                .setEndDelay(.5f)
+                .setEndDelay(1 - QQS_FADE_IN_INTERVAL)
                 .build();
-        mNonfirstPageDelayedAnimator = new TouchAnimator.Builder()
-                .setStartDelay(.14f)
-                .addFloat(tileLayout, "alpha", 0, 1).build();
+    }
+
+    private Pair<HeightExpansionAnimator, TouchAnimator> createSecondaryPageAnimators(int page) {
+        if (mPagedLayout == null) return null;
+        HeightExpansionAnimator animator = null;
+        TouchAnimator.Builder builder = new Builder()
+                .setInterpolator(mQSExpansionPathInterpolator.getYInterpolator());
+        TouchAnimator.Builder alphaDelayedBuilder = new Builder()
+                .setStartDelay(QS_TILE_LABEL_FADE_OUT_START)
+                .setEndDelay(QS_TILE_LABEL_FADE_OUT_END);
+        SideLabelTileLayout qqsLayout = (SideLabelTileLayout) mQuickQsPanel.getTileLayout();
+        View view = mQs.getView();
+        List<String> specs = mPagedLayout.getSpecsForPage(page);
+
+        int row = -1;
+        int lastTileTop = -1;
+
+        for (int i = 0; i < specs.size(); i++) {
+            QSTileView tileView = mQsPanelController.getTileView(specs.get(i));
+            getRelativePosition(mTmpLoc2, tileView, view);
+            int diff = mTmpLoc2[1] - (mQQSTop + qqsLayout.getPhantomTopPosition(i));
+            builder.addFloat(tileView, "translationY", -diff, 0);
+            // The different elements in the tile should be centered, so maintain them centered
+            int centerDiff = (tileView.getMeasuredHeight() - mLastQQSTileHeight) / 2;
+            builder.addFloat(tileView.getIcon(), "translationY", -centerDiff, 0);
+            builder.addFloat(tileView.getSecondaryIcon(), "translationY", -centerDiff, 0);
+            // The labels have different apparent size in QQS vs QS (no secondary label), so the
+            // translation needs to account for that.
+            int labelDiff = centerDiff - tileView.getSecondaryLabel().getMeasuredHeight() / 2;
+            builder.addFloat(tileView.getLabelContainer(), "translationY", -labelDiff, 0);
+            builder.addFloat(tileView.getSecondaryLabel(), "alpha", 0, 0.3f, 1);
+
+            alphaDelayedBuilder.addFloat(tileView.getLabelContainer(), "alpha", 0, 1);
+            alphaDelayedBuilder.addFloat(tileView.getIcon(), "alpha", 0, 1);
+            alphaDelayedBuilder.addFloat(tileView.getSecondaryIcon(), "alpha", 0, 1);
+
+            final int tileTop = tileView.getTop();
+            if (tileTop != lastTileTop) {
+                row++;
+                lastTileTop = tileTop;
+            }
+            if (i >= mQuickQsPanel.getTileLayout().getNumVisibleTiles() && row >= 2) {
+                // Fade completely the tiles in rows below the ones that will merge into QQS.
+                // args is an array of 0s where the length is the current row index (at least third
+                // row)
+                final float[] args = new float[row];
+                args[args.length - 1] = 1f;
+                builder.addFloat(tileView, "alpha", args);
+            } else {
+                // For all the other rows, fade them a bit
+                builder.addFloat(tileView, "alpha", 0.6f, 1);
+            }
+
+            if (animator == null) {
+                animator = new HeightExpansionAnimator(
+                                this, mLastQQSTileHeight, tileView.getMeasuredHeight());
+                animator.setInterpolator(mQSExpansionPathInterpolator.getYInterpolator());
+            }
+            animator.addView(tileView);
+
+            tileView.setClipChildren(true);
+            tileView.setClipToPadding(true);
+            mAllViews.add(tileView);
+            mAllViews.add(tileView.getSecondaryLabel());
+            mAllViews.add(tileView.getIcon());
+            mAllViews.add(tileView.getSecondaryIcon());
+            mAllViews.add(tileView.getLabelContainer());
+        }
+        builder.addFloat(alphaDelayedBuilder.build(), "position", 0, 1);
+        return new Pair<>(animator, builder.build());
     }
 
     private void animateBrightnessSlider(Builder firstPageBuilder) {
@@ -542,30 +667,36 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             }
         }
         mLastPosition = position;
-        if (mOnFirstPage && mAllowFancy) {
+        if (!mAllowFancy) return;
+        if (mOnFirstPage) {
             mQuickQsPanel.setAlpha(1);
             mFirstPageAnimator.setPosition(position);
-            mFirstPageDelayedAnimator.setPosition(position);
             mTranslationYAnimator.setPosition(position);
             mTranslationXAnimator.setPosition(position);
-            if (mQQSTileHeightAnimator != null) {
-                mQQSTileHeightAnimator.setPosition(position);
-            }
-            if (mOtherTilesExpandAnimator != null) {
-                mOtherTilesExpandAnimator.setPosition(position);
+            if (mOtherFirstPageTilesHeightAnimator != null) {
+                mOtherFirstPageTilesHeightAnimator.setPosition(position);
             }
         } else {
-            mNonfirstPageAnimator.setPosition(position);
-            mNonfirstPageDelayedAnimator.setPosition(position);
+            mNonfirstPageAlphaAnimator.setPosition(position);
         }
-        if (mAllowFancy) {
-            mAllPagesDelayedAnimator.setPosition(position);
-            if (mBrightnessAnimator != null) {
-                mBrightnessAnimator.setPosition(position);
+        for (int i = 0; i < mNonFirstPageQSAnimators.size(); i++) {
+            Pair<HeightExpansionAnimator, TouchAnimator> pair = mNonFirstPageQSAnimators.valueAt(i);
+            if (pair != null) {
+                pair.first.setPosition(position);
+                pair.second.setPosition(position);
             }
-            if (mQQSFooterActionsAnimator != null) {
-                mQQSFooterActionsAnimator.setPosition(position);
-            }
+        }
+        if (mQQSTileHeightAnimator != null) {
+            mQQSTileHeightAnimator.setPosition(position);
+        }
+        mQSTileLayoutTranslatorAnimator.setPosition(position);
+        mQQSTranslationYAnimator.setPosition(position);
+        mAllPagesDelayedAnimator.setPosition(position);
+        if (mBrightnessAnimator != null) {
+            mBrightnessAnimator.setPosition(position);
+        }
+        if (mQQSFooterActionsAnimator != null) {
+            mQQSFooterActionsAnimator.setPosition(position);
         }
     }
 
@@ -611,8 +742,11 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         if (mQQSTileHeightAnimator != null) {
             mQQSTileHeightAnimator.resetViewsHeights();
         }
-        if (mOtherTilesExpandAnimator != null) {
-            mOtherTilesExpandAnimator.resetViewsHeights();
+        if (mOtherFirstPageTilesHeightAnimator != null) {
+            mOtherFirstPageTilesHeightAnimator.resetViewsHeights();
+        }
+        for (int i = 0; i < mNonFirstPageQSAnimators.size(); i++) {
+            mNonFirstPageQSAnimators.valueAt(i).first.resetViewsHeights();
         }
         final int N2 = mAnimatedQsViews.size();
         for (int i = 0; i < N2; i++) {
@@ -623,7 +757,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     @Override
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
             int oldTop, int oldRight, int oldBottom) {
-        mExecutor.execute(mUpdateAnimators);
+        boolean actualChange =
+                left != oldLeft || top != oldTop || right != oldRight || bottom != oldBottom;
+        if (actualChange) mExecutor.execute(mUpdateAnimators);
     }
 
     @Override
