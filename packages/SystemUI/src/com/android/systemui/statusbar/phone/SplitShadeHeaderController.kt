@@ -46,10 +46,11 @@ class SplitShadeHeaderController @Inject constructor(
         private val SPLIT_HEADER_TRANSITION_ID = R.id.split_header_transition
     }
 
+    private val carrierIconSlots: List<String>
     private val combinedHeaders = featureFlags.useCombinedQSHeaders()
-    // TODO(b/194178072) Handle RSSI hiding when multi carrier
     private val iconManager: StatusBarIconController.IconManager
     private val qsCarrierGroupController: QSCarrierGroupController
+    private val iconContainer: StatusIconContainer
     private var visible = false
         set(value) {
             if (field == value) {
@@ -115,7 +116,16 @@ class SplitShadeHeaderController @Inject constructor(
         batteryMeterViewController.ignoreTunerUpdates()
         batteryIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
 
-        val iconContainer: StatusIconContainer = statusBar.findViewById(R.id.statusIcons)
+        carrierIconSlots = if (featureFlags.isCombinedStatusBarSignalIconsEnabled) {
+            listOf(
+                statusBar.context.getString(com.android.internal.R.string.status_bar_no_calling),
+                statusBar.context.getString(com.android.internal.R.string.status_bar_call_strength)
+            )
+        } else {
+            listOf(statusBar.context.getString(com.android.internal.R.string.status_bar_mobile))
+        }
+
+        iconContainer = statusBar.findViewById(R.id.statusIcons)
         iconManager = StatusBarIconController.IconManager(iconContainer, featureFlags)
         qsCarrierGroupController = qsCarrierGroupControllerBuilder
                 .setQSCarrierGroup(statusBar.findViewById(R.id.carrier_group))
@@ -181,9 +191,20 @@ class SplitShadeHeaderController @Inject constructor(
     private fun updateListeners() {
         qsCarrierGroupController.setListening(visible)
         if (visible) {
+            updateSingleCarrier(qsCarrierGroupController.isSingleCarrier)
+            qsCarrierGroupController.setOnSingleCarrierChangedListener { updateSingleCarrier(it) }
             statusBarIconController.addIconGroup(iconManager)
         } else {
+            qsCarrierGroupController.setOnSingleCarrierChangedListener(null)
             statusBarIconController.removeIconGroup(iconManager)
+        }
+    }
+
+    private fun updateSingleCarrier(singleCarrier: Boolean) {
+        if (singleCarrier) {
+            iconContainer.removeIgnoredSlots(carrierIconSlots)
+        } else {
+            iconContainer.addIgnoredSlots(carrierIconSlots)
         }
     }
 }
