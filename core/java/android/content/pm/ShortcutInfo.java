@@ -352,6 +352,16 @@ public final class ShortcutInfo implements Parcelable {
         return disabledReason >= DISABLED_REASON_RESTORE_ISSUE_START;
     }
 
+    /** @hide */
+    @IntDef(flag = true, value = {SURFACE_LAUNCHER})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Surface {}
+
+    /**
+     * Indicates system surfaces managed by a launcher app. e.g. Long-Press Menu.
+     */
+    public static final int SURFACE_LAUNCHER = 1 << 0;
+
     /**
      * Shortcut category for messaging related actions, such as chat.
      */
@@ -451,6 +461,8 @@ public final class ShortcutInfo implements Parcelable {
 
     @Nullable private String mStartingThemeResName;
 
+    private int mExcludedSurfaces;
+
     private ShortcutInfo(Builder b) {
         mUserId = b.mContext.getUserId();
 
@@ -474,6 +486,7 @@ public final class ShortcutInfo implements Parcelable {
         if (b.mIsLongLived) {
             setLongLived();
         }
+        mExcludedSurfaces = b.mExcludedSurfaces;
         mRank = b.mRank;
         mExtras = b.mExtras;
         mLocusId = b.mLocusId;
@@ -587,6 +600,7 @@ public final class ShortcutInfo implements Parcelable {
         mLastChangedTimestamp = source.mLastChangedTimestamp;
         mDisabledReason = source.mDisabledReason;
         mLocusId = source.mLocusId;
+        mExcludedSurfaces = source.mExcludedSurfaces;
 
         // Just always keep it since it's cheep.
         mIconResId = source.mIconResId;
@@ -1025,6 +1039,8 @@ public final class ShortcutInfo implements Parcelable {
 
         private int mStartingThemeResId;
 
+        private int mExcludedSurfaces;
+
         /**
          * Old style constructor.
          * @hide
@@ -1381,6 +1397,22 @@ public final class ShortcutInfo implements Parcelable {
         @NonNull
         public Builder setExtras(@NonNull PersistableBundle extras) {
             mExtras = extras;
+            return this;
+        }
+
+        /**
+         * Sets which surfaces a shortcut will be excluded from.
+         *
+         * If the shortcut is set to be excluded from {@link #SURFACE_LAUNCHER}, shortcuts will be
+         * excluded from the search result of {@link android.content.pm.LauncherApps#getShortcuts(
+         * android.content.pm.LauncherApps.ShortcutQuery, UserHandle)} nor
+         * {@link android.content.pm.ShortcutManager#getShortcuts(int)}. This generally means the
+         * shortcut would not be displayed by a launcher app (e.g. in Long-Press menu), while
+         * remain visible in other surfaces such as assistant or on-device-intelligence.
+         */
+        @NonNull
+        public Builder setExcludedFromSurfaces(final int surfaces) {
+            mExcludedSurfaces = surfaces;
             return this;
         }
 
@@ -2137,6 +2169,13 @@ public final class ShortcutInfo implements Parcelable {
         mCategories = cloneCategories(categories);
     }
 
+    /**
+     * Return true if the shortcut is included in specified surface.
+     */
+    public boolean isIncludedIn(@Surface int surface) {
+        return (mExcludedSurfaces & surface) == 0;
+    }
+
     private ShortcutInfo(Parcel source) {
         final ClassLoader cl = getClass().getClassLoader();
 
@@ -2185,6 +2224,7 @@ public final class ShortcutInfo implements Parcelable {
         mLocusId = source.readParcelable(cl);
         mIconUri = source.readString8();
         mStartingThemeResName = source.readString8();
+        mExcludedSurfaces = source.readInt();
     }
 
     @Override
@@ -2237,6 +2277,7 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeParcelable(mLocusId, flags);
         dest.writeString8(mIconUri);
         dest.writeString8(mStartingThemeResName);
+        dest.writeInt(mExcludedSurfaces);
     }
 
     public static final @NonNull Creator<ShortcutInfo> CREATOR =
@@ -2345,6 +2386,9 @@ public final class ShortcutInfo implements Parcelable {
         }
         if (isLongLived()) {
             sb.append("Liv");
+        }
+        if (!isIncludedIn(SURFACE_LAUNCHER)) {
+            sb.append("Hid-L");
         }
         sb.append("]");
 
