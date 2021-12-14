@@ -21,6 +21,7 @@ import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
 import android.content.pm.PackageInfo;
 
+import com.android.server.backup.OperationStorage;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
@@ -57,6 +58,7 @@ public class ShadowPerformUnifiedRestoreTask {
     @Implementation
     protected void __constructor__(
             UserBackupManagerService backupManagerService,
+            OperationStorage operationStorage,
             TransportConnection transportConnection,
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,

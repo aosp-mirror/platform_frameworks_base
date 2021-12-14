@@ -19,9 +19,6 @@ package com.android.server.backup.fullbackup;
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.UserBackupManagerService.OP_PENDING;
-import static com.android.server.backup.UserBackupManagerService.OP_TYPE_BACKUP;
-import static com.android.server.backup.UserBackupManagerService.OP_TYPE_BACKUP_WAIT;
 
 import android.annotation.Nullable;
 import android.app.IBackupAgent;
@@ -45,10 +42,12 @@ import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FullBackupJob;
+import com.android.server.backup.OperationStorage;
+import com.android.server.backup.OperationStorage.OpState;
+import com.android.server.backup.OperationStorage.OpType;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
-import com.android.server.backup.internal.Operation;
 import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
@@ -99,6 +98,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class PerformFullTransportBackupTask extends FullBackupTask implements BackupRestoreTask {
     public static PerformFullTransportBackupTask newWithCurrentTransport(
             UserBackupManagerService backupManagerService,
+            OperationStorage operationStorage,
             IFullBackupRestoreObserver observer,
             String[] whichPackages,
             boolean updateSchedule,
@@ -118,6 +118,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                                 listenerCaller);
         return new PerformFullTransportBackupTask(
                 backupManagerService,
+                operationStorage,
                 transportConnection,
                 observer,
                 whichPackages,
@@ -136,6 +137,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     private UserBackupManagerService mUserBackupManagerService;
     private final Object mCancelLock = new Object();
 
+    OperationStorage mOperationStorage;
     List<PackageInfo> mPackages;
     PackageInfo mCurrentPackage;
     boolean mUpdateSchedule;
@@ -158,6 +160,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     private final BackupEligibilityRules mBackupEligibilityRules;
 
     public PerformFullTransportBackupTask(UserBackupManagerService backupManagerService,
+            OperationStorage operationStorage,
             TransportConnection transportConnection,
             IFullBackupRestoreObserver observer,
             String[] whichPackages, boolean updateSchedule,
@@ -165,7 +168,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             @Nullable IBackupManagerMonitor monitor, @Nullable OnTaskFinishedListener listener,
             boolean userInitiated, BackupEligibilityRules backupEligibilityRules) {
         super(observer);
-        this.mUserBackupManagerService = backupManagerService;
+        mUserBackupManagerService = backupManagerService;
+        mOperationStorage = operationStorage;
         mTransportConnection = transportConnection;
         mUpdateSchedule = updateSchedule;
         mLatch = latch;
@@ -261,16 +265,13 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     }
 
     private void registerTask() {
-        synchronized (mUserBackupManagerService.getCurrentOpLock()) {
-            Slog.d(TAG, "backupmanager pftbt token=" + Integer.toHexString(mCurrentOpToken));
-            mUserBackupManagerService.getCurrentOperations().put(
-                    mCurrentOpToken,
-                    new Operation(OP_PENDING, this, OP_TYPE_BACKUP));
-        }
+        Slog.d(TAG, "backupmanager pftbt token=" + Integer.toHexString(mCurrentOpToken));
+        mOperationStorage.registerOperation(mCurrentOpToken, OpState.PENDING, this, OpType.BACKUP);
     }
 
+    // public, because called from KeyValueBackupTask.finishTask.
     public void unregisterTask() {
-        mUserBackupManagerService.removeOperation(mCurrentOpToken);
+        mOperationStorage.removeOperation(mCurrentOpToken);
     }
 
     @Override
@@ -722,7 +723,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
             try {
                 mUserBackupManagerService.prepareOperationTimeout(
-                        mCurrentOpToken, fullBackupAgentTimeoutMillis, this, OP_TYPE_BACKUP_WAIT);
+                        mCurrentOpToken, fullBackupAgentTimeoutMillis, this, OpType.BACKUP_WAIT);
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "Preflighting full payload of " + pkg.packageName);
                 }
@@ -777,7 +778,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             }
             mResult.set(result);
             mLatch.countDown();
-            mUserBackupManagerService.removeOperation(mCurrentOpToken);
+            mOperationStorage.removeOperation(mCurrentOpToken);
         }
 
         @Override
@@ -787,7 +788,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             }
             mResult.set(BackupTransport.AGENT_ERROR);
             mLatch.countDown();
-            mUserBackupManagerService.removeOperation(mCurrentOpToken);
+            mOperationStorage.removeOperation(mCurrentOpToken);
         }
 
         @Override
@@ -837,16 +838,12 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         }
 
         void registerTask() {
-            synchronized (mUserBackupManagerService.getCurrentOpLock()) {
-                mUserBackupManagerService.getCurrentOperations().put(
-                        mCurrentOpToken, new Operation(OP_PENDING, this, OP_TYPE_BACKUP_WAIT));
-            }
+            mOperationStorage.registerOperation(mCurrentOpToken,
+                    OpState.PENDING, this, OpType.BACKUP_WAIT);
         }
 
         void unregisterTask() {
-            synchronized (mUserBackupManagerService.getCurrentOpLock()) {
-                mUserBackupManagerService.getCurrentOperations().remove(mCurrentOpToken);
-            }
+            mOperationStorage.removeOperation(mCurrentOpToken);
         }
 
         @Override
@@ -956,7 +953,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             mPreflightLatch.countDown();
             mBackupLatch.countDown();
             // We are done with this operation.
-            mUserBackupManagerService.removeOperation(mCurrentOpToken);
+            mOperationStorage.removeOperation(mCurrentOpToken);
         }
     }
 }
