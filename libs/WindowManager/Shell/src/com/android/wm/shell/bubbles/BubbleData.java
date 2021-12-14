@@ -328,6 +328,7 @@ public class BubbleData {
         if (prevBubble == null) {
             // Create a new bubble
             bubble.setSuppressFlyout(suppressFlyout);
+            bubble.markUpdatedAt(mTimeSource.currentTimeMillis());
             doAdd(bubble);
             trim();
         } else {
