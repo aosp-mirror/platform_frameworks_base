@@ -104,8 +104,6 @@ public class PipMenuView extends FrameLayout {
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
-    private static final boolean ENABLE_ENTER_SPLIT = true;
-
     private int mMenuState;
     private boolean mAllowMenuTimeout = true;
     private boolean mAllowTouches = true;
@@ -277,6 +275,8 @@ public class PipMenuView extends FrameLayout {
             boolean resizeMenuOnShow, boolean withDelay, boolean showResizeHandle) {
         mAllowMenuTimeout = allowMenuTimeout;
         mDidLastShowMenuResize = resizeMenuOnShow;
+        final boolean enableEnterSplit =
+                mContext.getResources().getBoolean(R.bool.config_pipEnableEnterSplitButton);
         if (mMenuState != menuState) {
             // Disallow touches if the menu needs to resize while showing, and we are transitioning
             // to/from a full menu state.
@@ -297,7 +297,7 @@ public class PipMenuView extends FrameLayout {
                     mDismissButton.getAlpha(), 1f);
             ObjectAnimator enterSplitAnim = ObjectAnimator.ofFloat(mEnterSplitButton, View.ALPHA,
                     mEnterSplitButton.getAlpha(),
-                    ENABLE_ENTER_SPLIT && mFocusedTaskAllowSplitScreen ? 1f : 0f);
+                    enableEnterSplit && mFocusedTaskAllowSplitScreen ? 1f : 0f);
             if (menuState == MENU_STATE_FULL) {
                 mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim,
                         enterSplitAnim);
