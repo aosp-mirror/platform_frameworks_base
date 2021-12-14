@@ -275,11 +275,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void updateClockLayout() {
-        int largeClockTopMargin = 0;
-        if (mSmartspaceController.isEnabled()) {
-            largeClockTopMargin = getContext().getResources().getDimensionPixelSize(
-                    R.dimen.keyguard_large_clock_top_margin);
-        }
+        int largeClockTopMargin = getContext().getResources().getDimensionPixelSize(
+                R.dimen.keyguard_large_clock_top_margin);
+
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(MATCH_PARENT,
                 MATCH_PARENT);
         lp.topMargin = largeClockTopMargin;
