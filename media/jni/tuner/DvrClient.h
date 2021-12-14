@@ -82,6 +82,11 @@ public:
     int64_t writeToFile(int64_t size);
 
     /**
+     * Seeks the Dvr file descriptor from the beginning of the file.
+     */
+    int64_t seekFile(int64_t pos);
+
+    /**
      * Write data to the given buffer with given size. Return the actual write size.
      */
     int64_t writeToBuffer(int8_t* buffer, int64_t size);

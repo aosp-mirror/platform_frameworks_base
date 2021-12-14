@@ -40,6 +40,8 @@ public class MediaEvent extends FilterEvent {
     private final int mStreamId;
     private final boolean mIsPtsPresent;
     private final long mPts;
+    private final boolean mIsDtsPresent;
+    private final long mDts;
     private final long mDataLength;
     private final long mOffset;
     private LinearBlock mLinearBlock;
@@ -50,12 +52,14 @@ public class MediaEvent extends FilterEvent {
     private final AudioDescriptor mExtraMetaData;
 
     // This constructor is used by JNI code only
-    private MediaEvent(int streamId, boolean isPtsPresent, long pts, long dataLength, long offset,
-            LinearBlock buffer, boolean isSecureMemory, long dataId, int mpuSequenceNumber,
-            boolean isPrivateData, AudioDescriptor extraMetaData) {
+    private MediaEvent(int streamId, boolean isPtsPresent, long pts, boolean isDtsPresent, long dts,
+            long dataLength, long offset, LinearBlock buffer, boolean isSecureMemory, long dataId,
+            int mpuSequenceNumber, boolean isPrivateData, AudioDescriptor extraMetaData) {
         mStreamId = streamId;
         mIsPtsPresent = isPtsPresent;
         mPts = pts;
+        mIsDtsPresent = isDtsPresent;
+        mDts = dts;
         mDataLength = dataLength;
         mOffset = offset;
         mLinearBlock = buffer;
@@ -88,6 +92,26 @@ public class MediaEvent extends FilterEvent {
     public long getPts() {
         return mPts;
     }
+
+    /**
+     * Returns whether DTS (Decode Time Stamp) is present.
+     *
+     * <p>This query is only supported in Tuner 2.0 or higher version. Unsupported version will
+     * return {@code false}.
+     * Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
+     *
+     * @return {@code true} if DTS is present in PES header; {@code false} otherwise.
+     */
+    public boolean isDtsPresent() { return mIsDtsPresent; }
+
+    /**
+     * Gets DTS (Decode Time Stamp) for audio or video frame.
+     *
+     * * <p>This query is only supported in Tuner 2.0 or higher version. Unsupported version will
+     * return {@code -1}.
+     * Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
+     */
+    public long getDts() { return mDts; }
 
     /**
      * Gets data size in bytes of audio or video frame.
