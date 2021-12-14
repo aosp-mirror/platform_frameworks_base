@@ -21,10 +21,13 @@ import static android.content.PermissionChecker.PERMISSION_GRANTED;
 
 import android.annotation.NonNull;
 import android.content.AttributionSource;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.PermissionChecker;
 import android.os.IBinder;
 import android.os.ServiceManager;
+import android.provider.Settings;
+import android.uwb.AdapterState;
 import android.uwb.IUwbAdapter;
 
 
@@ -79,5 +82,24 @@ public class UwbInjector {
         int permissionCheckResult = PermissionChecker.checkPermissionForDataDelivery(
                 mContext, UWB_RANGING, -1, attributionSource, message);
         return permissionCheckResult == PERMISSION_GRANTED;
+    }
+
+    /** Returns true if UWB state saved in Settings is enabled. */
+    public boolean isPersistedUwbStateEnabled() {
+        final ContentResolver cr = mContext.getContentResolver();
+        try {
+            return Settings.Global.getInt(cr, Settings.Global.UWB_ENABLED)
+                    == AdapterState.STATE_ENABLED_ACTIVE;
+        } catch (Settings.SettingNotFoundException e) {
+            Settings.Global.putInt(cr, Settings.Global.UWB_ENABLED,
+                AdapterState.STATE_ENABLED_ACTIVE);
+            return true;
+        }
+    }
+
+    /** Returns true if airplane mode is turned on. */
+    public boolean isAirplaneModeOn() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
     }
 }

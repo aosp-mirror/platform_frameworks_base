@@ -13,12 +13,14 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
--->
-<resources>
-    <style name="Theme.CollapsingToolbar.Settings" parent="@style/Theme.MaterialComponents.DayNight">
-        <item name="elevationOverlayEnabled">true</item>
-        <item name="elevationOverlayColor">?attr/colorPrimary</item>
-        <item name="colorPrimary">@*android:color/primary_dark_device_default_settings</item>
-        <item name="colorAccent">@*android:color/accent_device_default_dark</item>
-    </style>
-</resources>
+  -->
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle"
+    android:width="@dimen/settingslib_switch_track_width"
+    android:height="@dimen/settingslib_switch_track_height">
+    <solid
+        android:color="@color/settingslib_track_off_color"
+        android:alpha="?android:attr/disabledAlpha"/>
+    <corners android:radius="@dimen/settingslib_switch_track_radius"/>
+</shape>

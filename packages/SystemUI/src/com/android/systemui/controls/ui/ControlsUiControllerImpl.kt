@@ -256,13 +256,13 @@ class ControlsUiControllerImpl @Inject constructor (
         // Force animations when transitioning from a dialog to an activity
         intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
 
-        if (keyguardStateController.isUnlocked()) {
+        if (keyguardStateController.isShowing()) {
+            activityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */)
+        } else {
             activityContext.startActivity(
                 intent,
                 ActivityOptions.makeSceneTransitionAnimation(activityContext as Activity).toBundle()
             )
-        } else {
-            activityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */)
         }
     }
 

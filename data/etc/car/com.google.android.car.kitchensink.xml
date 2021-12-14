@@ -48,6 +48,7 @@
         <permission name="android.permission.SET_ACTIVITY_WATCHER"/>
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+        <permission name="android.car.permission.CONTROL_APP_BLOCKING"/>
 
         <!-- use for rotary fragment to enable/disable packages related to rotary -->
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>

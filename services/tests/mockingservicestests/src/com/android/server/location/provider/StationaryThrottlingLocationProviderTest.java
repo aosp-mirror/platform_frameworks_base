@@ -90,7 +90,7 @@ public class StationaryThrottlingLocationProviderTest {
     }
 
     @Test
-    public void testThrottle() {
+    public void testThrottle_stationaryExit() {
         ProviderRequest request = new ProviderRequest.Builder().setIntervalMillis(50).build();
 
         mProvider.getController().setRequest(request);
@@ -108,6 +108,29 @@ public class StationaryThrottlingLocationProviderTest {
         verify(mListener, timeout(75).times(3)).onReportLocation(any(LocationResult.class));
 
         mInjector.getDeviceStationaryHelper().setStationary(false);
+        verify(mDelegate, times(2)).onSetRequest(request);
+        verify(mListener, after(75).times(3)).onReportLocation(any(LocationResult.class));
+    }
+
+    @Test
+    public void testThrottle_idleExit() {
+        ProviderRequest request = new ProviderRequest.Builder().setIntervalMillis(50).build();
+
+        mProvider.getController().setRequest(request);
+        verify(mDelegate).onSetRequest(request);
+
+        mDelegateProvider.reportLocation(createLocationResult("test_provider", mRandom));
+        verify(mListener, times(1)).onReportLocation(any(LocationResult.class));
+
+        mInjector.getDeviceIdleHelper().setIdle(true);
+        verify(mDelegate, never()).onSetRequest(ProviderRequest.EMPTY_REQUEST);
+
+        mInjector.getDeviceStationaryHelper().setStationary(true);
+        verify(mDelegate).onSetRequest(ProviderRequest.EMPTY_REQUEST);
+        verify(mListener, timeout(75).times(2)).onReportLocation(any(LocationResult.class));
+        verify(mListener, timeout(75).times(3)).onReportLocation(any(LocationResult.class));
+
+        mInjector.getDeviceIdleHelper().setIdle(false);
         verify(mDelegate, times(2)).onSetRequest(request);
         verify(mListener, after(75).times(3)).onReportLocation(any(LocationResult.class));
     }

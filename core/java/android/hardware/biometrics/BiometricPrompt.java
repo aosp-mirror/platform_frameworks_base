@@ -438,9 +438,16 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     }
 
     private class OnAuthenticationCancelListener implements CancellationSignal.OnCancelListener {
+        private final long mAuthRequestId;
+
+        OnAuthenticationCancelListener(long id) {
+            mAuthRequestId = id;
+        }
+
         @Override
         public void onCancel() {
-            cancelAuthentication();
+            Log.d(TAG, "Cancel BP authentication requested for: " + mAuthRequestId);
+            cancelAuthentication(mAuthRequestId);
         }
     }
 
@@ -853,10 +860,12 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @param userId The user to authenticate
      * @param operationId The keystore operation associated with authentication
      *
+     * @return A requestId that can be used to cancel this operation.
+     *
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void authenticateUserForOperation(
+    public long authenticateUserForOperation(
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
@@ -871,7 +880,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
         }
-        authenticateInternal(operationId, cancel, executor, callback, userId);
+
+        return authenticateInternal(operationId, cancel, executor, callback, userId);
     }
 
     /**
@@ -1002,10 +1012,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         authenticateInternal(null /* crypto */, cancel, executor, callback, mContext.getUserId());
     }
 
-    private void cancelAuthentication() {
+    private void cancelAuthentication(long requestId) {
         if (mService != null) {
             try {
-                mService.cancelAuthentication(mToken, mContext.getOpPackageName());
+                mService.cancelAuthentication(mToken, mContext.getOpPackageName(), requestId);
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to cancel authentication", e);
             }
@@ -1024,7 +1034,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         authenticateInternal(operationId, cancel, executor, callback, userId);
     }
 
-    private void authenticateInternal(
+    private long authenticateInternal(
             long operationId,
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
@@ -1040,9 +1050,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         try {
             if (cancel.isCanceled()) {
                 Log.w(TAG, "Authentication already canceled");
-                return;
-            } else {
-                cancel.setOnCancelListener(new OnAuthenticationCancelListener());
+                return -1;
             }
 
             mExecutor = executor;
@@ -1065,14 +1073,16 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                 promptInfo = mPromptInfo;
             }
 
-            mService.authenticate(mToken, operationId, userId, mBiometricServiceReceiver,
-                    mContext.getOpPackageName(), promptInfo);
-
+            final long authId = mService.authenticate(mToken, operationId, userId,
+                    mBiometricServiceReceiver, mContext.getOpPackageName(), promptInfo);
+            cancel.setOnCancelListener(new OnAuthenticationCancelListener(authId));
+            return authId;
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception while authenticating", e);
             mExecutor.execute(() -> callback.onAuthenticationError(
                     BiometricPrompt.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                     mContext.getString(R.string.biometric_error_hw_unavailable)));
+            return -1;
         }
     }
 

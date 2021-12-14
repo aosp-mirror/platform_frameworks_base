@@ -696,7 +696,7 @@ public final class AppHibernationService extends SystemService {
                 idpw.print("User Level Hibernation States, ");
                 idpw.printPair("user", userId);
                 idpw.println();
-                Map<String, UserLevelState> stateMap = mUserStates.get(i);
+                Map<String, UserLevelState> stateMap = mUserStates.get(userId);
                 idpw.increaseIndent();
                 for (UserLevelState state : stateMap.values()) {
                     idpw.print(state);

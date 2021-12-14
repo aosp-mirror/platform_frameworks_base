@@ -90,6 +90,24 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         onSourceChanged();
     }
 
+    @Override
+    protected boolean updateClientVisibility(InsetsControlTarget caller) {
+        boolean changed = super.updateClientVisibility(caller);
+        if (changed && caller.getRequestedVisibility(mSource.getType())) {
+            reportImeDrawnForOrganizer(caller);
+        }
+        return changed;
+    }
+
+    private void reportImeDrawnForOrganizer(InsetsControlTarget caller) {
+        if (caller.getWindow() != null && caller.getWindow().getTask() != null) {
+            if (caller.getWindow().getTask().isOrganized()) {
+                mWin.mWmService.mAtmService.mTaskOrganizerController.reportImeDrawnOnTask(
+                        caller.getWindow().getTask());
+            }
+        }
+    }
+
     private void onSourceChanged() {
         if (mLastSource.equals(mSource)) {
             return;

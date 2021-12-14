@@ -20,6 +20,8 @@ import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR;
 import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
 import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT;
 
+import static com.android.server.display.HighBrightnessModeController.HBM_TRANSITION_POINT_INVALID;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.spy;
@@ -124,6 +126,7 @@ public class HighBrightnessModeControllerTest {
                 mInjectorMock, mHandler, DISPLAY_WIDTH, DISPLAY_HEIGHT, mDisplayToken, DEFAULT_MIN,
                 DEFAULT_MAX, null, () -> {}, mContextSpy);
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
+        assertEquals(hbmc.getTransitionPoint(), HBM_TRANSITION_POINT_INVALID, 0.0f);
     }
 
     @Test
@@ -135,6 +138,7 @@ public class HighBrightnessModeControllerTest {
         hbmc.setAutoBrightnessEnabled(true);
         hbmc.onAmbientLuxChange(MINIMUM_LUX - 1); // below allowed range
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
+        assertEquals(hbmc.getTransitionPoint(), HBM_TRANSITION_POINT_INVALID, 0.0f);
     }
 
     @Test
