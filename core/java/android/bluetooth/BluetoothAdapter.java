@@ -788,7 +788,7 @@ public final class BluetoothAdapter {
     @RequiresNoPermission
     public static synchronized BluetoothAdapter getDefaultAdapter() {
         if (sAdapter == null) {
-            sAdapter = createAdapter(BluetoothManager.resolveAttributionSource(null));
+            sAdapter = createAdapter(AttributionSource.myAttributionSource());
         }
         return sAdapter;
     }

@@ -16,14 +16,10 @@
 
 package android.bluetooth;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
-import android.app.ActivityThread;
-import android.app.AppGlobals;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.content.Attributable;
@@ -69,35 +65,9 @@ public final class BluetoothManager {
      * @hide
      */
     public BluetoothManager(Context context) {
-        mAttributionSource = resolveAttributionSource(context);
+        mAttributionSource = (context != null) ? context.getAttributionSource() :
+                AttributionSource.myAttributionSource();
         mAdapter = BluetoothAdapter.createAdapter(mAttributionSource);
-    }
-
-    /** {@hide} */
-    public static @NonNull AttributionSource resolveAttributionSource(@Nullable Context context) {
-        AttributionSource res = null;
-        if (context != null) {
-            res = context.getAttributionSource();
-        }
-        if (res == null) {
-            res = ActivityThread.currentAttributionSource();
-        }
-        if (res == null) {
-            int uid = android.os.Process.myUid();
-            if (uid == android.os.Process.ROOT_UID) {
-                uid = android.os.Process.SYSTEM_UID;
-            }
-            try {
-                res = new AttributionSource.Builder(uid)
-                    .setPackageName(AppGlobals.getPackageManager().getPackagesForUid(uid)[0])
-                    .build();
-            } catch (RemoteException ignored) {
-            }
-        }
-        if (res == null) {
-            throw new IllegalStateException("Failed to resolve AttributionSource");
-        }
-        return res;
     }
 
     /**
