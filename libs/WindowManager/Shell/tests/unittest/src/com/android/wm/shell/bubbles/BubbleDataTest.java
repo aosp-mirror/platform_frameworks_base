@@ -794,7 +794,7 @@ public class BubbleDataTest extends ShellTestCase {
     }
 
     @Test
-    public void test_expanded_removeLastBubble_showsOverflowIfNotEmpty() {
+    public void test_expanded_removeLastBubble_collapsesIfOverflowNotEmpty() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         changeExpandedStateAtTime(true, 2000);
@@ -804,7 +804,7 @@ public class BubbleDataTest extends ShellTestCase {
         mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertThat(mBubbleData.getOverflowBubbles().size()).isGreaterThan(0);
-        assertSelectionChangedTo(mBubbleData.getOverflow());
+        assertExpandedChangedTo(false);
     }
 
     @Test
