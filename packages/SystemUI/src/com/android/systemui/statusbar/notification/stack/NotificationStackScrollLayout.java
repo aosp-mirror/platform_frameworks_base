@@ -668,6 +668,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public void setIsRemoteInputActive(boolean isActive) {
         mIsRemoteInputActive = isActive;
+        updateFooter();
     }
 
     @VisibleForTesting
