@@ -48,16 +48,28 @@ filegroup {
     ],
 }
 
+// IpSec related libraries.
+
+filegroup {
+    name: "services.connectivity-ipsec-sources",
+    srcs: [
+        "src/com/android/server/IpSecService.java",
+    ],
+    path: "src",
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
 // Connectivity-T common libraries.
 
 filegroup {
     name: "services.connectivity-tiramisu-sources",
     srcs: [
+        ":services.connectivity-ipsec-sources",
         ":services.connectivity-netstats-sources",
         ":services.connectivity-nsd-sources",
     ],
     path: "src",
-    visibility: [
-        "//frameworks/base/services/core",
-    ],
+    visibility: ["//frameworks/base/services/core"],
 }
