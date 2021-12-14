@@ -49,6 +49,8 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
+import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.Manifest;
@@ -111,12 +113,10 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
-import android.util.LruCache;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -250,10 +250,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     static final int MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE = 7000;
 
-    static final long TIME_TO_RECONNECT = 3 * 1000;
-
-    static final int SECURE_SUGGESTION_SPANS_MAX_SIZE = 20;
-
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
     private static final String HANDLER_THREAD_NAME = "android.imms";
@@ -301,8 +297,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     // lock for this class.
     final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
     final ArrayMap<String, InputMethodInfo> mMethodMap = new ArrayMap<>();
-    private final LruCache<SuggestionSpan, InputMethodInfo> mSecureSuggestionSpans =
-            new LruCache<>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
     final InputMethodSubtypeSwitchingController mSwitchingController;
 
     /**
@@ -312,12 +306,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private int mMethodMapUpdateCount = 0;
 
     /**
-     * Indicates whether {@link InputMethodBindingController#getVisibleConnection} is currently
-     * in use.
+     * The display id for which the latest startInput was called.
      */
-    private boolean isVisibleBound() {
-        return mBindingController.isVisibleBound();
+    @GuardedBy("mMethodMap")
+    int getDisplayIdToShowIme() {
+        return mDisplayIdToShowIme;
     }
+
+    @GuardedBy("mMethodMap")
+    private int mDisplayIdToShowIme = INVALID_DISPLAY;
 
     // Ongoing notification
     private NotificationManager mNotificationManager;
@@ -2354,10 +2351,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         // Compute the final shown display ID with validated cs.selfReportedDisplayId for this
         // session & other conditions.
-        final int displayIdToShowIme = computeImeDisplayIdForTarget(cs.selfReportedDisplayId,
+        mDisplayIdToShowIme = computeImeDisplayIdForTarget(cs.selfReportedDisplayId,
                 mImeDisplayValidator);
 
-        if (displayIdToShowIme == INVALID_DISPLAY) {
+        if (mDisplayIdToShowIme == INVALID_DISPLAY) {
             mImeHiddenByDisplayPolicy = true;
             hideCurrentInputLocked(mCurFocusedWindow, 0, null,
                     SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE);
@@ -2378,7 +2375,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // Check if the input method is changing.
         // We expect the caller has already verified that the client is allowed to access this
         // display ID.
-        if (isSelectedMethodBound(displayIdToShowIme)) {
+        if (isSelectedMethodBound()) {
             if (cs.curSession != null) {
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
@@ -2394,13 +2391,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         mBindingController.unbindCurrentMethodLocked();
 
-        return mBindingController.bindCurrentMethodLocked(displayIdToShowIme);
+        return mBindingController.bindCurrentMethodLocked();
     }
 
-    private boolean isSelectedMethodBound(int displayIdToShowIme) {
+    private boolean isSelectedMethodBound() {
         String curId = getCurId();
         return curId != null && curId.equals(getSelectedMethodId())
-                && displayIdToShowIme == mCurTokenDisplayId;
+                && mDisplayIdToShowIme == mCurTokenDisplayId;
     }
 
     @GuardedBy("mMethodMap")
@@ -2590,7 +2587,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             finishSessionLocked(mEnabledSession);
             mEnabledSession = null;
-            mBindingController.clearCurMethodLocked();
             scheduleNotifyImeUidToAudioService(Process.INVALID_UID);
         }
         hideStatusBarIconLocked();
@@ -3047,42 +3043,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
 
-        boolean res = false;
-        IInputMethod curMethod = getCurMethod();
-        if (curMethod != null) {
-            if (DEBUG) Slog.d(TAG, "showCurrentInputLocked: mCurToken=" + getCurToken());
+        mBindingController.setCurrentMethodVisibleLocked();
+        if (getCurMethod() != null) {
             // create a placeholder token for IMS so that IMS cannot inject windows into client app.
             Binder showInputToken = new Binder();
             mShowRequestWindowMap.put(showInputToken, windowToken);
+            IInputMethod curMethod = getCurMethod();
             executeOrSendMessage(curMethod, mCaller.obtainMessageIIOOO(MSG_SHOW_SOFT_INPUT,
                     getImeShowFlagsLocked(), reason, curMethod, resultReceiver,
                     showInputToken));
             mInputShown = true;
-            if (hasConnection() && !isVisibleBound()) {
-                mBindingController.bindCurrentInputMethodServiceVisibleConnectionLocked();
-            }
-            res = true;
-        } else {
-            long bindingDuration = SystemClock.uptimeMillis() - getLastBindTime();
-            if (hasConnection() && bindingDuration >= TIME_TO_RECONNECT) {
-                // The client has asked to have the input method shown, but
-                // we have been sitting here too long with a connection to the
-                // service and no interface received, so let's disconnect/connect
-                // to try to prod things along.
-                EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME, getSelectedMethodId(),
-                        bindingDuration, 1);
-                Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
-                mBindingController.unbindMainConnectionLocked();
-                mBindingController.bindCurrentInputMethodServiceMainConnectionLocked();
-            } else {
-                if (DEBUG) {
-                    Slog.d(TAG, "Can't show input: connection = " + hasConnection() + ", time = "
-                            + (TIME_TO_RECONNECT - bindingDuration));
-                }
-            }
+            return true;
         }
 
-        return res;
+        return false;
     }
 
     @Override
@@ -3166,9 +3140,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } else {
             res = false;
         }
-        if (hasConnection() && isVisibleBound()) {
-            mBindingController.unbindVisibleConnectionLocked();
-        }
+        mBindingController.setCurrentMethodNotVisibleLocked();
         mInputShown = false;
         mShowRequested = false;
         mShowExplicitlyRequested = false;
@@ -3520,10 +3492,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
         }
         return mWindowManagerInternal.shouldRestoreImeVisibility(windowToken);
-    }
-
-    private boolean isImeVisible() {
-        return (mImeWindowVis & InputMethodService.IME_VISIBLE) != 0;
     }
 
     @GuardedBy("mMethodMap")
@@ -5114,7 +5082,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " client=" + mCurFocusedWindowClient);
             focusedWindowClient = mCurFocusedWindowClient;
             p.println("  mCurId=" + getCurId() + " mHaveConnection=" + hasConnection()
-                    + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound=" + isVisibleBound());
+                    + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound="
+                    + mBindingController.isVisibleBound());
             p.println("  mCurToken=" + getCurToken());
             p.println("  mCurTokenDisplayId=" + mCurTokenDisplayId);
             p.println("  mCurHostInputToken=" + mCurHostInputToken);

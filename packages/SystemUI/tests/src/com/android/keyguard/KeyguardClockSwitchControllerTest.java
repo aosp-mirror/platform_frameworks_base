@@ -264,7 +264,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         reset(mView);
         observer.onChange(true);
         mExecutor.runAllReady();
-        verify(mView).switchToClock(KeyguardClockSwitch.SMALL);
+        verify(mView).switchToClock(KeyguardClockSwitch.SMALL, /* animate */ true);
     }
 
     private void verifyAttachment(VerificationMode times) {

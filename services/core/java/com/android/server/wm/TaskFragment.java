@@ -240,7 +240,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     /**
      * Whether to delay the last activity of TaskFragment being immediately removed while finishing.
      * This should only be set on a embedded TaskFragment, where the organizer can have the
-     * opportunity to perform other actions or animations.
+     * opportunity to perform animations and finishing the adjacent TaskFragment.
      */
     private boolean mDelayLastActivityRemoval;
 

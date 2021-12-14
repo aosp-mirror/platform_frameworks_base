@@ -39,6 +39,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
+import android.util.EventLog;
 import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.WindowManager;
@@ -49,6 +50,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.view.IInputMethod;
+import com.android.server.EventLogTags;
 import com.android.server.wm.WindowManagerInternal;
 
 /**
@@ -57,6 +59,9 @@ import com.android.server.wm.WindowManagerInternal;
 final class InputMethodBindingController {
     static final boolean DEBUG = false;
     private static final String TAG = InputMethodBindingController.class.getSimpleName();
+
+    /** Time in milliseconds that the IME service has to bind before it is reconnected. */
+    static final long TIME_TO_RECONNECT = 3 * 1000;
 
     @NonNull private final InputMethodManagerService mService;
     @NonNull private final Context mContext;
@@ -239,7 +244,7 @@ final class InputMethodBindingController {
     }
 
     /**
-     * Indicates whether {@link #getVisibleConnection} is currently in use.
+     * Indicates whether {@link #mVisibleConnection} is currently in use.
      */
     boolean isVisibleBound() {
         return mVisibleBound;
@@ -248,11 +253,6 @@ final class InputMethodBindingController {
     /**
      * Used to bring IME service up to visible adjustment while it is being shown.
      */
-    @NonNull
-    ServiceConnection getVisibleConnection() {
-        return mVisibleConnection;
-    }
-
     private final ServiceConnection mVisibleConnection = new ServiceConnection() {
         @Override public void onBindingDied(ComponentName name) {
             synchronized (mMethodMap) {
@@ -334,7 +334,7 @@ final class InputMethodBindingController {
                     // We consider this to be a new bind attempt, since the system
                     // should now try to restart the service for us.
                     mLastBindTime = SystemClock.uptimeMillis();
-                    mService.clearClientSessionsLocked();
+                    clearCurMethodAndSessionsLocked();
                     mService.clearInputShowRequestLocked();
                     mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
                 }
@@ -358,11 +358,12 @@ final class InputMethodBindingController {
         }
 
         mCurId = null;
-        mService.clearClientSessionsLocked();
+        clearCurMethodAndSessionsLocked();
     }
 
     @GuardedBy("mMethodMap")
-    void clearCurMethodLocked() {
+    private void clearCurMethodAndSessionsLocked() {
+        mService.clearClientSessionsLocked();
         mCurMethod = null;
         mCurMethodUid = Process.INVALID_UID;
     }
@@ -382,7 +383,7 @@ final class InputMethodBindingController {
 
     @GuardedBy("mMethodMap")
     @NonNull
-    InputBindResult bindCurrentMethodLocked(int displayIdToShowIme) {
+    InputBindResult bindCurrentMethodLocked() {
         InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
         if (info == null) {
             throw new IllegalArgumentException("Unknown id: " + mSelectedMethodId);
@@ -394,7 +395,7 @@ final class InputMethodBindingController {
             mCurId = info.getId();
             mLastBindTime = SystemClock.uptimeMillis();
 
-            addFreshWindowTokenLocked(displayIdToShowIme);
+            addFreshWindowTokenLocked();
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
                     null, null, mCurId, mCurSeq, false);
@@ -419,7 +420,8 @@ final class InputMethodBindingController {
     }
 
     @GuardedBy("mMethodMap")
-    private void addFreshWindowTokenLocked(int displayIdToShowIme) {
+    private void addFreshWindowTokenLocked() {
+        int displayIdToShowIme = mService.getDisplayIdToShowIme();
         mCurToken = new Binder();
 
         mService.setCurTokenDisplayId(displayIdToShowIme);
@@ -438,7 +440,7 @@ final class InputMethodBindingController {
     }
 
     @GuardedBy("mMethodMap")
-    void unbindMainConnectionLocked() {
+    private void unbindMainConnectionLocked() {
         mContext.unbindService(mMainConnection);
         mHasConnection = false;
     }
@@ -460,17 +462,61 @@ final class InputMethodBindingController {
     }
 
     @GuardedBy("mMethodMap")
-    boolean bindCurrentInputMethodServiceVisibleConnectionLocked() {
+    private boolean bindCurrentInputMethodServiceVisibleConnectionLocked() {
         mVisibleBound = bindCurrentInputMethodServiceLocked(mVisibleConnection,
                 IME_VISIBLE_BIND_FLAGS);
         return mVisibleBound;
     }
 
     @GuardedBy("mMethodMap")
-    boolean bindCurrentInputMethodServiceMainConnectionLocked() {
+    private boolean bindCurrentInputMethodServiceMainConnectionLocked() {
         mHasConnection = bindCurrentInputMethodServiceLocked(mMainConnection,
                 mImeConnectionBindFlags);
         return mHasConnection;
     }
 
+    /**
+     * Bind the IME so that it can be shown.
+     *
+     * <p>
+     * Performs a rebind if no binding is achieved in {@link #TIME_TO_RECONNECT} milliseconds.
+     */
+    @GuardedBy("mMethodMap")
+    void setCurrentMethodVisibleLocked() {
+        if (mCurMethod != null) {
+            if (DEBUG) Slog.d(TAG, "setCurrentMethodVisibleLocked: mCurToken=" + mCurToken);
+            if (mHasConnection && !mVisibleBound) {
+                bindCurrentInputMethodServiceVisibleConnectionLocked();
+            }
+            return;
+        }
+
+        long bindingDuration = SystemClock.uptimeMillis() - mLastBindTime;
+        if (mHasConnection && bindingDuration >= TIME_TO_RECONNECT) {
+            // The client has asked to have the input method shown, but
+            // we have been sitting here too long with a connection to the
+            // service and no interface received, so let's disconnect/connect
+            // to try to prod things along.
+            EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME, getSelectedMethodId(),
+                    bindingDuration, 1);
+            Slog.w(TAG, "Force disconnect/connect to the IME in setCurrentMethodVisibleLocked()");
+            unbindMainConnectionLocked();
+            bindCurrentInputMethodServiceMainConnectionLocked();
+        } else {
+            if (DEBUG) {
+                Slog.d(TAG, "Can't show input: connection = " + mHasConnection + ", time = "
+                        + (TIME_TO_RECONNECT - bindingDuration));
+            }
+        }
+    }
+
+    /**
+     * Remove the binding needed for the IME to be shown.
+     */
+    @GuardedBy("mMethodMap")
+    void setCurrentMethodNotVisibleLocked() {
+        if (mVisibleBound) {
+            unbindVisibleConnectionLocked();
+        }
+    }
 }

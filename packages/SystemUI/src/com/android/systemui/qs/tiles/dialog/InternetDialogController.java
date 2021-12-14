@@ -90,6 +90,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
@@ -485,6 +486,11 @@ public class InternetDialogController implements AccessPointController.AccessPoi
 
     private Map<Integer, CharSequence> getUniqueSubscriptionDisplayNames(Context context) {
         class DisplayInfo {
+            DisplayInfo(SubscriptionInfo subscriptionInfo, CharSequence originalName) {
+                this.subscriptionInfo = subscriptionInfo;
+                this.originalName = originalName;
+            }
+
             public SubscriptionInfo subscriptionInfo;
             public CharSequence originalName;
             public CharSequence uniqueName;
@@ -498,12 +504,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
                             // Filter out null values.
                             return (i != null && i.getDisplayName() != null);
                         })
-                        .map(i -> {
-                            DisplayInfo info = new DisplayInfo();
-                            info.subscriptionInfo = i;
-                            info.originalName = i.getDisplayName().toString().trim();
-                            return info;
-                        });
+                        .map(i -> new DisplayInfo(i, i.getDisplayName().toString().trim()));
 
         // A Unique set of display names
         Set<CharSequence> uniqueNames = new HashSet<>();
@@ -582,7 +583,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             return "";
         }
 
-        int resId = mapIconSets(config).get(iconKey).dataContentDescription;
+        int resId = Objects.requireNonNull(mapIconSets(config).get(iconKey)).dataContentDescription;
         if (isCarrierNetworkActive()) {
             SignalIcon.MobileIconGroup carrierMergedWifiIconGroup =
                     TelephonyIcons.CARRIER_MERGED_WIFI;

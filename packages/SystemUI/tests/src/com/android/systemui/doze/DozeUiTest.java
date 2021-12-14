@@ -45,6 +45,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.unfold.FoldAodAnimationController;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.After;
@@ -53,6 +55,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -79,6 +83,10 @@ public class DozeUiTest extends SysuiTestCase {
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
+    private FoldAodAnimationController mFoldAodAnimationController;
+    @Mock
+    private SysUIUnfoldComponent mSysUIUnfoldComponent;
+    @Mock
     private ConfigurationController mConfigurationController;
 
     @Before
@@ -90,9 +98,13 @@ public class DozeUiTest extends SysuiTestCase {
         mWakeLock = new WakeLockFake();
         mHandler = mHandlerThread.getThreadHandler();
 
+        when(mSysUIUnfoldComponent.getFoldAodAnimationController())
+                .thenReturn(mFoldAodAnimationController);
+
         mDozeUi = new DozeUi(mContext, mAlarmManager, mWakeLock, mHost, mHandler,
                 mDozeParameters, mKeyguardUpdateMonitor, mDozeLog, mTunerService,
-                mStatusBarStateController, mConfigurationController);
+                mStatusBarStateController, Optional.of(mSysUIUnfoldComponent),
+                mConfigurationController);
         mDozeUi.setDozeMachine(mMachine);
     }
 
@@ -121,6 +133,7 @@ public class DozeUiTest extends SysuiTestCase {
         reset(mHost);
         when(mDozeParameters.getAlwaysOn()).thenReturn(false);
         when(mDozeParameters.getDisplayNeedsBlanking()).thenReturn(false);
+        when(mDozeParameters.shouldAnimateDozingChange()).thenReturn(true);
 
         mDozeUi.getKeyguardCallback().onKeyguardVisibilityChanged(false);
         verify(mHost).setAnimateScreenOff(eq(false));
@@ -131,6 +144,7 @@ public class DozeUiTest extends SysuiTestCase {
         reset(mHost);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
         when(mDozeParameters.getDisplayNeedsBlanking()).thenReturn(false);
+        when(mDozeParameters.shouldAnimateDozingChange()).thenReturn(true);
 
         // Take over when the keyguard is visible.
         mDozeUi.getKeyguardCallback().onKeyguardVisibilityChanged(true);
@@ -142,6 +156,18 @@ public class DozeUiTest extends SysuiTestCase {
     }
 
     @Test
+    public void propagatesAnimateScreenOff_alwaysOn_shouldAnimateDozingChangeIsFalse() {
+        reset(mHost);
+        when(mDozeParameters.getAlwaysOn()).thenReturn(true);
+        when(mDozeParameters.getDisplayNeedsBlanking()).thenReturn(false);
+        when(mDozeParameters.shouldAnimateDozingChange()).thenReturn(false);
+
+        // Take over when the keyguard is visible.
+        mDozeUi.getKeyguardCallback().onKeyguardVisibilityChanged(true);
+        verify(mHost).setAnimateScreenOff(eq(false));
+    }
+
+    @Test
     public void neverAnimateScreenOff_whenNotSupported() {
         // Re-initialize DozeParameters saying that the display requires blanking.
         reset(mDozeParameters);
@@ -149,7 +175,8 @@ public class DozeUiTest extends SysuiTestCase {
         when(mDozeParameters.getDisplayNeedsBlanking()).thenReturn(true);
         mDozeUi = new DozeUi(mContext, mAlarmManager, mWakeLock, mHost, mHandler,
                 mDozeParameters, mKeyguardUpdateMonitor, mDozeLog, mTunerService,
-                mStatusBarStateController, mConfigurationController);
+                mStatusBarStateController, Optional.of(mSysUIUnfoldComponent),
+                mConfigurationController);
         mDozeUi.setDozeMachine(mMachine);
 
         // Never animate if display doesn't support it.

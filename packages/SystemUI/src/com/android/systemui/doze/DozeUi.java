@@ -37,10 +37,14 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.unfold.FoldAodAnimationController;
+import com.android.systemui.unfold.FoldAodAnimationController.FoldAodAnimationStatus;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.util.Calendar;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -49,7 +53,8 @@ import javax.inject.Inject;
  */
 @DozeScope
 public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
-        ConfigurationController.ConfigurationListener, StatusBarStateController.StateListener {
+        ConfigurationController.ConfigurationListener, FoldAodAnimationStatus,
+        StatusBarStateController.StateListener {
     // if enabled, calls dozeTimeTick() whenever the time changes:
     private static final boolean BURN_IN_TESTING_ENABLED = false;
     private static final long TIME_TICK_DEADLINE_MILLIS = 90 * 1000; // 1.5min
@@ -57,6 +62,7 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
     private final DozeHost mHost;
     private final Handler mHandler;
     private final WakeLock mWakeLock;
+    private final FoldAodAnimationController mFoldAodAnimationController;
     private DozeMachine mMachine;
     private final AlarmTimeout mTimeTicker;
     private final boolean mCanAnimateTransition;
@@ -100,6 +106,7 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
             DozeParameters params, KeyguardUpdateMonitor keyguardUpdateMonitor,
             DozeLog dozeLog, TunerService tunerService,
             StatusBarStateController statusBarStateController,
+            Optional<SysUIUnfoldComponent> sysUiUnfoldComponent,
             ConfigurationController configurationController) {
         mContext = context;
         mWakeLock = wakeLock;
@@ -118,12 +125,23 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
 
         mConfigurationController = configurationController;
         mConfigurationController.addCallback(this);
+
+        mFoldAodAnimationController = sysUiUnfoldComponent
+                .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
+
+        if (mFoldAodAnimationController != null) {
+            mFoldAodAnimationController.addCallback(this);
+        }
     }
 
     @Override
     public void destroy() {
         mTunerService.removeTunable(this);
         mConfigurationController.removeCallback(this);
+
+        if (mFoldAodAnimationController != null) {
+            mFoldAodAnimationController.removeCallback(this);
+        }
     }
 
     @Override
@@ -142,7 +160,8 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
                     && (mKeyguardShowing || mDozeParameters.shouldControlUnlockedScreenOff())
                     && !mHost.isPowerSaveActive();
             mDozeParameters.setControlScreenOffAnimation(controlScreenOff);
-            mHost.setAnimateScreenOff(controlScreenOff);
+            mHost.setAnimateScreenOff(controlScreenOff
+                    && mDozeParameters.shouldAnimateDozingChange());
         }
     }
 
@@ -297,6 +316,11 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
      */
     @Override
     public void onStatePostChange() {
+        updateAnimateScreenOff();
+    }
+
+    @Override
+    public void onFoldToAodAnimationChanged() {
         updateAnimateScreenOff();
     }
 }

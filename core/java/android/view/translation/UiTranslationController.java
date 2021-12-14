@@ -437,7 +437,10 @@ public class UiTranslationController {
                     if (view.getViewTranslationResponse() != null
                             && view.getViewTranslationResponse().equals(response)) {
                         if (callback instanceof TextViewTranslationCallback) {
-                            if (((TextViewTranslationCallback) callback).isShowingTranslation()) {
+                            TextViewTranslationCallback textViewCallback =
+                                    (TextViewTranslationCallback) callback;
+                            if (textViewCallback.isShowingTranslation()
+                                    || textViewCallback.isAnimationRunning()) {
                                 if (DEBUG) {
                                     Log.d(TAG, "Duplicate ViewTranslationResponse for " + autofillId
                                             + ". Ignoring.");

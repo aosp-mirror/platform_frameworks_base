@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -69,7 +70,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -95,18 +95,20 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock NavigationModeController mNavigationModeController;
     private @Mock KeyguardDisplayManager mKeyguardDisplayManager;
     private @Mock DozeParameters mDozeParameters;
-    private @Mock Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent;
-    private @Mock Optional<UnfoldLightRevealOverlayAnimation> mUnfoldAnimationOptional;
+    private @Mock SysUIUnfoldComponent mSysUIUnfoldComponent;
     private @Mock UnfoldLightRevealOverlayAnimation mUnfoldAnimation;
     private @Mock SysuiStatusBarStateController mStatusBarStateController;
     private @Mock KeyguardStateController mKeyguardStateController;
     private @Mock NotificationShadeDepthController mNotificationShadeDepthController;
     private @Mock KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private @Mock ScreenOffAnimationController mScreenOffAnimationController;
+    private @Mock FoldAodAnimationController mFoldAodAnimationController;
     private @Mock IKeyguardDrawnCallback mKeyguardDrawnCallback;
     private @Mock InteractionJankMonitor mInteractionJankMonitor;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
+
+    private Optional<SysUIUnfoldComponent> mSysUiUnfoldComponentOptional;
 
     private FalsingCollectorFake mFalsingCollector;
 
@@ -114,43 +116,19 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mFalsingCollector = new FalsingCollectorFake();
+        mSysUiUnfoldComponentOptional = Optional.of(mSysUIUnfoldComponent);
 
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
         when(mPowerManager.newWakeLock(anyInt(), any())).thenReturn(mock(WakeLock.class));
-        when(mSysUIUnfoldComponent.map(
-                ArgumentMatchers.<Function<SysUIUnfoldComponent, UnfoldLightRevealOverlayAnimation>>
-                        any()))
-            .thenReturn(mUnfoldAnimationOptional);
-        when(mUnfoldAnimationOptional.isPresent()).thenReturn(true);
-        when(mUnfoldAnimationOptional.get()).thenReturn(mUnfoldAnimation);
+        when(mSysUIUnfoldComponent.getUnfoldLightRevealOverlayAnimation())
+                .thenReturn(mUnfoldAnimation);
+        when(mSysUIUnfoldComponent.getFoldAodAnimationController())
+                .thenReturn(mFoldAodAnimationController);
+
         when(mInteractionJankMonitor.begin(any(), anyInt())).thenReturn(true);
         when(mInteractionJankMonitor.end(anyInt())).thenReturn(true);
 
-        mViewMediator = new KeyguardViewMediator(
-                mContext,
-                mFalsingCollector,
-                mLockPatternUtils,
-                mBroadcastDispatcher,
-                () -> mStatusBarKeyguardViewManager,
-                mDismissCallbackRegistry,
-                mUpdateMonitor,
-                mDumpManager,
-                mUiBgExecutor,
-                mPowerManager,
-                mTrustManager,
-                mUserSwitcherController,
-                mDeviceConfig,
-                mNavigationModeController,
-                mKeyguardDisplayManager,
-                mDozeParameters,
-                mSysUIUnfoldComponent,
-                mStatusBarStateController,
-                mKeyguardStateController,
-                () -> mKeyguardUnlockAnimationController,
-                mScreenOffAnimationController,
-                () -> mNotificationShadeDepthController,
-                mInteractionJankMonitor);
-        mViewMediator.start();
+        createAndStartViewMediator();
     }
 
     @Test
@@ -179,6 +157,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.onScreenTurningOn(mKeyguardDrawnCallback);
         TestableLooper.get(this).processAllMessages();
         onUnfoldOverlayReady();
+        onFoldAodReady();
 
         // Should be called when both unfold overlay and keyguard drawn ready
         verify(mKeyguardDrawnCallback).onDrawn();
@@ -188,7 +167,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void testUnfoldTransitionDisabledDrawnTasksReady_onScreenTurningOn_callsDrawnCallback()
             throws RemoteException {
-        when(mUnfoldAnimationOptional.isPresent()).thenReturn(false);
+        mSysUiUnfoldComponentOptional = Optional.empty();
+        createAndStartViewMediator();
 
         mViewMediator.onScreenTurningOn(mKeyguardDrawnCallback);
         TestableLooper.get(this).processAllMessages();
@@ -200,6 +180,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     @Test
     public void testIsAnimatingScreenOff() {
         when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true);
+        when(mDozeParameters.shouldAnimateDozingChange()).thenReturn(true);
 
         mViewMediator.onFinishedGoingToSleep(OFF_BECAUSE_OF_USER, false);
         mViewMediator.setDozing(true);
@@ -243,5 +224,40 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         verify(mUnfoldAnimation).onScreenTurningOn(overlayReadyCaptor.capture());
         overlayReadyCaptor.getValue().run();
         TestableLooper.get(this).processAllMessages();
+    }
+
+    private void onFoldAodReady() {
+        ArgumentCaptor<Runnable> ready = ArgumentCaptor.forClass(Runnable.class);
+        verify(mFoldAodAnimationController).onScreenTurningOn(ready.capture());
+        ready.getValue().run();
+        TestableLooper.get(this).processAllMessages();
+    }
+
+    private void createAndStartViewMediator() {
+        mViewMediator = new KeyguardViewMediator(
+                mContext,
+                mFalsingCollector,
+                mLockPatternUtils,
+                mBroadcastDispatcher,
+                () -> mStatusBarKeyguardViewManager,
+                mDismissCallbackRegistry,
+                mUpdateMonitor,
+                mDumpManager,
+                mUiBgExecutor,
+                mPowerManager,
+                mTrustManager,
+                mUserSwitcherController,
+                mDeviceConfig,
+                mNavigationModeController,
+                mKeyguardDisplayManager,
+                mDozeParameters,
+                mSysUiUnfoldComponentOptional,
+                mStatusBarStateController,
+                mKeyguardStateController,
+                () -> mKeyguardUnlockAnimationController,
+                mScreenOffAnimationController,
+                () -> mNotificationShadeDepthController,
+                mInteractionJankMonitor);
+        mViewMediator.start();
     }
 }

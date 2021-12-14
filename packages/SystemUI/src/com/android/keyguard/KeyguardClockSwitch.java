@@ -190,10 +190,14 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
     }
 
-    private void animateClockChange(boolean useLargeClock) {
+    private void updateClockViews(boolean useLargeClock, boolean animate) {
         if (mClockInAnim != null) mClockInAnim.cancel();
         if (mClockOutAnim != null) mClockOutAnim.cancel();
         if (mStatusAreaAnim != null) mStatusAreaAnim.cancel();
+
+        mClockInAnim = null;
+        mClockOutAnim = null;
+        mStatusAreaAnim = null;
 
         View in, out;
         int direction = 1;
@@ -212,6 +216,14 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
             // Must remove in order for notifications to appear in the proper place
             removeView(out);
+        }
+
+        if (!animate) {
+            out.setAlpha(0f);
+            in.setAlpha(1f);
+            in.setVisibility(VISIBLE);
+            mStatusArea.setTranslationY(statusAreaYTranslation);
+            return;
         }
 
         mClockOutAnim = new AnimatorSet();
@@ -273,7 +285,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
      *
      * @return true if desired clock appeared and false if it was already visible
      */
-    boolean switchToClock(@ClockSize int clockSize) {
+    boolean switchToClock(@ClockSize int clockSize, boolean animate) {
         if (mDisplayedClockSize != null && clockSize == mDisplayedClockSize) {
             return false;
         }
@@ -281,7 +293,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         // let's make sure clock is changed only after all views were laid out so we can
         // translate them properly
         if (mChildrenAreLaidOut) {
-            animateClockChange(clockSize == LARGE);
+            updateClockViews(clockSize == LARGE, animate);
         }
 
         mDisplayedClockSize = clockSize;
@@ -293,7 +305,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         super.onLayout(changed, l, t, r, b);
 
         if (mDisplayedClockSize != null && !mChildrenAreLaidOut) {
-            animateClockChange(mDisplayedClockSize == LARGE);
+            updateClockViews(mDisplayedClockSize == LARGE, /* animate */ true);
         }
 
         mChildrenAreLaidOut = true;

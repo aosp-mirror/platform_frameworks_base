@@ -43,9 +43,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.DismissCallbackRegistry;
-import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -79,9 +76,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock
     private NotificationPanelViewController mNotificationPanelView;
     @Mock
-    private BiometricUnlockController mBiometrucUnlockController;
-    @Mock
-    private DismissCallbackRegistry mDismissCallbackRegistry;
+    private BiometricUnlockController mBiometricUnlockController;
     @Mock
     private SysuiStatusBarStateController mStatusBarStateController;
     @Mock
@@ -97,15 +92,12 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock
     private KeyguardBouncer mBouncer;
     @Mock
-    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
-    @Mock
     private StatusBarKeyguardViewManager.AlternateAuthInterceptor mAlternateAuthInterceptor;
     @Mock
     private KeyguardMessageArea mKeyguardMessageArea;
     @Mock
     private ShadeController mShadeController;
 
-    private WakefulnessLifecycle mWakefulnessLifecycle;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Before
@@ -117,10 +109,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .thenReturn(mBouncer);
         when(mStatusBar.getBouncerContainer()).thenReturn(mContainer);
         when(mContainer.findViewById(anyInt())).thenReturn(mKeyguardMessageArea);
-        mWakefulnessLifecycle = new WakefulnessLifecycle(
-                getContext(),
-                null,
-                mock(DumpManager.class));
         mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(
                 getContext(),
                 mViewMediatorCallback,
@@ -134,15 +122,13 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mock(NotificationMediaManager.class),
                 mKeyguardBouncerFactory,
-                mWakefulnessLifecycle,
-                mUnlockedScreenOffAnimationController,
                 mKeyguardMessageAreaFactory,
                 () -> mShadeController);
         mStatusBarKeyguardViewManager.registerStatusBar(
                 mStatusBar,
                 mNotificationPanelView,
                 new PanelExpansionStateManager(),
-                mBiometrucUnlockController,
+                mBiometricUnlockController,
                 mNotificationContainer,
                 mBypassController);
         mStatusBarKeyguardViewManager.show(null);
@@ -261,7 +247,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     public void onPanelExpansionChanged_neverTranslatesBouncerWhenWakeAndUnlock() {
-        when(mBiometrucUnlockController.getMode())
+        when(mBiometricUnlockController.getMode())
                 .thenReturn(BiometricUnlockController.MODE_WAKE_AND_UNLOCK);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,

@@ -3212,6 +3212,10 @@ class ContextImpl extends Context {
     final void performFinalCleanup(String who, String what) {
         //Log.i(TAG, "Cleanup up context: " + this);
         mPackageInfo.removeContextRegistrations(getOuterContext(), who, what);
+        if (mContextType == CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI
+                && mToken instanceof WindowTokenClient) {
+            mMainThread.onSystemUiContextCleanup(this);
+        }
     }
 
     @UnsupportedAppUsage

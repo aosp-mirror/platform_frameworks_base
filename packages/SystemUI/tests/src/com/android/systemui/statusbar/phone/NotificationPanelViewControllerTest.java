@@ -425,6 +425,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 .thenReturn(mKeyguardUserSwitcherComponent);
         when(mKeyguardUserSwitcherComponent.getKeyguardUserSwitcherController())
                 .thenReturn(mKeyguardUserSwitcherController);
+        when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(true);
 
         doAnswer((Answer<Void>) invocation -> {
             mTouchHandler = invocation.getArgument(0);
@@ -880,11 +881,11 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
         triggerPositionClockAndNotifications();
-        verify(mKeyguardStatusViewController).displayClock(LARGE);
+        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
         mNotificationPanelViewController.closeQs();
-        verify(mKeyguardStatusViewController).displayClock(SMALL);
+        verify(mKeyguardStatusViewController).displayClock(SMALL, /* animate */ true);
     }
 
     @Test
@@ -894,12 +895,14 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
         triggerPositionClockAndNotifications();
-        verify(mKeyguardStatusViewController).displayClock(LARGE);
+        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
         triggerPositionClockAndNotifications();
-        verify(mKeyguardStatusViewController, times(2)).displayClock(LARGE);
-        verify(mKeyguardStatusViewController, never()).displayClock(SMALL);
+        verify(mKeyguardStatusViewController, times(2))
+                .displayClock(LARGE, /* animate */ true);
+        verify(mKeyguardStatusViewController, never())
+                .displayClock(SMALL, /* animate */ true);
     }
 
     @Test
@@ -911,7 +914,20 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         mNotificationPanelViewController.setDozing(true, false, null);
 
-        verify(mKeyguardStatusViewController).displayClock(LARGE);
+        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
+    }
+
+    @Test
+    public void testSwitchesToBigClockInSplitShadeOnAodAnimateDisabled() {
+        when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(false);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+        when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+
+        mNotificationPanelViewController.setDozing(true, false, null);
+
+        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ false);
     }
 
     @Test
@@ -923,13 +939,13 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         // one notification + media player visible
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
         triggerPositionClockAndNotifications();
-        verify(mKeyguardStatusViewController).displayClock(SMALL);
+        verify(mKeyguardStatusViewController).displayClock(SMALL, /* animate */ true);
 
         // only media player visible
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
         triggerPositionClockAndNotifications();
-        verify(mKeyguardStatusViewController, times(2)).displayClock(SMALL);
-        verify(mKeyguardStatusViewController, never()).displayClock(LARGE);
+        verify(mKeyguardStatusViewController, times(2)).displayClock(SMALL, true);
+        verify(mKeyguardStatusViewController, never()).displayClock(LARGE, /* animate */ true);
     }
 
     @Test
