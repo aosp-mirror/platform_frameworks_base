@@ -31959,6 +31959,7 @@ package android.os {
     method @Nullable public <T> java.util.ArrayList<T> readArrayList(@Nullable ClassLoader, @NonNull Class<? extends T>);
     method public void readBinderArray(@NonNull android.os.IBinder[]);
     method public void readBinderList(@NonNull java.util.List<android.os.IBinder>);
+    method @Nullable public byte[] readBlob();
     method public boolean readBoolean();
     method public void readBooleanArray(@NonNull boolean[]);
     method @Nullable public android.os.Bundle readBundle();
@@ -32018,6 +32019,8 @@ package android.os {
     method public void writeArray(@Nullable Object[]);
     method public void writeBinderArray(@Nullable android.os.IBinder[]);
     method public void writeBinderList(@Nullable java.util.List<android.os.IBinder>);
+    method public void writeBlob(@Nullable byte[]);
+    method public void writeBlob(@Nullable byte[], int, int);
     method public void writeBoolean(boolean);
     method public void writeBooleanArray(@Nullable boolean[]);
     method public void writeBundle(@Nullable android.os.Bundle);
