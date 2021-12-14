@@ -37,6 +37,7 @@ import androidx.test.filters.SmallTest;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import org.junit.Before;
@@ -58,6 +59,8 @@ public class FingerprintProviderTest {
     private UserManager mUserManager;
     @Mock
     private GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
+    @Mock
+    private FingerprintStateCallback mFingerprintStateCallback;
 
     private SensorProps[] mSensorProps;
     private LockoutResetDispatcher mLockoutResetDispatcher;
@@ -87,8 +90,8 @@ public class FingerprintProviderTest {
 
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
 
-        mFingerprintProvider = new TestableFingerprintProvider(mContext, mSensorProps, TAG,
-                mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
+        mFingerprintProvider = new TestableFingerprintProvider(mContext, mFingerprintStateCallback,
+                mSensorProps, TAG, mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
     }
 
     @SuppressWarnings("rawtypes")
@@ -133,11 +136,12 @@ public class FingerprintProviderTest {
 
     private static class TestableFingerprintProvider extends FingerprintProvider {
         public TestableFingerprintProvider(@NonNull Context context,
+                @NonNull FingerprintStateCallback fingerprintStateCallback,
                 @NonNull SensorProps[] props,
                 @NonNull String halInstanceName,
                 @NonNull LockoutResetDispatcher lockoutResetDispatcher,
                 @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
-            super(context, props, halInstanceName, lockoutResetDispatcher,
+            super(context, fingerprintStateCallback, props, halInstanceName, lockoutResetDispatcher,
                     gestureAvailabilityDispatcher);
         }
 

@@ -17,9 +17,8 @@
 
 <resources>
     <style name="TextAppearance.Footer.Title.SettingsLib"
-           parent="@android:style/TextAppearance.DeviceDefault.Medium">
+           parent="@android:style/TextAppearance.DeviceDefault.WindowTitle">
         <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
     </style>
 </resources>

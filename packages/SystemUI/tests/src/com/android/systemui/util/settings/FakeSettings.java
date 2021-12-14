@@ -31,6 +31,7 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
     private final Map<SettingsKey, String> mValues = new HashMap<>();
     private final Map<SettingsKey, List<ContentObserver>> mContentObservers =
             new HashMap<>();
+    private final Map<String, List<ContentObserver>> mContentObserversAllUsers = new HashMap<>();
 
     public static final Uri CONTENT_URI = Uri.parse("content://settings/fake");
 
@@ -55,9 +56,15 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
     @Override
     public void registerContentObserverForUser(Uri uri, boolean notifyDescendents,
             ContentObserver settingsObserver, int userHandle) {
-        SettingsKey key = new SettingsKey(userHandle, uri.toString());
-        mContentObservers.putIfAbsent(key, new ArrayList<>());
-        List<ContentObserver> observers = mContentObservers.get(key);
+        List<ContentObserver> observers;
+        if (userHandle == UserHandle.USER_ALL) {
+            mContentObserversAllUsers.putIfAbsent(uri.toString(), new ArrayList<>());
+            observers = mContentObserversAllUsers.get(uri.toString());
+        } else {
+            SettingsKey key = new SettingsKey(userHandle, uri.toString());
+            mContentObservers.putIfAbsent(key, new ArrayList<>());
+            observers = mContentObservers.get(key);
+        }
         observers.add(settingsObserver);
     }
 
@@ -65,6 +72,10 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
     public void unregisterContentObserver(ContentObserver settingsObserver) {
         for (SettingsKey key : mContentObservers.keySet()) {
             List<ContentObserver> observers = mContentObservers.get(key);
+            observers.remove(settingsObserver);
+        }
+        for (String key : mContentObserversAllUsers.keySet()) {
+            List<ContentObserver> observers = mContentObserversAllUsers.get(key);
             observers.remove(settingsObserver);
         }
     }
@@ -112,6 +123,10 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
 
         Uri uri = getUriFor(name);
         for (ContentObserver observer : mContentObservers.getOrDefault(key, new ArrayList<>())) {
+            observer.dispatchChange(false, List.of(uri), userHandle);
+        }
+        for (ContentObserver observer :
+                mContentObserversAllUsers.getOrDefault(uri.toString(), new ArrayList<>())) {
             observer.dispatchChange(false, List.of(uri), userHandle);
         }
         return true;

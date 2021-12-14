@@ -37,6 +37,7 @@ public interface QSHost {
     void removeCallback(Callback callback);
     TileServices getTileServices();
     void removeTile(String tileSpec);
+    void removeTiles(Collection<String> specs);
     void unmarkTileAsAutoAdded(String tileSpec);
 
     int indexOf(String tileSpec);

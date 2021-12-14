@@ -338,6 +338,13 @@ public abstract class PanelViewController {
     protected abstract float getOpeningHeight();
 
     /**
+     * Minimum fraction from where expansion should start. This is set when pulling down on a
+     * heads-up notification.
+     * @param minFraction Fraction from 0 to 1.
+     */
+    public abstract void setMinFraction(float minFraction);
+
+    /**
      * @return whether the swiping direction is upwards and above a 45 degree angle compared to the
      * horizontal direction
      */
@@ -1211,10 +1218,14 @@ public abstract class PanelViewController {
                 case MotionEvent.ACTION_MOVE:
                     final float h = y - mInitialTouchY;
                     addMovement(event);
-                    if (canCollapsePanel || mTouchStartedInEmptyArea || mAnimatingOnDown) {
+                    final boolean openShadeWithoutHun =
+                            mPanelClosedOnDown && !mCollapsedAndHeadsUpOnDown;
+                    if (canCollapsePanel || mTouchStartedInEmptyArea || mAnimatingOnDown
+                            || openShadeWithoutHun) {
                         float hAbs = Math.abs(h);
                         float touchSlop = getTouchSlop(event);
-                        if ((h < -touchSlop || (mAnimatingOnDown && hAbs > touchSlop))
+                        if ((h < -touchSlop
+                                || ((openShadeWithoutHun || mAnimatingOnDown) && hAbs > touchSlop))
                                 && hAbs > Math.abs(x - mInitialTouchX)) {
                             cancelHeightAnimator();
                             startExpandMotion(x, y, true /* startTracking */, mExpandedHeight);
@@ -1227,10 +1238,7 @@ public abstract class PanelViewController {
                     mVelocityTracker.clear();
                     break;
             }
-
-            // Finally, if none of the above cases applies, ensure that touches do not get handled
-            // by the contents of a panel that is not showing (a bit of a hack to avoid b/178277858)
-            return (mView.getVisibility() != View.VISIBLE);
+            return false;
         }
 
         @Override

@@ -50,6 +50,6 @@
         <item name="android:clipToPadding">true</item>
         <item name="android:clipChildren">true</item>
 
-        <item name="dialogCornerRadius">@*android:dimen/config_dialogCornerRadius</item>
+        <item name="dialogCornerRadius">@dimen/settingslib_dialogCornerRadius</item>
     </style>
 </resources>

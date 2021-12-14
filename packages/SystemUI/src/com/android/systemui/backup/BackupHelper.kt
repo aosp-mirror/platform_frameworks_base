@@ -40,10 +40,10 @@ import com.android.systemui.people.widget.PeopleBackupHelper
  * After restoring is done, a [ACTION_RESTORE_FINISHED] intent will be send to SystemUI user 0,
  * indicating that restoring is finished for a given user.
  */
-class BackupHelper : BackupAgentHelper() {
+open class BackupHelper : BackupAgentHelper() {
 
     companion object {
-        private const val TAG = "BackupHelper"
+        const val TAG = "BackupHelper"
         internal const val CONTROLS = ControlsFavoritePersistenceWrapper.FILE_NAME
         private const val NO_OVERWRITE_FILES_BACKUP_KEY = "systemui.files_no_overwrite"
         private const val PEOPLE_TILES_BACKUP_KEY = "systemui.people.shared_preferences"

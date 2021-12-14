@@ -42,6 +42,7 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintStateListener;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
@@ -49,6 +50,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 
@@ -76,6 +78,9 @@ import kotlin.Unit;
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
  * appropriate biometric UI (e.g. BiometricDialogView).
+ *
+ * Also coordinates biometric-related things, such as UDFPS, with
+ * {@link com.android.keyguard.KeyguardUpdateMonitor}
  */
 @SysUISingleton
 public class AuthController extends SystemUI implements CommandQueue.Callbacks,
@@ -115,12 +120,29 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Nullable private List<FingerprintSensorPropertiesInternal> mUdfpsProps;
     @Nullable private List<FingerprintSensorPropertiesInternal> mSidefpsProps;
 
+    @NonNull private final SparseBooleanArray mUdfpsEnrolledForUser;
+
     private class BiometricTaskStackListener extends TaskStackListener {
         @Override
         public void onTaskStackChanged() {
             mHandler.post(AuthController.this::handleTaskStackChanged);
         }
     }
+
+    private final FingerprintStateListener mFingerprintStateListener =
+            new FingerprintStateListener() {
+        @Override
+        public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
+            Log.d(TAG, "onEnrollmentsChanged, userId: " + userId
+                    + ", sensorId: " + sensorId
+                    + ", hasEnrollments: " + hasEnrollments);
+            for (FingerprintSensorPropertiesInternal prop : mUdfpsProps) {
+                if (prop.sensorId == sensorId) {
+                    mUdfpsEnrolledForUser.put(userId, hasEnrollments);
+                }
+            }
+        }
+    };
 
     @NonNull
     private final IFingerprintAuthenticatorsRegisteredCallback
@@ -436,6 +458,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mUdfpsControllerFactory = udfpsControllerFactory;
         mSidefpsControllerFactory = sidefpsControllerFactory;
         mWindowManager = windowManager;
+        mUdfpsEnrolledForUser = new SparseBooleanArray();
         mOrientationListener = new BiometricOrientationEventListener(context,
                 () -> {
                     onOrientationChanged();
@@ -474,6 +497,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         if (mFingerprintManager != null) {
             mFingerprintManager.addAuthenticatorsRegisteredCallback(
                     mFingerprintAuthenticatorsRegisteredCallback);
+            mFingerprintManager.registerFingerprintStateListener(mFingerprintStateListener);
         }
 
         mTaskStackListener = new BiometricTaskStackListener();
@@ -501,7 +525,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Override
     public void showAuthenticationDialog(PromptInfo promptInfo, IBiometricSysuiReceiver receiver,
             int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation,
-            int userId, String opPackageName, long operationId,
+            int userId, long operationId, String opPackageName, long requestId,
             @BiometricMultiSensorMode int multiSensorConfig) {
         @Authenticators.Types final int authenticators = promptInfo.getAuthenticators();
 
@@ -515,6 +539,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     + ", credentialAllowed: " + credentialAllowed
                     + ", requireConfirmation: " + requireConfirmation
                     + ", operationId: " + operationId
+                    + ", requestId: " + requestId
                     + ", multiSensorConfig: " + multiSensorConfig);
         }
         SomeArgs args = SomeArgs.obtain();
@@ -526,6 +551,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         args.argi1 = userId;
         args.arg6 = opPackageName;
         args.arg7 = operationId;
+        args.arg8 = requestId;
         args.argi2 = multiSensorConfig;
 
         boolean skipAnimation = false;
@@ -629,6 +655,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         if (mCurrentDialog == null) {
             // Could be possible if the caller canceled authentication after credential success
             // but before the client was notified.
+            if (DEBUG) Log.d(TAG, "dialog already gone");
             return;
         }
 
@@ -670,7 +697,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             return false;
         }
 
-        return mFingerprintManager.hasEnrolledTemplatesForAnySensor(userId, mUdfpsProps);
+        return mUdfpsEnrolledForUser.get(userId);
     }
 
     private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {
@@ -683,6 +710,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         final int userId = args.argi1;
         final String opPackageName = (String) args.arg6;
         final long operationId = (long) args.arg7;
+        final long requestId = (long) args.arg8;
         final @BiometricMultiSensorMode int multiSensorConfig = args.argi2;
 
         // Create a new dialog but do not replace the current one yet.
@@ -695,6 +723,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 opPackageName,
                 skipAnimation,
                 operationId,
+                requestId,
                 multiSensorConfig);
 
         if (newDialog == null) {
@@ -772,7 +801,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     protected AuthDialog buildDialog(PromptInfo promptInfo, boolean requireConfirmation,
             int userId, int[] sensorIds, boolean credentialAllowed, String opPackageName,
-            boolean skipIntro, long operationId,
+            boolean skipIntro, long operationId, long requestId,
             @BiometricMultiSensorMode int multiSensorConfig) {
         return new AuthContainerView.Builder(mContext)
                 .setCallback(this)
@@ -782,11 +811,16 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 .setOpPackageName(opPackageName)
                 .setSkipIntro(skipIntro)
                 .setOperationId(operationId)
+                .setRequestId(requestId)
                 .setMultiSensorConfig(multiSensorConfig)
                 .build(sensorIds, credentialAllowed, mFpProps, mFaceProps);
     }
 
-    interface Callback {
+    /**
+     * AuthController callback used to receive signal for when biometric authenticators are
+     * registered.
+     */
+    public interface Callback {
         /**
          * Called when authenticators are registered. If authenticators are already
          * registered before this call, this callback will never be triggered.
