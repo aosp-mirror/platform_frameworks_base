@@ -159,7 +159,8 @@ public class Filter implements AutoCloseable {
     public @interface Status {}
 
     /**
-     * The status of a filter that the data in the filter buffer is ready to be read.
+     * The status of a filter that the data in the filter buffer is ready to be read. It can also be
+     * used to know the STC (System Time Clock) ready status if it's PCR filter.
      */
     public static final int STATUS_DATA_READY = DemuxFilterStatus.DATA_READY;
     /**
