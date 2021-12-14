@@ -98,7 +98,7 @@ public class MagnificationProcessorTest {
                 .setScale(TEST_SCALE).build();
         setMagnificationActivated(TEST_DISPLAY, config);
 
-        float scale = mMagnificationProcessor.getScale(TEST_DISPLAY);
+        float scale = mMagnificationProcessor.getMagnificationConfig(TEST_DISPLAY).getScale();
 
         assertEquals(scale, TEST_SCALE, 0);
     }
@@ -111,20 +111,19 @@ public class MagnificationProcessorTest {
         setMagnificationActivated(TEST_DISPLAY, config);
 
         float centerX = mMagnificationProcessor.getCenterX(
-                TEST_DISPLAY,  /* canControlMagnification= */true);
+                TEST_DISPLAY, /* canControlMagnification= */true);
 
         assertEquals(centerX, TEST_CENTER_X, 0);
     }
 
     @Test
-    public void getCenterX_canControlWindowMagnification_returnCenterX() {
+    public void getCenterX_controlWindowMagnification_returnCenterX() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
                 .setMode(MAGNIFICATION_MODE_WINDOW)
                 .setCenterX(TEST_CENTER_X).build();
         setMagnificationActivated(TEST_DISPLAY, config);
 
-        float centerX = mMagnificationProcessor.getCenterX(
-                TEST_DISPLAY,  /* canControlMagnification= */true);
+        float centerX = mMagnificationProcessor.getMagnificationConfig(TEST_DISPLAY).getCenterX();
 
         assertEquals(centerX, TEST_CENTER_X, 0);
     }
@@ -143,14 +142,13 @@ public class MagnificationProcessorTest {
     }
 
     @Test
-    public void getCenterY_canControlWindowMagnification_returnCenterY() {
+    public void getCenterY_controlWindowMagnification_returnCenterY() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
                 .setMode(MAGNIFICATION_MODE_WINDOW)
                 .setCenterY(TEST_CENTER_Y).build();
         setMagnificationActivated(TEST_DISPLAY, config);
 
-        float centerY = mMagnificationProcessor.getCenterY(
-                TEST_DISPLAY,  /* canControlMagnification= */false);
+        float centerY = mMagnificationProcessor.getMagnificationConfig(TEST_DISPLAY).getCenterY();
 
         assertEquals(centerY, TEST_CENTER_Y, 0);
     }
@@ -159,21 +157,10 @@ public class MagnificationProcessorTest {
     public void getMagnificationRegion_canControlFullscreenMagnification_returnRegion() {
         final Region region = new Region(10, 20, 100, 200);
         setMagnificationActivated(TEST_DISPLAY, MAGNIFICATION_MODE_FULLSCREEN);
-        mMagnificationProcessor.getMagnificationRegion(TEST_DISPLAY,
+        mMagnificationProcessor.getFullscreenMagnificationRegion(TEST_DISPLAY,
                 region,  /* canControlMagnification= */true);
 
         verify(mMockFullScreenMagnificationController).getMagnificationRegion(eq(TEST_DISPLAY),
-                eq(region));
-    }
-
-    @Test
-    public void getMagnificationRegion_canControlWindowMagnification_returnRegion() {
-        final Region region = new Region(10, 20, 100, 200);
-        setMagnificationActivated(TEST_DISPLAY, MAGNIFICATION_MODE_WINDOW);
-        mMagnificationProcessor.getMagnificationRegion(TEST_DISPLAY,
-                region,  /* canControlMagnification= */true);
-
-        verify(mMockWindowMagnificationManager).getMagnificationSourceBounds(eq(TEST_DISPLAY),
                 eq(region));
     }
 
@@ -188,7 +175,7 @@ public class MagnificationProcessorTest {
                 any());
 
         final Region result = new Region();
-        mMagnificationProcessor.getMagnificationRegion(TEST_DISPLAY,
+        mMagnificationProcessor.getFullscreenMagnificationRegion(TEST_DISPLAY,
                 result, /* canControlMagnification= */true);
         assertEquals(region, result);
         verify(mMockFullScreenMagnificationController).register(TEST_DISPLAY);
@@ -237,7 +224,7 @@ public class MagnificationProcessorTest {
     public void reset_fullscreenMagnificationActivated() {
         setMagnificationActivated(TEST_DISPLAY, MAGNIFICATION_MODE_FULLSCREEN);
 
-        mMagnificationProcessor.reset(TEST_DISPLAY, /* animate= */false);
+        mMagnificationProcessor.resetFullscreenMagnification(TEST_DISPLAY, /* animate= */false);
 
         verify(mMockFullScreenMagnificationController).reset(TEST_DISPLAY, false);
     }
@@ -246,7 +233,7 @@ public class MagnificationProcessorTest {
     public void reset_windowMagnificationActivated() {
         setMagnificationActivated(TEST_DISPLAY, MAGNIFICATION_MODE_WINDOW);
 
-        mMagnificationProcessor.reset(TEST_DISPLAY, /* animate= */false);
+        mMagnificationProcessor.resetCurrentMagnification(TEST_DISPLAY, /* animate= */false);
 
         verify(mMockWindowMagnificationManager).reset(TEST_DISPLAY);
     }
