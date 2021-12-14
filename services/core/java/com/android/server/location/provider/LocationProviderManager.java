@@ -16,6 +16,8 @@
 
 package com.android.server.location.provider;
 
+import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
+import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
 import static android.app.compat.CompatChanges.isChangeEnabled;
 import static android.location.LocationManager.DELIVER_HISTORICAL_LOCATIONS;
 import static android.location.LocationManager.GPS_PROVIDER;
@@ -32,6 +34,7 @@ import static android.os.PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
 import static android.os.PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
 import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
@@ -98,7 +101,6 @@ import com.android.server.location.injector.AppForegroundHelper;
 import com.android.server.location.injector.AppForegroundHelper.AppForegroundListener;
 import com.android.server.location.injector.AppOpsHelper;
 import com.android.server.location.injector.Injector;
-import com.android.server.location.injector.LocationAttributionHelper;
 import com.android.server.location.injector.LocationPermissionsHelper;
 import com.android.server.location.injector.LocationPermissionsHelper.LocationPermissionsListener;
 import com.android.server.location.injector.LocationPowerSaveModeHelper;
@@ -191,7 +193,7 @@ public class LocationProviderManager extends
 
         private final ILocationListener mListener;
 
-        protected LocationListenerTransport(ILocationListener listener) {
+        LocationListenerTransport(ILocationListener listener) {
             mListener = Objects.requireNonNull(listener);
         }
 
@@ -300,7 +302,7 @@ public class LocationProviderManager extends
 
         private final ILocationCallback mCallback;
 
-        protected GetCurrentLocationTransport(ILocationCallback callback) {
+        GetCurrentLocationTransport(ILocationCallback callback) {
             mCallback = Objects.requireNonNull(callback);
         }
 
@@ -411,7 +413,7 @@ public class LocationProviderManager extends
             EVENT_LOG.logProviderClientActive(mName, getIdentity());
 
             if (!getRequest().isHiddenFromAppOps()) {
-                mLocationAttributionHelper.reportLocationStart(getIdentity());
+                mAppOpsHelper.startOpNoThrow(OP_MONITOR_LOCATION, getIdentity());
             }
             onHighPowerUsageChanged();
 
@@ -426,7 +428,7 @@ public class LocationProviderManager extends
 
             onHighPowerUsageChanged();
             if (!getRequest().isHiddenFromAppOps()) {
-                mLocationAttributionHelper.reportLocationStop(getIdentity());
+                mAppOpsHelper.finishOp(OP_MONITOR_LOCATION, getIdentity());
             }
 
             onProviderListenerInactive();
@@ -500,11 +502,9 @@ public class LocationProviderManager extends
 
                 if (!getRequest().isHiddenFromAppOps()) {
                     if (mIsUsingHighPower) {
-                        mLocationAttributionHelper.reportHighPowerLocationStart(
-                                getIdentity());
+                        mAppOpsHelper.startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, getIdentity());
                     } else {
-                        mLocationAttributionHelper.reportHighPowerLocationStop(
-                                getIdentity());
+                        mAppOpsHelper.finishOp(OP_MONITOR_HIGH_POWER_LOCATION, getIdentity());
                     }
                 }
             }
@@ -1015,7 +1015,7 @@ public class LocationProviderManager extends
     protected final class LocationListenerRegistration extends LocationRegistration implements
             IBinder.DeathRecipient {
 
-        protected LocationListenerRegistration(LocationRequest request, CallerIdentity identity,
+        LocationListenerRegistration(LocationRequest request, CallerIdentity identity,
                 LocationListenerTransport transport, @PermissionLevel int permissionLevel) {
             super(request, identity, transport, permissionLevel);
         }
@@ -1080,7 +1080,7 @@ public class LocationProviderManager extends
     protected final class LocationPendingIntentRegistration extends LocationRegistration implements
             PendingIntent.CancelListener {
 
-        protected LocationPendingIntentRegistration(LocationRequest request,
+        LocationPendingIntentRegistration(LocationRequest request,
                 CallerIdentity identity, LocationPendingIntentTransport transport,
                 @PermissionLevel int permissionLevel) {
             super(request, identity, transport, permissionLevel);
@@ -1089,13 +1089,15 @@ public class LocationProviderManager extends
         @GuardedBy("mLock")
         @Override
         protected void onLocationListenerRegister() {
-            ((PendingIntent) getKey()).registerCancelListener(this);
+            if (!((PendingIntent) getKey()).addCancelListener(DIRECT_EXECUTOR, this)) {
+                remove();
+            }
         }
 
         @GuardedBy("mLock")
         @Override
         protected void onLocationListenerUnregister() {
-            ((PendingIntent) getKey()).unregisterCancelListener(this);
+            ((PendingIntent) getKey()).removeCancelListener(this);
         }
 
         @Override
@@ -1138,7 +1140,7 @@ public class LocationProviderManager extends
 
         private long mExpirationRealtimeMs = Long.MAX_VALUE;
 
-        protected GetCurrentLocationListenerRegistration(LocationRequest request,
+        GetCurrentLocationListenerRegistration(LocationRequest request,
                 CallerIdentity identity, LocationTransport transport, int permissionLevel) {
             super(request, identity, transport, permissionLevel);
         }
@@ -1347,7 +1349,6 @@ public class LocationProviderManager extends
     protected final AppForegroundHelper mAppForegroundHelper;
     protected final LocationPowerSaveModeHelper mLocationPowerSaveModeHelper;
     protected final ScreenInteractiveHelper mScreenInteractiveHelper;
-    protected final LocationAttributionHelper mLocationAttributionHelper;
     protected final LocationUsageLogger mLocationUsageLogger;
     protected final LocationFudger mLocationFudger;
 
@@ -1415,7 +1416,6 @@ public class LocationProviderManager extends
         mAppForegroundHelper = injector.getAppForegroundHelper();
         mLocationPowerSaveModeHelper = injector.getLocationPowerSaveModeHelper();
         mScreenInteractiveHelper = injector.getScreenInteractiveHelper();
-        mLocationAttributionHelper = injector.getLocationAttributionHelper();
         mLocationUsageLogger = injector.getLocationUsageLogger();
         mLocationFudger = new LocationFudger(mSettingsHelper.getCoarseLocationAccuracyM());
 
