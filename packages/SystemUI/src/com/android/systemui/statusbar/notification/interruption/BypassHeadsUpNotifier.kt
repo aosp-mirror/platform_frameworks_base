@@ -25,8 +25,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.tuner.TunerService
@@ -44,7 +44,7 @@ class BypassHeadsUpNotifier @Inject constructor(
     private val headsUpManager: HeadsUpManagerPhone,
     private val notificationLockscreenUserManager: NotificationLockscreenUserManager,
     private val mediaManager: NotificationMediaManager,
-    private val entryManager: NotificationEntryManager,
+    private val commonNotifCollection: CommonNotifCollection,
     tunerService: TunerService
 ) : StatusBarStateController.StateListener, NotificationMediaManager.MediaListener {
 
@@ -77,8 +77,7 @@ class BypassHeadsUpNotifier @Inject constructor(
 
     override fun onPrimaryMetadataOrStateChanged(metadata: MediaMetadata?, state: Int) {
         val previous = currentMediaEntry
-        var newEntry = entryManager
-                .getActiveNotificationUnfiltered(mediaManager.mediaNotificationKey)
+        var newEntry = commonNotifCollection.getEntry(mediaManager.mediaNotificationKey)
         if (!NotificationMediaManager.isPlayingState(state)) {
             newEntry = null
         }
@@ -112,7 +111,7 @@ class BypassHeadsUpNotifier @Inject constructor(
             // filter notifications invisible on Keyguard
             return false
         }
-        if (entryManager.getActiveNotificationUnfiltered(entry.key) != null) {
+        if (commonNotifCollection.getEntry(entry.key) != null) {
             // filter notifications not the active list currently
             return false
         }

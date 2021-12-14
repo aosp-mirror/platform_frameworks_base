@@ -2700,6 +2700,16 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
+    void onSystemUiContextCleanup(ContextImpl context) {
+        synchronized (this) {
+            if (mDisplaySystemUiContexts == null) return;
+            final int index = mDisplaySystemUiContexts.indexOfValue(context);
+            if (index >= 0) {
+                mDisplaySystemUiContexts.removeAt(index);
+            }
+        }
+    }
+
     public void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
         synchronized (this) {
             getSystemContext().installSystemApplicationInfo(info, classLoader);
@@ -4093,12 +4103,12 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void handleStartBinderTracking() {
-        Binder.enableTracing();
+        Binder.enableStackTracking();
     }
 
     private void handleStopBinderTrackingAndDump(ParcelFileDescriptor fd) {
         try {
-            Binder.disableTracing();
+            Binder.disableStackTracking();
             Binder.getTransactionTracker().writeTracesToFile(fd);
         } finally {
             IoUtils.closeQuietly(fd);
@@ -6637,7 +6647,7 @@ public final class ActivityThread extends ClientTransactionHandler
         boolean isAppProfileable = isAppDebuggable || data.appInfo.isProfileable();
         Trace.setAppTracingAllowed(isAppProfileable);
         if ((isAppProfileable || Build.IS_DEBUGGABLE) && data.enableBinderTracking) {
-            Binder.enableTracing();
+            Binder.enableStackTracking();
         }
 
         // Initialize heap profiling.

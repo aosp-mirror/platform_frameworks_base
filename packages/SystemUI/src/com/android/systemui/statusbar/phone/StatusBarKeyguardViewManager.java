@@ -111,8 +111,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final NavigationModeController mNavigationModeController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final KeyguardBouncer.Factory mKeyguardBouncerFactory;
-    private final WakefulnessLifecycle mWakefulnessLifecycle;
-    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private final KeyguardMessageAreaController.Factory mKeyguardMessageAreaFactory;
     private KeyguardMessageAreaController mKeyguardMessageAreaController;
     private final Lazy<ShadeController> mShadeController;
@@ -244,8 +242,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             KeyguardStateController keyguardStateController,
             NotificationMediaManager notificationMediaManager,
             KeyguardBouncer.Factory keyguardBouncerFactory,
-            WakefulnessLifecycle wakefulnessLifecycle,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             KeyguardMessageAreaController.Factory keyguardMessageAreaFactory,
             Lazy<ShadeController> shadeController) {
         mContext = context;
@@ -260,8 +256,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mStatusBarStateController = sysuiStatusBarStateController;
         mDockManager = dockManager;
         mKeyguardBouncerFactory = keyguardBouncerFactory;
-        mWakefulnessLifecycle = wakefulnessLifecycle;
-        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mKeyguardMessageAreaFactory = keyguardMessageAreaFactory;
         mShadeController = shadeController;
     }
@@ -1155,7 +1149,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public ViewRootImpl getViewRootImpl() {
-        return mStatusBar.getStatusBarView().getViewRootImpl();
+        return mNotificationShadeWindowController.getNotificationShadeView().getViewRootImpl();
     }
 
     public void launchPendingWakeupAction() {

@@ -51,6 +51,7 @@ public class StackStateAnimator {
     public static final int ANIMATION_DURATION_CLOSE_REMOTE_INPUT = 150;
     public static final int ANIMATION_DURATION_HEADS_UP_APPEAR = 400;
     public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 400;
+    public static final int ANIMATION_DURATION_FOLD_TO_AOD = 600;
     public static final int ANIMATION_DURATION_PULSE_APPEAR =
             KeyguardSliceView.DEFAULT_ANIM_DURATION;
     public static final int ANIMATION_DURATION_BLOCKING_HELPER_FADE = 240;

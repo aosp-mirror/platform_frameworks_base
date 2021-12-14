@@ -341,7 +341,7 @@ public class StatusBar extends CoreStartable implements
         mStatusBarWindowState =  state;
         mStatusBarWindowHidden = state == WINDOW_STATE_HIDDEN;
         mStatusBarHideIconsForBouncerManager.setStatusBarWindowHidden(mStatusBarWindowHidden);
-        if (getStatusBarView() != null) {
+        if (mStatusBarView != null) {
             // Should #updateHideIconsForBouncer always be called, regardless of whether we have a
             //   status bar view? If so, we can make #updateHideIconsForBouncer private.
             mStatusBarHideIconsForBouncerManager.updateHideIconsForBouncer(/* animate= */ false);
@@ -1124,23 +1124,18 @@ public class StatusBar extends CoreStartable implements
         // Set up CollapsedStatusBarFragment and PhoneStatusBarView
         StatusBarInitializer initializer = mStatusBarComponent.getStatusBarInitializer();
         initializer.setStatusBarViewUpdatedListener(
-                new StatusBarInitializer.OnStatusBarViewUpdatedListener() {
-                    @Override
-                    public void onStatusBarViewUpdated(
-                            @NonNull PhoneStatusBarView statusBarView,
-                            @NonNull PhoneStatusBarViewController statusBarViewController) {
-                        mStatusBarView = statusBarView;
-                        mPhoneStatusBarViewController = statusBarViewController;
-                        mNotificationShadeWindowViewController.setStatusBarView(mStatusBarView);
-                        // Ensure we re-propagate panel expansion values to the panel controller and
-                        // any listeners it may have, such as PanelBar. This will also ensure we
-                        // re-display the notification panel if necessary (for example, if
-                        // a heads-up notification was being displayed and should continue being
-                        // displayed).
-                        mNotificationPanelViewController.updatePanelExpansionAndVisibility();
-                        setBouncerShowingForStatusBarComponents(mBouncerShowing);
-                        checkBarModes();
-                    }
+                (statusBarView, statusBarViewController) -> {
+                    mStatusBarView = statusBarView;
+                    mPhoneStatusBarViewController = statusBarViewController;
+                    mNotificationShadeWindowViewController.setStatusBarView(mStatusBarView);
+                    // Ensure we re-propagate panel expansion values to the panel controller and
+                    // any listeners it may have, such as PanelBar. This will also ensure we
+                    // re-display the notification panel if necessary (for example, if
+                    // a heads-up notification was being displayed and should continue being
+                    // displayed).
+                    mNotificationPanelViewController.updatePanelExpansionAndVisibility();
+                    setBouncerShowingForStatusBarComponents(mBouncerShowing);
+                    checkBarModes();
                 });
         initializer.initializeStatusBar(mStatusBarComponent);
 
@@ -1199,6 +1194,8 @@ public class StatusBar extends CoreStartable implements
             Runnable updateOpaqueness = () -> {
                 mNotificationShadeWindowController.setLightRevealScrimOpaque(
                         mLightRevealScrim.isScrimOpaque());
+                mScreenOffAnimationController
+                        .onScrimOpaqueChanged(mLightRevealScrim.isScrimOpaque());
             };
             if (opaque) {
                 // Delay making the view opaque for a frame, because it needs some time to render
@@ -1576,10 +1573,6 @@ public class StatusBar extends CoreStartable implements
         mMediaManager.setBiometricUnlockController(mBiometricUnlockController);
         mKeyguardDismissUtil.setDismissHandler(this::executeWhenUnlocked);
         Trace.endSection();
-    }
-
-    protected PhoneStatusBarView getStatusBarView() {
-        return mStatusBarView;
     }
 
     public NotificationShadeWindowView getNotificationShadeWindowView() {
@@ -2915,7 +2908,17 @@ public class StatusBar extends CoreStartable implements
                 showKeyguardImpl();
             }
         } else {
-            return hideKeyguardImpl(force);
+            // During folding a foldable device this might be called as a result of
+            // 'onScreenTurnedOff' call for the inner display.
+            // In this case:
+            //  * When phone is locked on folding: it doesn't make sense to hide keyguard as it
+            //    will be immediately locked again
+            //  * When phone is unlocked: we still don't want to execute hiding of the keyguard
+            //    as the animation could prepare 'fake AOD' interface (without actually
+            //    transitioning to keyguard state) and this might reset the view states
+            if (!mScreenOffAnimationController.isKeyguardHideDelayed()) {
+                return hideKeyguardImpl(force);
+            }
         }
         return false;
     }
@@ -3078,6 +3081,7 @@ public class StatusBar extends CoreStartable implements
         mNotificationPanelViewController.onAffordanceLaunchEnded();
         mNotificationPanelViewController.cancelAnimation();
         mNotificationPanelViewController.setAlpha(1f);
+        mNotificationPanelViewController.resetTranslation();
         mNotificationPanelViewController.resetViewGroupFade();
         updateDozingState();
         updateScrimController();

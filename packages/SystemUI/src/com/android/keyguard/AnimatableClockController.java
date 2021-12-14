@@ -168,6 +168,12 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         if (!mIsDozing) mView.animateAppearOnLockscreen();
     }
 
+    /** Animate the clock appearance when a foldable device goes from fully-open/half-open state to
+     * fully folded state and it goes to sleep (always on display screen) */
+    public void animateFoldAppear() {
+        mView.animateFoldAppear();
+    }
+
     /**
      * Updates the time for the view.
      */

@@ -76,6 +76,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.Dumpable;
@@ -88,6 +89,7 @@ import com.android.systemui.navigationbar.NavigationBar;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.shared.recents.IOverviewProxy;
@@ -161,6 +163,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final Optional<StartingSurface> mStartingSurface;
     private final SmartspaceTransitionController mSmartspaceTransitionController;
     private final Optional<RecentTasks> mRecentTasks;
+    private final UiEventLogger mUiEventLogger;
 
     private Region mActiveNavBarRegion;
 
@@ -248,6 +251,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             mContext.getSystemService(InputMethodManager.class)
                     .showInputMethodPickerFromSystem(true /* showAuxiliarySubtypes */,
                             DEFAULT_DISPLAY);
+            mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP);
         }
 
         @Override
@@ -560,6 +564,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             ShellTransitions shellTransitions,
             ScreenLifecycle screenLifecycle,
             SmartspaceTransitionController smartspaceTransitionController,
+            UiEventLogger uiEventLogger,
             DumpManager dumpManager) {
         super(broadcastDispatcher);
         mContext = context;
@@ -581,6 +586,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         mOneHandedOptional = oneHandedOptional;
         mShellTransitions = shellTransitions;
         mRecentTasks = recentTasks;
+        mUiEventLogger = uiEventLogger;
 
         // Assumes device always starts with back button until launcher tells it that it does not
         mNavBarButtonAlpha = 1.0f;

@@ -21,8 +21,6 @@ import dagger.Module;
 /**
  * Dagger Module providing Communal-related functionality.
  */
-@Module(subcomponents = {
-        AppWidgetOverlayComponent.class,
-})
+@Module(subcomponents = {AppWidgetOverlayComponent.class, DreamOverlayComponent.class})
 public interface DreamModule {
 }

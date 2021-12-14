@@ -78,6 +78,8 @@ interface SysUIUnfoldComponent {
 
     fun getStatusBarMoveFromCenterAnimationController(): StatusBarMoveFromCenterAnimationController
 
+    fun getFoldAodAnimationController(): FoldAodAnimationController
+
     fun getUnfoldTransitionWallpaperController(): UnfoldTransitionWallpaperController
 
     fun getUnfoldLightRevealOverlayAnimation(): UnfoldLightRevealOverlayAnimation
