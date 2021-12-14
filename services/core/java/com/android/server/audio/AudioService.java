@@ -130,7 +130,9 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -1994,6 +1996,18 @@ public class AudioService extends IAudioService.Stub
             mDeviceBroker.setForceUse_Async(AudioSystem.FOR_ENCODED_SURROUND, forceSetting,
                     eventSource);
         }
+    }
+
+    @Override // Binder call
+    public void onShellCommand(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_AUDIO_POLICY)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing MANAGE_AUDIO_POLICY permission");
+        }
+        new AudioManagerShellCommand(AudioService.this).exec(this, in, out, err,
+                args, callback, resultReceiver);
     }
 
     /** @see AudioManager#getSurroundFormats() */
