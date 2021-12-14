@@ -99,11 +99,6 @@ public:
     Result setLnb(sp<LnbClient> lnbClient);
 
     /**
-     * Enable or Disable Low Noise Amplifier (LNA).
-     */
-    Result setLna(bool bEnable);
-
-    /**
      * Link Frontend to the cicam with given id.
      *
      * @return lts id
@@ -120,7 +115,13 @@ public:
      */
     Result close();
 
+    /**
+     * Get Frontend hardware info.
+     */
+    Result getHardwareInfo(string& info);
+
     int32_t getId();
+
     shared_ptr<ITunerFrontend> getAidlFrontend();
 private:
     /**

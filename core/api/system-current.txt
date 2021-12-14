@@ -6382,6 +6382,7 @@ package android.media.tv.tuner {
     method public int getAvSyncHwId(@NonNull android.media.tv.tuner.filter.Filter);
     method public long getAvSyncTime(int);
     method @Nullable public java.util.List<android.media.tv.tuner.frontend.FrontendInfo> getAvailableFrontendInfos();
+    method @Nullable public String getCurrentFrontendHardwardInfo();
     method @Nullable public android.media.tv.tuner.DemuxCapabilities getDemuxCapabilities();
     method @Nullable public android.media.tv.tuner.frontend.FrontendInfo getFrontendInfo();
     method @Nullable public android.media.tv.tuner.frontend.FrontendStatus getFrontendStatus(@NonNull int[]);
@@ -6546,6 +6547,10 @@ package android.media.tv.tuner.filter {
     method public boolean isPassthrough();
     method public boolean useSecureMemory();
     field public static final int AUDIO_STREAM_TYPE_AAC = 6; // 0x6
+    field public static final int AUDIO_STREAM_TYPE_AAC_ADTS = 16; // 0x10
+    field public static final int AUDIO_STREAM_TYPE_AAC_HE_ADTS = 18; // 0x12
+    field public static final int AUDIO_STREAM_TYPE_AAC_HE_LATM = 19; // 0x13
+    field public static final int AUDIO_STREAM_TYPE_AAC_LATM = 17; // 0x11
     field public static final int AUDIO_STREAM_TYPE_AC3 = 7; // 0x7
     field public static final int AUDIO_STREAM_TYPE_AC4 = 9; // 0x9
     field public static final int AUDIO_STREAM_TYPE_DRA = 15; // 0xf
@@ -6707,6 +6712,7 @@ package android.media.tv.tuner.filter {
     method @IntRange(from=0) public int getMpuSequenceNumber();
     method public long getOffset();
     method public long getPts();
+    method public int getScIndexMask();
     method public int getStreamId();
     method public boolean isDtsPresent();
     method public boolean isPrivateData();
@@ -7819,6 +7825,7 @@ package android.media.tv.tuner.frontend {
     method public void onScanStopped();
     method public void onSignalTypeReported(int);
     method public void onSymbolRatesReported(@NonNull int[]);
+    method public default void onUnLocked();
   }
 
 }

@@ -102,15 +102,6 @@ Result FrontendClient::setLnb(sp<LnbClient> lnbClient) {
     return Result::INVALID_STATE;
 }
 
-Result FrontendClient::setLna(bool bEnable) {
-    if (mTunerFrontend != nullptr) {
-        Status s = mTunerFrontend->setLna(bEnable);
-        return ClientHelper::getServiceSpecificErrorCode(s);
-    }
-
-    return Result::INVALID_STATE;
-}
-
 int32_t FrontendClient::linkCiCamToFrontend(int32_t ciCamId) {
     int32_t ltsId = static_cast<int32_t>(Constant::INVALID_LTS_ID);
 
@@ -137,6 +128,15 @@ Result FrontendClient::close() {
     if (mTunerFrontend != nullptr) {
         Status s = mTunerFrontend->close();
         mTunerFrontend = nullptr;
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    return Result::INVALID_STATE;
+}
+
+Result FrontendClient::getHardwareInfo(string& info) {
+    if (mTunerFrontend != nullptr) {
+        Status s = mTunerFrontend->getHardwareInfo(&info);
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 

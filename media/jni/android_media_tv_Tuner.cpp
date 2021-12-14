@@ -604,9 +604,11 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
                                              const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/MediaEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>",
-                                           "(IZJZJJJLandroid/media/MediaCodec$LinearBlock;"
-                                           "ZJIZLandroid/media/tv/tuner/filter/AudioDescriptor;)V");
+    jmethodID eventInit = env->GetMethodID(
+            eventClazz,
+            "<init>",
+            "(IZJZJJJLandroid/media/MediaCodec$LinearBlock;"
+            "ZJIZILandroid/media/tv/tuner/filter/AudioDescriptor;)V");
     jfieldID eventContext = env->GetFieldID(eventClazz, "mNativeContext", "J");
 
     const DemuxFilterMediaEvent &mediaEvent = event.get<DemuxFilterEvent::Tag::media>();
@@ -639,10 +641,20 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
     jlong avDataId = mediaEvent.avDataId;
     jint mpuSequenceNumber = mediaEvent.mpuSequenceNumber;
     jboolean isPesPrivateData = mediaEvent.isPesPrivateData;
+    jint sc = 0;
+    if (mediaEvent.scIndexMask.getTag() == DemuxFilterScIndexMask::Tag::scIndex) {
+        sc = mediaEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scIndex>();
+    } else if (mediaEvent.scIndexMask.getTag() == DemuxFilterScIndexMask::Tag::scHevc) {
+        sc = mediaEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scHevc>();
+    } else if (mediaEvent.scIndexMask.getTag() == DemuxFilterScIndexMask::Tag::scAvc) {
+        sc = mediaEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scAvc>();
+        // Java uses the values defined by HIDL HAL. Left shift 4 bits.
+        sc = sc << 4;
+    }
 
     jobject obj = env->NewObject(eventClazz, eventInit, streamId, isPtsPresent, pts, isDtsPresent,
                                  dts, dataLength, offset, nullptr, isSecureMemory, avDataId,
-                                 mpuSequenceNumber, isPesPrivateData, audioDescriptor);
+                                 mpuSequenceNumber, isPesPrivateData, sc, audioDescriptor);
 
     uint64_t avSharedMemSize = mFilterClient->getAvSharedHandleInfo().size;
     if (mediaEvent.avMemory.fds.size() > 0 || mediaEvent.avDataId != 0 ||
@@ -1025,6 +1037,10 @@ void FrontendClientCallbackImpl::executeOnScanMessage(
                 env->CallVoidMethod(
                         frontend,
                         env->GetMethodID(clazz, "onLocked", "()V"));
+            } else {
+                env->CallVoidMethod(
+                        frontend,
+                        env->GetMethodID(clazz, "onUnLocked", "()V"));
             }
             break;
         }
@@ -1540,6 +1556,15 @@ jobject JTuner::getFrontendInfo(int id) {
                           maxSymbolRate, acquireRange, exclusiveGroupId, statusCaps, jcaps);
 }
 
+Result JTuner::getFrontendHardwareInfo(string &info) {
+    if (mFeClient == nullptr) {
+        ALOGE("frontend is not initialized");
+        return Result::INVALID_STATE;
+    }
+
+    return mFeClient->getHardwareInfo(info);
+}
+
 jobject JTuner::openLnbByHandle(int handle) {
     if (mTunerClient == nullptr) {
         return nullptr;
@@ -1649,11 +1674,10 @@ int JTuner::setLnb(sp<LnbClient> lnbClient) {
 }
 
 int JTuner::setLna(bool enable) {
-    if (mFeClient == nullptr) {
-        ALOGE("frontend client is not initialized");
-        return (int)Result::INVALID_STATE;
+    if (mTunerClient == nullptr) {
+        return (int)Result::NOT_INITIALIZED;
     }
-    Result result = mFeClient->setLna(enable);
+    Result result = mTunerClient->setLna(enable);
     return (int)result;
 }
 
@@ -4195,6 +4219,16 @@ static jobject android_media_tv_Tuner_open_shared_filter(
     return filterObj;
 }
 
+static jstring android_media_tv_Tuner_get_frontend_hardware_info(JNIEnv *env, jobject thiz) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    string info;
+    Result r = tuner->getFrontendHardwareInfo(info);
+    if (r != Result::SUCCESS) {
+        return nullptr;
+    }
+    return env->NewStringUTF(info.data());
+}
+
 static jint android_media_tv_Tuner_close_frontend(JNIEnv* env, jobject thiz, jint /* handle */) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->closeFrontend();
@@ -4504,6 +4538,8 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeOpenSharedFilter",
             "(Ljava/lang/String;)Landroid/media/tv/tuner/filter/SharedFilter;",
             (void *)android_media_tv_Tuner_open_shared_filter},
+    { "nativeGetFrontendHardwareInfo","()Ljava/lang/String;",
+            (void *)android_media_tv_Tuner_get_frontend_hardware_info },
 };
 
 static const JNINativeMethod gFilterMethods[] = {

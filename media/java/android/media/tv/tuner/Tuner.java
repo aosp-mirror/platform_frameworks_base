@@ -687,6 +687,7 @@ public class Tuner implements AutoCloseable  {
     private native FrontendInfo nativeGetFrontendInfo(int id);
     private native Filter nativeOpenFilter(int type, int subType, long bufferSize);
     private native TimeFilter nativeOpenTimeFilter();
+    private native String nativeGetFrontendHardwareInfo();
 
     private native Lnb nativeOpenLnbByHandle(int handle);
     private native Lnb nativeOpenLnbByName(String name);
@@ -1278,6 +1279,34 @@ public class Tuner implements AutoCloseable  {
         return Arrays.asList(feInfoList);
     }
 
+    /**
+     * Gets the currently initialized and activated frontend hardware information. The return values
+     * would differ per device makers. E.g. RF chip version, Demod chip version, detailed status of
+     * dvbs blind scan, etc
+     *
+     * <p>This API is only supported by Tuner HAL 2.0 or higher. Unsupported version would return
+     * {@code null}. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * @return The active frontend hardware information. {@code null} if the operation failed.
+     * @throws IllegalStateException if there is no active frontend currently.
+     */
+    @Nullable
+    public String getCurrentFrontendHardwardInfo() {
+        mFrontendLock.lock();
+        try {
+            if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_2_0, "Get Frontend hardware info")) {
+                return null;
+            }
+            if (mFrontend == null) {
+                throw new IllegalStateException("frontend is not initialized");
+            }
+            return nativeGetFrontendHardwareInfo();
+        } finally {
+            mFrontendLock.unlock();
+        }
+    }
+
     /** @hide */
     public FrontendInfo getFrontendInfoById(int id) {
         mFrontendLock.lock();
@@ -1346,6 +1375,24 @@ public class Tuner implements AutoCloseable  {
                     synchronized (mScanCallbackLock) {
                         if (mScanCallback != null) {
                             mScanCallback.onLocked();
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    private void onUnLocked() {
+        Log.d(TAG, "Wrote Stats Log for unlocked event from scanning.");
+        FrameworkStatsLog.write(FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
+                FrameworkStatsLog.TV_TUNER_STATE_CHANGED__STATE__LOCKED);
+
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onUnLocked();
                         }
                     }
                 });

@@ -127,6 +127,11 @@ public:
      */
     sp<FilterClient> openSharedFilter(const string& filterToken, sp<FilterClientCallback> cb);
 
+    /**
+     * Enable or Disable Low Noise Amplifier (LNA).
+     */
+    Result setLna(bool bEnable);
+
 private:
     /**
      * An AIDL Tuner Service Singleton assigned at the first time the Tuner Client
