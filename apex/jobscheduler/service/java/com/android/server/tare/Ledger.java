@@ -138,6 +138,11 @@ class Ledger {
             dumpTime(pw, transaction.endTimeMs);
             pw.print(": ");
             pw.print(EconomicPolicy.eventToString(transaction.eventId));
+            if (transaction.tag != null) {
+                pw.print("(");
+                pw.print(transaction.tag);
+                pw.print(")");
+            }
             pw.print(" --> ");
             pw.println(narcToString(transaction.delta));
         }
