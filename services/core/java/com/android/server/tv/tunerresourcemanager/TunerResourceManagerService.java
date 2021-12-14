@@ -288,6 +288,23 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
 
         @Override
+        public boolean transferOwner(int resourceType, int currentOwnerId, int newOwnerId) {
+            enforceTunerAccessPermission("transferOwner");
+            enforceTrmAccessPermission("transferOwner");
+            synchronized (mLock) {
+                if (!checkClientExists(currentOwnerId)) {
+                    Slog.e(TAG, "currentOwnerId:" + currentOwnerId + " does not exit");
+                    return false;
+                }
+                if (!checkClientExists(newOwnerId)) {
+                    Slog.e(TAG, "newOwnerId:" + newOwnerId + " does not exit");
+                    return false;
+                }
+                return transferOwnerInternal(resourceType, currentOwnerId, newOwnerId);
+            }
+        }
+
+        @Override
         public boolean requestDemux(@NonNull TunerDemuxRequest request,
                     @NonNull int[] demuxHandle) throws RemoteException {
             enforceTunerAccessPermission("requestDemux");
@@ -387,7 +404,11 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                 if (fe == null) {
                     throw new RemoteException("Releasing frontend does not exist.");
                 }
-                if (fe.getOwnerClientId() != clientId) {
+                int ownerClientId = fe.getOwnerClientId();
+                ClientProfile ownerProfile = getClientProfile(ownerClientId);
+                if (ownerClientId != clientId
+                        && (ownerProfile != null
+                              && !ownerProfile.getShareFeClientIds().contains(clientId))) {
                     throw new RemoteException(
                             "Client is not the current owner of the releasing fe.");
                 }
@@ -967,6 +988,83 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             getClientProfile(selfClientId).useFrontend(feId);
         }
         getClientProfile(targetClientId).shareFrontend(selfClientId);
+    }
+
+    private boolean transferFeOwner(int currentOwnerId, int newOwnerId) {
+        ClientProfile currentOwnerProfile = getClientProfile(currentOwnerId);
+        ClientProfile newOwnerProfile = getClientProfile(newOwnerId);
+        // change the owner of all the inUse frontend
+        newOwnerProfile.shareFrontend(currentOwnerId);
+        currentOwnerProfile.stopSharingFrontend(newOwnerId);
+        for (int inUseHandle : newOwnerProfile.getInUseFrontendHandles()) {
+            getFrontendResource(inUseHandle).setOwner(newOwnerId);
+        }
+        // double check there is no other resources tied to the previous owner
+        for (int inUseHandle : currentOwnerProfile.getInUseFrontendHandles()) {
+            int ownerId = getFrontendResource(inUseHandle).getOwnerClientId();
+            if (ownerId != newOwnerId) {
+                Slog.e(TAG, "something is wrong in transferFeOwner:" + inUseHandle
+                        + ", " + ownerId + ", " + newOwnerId);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean transferFeCiCamOwner(int currentOwnerId, int newOwnerId) {
+        ClientProfile currentOwnerProfile = getClientProfile(currentOwnerId);
+        ClientProfile newOwnerProfile = getClientProfile(newOwnerId);
+
+        // link ciCamId to the new profile
+        int ciCamId = currentOwnerProfile.getInUseCiCamId();
+        newOwnerProfile.useCiCam(ciCamId);
+
+        // set the new owner Id
+        CiCamResource ciCam = getCiCamResource(ciCamId);
+        ciCam.setOwner(newOwnerId);
+
+        // unlink cicam resource from the original owner profile
+        currentOwnerProfile.releaseCiCam();
+        return true;
+    }
+
+    private boolean transferLnbOwner(int currentOwnerId, int newOwnerId) {
+        ClientProfile currentOwnerProfile = getClientProfile(currentOwnerId);
+        ClientProfile newOwnerProfile = getClientProfile(newOwnerId);
+
+        Set<Integer> inUseLnbHandles = new HashSet<>();
+        for (Integer lnbHandle : currentOwnerProfile.getInUseLnbHandles()) {
+            // link lnb handle to the new profile
+            newOwnerProfile.useLnb(lnbHandle);
+
+            // set new owner Id
+            LnbResource lnb = getLnbResource(lnbHandle);
+            lnb.setOwner(newOwnerId);
+
+            inUseLnbHandles.add(lnbHandle);
+        }
+
+        // unlink lnb handles from the original owner
+        for (Integer lnbHandle : inUseLnbHandles) {
+            currentOwnerProfile.releaseLnb(lnbHandle);
+        }
+
+        return true;
+    }
+
+    @VisibleForTesting
+    protected boolean transferOwnerInternal(int resourceType, int currentOwnerId, int newOwnerId) {
+        switch (resourceType) {
+            case TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND:
+                return transferFeOwner(currentOwnerId, newOwnerId);
+            case TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM:
+                return transferFeCiCamOwner(currentOwnerId, newOwnerId);
+            case TunerResourceManager.TUNER_RESOURCE_TYPE_LNB:
+                return transferLnbOwner(currentOwnerId, newOwnerId);
+            default:
+                Slog.e(TAG, "transferOwnerInternal. unsupported resourceType: " + resourceType);
+                return false;
+        }
     }
 
     @VisibleForTesting

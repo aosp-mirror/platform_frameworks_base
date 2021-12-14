@@ -178,8 +178,10 @@ struct JTuner : public RefBase {
     jobject getFrontendIds();
     jobject openFrontendByHandle(int feHandle);
     int shareFrontend(int feId);
+    int unshareFrontend();
     void registerFeCbListener(JTuner* jtuner);
     void unregisterFeCbListener(JTuner* jtuner);
+    void updateFrontend(JTuner* jtuner);
     jint closeFrontendById(int id);
     jobject getFrontendInfo(int id);
     int tune(const FrontendSettings& settings);

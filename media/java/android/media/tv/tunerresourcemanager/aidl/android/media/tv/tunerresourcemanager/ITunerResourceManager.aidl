@@ -177,6 +177,19 @@ interface ITunerResourceManager {
     void shareFrontend(in int selfClientId, in int targetClientId);
 
     /*
+     * Transfers the ownership of the shared resource.
+     *
+     * <p><strong>Note:</strong> Only the existing frontend sharee can be the new owner.
+     *
+     * @param resourceType the type of resource to transfer the ownership for.
+     * @param currentOwnerId the id of the current owner client.
+     * @param newOwnerId the id of the new owner client.
+     *
+     * @return true if successful. false otherwise.
+     */
+    boolean transferOwner(in int resourceType, in int currentOwnerId, in int newOwnerId);
+
+    /*
      * This API is used by the Tuner framework to request an available demux from the TunerHAL.
      *
      * <p>There are three possible scenarios:

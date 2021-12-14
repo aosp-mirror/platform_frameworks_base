@@ -415,6 +415,25 @@ public class TunerResourceManager {
     }
 
     /**
+     * Transfers the ownership of shared resource.
+     *
+     * <p><strong>Note:</strong> Only the existing frontend sharee can be the new owner.
+     *
+     * @param resourceType the type of the resource to transfer the ownership for.
+     * @param currentOwnerId the id of the current owner client.
+     * @param newOwnerId the id of the new owner client.
+     *
+     * @return true if successful and false otherwise.
+     */
+    public boolean transferOwner(int resourceType, int currentOwnerId, int newOwnerId) {
+        try {
+            return mService.transferOwner(resourceType, currentOwnerId, newOwnerId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Requests a Tuner Demux resource.
      *
      * <p>There are three possible scenarios:

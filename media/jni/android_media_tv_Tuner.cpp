@@ -959,7 +959,8 @@ FrontendClientCallbackImpl::FrontendClientCallbackImpl(JTuner* jtuner, jweak lis
 void FrontendClientCallbackImpl::addCallbackListener(JTuner* jtuner, jweak listener) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jweak listenerRef = env->NewWeakGlobalRef(listener);
-    ALOGV("addCallbackListener() with listener:%p and ref:%p @%p", listener, listenerRef, this);
+    ALOGV("addCallbackListener() with listener:%p and ref:%p @%p",
+              listener, listenerRef, this);
     std::scoped_lock<std::mutex> lock(mMutex);
     mListenersMap[jtuner] = listenerRef;
 }
@@ -1314,15 +1315,40 @@ int JTuner::shareFrontend(int feId) {
     return (int)Result::SUCCESS;
 }
 
+int JTuner::unshareFrontend() {
+    if (mFeClient != nullptr) {
+        ALOGE("Cannot unshare frontend because this session is already holding %d"
+              " as an owner instead of as a sharee", mFeClient->getId());
+        return (int)Result::INVALID_STATE;
+    }
+
+    mSharedFeId = (int)Constant::INVALID_FRONTEND_ID;
+    return (int)Result::SUCCESS;
+}
+
 void JTuner::registerFeCbListener(JTuner* jtuner) {
+    ALOGV("registerFeCbListener: %p", jtuner);
     if (mFeClientCb != nullptr && jtuner != nullptr) {
         mFeClientCb->addCallbackListener(jtuner, jtuner->getObject());
     }
 }
 
 void JTuner::unregisterFeCbListener(JTuner* jtuner) {
+    ALOGV("unregisterFeCbListener: %p", jtuner);
     if (mFeClientCb != nullptr && jtuner != nullptr) {
         mFeClientCb->removeCallbackListener(jtuner);
+    }
+}
+
+void JTuner::updateFrontend(JTuner* jtuner) {
+    if (jtuner == nullptr) {
+        ALOGV("JTuner::updateFrontend(null) called for previous owner: %p", this);
+        mFeClient = nullptr;
+        mFeClientCb = nullptr;
+    } else {
+        ALOGV("JTuner::updateFrontend(%p) called for new owner: %p", jtuner, this);
+        mFeClient = jtuner->mFeClient;
+        mFeClientCb = jtuner->mFeClientCb;
     }
 }
 
@@ -3245,6 +3271,12 @@ static int android_media_tv_Tuner_share_frontend(
     return tuner->shareFrontend(id);
 }
 
+static int android_media_tv_Tuner_unshare_frontend(
+        JNIEnv *env, jobject thiz) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->unshareFrontend();
+}
+
 static void android_media_tv_Tuner_register_fe_cb_listener(
         JNIEnv *env, jobject thiz, jlong shareeJTuner) {
     sp<JTuner> tuner = getTuner(env, thiz);
@@ -3257,6 +3289,17 @@ static void android_media_tv_Tuner_unregister_fe_cb_listener(
     sp<JTuner> tuner = getTuner(env, thiz);
     JTuner *jtuner = (JTuner *)shareeJTuner;
     tuner->unregisterFeCbListener(jtuner);
+}
+
+static void android_media_tv_Tuner_update_frontend(JNIEnv *env, jobject thiz, jlong jtunerPtr) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    JTuner *jtuner;
+    if (jtunerPtr == 0) {
+        jtuner = nullptr;
+    } else {
+        jtuner = (JTuner *) jtunerPtr;
+    }
+    tuner->updateFrontend(jtuner);
 }
 
 static int android_media_tv_Tuner_tune(JNIEnv *env, jobject thiz, jint type, jobject settings) {
@@ -4432,10 +4475,14 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_frontend_by_handle },
     { "nativeShareFrontend", "(I)I",
             (void *)android_media_tv_Tuner_share_frontend },
+    { "nativeUnshareFrontend", "()I",
+            (void *)android_media_tv_Tuner_unshare_frontend },
     { "nativeRegisterFeCbListener", "(J)V",
             (void*)android_media_tv_Tuner_register_fe_cb_listener },
     { "nativeUnregisterFeCbListener", "(J)V",
             (void*)android_media_tv_Tuner_unregister_fe_cb_listener },
+    { "nativeUpdateFrontend", "(J)V",
+            (void*)android_media_tv_Tuner_update_frontend },
     { "nativeTune", "(ILandroid/media/tv/tuner/frontend/FrontendSettings;)I",
             (void *)android_media_tv_Tuner_tune },
     { "nativeStopTune", "()I", (void *)android_media_tv_Tuner_stop_tune },

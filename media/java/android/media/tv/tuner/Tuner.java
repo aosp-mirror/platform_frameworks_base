@@ -240,7 +240,7 @@ public class Tuner implements AutoCloseable  {
 
 
     private static final String TAG = "MediaTvTuner";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int MSG_RESOURCE_LOST = 1;
     private static final int MSG_ON_FILTER_EVENT = 2;
@@ -248,7 +248,6 @@ public class Tuner implements AutoCloseable  {
     private static final int MSG_ON_LNB_EVENT = 4;
 
     private static final int FILTER_CLEANUP_THRESHOLD = 256;
-
 
     /** @hide */
     @IntDef(prefix = "DVR_TYPE_", value = {DVR_TYPE_RECORD, DVR_TYPE_PLAYBACK})
@@ -454,6 +453,260 @@ public class Tuner implements AutoCloseable  {
     }
 
     /**
+     * Transfers the ownership of shared frontend and its associated resources.
+     *
+     * @param newOwner the Tuner instance to be the new owner.
+     *
+     * @return result status of tune operation.
+     */
+    public int transferOwner(@NonNull Tuner newOwner) {
+        acquireTRMSLock("transferOwner()");
+        mFrontendLock.lock();
+        mFrontendCiCamLock.lock();
+        mLnbLock.lock();
+        try {
+
+            if (!isFrontendOwner() || !isNewOwnerQualifiedForTransfer(newOwner)) {
+                return RESULT_INVALID_STATE;
+            }
+
+            int res = transferFeOwner(newOwner);
+            if (res != RESULT_SUCCESS) {
+                return res;
+            }
+
+            res = transferCiCamOwner(newOwner);
+            if (res != RESULT_SUCCESS) {
+                return res;
+            }
+
+            res = transferLnbOwner(newOwner);
+            if (res != RESULT_SUCCESS) {
+                return res;
+            }
+        } finally {
+            mFrontendLock.unlock();
+            mFrontendCiCamLock.unlock();
+            mLnbLock.unlock();
+            releaseTRMSLock();
+        }
+        return RESULT_SUCCESS;
+    }
+
+    /**
+     * Resets or copies Frontend related settings.
+     */
+    private void replicateFrontendSettings(@Nullable Tuner src) {
+        mFrontendLock.lock();
+        try {
+            if (src == null) {
+                if (DEBUG) {
+                    Log.d(TAG, "resetting Frontend params for " + mClientId);
+                }
+                mFrontend = null;
+                mFrontendHandle = null;
+                mFrontendInfo = null;
+                mFrontendType = FrontendSettings.TYPE_UNDEFINED;
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "copying Frontend params from " + src.mClientId
+                            + " to " + mClientId);
+                }
+                mFrontend = src.mFrontend;
+                mFrontendHandle = src.mFrontendHandle;
+                mFrontendInfo = src.mFrontendInfo;
+                mFrontendType = src.mFrontendType;
+            }
+        } finally {
+            mFrontendLock.unlock();
+        }
+    }
+
+    /**
+     * Sets the frontend owner. mFeOwnerTuner should be null for the owner Tuner instance.
+     */
+    private void setFrontendOwner(Tuner owner) {
+        mFrontendLock.lock();
+        try {
+            mFeOwnerTuner = owner;
+        } finally {
+            mFrontendLock.unlock();
+        }
+    }
+
+    /**
+     * Resets or copies the CiCam related settings.
+     */
+    private void replicateCiCamSettings(@Nullable Tuner src) {
+        mFrontendCiCamLock.lock();
+        try {
+            if (src == null) {
+                if (DEBUG) {
+                    Log.d(TAG, "resetting CiCamParams: " + mClientId);
+                }
+                mFrontendCiCamHandle = null;
+                mFrontendCiCamId = null;
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "copying CiCamParams from " + src.mClientId + " to " + mClientId);
+                    Log.d(TAG, "mFrontendCiCamHandle:" + src.mFrontendCiCamHandle + ", "
+                            + "mFrontendCiCamId:" + src.mFrontendCiCamId);
+                }
+                mFrontendCiCamHandle = src.mFrontendCiCamHandle;
+                mFrontendCiCamId = src.mFrontendCiCamId;
+            }
+        } finally {
+            mFrontendCiCamLock.unlock();
+        }
+    }
+
+    /**
+     * Resets or copies Lnb related settings.
+     */
+    private void replicateLnbSettings(@Nullable Tuner src) {
+        mLnbLock.lock();
+        try {
+            if (src == null) {
+                if (DEBUG) {
+                    Log.d(TAG, "resetting Lnb params");
+                }
+                mLnb = null;
+                mLnbHandle = null;
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "copying Lnb params from " + src.mClientId + " to " + mClientId);
+                }
+                mLnb = src.mLnb;
+                mLnbHandle = src.mLnbHandle;
+            }
+        } finally {
+            mLnbLock.unlock();
+        }
+    }
+
+    /**
+     * Checks if it is a frontend resource owner.
+     * Proper mutex must be held prior to calling this.
+     */
+    private boolean isFrontendOwner() {
+        boolean notAnOwner = (mFeOwnerTuner != null);
+        if (notAnOwner) {
+            Log.e(TAG, "transferOwner() - cannot be called on the non-owner");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if the newOwner is qualified.
+     * Proper mutex must be held prior to calling this.
+     */
+    private boolean isNewOwnerQualifiedForTransfer(@NonNull Tuner newOwner) {
+        // new owner must be the current sharee
+        boolean newOwnerIsTheCurrentSharee = (newOwner.mFeOwnerTuner == this)
+                && (newOwner.mFrontendHandle.equals(mFrontendHandle));
+        if (!newOwnerIsTheCurrentSharee) {
+            Log.e(TAG, "transferOwner() - new owner must be the current sharee");
+            return false;
+        }
+
+        // new owner must not be holding any of the to-be-shared resources
+        boolean newOwnerAlreadyHoldsToBeSharedResource =
+                (newOwner.mFrontendCiCamHandle != null || newOwner.mLnb != null);
+        if (newOwnerAlreadyHoldsToBeSharedResource) {
+            Log.e(TAG, "transferOwner() - new owner cannot be holding CiCam"
+                    + " nor Lnb resource");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Transfers the ownership of the already held frontend resource.
+     * Proper mutex must be held prior to calling this.
+     */
+    private int transferFeOwner(@NonNull Tuner newOwner) {
+        // handle native resource first
+        newOwner.nativeUpdateFrontend(getNativeContext());
+        nativeUpdateFrontend(0);
+
+        // transfer frontend related settings
+        newOwner.replicateFrontendSettings(this);
+
+        // transfer the frontend owner info
+        setFrontendOwner(newOwner);
+        newOwner.setFrontendOwner(null);
+
+        // handle TRM
+        if (mTunerResourceManager.transferOwner(
+                TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND,
+                mClientId, newOwner.mClientId)) {
+            return RESULT_SUCCESS;
+        } else {
+            return RESULT_UNKNOWN_ERROR;
+        }
+    }
+
+    /**
+     * Transfers the ownership of CiCam resource.
+     * This is a no-op if the CiCam resource is not held.
+     * Proper mutex must be held prior to calling this.
+     */
+    private int transferCiCamOwner(Tuner newOwner) {
+        boolean notAnOwner = (mFrontendCiCamHandle == null);
+        if (notAnOwner) {
+            // There is nothing to do here if there is no CiCam
+            return RESULT_SUCCESS;
+        }
+
+        // no need to handle at native level
+
+        // transfer the CiCam info at Tuner level
+        newOwner.replicateCiCamSettings(this);
+        replicateCiCamSettings(null);
+
+        // handle TRM
+        if (mTunerResourceManager.transferOwner(
+                TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM,
+                mClientId, newOwner.mClientId)) {
+            return RESULT_SUCCESS;
+        } else {
+            return RESULT_UNKNOWN_ERROR;
+        }
+    }
+
+    /**
+     * Transfers the ownership of Lnb resource.
+     * This is a no-op if the Lnb resource is not held.
+     * Proper mutex must be held prior to calling this.
+     */
+    private int transferLnbOwner(Tuner newOwner) {
+        boolean notAnOwner = (mLnb == null);
+        if (notAnOwner) {
+            // There is nothing to do here if there is no Lnb
+            return RESULT_SUCCESS;
+        }
+
+        // no need to handle at native level
+
+        // set the new owner
+        mLnb.setOwner(newOwner);
+
+        newOwner.replicateLnbSettings(this);
+        replicateLnbSettings(null);
+
+        // handle TRM
+        if (mTunerResourceManager.transferOwner(
+                TunerResourceManager.TUNER_RESOURCE_TYPE_LNB,
+                mClientId, newOwner.mClientId)) {
+            return RESULT_SUCCESS;
+        } else {
+            return RESULT_UNKNOWN_ERROR;
+        }
+    }
+
+    /**
      * Updates client priority with an arbitrary value along with a nice value.
      *
      * <p>Tuner resource manager (TRM) uses the client priority value to decide whether it is able
@@ -546,59 +799,114 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
+    /**
+     * Either unshares the frontend resource (for sharee) or release Frontend (for owner)
+     */
+    public void closeFrontend() {
+        acquireTRMSLock("closeFrontend()");
+        try {
+            releaseFrontend();
+        } finally {
+            releaseTRMSLock();
+        }
+    }
+
+    /**
+     * Releases frontend resource for the owner. Unshares frontend resource for the sharee.
+     */
     private void releaseFrontend() {
+        if (DEBUG) {
+            Log.d(TAG, "Tuner#releaseFrontend");
+        }
         mFrontendLock.lock();
         try {
             if (mFrontendHandle != null) {
+                if (DEBUG) {
+                    Log.d(TAG, "mFrontendHandle not null");
+                }
                 if (mFeOwnerTuner != null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "mFeOwnerTuner not null - sharee");
+                    }
                     // unregister self from the Frontend callback
                     mFeOwnerTuner.unregisterFrontendCallbackListener(this);
                     mFeOwnerTuner = null;
+                    nativeUnshareFrontend();
                 } else {
+                    if (DEBUG) {
+                        Log.d(TAG, "mFeOwnerTuner null - owner");
+                    }
                     // close resource as owner
                     int res = nativeCloseFrontend(mFrontendHandle);
                     if (res != Tuner.RESULT_SUCCESS) {
                         TunerUtils.throwExceptionForResult(res, "failed to close frontend");
                     }
-                    mTunerResourceManager.releaseFrontend(mFrontendHandle, mClientId);
                 }
+                if (DEBUG) {
+                    Log.d(TAG, "call TRM#releaseFrontend :" + mFrontendHandle + ", " + mClientId);
+                }
+                mTunerResourceManager.releaseFrontend(mFrontendHandle, mClientId);
                 FrameworkStatsLog
                         .write(FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
                         FrameworkStatsLog.TV_TUNER_STATE_CHANGED__STATE__UNKNOWN);
-                mFrontendHandle = null;
-                mFrontend = null;
+                replicateFrontendSettings(null);
             }
         } finally {
             mFrontendLock.unlock();
         }
     }
 
+    /**
+     * Releases CiCam resource if held. No-op otherwise.
+     */
+    private void releaseCiCam() {
+        mFrontendCiCamLock.lock();
+        try {
+            if (mFrontendCiCamHandle != null) {
+                if (DEBUG) {
+                    Log.d(TAG, "unlinking CiCam : " + mFrontendCiCamHandle + " for " +  mClientId);
+                }
+                int result = nativeUnlinkCiCam(mFrontendCiCamId);
+                if (result == RESULT_SUCCESS) {
+                    mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
+                    replicateCiCamSettings(null);
+                } else {
+                    Log.e(TAG, "nativeUnlinkCiCam(" + mFrontendCiCamHandle + ") for mClientId:"
+                            + mClientId + "failed with result:" + result);
+                }
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "NOT unlinking CiCam : " + mClientId);
+                }
+            }
+        } finally {
+            mFrontendCiCamLock.unlock();
+        }
+    }
+
     private void releaseAll() {
+        // release CiCam before frontend because frontend handle is needed to unlink CiCam
+        releaseCiCam();
+
         releaseFrontend();
 
         mLnbLock.lock();
         try {
             // mLnb will be non-null only for owner tuner
             if (mLnb != null) {
+                if (DEBUG) {
+                    Log.d(TAG, "calling mLnb.close() : " + mClientId);
+                }
                 mLnb.close();
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "NOT calling mLnb.close() : " + mClientId);
+                }
             }
         } finally {
             mLnbLock.unlock();
         }
 
-        mFrontendCiCamLock.lock();
-        try {
-            if (mFrontendCiCamHandle != null) {
-                int result = nativeUnlinkCiCam(mFrontendCiCamId);
-                if (result == RESULT_SUCCESS) {
-                    mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
-                    mFrontendCiCamId = null;
-                    mFrontendCiCamHandle = null;
-                }
-            }
-        } finally {
-            mFrontendCiCamLock.unlock();
-        }
 
         synchronized (mDescramblers) {
             if (!mDescramblers.isEmpty()) {
@@ -668,8 +976,11 @@ public class Tuner implements AutoCloseable  {
      */
     private native Frontend nativeOpenFrontendByHandle(int handle);
     private native int nativeShareFrontend(int id);
+    private native int nativeUnshareFrontend();
     private native void nativeRegisterFeCbListener(long nativeContext);
     private native void nativeUnregisterFeCbListener(long nativeContext);
+    // nativeUpdateFrontend must be called on the new owner first
+    private native void nativeUpdateFrontend(long nativeContext);
     @Result
     private native int nativeTune(int type, FrontendSettings settings);
     private native int nativeStopTune();
@@ -992,6 +1303,21 @@ public class Tuner implements AutoCloseable  {
         if (granted) {
             mFrontendHandle = feHandle[0];
             mFrontend = nativeOpenFrontendByHandle(mFrontendHandle);
+        }
+
+        // For satellite type, set Lnb if valid handle exists.
+        // This is necessary as now that we support closeFrontend().
+        if (mFrontendType == FrontendSettings.TYPE_DVBS
+                || mFrontendType == FrontendSettings.TYPE_ISDBS
+                || mFrontendType == FrontendSettings.TYPE_ISDBS3) {
+            mLnbLock.lock();
+            try {
+                if (mLnbHandle != null && mLnb != null) {
+                    nativeSetLnb(mLnb);
+                }
+            } finally {
+                mLnbLock.unlock();
+            }
         }
         return granted;
     }
@@ -1643,12 +1969,12 @@ public class Tuner implements AutoCloseable  {
             Objects.requireNonNull(executor, "executor must not be null");
             Objects.requireNonNull(cb, "LnbCallback must not be null");
             if (mLnb != null) {
-                mLnb.setCallback(executor, cb, this);
+                mLnb.setCallbackAndOwner(executor, cb, this);
                 return mLnb;
             }
             if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB, mLnbLock)
                     && mLnb != null) {
-                mLnb.setCallback(executor, cb, this);
+                mLnb.setCallbackAndOwner(executor, cb, this);
                 setLnb(mLnb);
                 return mLnb;
             }
@@ -1682,7 +2008,7 @@ public class Tuner implements AutoCloseable  {
                     mLnbHandle = null;
                 }
                 mLnb = newLnb;
-                mLnb.setCallback(executor, cb, this);
+                mLnb.setCallbackAndOwner(executor, cb, this);
                 setLnb(mLnb);
             }
             return mLnb;
@@ -1968,8 +2294,15 @@ public class Tuner implements AutoCloseable  {
         try {
             if (mLnbHandle != null) {
                 // LNB handle can be null if it's opened by name.
+                if (DEBUG) {
+                    Log.d(TAG, "releasing Lnb");
+                }
                 mTunerResourceManager.releaseLnb(mLnbHandle, mClientId);
                 mLnbHandle = null;
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "NOT releasing Lnb because mLnbHandle is null");
+                }
             }
             mLnb = null;
         } finally {
