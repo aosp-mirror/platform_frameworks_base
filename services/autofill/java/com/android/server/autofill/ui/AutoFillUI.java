@@ -66,6 +66,7 @@ public final class AutoFillUI {
 
     private @Nullable FillUi mFillUi;
     private @Nullable SaveUi mSaveUi;
+    private @Nullable DialogFillUi mFillDialog;
 
     private @Nullable AutoFillUiCallback mCallback;
 
@@ -387,7 +388,48 @@ public final class AutoFillUI {
                     + componentName.toShortString() + ": " + response);
         }
 
-        // TODO show fill dialog
+        // TODO: enable LogMaker
+
+        mHandler.post(() -> {
+            if (callback != mCallback) {
+                return;
+            }
+            hideAllUiThread(callback);
+            mFillDialog = new DialogFillUi(mContext, response, focusedId, filterText,
+                    serviceIcon, servicePackageName, componentName, mOverlayControl,
+                    mUiModeMgr.isNightMode(), new DialogFillUi.UiCallback() {
+                        @Override
+                        public void onResponsePicked(FillResponse response) {
+                            hideFillDialogUiThread(callback);
+                            if (mCallback != null) {
+                                mCallback.authenticate(response.getRequestId(),
+                                        AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED,
+                                        response.getAuthentication(), response.getClientState(),
+                                        /* authenticateInline= */ false);
+                            }
+                        }
+
+                        @Override
+                        public void onDatasetPicked(Dataset dataset) {
+                            hideFillDialogUiThread(callback);
+                            if (mCallback != null) {
+                                final int datasetIndex = response.getDatasets().indexOf(dataset);
+                                mCallback.fill(response.getRequestId(), datasetIndex, dataset);
+                            }
+                        }
+
+                        @Override
+                        public void onCanceled() {
+                            hideFillDialogUiThread(callback);
+                            callback.requestShowSoftInput(focusedId);
+                        }
+
+                        @Override
+                        public void startIntentSender(IntentSender intentSender) {
+                            mCallback.startIntentSenderAndFinishSession(intentSender);
+                        }
+                    });
+        });
     }
 
     /**
@@ -423,8 +465,7 @@ public final class AutoFillUI {
     }
 
     public boolean isFillDialogShowing() {
-        // TODO
-        return false;
+        return mFillDialog == null ? false : mFillDialog.isShowing();
     }
 
     public void dump(PrintWriter pw) {
@@ -443,6 +484,12 @@ public final class AutoFillUI {
             mSaveUi.dump(pw, prefix2);
         } else {
             pw.print(prefix); pw.println("showsSaveUi: false");
+        }
+        if (mFillDialog != null) {
+            pw.print(prefix); pw.println("showsFillDialog: true");
+            mFillDialog.dump(pw, prefix2);
+        } else {
+            pw.print(prefix); pw.println("showsFillDialog: false");
         }
     }
 
@@ -470,7 +517,10 @@ public final class AutoFillUI {
 
     @android.annotation.UiThread
     private void hideFillDialogUiThread(@Nullable AutoFillUiCallback callback) {
-        // TODO
+        if (mFillDialog != null && (callback == null || callback == mCallback)) {
+            mFillDialog.destroy();
+            mFillDialog = null;
+        }
     }
 
     @android.annotation.UiThread
