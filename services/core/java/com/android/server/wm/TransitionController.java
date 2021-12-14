@@ -247,7 +247,7 @@ class TransitionController {
             @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger,
             @NonNull WindowContainer readyGroupRef) {
         return requestTransitionIfNeeded(type, flags, trigger, readyGroupRef,
-                null /* remoteTransition */);
+                null /* remoteTransition */, null /* displayChange */);
     }
 
     private static boolean isExistenceType(@WindowManager.TransitionType int type) {
@@ -264,12 +264,16 @@ class TransitionController {
     @Nullable
     Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
             @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger,
-            @NonNull WindowContainer readyGroupRef, @Nullable RemoteTransition remoteTransition) {
+            @NonNull WindowContainer readyGroupRef, @Nullable RemoteTransition remoteTransition,
+            @Nullable TransitionRequestInfo.DisplayChange displayChange) {
         if (mTransitionPlayer == null) {
             return null;
         }
         Transition newTransition = null;
         if (isCollecting()) {
+            if (displayChange != null) {
+                throw new IllegalArgumentException("Provided displayChange for a non-new request");
+            }
             // Make the collecting transition wait until this request is ready.
             mCollectingTransition.setReady(readyGroupRef, false);
             if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) {
@@ -278,7 +282,7 @@ class TransitionController {
             }
         } else {
             newTransition = requestStartTransition(createTransition(type, flags),
-                    trigger != null ? trigger.asTask() : null, remoteTransition);
+                    trigger != null ? trigger.asTask() : null, remoteTransition, displayChange);
         }
         if (trigger != null) {
             if (isExistenceType(type)) {
@@ -293,7 +297,8 @@ class TransitionController {
     /** Asks the transition player (shell) to start a created but not yet started transition. */
     @NonNull
     Transition requestStartTransition(@NonNull Transition transition, @Nullable Task startTask,
-            @Nullable RemoteTransition remoteTransition) {
+            @Nullable RemoteTransition remoteTransition,
+            @Nullable TransitionRequestInfo.DisplayChange displayChange) {
         try {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);
@@ -303,7 +308,7 @@ class TransitionController {
                 startTask.fillTaskInfo(info);
             }
             mTransitionPlayer.requestStartTransition(transition, new TransitionRequestInfo(
-                    transition.mType, info, remoteTransition));
+                    transition.mType, info, remoteTransition, displayChange));
         } catch (RemoteException e) {
             Slog.e(TAG, "Error requesting transition", e);
             transition.start();
@@ -317,7 +322,7 @@ class TransitionController {
         if (wc.isVisibleRequested()) {
             if (!isCollecting()) {
                 requestStartTransition(createTransition(TRANSIT_CLOSE, 0 /* flags */),
-                        wc.asTask(), null /* remoteTransition */);
+                        wc.asTask(), null /* remoteTransition */, null /* displayChange */);
             }
             collectExistenceChange(wc);
         } else {

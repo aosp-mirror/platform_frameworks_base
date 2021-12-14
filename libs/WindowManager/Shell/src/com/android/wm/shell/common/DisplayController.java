@@ -76,6 +76,11 @@ public class DisplayController {
         }
     }
 
+    /** Get the DisplayChangeController. */
+    public DisplayChangeController getChangeController() {
+        return mChangeController;
+    }
+
     /**
      * Gets a display by id from DisplayManager.
      */
