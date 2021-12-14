@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
@@ -28,6 +29,7 @@ import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.SaProposal;
 import android.os.Build;
@@ -55,6 +57,7 @@ import java.util.concurrent.TimeUnit;
  * Provides access to telephony configuration values that are carrier-specific.
  */
 @SystemService(Context.CARRIER_CONFIG_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
 public class CarrierConfigManager {
     private final static String TAG = "CarrierConfigManager";
 
