@@ -68,8 +68,18 @@ filegroup {
     srcs: [
         ":services.connectivity-ipsec-sources",
         ":services.connectivity-netstats-sources",
-        ":services.connectivity-nsd-sources",
     ],
     path: "src",
     visibility: ["//frameworks/base/services/core"],
+}
+
+filegroup {
+    name: "services.connectivity-tiramisu-updatable-sources",
+    srcs: [
+        ":services.connectivity-nsd-sources",
+    ],
+    path: "src",
+    visibility: [
+        "//packages/modules/Connectivity:__subpackages__",
+    ],
 }

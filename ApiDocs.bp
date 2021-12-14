@@ -118,6 +118,7 @@ stubs_defaults {
     srcs: [
         ":framework-appsearch-sources",
         ":framework-connectivity-sources",
+        ":framework-connectivity-tiramisu-updatable-sources",
         ":framework-graphics-srcs",
         ":framework-mediaprovider-sources",
         ":framework-nearby-sources",
@@ -164,6 +165,7 @@ droidstubs {
         ":android.net.ipsec.ike{.public.stubs.source}",
         ":framework-appsearch{.public.stubs.source}",
         ":framework-connectivity{.public.stubs.source}",
+        ":framework-connectivity-tiramisu{.public.stubs.source}",
         ":framework-graphics{.public.stubs.source}",
         ":framework-media{.public.stubs.source}",
         ":framework-mediaprovider{.public.stubs.source}",
@@ -204,6 +206,7 @@ genrule {
         ":art.module.public.api{.public.annotations.zip}",
         ":framework-appsearch{.public.annotations.zip}",
         ":framework-connectivity{.public.annotations.zip}",
+        ":framework-connectivity-tiramisu{.public.annotations.zip}",
         ":framework-graphics{.public.annotations.zip}",
         ":framework-media{.public.annotations.zip}",
         ":framework-mediaprovider{.public.annotations.zip}",

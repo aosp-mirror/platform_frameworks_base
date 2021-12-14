@@ -27361,65 +27361,6 @@ package android.net.http {
 
 }
 
-package android.net.nsd {
-
-  public final class NsdManager {
-    method public void discoverServices(String, int, android.net.nsd.NsdManager.DiscoveryListener);
-    method public void registerService(android.net.nsd.NsdServiceInfo, int, android.net.nsd.NsdManager.RegistrationListener);
-    method public void resolveService(android.net.nsd.NsdServiceInfo, android.net.nsd.NsdManager.ResolveListener);
-    method public void stopServiceDiscovery(android.net.nsd.NsdManager.DiscoveryListener);
-    method public void unregisterService(android.net.nsd.NsdManager.RegistrationListener);
-    field public static final String ACTION_NSD_STATE_CHANGED = "android.net.nsd.STATE_CHANGED";
-    field public static final String EXTRA_NSD_STATE = "nsd_state";
-    field public static final int FAILURE_ALREADY_ACTIVE = 3; // 0x3
-    field public static final int FAILURE_INTERNAL_ERROR = 0; // 0x0
-    field public static final int FAILURE_MAX_LIMIT = 4; // 0x4
-    field public static final int NSD_STATE_DISABLED = 1; // 0x1
-    field public static final int NSD_STATE_ENABLED = 2; // 0x2
-    field public static final int PROTOCOL_DNS_SD = 1; // 0x1
-  }
-
-  public static interface NsdManager.DiscoveryListener {
-    method public void onDiscoveryStarted(String);
-    method public void onDiscoveryStopped(String);
-    method public void onServiceFound(android.net.nsd.NsdServiceInfo);
-    method public void onServiceLost(android.net.nsd.NsdServiceInfo);
-    method public void onStartDiscoveryFailed(String, int);
-    method public void onStopDiscoveryFailed(String, int);
-  }
-
-  public static interface NsdManager.RegistrationListener {
-    method public void onRegistrationFailed(android.net.nsd.NsdServiceInfo, int);
-    method public void onServiceRegistered(android.net.nsd.NsdServiceInfo);
-    method public void onServiceUnregistered(android.net.nsd.NsdServiceInfo);
-    method public void onUnregistrationFailed(android.net.nsd.NsdServiceInfo, int);
-  }
-
-  public static interface NsdManager.ResolveListener {
-    method public void onResolveFailed(android.net.nsd.NsdServiceInfo, int);
-    method public void onServiceResolved(android.net.nsd.NsdServiceInfo);
-  }
-
-  public final class NsdServiceInfo implements android.os.Parcelable {
-    ctor public NsdServiceInfo();
-    method public int describeContents();
-    method public java.util.Map<java.lang.String,byte[]> getAttributes();
-    method public java.net.InetAddress getHost();
-    method public int getPort();
-    method public String getServiceName();
-    method public String getServiceType();
-    method public void removeAttribute(String);
-    method public void setAttribute(String, String);
-    method public void setHost(java.net.InetAddress);
-    method public void setPort(int);
-    method public void setServiceName(String);
-    method public void setServiceType(String);
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.nsd.NsdServiceInfo> CREATOR;
-  }
-
-}
-
 package android.net.rtp {
 
   @Deprecated public class AudioCodec {
