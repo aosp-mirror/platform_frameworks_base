@@ -100,6 +100,20 @@ filegroup {
     ],
 }
 
+// IpSec related libraries.
+
+filegroup {
+    name: "framework-connectivity-ipsec-sources",
+    srcs: [
+        "src/android/net/IIpSecService.aidl",
+        "src/android/net/IpSec*.*",
+    ],
+    path: "src",
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
 // Connectivity-T common libraries.
 
 filegroup {
@@ -116,11 +130,10 @@ filegroup {
 filegroup {
     name: "framework-connectivity-tiramisu-sources",
     srcs: [
+        ":framework-connectivity-ipsec-sources",
         ":framework-connectivity-netstats-sources",
         ":framework-connectivity-nsd-sources",
         ":framework-connectivity-tiramisu-internal-sources",
     ],
-    visibility: [
-        "//frameworks/base",
-    ],
+    visibility: ["//frameworks/base"],
 }
