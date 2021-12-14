@@ -770,20 +770,25 @@ public interface InputConnection {
     boolean beginBatchEdit();
 
     /**
-     * Tell the editor that you are done with a batch edit previously
-     * initiated with {@link #beginBatchEdit}. This ends the latest
-     * batch only.
+     * Tell the editor that you are done with a batch edit previously initiated with
+     * {@link #beginBatchEdit()}. This ends the latest batch only.
      *
-     * <p><strong>IME authors:</strong> make sure you call this
-     * exactly once for each call to {@link #beginBatchEdit}.</p>
+     * <p><strong>IME authors:</strong> make sure you call this exactly once for each call to
+     * {@link #beginBatchEdit()}.</p>
      *
-     * <p><strong>Editor authors:</strong> please be careful about
-     * batch edit nesting. Updates still to be held back until the end
-     * of the last batch edit.</p>
+     * <p><strong>Editor authors:</strong> please be careful about batch edit nesting. Updates still
+     * to be held back until the end of the last batch edit.  In case you are delegating this API
+     * call to the one obtained from
+     * {@link android.widget.EditText#onCreateInputConnection(EditorInfo)}, there was an off-by-one
+     * that had returned {@code true} when its nested batch edit count becomes {@code 0} as a result
+     * of invoking this API.  This bug is fixed in {@link android.os.Build.VERSION_CODES#TIRAMISU}.
+     * </p>
      *
-     * @return true if there is still a batch edit in progress after closing
-     * the latest one (in other words, if the nesting count is > 0), false
-     * otherwise or if the input connection is no longer valid.
+     * @return For editor authors, you must return {@code true} if a batch edit is still in progress
+     *         after closing the latest one (in other words, if the nesting count is still a
+     *         positive number). Return {@code false} otherwise.  For IME authors, you will
+     *         always receive {@code true} as long as the request was sent to the editor, and
+     *         receive {@code false} only if the input connection is no longer valid.
      */
     boolean endBatchEdit();
 
