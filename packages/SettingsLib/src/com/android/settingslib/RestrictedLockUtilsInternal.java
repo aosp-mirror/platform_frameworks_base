@@ -38,6 +38,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -54,6 +55,7 @@ import java.util.List;
 public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
 
     private static final String LOG_TAG = "RestrictedLockUtils";
+    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
 
     /**
      * @return drawables for displaying with settings that are locked by a device admin.
@@ -92,14 +94,25 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         }
 
         final UserManager um = UserManager.get(context);
+        final UserHandle userHandle = UserHandle.of(userId);
         final List<UserManager.EnforcingUser> enforcingUsers =
-                um.getUserRestrictionSources(userRestriction, UserHandle.of(userId));
+                um.getUserRestrictionSources(userRestriction, userHandle);
 
         if (enforcingUsers.isEmpty()) {
             // Restriction is not enforced.
             return null;
-        } else if (enforcingUsers.size() > 1) {
-            return EnforcedAdmin.createDefaultEnforcedAdminWithRestriction(userRestriction);
+        }
+        final int size = enforcingUsers.size();
+        if (size > 1) {
+            final EnforcedAdmin enforcedAdmin = EnforcedAdmin
+                    .createDefaultEnforcedAdminWithRestriction(userRestriction);
+            enforcedAdmin.user = userHandle;
+            if (DEBUG) {
+                Log.d(LOG_TAG, "Multiple (" + size + ") enforcing users for restriction '"
+                        + userRestriction + "' on user " + userHandle + "; returning default admin "
+                        + "(" + enforcedAdmin + ")");
+            }
+            return enforcedAdmin;
         }
 
         final int restrictionSource = enforcingUsers.get(0).getUserRestrictionSource();
