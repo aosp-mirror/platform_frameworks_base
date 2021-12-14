@@ -26,6 +26,7 @@ import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvInputManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -86,6 +87,51 @@ public final class TvIAppManager {
      * @hide
      */
     public static final int TV_IAPP_RTE_STATE_ERROR = 4;
+
+    /**
+     * Key for package name in app link.
+     * <p>Type: String
+     *
+     * @see #notifyAppLinkInfo(String, Bundle)
+     * @hide
+     */
+    public static final String KEY_PACKAGE_NAME = "package_name";
+
+    /**
+     * Key for class name in app link.
+     * <p>Type: String
+     *
+     * @see #notifyAppLinkInfo(String, Bundle)
+     * @hide
+     */
+    public static final String KEY_CLASS_NAME = "class_name";
+
+    /**
+     * Key for URI scheme in app link.
+     * <p>Type: String
+     *
+     * @see #notifyAppLinkInfo(String, Bundle)
+     * @hide
+     */
+    public static final String KEY_URI_SCHEME = "uri_scheme";
+
+    /**
+     * Key for URI host in app link.
+     * <p>Type: String
+     *
+     * @see #notifyAppLinkInfo(String, Bundle)
+     * @hide
+     */
+    public static final String KEY_URI_HOST = "uri_host";
+
+    /**
+     * Key for URI prefix in app link.
+     * <p>Type: String
+     *
+     * @see #notifyAppLinkInfo(String, Bundle)
+     * @hide
+     */
+    public static final String KEY_URI_PREFIX = "uri_prefix";
 
     private final ITvIAppManager mService;
     private final int mUserId;
@@ -412,6 +458,18 @@ public final class TvIAppManager {
     public void prepare(String tvIAppServiceId, int type) {
         try {
             mService.prepare(tvIAppServiceId, type, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies app link info.
+     * @hide
+     */
+    public void notifyAppLinkInfo(String tvIAppServiceId, Bundle appLinkInfo) {
+        try {
+            mService.notifyAppLinkInfo(tvIAppServiceId, appLinkInfo, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

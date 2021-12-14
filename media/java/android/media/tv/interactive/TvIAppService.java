@@ -30,6 +30,7 @@ import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -123,6 +124,11 @@ public abstract class TvIAppService extends Service {
             public void prepare(int type) {
                 onPrepare(type);
             }
+
+            @Override
+            public void notifyAppLinkInfo(Bundle appLinkInfo) {
+                onAppLinkInfo(appLinkInfo);
+            }
         };
         return tvIAppServiceBinder;
     }
@@ -132,6 +138,14 @@ public abstract class TvIAppService extends Service {
      * @hide
      */
     public void onPrepare(int type) {
+        // TODO: make it abstract when unhide
+    }
+
+    /**
+     * Registers App link info.
+     * @hide
+     */
+    public void onAppLinkInfo(Bundle appLinkInfo) {
         // TODO: make it abstract when unhide
     }
 
