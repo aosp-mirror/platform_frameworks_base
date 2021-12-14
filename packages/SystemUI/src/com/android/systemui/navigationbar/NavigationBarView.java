@@ -75,12 +75,12 @@ import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
 import com.android.systemui.navigationbar.buttons.NearestTouchFrame;
 import com.android.systemui.navigationbar.buttons.RotationContextButton;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
-import com.android.systemui.shared.rotation.FloatingRotationButton;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
+import com.android.systemui.shared.rotation.FloatingRotationButton;
 import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.shared.rotation.RotationButtonController;
-import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
@@ -1386,8 +1386,12 @@ public class NavigationBarView extends FrameLayout implements
         legacySplitScreen.registerInSplitScreenListener(mDockedListener);
     }
 
-    void registerPipExclusionBoundsChangeListener(Pip pip) {
-        pip.setPipExclusionBoundsChangeListener(mPipListener);
+    void addPipExclusionBoundsChangeListener(Pip pip) {
+        pip.addPipExclusionBoundsChangeListener(mPipListener);
+    }
+
+    void removePipExclusionBoundsChangeListener(Pip pip) {
+        pip.removePipExclusionBoundsChangeListener(mPipListener);
     }
 
     private static void dumpButton(PrintWriter pw, String caption, ButtonDispatcher button) {
