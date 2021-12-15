@@ -27,6 +27,7 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IAudioFocusDispatcher;
 import android.media.MediaMetrics;
+import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.os.Binder;
 import android.os.Build;
@@ -219,6 +220,51 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 exFocusOwner.release();
             }
         }
+    }
+
+    /**
+     * Return a copy of the focus stack for external consumption (composed of AudioFocusInfo
+     * instead of FocusRequester instances)
+     * @return a SystemApi-friendly version of the focus stack, in the same order (last entry
+     *         is top of focus stack, i.e. latest focus owner)
+     * @see AudioPolicy#getFocusStack()
+     */
+    @NonNull List<AudioFocusInfo> getFocusStack() {
+        synchronized (mAudioFocusLock) {
+            final ArrayList<AudioFocusInfo> stack = new ArrayList<>(mFocusStack.size());
+            for (FocusRequester fr : mFocusStack) {
+                stack.add(fr.toAudioFocusInfo());
+            }
+            return stack;
+        }
+    }
+
+    /**
+     * Send AUDIOFOCUS_LOSS to a specific stack entry.
+     * Note this method is supporting an external API, and is restricted to LOSS in order to
+     * prevent allowing the stack to be in an invalid state (e.g. entry inside stack has focus)
+     * @param focusLoser the stack entry that is exiting the stack through a focus loss
+     * @return false if the focusLoser wasn't found in the stack, true otherwise
+     * @see AudioPolicy#sendFocusLoss(AudioFocusInfo)
+     */
+    boolean sendFocusLoss(@NonNull AudioFocusInfo focusLoser) {
+        synchronized (mAudioFocusLock) {
+            FocusRequester loserToRemove = null;
+            for (FocusRequester fr : mFocusStack) {
+                if (fr.getClientId().equals(focusLoser.getClientId())) {
+                    fr.handleFocusLoss(AudioManager.AUDIOFOCUS_LOSS, null,
+                            false /*forceDuck*/);
+                    loserToRemove = fr;
+                    break;
+                }
+            }
+            if (loserToRemove != null) {
+                mFocusStack.remove(loserToRemove);
+                loserToRemove.release();
+                return true;
+            }
+        }
+        return false;
     }
 
     @GuardedBy("mAudioFocusLock")

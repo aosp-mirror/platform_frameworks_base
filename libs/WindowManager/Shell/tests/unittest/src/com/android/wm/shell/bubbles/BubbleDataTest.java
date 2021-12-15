@@ -39,6 +39,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.Log;
 import android.util.Pair;
 import android.view.WindowManager;
 
@@ -793,7 +794,7 @@ public class BubbleDataTest extends ShellTestCase {
     }
 
     @Test
-    public void test_expanded_removeLastBubble_showsOverflowIfNotEmpty() {
+    public void test_expanded_removeLastBubble_collapsesIfOverflowNotEmpty() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         changeExpandedStateAtTime(true, 2000);
@@ -803,7 +804,7 @@ public class BubbleDataTest extends ShellTestCase {
         mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertThat(mBubbleData.getOverflowBubbles().size()).isGreaterThan(0);
-        assertSelectionChangedTo(mBubbleData.getOverflow());
+        assertExpandedChangedTo(false);
     }
 
     @Test
@@ -913,6 +914,31 @@ public class BubbleDataTest extends ShellTestCase {
         assertSelectionChangedTo(mBubbleA2);
     }
 
+    /**
+      * - have a maxed out bubble stack & all of the bubbles have been recently accessed
+      * - bubble a notification that was posted before any of those bubbles were accessed
+      * => that bubble should be added
+     *
+      */
+    @Test
+    public void test_addOldNotifWithNewerBubbles() {
+        sendUpdatedEntryAtTime(mEntryA1, 2000);
+        sendUpdatedEntryAtTime(mEntryA2, 3000);
+        sendUpdatedEntryAtTime(mEntryA3, 4000);
+        sendUpdatedEntryAtTime(mEntryB1, 5000);
+        sendUpdatedEntryAtTime(mEntryB2, 6000);
+
+        mBubbleData.setListener(mListener);
+        sendUpdatedEntryAtTime(mEntryB3, 1000 /* postTime */, 7000 /* currentTime */);
+        verifyUpdateReceived();
+
+        // B3 is in the stack
+        assertThat(mBubbleData.getBubbleInStackWithKey(mBubbleB3.getKey())).isNotNull();
+        // A1 is the oldest so it's in the overflow
+        assertThat(mBubbleData.getOverflowBubbleWithKey(mEntryA1.getKey())).isNotNull();
+        assertOrderChangedTo(mBubbleB3, mBubbleB2, mBubbleB1, mBubbleA3, mBubbleA2);
+    }
+
     private void verifyUpdateReceived() {
         verify(mListener).applyUpdate(mUpdateCaptor.capture());
         reset(mListener);
@@ -1014,6 +1040,12 @@ public class BubbleDataTest extends ShellTestCase {
     }
 
     private void sendUpdatedEntryAtTime(BubbleEntry entry, long postTime) {
+        setCurrentTime(postTime);
+        sendUpdatedEntryAtTime(entry, postTime, true /* isTextChanged */);
+    }
+
+    private void sendUpdatedEntryAtTime(BubbleEntry entry, long postTime, long currentTime) {
+        setCurrentTime(currentTime);
         sendUpdatedEntryAtTime(entry, postTime, true /* isTextChanged */);
     }
 

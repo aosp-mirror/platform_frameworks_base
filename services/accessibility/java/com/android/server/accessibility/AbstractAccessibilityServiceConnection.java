@@ -1027,8 +1027,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     mSystemSupport.getMagnificationProcessor();
             final long identity = Binder.clearCallingIdentity();
             try {
-                magnificationProcessor.getMagnificationRegion(displayId, region,
-                        mSecurityPolicy.canControlMagnification(this));
+                magnificationProcessor.getFullscreenMagnificationRegion(displayId,
+                        region, mSecurityPolicy.canControlMagnification(this));
                 return region;
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1095,7 +1095,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         try {
             MagnificationProcessor magnificationProcessor =
                     mSystemSupport.getMagnificationProcessor();
-            return (magnificationProcessor.reset(displayId, animate)
+            return (magnificationProcessor.resetFullscreenMagnification(displayId, animate)
                     || !magnificationProcessor.isMagnifying(displayId));
         } finally {
             Binder.restoreCallingIdentity(identity);

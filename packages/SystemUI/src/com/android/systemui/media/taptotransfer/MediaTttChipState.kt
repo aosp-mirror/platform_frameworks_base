@@ -50,7 +50,11 @@ class TransferInitiated(
 
 /**
  * A state representing that a transfer has been successfully completed.
+ *
+ * @property undoRunnable if present, the runnable that should be run to undo the transfer. We will
+ *   show an Undo button on the chip if this runnable is present.
  */
 class TransferSucceeded(
-    otherDeviceName: String
+    otherDeviceName: String,
+    val undoRunnable: Runnable? = null
 ) : MediaTttChipState(R.string.media_transfer_playing, otherDeviceName)

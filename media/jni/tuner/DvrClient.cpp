@@ -22,6 +22,8 @@
 #include <aidl/android/hardware/tv/tuner/DemuxQueueNotifyBits.h>
 #include <android-base/logging.h>
 #include <inttypes.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <utils/Log.h>
 
 #include "ClientHelper.h"
@@ -198,6 +200,14 @@ int64_t DvrClient::writeToBuffer(int8_t* buffer, int64_t size) {
         return -1;
     }
     return size;
+}
+
+int64_t DvrClient::seekFile(int64_t pos) {
+    if (mFd < 0) {
+        ALOGE("Failed to seekFile. File is not configured");
+        return -1;
+    }
+    return lseek64(mFd, pos, SEEK_SET);
 }
 
 Result DvrClient::configure(DvrSettings settings) {

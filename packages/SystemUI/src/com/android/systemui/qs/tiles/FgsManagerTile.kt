@@ -54,7 +54,7 @@ class FgsManagerTile @Inject constructor(
     qsLogger: QSLogger?,
     private val fgsManagerDialogFactory: FgsManagerDialogFactory,
     private val runningFgsController: RunningFgsController
-) : QSTileImpl<QSTile.State?>(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+) : QSTileImpl<QSTile.State>(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
         statusBarStateController, activityStarter, qsLogger), RunningFgsController.Callback {
 
     override fun handleInitialize() {

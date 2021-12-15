@@ -13385,6 +13385,7 @@ package android.content.pm {
     method public boolean isDynamic();
     method public boolean isEnabled();
     method public boolean isImmutable();
+    method public boolean isIncludedIn(int);
     method public boolean isPinned();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.ShortcutInfo> CREATOR;
@@ -13397,6 +13398,7 @@ package android.content.pm {
     field public static final int DISABLED_REASON_UNKNOWN = 3; // 0x3
     field public static final int DISABLED_REASON_VERSION_LOWER = 100; // 0x64
     field public static final String SHORTCUT_CATEGORY_CONVERSATION = "android.shortcut.conversation";
+    field public static final int SURFACE_LAUNCHER = 1; // 0x1
   }
 
   public static class ShortcutInfo.Builder {
@@ -13405,6 +13407,7 @@ package android.content.pm {
     method @NonNull public android.content.pm.ShortcutInfo.Builder setActivity(@NonNull android.content.ComponentName);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setCategories(java.util.Set<java.lang.String>);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setDisabledMessage(@NonNull CharSequence);
+    method @NonNull public android.content.pm.ShortcutInfo.Builder setExcludedFromSurfaces(int);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setIcon(android.graphics.drawable.Icon);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setIntent(@NonNull android.content.Intent);
@@ -17888,6 +17891,7 @@ package android.hardware {
     field public static final int RGB_565 = 4; // 0x4
     field public static final int RGB_888 = 3; // 0x3
     field public static final int S_UI8 = 53; // 0x35
+    field public static final long USAGE_COMPOSER_OVERLAY = 2048L; // 0x800L
     field public static final long USAGE_CPU_READ_OFTEN = 3L; // 0x3L
     field public static final long USAGE_CPU_READ_RARELY = 2L; // 0x2L
     field public static final long USAGE_CPU_WRITE_OFTEN = 48L; // 0x30L
@@ -18527,6 +18531,7 @@ package android.hardware.camera2 {
     method @NonNull public android.hardware.camera2.CameraExtensionCharacteristics getCameraExtensionCharacteristics(@NonNull String) throws android.hardware.camera2.CameraAccessException;
     method @NonNull public String[] getCameraIdList() throws android.hardware.camera2.CameraAccessException;
     method @NonNull public java.util.Set<java.util.Set<java.lang.String>> getConcurrentCameraIds() throws android.hardware.camera2.CameraAccessException;
+    method public int getTorchStrengthLevel(@NonNull String) throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(android.Manifest.permission.CAMERA) public boolean isConcurrentSessionConfigurationSupported(@NonNull java.util.Map<java.lang.String,android.hardware.camera2.params.SessionConfiguration>) throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(android.Manifest.permission.CAMERA) public void openCamera(@NonNull String, @NonNull android.hardware.camera2.CameraDevice.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(android.Manifest.permission.CAMERA) public void openCamera(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraDevice.StateCallback) throws android.hardware.camera2.CameraAccessException;
@@ -18535,6 +18540,7 @@ package android.hardware.camera2 {
     method public void registerTorchCallback(@NonNull android.hardware.camera2.CameraManager.TorchCallback, @Nullable android.os.Handler);
     method public void registerTorchCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraManager.TorchCallback);
     method public void setTorchMode(@NonNull String, boolean) throws android.hardware.camera2.CameraAccessException;
+    method public void turnOnTorchWithStrengthLevel(@NonNull String, int) throws android.hardware.camera2.CameraAccessException;
     method public void unregisterAvailabilityCallback(@NonNull android.hardware.camera2.CameraManager.AvailabilityCallback);
     method public void unregisterTorchCallback(@NonNull android.hardware.camera2.CameraManager.TorchCallback);
   }
@@ -18552,6 +18558,7 @@ package android.hardware.camera2 {
     ctor public CameraManager.TorchCallback();
     method public void onTorchModeChanged(@NonNull String, boolean);
     method public void onTorchModeUnavailable(@NonNull String);
+    method public void onTorchStrengthLevelChanged(@NonNull String, int);
   }
 
   public abstract class CameraMetadata<TKey> {
@@ -31952,6 +31959,7 @@ package android.os {
     method @Nullable public <T> java.util.ArrayList<T> readArrayList(@Nullable ClassLoader, @NonNull Class<? extends T>);
     method public void readBinderArray(@NonNull android.os.IBinder[]);
     method public void readBinderList(@NonNull java.util.List<android.os.IBinder>);
+    method @Nullable public byte[] readBlob();
     method public boolean readBoolean();
     method public void readBooleanArray(@NonNull boolean[]);
     method @Nullable public android.os.Bundle readBundle();
@@ -32011,6 +32019,8 @@ package android.os {
     method public void writeArray(@Nullable Object[]);
     method public void writeBinderArray(@Nullable android.os.IBinder[]);
     method public void writeBinderList(@Nullable java.util.List<android.os.IBinder>);
+    method public void writeBlob(@Nullable byte[]);
+    method public void writeBlob(@Nullable byte[], int, int);
     method public void writeBoolean(boolean);
     method public void writeBooleanArray(@Nullable boolean[]);
     method public void writeBundle(@Nullable android.os.Bundle);
@@ -49046,6 +49056,7 @@ package android.view {
     method @NonNull public android.view.SurfaceControl build();
     method @NonNull public android.view.SurfaceControl.Builder setBufferSize(@IntRange(from=0) int, @IntRange(from=0) int);
     method @NonNull public android.view.SurfaceControl.Builder setFormat(int);
+    method @NonNull public android.view.SurfaceControl.Builder setHidden(boolean);
     method @NonNull public android.view.SurfaceControl.Builder setName(@NonNull String);
     method @NonNull public android.view.SurfaceControl.Builder setOpaque(boolean);
     method @NonNull public android.view.SurfaceControl.Builder setParent(@Nullable android.view.SurfaceControl);
@@ -49060,11 +49071,18 @@ package android.view {
     method @NonNull public android.view.SurfaceControl.Transaction merge(@NonNull android.view.SurfaceControl.Transaction);
     method @NonNull public android.view.SurfaceControl.Transaction reparent(@NonNull android.view.SurfaceControl, @Nullable android.view.SurfaceControl);
     method @NonNull public android.view.SurfaceControl.Transaction setAlpha(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0, to=1.0) float);
+    method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer);
     method @NonNull public android.view.SurfaceControl.Transaction setBufferSize(@NonNull android.view.SurfaceControl, @IntRange(from=0) int, @IntRange(from=0) int);
+    method @NonNull public android.view.SurfaceControl.Transaction setBufferTransform(@NonNull android.view.SurfaceControl, int);
+    method @NonNull public android.view.SurfaceControl.Transaction setCrop(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Rect);
+    method @NonNull public android.view.SurfaceControl.Transaction setDamageRegion(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Region);
     method @NonNull public android.view.SurfaceControl.Transaction setFrameRate(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0) float, int);
     method @NonNull public android.view.SurfaceControl.Transaction setFrameRate(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0) float, int, int);
     method @NonNull public android.view.SurfaceControl.Transaction setGeometry(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Rect, @Nullable android.graphics.Rect, int);
     method @NonNull public android.view.SurfaceControl.Transaction setLayer(@NonNull android.view.SurfaceControl, @IntRange(from=java.lang.Integer.MIN_VALUE, to=java.lang.Integer.MAX_VALUE) int);
+    method @NonNull public android.view.SurfaceControl.Transaction setOpaque(@NonNull android.view.SurfaceControl, boolean);
+    method @NonNull public android.view.SurfaceControl.Transaction setPosition(@NonNull android.view.SurfaceControl, float, float);
+    method @NonNull public android.view.SurfaceControl.Transaction setScale(@NonNull android.view.SurfaceControl, float, float);
     method @NonNull public android.view.SurfaceControl.Transaction setVisibility(@NonNull android.view.SurfaceControl, boolean);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.SurfaceControl.Transaction> CREATOR;

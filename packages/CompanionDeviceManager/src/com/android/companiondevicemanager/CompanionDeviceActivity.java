@@ -16,327 +16,356 @@
 
 package com.android.companiondevicemanager;
 
-import static android.companion.BluetoothDeviceFilterUtils.getDeviceMacAddress;
-import static android.text.TextUtils.emptyIfNull;
-import static android.text.TextUtils.isEmpty;
-import static android.text.TextUtils.withoutPrefix;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+
+import static com.android.companiondevicemanager.Utils.getApplicationLabel;
+import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
+import static com.android.companiondevicemanager.Utils.prepareResultReceiverForIpc;
 
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
+import android.companion.IAssociationRequestCallback;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.database.DataSetObserver;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
+import android.net.MacAddress;
 import android.os.Bundle;
-import android.text.Html;
+import android.os.Handler;
+import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.text.Spanned;
 import android.util.Log;
-import android.util.SparseArray;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DeviceFilterPair;
-import com.android.internal.util.Preconditions;
-
 public class CompanionDeviceActivity extends Activity {
-
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = CompanionDeviceActivity.class.getSimpleName();
+    private static final String TAG = CompanionDeviceActivity.class.getSimpleName();
 
-    static CompanionDeviceActivity sInstance;
+    // Keep the following constants in sync with
+    // frameworks/base/services/companion/java/
+    // com/android/server/companion/AssociationRequestsProcessor.java
 
-    View mLoadingIndicator = null;
-    ListView mDeviceListView;
-    private View mPairButton;
-    private View mCancelButton;
+    // AssociationRequestsProcessor <-> UI
+    private static final String EXTRA_APPLICATION_CALLBACK = "application_callback";
+    private static final String EXTRA_ASSOCIATION_REQUEST = "association_request";
+    private static final String EXTRA_RESULT_RECEIVER = "result_receiver";
 
-    DevicesAdapter mDevicesAdapter;
+    // AssociationRequestsProcessor -> UI
+    private static final int RESULT_CODE_ASSOCIATION_CREATED = 0;
+    private static final String EXTRA_ASSOCIATION = "association";
+
+    // UI -> AssociationRequestsProcessor
+    private static final int RESULT_CODE_ASSOCIATION_APPROVED = 0;
+    private static final String EXTRA_MAC_ADDRESS = "mac_address";
+
+    private AssociationRequest mRequest;
+    private IAssociationRequestCallback mAppCallback;
+    private ResultReceiver mCdmServiceReceiver;
+
+    // Always present widgets.
+    private TextView mTitle;
+    private TextView mSummary;
+
+    // Progress indicator is only shown while we are looking for the first suitable device for a
+    // "regular" (ie. not self-managed) association.
+    private View mProgressIndicator;
+
+    // Present for self-managed association requests and "single-device" regular association
+    // regular.
+    private Button mButtonAllow;
+
+    // The list is only shown for multiple-device regular association request, after at least one
+    // matching device is found.
+    private @Nullable ListView mListView;
+    private @Nullable DeviceListAdapter mAdapter;
+
+    // The flag used to prevent double taps, that may lead to sending several requests for creating
+    // an association to CDM.
+    private boolean mAssociationApproved;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Log.i(LOG_TAG, "Starting UI for " + getService().mRequest);
-
-        if (getService().mDevicesFound.isEmpty()) {
-            Log.e(LOG_TAG, "About to show UI, but no devices to show");
-        }
-
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
-        sInstance = this;
-        getService().mActivity = this;
-
-        String deviceProfile = getRequest().getDeviceProfile();
-        String profilePrivacyDisclaimer = emptyIfNull(getRequest()
-                .getDeviceProfilePrivilegesDescription())
-                .replace("APP_NAME", getCallingAppName());
-        boolean useDeviceProfile = deviceProfile != null && !isEmpty(profilePrivacyDisclaimer);
-        String profileName = useDeviceProfile
-                ? getDeviceProfileName(deviceProfile)
-                : getString(R.string.profile_name_generic);
-
-        if (getRequest().isSingleDevice()) {
-            setContentView(R.layout.device_confirmation);
-            final DeviceFilterPair selectedDevice = getService().mDevicesFound.get(0);
-            setTitle(Html.fromHtml(getString(
-                    R.string.confirmation_title,
-                    Html.escapeHtml(getCallingAppName()),
-                    Html.escapeHtml(selectedDevice.getDisplayName())), 0));
-
-            mPairButton = findViewById(R.id.button_pair);
-            mPairButton.setOnClickListener(v -> onDeviceConfirmed(getService().mSelectedDevice));
-            getService().mSelectedDevice = selectedDevice;
-            onSelectionUpdate();
-            if (getRequest().isSkipPrompt()) {
-                onDeviceConfirmed(selectedDevice);
-            }
-        } else {
-            setContentView(R.layout.device_chooser);
-            mPairButton = findViewById(R.id.button_pair);
-            mPairButton.setVisibility(View.GONE);
-            setTitle(Html.fromHtml(getString(R.string.chooser_title,
-                    Html.escapeHtml(profileName),
-                    Html.escapeHtml(getCallingAppName())), 0));
-            mDeviceListView = findViewById(R.id.device_list);
-            mDevicesAdapter = new DevicesAdapter();
-            mDeviceListView.setAdapter(mDevicesAdapter);
-            mDeviceListView.setOnItemClickListener((adapterView, view, pos, l) -> {
-                getService().mSelectedDevice =
-                        (DeviceFilterPair) adapterView.getItemAtPosition(pos);
-                mDevicesAdapter.notifyDataSetChanged();
-            });
-            mDevicesAdapter.registerDataSetObserver(new DataSetObserver() {
-                @Override
-                public void onChanged() {
-                    onSelectionUpdate();
-                }
-            });
-            mDeviceListView.addFooterView(mLoadingIndicator = getProgressBar(), null, false);
-        }
-
-        TextView profileSummary = findViewById(R.id.profile_summary);
-
-        if (useDeviceProfile) {
-            profileSummary.setVisibility(View.VISIBLE);
-            String deviceRef = getRequest().isSingleDevice()
-                    ? getService().mDevicesFound.get(0).getDisplayName()
-                    : profileName;
-            profileSummary.setText(getString(R.string.profile_summary,
-                    deviceRef,
-                    profilePrivacyDisclaimer));
-        } else {
-            profileSummary.setVisibility(View.GONE);
-        }
-
-        mCancelButton = findViewById(R.id.button_cancel);
-        mCancelButton.setOnClickListener(v -> cancel());
     }
 
-    static void notifyDevicesChanged() {
-        if (sInstance != null && sInstance.mDevicesAdapter != null && !sInstance.isFinishing()) {
-            sInstance.mDevicesAdapter.notifyDataSetChanged();
-        }
-    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (DEBUG) Log.d(TAG, "onStart()");
 
-    private AssociationRequest getRequest() {
-        return getService().mRequest;
-    }
+        final Intent intent = getIntent();
+        mRequest = intent.getParcelableExtra(EXTRA_ASSOCIATION_REQUEST);
+        mAppCallback = IAssociationRequestCallback.Stub.asInterface(
+                intent.getExtras().getBinder(EXTRA_APPLICATION_CALLBACK));
+        mCdmServiceReceiver = intent.getParcelableExtra(EXTRA_RESULT_RECEIVER);
 
-    private String getDeviceProfileName(@Nullable String deviceProfile) {
-        if (deviceProfile == null) {
-            return getString(R.string.profile_name_generic);
-        }
-        switch (deviceProfile) {
-            case AssociationRequest.DEVICE_PROFILE_WATCH: {
-                return getString(R.string.profile_name_watch);
-            }
-            default: {
-                Log.w(LOG_TAG,
-                        "No localized profile name found for device profile: " + deviceProfile);
-                return withoutPrefix("android.app.role.COMPANION_DEVICE_", deviceProfile)
-                        .toLowerCase()
-                        .replace('_', ' ');
-            }
-        }
-    }
+        requireNonNull(mRequest);
+        requireNonNull(mAppCallback);
+        requireNonNull(mCdmServiceReceiver);
 
-    private void cancel() {
-        Log.i(LOG_TAG, "cancel()");
-        getService().onCancel();
-        setResult(RESULT_CANCELED);
-        finish();
+        // Start discovery services if needed.
+        if (!mRequest.isSelfManaged()) {
+            CompanionDeviceDiscoveryService.startForRequest(this, mRequest);
+        }
+        // Init UI.
+        initUI();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (!isFinishing() && !isChangingConfigurations()) {
-            Log.i(LOG_TAG, "onStop() - cancelling");
-            cancel();
+        if (DEBUG) Log.d(TAG, "onStop(), finishing=" + isFinishing());
+
+        // TODO: handle config changes without cancelling.
+        if (!isFinishing()) {
+            cancel(); // will finish()
         }
+
+        // mAdapter may be observing - need to remove it.
+        CompanionDeviceDiscoveryService.SCAN_RESULTS_OBSERVABLE.deleteObservers();
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        getService().mActivity = null;
-        if (sInstance == this) {
-            sInstance = null;
-        }
-    }
+    protected void onNewIntent(Intent intent) {
+        // Handle another incoming request (while we are not done with the original - mRequest -
+        // yet).
+        final AssociationRequest request = requireNonNull(
+                intent.getParcelableExtra(EXTRA_ASSOCIATION_REQUEST));
+        if (DEBUG) Log.d(TAG, "onNewIntent(), request=" + request);
 
-    private CharSequence getCallingAppName() {
+        // We can only "process" one request at a time.
+        final IAssociationRequestCallback appCallback = IAssociationRequestCallback.Stub
+                .asInterface(intent.getExtras().getBinder(EXTRA_APPLICATION_CALLBACK));
         try {
-            final PackageManager packageManager = getPackageManager();
-            String callingPackage = Preconditions.checkStringNotEmpty(
-                    getCallingPackage(),
-                    "This activity must be called for result");
-            return packageManager.getApplicationLabel(
-                    packageManager.getApplicationInfo(callingPackage, 0));
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new RuntimeException(e);
+            requireNonNull(appCallback).onFailure("Busy.");
+        } catch (RemoteException ignore) {
         }
     }
 
-    @Override
-    public String getCallingPackage() {
-        return requireNonNull(getRequest().getCallingPackage());
-    }
+    private void initUI() {
+        if (DEBUG) Log.d(TAG, "initUI(), request=" + mRequest);
 
-    @Override
-    public void setTitle(CharSequence title) {
-        final TextView titleView = findViewById(R.id.title);
-        final int padding = getPadding(getResources());
-        titleView.setPadding(padding, padding, padding, padding);
-        titleView.setText(title);
-    }
+        setContentView(R.layout.activity_confirmation);
 
-    private ProgressBar getProgressBar() {
-        final ProgressBar progressBar = new ProgressBar(this);
-        progressBar.setForegroundGravity(Gravity.CENTER_HORIZONTAL);
-        final int padding = getPadding(getResources());
-        progressBar.setPadding(padding, padding, padding, padding);
-        return progressBar;
-    }
+        mTitle = findViewById(R.id.title);
+        mSummary = findViewById(R.id.summary);
 
-    static int getPadding(Resources r) {
-        return r.getDimensionPixelSize(R.dimen.padding);
-    }
+        mListView = findViewById(R.id.device_list);
+        mListView.setOnItemClickListener((av, iv, position, id) -> onListItemClick(position));
 
-    private void onSelectionUpdate() {
-        DeviceFilterPair selectedDevice = getService().mSelectedDevice;
-        if (mPairButton.getVisibility() != View.VISIBLE && selectedDevice != null) {
-            onDeviceConfirmed(selectedDevice);
+        mButtonAllow = findViewById(R.id.button_allow);
+        mButtonAllow.setOnClickListener(this::onAllowButtonClick);
+
+        findViewById(R.id.button_cancel).setOnClickListener(v -> cancel());
+
+        final CharSequence appLabel = getApplicationLabel(this, mRequest.getPackageName());
+        if (mRequest.isSelfManaged()) {
+            initUiForSelfManagedAssociation(appLabel);
+        } else if (mRequest.isSingleDevice()) {
+            initUiForSingleDevice(appLabel);
         } else {
-            mPairButton.setEnabled(selectedDevice != null);
+            initUiForMultipleDevices(appLabel);
         }
     }
 
-    private CompanionDeviceDiscoveryService getService() {
-        return CompanionDeviceDiscoveryService.sInstance;
+    private void onAssociationCreated(@NonNull AssociationInfo association) {
+        if (DEBUG) Log.i(TAG, "onAssociationCreated(), association=" + association);
+
+        // Don't need to notify the app, CdmService has already done that. Just finish.
+        setResultAndFinish(association);
     }
 
-    protected void onDeviceConfirmed(DeviceFilterPair selectedDevice) {
-        Log.i(LOG_TAG, "onDeviceConfirmed(selectedDevice = " + selectedDevice + ")");
-        getService().onDeviceSelected(
-                getCallingPackage(), getDeviceMacAddress(selectedDevice.device));
+    private void cancel() {
+        if (DEBUG) Log.i(TAG, "cancel()");
+
+        // Stop discovery service if it was used.
+        if (!mRequest.isSelfManaged()) {
+            CompanionDeviceDiscoveryService.stop(this);
+        }
+
+        // First send callback to the app directly...
+        try {
+            mAppCallback.onFailure("Cancelled.");
+        } catch (RemoteException ignore) {
+        }
+
+        // ... then set result and finish ("sending" onActivityResult()).
+        setResultAndFinish(null);
     }
 
-    void setResultAndFinish() {
-        Log.i(LOG_TAG, "setResultAndFinish(selectedDevice = "
-                + getService().mSelectedDevice.device + ")");
-        setResult(RESULT_OK,
-                new Intent().putExtra(
-                        CompanionDeviceManager.EXTRA_DEVICE, getService().mSelectedDevice.device));
+    private void setResultAndFinish(@Nullable AssociationInfo association) {
+        if (DEBUG) Log.i(TAG, "setResultAndFinish(), association=" + association);
+
+        final Intent data = new Intent();
+        if (association != null) {
+            data.putExtra(CompanionDeviceManager.EXTRA_ASSOCIATION, association);
+            if (!association.isSelfManaged()) {
+                data.putExtra(CompanionDeviceManager.EXTRA_DEVICE,
+                        association.getDeviceMacAddressAsString());
+            }
+        }
+        setResult(association != null ? RESULT_OK : RESULT_CANCELED, data);
+
         finish();
     }
 
-    class DevicesAdapter extends BaseAdapter {
-        private final Drawable mBluetoothIcon = icon(android.R.drawable.stat_sys_data_bluetooth);
-        private final Drawable mWifiIcon = icon(com.android.internal.R.drawable.ic_wifi_signal_3);
+    private void initUiForSelfManagedAssociation(CharSequence appLabel) {
+        if (DEBUG) Log.i(TAG, "initUiFor_SelfManaged_Association()");
 
-        private SparseArray<Integer> mColors = new SparseArray();
+        final CharSequence deviceName = mRequest.getDisplayName(); // "<device>";
+        final String deviceProfile = mRequest.getDeviceProfile(); // DEVICE_PROFILE_APP_STREAMING;
 
-        private Drawable icon(int drawableRes) {
-            Drawable icon = getResources().getDrawable(drawableRes, null);
-            icon.setTint(Color.DKGRAY);
-            return icon;
+        final Spanned title;
+        final Spanned summary;
+        switch (deviceProfile) {
+            case DEVICE_PROFILE_APP_STREAMING:
+                title = getHtmlFromResources(this, R.string.title_app_streaming, appLabel);
+                summary = getHtmlFromResources(
+                        this, R.string.summary_app_streaming, appLabel, deviceName);
+                break;
+
+            case DEVICE_PROFILE_AUTOMOTIVE_PROJECTION:
+                title = getHtmlFromResources(this, R.string.title_automotive_projection, appLabel);
+                summary = getHtmlFromResources(
+                        this, R.string.summary_automotive_projection, appLabel, deviceName);
+                break;
+
+            default:
+                throw new RuntimeException("Unsupported profile " + deviceProfile);
         }
+        mTitle.setText(title);
+        mSummary.setText(summary);
 
-        @Override
-        public View getView(
-                int position,
-                @Nullable View convertView,
-                @NonNull ViewGroup parent) {
-            TextView view = convertView instanceof TextView
-                    ? (TextView) convertView
-                    : newView();
-            bind(view, getItem(position));
-            return view;
-        }
-
-        private void bind(TextView textView, DeviceFilterPair device) {
-            textView.setText(device.getDisplayName());
-            textView.setBackgroundColor(
-                    device.equals(getService().mSelectedDevice)
-                            ? getColor(android.R.attr.colorControlHighlight)
-                            : Color.TRANSPARENT);
-            textView.setCompoundDrawablesWithIntrinsicBounds(
-                    device.device instanceof android.net.wifi.ScanResult
-                            ? mWifiIcon
-                            : mBluetoothIcon,
-                    null, null, null);
-            textView.getCompoundDrawables()[0].setTint(getColor(android.R.attr.colorForeground));
-        }
-
-        private TextView newView() {
-            final TextView textView = new TextView(CompanionDeviceActivity.this);
-            textView.setTextColor(getColor(android.R.attr.colorForeground));
-            final int padding = CompanionDeviceActivity.getPadding(getResources());
-            textView.setPadding(padding, padding, padding, padding);
-            textView.setCompoundDrawablePadding(padding);
-            return textView;
-        }
-
-        private int getColor(int colorAttr) {
-            if (mColors.contains(colorAttr)) {
-                return mColors.get(colorAttr);
-            }
-            TypedValue typedValue = new TypedValue();
-            TypedArray a = obtainStyledAttributes(typedValue.data, new int[] { colorAttr });
-            int result = a.getColor(0, 0);
-            a.recycle();
-            mColors.put(colorAttr, result);
-            return result;
-        }
-
-        @Override
-        public int getCount() {
-            return getService().mDevicesFound.size();
-        }
-
-        @Override
-        public DeviceFilterPair getItem(int position) {
-            return getService().mDevicesFound.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
+        mListView.setVisibility(View.GONE);
     }
+
+    private void initUiForSingleDevice(CharSequence appLabel) {
+        if (DEBUG) Log.i(TAG, "initUiFor_SingleDevice()");
+
+        // TODO: use real name
+        final String deviceName = "<device>";
+        final String deviceProfile = mRequest.getDeviceProfile();
+
+        final Spanned title = getHtmlFromResources(
+                this, R.string.confirmation_title, appLabel, deviceName);
+        final Spanned summary;
+        if (deviceProfile == null) {
+            summary = getHtmlFromResources(this, R.string.summary_generic);
+        } else if (deviceProfile.equals(DEVICE_PROFILE_WATCH)) {
+            summary = getHtmlFromResources(this, R.string.summary_watch, appLabel, deviceName);
+        } else {
+            throw new RuntimeException("Unsupported profile " + deviceProfile);
+        }
+
+        mTitle.setText(title);
+        mSummary.setText(summary);
+
+        mListView.setVisibility(View.GONE);
+    }
+
+    private void initUiForMultipleDevices(CharSequence appLabel) {
+        if (DEBUG) Log.i(TAG, "initUiFor_MultipleDevices()");
+
+        final String deviceProfile = mRequest.getDeviceProfile();
+
+        final String profileName;
+        final Spanned summary;
+        if (deviceProfile == null) {
+            profileName = getString(R.string.profile_name_generic);
+            summary = getHtmlFromResources(this, R.string.summary_generic);
+        } else if (deviceProfile.equals(DEVICE_PROFILE_WATCH)) {
+            profileName = getString(R.string.profile_name_watch);
+            summary = getHtmlFromResources(this, R.string.summary_watch, appLabel);
+        } else {
+            throw new RuntimeException("Unsupported profile " + deviceProfile);
+        }
+        final Spanned title = getHtmlFromResources(
+                this, R.string.chooser_title, profileName, appLabel);
+
+        mTitle.setText(title);
+        mSummary.setText(summary);
+
+        mAdapter = new DeviceListAdapter(this);
+        CompanionDeviceDiscoveryService.SCAN_RESULTS_OBSERVABLE.addObserver(mAdapter);
+        // TODO: hide the list and show a spinner until a first device matching device is found.
+        mListView.setAdapter(mAdapter);
+
+        // "Remove" consent button: users would need to click on the list item.
+        mButtonAllow.setVisibility(View.GONE);
+    }
+
+    private void onListItemClick(int position) {
+        if (DEBUG) Log.d(TAG, "onListItemClick() " + position);
+
+        final DeviceFilterPair<?> selectedDevice = mAdapter.getItem(position);
+        final MacAddress macAddress = selectedDevice.getMacAddress();
+        onAssociationApproved(macAddress);
+    }
+
+    private void onAllowButtonClick(View v) {
+        if (DEBUG) Log.d(TAG, "onAllowButtonClick()");
+
+        // Disable the button, to prevent more clicks.
+        v.setEnabled(false);
+
+        final MacAddress macAddress;
+        if (mRequest.isSelfManaged()) {
+            macAddress = null;
+        } else {
+            // TODO: implement.
+            throw new UnsupportedOperationException(
+                    "isSingleDevice() requests are not supported yet.");
+        }
+        onAssociationApproved(macAddress);
+    }
+
+    private void onAssociationApproved(@Nullable MacAddress macAddress) {
+        if (mAssociationApproved) return;
+        mAssociationApproved = true;
+
+        if (DEBUG) Log.i(TAG, "onAssociationApproved() macAddress=" + macAddress);
+
+        if (!mRequest.isSelfManaged()) {
+            requireNonNull(macAddress);
+            CompanionDeviceDiscoveryService.stop(this);
+        }
+
+        final Bundle data = new Bundle();
+        data.putParcelable(EXTRA_ASSOCIATION_REQUEST, mRequest);
+        data.putBinder(EXTRA_APPLICATION_CALLBACK, mAppCallback.asBinder());
+        if (macAddress != null) {
+            data.putParcelable(EXTRA_MAC_ADDRESS, macAddress);
+        }
+
+        data.putParcelable(EXTRA_RESULT_RECEIVER,
+                prepareResultReceiverForIpc(mOnAssociationCreatedReceiver));
+
+        mCdmServiceReceiver.send(RESULT_CODE_ASSOCIATION_APPROVED, data);
+    }
+
+    private final ResultReceiver mOnAssociationCreatedReceiver =
+            new ResultReceiver(Handler.getMain()) {
+                @Override
+                protected void onReceiveResult(int resultCode, Bundle data) {
+                    if (resultCode != RESULT_CODE_ASSOCIATION_CREATED) {
+                        throw new RuntimeException("Unknown result code: " + resultCode);
+                    }
+
+                    final AssociationInfo association = data.getParcelable(EXTRA_ASSOCIATION);
+                    requireNonNull(association);
+
+                    onAssociationCreated(association);
+                }
+            };
 }

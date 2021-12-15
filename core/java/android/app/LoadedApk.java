@@ -1352,7 +1352,9 @@ public final class LoadedApk {
 
         Application app = null;
 
-        String appClass = mApplicationInfo.className;
+        final String myProcessName = Process.myProcessName();
+        String appClass = mApplicationInfo.getCustomApplicationClassNameForProcess(
+                myProcessName);
         if (forceDefaultAppClass || (appClass == null)) {
             appClass = "android.app.Application";
         }

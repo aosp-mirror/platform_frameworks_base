@@ -42,6 +42,7 @@ import android.media.tv.interactive.TvIAppInfo;
 import android.media.tv.interactive.TvIAppService;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -652,10 +653,47 @@ public class TvIAppManagerService extends SystemService {
                         userState.mServiceStateMap.put(componentName, serviceState);
                     } else if (serviceState.mService != null) {
                         serviceState.mService.prepare(type);
+                    } else {
+                        serviceState.mPendingPrepare = true;
+                        serviceState.mPendingPrepareType = type;
                     }
                 }
             } catch (RemoteException e) {
                 Slogf.e(TAG, "error in prepare", e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void notifyAppLinkInfo(String tiasId, Bundle appLinkInfo, int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "notifyAppLinkInfo");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    TvIAppState iAppState = userState.mIAppMap.get(tiasId);
+                    if (iAppState == null) {
+                        Slogf.e(TAG, "failed to notifyAppLinkInfo - unknown TIAS id "
+                                + tiasId);
+                        return;
+                    }
+                    ComponentName componentName = iAppState.mInfo.getComponent();
+                    ServiceState serviceState = userState.mServiceStateMap.get(componentName);
+                    if (serviceState == null) {
+                        serviceState = new ServiceState(
+                                componentName, tiasId, resolvedUserId);
+                        serviceState.addPendingAppLink(appLinkInfo);
+                        userState.mServiceStateMap.put(componentName, serviceState);
+                    } else if (serviceState.mService != null) {
+                        serviceState.mService.notifyAppLinkInfo(appLinkInfo);
+                    } else {
+                        serviceState.addPendingAppLink(appLinkInfo);
+                    }
+                }
+            } catch (RemoteException e) {
+                Slogf.e(TAG, "error in notifyAppLinkInfo", e);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1237,6 +1275,7 @@ public class TvIAppManagerService extends SystemService {
         private final ServiceConnection mConnection;
         private final ComponentName mComponent;
         private final String mIAppSeriviceId;
+        private final List<Bundle> mPendingAppLinkInfo = new ArrayList<>();
 
         private boolean mPendingPrepare = false;
         private Integer mPendingPrepareType = null;
@@ -1256,6 +1295,10 @@ public class TvIAppManagerService extends SystemService {
             mPendingPrepareType = prepareType;
             mConnection = new IAppServiceConnection(component, userId);
             mIAppSeriviceId = tias;
+        }
+
+        private void addPendingAppLink(Bundle info) {
+            mPendingAppLinkInfo.add(info);
         }
     }
 
@@ -1293,6 +1336,23 @@ public class TvIAppManagerService extends SystemService {
                         Slogf.e(TAG, "error in prepare when onServiceConnected", e);
                     } finally {
                         Binder.restoreCallingIdentity(identity);
+                    }
+                }
+
+                if (!serviceState.mPendingAppLinkInfo.isEmpty()) {
+                    for (Iterator<Bundle> it = serviceState.mPendingAppLinkInfo.iterator();
+                            it.hasNext(); ) {
+                        Bundle appLinkInfo = it.next();
+                        final long identity = Binder.clearCallingIdentity();
+                        try {
+                            serviceState.mService.notifyAppLinkInfo(appLinkInfo);
+                            it.remove();
+                        } catch (RemoteException e) {
+                            Slogf.e(TAG, "error in notifyAppLinkInfo(" + appLinkInfo
+                                    + ") when onServiceConnected", e);
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
                     }
                 }
 

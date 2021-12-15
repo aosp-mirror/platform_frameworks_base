@@ -112,7 +112,6 @@ import com.android.server.location.injector.DeviceIdleHelper;
 import com.android.server.location.injector.DeviceStationaryHelper;
 import com.android.server.location.injector.EmergencyHelper;
 import com.android.server.location.injector.Injector;
-import com.android.server.location.injector.LocationAttributionHelper;
 import com.android.server.location.injector.LocationPermissionsHelper;
 import com.android.server.location.injector.LocationPowerSaveModeHelper;
 import com.android.server.location.injector.LocationUsageLogger;
@@ -1705,7 +1704,6 @@ public class LocationManagerService extends ILocationManager.Stub implements
         private final SystemScreenInteractiveHelper mScreenInteractiveHelper;
         private final SystemDeviceStationaryHelper mDeviceStationaryHelper;
         private final SystemDeviceIdleHelper mDeviceIdleHelper;
-        private final LocationAttributionHelper mLocationAttributionHelper;
         private final LocationUsageLogger mLocationUsageLogger;
 
         // lazily instantiated since they may not always be used
@@ -1731,7 +1729,6 @@ public class LocationManagerService extends ILocationManager.Stub implements
             mScreenInteractiveHelper = new SystemScreenInteractiveHelper(context);
             mDeviceStationaryHelper = new SystemDeviceStationaryHelper();
             mDeviceIdleHelper = new SystemDeviceIdleHelper(context);
-            mLocationAttributionHelper = new LocationAttributionHelper(mAppOpsHelper);
             mLocationUsageLogger = new LocationUsageLogger();
         }
 
@@ -1805,11 +1802,6 @@ public class LocationManagerService extends ILocationManager.Stub implements
         @Override
         public DeviceIdleHelper getDeviceIdleHelper() {
             return mDeviceIdleHelper;
-        }
-
-        @Override
-        public LocationAttributionHelper getLocationAttributionHelper() {
-            return mLocationAttributionHelper;
         }
 
         @Override

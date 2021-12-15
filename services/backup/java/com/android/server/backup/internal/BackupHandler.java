@@ -35,6 +35,7 @@ import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
+import com.android.server.backup.OperationStorage;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.PerformAdbBackupTask;
@@ -84,6 +85,7 @@ public class BackupHandler extends Handler {
     public static final int MSG_STOP = 22;
 
     private final UserBackupManagerService backupManagerService;
+    private final OperationStorage mOperationStorage;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     private final HandlerThread mBackupThread;
@@ -92,10 +94,12 @@ public class BackupHandler extends Handler {
     volatile boolean mIsStopping = false;
 
     public BackupHandler(
-            UserBackupManagerService backupManagerService, HandlerThread backupThread) {
+            UserBackupManagerService backupManagerService, OperationStorage operationStorage,
+            HandlerThread backupThread) {
         super(backupThread.getLooper());
         mBackupThread = backupThread;
         this.backupManagerService = backupManagerService;
+        mOperationStorage = operationStorage;
         mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
@@ -215,6 +219,7 @@ public class BackupHandler extends Handler {
                                                         caller);
                         KeyValueBackupTask.start(
                                 backupManagerService,
+                                mOperationStorage,
                                 transportConnection,
                                 transport.transportDirName(),
                                 queue,
@@ -278,8 +283,8 @@ public class BackupHandler extends Handler {
                 // TODO: refactor full backup to be a looper-based state machine
                 // similar to normal backup/restore.
                 AdbBackupParams params = (AdbBackupParams) msg.obj;
-                PerformAdbBackupTask task = new PerformAdbBackupTask(backupManagerService,
-                        params.fd,
+                PerformAdbBackupTask task = new PerformAdbBackupTask(
+                        backupManagerService, mOperationStorage, params.fd,
                         params.observer, params.includeApks, params.includeObbs,
                         params.includeShared, params.doWidgets, params.curPassword,
                         params.encryptPassword, params.allApps, params.includeSystem,
@@ -296,6 +301,7 @@ public class BackupHandler extends Handler {
                 PerformUnifiedRestoreTask task =
                         new PerformUnifiedRestoreTask(
                                 backupManagerService,
+                                mOperationStorage,
                                 params.mTransportConnection,
                                 params.observer,
                                 params.monitor,
@@ -332,7 +338,7 @@ public class BackupHandler extends Handler {
                 // similar to normal backup/restore.
                 AdbRestoreParams params = (AdbRestoreParams) msg.obj;
                 PerformAdbRestoreTask task = new PerformAdbRestoreTask(backupManagerService,
-                        params.fd,
+                        mOperationStorage, params.fd,
                         params.curPassword, params.encryptPassword,
                         params.observer, params.latch);
                 (new Thread(task, "adb-restore")).start();
@@ -459,6 +465,7 @@ public class BackupHandler extends Handler {
 
                 KeyValueBackupTask.start(
                         backupManagerService,
+                        mOperationStorage,
                         params.mTransportConnection,
                         params.dirName,
                         params.kvPackages,

@@ -18,6 +18,7 @@ package com.android.systemui.util.dagger;
 
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.RingerModeTrackerImpl;
+import com.android.systemui.util.condition.dagger.MonitorComponent;
 import com.android.systemui.util.wrapper.UtilWrapperModule;
 
 import dagger.Binds;
@@ -26,6 +27,9 @@ import dagger.Module;
 /** Dagger Module for code in the util package. */
 @Module(includes = {
                 UtilWrapperModule.class
+        },
+        subcomponents = {
+                MonitorComponent.class,
         })
 public interface UtilModule {
     /** */

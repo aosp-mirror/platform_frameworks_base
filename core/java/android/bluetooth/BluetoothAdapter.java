@@ -48,7 +48,6 @@ import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.Attributable;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
@@ -58,7 +57,7 @@ import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
+import android.sysprop.BluetoothProperties;
 import android.util.Log;
 import android.util.Pair;
 
@@ -1352,7 +1351,7 @@ public final class BluetoothAdapter {
                 return true;
             }
             Log.e(TAG, "factoryReset(): Setting persist.bluetooth.factoryreset to retry later");
-            SystemProperties.set("persist.bluetooth.factoryreset", "true");
+            BluetoothProperties.factory_reset(true);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         } finally {

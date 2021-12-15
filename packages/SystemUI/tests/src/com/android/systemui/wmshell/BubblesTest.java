@@ -116,7 +116,6 @@ import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEntry;
 import com.android.wm.shell.bubbles.BubbleIconFactory;
 import com.android.wm.shell.bubbles.BubbleLogger;
-import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.bubbles.BubbleViewInfoTask;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -631,7 +630,7 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRemoveLastExpanded_selectsOverflow() {
+    public void testRemoveLastExpanded_collapses() {
         // Mark it as a bubble and add it explicitly
         mEntryListener.onPendingEntryAdded(mRow);
         mEntryListener.onPendingEntryAdded(mRow2);
@@ -670,11 +669,10 @@ public class BubblesTest extends SysuiTestCase {
                         stackView.getExpandedBubble().getKey()).getKey(),
                 Bubbles.DISMISS_USER_GESTURE);
 
-        // Overflow should be selected
-        assertEquals(mBubbleData.getSelectedBubble().getKey(), BubbleOverflow.KEY);
-        verify(mBubbleExpandListener).onBubbleExpandChanged(true, BubbleOverflow.KEY);
-        assertTrue(mBubbleController.hasBubbles());
-        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
+        // We should be collapsed
+        verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getKey());
+        assertFalse(mBubbleController.hasBubbles());
+        assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
     @Test

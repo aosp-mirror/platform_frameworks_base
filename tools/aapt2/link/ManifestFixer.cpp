@@ -588,10 +588,21 @@ static bool RenameManifestPackage(const StringPiece& package_override, xml::Elem
             child_el->name == "provider" || child_el->name == "receiver" ||
             child_el->name == "service") {
           FullyQualifyClassName(original_package, xml::kSchemaAndroid, "name", child_el);
+          continue;
         }
 
         if (child_el->name == "activity-alias") {
           FullyQualifyClassName(original_package, xml::kSchemaAndroid, "targetActivity", child_el);
+          continue;
+        }
+
+        if (child_el->name == "processes") {
+          for (xml::Element* grand_child_el : child_el->GetChildElements()) {
+            if (grand_child_el->name == "process") {
+              FullyQualifyClassName(original_package, xml::kSchemaAndroid, "name", grand_child_el);
+            }
+          }
+          continue;
         }
       }
     }

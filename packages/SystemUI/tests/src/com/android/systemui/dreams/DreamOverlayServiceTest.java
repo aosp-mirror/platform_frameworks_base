@@ -191,4 +191,20 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
         verify(mDreamOverlayStatusBarViewController).init();
     }
+
+    @Test
+    public void testRootViewAttachListenerIsAddedToDreamOverlayContentView() throws Exception {
+        final DreamOverlayService service = new DreamOverlayService(mContext, mMainExecutor,
+                mDreamOverlayStateController, mDreamOverlayStatusBarViewComponentFactory);
+
+        final IBinder proxy = service.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        mMainExecutor.runAllReady();
+
+        verify(mDreamOverlayContentView).addOnAttachStateChangeListener(
+                any(View.OnAttachStateChangeListener.class));
+    }
 }

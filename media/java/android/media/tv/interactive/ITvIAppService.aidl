@@ -18,6 +18,7 @@ package android.media.tv.interactive;
 
 import android.media.tv.interactive.ITvIAppServiceCallback;
 import android.media.tv.interactive.ITvIAppSessionCallback;
+import android.os.Bundle;
 import android.view.InputChannel;
 
 /**
@@ -31,4 +32,5 @@ oneway interface ITvIAppService {
     void createSession(in InputChannel channel, in ITvIAppSessionCallback callback,
             in String iAppServiceId, int type);
     void prepare(int type);
+    void notifyAppLinkInfo(in Bundle info);
 }

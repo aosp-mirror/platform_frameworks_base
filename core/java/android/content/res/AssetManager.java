@@ -792,6 +792,21 @@ public final class AssetManager implements AutoCloseable {
     }
 
     /**
+     * To get the parent theme resource id according to the parameter theme resource id.
+     * @param resId theme resource id.
+     * @return the parent theme resource id.
+     * @hide
+     */
+    @StyleRes
+    int getParentThemeIdentifier(@StyleRes int resId) {
+        synchronized (this) {
+            ensureValidLocked();
+            // name is checked in JNI.
+            return nativeGetParentThemeIdentifier(mObject, resId);
+        }
+    }
+
+    /**
      * Enable resource resolution logging to track the steps taken to resolve the last resource
      * entry retrieved. Stores the configuration and package names for each step.
      *
@@ -1600,6 +1615,8 @@ public final class AssetManager implements AutoCloseable {
     private static native void nativeThemeDump(long ptr, long themePtr, int priority, String tag,
             String prefix);
     static native @NativeConfig int nativeThemeGetChangingConfigurations(long themePtr);
+    @StyleRes
+    private static native int nativeGetParentThemeIdentifier(long ptr, @StyleRes int styleId);
 
     // AssetInputStream related native methods.
     private static native void nativeAssetDestroy(long assetPtr);

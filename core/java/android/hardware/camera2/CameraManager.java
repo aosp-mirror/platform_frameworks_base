@@ -1036,6 +1036,95 @@ public final class CameraManager {
     }
 
     /**
+     * Set the brightness level of the flashlight associated with the given cameraId in torch
+     * mode. If the torch is OFF and torchStrength is >= 1, torch will turn ON with the
+     * strength level specified in torchStrength.
+     *
+     * <p>Use
+     * {@link android.hardware.camera2.CameraCharacteristics#FLASH_INFO_STRENGTH_MAXIMUM_LEVEL}
+     * to check whether the camera device supports flash unit strength control or not. If this value
+     * is greater than 1, applications can call this API to control the flashlight brightness level.
+     * </p>
+     *
+     * <p>If {@link #turnOnTorchWithStrengthLevel} is called to change the brightness level of the
+     * flash unit {@link CameraManager.TorchCallback#onTorchStrengthLevelChanged} will be invoked.
+     * If the new desired strength level is same as previously set level, then this callback will
+     * not be invoked.
+     * If the torch is OFF and {@link #turnOnTorchWithStrengthLevel} is called with level >= 1,
+     * the torch will be turned ON with that brightness level. In this case
+     * {@link CameraManager.TorchCallback#onTorchModeChanged} will also be invoked.
+     * </p>
+     *
+     * <p>When the torch is turned OFF via {@link #setTorchMode}, the flashlight brightness level
+     * will reset to default value
+     * {@link android.hardware.camera2.CameraCharacteristics#FLASH_INFO_STRENGTH_DEFAULT_LEVEL}
+     * In this case the {@link CameraManager.TorchCallback#onTorchStrengthLevelChanged} will not be
+     * invoked.
+     * </p>
+     *
+     * <p>If torch is enabled via {@link #setTorchMode} after calling
+     * {@link #turnOnTorchWithStrengthLevel} with level N then the flash unit will have the
+     * brightness level N.
+     * Since multiple applications are free to call {@link #setTorchMode}, when the latest
+     * application that turned ON the torch mode exits, the torch mode will be turned OFF
+     * and in this case the brightness level will reset to default level.
+     * </p>
+     *
+     * @param cameraId
+     *             The unique identifier of the camera device that the flash unit belongs to.
+     * @param torchStrength
+     *             The desired brightness level to be set for the flash unit in the range 1 to
+     *             {@link android.hardware.camera2.CameraCharacteristics#FLASH_INFO_STRENGTH_MAXIMUM_LEVEL}.
+     *
+     * @throws CameraAccessException if it failed to access the flash unit.
+     *             {@link CameraAccessException#CAMERA_IN_USE} will be thrown if the camera device
+     *             is in use. {@link CameraAccessException#MAX_CAMERAS_IN_USE} will be thrown if
+     *             other camera resources needed to turn on the torch mode are in use.
+     *             {@link CameraAccessException#CAMERA_DISCONNECTED} will be thrown if camera
+     *             service is not available.
+     * @throws IllegalArgumentException if cameraId was null, cameraId doesn't match any currently
+     *              or previously available camera device, the camera device doesn't have a
+     *              flash unit or if torchStrength is not within the range i.e. is greater than
+     *              the maximum level
+     *              {@link android.hardware.camera2.CameraCharacteristics#FLASH_INFO_STRENGTH_MAXIMUM_LEVEL}
+     *              or <= 0.
+     *
+     */
+    public void turnOnTorchWithStrengthLevel(@NonNull String cameraId, int torchStrength)
+            throws CameraAccessException {
+        if (CameraManagerGlobal.sCameraServiceDisabled) {
+            throw new IllegalArgumentException("No camera available on device");
+        }
+        CameraManagerGlobal.get().turnOnTorchWithStrengthLevel(cameraId, torchStrength);
+    }
+
+    /**
+     * Returns the brightness level of the flash unit associated with the cameraId.
+     *
+     * @param cameraId
+     *              The unique identifier of the camera device that the flash unit belongs to.
+     * @return The brightness level of the flash unit associated with cameraId.
+     *         When the torch is turned OFF, the strength level will reset to a default level
+     *         {@link android.hardware.camera2.CameraCharacteristics#FLASH_INFO_STRENGTH_DEFAULT_LEVEL}.
+     *         In this case the return value will be
+     *         {@link android.hardware.camera2.CameraCharacteristics#FLASH_INFO_STRENGTH_DEFAULT_LEVEL}
+     *         rather than 0.
+     *
+     * @throws CameraAccessException if it failed to access the flash unit.
+     * @throws IllegalArgumentException if cameraId was null, cameraId doesn't match any currently
+     *              or previously available camera device, or the camera device doesn't have a
+     *              flash unit.
+     *
+     */
+    public int getTorchStrengthLevel(@NonNull String cameraId)
+            throws CameraAccessException {
+        if (CameraManagerGlobal.sCameraServiceDisabled) {
+            throw new IllegalArgumentException("No camera available on device.");
+        }
+        return CameraManagerGlobal.get().getTorchStrengthLevel(cameraId);
+    }
+
+    /**
      * A callback for camera devices becoming available or unavailable to open.
      *
      * <p>Cameras become available when they are no longer in use, or when a new
@@ -1237,6 +1326,24 @@ public final class CameraManager {
          *                be turned on.
          */
         public void onTorchModeChanged(@NonNull String cameraId, boolean enabled) {
+            // default empty implementation
+        }
+
+        /**
+         * A camera's flash unit brightness level has been changed in torch mode via
+         * {@link #turnOnTorchWithStrengthLevel}. When the torch is turned OFF, this
+         * callback will not be triggered even though the torch strength level resets to
+         * default value
+         * {@link android.hardware.camera2.CameraCharacteristics#FLASH_INFO_STRENGTH_DEFAULT_LEVEL}
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param cameraId The unique identifier of the camera whose flash unit brightness level has
+         * been changed.
+         *
+         * @param newStrengthLevel The brightness level of the flash unit that has been changed to.
+         */
+        public void onTorchStrengthLevelChanged(@NonNull String cameraId, int newStrengthLevel) {
             // default empty implementation
         }
     }
@@ -1642,6 +1749,10 @@ public final class CameraManager {
                 public void onTorchStatusChanged(int status, String id) throws RemoteException {
                 }
                 @Override
+                public void onTorchStrengthLevelChanged(String id, int newStrengthLevel)
+                        throws RemoteException {
+                }
+                @Override
                 public void onCameraAccessPrioritiesChanged() {
                 }
                 @Override
@@ -1825,6 +1936,57 @@ public final class CameraManager {
             }
         }
 
+        public void turnOnTorchWithStrengthLevel(String cameraId, int torchStrength) throws
+                CameraAccessException {
+            synchronized(mLock) {
+
+                if (cameraId == null) {
+                    throw new IllegalArgumentException("cameraId was null");
+                }
+
+                ICameraService cameraService = getCameraService();
+                if (cameraService == null) {
+                    throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
+                        "Camera service is currently unavailable.");
+                }
+
+                try {
+                    cameraService.turnOnTorchWithStrengthLevel(cameraId, torchStrength,
+                            mTorchClientBinder);
+                } catch(ServiceSpecificException e) {
+                    throwAsPublicException(e);
+                } catch (RemoteException e) {
+                    throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
+                            "Camera service is currently unavailable.");
+                }
+            }
+        }
+
+        public int getTorchStrengthLevel(String cameraId) throws CameraAccessException {
+            int torchStrength = 0;
+            synchronized(mLock) {
+                if (cameraId == null) {
+                    throw new IllegalArgumentException("cameraId was null");
+                }
+
+                ICameraService cameraService = getCameraService();
+                if (cameraService == null) {
+                    throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
+                        "Camera service is currently unavailable.");
+                }
+
+                try {
+                    torchStrength = cameraService.getTorchStrengthLevel(cameraId);
+                } catch(ServiceSpecificException e) {
+                    throwAsPublicException(e);
+                } catch (RemoteException e) {
+                    throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
+                            "Camera service is currently unavailable.");
+                }
+            }
+            return torchStrength;
+        }
+
         private void handleRecoverableSetupErrors(ServiceSpecificException e) {
             switch (e.errorCode) {
                 case ICameraService.ERROR_DISCONNECTED:
@@ -1981,6 +2143,18 @@ public final class CameraManager {
                         }
                     }
                     break;
+            }
+        }
+
+        private void postSingleTorchStrengthLevelUpdate(final TorchCallback callback,
+                 final Executor executor, final String id, final int newStrengthLevel) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                executor.execute(() -> {
+                    callback.onTorchStrengthLevelChanged(id, newStrengthLevel);
+                });
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
 
@@ -2167,6 +2341,22 @@ public final class CameraManager {
             }
         } // onTorchStatusChangedLocked
 
+        private void onTorchStrengthLevelChangedLocked(String cameraId, int newStrengthLevel) {
+            if (DEBUG) {
+
+                Log.v(TAG,
+                        String.format("Camera id %s has torch strength level changed to %d",
+                            cameraId, newStrengthLevel));
+            }
+
+            final int callbackCount = mTorchCallbackMap.size();
+            for (int i = 0; i < callbackCount; i++) {
+                final Executor executor = mTorchCallbackMap.valueAt(i);
+                final TorchCallback callback = mTorchCallbackMap.keyAt(i);
+                postSingleTorchStrengthLevelUpdate(callback, executor, cameraId, newStrengthLevel);
+            }
+        } // onTorchStrengthLevelChanged
+
         /**
          * Register a callback to be notified about camera device availability with the
          * global listener singleton.
@@ -2254,6 +2444,14 @@ public final class CameraManager {
         public void onTorchStatusChanged(int status, String cameraId) throws RemoteException {
             synchronized (mLock) {
                 onTorchStatusChangedLocked(status, cameraId);
+            }
+        }
+
+        @Override
+        public void onTorchStrengthLevelChanged(String cameraId, int newStrengthLevel)
+                throws RemoteException {
+            synchronized (mLock) {
+                onTorchStrengthLevelChangedLocked(cameraId, newStrengthLevel);
             }
         }
 

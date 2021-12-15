@@ -1394,6 +1394,12 @@ public abstract class AccessibilityService extends Service {
          * {@link AccessibilityService#onServiceConnected()} has not yet been
          * called) or the service has been disconnected, this method will
          * return a default value of {@code 1.0f}.
+         * </p>
+         * <p>
+         * <strong>Note:</strong> This legacy API gets the scale of full-screen
+         * magnification. To get the scale of the current controlling magnifier,
+         * use {@link #getMagnificationConfig} instead.
+         * </p>
          *
          * @return the current magnification scale
          */
@@ -1422,6 +1428,12 @@ public abstract class AccessibilityService extends Service {
          * {@link AccessibilityService#onServiceConnected()} has not yet been
          * called) or the service has been disconnected, this method will
          * return a default value of {@code 0.0f}.
+         * </p>
+         * <p>
+         * <strong>Note:</strong> This legacy API gets the center position of full-screen
+         * magnification. To get the magnification center of the current controlling magnifier,
+         * use {@link #getMagnificationConfig} instead.
+         * </p>
          *
          * @return the unscaled screen-relative X coordinate of the center of
          *         the magnified region
@@ -1451,6 +1463,12 @@ public abstract class AccessibilityService extends Service {
          * {@link AccessibilityService#onServiceConnected()} has not yet been
          * called) or the service has been disconnected, this method will
          * return a default value of {@code 0.0f}.
+         * </p>
+         * <p>
+         * <strong>Note:</strong> This legacy API gets the center position of full-screen
+         * magnification. To get the magnification center of the current controlling magnifier,
+         * use {@link #getMagnificationConfig} instead.
+         * </p>
          *
          * @return the unscaled screen-relative Y coordinate of the center of
          *         the magnified region
@@ -1571,6 +1589,11 @@ public abstract class AccessibilityService extends Service {
          * {@link AccessibilityService#onServiceConnected()} has not yet been
          * called) or the service has been disconnected, this method will have
          * no effect and return {@code false}.
+         * <p>
+         * <strong>Note:</strong> This legacy API sets the scale of full-screen
+         * magnification. To set the scale of the specified magnifier,
+         * use {@link #setMagnificationConfig} instead.
+         * </p>
          *
          * @param scale the magnification scale to set, must be >= 1 and <= 8
          * @param animate {@code true} to animate from the current scale or
@@ -1602,6 +1625,12 @@ public abstract class AccessibilityService extends Service {
          * {@link AccessibilityService#onServiceConnected()} has not yet been
          * called) or the service has been disconnected, this method will have
          * no effect and return {@code false}.
+         * </p>
+         * <p>
+         * <strong>Note:</strong> This legacy API sets the center of full-screen
+         * magnification. To set the center of the specified magnifier,
+         * use {@link #setMagnificationConfig} instead.
+         * </p>
          *
          * @param centerX the unscaled screen-relative X coordinate on which to
          *                center the viewport

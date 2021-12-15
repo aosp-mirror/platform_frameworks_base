@@ -14,29 +14,33 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.conditions;
+package com.android.systemui.util.condition.dagger;
 
-
-import static com.android.systemui.communal.dagger.CommunalModule.COMMUNAL_CONDITIONS;
-
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.util.condition.Condition;
 import com.android.systemui.util.condition.Monitor;
 
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import dagger.BindsInstance;
+import dagger.Subcomponent;
 
 /**
- * A concrete implementation of {@Monitor} with conditions for monitoring when communal mode should
- * be enabled.
+ * Component for {@link Monitor}.
  */
-@SysUISingleton
-public class CommunalConditionsMonitor extends Monitor {
-    @Inject
-    public CommunalConditionsMonitor(
-            @Named(COMMUNAL_CONDITIONS) Set<Condition> communalConditions) {
-        super(communalConditions);
+@Subcomponent
+public interface MonitorComponent {
+    /**
+     * Factory for {@link MonitorComponent}.
+     */
+    @Subcomponent.Factory
+    interface Factory {
+        MonitorComponent create(@BindsInstance Set<Condition> conditions,
+                @BindsInstance Set<Monitor.Callback> callbacks);
     }
+
+    /**
+     * Provides {@link Monitor}.
+     * @return
+     */
+    Monitor getMonitor();
 }

@@ -58,7 +58,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
         mCondition3 = spy(new FakeCondition());
         mConditions = new HashSet<>(Arrays.asList(mCondition1, mCondition2, mCondition3));
 
-        mConditionMonitor = new Monitor(mConditions);
+        mConditionMonitor = new Monitor(mConditions, null /*callbacks*/);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void addCallback_noConditions_reportAllConditionsMet() {
-        final Monitor monitor = new Monitor(new HashSet<>());
+        final Monitor monitor = new Monitor(new HashSet<>(), null /*callbacks*/);
         final Monitor.Callback callback = mock(Monitor.Callback.class);
 
         monitor.addCallback(callback);

@@ -23,8 +23,6 @@ import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
 
 import static com.android.server.backup.UserBackupManagerService.KEY_WIDGET_STATE;
-import static com.android.server.backup.UserBackupManagerService.OP_PENDING;
-import static com.android.server.backup.UserBackupManagerService.OP_TYPE_BACKUP;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -57,10 +55,12 @@ import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.KeyValueBackupJob;
+import com.android.server.backup.OperationStorage;
+import com.android.server.backup.OperationStorage.OpState;
+import com.android.server.backup.OperationStorage.OpType;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.internal.OnTaskFinishedListener;
-import com.android.server.backup.internal.Operation;
 import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.remote.RemoteCallable;
 import com.android.server.backup.remote.RemoteResult;
@@ -211,6 +211,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
      */
     public static KeyValueBackupTask start(
             UserBackupManagerService backupManagerService,
+            OperationStorage operationStorage,
             TransportConnection transportConnection,
             String transportDirName,
             List<String> queue,
@@ -227,6 +228,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         KeyValueBackupTask task =
                 new KeyValueBackupTask(
                         backupManagerService,
+                        operationStorage,
                         transportConnection,
                         transportDirName,
                         queue,
@@ -244,6 +246,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     }
 
     private final UserBackupManagerService mBackupManagerService;
+    private final OperationStorage mOperationStorage;
     private final PackageManager mPackageManager;
     private final TransportConnection mTransportConnection;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
@@ -302,6 +305,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     @VisibleForTesting
     public KeyValueBackupTask(
             UserBackupManagerService backupManagerService,
+            OperationStorage operationStorage,
             TransportConnection transportConnection,
             String transportDirName,
             List<String> queue,
@@ -313,6 +317,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             boolean nonIncremental,
             BackupEligibilityRules backupEligibilityRules) {
         mBackupManagerService = backupManagerService;
+        mOperationStorage = operationStorage;
         mPackageManager = backupManagerService.getPackageManager();
         mTransportConnection = transportConnection;
         mOriginalQueue = queue;
@@ -338,12 +343,11 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     }
 
     private void registerTask() {
-        mBackupManagerService.putOperation(
-                mCurrentOpToken, new Operation(OP_PENDING, this, OP_TYPE_BACKUP));
+        mOperationStorage.registerOperation(mCurrentOpToken, OpState.PENDING, this, OpType.BACKUP);
     }
 
     private void unregisterTask() {
-        mBackupManagerService.removeOperation(mCurrentOpToken);
+        mOperationStorage.removeOperation(mCurrentOpToken);
     }
 
     @Override
@@ -639,6 +643,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     private PerformFullTransportBackupTask createFullBackupTask(List<String> packages) {
         return new PerformFullTransportBackupTask(
                 mBackupManagerService,
+                mOperationStorage,
                 mTransportConnection,
                 /* fullBackupRestoreObserver */ null,
                 packages.toArray(new String[packages.size()]),

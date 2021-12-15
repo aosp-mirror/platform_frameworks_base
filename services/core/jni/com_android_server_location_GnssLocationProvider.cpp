@@ -997,7 +997,7 @@ static void android_location_gnss_hal_GnssNative_init_once(JNIEnv* env, jobject 
         }
     }
 
-    if (gnssHalAidl != nullptr) {
+    if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
         sp<IAGnssAidl> agnssAidl;
         auto status = gnssHalAidl->getExtensionAGnss(&agnssAidl);
         if (checkAidlStatus(status, "Unable to get a handle to AGnss interface.")) {

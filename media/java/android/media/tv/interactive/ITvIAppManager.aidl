@@ -22,6 +22,7 @@ import android.media.tv.interactive.ITvIAppClient;
 import android.media.tv.interactive.ITvIAppManagerCallback;
 import android.media.tv.interactive.TvIAppInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.view.Surface;
 
 /**
@@ -31,6 +32,7 @@ import android.view.Surface;
 interface ITvIAppManager {
     List<TvIAppInfo> getTvIAppServiceList(int userId);
     void prepare(String tiasId, int type, int userId);
+    void notifyAppLinkInfo(String tiasId, in Bundle info, int userId);
     void startIApp(in IBinder sessionToken, int userId);
     void createSession(
             in ITvIAppClient client, in String iAppServiceId, int type, int seq, int userId);
