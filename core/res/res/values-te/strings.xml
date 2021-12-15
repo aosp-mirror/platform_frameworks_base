@@ -422,7 +422,7 @@
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"మీ ఫోన్‌లో నిల్వ చేసి ఉన్న కాంటాక్ట్‌లకు సంబంధించిన డేటాను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి, కాంటాక్ట్ డేటాను తొలగించడానికి యాప్‌లను అనుమతిస్తుంది."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"కాల్ లాగ్‌ను చదవడం"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"ఈ యాప్‌ మీ కాల్ చరిత్రను చదవగలదు."</string>
-    <string name="permlab_writeCallLog" msgid="670292975137658895">"కాల్ లాగ్‌ను వ్రాయడం"</string>
+    <string name="permlab_writeCallLog" msgid="670292975137658895">"కాల్ లాగ్‌ను రాయడం"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"ఇన్‌కమింగ్ మరియు అవుట్‌గోయింగ్ కాల్స్‌ల గురించిన డేటాతో సహా మీ టాబ్లెట్ యొక్క కాల్ లాగ్‌ను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. హానికరమైన యాప్‌లు మీ కాల్ లాగ్‌ను ఎరేజ్ చేయడానికి లేదా సవరించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ఇన్‌కమింగ్ మరియు అవుట్‌గోయింగ్ కాల్స్‌కు సంబంధించిన డేటాతో సహా మీ Android TV పరికరం కాల్ లాగ్‌ను సవరించడానికి యాప్‌ని అనుమతిస్తుంది. హానికరమైన యాప్‌లు మీ కాల్ లాగ్‌ను తీసివేయడానికి లేదా సవరించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ఇన్‌కమింగ్ మరియు అవుట్‌గోయింగ్ కాల్స్‌ల గురించిన డేటాతో సహా మీ ఫోన్ యొక్క కాల్ లాగ్‌ను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. హానికరమైన యాప్‌లు మీ కాల్ లాగ్‌ను ఎరేజ్ చేయడానికి లేదా సవరించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"మీ ప్రమేయం లేకుండా కాల్స్‌ చేయడం కోసం IMS సేవను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ఫోన్ స్టేటస్‌ మరియు గుర్తింపుని చదవడం"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"పరికరం యొక్క ఫోన్ ఫీచర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ సక్రియంగా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"ప్రాథమిక టెలిఫోన్ స్టేటస్, గుర్తింపును చదవండి"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"పరికరం తాలూకు ప్రాథమిక టెలిఫోన్ ఫీచర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"కాల్స్‌ను సిస్టమ్ ద్వారా వెళ్లేలా చేయి"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"కాలింగ్ అనుభవాన్ని మెరుగుపరచడం కోసం తన కాల్స్‌ను సిస్టమ్ ద్వారా వెళ్లేలా చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"సిస్టమ్ ద్వారా కాల్స్‌ను చూసి, నియంత్రించండి."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ఫేస్ మోడల్‌ను తొలగించడానికి నొక్కండి, ఆపై మీ ముఖాన్ని మళ్లీ జోడించండి"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ఫేస్ అన్‌లాక్‌ను సెటప్ చేయండి"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"మీ ఫోన్‌ను చూడటం ద్వారా దాన్ని అన్‌లాక్ చేయండి"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ఫేస్ అన్‌లాక్‌ను ఉపయోగించడానికి, సెట్టింగ్‌లు &gt; గోప్యతలో "<b>"కెమెరా యాక్సెస్"</b>"ను ఆన్ చేయండి"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"అన్‌లాక్ చేయడానికి మరిన్ని మార్గాలను సెటప్ చేయండి"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"వేలిముద్రను జోడించడానికి ట్యాప్ చేయండి"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"వేలిముద్ర అన్‌లాక్"</string>
@@ -725,7 +728,7 @@
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"క్యారియర్ సేవలకు అనుబంధించడం"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"క్యారియర్ సేవలకు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"అంతరాయం కలిగించవద్దును యాక్సెస్ చేయడం"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"అంతరాయం కలిగించవద్దు ఎంపిక కాన్ఫిగరేషన్ చదవడానికి మరియు వ్రాయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"అంతరాయం కలిగించవద్దు ఎంపిక కాన్ఫిగరేషన్ చదవడానికి మరియు రాయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"వీక్షణ అనుమతి వినియోగాన్ని ప్రారంభించండి"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"యాప్‌నకు అనుమతి వినియోగాన్ని ప్రారంభించడానికి హోల్డర్‌‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ ఇటువంటి అనుమతి అవసరం ఉండదు."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"యాప్ ఫీచర్‌లను చూడటాన్ని ప్రారంభించండి"</string>
@@ -1020,7 +1023,7 @@
     <string name="autofill_emirate" msgid="2544082046790551168">"ఎమిరేట్"</string>
     <string name="permlab_readHistoryBookmarks" msgid="9102293913842539697">"మీ వెబ్ బుక్‌మార్క్‌లు మరియు చరిత్రను చదవడం"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"బ్రౌజర్ సందర్శించిన అన్ని URLల చరిత్ర గురించి మరియు అన్ని బ్రౌజర్ బుక్‌మార్క్‌ల గురించి చదవడానికి యాప్‌ను అనుమతిస్తుంది. గమనిక: ఈ అనుమతి మూడవ పక్షం బ్రౌజర్‌లు లేదా వెబ్ బ్రౌజింగ్ సామర్థ్యాలు గల ఇతర యాప్‌ల ద్వారా అమలు చేయబడకపోవచ్చు."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"వెబ్ బుక్‌మార్క్‌లు మరియు చరిత్రను వ్రాయడం"</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"వెబ్ బుక్‌మార్క్‌లు మరియు చరిత్రను రాయడం"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"మీ టాబ్లెట్‌లో నిల్వ చేయబడిన బ్రౌజర్ హిస్టరీని, బుక్‌మార్క్‌లను ఎడిట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఇది బ్రౌజర్ డేటాను ఎరేజ్ చేయడానికి లేదా ఎడిట్ చేయడానికి యాప్‌ను అనుమతించవచ్చు. గమనిక: ఈ అనుమతిని థర్డ్ పార్టీ బ్రౌజర్‌లు లేదా వెబ్ బ్రౌజింగ్ సామర్థ్యాలు గల ఇతర యాప్‌లు అమలు చేయకపోవచ్చు."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"మీ Android TV పరికరంలో నిల్వ చేసిన బ్రౌజర్ చరిత్ర లేదా బుక్‌మార్క్‌లను సవరించడానికి యాప్‌ని అనుమతిస్తుంది. ఇది బ్రౌజర్ డేటాను తీసివేయడానికి లేదా సవరించడానికి యాప్‌ని అనుమతించవచ్చు. గమనిక: ఈ అనుమతి మూడవ-పక్ష బ్రౌజర్‌లు లేదా వెబ్ బ్రౌజింగ్ సామర్థ్యాలు గల ఇతర యాప్‌ల ద్వారా అమలు కాకపోవచ్చు."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"మీ ఫోన్‌లో నిల్వ చేయబడిన బ్రౌజర్ చరిత్రను లేదా బుక్‌మార్క్‌లను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. ఇది బ్రౌజర్ డేటాను ఎరేజ్ చేయడానికి లేదా సవరించడానికి యాప్‌ను అనుమతించవచ్చు. గమనిక: ఈ అనుమతి మూడవ పక్షం బ్రౌజర్‌లు లేదా వెబ్ బ్రౌజింగ్ సామర్థ్యాలు గల ఇతర యాప్‌ల ద్వారా అమలు చేయబడకపోవచ్చు."</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>ని సిద్ధం చేస్తోంది."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"యాప్‌లను ప్రారంభిస్తోంది."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"బూట్‌ను ముగిస్తోంది."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"స్క్రీన్‌ను ఆఫ్ చేయాలా?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"మీ వేలిముద్రను సెటప్ చేస్తున్నప్పుడు, మీరు పవర్ బటన్‌ను నొక్కారు.\n\nఇది సాధారణంగా మీ స్క్రీన్‌ను ఆఫ్ చేస్తుంది."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ఆఫ్ చేయండి"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"రద్దు చేయండి"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"సెటప్‌ను కొనసాగించాలా?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"మీరు పవర్ బటన్‌ను నొక్కారు — ఇది సాధారణంగా స్క్రీన్‌ను ఆఫ్ చేస్తుంది.\n\nమీ వేలిముద్రను సెటప్ చేస్తున్నప్పుడు తేలికగా ట్యాప్ చేయడానికి ట్రై చేయండి."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"స్క్రీన్‌ను ఆఫ్ చేయి"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"సెటప్‌ను కొనసాగించు"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"మీ వేలిముద్ర వెరిఫై‌ను కొనసాగించాలా?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"మీరు పవర్ బటన్‌ను నొక్కారు — ఇది సాధారణంగా స్క్రీన్‌ను ఆఫ్ చేస్తుంది.\n\nమీ వేలిముద్రను వెరిఫై చేయడానికి తేలికగా ట్యాప్ చేయడం ట్రై చేయండి."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"స్క్రీన్‌ను ఆఫ్ చేయి"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"కొనసాగించండి"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> అమలవుతోంది"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"గేమ్‌కి తిరిగి రావడానికి నొక్కండి"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"గేమ్‌ను ఎంచుకోండి"</string>

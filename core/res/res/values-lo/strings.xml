@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ໃຊ້​ການ​ບໍ​ລິ​ການ IMS ເພື່ອ​ໂທ​ໂດຍ​ບໍ່​ມີ​ການ​ຊ່ວຍ​ເຫຼືອ​ຂອງ​ທ່ານ."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ອ່ານສະຖານະ ແລະຂໍ້ມູນລະບຸໂຕຕົນຂອງໂທລະສັບ"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"ອະນຸຍາດໃຫ້ແອັບຯ ເຂົ້າເຖິງຄວາມສາມາດການໂທລະສັບຂອງອຸປະກອນ. ການກຳນົດສິດນີ້ເຮັດໃຫ້ແອັບຯສາມາດກວດສອບເບີໂທລະສັບ ແລະ ID ຂອງອຸປະກອນ, ບໍ່ວ່າການໂທຈະຍັງດຳເນີນຢູ່ ແລະເບີປາຍທາງເຊື່ອມຕໍ່ຢູ່ຫຼືບໍ່ກໍຕາມ."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"ອ່ານສະຖານະໂທລະສັບພື້ນຖານ ແລະ ຕົວຕົນ"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຄຸນສົມບັດໂທລະສັບພື້ນຖານຂອງອຸປະກອນໄດ້."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"route calls through the system"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Allows the app to route its calls through the system in order to improve the calling experience."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ເຫັນ ແລະ ຄວບຄຸມການໂທຜ່ານລະບົບ."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ແຕະເພື່ອລຶບຮູບແບບໃບໜ້າຂອງທ່ານ, ຈາກນັ້ນເພີ່ມໃບໜ້າຂອງທ່ານໃສ່ໃໝ່"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ປົດລັອກໂທລະສັບຂອງທ່ານໂດຍການເບິ່ງມັນ"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ເພື່ອໃຊ້ການປົດລັອກດ້ວຍໜ້າ, ກະລຸນາເປີດໃຊ້ "<b>"ສິດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບ"</b>" ໃນການຕັ້ງຄ່າ &gt; ຄວາມເປັນສ່ວນຕົວ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ຕັ້ງຄ່າວິທີເພີ່ມເຕີມເພື່ອປົດລັອກ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ແຕະເພື່ອເພີ່ມລາຍນິ້ວມື"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ປົດລັອກດ້ວຍລາຍນິ້ວມື"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"ກຳ​ລັງ​ກຽມ <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ກຳລັງເປີດແອັບຯ."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ກຳລັງສຳເລັດການເປີດລະບົບ."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"ປິດໜ້າຈໍໄວ້ບໍ?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"ໃນລະຫວ່າງການຕັ້ງຄ່າລາຍນິ້ວມືຂອງທ່ານ, ທ່ານກົດປຸ່ມເປີດປິດ.\n\nໂດຍປົກກະຕິນີ້ຈະເປັນການປິດໜ້າຈໍຂອງທ່ານ."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ປິດໄວ້"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"ຍົກເລີກ"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ສືບຕໍ່ການຕັ້ງຄ່າບໍ?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ທ່ານກົດປຸ່ມເປີດປິດ, ປົກກະຕິນີ້ຈະປິດໜ້າຈໍ.\n\nລອງແຕະຄ່ອຍໆໃນລະຫວ່າງຕັ້ງຄ່າລາຍນິ້ວມືຂອງທ່ານ."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"ປິດໜ້າຈໍ"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ສືບຕໍ່ການຕັ້ງຄ່າ"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ສືບຕໍ່ການຢັ້ງຢືນລາຍນິ້ວມືຂອງທ່ານບໍ?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ທ່ານກົດປຸ່ມເປີດປິດ, ປົກກະຕິນີ້ຈະເປັນການປິດໜ້າຈໍ.\n\nໃຫ້ລອງແຕະຄ່ອຍໆເພື່ອຢັ້ງຢືນລາຍນິ້ວມືຂອງທ່ານ."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"ປິດໜ້າຈໍ"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ສືບຕໍ່"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງເຮັດວຽກ"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Tap to return to game"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Choose game"</string>

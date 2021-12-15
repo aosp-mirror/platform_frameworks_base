@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Разрешава на приложението да използва услугата за незабавни съобщения за извършване на обаждания без намеса от ваша страна."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"четене на състоянието и идентификационните данни на телефона"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Разрешава на приложението достъп до телефонните функции на устройството. Това разрешение позволява на приложението да определя телефонния номер и идентификационния номер на устройството, дали се води разговор и отдалечения номер, до който е установена връзка с обаждането."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"четене на основното телефонно състояние и идентичност"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Разрешава на приложението да осъществява достъп до основните телефонни функции на устройството."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"маршрутизиране на обажданията чрез системата"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Разрешава на приложението да маршрутизира обажданията си чрез системата с цел подобряване на свързаната с тях практическа работа."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"вижда и управлява обажданията чрез системата."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Докоснете, за да изтриете модела на лицето си, след което добавете лицето си отново"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Настройване на отключването с лице"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отключвайте телефона си, като го погледнете"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"За да използвате функцията „Отключване с лице“, включете "<b>"достъпа до камерата"</b>" от „Настройки &gt; Поверителност“"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Настройване на още начини за отключване на телефона"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Докоснете, за да добавите отпечатък"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отключване с отпечатък"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> се подготвя."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Приложенията се стартират."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Зареждането завършва."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Да се изключи ли екранът?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"При настройването на отпечатъка си натиснахте бутона за захранване.\n\nТова действие обикновено изключва екрана."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Изключване"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Отказ"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Искате ли да продължите с настройването?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Натиснахте бутона за включване/изключване – това обикновено изключва екрана.\n\nОпитайте да докоснете леко, докато настройвате отпечатъка си."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Изключване на екрана"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Напред с настройв."</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Напред с потвърждаването на отпечатъка?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Натиснахте бутона за включване/изключване – това обикновено изключва екрана.\n\nОпитайте да докоснете леко, за да потвърдите отпечатъка си."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Изключване на екрана"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Напред"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> се изпълнява"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Докоснете, за да се върнете към играта"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Избиране на игра"</string>

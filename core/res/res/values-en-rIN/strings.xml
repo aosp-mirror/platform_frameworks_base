@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Allows the app to use the IMS service to make calls without your intervention."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"read phone status and identity"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Allows the app to access the phone features of the device. This permission allows the app to determine the phone number and device IDs, whether a call is active and the remote number connected by a call."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"read basic telephony status and identity"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Allows the app to access the basic telephony features of the device."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"route calls through the system"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Allows the app to route its calls through the system in order to improve the calling experience."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"see and control calls through the system."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tap to delete your face model, then add your face again"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Set up Face Unlock"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Unlock your phone by looking at it"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"To use Face Unlock, turn on "<b>"Camera access"</b>" in Settings &gt; Privacy"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Set up more ways to unlock"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tap to add a fingerprint"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingerprint Unlock"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Preparing <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Starting apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Finishing boot."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Turn off screen?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"While setting up your fingerprint, you pressed the power button.\n\nThis usually turns off your screen."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Turn off"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Cancel"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Continue setup?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"You pressed the power button – this usually turns off the screen.\n\nTry tapping lightly while setting up your fingerprint."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Turn off screen"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Continue setup"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Continue verifying your fingerprint?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"You pressed the power button – this usually turns off the screen.\n\nTry tapping lightly to verify your fingerprint."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Turn off screen"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Continue"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> running"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Tap to return to game"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Choose game"</string>

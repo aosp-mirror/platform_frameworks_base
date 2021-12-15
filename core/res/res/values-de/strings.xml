@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Ermöglicht der App die Verwendung des IMS-Dienstes zum Tätigen von Anrufen ohne Nutzereingriffe"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"Telefonstatus und Identität abrufen"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Ermöglicht der App, auf die Telefonfunktionen des Geräts zuzugreifen. Die Berechtigung erlaubt der App, die Telefonnummer und Geräte-IDs zu erfassen, festzustellen, ob gerade ein Gespräch geführt wird, und die Rufnummer verbundener Anrufer zu lesen."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"Grundlegenden Telefoniestatus und Identität lesen"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Ermöglicht der App, auf die grundlegenden Telefoniefunktionen des Geräts zuzugreifen."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"Anrufe über das System durchführen"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Ermöglicht der App, Anrufe über das System durchzuführen, um die Anrufqualität zu verbessern."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"Anrufe durch das System einsehen und verwalten."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tippe, um dein Gesichtsmodell zu löschen, und füge es dann noch einmal hinzu"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Entsperrung per Gesichtserkennung einrichten"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Entsperre dein Smartphone, indem du es ansiehst"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Wenn du die Entsperrung per Gesichtserkennung verwenden möchtest, aktiviere in den Einstellungen unter „Datenschutz“ die Option "<b>"Kamerazugriff"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Weitere Möglichkeiten zum Entsperren einrichten"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tippe, um einen Fingerabdruck hinzuzufügen"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Entsperrung per Fingerabdruck"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> wird vorbereitet"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps werden gestartet..."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Start wird abgeschlossen..."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Display ausschalten?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Beim Einrichten deines Fingerabdrucks hast du die Ein-/Aus-Taste gedrückt.\n\nDamit wird üblicherweise das Display ausgeschaltet."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Ausschalten"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Abbrechen"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Einrichtung fortsetzen?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um deinen Fingerabdruck einzurichten."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Ausschalten"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Weiter einrichten"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Mit der Fingerabdruckprüfung fortfahren?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um mit deinem Fingerabdruck deine Identität zu bestätigen."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Ausschalten"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortfahren"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> läuft"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Tippe, um zum Spiel zurückzukehren"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Spiel wählen"</string>

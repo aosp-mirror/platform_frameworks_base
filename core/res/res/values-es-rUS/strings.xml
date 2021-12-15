@@ -329,17 +329,17 @@
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notificaciones"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"mostrar notificaciones"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperar el contenido de las ventanas"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspecciona el contenido de la ventana con la que estés interactuando."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspeccionará el contenido de la ventana con la que estés interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activar la Exploración táctil"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Los elementos que presiones se dirán en voz alta y podrás explorar la pantalla mediante gestos."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Observar el texto que escribes"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Incluye datos personales, como números de tarjeta de crédito y contraseñas."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Controlar la ampliación de pantalla"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controla el posicionamiento y el nivel de zoom de la pantalla."</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controlará el posicionamiento y el nivel de zoom de la pantalla."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Usar gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Permite presionar, deslizar, pellizcar y usar otros gestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos del sensor de huellas dactilares"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Captura los gestos que se hacen en el sensor de huellas dactilares del dispositivo."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Capturará los gestos que se hacen en el sensor de huellas dactilares del dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Tomar captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puede tomar una captura de la pantalla."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra de estado"</string>
@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permite que la aplicación utilice el servicio IMS para hacer llamadas sin tu intervención."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"leer la identidad y el estado del dispositivo"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Permite que la aplicación acceda a las funciones de teléfono del dispositivo. La aplicación puede utilizar este permiso para descubrir identificadores de dispositivos y números de teléfono, para saber si una llamada está activa y para conocer el número remoto con el que se ha establecido conexión mediante una llamada."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"leer identidad y estado de telefonía básica"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Permite que la app acceda a las funciones de telefonía básica del dispositivo."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"Transmite llamadas a través del sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Permite que la app transmita las llamadas a través del sistema para mejorar la experiencia de llamadas."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"Mirar y controlar las llamadas con el sistema"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Presiona para borrar el modelo de rostro y, luego, vuelve a agregar tu rostro"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura Desbloqueo facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloquea el teléfono con solo mirarlo"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para usar Desbloqueo facial, activa el "<b>"Acceso a la cámara"</b>" en Configuración y privacidad"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura más formas de desbloquear el dispositivo"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Presiona para agregar una huella dactilar"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueo con huellas dactilares"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando aplicaciones"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Finalizando el inicio"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"¿Quieres apagar la pantalla?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Al configurar tu huella dactilar, presionaste el botón de encendido.\n\nPor lo general, esta acción apaga la pantalla."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Apagar"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Cancelar"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"¿Continuar con la configuración?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Presionaste el botón de encendido. Por lo general, esta acción apaga la pantalla.\n\nPresiona suavemente mientras configuras tu huella dactilar."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Apagar pantalla"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Continuar config."</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"¿Verificar huella dactilar?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Presionaste el botón de encendido. Por lo general, esta acción apaga la pantalla.\n\nPresiona suavemente para verificar tu huella dactilar."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Apagar pantalla"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Continuar"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> en ejecución"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Presiona para volver al juego"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Elige un juego"</string>

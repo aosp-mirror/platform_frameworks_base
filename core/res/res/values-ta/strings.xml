@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"உங்கள் குறுக்கீடின்றி IMS சேவையைப் பயன்படுத்தி அழைப்பதற்கு, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"மொபைல் நிலை மற்றும் அடையாளத்தைப் படித்தல்"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"சாதனத்தின் மொபைல் அம்சங்களை அணுகப் ஆப்ஸை அனுமதிக்கிறது. மொபைல் மற்றும் சாதன ஐடிகள், அழைப்பு செயலில் உள்ளதா மற்றும் அழைப்பு மூலம் இணைக்கப்பட்ட தொலைக் கட்டுப்பாட்டு எண் ஆகியவற்றைத் தீர்மானிக்க இந்த அனுமதி ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"அடிப்படையான டெலிஃபோனி நிலையையும் அடையாளத்தையும் படித்தல்"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"சாதனத்திலுள்ள அடிப்படையான டெலிஃபோனி அம்சங்களை அணுக ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"சிஸ்டம் மூலம் அழைப்புகளை ரூட் செய்தல்"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"அழைக்கும் அனுபவத்தை மேம்படுத்தும் பொருட்டு, சிஸ்டம் மூலம் தனது அழைப்புகளை ரூட் செய்ய ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"சிஸ்டம் மூலமாக அழைப்புகளைப் பார்த்தலும் கட்டுப்படுத்துதலும்."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"முகத் தோற்றப் பதிவைத் தட்டி நீக்கிவிட்டு உங்கள் முகத்தை மீண்டும் சேர்க்கவும்"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை அமைத்தல்"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"மொபைலைப் பார்ப்பதன் மூலம் அதை அன்லாக் செய்யலாம்"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"முகம் காட்டித் திறத்தல் அம்சத்தைப் பயன்படுத்த, அமைப்புகள் &gt; தனியுரிமை என்பதற்குச் சென்று "<b>"கேமரா அணுகலை"</b>" இயக்கவும்"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"அன்லாக் செய்ய மேலும் பல வழிகளை அமையுங்கள்"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"கைரேகையைச் சேர்க்கத் தட்டுங்கள்"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"கைரேகை அன்லாக்"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>ஐத் தயார்செய்கிறது."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ஆப்ஸ் தொடங்கப்படுகின்றன."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"துவக்குதலை முடிக்கிறது."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"திரையை ஆஃப் செய்யவா?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"கைரேகையை அமைக்கும்போது பவர் பட்டனை அழுத்திவிட்டீர்கள்.\n\nஇது திரையை ஆஃப் செய்துவிடும்."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ஆஃப் செய்"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"ரத்துசெய்"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"அமைவைத் தொடரவா?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"நீங்கள் பவர் பட்டனை அழுத்தியுள்ளீர்கள் — வழக்கமாக இது திரையை ஆஃப் செய்யும்.\n\nஉங்கள் கைரேகையை அமைக்கும்போது மெதுவாகத் தொடுங்கள்."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"திரையை ஆஃப் செய்"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"அமைவைத் தொடர்க"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"கைரேகைச் சரிபார்ப்பைத் தொடரவா?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"நீங்கள் பவர் பட்டனை அழுத்தியுள்ளீர்கள் — வழக்கமாக இது திரையை ஆஃப் செய்யும்.\n\nஉங்கள் கைரேகையைச் சரிபார்க்க மெதுவாகத் தொடுங்கள்."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"திரையை ஆஃப் செய்"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"தொடர்க"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> இயங்குகிறது"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"கேமிற்குச் செல்ல, தட்டவும்"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"கேமைத் தேர்வுசெய்க"</string>

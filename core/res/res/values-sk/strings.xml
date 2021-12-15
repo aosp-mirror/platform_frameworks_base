@@ -477,6 +477,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Umožňuje aplikácii používať službu okamžitých správ (IMS) na volanie bez intervencie používateľa."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"čítať stav a identitu telefónu"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Umožňuje aplikácii pristupovať k telefónnym funkciám zariadenia. Aplikácia s týmto povolením môže určiť telefónne číslo a ID zariadenia, či práve prebieha hovor, a vzdialené číslo, s ktorým je prostredníctvom hovoru nadviazané spojenie."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"čítanie základného stavu a identity súvisiacich s telefonovaním"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Umožňuje aplikácii prístup k základným telefonickým funkciám zariadenia."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"presmerovanie hovorov cez systém"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Umožňuje aplikácii presmerovať hovory cez systém na účely zlepšenia kvality hovorov."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"zobrazenie a kontrola hovorov prostredníctvom systému."</string>
@@ -628,6 +630,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Klepnutím odstráňte model tváre a potom znova pridajte svoju tvár"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Nastavte odomknutie tvárou"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Odomykajte telefón tak, že sa naň pozriete"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Ak chcete používať odomknutie tvárou, v sekcii Nastavenia &gt; Ochrana súkromia zapnite "<b>"prístup ku kamere"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Nastavte viac spôsobov odomknutia"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Klepnutím pridajte odtlačok prsta"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Odomknutie odtlačkom prsta"</string>
@@ -1316,10 +1319,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Pripravuje sa aplikácia <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Prebieha spúšťanie aplikácií."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Prebieha dokončovanie spúšťania."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Chcete vypnúť obrazovku?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Pri nastavovaní odtlačku prsta ste stlačili vypínač.\n\nObrazovka sa tým zvyčajne vypne."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Vypnúť"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Zrušiť"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Chcete pokračovať v nastavovaní?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Stlačili ste vypínač. Obvykle tým vypnete obrazovku.\n\nPri nastavovaní odtlačku prsta skúste klepnúť jemne."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Vypnúť obrazovku"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Pokračovať v nastav."</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Pokračovať v overovaní odtlačku prsta?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Stlačili ste vypínač. Obvykle tým vypnete obrazovku.\n\nAk chcete overiť odtlačok prsta, skúste klepnúť jemne."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Vypnúť obrazovku"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Pokračovať"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Spustená aplikácia: <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Klepnutím prejdete späť do hry"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Vyberte hru"</string>

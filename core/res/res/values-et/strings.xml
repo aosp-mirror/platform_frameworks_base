@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Võimaldab rakendusel kasutada IMS-teenust kõnede tegemiseks ilma, et peaksite sekkuma."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"Telefoni oleku ja identiteedi lugemine"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Annab rakendusele juurdepääsu seadme telefonifunktsioonidele. See luba võimaldab rakendusel määrata telefoninumbri ja seadme ID-d ning kontrollida, kas kõne on aktiivne ja kaugnumber on kõne kaudu telefoniga ühendatud."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"Lugeda peamiste telefonifunktsioonide olekut ja kasutajate identiteeti"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Võimaldab rakendusel pääseda juurde seadme peamistele telefonifunktsioonidele."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"kõnede marsruutimine süsteemi kaudu"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Võimaldab rakendusel kõnesid süsteemi kaudu marsruutida, et helistamiskogemust täiustada."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"süsteemi kaudu kõnede vaatamine ja juhtimine."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Puudutage näomudeli kustutamiseks, seejärel lisage oma nägu uuesti"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Näoga avamise seadistamine"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Avage telefon seda vaadates"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Näoga avamise kasutamiseks lülitage menüüs Seaded &gt; Privaatsus sisse "<b>"juurdepääs kaamerale"</b>"."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Seadistage rohkem viise avamiseks"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Puudutage sõrmejälje lisamiseks"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Sõrmejäljega avamine"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Rakenduse <xliff:g id="APPNAME">%1$s</xliff:g> ettevalmistamine."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Rakenduste käivitamine."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Käivitamise lõpuleviimine."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Kas lülitada ekraan välja?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Sõrmejälje seadistamisel vajutasite toitenuppu.\n\nSee lülitab ekraanikuva tavaliselt välja."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Lülita välja"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Tühista"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Kas jätkata seadistamist?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Vajutasite toitenuppu – tavaliselt lülitab see ekraani välja.\n\nPuudutage õrnalt ja seadistage oma sõrmejälg."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Lülita ekraan välja"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Jätka seadistamist"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Kas jätkata sõrmejälje kinnitamist?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Vajutasite toitenuppu – tavaliselt lülitab see ekraani välja.\n\nPuudutage õrnalt, et oma sõrmejälg kinnitada."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Lülita ekraan välja"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Jätka"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> töötab"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Puudutage mängu naasmiseks"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Valige mäng"</string>

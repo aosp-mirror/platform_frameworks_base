@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"อนุญาตให้แอปใช้บริการ IMS เพื่อโทรออกโดยคุณไม่ต้องดำเนินการใดๆ เลย"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"อ่านสถานะและข้อมูลระบุตัวตนของโทรศัพท์"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"อนุญาตให้แอปพลิเคชันเข้าถึงฟีเจอร์โทรศัพท์ของอุปกรณ์ การอนุญาตนี้ทำให้แอปพลิเคชันสามารถตรวจสอบหมายเลขโทรศัพท์และรหัสอุปกรณ์ ตรวจสอบว่ามีการโทรที่ทำงานอยู่หรือไม่ และตรวจสอบหมายเลขระยะไกลที่เชื่อมต่อด้วยการโทร"</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"อ่านสถานะการใช้โทรศัพท์เบื้องต้นและข้อมูลระบุตัวตน"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"อนุญาตให้แอปเข้าถึงฟีเจอร์พื้นฐานในการใช้โทรศัพท์ของอุปกรณ์นี้"</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"กำหนดเส้นทางการโทรผ่านระบบ"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"อนุญาตให้แอปกำหนดเส้นทางการโทรของแอปผ่านระบบเพื่อปรับปรุงประสบการณ์ในการโทร"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ดูและจัดการการติดต่อผ่านระบบ"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"แตะเพื่อลบรูปแบบใบหน้า แล้วเพิ่มใบหน้าอีกครั้ง"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ตั้งค่าการปลดล็อกด้วยใบหน้า"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ปลดล็อกโทรศัพท์โดยมองไปที่โทรศัพท์"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"หากต้องการใช้ปลดล็อกด้วยใบหน้า ให้เปิด"<b>"การเข้าถึงกล้อง"</b>"ในการตั้งค่าและความเป็นส่วนตัว"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ตั้งค่าการปลดล็อกด้วยวิธีอื่น"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"แตะเพื่อเพิ่มลายนิ้วมือ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ปลดล็อกด้วยลายนิ้วมือ"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"กำลังเตรียม <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"กำลังเริ่มต้นแอปพลิเคชัน"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"เสร็จสิ้นการบูต"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"ปิดหน้าจอใช่ไหม"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"ขณะตั้งค่าลายนิ้วมือคุณจะต้องกดปุ่มเปิด/ปิด\n\nซึ่งโดยปกติจะเป็นการปิดหน้าจอด้วย"</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ปิด"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"ยกเลิก"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ตั้งค่าต่อไหม"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"คุณกดปุ่มเปิด/ปิดซึ่งโดยปกติจะเป็นการปิดหน้าจอ\n\nลองแตะเบาๆ ขณะตั้งค่าลายนิ้วมือ"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"ปิดหน้าจอ"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ตั้งค่าต่อ"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ยืนยันลายนิ้วมือต่อไหม"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"คุณกดปุ่มเปิด/ปิดซึ่งโดยปกติจะเป็นการปิดหน้าจอ\n\nลองแตะเบาๆ เพื่อยืนยันลายนิ้วมือ"</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"ปิดหน้าจอ"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ต่อไป"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> กำลังทำงาน"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"แตะเพื่อกลับไปที่เกม"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"เลือกเกม"</string>
