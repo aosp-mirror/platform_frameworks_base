@@ -151,7 +151,13 @@ public class DragAndDropPolicy {
                 final Rect rightHitRegion = new Rect();
                 final Rect rightDrawRegion = bottomOrRightBounds;
 
-                displayRegion.splitVertically(leftHitRegion, rightHitRegion);
+                // If we have existing split regions use those bounds, otherwise split it 50/50
+                if (inSplitScreen) {
+                    leftHitRegion.set(topOrLeftBounds);
+                    rightHitRegion.set(bottomOrRightBounds);
+                } else {
+                    displayRegion.splitVertically(leftHitRegion, rightHitRegion);
+                }
 
                 mTargets.add(new Target(TYPE_SPLIT_LEFT, leftHitRegion, leftDrawRegion));
                 mTargets.add(new Target(TYPE_SPLIT_RIGHT, rightHitRegion, rightDrawRegion));
@@ -162,8 +168,13 @@ public class DragAndDropPolicy {
                 final Rect bottomHitRegion = new Rect();
                 final Rect bottomDrawRegion = bottomOrRightBounds;
 
-                displayRegion.splitHorizontally(
-                        topHitRegion, bottomHitRegion);
+                // If we have existing split regions use those bounds, otherwise split it 50/50
+                if (inSplitScreen) {
+                    topHitRegion.set(topOrLeftBounds);
+                    bottomHitRegion.set(bottomOrRightBounds);
+                } else {
+                    displayRegion.splitHorizontally(topHitRegion, bottomHitRegion);
+                }
 
                 mTargets.add(new Target(TYPE_SPLIT_TOP, topHitRegion, topDrawRegion));
                 mTargets.add(new Target(TYPE_SPLIT_BOTTOM, bottomHitRegion, bottomDrawRegion));
