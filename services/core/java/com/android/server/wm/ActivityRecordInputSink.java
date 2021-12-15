@@ -60,7 +60,7 @@ class ActivityRecordInputSink {
     // Hold on to InputEventReceiver to prevent it from getting GCd.
     private InputEventReceiver mInputEventReceiver;
     private InputWindowHandleWrapper mInputWindowHandleWrapper;
-
+    private SurfaceControl mSurfaceControl;
     private int mRapidTouchCount = 0;
     private IBinder mToken;
     private boolean mDisabled = false;
@@ -73,12 +73,25 @@ class ActivityRecordInputSink {
                 + mActivityRecord.mActivityComponent.getShortClassName();
     }
 
-    public void applyChangesToSurfaceIfChanged(
-            SurfaceControl.Transaction transaction, SurfaceControl surfaceControl) {
+    public void applyChangesToSurfaceIfChanged(SurfaceControl.Transaction transaction) {
         InputWindowHandleWrapper inputWindowHandleWrapper = getInputWindowHandleWrapper();
-        if (inputWindowHandleWrapper.isChanged()) {
-            inputWindowHandleWrapper.applyChangesToSurface(transaction, surfaceControl);
+        if (mSurfaceControl == null) {
+            mSurfaceControl = createSurface(transaction);
         }
+        if (inputWindowHandleWrapper.isChanged()) {
+            inputWindowHandleWrapper.applyChangesToSurface(transaction, mSurfaceControl);
+        }
+    }
+
+    private SurfaceControl createSurface(SurfaceControl.Transaction t) {
+        SurfaceControl surfaceControl = mActivityRecord.makeChildSurface(null)
+                .setName(mName)
+                .setHidden(false)
+                .setCallsite("ActivityRecordInputSink.createSurface")
+                .build();
+        // Put layer below all siblings (and the parent surface too)
+        t.setLayer(surfaceControl, Integer.MIN_VALUE);
+        return surfaceControl;
     }
 
     private InputWindowHandleWrapper getInputWindowHandleWrapper() {
