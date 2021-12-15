@@ -8321,12 +8321,58 @@ public class TelephonyManager {
     public NetworkScan requestNetworkScan(
             NetworkScanRequest request, Executor executor,
             TelephonyScanManager.NetworkScanCallback callback) {
-        synchronized (this) {
+        return requestNetworkScan(false, request, executor, callback);
+    }
+
+    /**
+     * Request a network scan.
+     *
+     * This method is asynchronous, so the network scan results will be returned by callback.
+     * The returned NetworkScan will contain a callback method which can be used to stop the scan.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges})
+     * and {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
+     *
+     * If the system-wide location switch is off, apps may still call this API, with the
+     * following constraints:
+     * <ol>
+     *     <li>The app must hold the {@code android.permission.NETWORK_SCAN} permission.</li>
+     *     <li>The app must not supply any specific bands or channels to scan.</li>
+     *     <li>The app must only specify MCC/MNC pairs that are
+     *     associated to a SIM in the device.</li>
+     *     <li>Returned results will have no meaningful info other than signal strength
+     *     and MCC/MNC info.</li>
+     * </ol>
+     *
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
+     * @param request Contains all the RAT with bands/channels that need to be scanned.
+     * @param executor The executor through which the callback should be invoked. Since the scan
+     *        request may trigger multiple callbacks and they must be invoked in the same order as
+     *        they are received by the platform, the user should provide an executor which executes
+     *        tasks one at a time in serial order. For example AsyncTask.SERIAL_EXECUTOR.
+     * @param callback Returns network scan results or errors.
+     * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION
+    })
+    public @Nullable NetworkScan requestNetworkScan(
+            boolean renounceFineLocationAccess, @NonNull NetworkScanRequest request,
+            @NonNull Executor executor,
+            @NonNull TelephonyScanManager.NetworkScanCallback callback) {
+        synchronized (sCacheLock) {
             if (mTelephonyScanManager == null) {
                 mTelephonyScanManager = new TelephonyScanManager();
             }
         }
-        return mTelephonyScanManager.requestNetworkScan(getSubId(), request, executor, callback,
+        return mTelephonyScanManager.requestNetworkScan(getSubId(), renounceFineLocationAccess,
+                request, executor, callback,
                 getOpPackageName(), getAttributionTag());
     }
 
@@ -11387,7 +11433,6 @@ public class TelephonyManager {
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
      * and {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     *
      * May return {@code null} when the subscription is inactive or when there was an error
      * communicating with the phone process.
      */
@@ -11397,7 +11442,72 @@ public class TelephonyManager {
             Manifest.permission.ACCESS_COARSE_LOCATION
     })
     public @Nullable ServiceState getServiceState() {
-        return getServiceStateForSubscriber(getSubId());
+        return getServiceState(false, false);
+    }
+
+    /**
+     * Returns the current {@link ServiceState} information.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     *
+     * If you want continuous updates of service state info, register a {@link PhoneStateListener}
+     * via {@link #listen} with the {@link PhoneStateListener#LISTEN_SERVICE_STATE} event.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
+     * and {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
+     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
+     * receive location related information which will be sent if the caller already possess
+     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     * May return {@code null} when the subscription is inactive or when there was an error
+     * communicating with the phone process.
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(allOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+    })
+    public @Nullable ServiceState getServiceState(boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess) {
+        return getServiceStateForSubscriber(getSubId(), renounceFineLocationAccess,
+                renounceCoarseLocationAccess);
+    }
+
+    /**
+     * Returns the service state information on specified subscription. Callers require
+     * either READ_PRIVILEGED_PHONE_STATE or READ_PHONE_STATE to retrieve the information.
+     *
+     * May return {@code null} when the subscription is inactive or when there was an error
+     * communicating with the phone process.
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
+     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
+     * receive location related information which will be sent if the caller already possess
+     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     */
+    private ServiceState getServiceStateForSubscriber(int subId,
+            boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getServiceStateForSubscriber(subId, renounceFineLocationAccess,
+                        renounceCoarseLocationAccess,
+                        getOpPackageName(), getAttributionTag());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
+        } catch (NullPointerException e) {
+            AnomalyReporter.reportAnomaly(
+                    UUID.fromString("a3ab0b9d-f2aa-4baf-911d-7096c0d4645a"),
+                    "getServiceStateForSubscriber " + subId + " NPE");
+        }
+        return null;
     }
 
     /**
@@ -11410,20 +11520,7 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public ServiceState getServiceStateForSubscriber(int subId) {
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                return service.getServiceStateForSubscriber(subId, getOpPackageName(),
-                        getAttributionTag());
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
-        } catch (NullPointerException e) {
-            AnomalyReporter.reportAnomaly(
-                    UUID.fromString("a3ab0b9d-f2aa-4baf-911d-7096c0d4645a"),
-                    "getServiceStateForSubscriber " + subId + " NPE");
-        }
-        return null;
+        return getServiceStateForSubscriber(getSubId(), false, false);
     }
 
     /**
@@ -15274,7 +15371,49 @@ public class TelephonyManager {
      */
     public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
+        registerTelephonyCallback(false, false, executor, callback);
+    }
 
+    /**
+     * Registers a callback object to receive notification of changes in specified telephony states.
+     * <p>
+     * To register a callback, pass a {@link TelephonyCallback} which implements
+     * interfaces of events. For example,
+     * FakeServiceStateCallback extends {@link TelephonyCallback} implements
+     * {@link TelephonyCallback.ServiceStateListener}.
+     *
+     * At registration, and when a specified telephony state changes, the telephony manager invokes
+     * the appropriate callback method on the callback object and passes the current (updated)
+     * values.
+     * <p>
+     *
+     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
+     * applies to the given subId. Otherwise, applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}. To register events for multiple
+     * subIds, pass a separate callback object to each TelephonyManager object created with
+     * {@link #createForSubscriptionId}.
+     *
+     * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
+     * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
+     * {@link SecurityException} will be thrown otherwise.
+     *
+     * This API should be used sparingly -- large numbers of callbacks will cause system
+     * instability. If a process has registered too many callbacks without unregistering them, it
+     * may encounter an {@link IllegalStateException} when trying to register more callbacks.
+     *
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permissions.
+     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
+     * receive location related information which will be sent if the caller already possess
+     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     * @param executor The executor of where the callback will execute.
+     * @param callback The {@link TelephonyCallback} object to register.
+     */
+    public void registerTelephonyCallback(boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull TelephonyCallback callback) {
         if (mContext == null) {
             throw new IllegalStateException("telephony service is null.");
         }
@@ -15285,7 +15424,8 @@ public class TelephonyManager {
         mTelephonyRegistryMgr = (TelephonyRegistryManager)
                 mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
         if (mTelephonyRegistryMgr != null) {
-            mTelephonyRegistryMgr.registerTelephonyCallback(executor, mSubId, getOpPackageName(),
+            mTelephonyRegistryMgr.registerTelephonyCallback(renounceFineLocationAccess,
+                    renounceCoarseLocationAccess, executor, mSubId, getOpPackageName(),
                     getAttributionTag(), callback, getITelephony() != null);
         } else {
             throw new IllegalStateException("telephony service is null.");
