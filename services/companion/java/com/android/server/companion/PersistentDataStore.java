@@ -168,6 +168,7 @@ final class PersistentDataStore {
     private static final String XML_ATTR_SELF_MANAGED = "self_managed";
     private static final String XML_ATTR_NOTIFY_DEVICE_NEARBY = "notify_device_nearby";
     private static final String XML_ATTR_TIME_APPROVED = "time_approved";
+    private static final String XML_ATTR_LAST_TIME_CONNECTED = "last_time_connected";
 
     private static final String LEGACY_XML_ATTR_DEVICE = "device";
 
@@ -378,7 +379,7 @@ final class PersistentDataStore {
 
         out.add(new AssociationInfo(associationId, userId, appPackage,
                 MacAddress.fromString(deviceAddress), null, profile,
-                /* managedByCompanionApp */false, notify, timeApproved));
+                /* managedByCompanionApp */false, notify, timeApproved, Long.MAX_VALUE));
     }
 
     private static void readAssociationsV1(@NonNull TypedXmlPullParser parser,
@@ -408,9 +409,12 @@ final class PersistentDataStore {
         final boolean selfManaged = readBooleanAttribute(parser, XML_ATTR_SELF_MANAGED);
         final boolean notify = readBooleanAttribute(parser, XML_ATTR_NOTIFY_DEVICE_NEARBY);
         final long timeApproved = readLongAttribute(parser, XML_ATTR_TIME_APPROVED, 0L);
+        final long lastTimeConnected = readLongAttribute(
+                parser, XML_ATTR_LAST_TIME_CONNECTED, Long.MAX_VALUE);
 
         final AssociationInfo associationInfo = createAssociationInfoNoThrow(associationId, userId,
-                appPackage, macAddress, displayName, profile, selfManaged, notify, timeApproved);
+                appPackage, macAddress, displayName, profile, selfManaged, notify, timeApproved,
+                lastTimeConnected);
         if (associationInfo != null) {
             out.add(associationInfo);
         }
@@ -464,6 +468,8 @@ final class PersistentDataStore {
         writeBooleanAttribute(
                 serializer, XML_ATTR_NOTIFY_DEVICE_NEARBY, a.isNotifyOnDeviceNearby());
         writeLongAttribute(serializer, XML_ATTR_TIME_APPROVED, a.getTimeApprovedMs());
+        writeLongAttribute(
+                serializer, XML_ATTR_LAST_TIME_CONNECTED, a.getLastTimeConnectedMs());
 
         serializer.endTag(null, XML_TAG_ASSOCIATION);
     }
@@ -512,11 +518,11 @@ final class PersistentDataStore {
     private static AssociationInfo createAssociationInfoNoThrow(int associationId,
             @UserIdInt int userId, @NonNull String appPackage, @Nullable MacAddress macAddress,
             @Nullable CharSequence displayName, @Nullable String profile, boolean selfManaged,
-            boolean notify, long timeApproved) {
+            boolean notify, long timeApproved, long lastTimeConnected) {
         AssociationInfo associationInfo = null;
         try {
             associationInfo = new AssociationInfo(associationId, userId, appPackage, macAddress,
-                    displayName, profile, selfManaged, notify, timeApproved);
+                    displayName, profile, selfManaged, notify, timeApproved, lastTimeConnected);
         } catch (Exception e) {
             if (DEBUG) Slog.w(LOG_TAG, "Could not create AssociationInfo", e);
         }

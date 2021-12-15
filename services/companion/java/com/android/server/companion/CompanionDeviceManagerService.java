@@ -149,6 +149,9 @@ public class CompanionDeviceManagerService extends SystemService
     private static final String PREF_FILE_NAME = "companion_device_preferences.xml";
     private static final String PREF_KEY_AUTO_REVOKE_GRANTS_DONE = "auto_revoke_grants_done";
 
+    private static final long ASSOCIATION_CLEAN_UP_TIME_WINDOW =
+            90L * 24 * 60 * 60 * 1000; // 3 months
+
     private static DateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     static {
         sDateFormat.setTimeZone(TimeZone.getDefault());
@@ -179,6 +182,7 @@ public class CompanionDeviceManagerService extends SystemService
             new ArrayMap<>();
     private final RemoteCallbackList<IOnAssociationsChangedListener> mListeners =
             new RemoteCallbackList<>();
+    private final CompanionDeviceManagerServiceInternal mLocalService = new LocalService(this);
 
     final Handler mMainHandler = Handler.getMain();
     private CompanionDevicePresenceController mCompanionDevicePresenceController;
@@ -208,6 +212,8 @@ public class CompanionDeviceManagerService extends SystemService
         mPermissionControllerManager = requireNonNull(
                 context.getSystemService(PermissionControllerManager.class));
         mUserManager = context.getSystemService(UserManager.class);
+
+        LocalServices.addService(CompanionDeviceManagerServiceInternal.class, mLocalService);
     }
 
     @Override
@@ -250,6 +256,9 @@ public class CompanionDeviceManagerService extends SystemService
             } else {
                 Slog.w(LOG_TAG, "No BluetoothAdapter available");
             }
+        } else if (phase == PHASE_BOOT_COMPLETED) {
+            // Run the Association CleanUp job service daily.
+            AssociationCleanUpService.schedule(getContext());
         }
     }
 
@@ -292,6 +301,24 @@ public class CompanionDeviceManagerService extends SystemService
         }
 
         return association;
+    }
+
+    // Revoke associations if the selfManaged companion device does not connect for 3
+    // months for specific profile.
+    private void associationCleanUp(String profile) {
+        for (AssociationInfo ai : mAssociationStore.getAssociations()) {
+            if (ai.isSelfManaged()
+                    && profile.equals(ai.getDeviceProfile())
+                    && System.currentTimeMillis() - ai.getLastTimeConnectedMs()
+                    >= ASSOCIATION_CLEAN_UP_TIME_WINDOW) {
+                Slog.d(LOG_TAG, "Removing the association for associationId: "
+                        + ai.getId()
+                        + " due to the device does not connect for 3 months."
+                        + " Current time: "
+                        + new Date(System.currentTimeMillis()));
+                disassociateInternal(ai.getId());
+            }
+        }
     }
 
     void maybeGrantAutoRevokeExemptions() {
@@ -573,6 +600,9 @@ public class CompanionDeviceManagerService extends SystemService
                 return;
             }
 
+            association.setLastTimeConnected(System.currentTimeMillis());
+            mAssociationStore.updateAssociation(association);
+
             mCompanionDevicePresenceController.onDeviceNotifyAppeared(
                     association, getContext(), mMainHandler);
         }
@@ -735,7 +765,8 @@ public class CompanionDeviceManagerService extends SystemService
         final long timestamp = System.currentTimeMillis();
 
         final AssociationInfo association = new AssociationInfo(id, userId, packageName,
-                macAddress, displayName, deviceProfile, selfManaged, false, timestamp);
+                macAddress, displayName, deviceProfile, selfManaged, false, timestamp,
+                Long.MAX_VALUE);
         Slog.i(LOG_TAG, "New CDM association created=" + association);
         mAssociationStore.addAssociation(association);
 
@@ -1296,5 +1327,18 @@ public class CompanionDeviceManagerService extends SystemService
         }
 
         return Collections.unmodifiableMap(copy);
+    }
+
+    private final class LocalService extends CompanionDeviceManagerServiceInternal {
+        private final CompanionDeviceManagerService mService;
+
+        LocalService(CompanionDeviceManagerService service) {
+            mService = service;
+        }
+
+        @Override
+        public void associationCleanUp(String profile) {
+            mService.associationCleanUp(profile);
+        }
     }
 }
