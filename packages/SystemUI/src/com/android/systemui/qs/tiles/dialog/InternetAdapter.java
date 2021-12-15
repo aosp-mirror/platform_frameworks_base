@@ -151,7 +151,8 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
         }
 
         void onBind(@NonNull WifiEntry wifiEntry) {
-            mWifiIcon.setImageDrawable(getWifiDrawable(wifiEntry));
+            mWifiIcon.setImageDrawable(
+                    getWifiDrawable(wifiEntry.getLevel(), wifiEntry.shouldShowXLevelIcon()));
             setWifiNetworkLayout(wifiEntry.getTitle(),
                     Html.fromHtml(wifiEntry.getSummary(false), Html.FROM_HTML_MODE_LEGACY));
 
@@ -188,12 +189,13 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
             mWifiSummaryText.setText(summary);
         }
 
-        Drawable getWifiDrawable(@NonNull WifiEntry wifiEntry) {
-            if (wifiEntry.getLevel() == WifiEntry.WIFI_LEVEL_UNREACHABLE) {
+        Drawable getWifiDrawable(int level, boolean hasNoInternet) {
+            // If the Wi-Fi level is equal to WIFI_LEVEL_UNREACHABLE(-1), then a null drawable
+            // will be returned.
+            if (level == WifiEntry.WIFI_LEVEL_UNREACHABLE) {
                 return null;
             }
-            final Drawable drawable = mWifiIconInjector.getIcon(wifiEntry.shouldShowXLevelIcon(),
-                    wifiEntry.getLevel());
+            final Drawable drawable = mWifiIconInjector.getIcon(hasNoInternet, level);
             if (drawable == null) {
                 return null;
             }
