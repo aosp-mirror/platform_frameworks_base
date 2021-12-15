@@ -16,10 +16,14 @@
 
 package com.android.server.companion.virtual;
 
+import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_ENABLED;
+import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
+import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.annotation.NonNull;
+import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.VirtualDeviceParams;
@@ -34,6 +38,9 @@ import android.hardware.input.VirtualTouchEvent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.util.ArraySet;
 import android.util.SparseArray;
 import android.window.DisplayWindowPolicyController;
 
@@ -286,9 +293,27 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mVirtualDisplayIds.add(displayId);
         final GenericWindowPolicyController dwpc =
                 new GenericWindowPolicyController(FLAG_SECURE,
-                        SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+                        SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, getAllowedUserHandles());
         mWindowPolicyControllers.put(displayId, dwpc);
         return dwpc;
+    }
+
+    private ArraySet<UserHandle> getAllowedUserHandles() {
+        ArraySet<UserHandle> result = new ArraySet<>();
+        DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        for (UserHandle profile : userManager.getAllProfiles()) {
+            int nearbyAppStreamingPolicy = dpm.getNearbyAppStreamingPolicy(profile.getIdentifier());
+            if (nearbyAppStreamingPolicy == NEARBY_STREAMING_ENABLED
+                    || nearbyAppStreamingPolicy == NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY) {
+                result.add(profile);
+            } else if (nearbyAppStreamingPolicy == NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY) {
+                if (mParams.getUsersWithMatchingAccounts().contains(profile)) {
+                    result.add(profile);
+                }
+            }
+        }
+        return result;
     }
 
     void onVirtualDisplayRemovedLocked(int displayId) {

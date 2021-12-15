@@ -23,12 +23,16 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
+import android.util.ArraySet;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Params that can be configured when creating virtual devices.
@@ -60,18 +64,38 @@ public final class VirtualDeviceParams implements Parcelable {
     public static final int LOCK_STATE_ALWAYS_UNLOCKED = 1;
 
     private final int mLockState;
+    private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
 
-    private VirtualDeviceParams(@LockState int lockState) {
+    private VirtualDeviceParams(
+            @LockState int lockState,
+            @NonNull Set<UserHandle> usersWithMatchingAccounts) {
         mLockState = lockState;
+        mUsersWithMatchingAccounts = new ArraySet<>(usersWithMatchingAccounts);
     }
 
+    @SuppressWarnings("unchecked")
     private VirtualDeviceParams(Parcel parcel) {
         mLockState = parcel.readInt();
+        mUsersWithMatchingAccounts = (ArraySet<UserHandle>) parcel.readArraySet(null);
     }
 
+    /**
+     * Returns the lock state of the virtual device.
+     */
     @LockState
     public int getLockState() {
         return mLockState;
+    }
+
+    /**
+     * Returns the user handles with matching managed accounts on the remote device to which
+     * this virtual device is streaming.
+     *
+     * @see android.app.admin.DevicePolicyManager#NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY
+     */
+    @NonNull
+    public Set<UserHandle> getUsersWithMatchingAccounts() {
+        return Collections.unmodifiableSet(mUsersWithMatchingAccounts);
     }
 
     @Override
@@ -82,6 +106,7 @@ public final class VirtualDeviceParams implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mLockState);
+        dest.writeArraySet(mUsersWithMatchingAccounts);
     }
 
     @Override
@@ -93,18 +118,20 @@ public final class VirtualDeviceParams implements Parcelable {
             return false;
         }
         VirtualDeviceParams that = (VirtualDeviceParams) o;
-        return mLockState == that.mLockState;
+        return mLockState == that.mLockState && mUsersWithMatchingAccounts.equals(
+                that.mUsersWithMatchingAccounts);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mLockState);
+        return Objects.hash(mLockState, mUsersWithMatchingAccounts);
     }
 
     @Override
     public String toString() {
         return "VirtualDeviceParams("
                 + " mLockState=" + mLockState
+                + " mUsersWithMatchingAccounts=" + mUsersWithMatchingAccounts
                 + ")";
     }
 
@@ -125,6 +152,7 @@ public final class VirtualDeviceParams implements Parcelable {
     public static final class Builder {
 
         private @LockState int mLockState = LOCK_STATE_ALWAYS_LOCKED;
+        private Set<UserHandle> mUsersWithMatchingAccounts;
 
         /**
          * Sets the lock state of the device. The permission {@code ADD_ALWAYS_UNLOCKED_DISPLAY}
@@ -142,11 +170,28 @@ public final class VirtualDeviceParams implements Parcelable {
         }
 
         /**
+         * Sets the user handles with matching managed accounts on the remote device to which
+         * this virtual device is streaming.
+         *
+         * @param usersWithMatchingAccounts A set of user handles with matching managed
+         *   accounts on the remote device this is streaming to.
+         * @see android.app.admin.DevicePolicyManager#NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY
+         */
+        public Builder setUsersWithMatchingAccounts(
+                @NonNull Set<UserHandle> usersWithMatchingAccounts) {
+            mUsersWithMatchingAccounts = usersWithMatchingAccounts;
+            return this;
+        }
+
+        /**
          * Builds the {@link VirtualDeviceParams} instance.
          */
         @NonNull
         public VirtualDeviceParams build() {
-            return new VirtualDeviceParams(mLockState);
+            if (mUsersWithMatchingAccounts == null) {
+                mUsersWithMatchingAccounts = Collections.emptySet();
+            }
+            return new VirtualDeviceParams(mLockState, mUsersWithMatchingAccounts);
         }
     }
 }

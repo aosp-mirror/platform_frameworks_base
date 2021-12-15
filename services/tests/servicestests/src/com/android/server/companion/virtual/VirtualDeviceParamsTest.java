@@ -20,19 +20,24 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.companion.virtual.VirtualDeviceParams;
 import android.os.Parcel;
+import android.os.UserHandle;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Set;
+
 @RunWith(AndroidJUnit4.class)
 public class VirtualDeviceParamsTest {
 
     @Test
     public void parcelable_shouldRecreateSuccessfully() {
-        VirtualDeviceParams originalParams = new VirtualDeviceParams.Builder().setLockState(
-                VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED).build();
+        VirtualDeviceParams originalParams = new VirtualDeviceParams.Builder()
+                .setLockState(VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED)
+                .setUsersWithMatchingAccounts(Set.of(UserHandle.of(123), UserHandle.of(456)))
+                .build();
         Parcel parcel = Parcel.obtain();
         originalParams.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
@@ -40,5 +45,7 @@ public class VirtualDeviceParamsTest {
         VirtualDeviceParams params = VirtualDeviceParams.CREATOR.createFromParcel(parcel);
         assertThat(params).isEqualTo(originalParams);
         assertThat(params.getLockState()).isEqualTo(VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED);
+        assertThat(params.getUsersWithMatchingAccounts())
+                .containsExactly(UserHandle.of(123), UserHandle.of(456));
     }
 }
