@@ -36,6 +36,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.IRotationWatcher;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -453,6 +454,7 @@ public class RotationButtonController {
         mUiEventLogger.log(RotationButtonEvent.ROTATION_SUGGESTION_ACCEPTED);
         incrementNumAcceptedRotationSuggestionsIfNeeded();
         setRotationLockedAtAngle(mLastRotationSuggestion);
+        v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
 
     private boolean onRotateSuggestionHover(View v, MotionEvent event) {
