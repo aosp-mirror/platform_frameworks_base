@@ -35,17 +35,44 @@ final class VerificationUtils {
     private static final long DEFAULT_VERIFICATION_TIMEOUT = 10 * 1000;
 
     /**
-     * Get the verification agent timeout.  Used for both the APK verifier and the
+     * The default maximum time to wait for the verification agent to return in
+     * milliseconds.
+     */
+    private static final long DEFAULT_STREAMING_VERIFICATION_TIMEOUT = 3 * 1000;
+
+    public static long getVerificationTimeout(Context context, boolean streaming) {
+        if (streaming) {
+            return getDefaultStreamingVerificationTimeout(context);
+        }
+        return getDefaultVerificationTimeout(context);
+    }
+
+    /**
+     * Get the default verification agent timeout. Used for both the APK verifier and the
      * intent filter verifier.
      *
      * @return verification timeout in milliseconds
      */
-    public static long getVerificationTimeout(Context context) {
+    public static long getDefaultVerificationTimeout(Context context) {
         long timeout = Settings.Global.getLong(context.getContentResolver(),
                 Settings.Global.PACKAGE_VERIFIER_TIMEOUT, DEFAULT_VERIFICATION_TIMEOUT);
         // The setting can be used to increase the timeout but not decrease it, since that is
         // equivalent to disabling the verifier.
         return Math.max(timeout, DEFAULT_VERIFICATION_TIMEOUT);
+    }
+
+    /**
+     * Get the default verification agent timeout for streaming installations.
+     *
+     * @return verification timeout in milliseconds
+     */
+    public static long getDefaultStreamingVerificationTimeout(Context context) {
+        long timeout = Settings.Global.getLong(context.getContentResolver(),
+                Settings.Global.PACKAGE_STREAMING_VERIFIER_TIMEOUT,
+                DEFAULT_STREAMING_VERIFICATION_TIMEOUT);
+        // The setting can be used to increase the timeout but not decrease it, since that is
+        // equivalent to disabling the verifier.
+        return Math.max(timeout, DEFAULT_STREAMING_VERIFICATION_TIMEOUT);
     }
 
     public static void broadcastPackageVerified(int verificationId, Uri packageUri,

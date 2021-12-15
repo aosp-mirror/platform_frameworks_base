@@ -56,7 +56,6 @@ import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
-import static com.android.server.pm.PackageManagerService.DEBUG_VERIFY;
 import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.POST_INSTALL;
@@ -90,7 +89,6 @@ import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
@@ -190,11 +188,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 final class InstallPackageHelper {
-    /**
-     * Whether verification is enabled by default.
-     */
-    private static final boolean DEFAULT_VERIFY_ENABLE = true;
-
     private final PackageManagerService mPm;
     private final AppDataHelper mAppDataHelper;
     private final PackageManagerServiceInjector mInjector;
@@ -2833,56 +2826,6 @@ final class InstallPackageHelper {
 
             return pkg.getUid();
         }
-    }
-
-    /**
-     * Check whether or not package verification has been enabled.
-     *
-     * @return true if verification should be performed
-     */
-    boolean isVerificationEnabled(PackageInfoLite pkgInfoLite, int userId, int installFlags,
-            int installerUid) {
-        if (!DEFAULT_VERIFY_ENABLE) {
-            return false;
-        }
-
-        // Check if installing from ADB
-        if ((installFlags & PackageManager.INSTALL_FROM_ADB) != 0) {
-            if (mPm.isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS)) {
-                return true;
-            }
-            // Check if the developer wants to skip verification for ADB installs
-            if ((installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0) {
-                synchronized (mPm.mLock) {
-                    if (mPm.mSettings.getPackageLPr(pkgInfoLite.packageName) == null) {
-                        // Always verify fresh install
-                        return true;
-                    }
-                }
-                // Only skip when apk is debuggable
-                return !pkgInfoLite.debuggable;
-            }
-            return android.provider.Settings.Global.getInt(mPm.mContext.getContentResolver(),
-                    android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
-        }
-
-        // only when not installed from ADB, skip verification for instant apps when
-        // the installer and verifier are the same.
-        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-            if (mPm.mInstantAppInstallerActivity != null
-                    && mPm.mInstantAppInstallerActivity.packageName.equals(
-                    mPm.mRequiredVerifierPackage)) {
-                try {
-                    mPm.mInjector.getSystemService(AppOpsManager.class)
-                            .checkPackage(installerUid, mPm.mRequiredVerifierPackage);
-                    if (DEBUG_VERIFY) {
-                        Slog.i(TAG, "disable verification for instant app");
-                    }
-                    return false;
-                } catch (SecurityException ignore) { }
-            }
-        }
-        return true;
     }
 
     public void sendPendingBroadcasts() {

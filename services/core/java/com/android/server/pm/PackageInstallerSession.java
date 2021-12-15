@@ -1303,22 +1303,30 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public String[] getNames() {
-        assertCallerIsOwnerOrRoot();
+        assertCallerIsOwnerRootOrVerifier();
         synchronized (mLock) {
-            assertPreparedAndNotCommittedOrDestroyedLocked("getNames");
-
-            return getNamesLocked();
+            assertPreparedAndNotDestroyedLocked("getNames");
+            if (!mCommitted.get()) {
+                return getNamesLocked();
+            } else {
+                return getStageDirContentsLocked();
+            }
         }
+    }
+
+    @GuardedBy("mLock")
+    private String[] getStageDirContentsLocked() {
+        String[] result = stageDir.list();
+        if (result == null) {
+            result = EmptyArray.STRING;
+        }
+        return result;
     }
 
     @GuardedBy("mLock")
     private String[] getNamesLocked() {
         if (!isDataLoaderInstallation()) {
-            String[] result = stageDir.list();
-            if (result == null) {
-                result = EmptyArray.STRING;
-            }
-            return result;
+            return getStageDirContentsLocked();
         }
 
         InstallationFile[] files = getInstallationFilesLocked();
@@ -1403,6 +1411,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public void requestChecksums(@NonNull String name, @Checksum.TypeMask int optional,
             @Checksum.TypeMask int required, @Nullable List trustedInstallers,
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener) {
+        assertCallerIsOwnerRootOrVerifier();
         final File file = new File(stageDir, name);
         final String installerPackageName = getInstallSource().initiatingPackageName;
         try {
@@ -1667,6 +1676,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
         }
+    }
+
+    /**
+     * Check if the caller is the owner of this session or a verifier.
+     * Otherwise throw a {@link SecurityException}.
+     */
+    private void assertCallerIsOwnerRootOrVerifier() {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid == Process.ROOT_UID || callingUid == mInstallerUid) {
+            return;
+        }
+        if (isSealed() && mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.PACKAGE_VERIFICATION_AGENT)
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        throw new SecurityException("Session does not belong to uid " + callingUid);
     }
 
     /**

@@ -30,6 +30,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static com.android.server.pm.PackageManagerService.CHECK_PENDING_INTEGRITY_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.CHECK_PENDING_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.DEBUG_VERIFY;
+import static com.android.server.pm.PackageManagerService.DEFAULT_VERIFICATION_RESPONSE;
 import static com.android.server.pm.PackageManagerService.ENABLE_ROLLBACK_TIMEOUT;
 import static com.android.server.pm.PackageManagerService.PACKAGE_MIME_TYPE;
 import static com.android.server.pm.PackageManagerService.TAG;
@@ -59,10 +60,13 @@ import android.os.Bundle;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
@@ -75,6 +79,11 @@ import java.util.List;
 import java.util.Set;
 
 final class VerificationParams extends HandlerParams {
+    /**
+     * Whether verification is enabled by default.
+     */
+    private static final boolean DEFAULT_VERIFY_ENABLE = true;
+
     /**
      * Whether integrity verification is enabled by default.
      */
@@ -333,157 +342,273 @@ final class VerificationParams extends HandlerParams {
         if (verifierUser == UserHandle.ALL) {
             verifierUser = UserHandle.SYSTEM;
         }
+        final int verifierUserId = verifierUser.getIdentifier();
+
+        String requiredVerifierPackage = mPm.mRequiredVerifierPackage;
+        boolean requiredVerifierPackageOverridden = false;
+
+        // Allow verifier override for ADB installations which could already be unverified using
+        // PackageManager.INSTALL_DISABLE_VERIFICATION flag.
+        if ((mInstallFlags & PackageManager.INSTALL_FROM_ADB) != 0
+                && (mInstallFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) == 0) {
+            final String adbVerifierOverridePackage = SystemProperties.get(
+                    "debug.pm.adb_verifier_override_package", "");
+            // Check if the package installed.
+            if (!TextUtils.isEmpty(adbVerifierOverridePackage)
+                    && packageExists(adbVerifierOverridePackage)) {
+                // Pretend we requested to disable verification from command line.
+                boolean requestedDisableVerification = true;
+                // If this returns false then the caller can already skip verification, so we are
+                // not adding a new way to disable verifications.
+                if (!isAdbVerificationEnabled(pkgLite, verifierUserId,
+                        requestedDisableVerification)) {
+                    requiredVerifierPackage = adbVerifierOverridePackage;
+                    requiredVerifierPackageOverridden = true;
+                }
+            }
+        }
 
         /*
          * Determine if we have any installed package verifiers. If we
          * do, then we'll defer to them to verify the packages.
          */
-        final int requiredUid = mPm.mRequiredVerifierPackage == null ? -1
-                : mPm.getPackageUid(mPm.mRequiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
-                        verifierUser.getIdentifier());
+        final int requiredUid = requiredVerifierPackage == null ? -1
+                : mPm.getPackageUid(requiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
+                        verifierUserId);
         verificationState.setRequiredVerifierUid(requiredUid);
-        final int installerUid =
-                mVerificationInfo == null ? -1 : mVerificationInfo.mInstallerUid;
-        final boolean isVerificationEnabled = mInstallPackageHelper.isVerificationEnabled(
-                pkgLite, verifierUser.getIdentifier(), mInstallFlags, installerUid);
-        final boolean isV4Signed =
-                (mSigningDetails.getSignatureSchemeVersion() == SIGNING_BLOCK_V4);
-        final boolean isIncrementalInstall =
-                (mDataLoaderType == DataLoaderType.INCREMENTAL);
-        // NOTE: We purposefully skip verification for only incremental installs when there's
-        // a v4 signature block. Otherwise, proceed with verification as usual.
-        if (!mOriginInfo.mExisting
-                && isVerificationEnabled
-                && (!isIncrementalInstall || !isV4Signed)) {
-            final Intent verification = new Intent(
-                    Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
-            verification.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-            verification.setDataAndType(Uri.fromFile(new File(mOriginInfo.mResolvedPath)),
-                    PACKAGE_MIME_TYPE);
-            verification.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        final boolean isVerificationEnabled = isVerificationEnabled(pkgLite,
+                verifierUserId);
 
-            // Query all live verifiers based on current user state
-            final ParceledListSlice<ResolveInfo> receivers = mPm.queryIntentReceivers(verification,
-                    PACKAGE_MIME_TYPE, 0, verifierUser.getIdentifier());
+        if (mOriginInfo.mExisting || !isVerificationEnabled) {
+            verificationState.setVerifierResponse(requiredUid, PackageManager.VERIFICATION_ALLOW);
+            return;
+        }
 
-            if (DEBUG_VERIFY) {
-                Slog.d(TAG, "Found " + receivers.getList().size() + " verifiers for intent "
-                        + verification.toString() + " with " + pkgLite.verifiers.length
-                        + " optional verifiers");
-            }
+        final Intent verification = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
+        verification.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        verification.setDataAndType(Uri.fromFile(new File(mOriginInfo.mResolvedPath)),
+                PACKAGE_MIME_TYPE);
+        verification.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            verification.putExtra(PackageManager.EXTRA_VERIFICATION_ID, verificationId);
+        // Query all live verifiers based on current user state
+        final ParceledListSlice<ResolveInfo> receivers = mPm.queryIntentReceivers(verification,
+                PACKAGE_MIME_TYPE, 0, verifierUserId);
 
-            verification.putExtra(
-                    PackageManager.EXTRA_VERIFICATION_INSTALL_FLAGS, mInstallFlags);
+        if (DEBUG_VERIFY) {
+            Slog.d(TAG, "Found " + receivers.getList().size() + " verifiers for intent "
+                    + verification.toString() + " with " + pkgLite.verifiers.length
+                    + " optional verifiers");
+        }
 
-            verification.putExtra(
-                    PackageManager.EXTRA_VERIFICATION_PACKAGE_NAME, pkgLite.packageName);
+        verification.putExtra(PackageManager.EXTRA_VERIFICATION_ID, verificationId);
 
-            verification.putExtra(
-                    PackageManager.EXTRA_VERIFICATION_VERSION_CODE, pkgLite.versionCode);
+        verification.putExtra(
+                PackageManager.EXTRA_VERIFICATION_INSTALL_FLAGS, mInstallFlags);
 
-            verification.putExtra(
-                    PackageManager.EXTRA_VERIFICATION_LONG_VERSION_CODE,
-                    pkgLite.getLongVersionCode());
+        verification.putExtra(
+                PackageManager.EXTRA_VERIFICATION_PACKAGE_NAME, pkgLite.packageName);
 
-            final String baseCodePath = mPackageLite.getBaseApkPath();
-            final String[] splitCodePaths = mPackageLite.getSplitApkPaths();
-            final String rootHashString =
-                    PackageManagerServiceUtils.buildVerificationRootHashString(baseCodePath,
-                            splitCodePaths);
+        verification.putExtra(
+                PackageManager.EXTRA_VERIFICATION_VERSION_CODE, pkgLite.versionCode);
 
-            if (rootHashString != null) {
-                verification.putExtra(PackageManager.EXTRA_VERIFICATION_ROOT_HASH, rootHashString);
-            }
+        verification.putExtra(
+                PackageManager.EXTRA_VERIFICATION_LONG_VERSION_CODE,
+                pkgLite.getLongVersionCode());
 
-            verification.putExtra(PackageInstaller.EXTRA_DATA_LOADER_TYPE, mDataLoaderType);
+        final String baseCodePath = mPackageLite.getBaseApkPath();
+        final String[] splitCodePaths = mPackageLite.getSplitApkPaths();
+        final String rootHashString = PackageManagerServiceUtils.buildVerificationRootHashString(
+                baseCodePath, splitCodePaths);
 
-            verification.putExtra(PackageInstaller.EXTRA_SESSION_ID, mSessionId);
+        if (rootHashString != null) {
+            verification.putExtra(PackageManager.EXTRA_VERIFICATION_ROOT_HASH, rootHashString);
+        }
 
-            populateInstallerExtras(verification);
+        verification.putExtra(PackageInstaller.EXTRA_DATA_LOADER_TYPE, mDataLoaderType);
 
-            final List<ComponentName> sufficientVerifiers = matchVerifiers(pkgLite,
-                    receivers.getList(), verificationState);
+        verification.putExtra(PackageInstaller.EXTRA_SESSION_ID, mSessionId);
 
-            DeviceIdleInternal idleController =
-                    mPm.mInjector.getLocalService(DeviceIdleInternal.class);
-            final long idleDuration = VerificationUtils.getVerificationTimeout(mPm.mContext);
-            final BroadcastOptions options = BroadcastOptions.makeBasic();
-            options.setTemporaryAppAllowlist(idleDuration,
-                    TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
-                    REASON_PACKAGE_VERIFIER, "");
+        populateInstallerExtras(verification);
 
-            /*
-             * If any sufficient verifiers were listed in the package
-             * manifest, attempt to ask them.
-             */
-            if (sufficientVerifiers != null) {
-                final int n = sufficientVerifiers.size();
-                if (n == 0) {
-                    String errorMsg = "Additional verifiers required, but none installed.";
-                    Slog.i(TAG, errorMsg);
-                    setReturnCode(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE, errorMsg);
-                } else {
-                    for (int i = 0; i < n; i++) {
-                        final ComponentName verifierComponent = sufficientVerifiers.get(i);
-                        idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
-                                verifierComponent.getPackageName(), idleDuration,
-                                verifierUser.getIdentifier(), false,
-                                REASON_PACKAGE_VERIFIER, "package verifier");
+        // Streaming installation timeout schema is enabled only for:
+        // 1. Incremental installs with v4,
+        // 2. If device/policy allow unverified app installs by default.
+        final boolean streaming = (mDataLoaderType == DataLoaderType.INCREMENTAL)
+                && (mSigningDetails.getSignatureSchemeVersion() == SIGNING_BLOCK_V4)
+                && (getDefaultVerificationResponse() == PackageManager.VERIFICATION_ALLOW);
 
-                        final Intent sufficientIntent = new Intent(verification);
-                        sufficientIntent.setComponent(verifierComponent);
-                        mPm.mContext.sendBroadcastAsUser(sufficientIntent, verifierUser,
-                                /* receiverPermission= */ null,
-                                options.toBundle());
-                    }
+        final long verificationTimeout = VerificationUtils.getVerificationTimeout(mPm.mContext,
+                streaming);
+
+        final List<ComponentName> sufficientVerifiers = matchVerifiers(pkgLite,
+                receivers.getList(), verificationState);
+
+        DeviceIdleInternal idleController =
+                mPm.mInjector.getLocalService(DeviceIdleInternal.class);
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setTemporaryAppAllowlist(verificationTimeout,
+                TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                REASON_PACKAGE_VERIFIER, "");
+
+        /*
+         * If any sufficient verifiers were listed in the package
+         * manifest, attempt to ask them.
+         */
+        if (sufficientVerifiers != null) {
+            final int n = sufficientVerifiers.size();
+            if (n == 0) {
+                String errorMsg = "Additional verifiers required, but none installed.";
+                Slog.i(TAG, errorMsg);
+                setReturnCode(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE, errorMsg);
+            } else {
+                for (int i = 0; i < n; i++) {
+                    final ComponentName verifierComponent = sufficientVerifiers.get(i);
+                    idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
+                            verifierComponent.getPackageName(), verificationTimeout,
+                            verifierUserId, false,
+                            REASON_PACKAGE_VERIFIER, "package verifier");
+
+                    final Intent sufficientIntent = new Intent(verification);
+                    sufficientIntent.setComponent(verifierComponent);
+                    mPm.mContext.sendBroadcastAsUser(sufficientIntent, verifierUser,
+                            /* receiverPermission= */ null,
+                            options.toBundle());
                 }
             }
+        }
 
-            if (mPm.mRequiredVerifierPackage != null) {
-                final ComponentName requiredVerifierComponent = matchComponentForVerifier(
-                        mPm.mRequiredVerifierPackage, receivers.getList());
-                /*
-                 * Send the intent to the required verification agent,
-                 * but only start the verification timeout after the
-                 * target BroadcastReceivers have run.
-                 */
-                verification.setComponent(requiredVerifierComponent);
-                idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
-                        mPm.mRequiredVerifierPackage, idleDuration,
-                        verifierUser.getIdentifier(), false,
-                        REASON_PACKAGE_VERIFIER, "package verifier");
-                mPm.mContext.sendOrderedBroadcastAsUser(verification, verifierUser,
-                        android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
-                        /* appOp= */ AppOpsManager.OP_NONE,
-                        /* options= */ options.toBundle(),
-                        new BroadcastReceiver() {
-                            @Override
-                            public void onReceive(Context context, Intent intent) {
-                                final Message msg = mPm.mHandler
-                                        .obtainMessage(CHECK_PENDING_VERIFICATION);
-                                msg.arg1 = verificationId;
-                                mPm.mHandler.sendMessageDelayed(msg,
-                                        VerificationUtils.getVerificationTimeout(mPm.mContext));
-                            }
-                        }, null, 0, null, null);
+        if (requiredVerifierPackage == null) {
+            Slog.e(TAG, "Required verifier is null");
+            return;
+        }
 
-                Trace.asyncTraceBegin(
-                        TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
-
-                /*
-                 * We don't want the copy to proceed until verification
-                 * succeeds.
-                 */
-                mWaitForVerificationToComplete = true;
-            }
+        final int verificationCodeAtTimeout;
+        if (getDefaultVerificationResponse() == PackageManager.VERIFICATION_ALLOW) {
+            verificationCodeAtTimeout = PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT;
         } else {
-            verificationState.setVerifierResponse(
-                    requiredUid, PackageManager.VERIFICATION_ALLOW);
+            verificationCodeAtTimeout = PackageManager.VERIFICATION_REJECT;
+        }
+        final PackageVerificationResponse response = new PackageVerificationResponse(
+                verificationCodeAtTimeout, requiredUid);
+
+        /*
+         * Send the intent to the required verification agent,
+         * but only start the verification timeout after the
+         * target BroadcastReceivers have run.
+         */
+        if (!requiredVerifierPackageOverridden) {
+            final ComponentName requiredVerifierComponent = matchComponentForVerifier(
+                    requiredVerifierPackage, receivers.getList());
+            verification.setComponent(requiredVerifierComponent);
+        } else {
+            verification.setPackage(requiredVerifierPackage);
+        }
+        idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
+                requiredVerifierPackage, verificationTimeout,
+                verifierUserId, false,
+                REASON_PACKAGE_VERIFIER, "package verifier");
+        mPm.mContext.sendOrderedBroadcastAsUser(verification, verifierUser,
+                android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
+                /* appOp= */ AppOpsManager.OP_NONE,
+                /* options= */ options.toBundle(),
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        final Message msg = mPm.mHandler
+                                .obtainMessage(CHECK_PENDING_VERIFICATION);
+                        msg.arg1 = verificationId;
+                        msg.arg2 = streaming ? 1 : 0;
+                        msg.obj = response;
+                        mPm.mHandler.sendMessageDelayed(msg, verificationTimeout);
+                    }
+                }, null, 0, null, null);
+
+        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
+
+        /*
+         * We don't want the copy to proceed until verification
+         * succeeds.
+         */
+        mWaitForVerificationToComplete = true;
+    }
+
+    /**
+     * Get the default verification agent response code.
+     *
+     * @return default verification response code
+     */
+    int getDefaultVerificationResponse() {
+        if (mPm.mUserManager.hasUserRestriction(UserManager.ENSURE_VERIFY_APPS,
+                getUser().getIdentifier())) {
+            return PackageManager.VERIFICATION_REJECT;
+        }
+        return android.provider.Settings.Global.getInt(mPm.mContext.getContentResolver(),
+                android.provider.Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE,
+                DEFAULT_VERIFICATION_RESPONSE);
+    }
+
+    private boolean packageExists(String packageName) {
+        synchronized (mPm.mLock) {
+            return mPm.mSettings.getPackageLPr(packageName) != null;
         }
     }
 
+    private boolean isAdbVerificationEnabled(PackageInfoLite pkgInfoLite, int userId,
+            boolean requestedDisableVerification) {
+        if (mPm.isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS)) {
+            return true;
+        }
+        // Check if the developer wants to skip verification for ADB installs
+        if (requestedDisableVerification) {
+            if (!packageExists(pkgInfoLite.packageName)) {
+                // Always verify fresh install
+                return true;
+            }
+            // Only skip when apk is debuggable
+            return !pkgInfoLite.debuggable;
+        }
+        return android.provider.Settings.Global.getInt(mPm.mContext.getContentResolver(),
+                android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
+    }
+
+    /**
+     * Check whether package verification has been enabled.
+     *
+     * @return true if verification should be performed
+     */
+    private boolean isVerificationEnabled(PackageInfoLite pkgInfoLite, int userId) {
+        if (!DEFAULT_VERIFY_ENABLE) {
+            return false;
+        }
+
+        final int installerUid = mVerificationInfo == null ? -1 : mVerificationInfo.mInstallerUid;
+        final int installFlags = mInstallFlags;
+
+        // Check if installing from ADB
+        if ((installFlags & PackageManager.INSTALL_FROM_ADB) != 0) {
+            boolean requestedDisableVerification =
+                    (mInstallFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0;
+            return isAdbVerificationEnabled(pkgInfoLite, userId, requestedDisableVerification);
+        }
+
+        // only when not installed from ADB, skip verification for instant apps when
+        // the installer and verifier are the same.
+        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
+            if (mPm.mInstantAppInstallerActivity != null
+                    && mPm.mInstantAppInstallerActivity.packageName.equals(
+                    mPm.mRequiredVerifierPackage)) {
+                try {
+                    mPm.mInjector.getSystemService(AppOpsManager.class)
+                            .checkPackage(installerUid, mPm.mRequiredVerifierPackage);
+                    if (DEBUG_VERIFY) {
+                        Slog.i(TAG, "disable verification for instant app");
+                    }
+                    return false;
+                } catch (SecurityException ignore) { }
+            }
+        }
+        return true;
+    }
 
     private List<ComponentName> matchVerifiers(PackageInfoLite pkgInfo,
             List<ResolveInfo> receivers, final PackageVerificationState verificationState) {
