@@ -16,6 +16,7 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.BytesLong;
 import android.annotation.SystemApi;
 
 /**
@@ -69,5 +70,11 @@ public class SectionEvent extends FilterEvent {
         return (int) getDataLengthLong();
     }
 
-    public long getDataLengthLong() { return mDataLength; }
+    /**
+     * Gets data size in bytes of filtered data.
+     */
+    @BytesLong
+    public long getDataLengthLong() {
+        return mDataLength;
+    }
 }

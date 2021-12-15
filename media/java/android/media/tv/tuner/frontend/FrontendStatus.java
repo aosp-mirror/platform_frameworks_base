@@ -53,7 +53,7 @@ public class FrontendStatus {
             FRONTEND_STATUS_TYPE_MODULATIONS_EXT, FRONTEND_STATUS_TYPE_ROLL_OFF,
             FRONTEND_STATUS_TYPE_IS_MISO_ENABLED, FRONTEND_STATUS_TYPE_IS_LINEAR,
             FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES_ENABLED, FRONTEND_STATUS_TYPE_ISDBT_MODE,
-            FRONTEND_STATUS_TYPE_ISDBT_PARTIAL_RECEPTION_FLAG, FRONTEND_STATUS_TYPE_STREAM_ID_LIST})
+            FRONTEND_STATUS_TYPE_ISDBT_PARTIAL_RECEPTION_FLAG, FRONTEND_STATUS_TYPE_STREAM_IDS})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendStatusType {}
 
@@ -255,9 +255,9 @@ public class FrontendStatus {
             android.hardware.tv.tuner.FrontendStatusType.ISDBT_PARTIAL_RECEPTION_FLAG;
 
     /**
-     * Stream ID list included in a transponder.
+     * Stream IDs included in a transponder.
      */
-    public static final int FRONTEND_STATUS_TYPE_STREAM_ID_LIST =
+    public static final int FRONTEND_STATUS_TYPE_STREAM_IDS =
             android.hardware.tv.tuner.FrontendStatusType.STREAM_ID_LIST;
 
     /** @hide */
@@ -1008,19 +1008,19 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets stream id list included in a transponder.
+     * Gets stream ids included in a transponder.
      *
      * <p>This query is only supported by Tuner HAL 2.0 or higher. Unsupported version or if HAL
-     * doesn't return stream id list status will throw IllegalStateException. Use
+     * doesn't return stream ids will throw IllegalStateException. Use
      * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @SuppressLint("ArrayReturn")
     @NonNull
-    public int[] getStreamIdList() {
+    public int[] getStreamIds() {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
-                TunerVersionChecker.TUNER_VERSION_2_0, "stream id list status");
+                TunerVersionChecker.TUNER_VERSION_2_0, "stream ids status");
         if (mStreamIds == null) {
-            throw new IllegalStateException("stream id list status is empty");
+            throw new IllegalStateException("stream ids are empty");
         }
         return mStreamIds;
     }
