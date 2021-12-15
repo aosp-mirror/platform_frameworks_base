@@ -779,24 +779,25 @@ public final class UsageStatsManager {
      * thinks the app will be launched sooner, 2) the estimated time has passed. Passing in
      * {@link Long#MAX_VALUE} effectively clears the previously set launch time for the app.
      *
-     * @param packageName         The package name of the app to set the bucket for.
-     * @param estimatedLaunchTime The next time the app is expected to be launched. Units are in
-     *                            milliseconds since epoch (the same as
-     *                            {@link System#currentTimeMillis()}).
+     * @param packageName               The package name of the app to set the bucket for.
+     * @param estimatedLaunchTimeMillis The next time the app is expected to be launched. Units are
+     *                                  in milliseconds since epoch (the same as
+     *                                  {@link System#currentTimeMillis()}).
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE)
-    public void setEstimatedLaunchTime(@NonNull String packageName,
-            @CurrentTimeMillisLong long estimatedLaunchTime) {
+    public void setEstimatedLaunchTimeMillis(@NonNull String packageName,
+            @CurrentTimeMillisLong long estimatedLaunchTimeMillis) {
         if (packageName == null) {
             throw new NullPointerException("package name cannot be null");
         }
-        if (estimatedLaunchTime <= 0) {
+        if (estimatedLaunchTimeMillis <= 0) {
             throw new IllegalArgumentException("estimated launch time must be positive");
         }
         try {
-            mService.setEstimatedLaunchTime(packageName, estimatedLaunchTime, mContext.getUserId());
+            mService.setEstimatedLaunchTime(
+                    packageName, estimatedLaunchTimeMillis, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -806,19 +807,20 @@ public final class UsageStatsManager {
      * Changes the estimated launch times for multiple apps at once. The map is keyed by the
      * package name and the value is the estimated launch time.
      *
-     * @param estimatedLaunchTimes A map of package name to estimated launch time.
-     * @see #setEstimatedLaunchTime(String, long)
+     * @param estimatedLaunchTimesMillis A map of package name to estimated launch time.
+     * @see #setEstimatedLaunchTimeMillis(String, long)
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE)
-    public void setEstimatedLaunchTimes(@NonNull Map<String, Long> estimatedLaunchTimes) {
-        if (estimatedLaunchTimes == null) {
-            throw new NullPointerException("estimatedLaunchTimes cannot be null");
+    public void setEstimatedLaunchTimesMillis(
+            @NonNull Map<String, Long> estimatedLaunchTimesMillis) {
+        if (estimatedLaunchTimesMillis == null) {
+            throw new NullPointerException("estimatedLaunchTimesMillis cannot be null");
         }
         final List<AppLaunchEstimateInfo> estimateList =
-                new ArrayList<>(estimatedLaunchTimes.size());
-        for (Map.Entry<String, Long> estimateEntry : estimatedLaunchTimes.entrySet()) {
+                new ArrayList<>(estimatedLaunchTimesMillis.size());
+        for (Map.Entry<String, Long> estimateEntry : estimatedLaunchTimesMillis.entrySet()) {
             final String pkgName = estimateEntry.getKey();
             if (pkgName == null) {
                 throw new NullPointerException("package name cannot be null");

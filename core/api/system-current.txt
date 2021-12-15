@@ -1971,8 +1971,8 @@ package android.app.usage {
     method public void reportUsageStop(@NonNull android.app.Activity, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE) public void setAppStandbyBucket(String, int);
     method @RequiresPermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE) public void setAppStandbyBuckets(java.util.Map<java.lang.String,java.lang.Integer>);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE) public void setEstimatedLaunchTime(@NonNull String, long);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE) public void setEstimatedLaunchTimes(@NonNull java.util.Map<java.lang.String,java.lang.Long>);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE) public void setEstimatedLaunchTimeMillis(@NonNull String, long);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE) public void setEstimatedLaunchTimesMillis(@NonNull java.util.Map<java.lang.String,java.lang.Long>);
     method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void unregisterAppUsageLimitObserver(int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void unregisterAppUsageObserver(int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void unregisterUsageSessionObserver(int);
