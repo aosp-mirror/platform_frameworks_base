@@ -8967,8 +8967,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
+                mProcessList.mAppExitInfoTracker.dumpHistoryProcessExitInfo(pw, dumpPackage);
             }
-            mProcessList.mAppExitInfoTracker.dumpHistoryProcessExitInfo(pw, dumpPackage);
             if (dumpPackage == null) {
                 pw.println();
                 if (dumpAll) {
