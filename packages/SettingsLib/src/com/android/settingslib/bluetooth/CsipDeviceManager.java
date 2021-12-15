@@ -193,7 +193,7 @@ public class CsipDeviceManager {
                     return true;
                 }
                 final Set<CachedBluetoothDevice> memberSet = cachedDevice.getMemberDevice();
-                if (memberSet == null) {
+                if (memberSet.isEmpty()) {
                     break;
                 }
 
@@ -225,7 +225,7 @@ public class CsipDeviceManager {
         for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
             if (isValidGroupId(cachedDevice.getGroupId())) {
                 Set<CachedBluetoothDevice> memberSet = cachedDevice.getMemberDevice();
-                if (memberSet == null) {
+                if (memberSet.isEmpty()) {
                     continue;
                 }
 
