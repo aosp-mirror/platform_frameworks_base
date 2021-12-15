@@ -335,8 +335,7 @@ public class ShellTaskOrganizerTests {
         mOrganizer.onTaskAppeared(taskInfo1, null);
 
         // sizeCompatActivity is null if top activity is not in size compat.
-        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* taskListener */);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1, null /* taskListener */);
 
         // sizeCompatActivity is non-null if top activity is in size compat.
         clearInvocations(mCompatUI);
@@ -346,8 +345,7 @@ public class ShellTaskOrganizerTests {
         taskInfo2.topActivityInSizeCompat = true;
         taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
-        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                taskInfo1.configuration, taskListener);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo2, taskListener);
 
         // Not show size compat UI if task is not visible.
         clearInvocations(mCompatUI);
@@ -357,13 +355,11 @@ public class ShellTaskOrganizerTests {
         taskInfo3.topActivityInSizeCompat = true;
         taskInfo3.isVisible = false;
         mOrganizer.onTaskInfoChanged(taskInfo3);
-        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* taskListener */);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo3, null /* taskListener */);
 
         clearInvocations(mCompatUI);
         mOrganizer.onTaskVanished(taskInfo1);
-        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* taskListener */);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1, null /* taskListener */);
     }
 
     @Test
@@ -377,8 +373,7 @@ public class ShellTaskOrganizerTests {
 
         // Task listener sent to compat UI is null if top activity doesn't request a camera
         // compat control.
-        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* taskListener */);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1, null /* taskListener */);
 
         // Task linster is non-null when request a camera compat control for a visible task.
         clearInvocations(mCompatUI);
@@ -388,8 +383,7 @@ public class ShellTaskOrganizerTests {
         taskInfo2.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
         taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
-        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                taskInfo1.configuration, taskListener);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo2, taskListener);
 
         // CompatUIController#onCompatInfoChanged is called when requested state for a camera
         // compat control changes for a visible task.
@@ -400,8 +394,7 @@ public class ShellTaskOrganizerTests {
         taskInfo3.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
         taskInfo3.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo3);
-        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                taskInfo1.configuration, taskListener);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo3, taskListener);
 
         // CompatUIController#onCompatInfoChanged is called when a top activity goes in size compat
         // mode for a visible task that has a compat control.
@@ -413,8 +406,7 @@ public class ShellTaskOrganizerTests {
         taskInfo4.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
         taskInfo4.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo4);
-        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                taskInfo1.configuration, taskListener);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo4, taskListener);
 
         // Task linster is null when a camera compat control is dimissed for a visible task.
         clearInvocations(mCompatUI);
@@ -424,8 +416,7 @@ public class ShellTaskOrganizerTests {
         taskInfo5.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
         taskInfo5.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo5);
-        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* taskListener */);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo5, null /* taskListener */);
 
         // Task linster is null when request a camera compat control for a invisible task.
         clearInvocations(mCompatUI);
@@ -435,13 +426,11 @@ public class ShellTaskOrganizerTests {
         taskInfo6.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
         taskInfo6.isVisible = false;
         mOrganizer.onTaskInfoChanged(taskInfo6);
-        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* taskListener */);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo6, null /* taskListener */);
 
         clearInvocations(mCompatUI);
         mOrganizer.onTaskVanished(taskInfo1);
-        verify(mCompatUI).onCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* taskListener */);
+        verify(mCompatUI).onCompatInfoChanged(taskInfo1, null /* taskListener */);
     }
 
     @Test

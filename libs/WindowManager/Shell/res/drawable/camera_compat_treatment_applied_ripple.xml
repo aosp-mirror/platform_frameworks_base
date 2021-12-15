@@ -16,5 +16,5 @@
   -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
         android:color="@color/compat_background_ripple">
-    <item android:drawable="@drawable/size_compat_restart_button"/>
+    <item android:drawable="@drawable/camera_compat_treatment_applied_button"/>
 </ripple>
