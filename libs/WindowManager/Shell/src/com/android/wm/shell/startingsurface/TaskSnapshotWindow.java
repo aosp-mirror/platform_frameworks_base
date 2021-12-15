@@ -380,9 +380,7 @@ public class TaskSnapshotWindow {
     }
 
     private void drawSizeMatchSnapshot() {
-        GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
-                mSnapshot.getHardwareBuffer());
-        mTransaction.setBuffer(mSurfaceControl, graphicBuffer)
+        mTransaction.setBuffer(mSurfaceControl, mSnapshot.getHardwareBuffer())
                 .setColorSpace(mSurfaceControl, mSnapshot.getColorSpace())
                 .apply();
     }
@@ -428,20 +426,20 @@ public class TaskSnapshotWindow {
         // Scale the mismatch dimensions to fill the task bounds
         mSnapshotMatrix.setRectToRect(mTmpSnapshotSize, mTmpDstFrame, Matrix.ScaleToFit.FILL);
         mTransaction.setMatrix(childSurfaceControl, mSnapshotMatrix, mTmpFloat9);
-        GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
-                mSnapshot.getHardwareBuffer());
         mTransaction.setColorSpace(childSurfaceControl, mSnapshot.getColorSpace());
-        mTransaction.setBuffer(childSurfaceControl, graphicBuffer);
+        mTransaction.setBuffer(childSurfaceControl, mSnapshot.getHardwareBuffer());
 
         if (aspectRatioMismatch) {
             GraphicBuffer background = GraphicBuffer.create(mFrame.width(), mFrame.height(),
                     PixelFormat.RGBA_8888,
                     GraphicBuffer.USAGE_HW_TEXTURE | GraphicBuffer.USAGE_HW_COMPOSER
                             | GraphicBuffer.USAGE_SW_WRITE_RARELY);
+            // TODO: Support this on HardwareBuffer
             final Canvas c = background.lockCanvas();
             drawBackgroundAndBars(c, frame);
             background.unlockCanvasAndPost(c);
-            mTransaction.setBuffer(mSurfaceControl, background);
+            mTransaction.setBuffer(mSurfaceControl,
+                    HardwareBuffer.createFromGraphicBuffer(background));
         }
         mTransaction.apply();
         childSurfaceControl.release();

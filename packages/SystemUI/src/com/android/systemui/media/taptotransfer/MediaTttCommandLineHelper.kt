@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.taptotransfer
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.commandline.Command
@@ -48,7 +49,9 @@ class MediaTttCommandLineHelper @Inject constructor(
                     mediaTttChipController.displayChip(TransferInitiated(otherDeviceName))
                 }
                 TRANSFER_SUCCEEDED_COMMAND_NAME -> {
-                    mediaTttChipController.displayChip(TransferSucceeded(otherDeviceName))
+                    mediaTttChipController.displayChip(
+                        TransferSucceeded(otherDeviceName, fakeUndoRunnable)
+                    )
                 }
                 else -> {
                     pw.println("Chip type must be one of " +
@@ -74,6 +77,10 @@ class MediaTttCommandLineHelper @Inject constructor(
         override fun help(pw: PrintWriter) {
             pw.println("Usage: adb shell cmd statusbar $REMOVE_CHIP_COMMAND_TAG")
         }
+    }
+
+    private val fakeUndoRunnable = Runnable {
+        Log.i(TAG, "Undo runnable triggered")
     }
 }
 

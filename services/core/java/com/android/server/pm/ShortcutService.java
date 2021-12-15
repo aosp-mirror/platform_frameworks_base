@@ -2014,6 +2014,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts, /*ignoreInvisible=*/ true);
             ps.ensureNoBitmapIconIfShortcutIsLongLived(newShortcuts);
+            ps.ensureAllShortcutsVisibleToLauncher(newShortcuts);
 
             // For update, don't fill in the default activity.  Having null activity means
             // "don't update the activity" here.
@@ -2214,6 +2215,9 @@ public class ShortcutService extends IShortcutService.Stub {
             IntentSender resultIntent, int userId, AndroidFuture<String> ret) {
         Objects.requireNonNull(shortcut);
         Preconditions.checkArgument(shortcut.isEnabled(), "Shortcut must be enabled");
+        Preconditions.checkArgument(
+                shortcut.isIncludedIn(ShortcutInfo.SURFACE_LAUNCHER),
+                "Shortcut excluded from launcher cannot be pinned");
         ret.complete(String.valueOf(requestPinItem(
                 packageName, userId, shortcut, null, null, resultIntent)));
     }

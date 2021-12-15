@@ -902,6 +902,27 @@ std::string AssetManager2::GetLastResourceResolution() const {
   return log_stream.str();
 }
 
+base::expected<uint32_t, NullOrIOError> AssetManager2::GetParentThemeResourceId(uint32_t resid)
+const {
+  auto entry = FindEntry(resid, 0u /* density_override */,
+                         false /* stop_at_first_match */,
+                         false /* ignore_configuration */);
+  if (!entry.has_value()) {
+    return base::unexpected(entry.error());
+  }
+
+  auto entry_map = std::get_if<incfs::verified_map_ptr<ResTable_map_entry>>(&entry->entry);
+  if (entry_map == nullptr) {
+    // Not a bag, nothing to do.
+    return base::unexpected(std::nullopt);
+  }
+
+  auto map = *entry_map;
+  const uint32_t parent_resid = dtohl(map->parent.ident);
+
+  return parent_resid;
+}
+
 base::expected<AssetManager2::ResourceName, NullOrIOError> AssetManager2::GetResourceName(
     uint32_t resid) const {
   auto result = FindEntry(resid, 0u /* density_override */, true /* stop_at_first_match */,

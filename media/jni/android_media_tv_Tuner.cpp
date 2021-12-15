@@ -588,13 +588,13 @@ void FilterClientCallbackImpl::getSectionEvent(jobjectArray &arr, const int size
                                                const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/SectionEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIII)V");
+    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIJ)V");
 
     const DemuxFilterSectionEvent &sectionEvent = event.get<DemuxFilterEvent::Tag::section>();
     jint tableId = sectionEvent.tableId;
     jint version = sectionEvent.version;
     jint sectionNum = sectionEvent.sectionNum;
-    jint dataLength = sectionEvent.dataLength;
+    jlong dataLength = sectionEvent.dataLength;
 
     jobject obj = env->NewObject(eventClazz, eventInit, tableId, version, sectionNum, dataLength);
     env->SetObjectArrayElement(arr, size, obj);
@@ -604,10 +604,9 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
                                              const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/MediaEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz,
-            "<init>",
-            "(IZJJJLandroid/media/MediaCodec$LinearBlock;"
-            "ZJIZLandroid/media/tv/tuner/filter/AudioDescriptor;)V");
+    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>",
+                                           "(IZJZJJJLandroid/media/MediaCodec$LinearBlock;"
+                                           "ZJIZLandroid/media/tv/tuner/filter/AudioDescriptor;)V");
     jfieldID eventContext = env->GetFieldID(eventClazz, "mNativeContext", "J");
 
     const DemuxFilterMediaEvent &mediaEvent = event.get<DemuxFilterEvent::Tag::media>();
@@ -633,15 +632,17 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
     jint streamId = mediaEvent.streamId;
     jboolean isPtsPresent = mediaEvent.isPtsPresent;
     jlong pts = mediaEvent.pts;
+    jboolean isDtsPresent = mediaEvent.isDtsPresent;
+    jlong dts = mediaEvent.dts;
     jlong offset = mediaEvent.offset;
     jboolean isSecureMemory = mediaEvent.isSecureMemory;
     jlong avDataId = mediaEvent.avDataId;
     jint mpuSequenceNumber = mediaEvent.mpuSequenceNumber;
     jboolean isPesPrivateData = mediaEvent.isPesPrivateData;
 
-    jobject obj = env->NewObject(eventClazz, eventInit, streamId, isPtsPresent, pts, dataLength,
-                                 offset, nullptr, isSecureMemory, avDataId, mpuSequenceNumber,
-                                 isPesPrivateData, audioDescriptor);
+    jobject obj = env->NewObject(eventClazz, eventInit, streamId, isPtsPresent, pts, isDtsPresent,
+                                 dts, dataLength, offset, nullptr, isSecureMemory, avDataId,
+                                 mpuSequenceNumber, isPesPrivateData, audioDescriptor);
 
     uint64_t avSharedMemSize = mFilterClient->getAvSharedHandleInfo().size;
     if (mediaEvent.avMemory.fds.size() > 0 || mediaEvent.avDataId != 0 ||
@@ -733,16 +734,17 @@ void FilterClientCallbackImpl::getDownloadEvent(jobjectArray &arr, const int siz
                                                 const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/DownloadEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIII)V");
+    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIIII)V");
 
     const DemuxFilterDownloadEvent &downloadEvent = event.get<DemuxFilterEvent::Tag::download>();
     jint itemId = downloadEvent.itemId;
+    jint downloadId = downloadEvent.downloadId;
     jint mpuSequenceNumber = downloadEvent.mpuSequenceNumber;
     jint itemFragmentIndex = downloadEvent.itemFragmentIndex;
     jint lastItemFragmentIndex = downloadEvent.lastItemFragmentIndex;
     jint dataLength = downloadEvent.dataLength;
 
-    jobject obj = env->NewObject(eventClazz, eventInit, itemId, mpuSequenceNumber,
+    jobject obj = env->NewObject(eventClazz, eventInit, itemId, downloadId, mpuSequenceNumber,
                                  itemFragmentIndex, lastItemFragmentIndex, dataLength);
     env->SetObjectArrayElement(arr, size, obj);
 }
@@ -2507,7 +2509,14 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                 env->SetObjectField(statusObj, field, newIntegerObj);
                 break;
             }
-            default: {
+            case FrontendStatus::Tag::streamIdList: {
+                jfieldID field = env->GetFieldID(clazz, "mStreamIds", "[I");
+                std::vector<int32_t> ids = s.get<FrontendStatus::Tag::streamIdList>();
+
+                jintArray valObj = env->NewIntArray(v.size());
+                env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint *>(&ids[0]));
+
+                env->SetObjectField(statusObj, field, valObj);
                 break;
             }
         }
@@ -3540,10 +3549,13 @@ static DemuxFilterRecordSettings getFilterRecordSettings(JNIEnv *env, const jobj
 
 static DemuxFilterDownloadSettings getFilterDownloadSettings(JNIEnv *env, const jobject& settings) {
     jclass clazz = env->FindClass("android/media/tv/tuner/filter/DownloadSettings");
+    bool useDownloadId =
+            env->GetBooleanField(settings, env->GetFieldID(clazz, "mUseDownloadId", "Z"));
     int32_t downloadId = env->GetIntField(settings, env->GetFieldID(clazz, "mDownloadId", "I"));
 
-    DemuxFilterDownloadSettings filterDownloadSettings {
-        .downloadId = downloadId,
+    DemuxFilterDownloadSettings filterDownloadSettings{
+            .useDownloadId = useDownloadId,
+            .downloadId = downloadId,
     };
     return filterDownloadSettings;
 }
@@ -4324,6 +4336,17 @@ static jlong android_media_tv_Tuner_read_dvr(JNIEnv *env, jobject dvr, jlong siz
     return (jlong)dvrClient->readFromFile(size);
 }
 
+static jlong android_media_tv_Tuner_seek_dvr(JNIEnv *env, jobject dvr, jlong pos) {
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Failed to seek dvr: dvr client not found");
+        return -1;
+    }
+
+    return (jlong)dvrClient->seekFile(pos);
+}
+
 static jlong android_media_tv_Tuner_read_dvr_from_array(
         JNIEnv* env, jobject dvr, jbyteArray buffer, jlong offset, jlong size) {
     sp<DvrClient> dvrClient = getDvrClient(env, dvr);
@@ -4478,38 +4501,37 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_tuner },
     { "nativeCloseFrontend", "(I)I", (void *)android_media_tv_Tuner_close_frontend },
     { "nativeCloseDemux", "(I)I", (void *)android_media_tv_Tuner_close_demux },
-    {"nativeOpenSharedFilter",
+    { "nativeOpenSharedFilter",
             "(Ljava/lang/String;)Landroid/media/tv/tuner/filter/SharedFilter;",
             (void *)android_media_tv_Tuner_open_shared_filter},
 };
 
 static const JNINativeMethod gFilterMethods[] = {
     { "nativeConfigureFilter", "(IILandroid/media/tv/tuner/filter/FilterConfiguration;)I",
-            (void *)android_media_tv_Tuner_configure_filter },
-    { "nativeGetId", "()I", (void *)android_media_tv_Tuner_get_filter_id },
-    { "nativeGetId64Bit", "()J",
-            (void *)android_media_tv_Tuner_get_filter_64bit_id },
+            (void *)android_media_tv_Tuner_configure_filter},
+    { "nativeGetId", "()I", (void *)android_media_tv_Tuner_get_filter_id},
+    { "nativeGetId64Bit", "()J", (void *)android_media_tv_Tuner_get_filter_64bit_id},
     { "nativeConfigureMonitorEvent", "(I)I",
-            (void *)android_media_tv_Tuner_configure_monitor_event },
+            (void *)android_media_tv_Tuner_configure_monitor_event},
     { "nativeSetDataSource", "(Landroid/media/tv/tuner/filter/Filter;)I",
-            (void *)android_media_tv_Tuner_set_filter_data_source },
-    { "nativeStartFilter", "()I", (void *)android_media_tv_Tuner_start_filter },
-    { "nativeStopFilter", "()I", (void *)android_media_tv_Tuner_stop_filter },
-    { "nativeFlushFilter", "()I", (void *)android_media_tv_Tuner_flush_filter },
-    { "nativeRead", "([BJJ)I", (void *)android_media_tv_Tuner_read_filter_fmq },
-    { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_filter },
-    {"nativeAcquireSharedFilterToken", "()Ljava/lang/String;",
+            (void *)android_media_tv_Tuner_set_filter_data_source},
+    { "nativeStartFilter", "()I", (void *)android_media_tv_Tuner_start_filter},
+    { "nativeStopFilter", "()I", (void *)android_media_tv_Tuner_stop_filter},
+    { "nativeFlushFilter", "()I", (void *)android_media_tv_Tuner_flush_filter},
+    { "nativeRead", "([BJJ)I", (void *)android_media_tv_Tuner_read_filter_fmq},
+    { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_filter},
+    { "nativeAcquireSharedFilterToken", "()Ljava/lang/String;",
             (void *)android_media_tv_Tuner_acquire_shared_filter_token},
-    {"nativeFreeSharedFilterToken", "(Ljava/lang/String;)V",
+    { "nativeFreeSharedFilterToken", "(Ljava/lang/String;)V",
             (void *)android_media_tv_Tuner_free_shared_filter_token},
 };
 
 static const JNINativeMethod gSharedFilterMethods[] = {
-    {"nativeStartSharedFilter", "()I", (void *)android_media_tv_Tuner_start_filter},
-    {"nativeStopSharedFilter", "()I", (void *)android_media_tv_Tuner_stop_filter},
-    {"nativeFlushSharedFilter", "()I", (void *)android_media_tv_Tuner_flush_filter},
-    {"nativeSharedRead", "([BJJ)I", (void *)android_media_tv_Tuner_read_filter_fmq},
-    {"nativeSharedClose", "()I", (void *)android_media_tv_Tuner_close_filter},
+    { "nativeStartSharedFilter", "()I", (void *)android_media_tv_Tuner_start_filter},
+    { "nativeStopSharedFilter", "()I", (void *)android_media_tv_Tuner_stop_filter},
+    { "nativeFlushSharedFilter", "()I", (void *)android_media_tv_Tuner_flush_filter},
+    { "nativeSharedRead", "([BJJ)I", (void *)android_media_tv_Tuner_read_filter_fmq},
+    { "nativeSharedClose", "()I", (void *)android_media_tv_Tuner_close_filter},
 };
 
 static const JNINativeMethod gTimeFilterMethods[] = {
@@ -4549,18 +4571,19 @@ static const JNINativeMethod gDvrRecorderMethods[] = {
 
 static const JNINativeMethod gDvrPlaybackMethods[] = {
     { "nativeAttachFilter", "(Landroid/media/tv/tuner/filter/Filter;)I",
-            (void *)android_media_tv_Tuner_attach_filter },
+            (void *)android_media_tv_Tuner_attach_filter},
     { "nativeDetachFilter", "(Landroid/media/tv/tuner/filter/Filter;)I",
-            (void *)android_media_tv_Tuner_detach_filter },
+            (void *)android_media_tv_Tuner_detach_filter},
     { "nativeConfigureDvr", "(Landroid/media/tv/tuner/dvr/DvrSettings;)I",
-            (void *)android_media_tv_Tuner_configure_dvr },
-    { "nativeStartDvr", "()I", (void *)android_media_tv_Tuner_start_dvr },
-    { "nativeStopDvr", "()I", (void *)android_media_tv_Tuner_stop_dvr },
-    { "nativeFlushDvr", "()I", (void *)android_media_tv_Tuner_flush_dvr },
-    { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_dvr },
-    { "nativeSetFileDescriptor", "(I)V", (void *)android_media_tv_Tuner_dvr_set_fd },
-    { "nativeRead", "(J)J", (void *)android_media_tv_Tuner_read_dvr },
-    { "nativeRead", "([BJJ)J", (void *)android_media_tv_Tuner_read_dvr_from_array },
+            (void *)android_media_tv_Tuner_configure_dvr},
+    { "nativeStartDvr", "()I", (void *)android_media_tv_Tuner_start_dvr},
+    { "nativeStopDvr", "()I", (void *)android_media_tv_Tuner_stop_dvr},
+    { "nativeFlushDvr", "()I", (void *)android_media_tv_Tuner_flush_dvr},
+    { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_dvr},
+    { "nativeSetFileDescriptor", "(I)V", (void *)android_media_tv_Tuner_dvr_set_fd},
+    { "nativeRead", "(J)J", (void *)android_media_tv_Tuner_read_dvr},
+    { "nativeRead", "([BJJ)J", (void *)android_media_tv_Tuner_read_dvr_from_array},
+    { "nativeSeek", "(J)J", (void *)android_media_tv_Tuner_seek_dvr},
 };
 
 static const JNINativeMethod gLnbMethods[] = {

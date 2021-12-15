@@ -44,7 +44,6 @@ import android.content.res.TypedArray;
 import android.graphics.BLASTBufferQueue;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -1930,9 +1929,7 @@ public abstract class WallpaperService extends Service {
 
             mScreenshotSize.set(mSurfaceSize.x, mSurfaceSize.y);
 
-            GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(hardwareBuffer);
-
-            t.setBuffer(mScreenshotSurfaceControl, graphicBuffer);
+            t.setBuffer(mScreenshotSurfaceControl, hardwareBuffer);
             t.setColorSpace(mScreenshotSurfaceControl, screenshotBuffer.getColorSpace());
             // Place on top everything else.
             t.setLayer(mScreenshotSurfaceControl, Integer.MAX_VALUE);

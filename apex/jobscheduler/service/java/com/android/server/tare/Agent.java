@@ -46,6 +46,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArrayMap;
+import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -681,8 +682,8 @@ class Agent {
             final long minBalance = mIrs.getMinBalanceLocked(userId, pkgName);
             final double perc = batteryLevel / 100d;
             // TODO: maybe don't give credits to bankrupt apps until battery level >= 50%
-            if (ledger.getCurrentBalance() < minBalance) {
-                final long shortfall = minBalance - getBalanceLocked(userId, pkgName);
+            final long shortfall = minBalance - ledger.getCurrentBalance();
+            if (shortfall > 0) {
                 recordTransactionLocked(userId, pkgName, ledger,
                         new Ledger.Transaction(now, now, REGULATION_BASIC_INCOME,
                                 null, (long) (perc * shortfall)), true);
@@ -1170,5 +1171,57 @@ class Agent {
     void dumpLocked(IndentingPrintWriter pw) {
         pw.println();
         mBalanceThresholdAlarmQueue.dump(pw);
+
+        pw.println();
+        pw.println("Ongoing events:");
+        pw.increaseIndent();
+        boolean printedEvents = false;
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        for (int u = mCurrentOngoingEvents.numMaps() - 1; u >= 0; --u) {
+            final int userId = mCurrentOngoingEvents.keyAt(u);
+            for (int p = mCurrentOngoingEvents.numElementsForKey(userId) - 1; p >= 0; --p) {
+                final String pkgName = mCurrentOngoingEvents.keyAt(u, p);
+                final SparseArrayMap<String, OngoingEvent> ongoingEvents =
+                        mCurrentOngoingEvents.get(userId, pkgName);
+
+                boolean printedApp = false;
+
+                for (int e = ongoingEvents.numMaps() - 1; e >= 0; --e) {
+                    final int eventId = ongoingEvents.keyAt(e);
+                    for (int t = ongoingEvents.numElementsForKey(eventId) - 1; t >= 0; --t) {
+                        if (!printedApp) {
+                            printedApp = true;
+                            pw.println(appToString(userId, pkgName));
+                            pw.increaseIndent();
+                        }
+                        printedEvents = true;
+
+                        OngoingEvent ongoingEvent = ongoingEvents.valueAt(e, t);
+
+                        pw.print(EconomicPolicy.eventToString(ongoingEvent.eventId));
+                        if (ongoingEvent.tag != null) {
+                            pw.print("(");
+                            pw.print(ongoingEvent.tag);
+                            pw.print(")");
+                        }
+                        pw.print(" runtime=");
+                        TimeUtils.formatDuration(nowElapsed - ongoingEvent.startTimeElapsed, pw);
+                        pw.print(" delta/sec=");
+                        pw.print(ongoingEvent.deltaPerSec);
+                        pw.print(" refCount=");
+                        pw.print(ongoingEvent.refCount);
+                        pw.println();
+                    }
+                }
+
+                if (printedApp) {
+                    pw.decreaseIndent();
+                }
+            }
+        }
+        if (!printedEvents) {
+            pw.print("N/A");
+        }
+        pw.decreaseIndent();
     }
 }

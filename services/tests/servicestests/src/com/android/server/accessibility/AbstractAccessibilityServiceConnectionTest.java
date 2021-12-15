@@ -585,8 +585,8 @@ public class AbstractAccessibilityServiceConnectionTest {
         doAnswer((invocation) -> {
             ((Region) invocation.getArguments()[1]).set(region);
             return null;
-        }).when(mMockMagnificationProcessor).getMagnificationRegion(eq(displayId),
-                any(), anyBoolean());
+        }).when(mMockMagnificationProcessor).getFullscreenMagnificationRegion(eq(displayId), any(),
+                anyBoolean());
         when(mMockSystemSupport.getCurrentUserIdLocked()).thenReturn(USER_ID2);
 
         final Region result = mServiceConnection.getMagnificationRegion(displayId);
@@ -620,7 +620,8 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Test
     public void resetMagnification() {
         final int displayId = 1;
-        when(mMockMagnificationProcessor.reset(displayId, true)).thenReturn(true);
+        when(mMockMagnificationProcessor.resetFullscreenMagnification(displayId, true)).thenReturn(
+                true);
 
         final boolean result = mServiceConnection.resetMagnification(displayId, true);
         assertThat(result, is(true));
@@ -629,7 +630,8 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Test
     public void resetMagnification_cantControlMagnification_returnFalse() {
         final int displayId = 1;
-        when(mMockMagnificationProcessor.reset(displayId, true)).thenReturn(true);
+        when(mMockMagnificationProcessor.resetFullscreenMagnification(displayId, true)).thenReturn(
+                true);
         when(mMockSecurityPolicy.canControlMagnification(mServiceConnection)).thenReturn(false);
 
         final boolean result = mServiceConnection.resetMagnification(displayId, true);
@@ -639,7 +641,8 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Test
     public void resetMagnification_serviceNotBelongCurrentUser_returnFalse() {
         final int displayId = 1;
-        when(mMockMagnificationProcessor.reset(displayId, true)).thenReturn(true);
+        when(mMockMagnificationProcessor.resetFullscreenMagnification(displayId, true)).thenReturn(
+                true);
         when(mMockSystemSupport.getCurrentUserIdLocked()).thenReturn(USER_ID2);
 
         final boolean result = mServiceConnection.resetMagnification(displayId, true);

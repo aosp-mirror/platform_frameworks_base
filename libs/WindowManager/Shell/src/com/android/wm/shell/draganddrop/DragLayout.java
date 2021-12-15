@@ -17,7 +17,9 @@
 package com.android.wm.shell.draganddrop;
 
 import static android.app.StatusBarManager.DISABLE_NONE;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 
 import android.animation.Animator;
@@ -32,11 +34,11 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Insets;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
 import android.view.DragEvent;
 import android.view.SurfaceControl;
-import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.widget.LinearLayout;
@@ -73,6 +75,7 @@ public class DragLayout extends LinearLayout {
     private DropZoneView mDropZoneView2;
 
     private int mDisplayMargin;
+    private int mDividerSize;
     private Insets mInsets = Insets.NONE;
 
     private boolean mIsShowing;
@@ -89,13 +92,15 @@ public class DragLayout extends LinearLayout {
 
         mDisplayMargin = context.getResources().getDimensionPixelSize(
                 R.dimen.drop_layout_display_margin);
+        mDividerSize = context.getResources().getDimensionPixelSize(
+                R.dimen.split_divider_bar_width);
 
         mDropZoneView1 = new DropZoneView(context);
         mDropZoneView2 = new DropZoneView(context);
-        addView(mDropZoneView1, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        addView(mDropZoneView2, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
+        addView(mDropZoneView1, new LinearLayout.LayoutParams(MATCH_PARENT,
+                MATCH_PARENT));
+        addView(mDropZoneView2, new LinearLayout.LayoutParams(MATCH_PARENT,
+                MATCH_PARENT));
         ((LayoutParams) mDropZoneView1.getLayoutParams()).weight = 1;
         ((LayoutParams) mDropZoneView2.getLayoutParams()).weight = 1;
         updateContainerMargins();
@@ -165,42 +170,80 @@ public class DragLayout extends LinearLayout {
         mHasDropped = false;
         mCurrentTarget = null;
 
-        List<ActivityManager.RunningTaskInfo> tasks = null;
-        // Figure out the splashscreen info for the existing task(s).
-        try {
-            tasks = ActivityTaskManager.getService().getTasks(2,
-                            false /* filterOnlyVisibleRecents */,
-                            false /* keepIntentExtra */);
-        } catch (RemoteException e) {
-            // don't show an icon / will just use the defaults
-        }
-        if (tasks != null && !tasks.isEmpty()) {
-            ActivityManager.RunningTaskInfo taskInfo1 = tasks.get(0);
-            Drawable icon1 = mIconProvider.getIcon(taskInfo1.topActivityInfo);
-            int bgColor1 = getResizingBackgroundColor(taskInfo1);
-
-            boolean alreadyInSplit = mSplitScreenController != null
-                    && mSplitScreenController.isSplitScreenVisible();
-            if (alreadyInSplit && tasks.size() > 1) {
-                ActivityManager.RunningTaskInfo taskInfo2 = tasks.get(1);
-                Drawable icon2 = mIconProvider.getIcon(taskInfo2.topActivityInfo);
-                int bgColor2 = getResizingBackgroundColor(taskInfo2);
-
-                // figure out which task is on which side
-                int splitPosition1 = mSplitScreenController.getSplitPosition(taskInfo1.taskId);
-                boolean isTask1TopOrLeft = splitPosition1 == SPLIT_POSITION_TOP_OR_LEFT;
-                if (isTask1TopOrLeft) {
-                    mDropZoneView1.setAppInfo(bgColor1, icon1);
-                    mDropZoneView2.setAppInfo(bgColor2, icon2);
-                } else {
-                    mDropZoneView2.setAppInfo(bgColor1, icon1);
-                    mDropZoneView1.setAppInfo(bgColor2, icon2);
-                }
-            } else {
+        boolean alreadyInSplit = mSplitScreenController != null
+                && mSplitScreenController.isSplitScreenVisible();
+        if (!alreadyInSplit) {
+            List<ActivityManager.RunningTaskInfo> tasks = null;
+            // Figure out the splashscreen info for the existing task.
+            try {
+                tasks = ActivityTaskManager.getService().getTasks(1,
+                        false /* filterOnlyVisibleRecents */,
+                        false /* keepIntentExtra */);
+            } catch (RemoteException e) {
+                // don't show an icon / will just use the defaults
+            }
+            if (tasks != null && !tasks.isEmpty()) {
+                ActivityManager.RunningTaskInfo taskInfo1 = tasks.get(0);
+                Drawable icon1 = mIconProvider.getIcon(taskInfo1.topActivityInfo);
+                int bgColor1 = getResizingBackgroundColor(taskInfo1);
                 mDropZoneView1.setAppInfo(bgColor1, icon1);
                 mDropZoneView2.setAppInfo(bgColor1, icon1);
+                updateDropZoneSizes(null, null); // passing null splits the views evenly
             }
+        } else {
+            // We're already in split so get taskInfo from the controller to populate icon / color.
+            ActivityManager.RunningTaskInfo topOrLeftTask =
+                    mSplitScreenController.getTaskInfo(SPLIT_POSITION_TOP_OR_LEFT);
+            ActivityManager.RunningTaskInfo bottomOrRightTask =
+                    mSplitScreenController.getTaskInfo(SPLIT_POSITION_BOTTOM_OR_RIGHT);
+            if (topOrLeftTask != null && bottomOrRightTask != null) {
+                Drawable topOrLeftIcon = mIconProvider.getIcon(topOrLeftTask.topActivityInfo);
+                int topOrLeftColor = getResizingBackgroundColor(topOrLeftTask);
+                Drawable bottomOrRightIcon = mIconProvider.getIcon(
+                        bottomOrRightTask.topActivityInfo);
+                int bottomOrRightColor = getResizingBackgroundColor(bottomOrRightTask);
+                mDropZoneView1.setAppInfo(topOrLeftColor, topOrLeftIcon);
+                mDropZoneView2.setAppInfo(bottomOrRightColor, bottomOrRightIcon);
+            }
+
+            // Update the dropzones to match existing split sizes
+            Rect topOrLeftBounds = new Rect();
+            Rect bottomOrRightBounds = new Rect();
+            mSplitScreenController.getStageBounds(topOrLeftBounds, bottomOrRightBounds);
+            updateDropZoneSizes(topOrLeftBounds, bottomOrRightBounds);
         }
+    }
+
+    /**
+     * Sets the size of the two drop zones based on the provided bounds. The divider sits between
+     * the views and its size is included in the calculations.
+     *
+     * @param bounds1 bounds to apply to the first dropzone view, null if split in half.
+     * @param bounds2 bounds to apply to the second dropzone view, null if split in half.
+     */
+    private void updateDropZoneSizes(Rect bounds1, Rect bounds2) {
+        final int orientation = getResources().getConfiguration().orientation;
+        final boolean isPortrait = orientation == Configuration.ORIENTATION_PORTRAIT;
+        final int halfDivider = mDividerSize / 2;
+        final LinearLayout.LayoutParams dropZoneView1 =
+                (LayoutParams) mDropZoneView1.getLayoutParams();
+        final LinearLayout.LayoutParams dropZoneView2 =
+                (LayoutParams) mDropZoneView2.getLayoutParams();
+        if (isPortrait) {
+            dropZoneView1.width = MATCH_PARENT;
+            dropZoneView2.width = MATCH_PARENT;
+            dropZoneView1.height = bounds1 != null ? bounds1.height() + halfDivider : MATCH_PARENT;
+            dropZoneView2.height = bounds2 != null ? bounds2.height() + halfDivider : MATCH_PARENT;
+        } else {
+            dropZoneView1.width = bounds1 != null ? bounds1.width() + halfDivider : MATCH_PARENT;
+            dropZoneView2.width = bounds2 != null ? bounds2.width() + halfDivider : MATCH_PARENT;
+            dropZoneView1.height = MATCH_PARENT;
+            dropZoneView2.height = MATCH_PARENT;
+        }
+        dropZoneView1.weight = bounds1 != null ? 0 : 1;
+        dropZoneView2.weight = bounds2 != null ? 0 : 1;
+        mDropZoneView1.setLayoutParams(dropZoneView1);
+        mDropZoneView2.setLayoutParams(dropZoneView2);
     }
 
     public void show() {

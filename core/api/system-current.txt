@@ -70,6 +70,7 @@ package android {
     field public static final String BIND_TRANSLATION_SERVICE = "android.permission.BIND_TRANSLATION_SERVICE";
     field public static final String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
+    field public static final String BLUETOOTH_MAP = "android.permission.BLUETOOTH_MAP";
     field public static final String BRICK = "android.permission.BRICK";
     field public static final String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final String BROADCAST_CLOSE_SYSTEM_DIALOGS = "android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS";
@@ -5875,9 +5876,11 @@ package android.media.audiopolicy {
     method public android.media.AudioTrack createAudioTrackSource(android.media.audiopolicy.AudioMix) throws java.lang.IllegalArgumentException;
     method public int detachMixes(@NonNull java.util.List<android.media.audiopolicy.AudioMix>);
     method public int getFocusDuckingBehavior();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioFocusInfo> getFocusStack();
     method public int getStatus();
     method public boolean removeUidDeviceAffinity(int);
     method public boolean removeUserIdDeviceAffinity(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean sendFocusLoss(@NonNull android.media.AudioFocusInfo) throws java.lang.IllegalStateException;
     method public int setFocusDuckingBehavior(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setRegistration(String);
     method public boolean setUidDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
@@ -6447,6 +6450,7 @@ package android.media.tv.tuner.dvr {
     method public int flush();
     method public long read(long);
     method public long read(@NonNull byte[], long, long);
+    method public long seek(long);
     method public void setFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
     method public int start();
     method public int stop();
@@ -6582,6 +6586,7 @@ package android.media.tv.tuner.filter {
 
   public class DownloadEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public int getDataLength();
+    method public int getDownloadId();
     method public int getItemFragmentIndex();
     method public int getItemId();
     method public int getLastItemFragmentIndex();
@@ -6591,11 +6596,13 @@ package android.media.tv.tuner.filter {
   public class DownloadSettings extends android.media.tv.tuner.filter.Settings {
     method @NonNull public static android.media.tv.tuner.filter.DownloadSettings.Builder builder(int);
     method public int getDownloadId();
+    method public boolean useDownloadId();
   }
 
   public static class DownloadSettings.Builder {
     method @NonNull public android.media.tv.tuner.filter.DownloadSettings build();
     method @NonNull public android.media.tv.tuner.filter.DownloadSettings.Builder setDownloadId(int);
+    method @NonNull public android.media.tv.tuner.filter.DownloadSettings.Builder setUseDownloadId(boolean);
   }
 
   public class Filter implements java.lang.AutoCloseable {
@@ -6694,12 +6701,14 @@ package android.media.tv.tuner.filter {
     method public long getAudioHandle();
     method public long getAvDataId();
     method public long getDataLength();
+    method public long getDts();
     method @Nullable public android.media.tv.tuner.filter.AudioDescriptor getExtraMetaData();
     method @Nullable public android.media.MediaCodec.LinearBlock getLinearBlock();
     method @IntRange(from=0) public int getMpuSequenceNumber();
     method public long getOffset();
     method public long getPts();
     method public int getStreamId();
+    method public boolean isDtsPresent();
     method public boolean isPrivateData();
     method public boolean isPtsPresent();
     method public boolean isSecureMemory();
@@ -6809,7 +6818,8 @@ package android.media.tv.tuner.filter {
   }
 
   public class SectionEvent extends android.media.tv.tuner.filter.FilterEvent {
-    method public int getDataLength();
+    method @Deprecated public int getDataLength();
+    method public long getDataLengthLong();
     method public int getSectionNumber();
     method public int getTableId();
     method public int getVersion();
@@ -7541,6 +7551,7 @@ package android.media.tv.tuner.frontend {
     method public int getSignalStrength();
     method public int getSnr();
     method public int getSpectralInversion();
+    method @NonNull public int[] getStreamIdList();
     method public int getSymbolRate();
     method @IntRange(from=0, to=65535) public int getSystemId();
     method public int getTransmissionMode();
@@ -7587,6 +7598,7 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH = 6; // 0x6
     field public static final int FRONTEND_STATUS_TYPE_SNR = 1; // 0x1
     field public static final int FRONTEND_STATUS_TYPE_SPECTRAL = 10; // 0xa
+    field public static final int FRONTEND_STATUS_TYPE_STREAM_ID_LIST = 39; // 0x27
     field public static final int FRONTEND_STATUS_TYPE_SYMBOL_RATE = 7; // 0x7
     field public static final int FRONTEND_STATUS_TYPE_T2_SYSTEM_ID = 29; // 0x1d
     field public static final int FRONTEND_STATUS_TYPE_TRANSMISSION_MODE = 27; // 0x1b

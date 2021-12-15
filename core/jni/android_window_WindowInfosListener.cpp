@@ -16,8 +16,10 @@
 
 #define LOG_TAG "WindowInfosListener"
 
+#include <android/graphics/matrix.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
+#include <gui/DisplayInfo.h>
 #include <gui/SurfaceComposerClient.h>
 #include <nativehelper/JNIHelp.h>
 #include <utils/Log.h>
@@ -37,14 +39,30 @@ static struct {
     jmethodID onWindowInfosChanged;
 } gListenerClassInfo;
 
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gDisplayInfoClassInfo;
+
 static jclass gInputWindowHandleClass;
+
+jobject fromDisplayInfo(JNIEnv* env, gui::DisplayInfo displayInfo) {
+    float transformValues[9];
+    for (int i = 0; i < 9; i++) {
+        transformValues[i] = displayInfo.transform[i % 3][i / 3];
+    }
+    ScopedLocalRef<jobject> matrixObj(env, AMatrix_newInstance(env, transformValues));
+    return env->NewObject(gDisplayInfoClassInfo.clazz, gDisplayInfoClassInfo.ctor,
+                          displayInfo.displayId, displayInfo.logicalWidth,
+                          displayInfo.logicalHeight, matrixObj.get());
+}
 
 struct WindowInfosListener : public gui::WindowInfosListener {
     WindowInfosListener(JNIEnv* env, jobject listener)
           : mListener(env->NewWeakGlobalRef(listener)) {}
 
     void onWindowInfosChanged(const std::vector<WindowInfo>& windowInfos,
-                              const std::vector<DisplayInfo>& /*displayInfos*/) override {
+                              const std::vector<DisplayInfo>& displayInfos) override {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         LOG_ALWAYS_FATAL_IF(env == nullptr, "Unable to retrieve JNIEnv in onWindowInfoChanged.");
 
@@ -64,7 +82,15 @@ struct WindowInfosListener : public gui::WindowInfosListener {
             env->SetObjectArrayElement(jWindowHandlesArray, i, jWindowHandle.get());
         }
 
-        env->CallVoidMethod(listener, gListenerClassInfo.onWindowInfosChanged, jWindowHandlesArray);
+        jobjectArray jDisplayInfoArray =
+                env->NewObjectArray(displayInfos.size(), gDisplayInfoClassInfo.clazz, nullptr);
+        for (int i = 0; i < displayInfos.size(); i++) {
+            ScopedLocalRef<jobject> jDisplayInfo(env, fromDisplayInfo(env, displayInfos[i]));
+            env->SetObjectArrayElement(jDisplayInfoArray, i, jDisplayInfo.get());
+        }
+
+        env->CallVoidMethod(listener, gListenerClassInfo.onWindowInfosChanged, jWindowHandlesArray,
+                            jDisplayInfoArray);
         env->DeleteGlobalRef(listener);
 
         if (env->ExceptionCheck()) {
@@ -126,10 +152,16 @@ int register_android_window_WindowInfosListener(JNIEnv* env) {
     gListenerClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
     gListenerClassInfo.onWindowInfosChanged =
             env->GetMethodID(gListenerClassInfo.clazz, "onWindowInfosChanged",
-                             "([Landroid/view/InputWindowHandle;)V");
+                             "([Landroid/view/InputWindowHandle;[Landroid/window/"
+                             "WindowInfosListener$DisplayInfo;)V");
 
     clazz = env->FindClass("android/view/InputWindowHandle");
     gInputWindowHandleClass = MakeGlobalRefOrDie(env, clazz);
+
+    clazz = env->FindClass("android/window/WindowInfosListener$DisplayInfo");
+    gDisplayInfoClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
+    gDisplayInfoClassInfo.ctor = env->GetMethodID(gDisplayInfoClassInfo.clazz, "<init>",
+                                                  "(IIILandroid/graphics/Matrix;)V");
     return 0;
 }
 

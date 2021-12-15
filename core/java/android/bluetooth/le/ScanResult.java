@@ -18,8 +18,8 @@ package android.bluetooth.le;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.bluetooth.Attributable;
 import android.bluetooth.BluetoothDevice;
-import android.content.Attributable;
 import android.content.AttributionSource;
 import android.os.Parcel;
 import android.os.Parcelable;

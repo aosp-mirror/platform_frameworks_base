@@ -186,6 +186,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return mStageCoordinator.isSplitScreenVisible();
     }
 
+    @Nullable
+    public ActivityManager.RunningTaskInfo getTaskInfo(@SplitPosition int splitPosition) {
+        if (isSplitScreenVisible()) {
+            int taskId = mStageCoordinator.getTaskId(splitPosition);
+            return mTaskOrganizer.getRunningTaskInfo(taskId);
+        }
+        return null;
+    }
+
     public boolean isTaskInSplitScreen(int taskId) {
         return isSplitScreenVisible()
                 && mStageCoordinator.getStageOfTask(taskId) != STAGE_TYPE_UNDEFINED;

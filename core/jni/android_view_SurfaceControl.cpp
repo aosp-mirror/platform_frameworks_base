@@ -597,6 +597,14 @@ static void nativeSetPosition(JNIEnv* env, jclass clazz, jlong transactionObj,
     transaction->setPosition(ctrl, x, y);
 }
 
+static void nativeSetScale(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+                           jfloat xScale, jfloat yScale) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setMatrix(ctrl, xScale, 0, 0, yScale);
+}
+
 static void nativeSetGeometry(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
         jobject sourceObj, jobject dstObj, jlong orientation) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -620,9 +628,19 @@ static void nativeSetBuffer(JNIEnv* env, jclass clazz, jlong transactionObj, jlo
                             jobject bufferObject) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
-    sp<GraphicBuffer> buffer(
-            android_graphics_GraphicBuffer_getNativeGraphicsBuffer(env, bufferObject));
-    transaction->setBuffer(ctrl, buffer);
+    sp<GraphicBuffer> graphicBuffer(GraphicBuffer::fromAHardwareBuffer(
+            android_hardware_HardwareBuffer_getNativeHardwareBuffer(env, bufferObject)));
+    transaction->setBuffer(ctrl, graphicBuffer);
+}
+
+static void nativeSetBufferTransform(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                     jlong nativeObject, jint transform) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setTransform(ctrl, transform);
+    bool transformToInverseDisplay = (NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY & transform) ==
+            NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY;
+    transaction->setTransformToDisplayInverse(ctrl, transformToInverseDisplay);
 }
 
 static void nativeSetColorSpace(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
@@ -738,6 +756,37 @@ static void nativeSetTransparentRegionHint(JNIEnv* env, jclass clazz, jlong tran
         auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
         transaction->setTransparentRegionHint(ctrl, reg);
     }
+}
+
+static void nativeSetDamageRegion(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                  jlong nativeObject, jobject regionObj) {
+    SurfaceControl* const surfaceControl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    if (regionObj == nullptr) {
+        transaction->setSurfaceDamageRegion(surfaceControl, Region::INVALID_REGION);
+        return;
+    }
+
+    graphics::RegionIterator iterator(env, regionObj);
+    if (!iterator.isValid()) {
+        transaction->setSurfaceDamageRegion(surfaceControl, Region::INVALID_REGION);
+        return;
+    }
+
+    Region region;
+    while (!iterator.isDone()) {
+        ARect rect = iterator.getRect();
+        region.orSelf(static_cast<const Rect&>(rect));
+        iterator.next();
+    }
+
+    if (region.getBounds().isEmpty()) {
+        transaction->setSurfaceDamageRegion(surfaceControl, Region::INVALID_REGION);
+        return;
+    }
+
+    transaction->setSurfaceDamageRegion(surfaceControl, region);
 }
 
 static void nativeSetAlpha(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1905,10 +1954,14 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetRelativeLayer },
     {"nativeSetPosition", "(JJFF)V",
             (void*)nativeSetPosition },
+    {"nativeSetScale", "(JJFF)V",
+            (void*)nativeSetScale },
     {"nativeSetSize", "(JJII)V",
             (void*)nativeSetSize },
     {"nativeSetTransparentRegionHint", "(JJLandroid/graphics/Region;)V",
             (void*)nativeSetTransparentRegionHint },
+    { "nativeSetDamageRegion", "(JJLandroid/graphics/Region;)V",
+            (void*)nativeSetDamageRegion },
     {"nativeSetAlpha", "(JJF)V",
             (void*)nativeSetAlpha },
     {"nativeSetColor", "(JJ[F)V",
@@ -2018,8 +2071,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetDisplayedContentSample },
     {"nativeSetGeometry", "(JJLandroid/graphics/Rect;Landroid/graphics/Rect;J)V",
             (void*)nativeSetGeometry },
-    {"nativeSetBuffer", "(JJLandroid/graphics/GraphicBuffer;)V",
+    {"nativeSetBuffer", "(JJLandroid/hardware/HardwareBuffer;)V",
             (void*)nativeSetBuffer },
+    {"nativeSetBufferTransform", "(JJI)V", (void*) nativeSetBufferTransform},
     {"nativeSetColorSpace", "(JJI)V",
             (void*)nativeSetColorSpace },
     {"nativeSyncInputWindows", "(J)V",

@@ -28,10 +28,10 @@ public class SectionEvent extends FilterEvent {
     private final int mTableId;
     private final int mVersion;
     private final int mSectionNum;
-    private final int mDataLength;
+    private final long mDataLength;
 
     // This constructor is used by JNI code only
-    private SectionEvent(int tableId, int version, int sectionNum, int dataLength) {
+    private SectionEvent(int tableId, int version, int sectionNum, long dataLength) {
         mTableId = tableId;
         mVersion = version;
         mSectionNum = sectionNum;
@@ -61,8 +61,13 @@ public class SectionEvent extends FilterEvent {
 
     /**
      * Gets data size in bytes of filtered data.
+     *
+     * @deprecated Use {@link #getDataLengthLong()}
      */
+    @Deprecated
     public int getDataLength() {
-        return mDataLength;
+        return (int) getDataLengthLong();
     }
+
+    public long getDataLengthLong() { return mDataLength; }
 }

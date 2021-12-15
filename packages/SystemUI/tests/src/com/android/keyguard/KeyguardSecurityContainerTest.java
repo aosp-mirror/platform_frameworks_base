@@ -244,7 +244,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         ViewGroup userSwitcher = mKeyguardSecurityContainer.findViewById(
                 R.id.keyguard_bouncer_user_switcher);
         assertThat(((FrameLayout.LayoutParams) userSwitcher.getLayoutParams()).gravity)
-                .isEqualTo(Gravity.LEFT | Gravity.TOP);
+                .isEqualTo(Gravity.LEFT | Gravity.CENTER_VERTICAL);
     }
 
     @Test

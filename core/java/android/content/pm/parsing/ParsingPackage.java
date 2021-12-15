@@ -118,6 +118,7 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage addQueriesProvider(String authority);
 
+    /** Sets a process name -> {@link ParsedProcess} map coming from the <processes> tag. */
     ParsingPackage setProcesses(@NonNull Map<String, ParsedProcess> processes);
 
     ParsingPackage asSplit(

@@ -35,6 +35,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.backup.internal.LifecycleOperationStorage;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.params.BackupParams;
 import com.android.server.backup.transport.BackupTransportClient;
@@ -60,7 +61,7 @@ public class UserBackupManagerServiceTest {
     @Mock TransportConnection mTransportConnection;
     @Mock BackupTransportClient mBackupTransport;
     @Mock BackupEligibilityRules mBackupEligibilityRules;
-
+    @Mock LifecycleOperationStorage mOperationStorage;
 
     private TestBackupService mService;
 
@@ -68,7 +69,7 @@ public class UserBackupManagerServiceTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mService = new TestBackupService(mContext, mPackageManager);
+        mService = new TestBackupService(mContext, mPackageManager, mOperationStorage);
         mService.setEnabled(true);
         mService.setSetupComplete(true);
     }
@@ -173,8 +174,9 @@ public class UserBackupManagerServiceTest {
         boolean isEnabledStatePersisted = false;
         boolean shouldUseNewBackupEligibilityRules = false;
 
-        TestBackupService(Context context, PackageManager packageManager) {
-            super(context, packageManager);
+        TestBackupService(Context context, PackageManager packageManager,
+                LifecycleOperationStorage operationStorage) {
+            super(context, packageManager, operationStorage);
         }
 
         @Override

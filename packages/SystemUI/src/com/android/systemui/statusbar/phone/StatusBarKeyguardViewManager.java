@@ -410,12 +410,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * dragging it and translation should be deferred {@see KeyguardBouncer#show(boolean, boolean)}
      */
     public void showGenericBouncer(boolean scrimmed) {
-        if (mAlternateAuthInterceptor != null) {
+        if (shouldShowAltAuth()) {
             updateAlternateAuthShowing(mAlternateAuthInterceptor.showAlternateAuthBouncer());
             return;
         }
 
         showBouncer(scrimmed);
+    }
+
+    private boolean shouldShowAltAuth() {
+        return mAlternateAuthInterceptor != null
+                && mKeyguardUpdateManager.isUnlockingWithBiometricAllowed(true);
     }
 
     /**
@@ -473,7 +478,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
             // If there is an an alternate auth interceptor (like the UDFPS), show that one instead
             // of the bouncer.
-            if (mAlternateAuthInterceptor != null) {
+            if (shouldShowAltAuth()) {
                 if (!afterKeyguardGone) {
                     mBouncer.setDismissAction(mAfterKeyguardGoneAction, mKeyguardGoneCancelAction);
                     mAfterKeyguardGoneAction = null;

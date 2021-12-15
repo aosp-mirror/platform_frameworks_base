@@ -120,6 +120,8 @@ public final class SurfaceControl implements Parcelable {
             long relativeToObject, int zorder);
     private static native void nativeSetPosition(long transactionObj, long nativeObject,
             float x, float y);
+    private static native void nativeSetScale(long transactionObj, long nativeObject,
+            float x, float y);
     private static native void nativeSetSize(long transactionObj, long nativeObject, int w, int h);
     private static native void nativeSetTransparentRegionHint(long transactionObj,
             long nativeObject, Region region);
@@ -202,9 +204,13 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeReparent(long transactionObj, long nativeObject,
             long newParentNativeObject);
     private static native void nativeSetBuffer(long transactionObj, long nativeObject,
-            GraphicBuffer buffer);
+            HardwareBuffer buffer);
+    private static native void nativeSetBufferTransform(long transactionObj, long nativeObject,
+            int transform);
     private static native void nativeSetColorSpace(long transactionObj, long nativeObject,
             int colorSpace);
+    private static native void nativeSetDamageRegion(long transactionObj, long nativeObject,
+            Region region);
 
     private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
 
@@ -1333,7 +1339,6 @@ public final class SurfaceControl implements Parcelable {
          * Set the initial visibility for the SurfaceControl.
          *
          * @param hidden Whether the Surface is initially HIDDEN.
-         * @hide
          */
         @NonNull
         public Builder setHidden(boolean hidden) {
@@ -2840,12 +2845,34 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * @hide
+         * Sets the SurfaceControl to the specified position relative to the parent
+         * SurfaceControl
+         *
+         * @param sc The SurfaceControl to change position
+         * @param x the X position
+         * @param y the Y position
+         * @return this transaction
          */
-        @UnsupportedAppUsage
-        public Transaction setPosition(SurfaceControl sc, float x, float y) {
+        @NonNull
+        public Transaction setPosition(@NonNull SurfaceControl sc, float x, float y) {
             checkPreconditions(sc);
             nativeSetPosition(mNativeObject, sc.mNativeObject, x, y);
+            return this;
+        }
+
+        /**
+         * Sets the SurfaceControl to the specified scale with (0, 0) as the center point
+         * of the scale.
+         *
+         * @param sc The SurfaceControl to change scale
+         * @param scaleX the X scale
+         * @param scaleY the Y scale
+         * @return this transaction
+         */
+        @NonNull
+        public Transaction setScale(@NonNull SurfaceControl sc, float scaleX, float scaleY) {
+            checkPreconditions(sc);
+            nativeSetScale(mNativeObject, sc.mNativeObject, scaleX, scaleY);
             return this;
         }
 
@@ -3056,9 +3083,33 @@ public final class SurfaceControl implements Parcelable {
          * @param sc   SurfaceControl to set crop of.
          * @param crop Bounds of the crop to apply.
          * @hide
+         * @deprecated Use {@link #setCrop(SurfaceControl, Rect)} instead.
          */
+        @Deprecated
         @UnsupportedAppUsage
         public Transaction setWindowCrop(SurfaceControl sc, Rect crop) {
+            checkPreconditions(sc);
+            if (crop != null) {
+                nativeSetWindowCrop(mNativeObject, sc.mNativeObject,
+                        crop.left, crop.top, crop.right, crop.bottom);
+            } else {
+                nativeSetWindowCrop(mNativeObject, sc.mNativeObject, 0, 0, 0, 0);
+            }
+
+            return this;
+        }
+
+        /**
+         * Bounds the surface and its children to the bounds specified. Size of the surface will be
+         * ignored and only the crop and buffer size will be used to determine the bounds of the
+         * surface. If no crop is specified and the surface has no buffer, the surface bounds is
+         * only constrained by the size of its parent bounds.
+         *
+         * @param sc   SurfaceControl to set crop of.
+         * @param crop Bounds of the crop to apply.
+         * @return this This transaction for chaining
+         */
+        public @NonNull Transaction setCrop(@NonNull SurfaceControl sc, @Nullable Rect crop) {
             checkPreconditions(sc);
             if (crop != null) {
                 nativeSetWindowCrop(mNativeObject, sc.mNativeObject,
@@ -3215,11 +3266,34 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Sets the opacity of the surface.  Setting the flag is equivalent to creating the
-         * Surface with the {@link #OPAQUE} flag.
-         * @hide
+         * Indicates whether the surface must be considered opaque, even if its pixel format is
+         * set to translucent. This can be useful if an application needs full RGBA 8888 support
+         * for instance but will still draw every pixel opaque.
+         * <p>
+         * This flag only determines whether opacity will be sampled from the alpha channel.
+         * Plane-alpha from calls to setAlpha() can still result in blended composition
+         * regardless of the opaque setting.
+         *
+         * Combined effects are (assuming a buffer format with an alpha channel):
+         * <ul>
+         * <li>OPAQUE + alpha(1.0) == opaque composition
+         * <li>OPAQUE + alpha(0.x) == blended composition
+         * <li>OPAQUE + alpha(0.0) == no composition
+         * <li>!OPAQUE + alpha(1.0) == blended composition
+         * <li>!OPAQUE + alpha(0.x) == blended composition
+         * <li>!OPAQUE + alpha(0.0) == no composition
+         * </ul>
+         * If the underlying buffer lacks an alpha channel, it is as if setOpaque(true)
+         * were set automatically.
+         *
+         * @see Builder#setOpaque(boolean)
+         *
+         * @param sc The SurfaceControl to update
+         * @param isOpaque true if the buffer's alpha should be ignored, false otherwise
+         * @return this
          */
-        public Transaction setOpaque(SurfaceControl sc, boolean isOpaque) {
+        @NonNull
+        public Transaction setOpaque(@NonNull SurfaceControl sc, boolean isOpaque) {
             checkPreconditions(sc);
             if (isOpaque) {
                 nativeSetFlags(mNativeObject, sc.mNativeObject, SURFACE_OPAQUE, SURFACE_OPAQUE);
@@ -3498,10 +3572,53 @@ public final class SurfaceControl implements Parcelable {
          * created as type {@link #FX_SURFACE_BLAST}
          *
          * @hide
+         * @deprecated Use {@link #setBuffer(SurfaceControl, HardwareBuffer)} instead
          */
+        @Deprecated
         public Transaction setBuffer(SurfaceControl sc, GraphicBuffer buffer) {
+            return setBuffer(sc, HardwareBuffer.createFromGraphicBuffer(buffer));
+        }
+
+        /**
+         * Updates the HardwareBuffer displayed for the SurfaceControl.
+         *
+         * Note that the buffer must be allocated with {@link HardwareBuffer#USAGE_COMPOSER_OVERLAY}
+         * as well as {@link HardwareBuffer#USAGE_GPU_SAMPLED_IMAGE} as the surface control might
+         * be composited using either an overlay or using the GPU.
+         *
+         * @param sc The SurfaceControl to update
+         * @param buffer The buffer to be displayed
+         * @return this
+         */
+        public @NonNull Transaction setBuffer(@NonNull SurfaceControl sc,
+                @Nullable HardwareBuffer buffer) {
             checkPreconditions(sc);
             nativeSetBuffer(mNativeObject, sc.mNativeObject, buffer);
+            return this;
+        }
+
+        /**
+         * Sets the buffer transform that should be applied to the current buffer.
+         *
+         * @param sc The SurfaceControl to update
+         * @param transform The transform to apply to the buffer.
+         * @return this
+         */
+        public @NonNull Transaction setBufferTransform(@NonNull SurfaceControl sc,
+                /* TODO: Mark the intdef */ int transform) {
+            checkPreconditions(sc);
+            nativeSetBufferTransform(mNativeObject, sc.mNativeObject, transform);
+            return this;
+        }
+
+        /**
+         * Updates the region for the content on this surface updated in this transaction.
+         *
+         * If unspecified, the complete surface is assumed to be damaged.
+         */
+        public @NonNull Transaction setDamageRegion(@NonNull SurfaceControl sc,
+                @Nullable Region region) {
+            nativeSetDamageRegion(mNativeObject, sc.mNativeObject, region);
             return this;
         }
 

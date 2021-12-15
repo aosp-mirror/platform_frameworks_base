@@ -167,7 +167,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -4092,8 +4091,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Make IME snapshot as trusted overlay
         InputMonitor.setTrustedOverlayInputInfo(imeSurface, t, getDisplayId(),
                 "IME-snapshot-surface");
-        GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(buffer);
-        t.setBuffer(imeSurface, graphicBuffer);
+        t.setBuffer(imeSurface, buffer);
         t.setColorSpace(mSurfaceControl, ColorSpace.get(ColorSpace.Named.SRGB));
         t.setRelativeLayer(imeSurface, activity.getSurfaceControl(), 1);
         t.setPosition(imeSurface, mInputMethodWindow.getDisplayFrame().left,

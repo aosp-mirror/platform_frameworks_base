@@ -192,14 +192,15 @@ public class GraphicsEnvironment {
 
         // We only want to use ANGLE if the developer has explicitly chosen something other than
         // default driver.
-        final boolean requested = devOptIn.equals(ANGLE_GL_DRIVER_CHOICE_ANGLE);
-        if (requested) {
+        final boolean forceAngle = devOptIn.equals(ANGLE_GL_DRIVER_CHOICE_ANGLE);
+        final boolean forceNative = devOptIn.equals(ANGLE_GL_DRIVER_CHOICE_NATIVE);
+        if (forceAngle || forceNative) {
             Log.v(TAG, "ANGLE developer option for " + packageName + ": " + devOptIn);
         }
 
         final boolean gameModeEnabledAngle = isAngleEnabledByGameMode(context, packageName);
 
-        return requested || gameModeEnabledAngle;
+        return !forceNative && (forceAngle || gameModeEnabledAngle);
     }
 
     private int getVulkanVersion(PackageManager pm) {

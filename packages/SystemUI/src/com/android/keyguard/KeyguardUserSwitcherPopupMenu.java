@@ -18,12 +18,10 @@ package com.android.keyguard;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ListPopupWindow;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.plugins.FalsingManager;
@@ -67,12 +65,6 @@ public class KeyguardUserSwitcherPopupMenu extends ListPopupWindow {
 
         // This will force the popupwindow to show upward instead of drop down
         listView.addOnLayoutChangeListener(mLayoutListener);
-
-        TextView header = (TextView) LayoutInflater.from(mContext).inflate(
-                R.layout.keyguard_bouncer_user_switcher_item, listView, false);
-        header.setText(mContext.getResources().getString(
-                R.string.accessibility_multi_user_switch_switcher));
-        listView.addHeaderView(header);
 
         listView.setOnTouchListener((v, ev) -> {
             if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {

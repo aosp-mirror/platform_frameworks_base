@@ -192,6 +192,12 @@ class AssetManager2 {
   std::unique_ptr<Asset> OpenNonAsset(const std::string& filename, ApkAssetsCookie cookie,
                                       Asset::AccessMode mode) const;
 
+  // Returns the resource id of parent style of the specified theme.
+  //
+  // Returns a null error if the name is missing/corrupt, or an I/O error if reading resource data
+  // failed.
+  base::expected<uint32_t, NullOrIOError> GetParentThemeResourceId(uint32_t resid) const;
+
   // Returns the resource name of the specified resource ID.
   //
   // Utf8 strings are preferred, and only if they are unavailable are the Utf16 variants populated.

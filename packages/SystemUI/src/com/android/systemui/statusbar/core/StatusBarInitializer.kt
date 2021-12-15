@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.core
 import android.app.Fragment
 import com.android.systemui.R
 import com.android.systemui.fragments.FragmentHostManager
+import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
 import com.android.systemui.statusbar.phone.PhoneStatusBarView
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent
@@ -50,12 +51,11 @@ class StatusBarInitializer @Inject constructor(
                     override fun onFragmentViewCreated(tag: String, fragment: Fragment) {
                         val statusBarFragmentComponent = (fragment as CollapsedStatusBarFragment)
                                 .statusBarFragmentComponent ?: throw IllegalStateException()
-                        val statusBarView = statusBarFragmentComponent.phoneStatusBarView
-                        val sbViewController =
-                                statusBarFragmentComponent.phoneStatusBarViewController
-
-                        statusBarViewUpdatedListener
-                                ?.onStatusBarViewUpdated(statusBarView, sbViewController)
+                        statusBarViewUpdatedListener?.onStatusBarViewUpdated(
+                            statusBarFragmentComponent.phoneStatusBarView,
+                            statusBarFragmentComponent.phoneStatusBarViewController,
+                            statusBarFragmentComponent.phoneStatusBarTransitions
+                        )
                     }
 
                     override fun onFragmentViewDestroyed(tag: String?, fragment: Fragment?) {
@@ -72,7 +72,8 @@ class StatusBarInitializer @Inject constructor(
     interface OnStatusBarViewUpdatedListener {
         fun onStatusBarViewUpdated(
             statusBarView: PhoneStatusBarView,
-            statusBarViewController: PhoneStatusBarViewController
+            statusBarViewController: PhoneStatusBarViewController,
+            statusBarTransitions: PhoneStatusBarTransitions
         )
     }
 }

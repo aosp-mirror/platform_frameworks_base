@@ -32,7 +32,6 @@ import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.navigationbar.NavigationBarController;
-import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.util.ViewController;
@@ -54,8 +53,7 @@ public class StatusBarDemoMode extends ViewController<View> implements DemoMode 
     private final Clock mClockView;
     private final View mOperatorNameView;
     private final DemoModeController mDemoModeController;
-    private final NotificationShadeWindowController mNotificationShadeWindowController;
-    private final NotificationShadeWindowViewController mNotificationShadeWindowViewController;
+    private final PhoneStatusBarTransitions mPhoneStatusBarTransitions;
     private final NavigationBarController mNavigationBarController;
     private final int mDisplayId;
 
@@ -64,16 +62,14 @@ public class StatusBarDemoMode extends ViewController<View> implements DemoMode 
             Clock clockView,
             @Named(OPERATOR_NAME_VIEW) View operatorNameView,
             DemoModeController demoModeController,
-            NotificationShadeWindowController notificationShadeWindowController,
-            NotificationShadeWindowViewController notificationShadeWindowViewController,
+            PhoneStatusBarTransitions phoneStatusBarTransitions,
             NavigationBarController navigationBarController,
             @DisplayId int displayId) {
         super(clockView);
         mClockView = clockView;
         mOperatorNameView = operatorNameView;
         mDemoModeController = demoModeController;
-        mNotificationShadeWindowController = notificationShadeWindowController;
-        mNotificationShadeWindowViewController = notificationShadeWindowViewController;
+        mPhoneStatusBarTransitions = phoneStatusBarTransitions;
         mNavigationBarController = navigationBarController;
         mDisplayId = displayId;
     }
@@ -128,11 +124,7 @@ public class StatusBarDemoMode extends ViewController<View> implements DemoMode 
                                                     -1;
             if (barMode != -1) {
                 boolean animate = true;
-                if (mNotificationShadeWindowController != null
-                        && mNotificationShadeWindowViewController.getBarTransitions() != null) {
-                    mNotificationShadeWindowViewController.getBarTransitions().transitionTo(
-                            barMode, animate);
-                }
+                mPhoneStatusBarTransitions.transitionTo(barMode, animate);
                 mNavigationBarController.transitionTo(mDisplayId, barMode, animate);
             }
         }

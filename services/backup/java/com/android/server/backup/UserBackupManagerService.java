@@ -107,12 +107,14 @@ import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.backup.OperationStorage.OpState;
+import com.android.server.backup.OperationStorage.OpType;
 import com.android.server.backup.fullbackup.FullBackupEntry;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.internal.ClearDataObserver;
+import com.android.server.backup.internal.LifecycleOperationStorage;
 import com.android.server.backup.internal.OnTaskFinishedListener;
-import com.android.server.backup.internal.Operation;
 import com.android.server.backup.internal.PerformInitializeTask;
 import com.android.server.backup.internal.RunInitializeReceiver;
 import com.android.server.backup.internal.SetupObserver;
@@ -287,21 +289,6 @@ public class UserBackupManagerService {
     private static final String BACKUP_FINISHED_ACTION = "android.intent.action.BACKUP_FINISHED";
     private static final String BACKUP_FINISHED_PACKAGE_EXTRA = "packageName";
 
-    // Bookkeeping of in-flight operations. The operation token is the index of the entry in the
-    // pending operations list.
-    public static final int OP_PENDING = 0;
-    private static final int OP_ACKNOWLEDGED = 1;
-    private static final int OP_TIMEOUT = -1;
-
-    // Waiting for backup agent to respond during backup operation.
-    public static final int OP_TYPE_BACKUP_WAIT = 0;
-
-    // Waiting for backup agent to respond during restore operation.
-    public static final int OP_TYPE_RESTORE_WAIT = 1;
-
-    // An entire backup operation spanning multiple packages.
-    public static final int OP_TYPE_BACKUP = 2;
-
     // Time delay for initialization operations that can be delayed so as not to consume too much
     // CPU on bring-up and increase time-to-UI.
     private static final long INITIALIZATION_DELAY_MILLIS = 3000;
@@ -400,30 +387,8 @@ public class UserBackupManagerService {
 
     private ActiveRestoreSession mActiveRestoreSession;
 
-    /**
-     * mCurrentOperations contains the list of currently active operations.
-     *
-     * If type of operation is OP_TYPE_WAIT, it are waiting for an ack or timeout.
-     * An operation wraps a BackupRestoreTask within it.
-     * It's the responsibility of this task to remove the operation from this array.
-     *
-     * A BackupRestore task gets notified of ack/timeout for the operation via
-     * BackupRestoreTask#handleCancel, BackupRestoreTask#operationComplete and notifyAll called
-     * on the mCurrentOpLock.
-     * {@link UserBackupManagerService#waitUntilOperationComplete(int)} is
-     * used in various places to 'wait' for notifyAll and detect change of pending state of an
-     * operation. So typically, an operation will be removed from this array by:
-     * - BackupRestoreTask#handleCancel and
-     * - BackupRestoreTask#operationComplete OR waitUntilOperationComplete. Do not remove at both
-     * these places because waitUntilOperationComplete relies on the operation being present to
-     * determine its completion status.
-     *
-     * If type of operation is OP_BACKUP, it is a task running backups. It provides a handle to
-     * cancel backup tasks.
-     */
-    @GuardedBy("mCurrentOpLock")
-    private final SparseArray<Operation> mCurrentOperations = new SparseArray<>();
-    private final Object mCurrentOpLock = new Object();
+    private final LifecycleOperationStorage mOperationStorage;
+
     private final Random mTokenGenerator = new Random();
     private final AtomicInteger mNextToken = new AtomicInteger();
 
@@ -542,12 +507,14 @@ public class UserBackupManagerService {
     }
 
     @VisibleForTesting
-    UserBackupManagerService(Context context, PackageManager packageManager) {
+    UserBackupManagerService(Context context, PackageManager packageManager,
+            LifecycleOperationStorage operationStorage) {
         mContext = context;
 
         mUserId = 0;
         mRegisterTransportsRequestedTime = 0;
         mPackageManager = packageManager;
+        mOperationStorage = operationStorage;
 
         mBaseStateDir = null;
         mDataDir = null;
@@ -600,8 +567,10 @@ public class UserBackupManagerService {
                 BackupAgentTimeoutParameters(Handler.getMain(), mContext.getContentResolver());
         mAgentTimeoutParameters.start();
 
+        mOperationStorage = new LifecycleOperationStorage(mUserId);
+
         Objects.requireNonNull(userBackupThread, "userBackupThread cannot be null");
-        mBackupHandler = new BackupHandler(this, userBackupThread);
+        mBackupHandler = new BackupHandler(this, mOperationStorage, userBackupThread);
 
         // Set up our bookkeeping
         final ContentResolver resolver = context.getContentResolver();
@@ -756,6 +725,10 @@ public class UserBackupManagerService {
         return mTransportManager;
     }
 
+    public OperationStorage getOperationStorage() {
+        return mOperationStorage;
+    }
+
     public boolean isEnabled() {
         return mEnabled;
     }
@@ -836,14 +809,6 @@ public class UserBackupManagerService {
 
     public ActiveRestoreSession getActiveRestoreSession() {
         return mActiveRestoreSession;
-    }
-
-    public SparseArray<Operation> getCurrentOperations() {
-        return mCurrentOperations;
-    }
-
-    public Object getCurrentOpLock() {
-        return mCurrentOpLock;
     }
 
     public SparseArray<AdbParams> getAdbBackupRestoreConfirmations() {
@@ -1987,18 +1952,12 @@ public class UserBackupManagerService {
         }
         final long oldToken = Binder.clearCallingIdentity();
         try {
-            List<Integer> operationsToCancel = new ArrayList<>();
-            synchronized (mCurrentOpLock) {
-                for (int i = 0; i < mCurrentOperations.size(); i++) {
-                    Operation op = mCurrentOperations.valueAt(i);
-                    int token = mCurrentOperations.keyAt(i);
-                    if (op.type == OP_TYPE_BACKUP) {
-                        operationsToCancel.add(token);
-                    }
-                }
-            }
+            Set<Integer> operationsToCancel =
+                    mOperationStorage.operationTokensForOpType(OpType.BACKUP);
+
             for (Integer token : operationsToCancel) {
-                handleCancel(token, true /* cancelAll */);
+                mOperationStorage.cancelOperation(token, /* cancelAll */ true,
+                        operationType -> { /* no callback needed here */ });
             }
             // We don't want the backup jobs to kick in any time soon.
             // Reschedules them to run in the distant future.
@@ -2012,7 +1971,7 @@ public class UserBackupManagerService {
     /** Schedule a timeout message for the operation identified by {@code token}. */
     public void prepareOperationTimeout(int token, long interval, BackupRestoreTask callback,
             int operationType) {
-        if (operationType != OP_TYPE_BACKUP_WAIT && operationType != OP_TYPE_RESTORE_WAIT) {
+        if (operationType != OpType.BACKUP_WAIT && operationType != OpType.RESTORE_WAIT) {
             Slog.wtf(
                     TAG,
                     addUserIdToLogMessage(
@@ -2036,19 +1995,17 @@ public class UserBackupManagerService {
                                     + callback));
         }
 
-        synchronized (mCurrentOpLock) {
-            mCurrentOperations.put(token, new Operation(OP_PENDING, callback, operationType));
-            Message msg = mBackupHandler.obtainMessage(getMessageIdForOperationType(operationType),
-                    token, 0, callback);
-            mBackupHandler.sendMessageDelayed(msg, interval);
-        }
+        mOperationStorage.registerOperation(token, OpState.PENDING, callback, operationType);
+        Message msg = mBackupHandler.obtainMessage(getMessageIdForOperationType(operationType),
+                token, 0, callback);
+        mBackupHandler.sendMessageDelayed(msg, interval);
     }
 
     private int getMessageIdForOperationType(int operationType) {
         switch (operationType) {
-            case OP_TYPE_BACKUP_WAIT:
+            case OpType.BACKUP_WAIT:
                 return MSG_BACKUP_OPERATION_TIMEOUT;
-            case OP_TYPE_RESTORE_WAIT:
+            case OpType.RESTORE_WAIT:
                 return MSG_RESTORE_OPERATION_TIMEOUT;
             default:
                 Slog.wtf(
@@ -2061,162 +2018,28 @@ public class UserBackupManagerService {
         }
     }
 
-    /**
-     * Add an operation to the list of currently running operations. Used for cancellation,
-     * completion and timeout callbacks that act on the operation via the {@code token}.
-     */
-    public void putOperation(int token, Operation operation) {
-        if (MORE_DEBUG) {
-            Slog.d(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "Adding operation token="
-                                    + Integer.toHexString(token)
-                                    + ", operation type="
-                                    + operation.type));
-        }
-        synchronized (mCurrentOpLock) {
-            mCurrentOperations.put(token, operation);
-        }
-    }
-
-    /**
-     * Remove an operation from the list of currently running operations. An operation is removed
-     * when it is completed, cancelled, or timed out, and thus no longer running.
-     */
-    public void removeOperation(int token) {
-        if (MORE_DEBUG) {
-            Slog.d(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "Removing operation token=" + Integer.toHexString(token)));
-        }
-        synchronized (mCurrentOpLock) {
-            if (mCurrentOperations.get(token) == null) {
-                Slog.w(TAG, addUserIdToLogMessage(mUserId, "Duplicate remove for operation. token="
-                        + Integer.toHexString(token)));
-            }
-            mCurrentOperations.remove(token);
-        }
-    }
-
     /** Block until we received an operation complete message (from the agent or cancellation). */
     public boolean waitUntilOperationComplete(int token) {
-        if (MORE_DEBUG) {
-            Slog.i(TAG, addUserIdToLogMessage(mUserId, "Blocking until operation complete for "
-                    + Integer.toHexString(token)));
-        }
-        int finalState = OP_PENDING;
-        Operation op = null;
-        synchronized (mCurrentOpLock) {
-            while (true) {
-                op = mCurrentOperations.get(token);
-                if (op == null) {
-                    // mysterious disappearance: treat as success with no callback
-                    break;
-                } else {
-                    if (op.state == OP_PENDING) {
-                        try {
-                            mCurrentOpLock.wait();
-                        } catch (InterruptedException e) {
-                        }
-                        // When the wait is notified we loop around and recheck the current state
-                    } else {
-                        if (MORE_DEBUG) {
-                            Slog.d(
-                                    TAG,
-                                    addUserIdToLogMessage(
-                                            mUserId,
-                                            "Unblocked waiting for operation token="
-                                                    + Integer.toHexString(token)));
-                        }
-                        // No longer pending; we're done
-                        finalState = op.state;
-                        break;
-                    }
-                }
-            }
-        }
-
-        removeOperation(token);
-        if (op != null) {
-            mBackupHandler.removeMessages(getMessageIdForOperationType(op.type));
-        }
-        if (MORE_DEBUG) {
-            Slog.v(TAG, addUserIdToLogMessage(mUserId, "operation " + Integer.toHexString(token)
-                    + " complete: finalState=" + finalState));
-        }
-        return finalState == OP_ACKNOWLEDGED;
+        return mOperationStorage.waitUntilOperationComplete(token, operationType -> {
+            mBackupHandler.removeMessages(getMessageIdForOperationType(operationType));
+        });
     }
 
     /** Cancel the operation associated with {@code token}. */
     public void handleCancel(int token, boolean cancelAll) {
-        // Notify any synchronous waiters
-        Operation op = null;
-        synchronized (mCurrentOpLock) {
-            op = mCurrentOperations.get(token);
-            if (MORE_DEBUG) {
-                if (op == null) {
-                    Slog.w(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId,
-                                    "Cancel of token "
-                                            + Integer.toHexString(token)
-                                            + " but no op found"));
-                }
+        // Remove all pending timeout messages of types OpType.BACKUP_WAIT and
+        // OpType.RESTORE_WAIT. On the other hand, OP_TYPE_BACKUP cannot time out and
+        // doesn't require cancellation.
+        mOperationStorage.cancelOperation(token, cancelAll, operationType -> {
+            if (operationType == OpType.BACKUP_WAIT || operationType == OpType.RESTORE_WAIT) {
+                mBackupHandler.removeMessages(getMessageIdForOperationType(operationType));
             }
-            int state = (op != null) ? op.state : OP_TIMEOUT;
-            if (state == OP_ACKNOWLEDGED) {
-                // The operation finished cleanly, so we have nothing more to do.
-                if (DEBUG) {
-                    Slog.w(TAG, addUserIdToLogMessage(mUserId, "Operation already got an ack."
-                            + "Should have been removed from mCurrentOperations."));
-                }
-                op = null;
-                mCurrentOperations.delete(token);
-            } else if (state == OP_PENDING) {
-                if (DEBUG) {
-                    Slog.v(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "Cancel: token=" + Integer.toHexString(token)));
-                }
-                op.state = OP_TIMEOUT;
-                // Can't delete op from mCurrentOperations here. waitUntilOperationComplete may be
-                // called after we receive cancel here. We need this op's state there.
-
-                // Remove all pending timeout messages of types OP_TYPE_BACKUP_WAIT and
-                // OP_TYPE_RESTORE_WAIT. On the other hand, OP_TYPE_BACKUP cannot time out and
-                // doesn't require cancellation.
-                if (op.type == OP_TYPE_BACKUP_WAIT || op.type == OP_TYPE_RESTORE_WAIT) {
-                    mBackupHandler.removeMessages(getMessageIdForOperationType(op.type));
-                }
-            }
-            mCurrentOpLock.notifyAll();
-        }
-
-        // If there's a TimeoutHandler for this event, call it
-        if (op != null && op.callback != null) {
-            if (MORE_DEBUG) {
-                Slog.v(TAG, addUserIdToLogMessage(mUserId, "   Invoking cancel on " + op.callback));
-            }
-            op.callback.handleCancel(cancelAll);
-        }
+        });
     }
 
     /** Returns {@code true} if a backup is currently running, else returns {@code false}. */
     public boolean isBackupOperationInProgress() {
-        synchronized (mCurrentOpLock) {
-            for (int i = 0; i < mCurrentOperations.size(); i++) {
-                Operation op = mCurrentOperations.valueAt(i);
-                if (op.type == OP_TYPE_BACKUP && op.state == OP_PENDING) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return mOperationStorage.isBackupOperationInProgress();
     }
 
     /** Unbind the backup agent and kill the app if it's a non-system app. */
@@ -2578,6 +2401,7 @@ public class UserBackupManagerService {
             String[] pkg = new String[]{entry.packageName};
             mRunningFullBackupTask = PerformFullTransportBackupTask.newWithCurrentTransport(
                     this,
+                    mOperationStorage,
                     /* observer */ null,
                     pkg,
                     /* updateSchedule */ true,
@@ -3107,6 +2931,7 @@ public class UserBackupManagerService {
                 CountDownLatch latch = new CountDownLatch(1);
                 Runnable task = PerformFullTransportBackupTask.newWithCurrentTransport(
                         this,
+                        mOperationStorage,
                         /* observer */ null,
                         pkgNames,
                         /* updateSchedule */ false,
@@ -4126,48 +3951,11 @@ public class UserBackupManagerService {
      * outstanding asynchronous backup/restore operation.
      */
     public void opComplete(int token, long result) {
-        if (MORE_DEBUG) {
-            Slog.v(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "opComplete: " + Integer.toHexString(token) + " result=" + result));
-        }
-        Operation op = null;
-        synchronized (mCurrentOpLock) {
-            op = mCurrentOperations.get(token);
-            if (op != null) {
-                if (op.state == OP_TIMEOUT) {
-                    // The operation already timed out, and this is a late response.  Tidy up
-                    // and ignore it; we've already dealt with the timeout.
-                    op = null;
-                    mCurrentOperations.delete(token);
-                } else if (op.state == OP_ACKNOWLEDGED) {
-                    if (DEBUG) {
-                        Slog.w(
-                                TAG,
-                                addUserIdToLogMessage(
-                                        mUserId,
-                                        "Received duplicate ack for token="
-                                                + Integer.toHexString(token)));
-                    }
-                    op = null;
-                    mCurrentOperations.remove(token);
-                } else if (op.state == OP_PENDING) {
-                    // Can't delete op from mCurrentOperations. waitUntilOperationComplete can be
-                    // called after we we receive this call.
-                    op.state = OP_ACKNOWLEDGED;
-                }
-            }
-            mCurrentOpLock.notifyAll();
-        }
-
-        // The completion callback, if any, is invoked on the handler
-        if (op != null && op.callback != null) {
-            Pair<BackupRestoreTask, Long> callbackAndResult = Pair.create(op.callback, result);
+        mOperationStorage.onOperationComplete(token, result, callback -> {
+            Pair<BackupRestoreTask, Long> callbackAndResult = Pair.create(callback, result);
             Message msg = mBackupHandler.obtainMessage(MSG_OP_COMPLETE, callbackAndResult);
             mBackupHandler.sendMessage(msg);
-        }
+        });
     }
 
     /** Checks if the package is eligible for backup. */

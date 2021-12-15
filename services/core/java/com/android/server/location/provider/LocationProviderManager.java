@@ -16,6 +16,8 @@
 
 package com.android.server.location.provider;
 
+import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
+import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
 import static android.app.compat.CompatChanges.isChangeEnabled;
 import static android.location.LocationManager.DELIVER_HISTORICAL_LOCATIONS;
 import static android.location.LocationManager.GPS_PROVIDER;
@@ -32,6 +34,7 @@ import static android.os.PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
 import static android.os.PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
 import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
@@ -98,7 +101,6 @@ import com.android.server.location.injector.AppForegroundHelper;
 import com.android.server.location.injector.AppForegroundHelper.AppForegroundListener;
 import com.android.server.location.injector.AppOpsHelper;
 import com.android.server.location.injector.Injector;
-import com.android.server.location.injector.LocationAttributionHelper;
 import com.android.server.location.injector.LocationPermissionsHelper;
 import com.android.server.location.injector.LocationPermissionsHelper.LocationPermissionsListener;
 import com.android.server.location.injector.LocationPowerSaveModeHelper;
@@ -177,7 +179,7 @@ public class LocationProviderManager extends
     protected interface LocationTransport {
 
         void deliverOnLocationChanged(LocationResult locationResult,
-                @Nullable Runnable onCompleteCallback) throws Exception;
+                @Nullable IRemoteCallback onCompleteCallback) throws Exception;
         void deliverOnFlushComplete(int requestCode) throws Exception;
     }
 
@@ -191,15 +193,14 @@ public class LocationProviderManager extends
 
         private final ILocationListener mListener;
 
-        protected LocationListenerTransport(ILocationListener listener) {
+        LocationListenerTransport(ILocationListener listener) {
             mListener = Objects.requireNonNull(listener);
         }
 
         @Override
         public void deliverOnLocationChanged(LocationResult locationResult,
-                @Nullable Runnable onCompleteCallback) throws RemoteException {
-            mListener.onLocationChanged(locationResult.asList(),
-                    SingleUseCallback.wrap(onCompleteCallback));
+                @Nullable IRemoteCallback onCompleteCallback) throws RemoteException {
+            mListener.onLocationChanged(locationResult.asList(), onCompleteCallback);
         }
 
         @Override
@@ -227,7 +228,7 @@ public class LocationProviderManager extends
 
         @Override
         public void deliverOnLocationChanged(LocationResult locationResult,
-                @Nullable Runnable onCompleteCallback)
+                @Nullable IRemoteCallback onCompleteCallback)
                 throws PendingIntent.CanceledException {
             BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setDontSendToRestrictedApps(true);
@@ -243,20 +244,34 @@ public class LocationProviderManager extends
                 intent.putExtra(KEY_LOCATIONS, locationResult.asList().toArray(new Location[0]));
             }
 
+            PendingIntent.OnFinished onFinished = null;
+
             // send() SHOULD only run the completion callback if it completes successfully. however,
-            // b/199464864 (which could not be fixed in the S timeframe) means that it's possible
+            // b/201299281 (which could not be fixed in the S timeframe) means that it's possible
             // for send() to throw an exception AND run the completion callback. if this happens, we
             // would over-release the wakelock... we take matters into our own hands to ensure that
             // the completion callback can only be run if send() completes successfully. this means
             // the completion callback may be run inline - but as we've never specified what thread
             // the callback is run on, this is fine.
-            GatedCallback gatedCallback = new GatedCallback(onCompleteCallback);
+            GatedCallback gatedCallback;
+            if (onCompleteCallback != null) {
+                gatedCallback = new GatedCallback(() -> {
+                    try {
+                        onCompleteCallback.sendResult(null);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                });
+                onFinished = (pI, i, rC, rD, rE) -> gatedCallback.run();
+            } else {
+                gatedCallback = new GatedCallback(null);
+            }
 
             mPendingIntent.send(
                     mContext,
                     0,
                     intent,
-                    (pI, i, rC, rD, rE) -> gatedCallback.run(),
+                    onFinished,
                     null,
                     null,
                     options.toBundle());
@@ -287,13 +302,13 @@ public class LocationProviderManager extends
 
         private final ILocationCallback mCallback;
 
-        protected GetCurrentLocationTransport(ILocationCallback callback) {
+        GetCurrentLocationTransport(ILocationCallback callback) {
             mCallback = Objects.requireNonNull(callback);
         }
 
         @Override
         public void deliverOnLocationChanged(@Nullable LocationResult locationResult,
-                @Nullable Runnable onCompleteCallback)
+                @Nullable IRemoteCallback onCompleteCallback)
                 throws RemoteException {
             // ILocationCallback doesn't currently support completion callbacks
             Preconditions.checkState(onCompleteCallback == null);
@@ -398,7 +413,7 @@ public class LocationProviderManager extends
             EVENT_LOG.logProviderClientActive(mName, getIdentity());
 
             if (!getRequest().isHiddenFromAppOps()) {
-                mLocationAttributionHelper.reportLocationStart(getIdentity());
+                mAppOpsHelper.startOpNoThrow(OP_MONITOR_LOCATION, getIdentity());
             }
             onHighPowerUsageChanged();
 
@@ -413,7 +428,7 @@ public class LocationProviderManager extends
 
             onHighPowerUsageChanged();
             if (!getRequest().isHiddenFromAppOps()) {
-                mLocationAttributionHelper.reportLocationStop(getIdentity());
+                mAppOpsHelper.finishOp(OP_MONITOR_LOCATION, getIdentity());
             }
 
             onProviderListenerInactive();
@@ -487,11 +502,9 @@ public class LocationProviderManager extends
 
                 if (!getRequest().isHiddenFromAppOps()) {
                     if (mIsUsingHighPower) {
-                        mLocationAttributionHelper.reportHighPowerLocationStart(
-                                getIdentity());
+                        mAppOpsHelper.startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, getIdentity());
                     } else {
-                        mLocationAttributionHelper.reportHighPowerLocationStop(
-                                getIdentity());
+                        mAppOpsHelper.finishOp(OP_MONITOR_HIGH_POWER_LOCATION, getIdentity());
                     }
                 }
             }
@@ -714,6 +727,13 @@ public class LocationProviderManager extends
 
         final PowerManager.WakeLock mWakeLock;
 
+        // b/206340085 - if we allocate a new wakelock releaser object for every delivery we
+        // increase the risk of resource starvation. if a client stops processing deliveries the
+        // system server binder allocation pool will be starved as we continue to queue up
+        // deliveries, each with a new allocation. in order to mitigate this, we use a single
+        // releaser object per registration rather than per delivery.
+        final ExternalWakeLockReleaser mWakeLockReleaser;
+
         private volatile ProviderTransport mProviderTransport;
         private int mNumLocationsDelivered = 0;
         private long mExpirationRealtimeMs = Long.MAX_VALUE;
@@ -727,6 +747,7 @@ public class LocationProviderManager extends
                     .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
             mWakeLock.setReferenceCounted(true);
             mWakeLock.setWorkSource(request.getWorkSource());
+            mWakeLockReleaser = new ExternalWakeLockReleaser(identity, mWakeLock);
         }
 
         @Override
@@ -943,7 +964,7 @@ public class LocationProviderManager extends
                     }
 
                     listener.deliverOnLocationChanged(deliverLocationResult,
-                            mUseWakeLock ? mWakeLock::release : null);
+                            mUseWakeLock ? mWakeLockReleaser : null);
                     EVENT_LOG.logProviderDeliveredLocations(mName, locationResult.size(),
                             getIdentity());
                 }
@@ -994,7 +1015,7 @@ public class LocationProviderManager extends
     protected final class LocationListenerRegistration extends LocationRegistration implements
             IBinder.DeathRecipient {
 
-        protected LocationListenerRegistration(LocationRequest request, CallerIdentity identity,
+        LocationListenerRegistration(LocationRequest request, CallerIdentity identity,
                 LocationListenerTransport transport, @PermissionLevel int permissionLevel) {
             super(request, identity, transport, permissionLevel);
         }
@@ -1059,7 +1080,7 @@ public class LocationProviderManager extends
     protected final class LocationPendingIntentRegistration extends LocationRegistration implements
             PendingIntent.CancelListener {
 
-        protected LocationPendingIntentRegistration(LocationRequest request,
+        LocationPendingIntentRegistration(LocationRequest request,
                 CallerIdentity identity, LocationPendingIntentTransport transport,
                 @PermissionLevel int permissionLevel) {
             super(request, identity, transport, permissionLevel);
@@ -1068,13 +1089,15 @@ public class LocationProviderManager extends
         @GuardedBy("mLock")
         @Override
         protected void onLocationListenerRegister() {
-            ((PendingIntent) getKey()).registerCancelListener(this);
+            if (!((PendingIntent) getKey()).addCancelListener(DIRECT_EXECUTOR, this)) {
+                remove();
+            }
         }
 
         @GuardedBy("mLock")
         @Override
         protected void onLocationListenerUnregister() {
-            ((PendingIntent) getKey()).unregisterCancelListener(this);
+            ((PendingIntent) getKey()).removeCancelListener(this);
         }
 
         @Override
@@ -1117,7 +1140,7 @@ public class LocationProviderManager extends
 
         private long mExpirationRealtimeMs = Long.MAX_VALUE;
 
-        protected GetCurrentLocationListenerRegistration(LocationRequest request,
+        GetCurrentLocationListenerRegistration(LocationRequest request,
                 CallerIdentity identity, LocationTransport transport, int permissionLevel) {
             super(request, identity, transport, permissionLevel);
         }
@@ -1326,7 +1349,6 @@ public class LocationProviderManager extends
     protected final AppForegroundHelper mAppForegroundHelper;
     protected final LocationPowerSaveModeHelper mLocationPowerSaveModeHelper;
     protected final ScreenInteractiveHelper mScreenInteractiveHelper;
-    protected final LocationAttributionHelper mLocationAttributionHelper;
     protected final LocationUsageLogger mLocationUsageLogger;
     protected final LocationFudger mLocationFudger;
 
@@ -1394,7 +1416,6 @@ public class LocationProviderManager extends
         mAppForegroundHelper = injector.getAppForegroundHelper();
         mLocationPowerSaveModeHelper = injector.getLocationPowerSaveModeHelper();
         mScreenInteractiveHelper = injector.getScreenInteractiveHelper();
-        mLocationAttributionHelper = injector.getLocationAttributionHelper();
         mLocationUsageLogger = injector.getLocationUsageLogger();
         mLocationFudger = new LocationFudger(mSettingsHelper.getCoarseLocationAccuracyM());
 
@@ -2761,7 +2782,7 @@ public class LocationProviderManager extends
         @GuardedBy("this")
         private boolean mRun;
 
-        GatedCallback(Runnable callback) {
+        GatedCallback(@Nullable Runnable callback) {
             mCallback = callback;
         }
 
@@ -2793,6 +2814,26 @@ public class LocationProviderManager extends
 
             if (callback != null) {
                 callback.run();
+            }
+        }
+    }
+
+    private static class ExternalWakeLockReleaser extends IRemoteCallback.Stub {
+
+        private final CallerIdentity mIdentity;
+        private final PowerManager.WakeLock mWakeLock;
+
+        ExternalWakeLockReleaser(CallerIdentity identity, PowerManager.WakeLock wakeLock) {
+            mIdentity = identity;
+            mWakeLock = Objects.requireNonNull(wakeLock);
+        }
+
+        @Override
+        public void sendResult(Bundle data) {
+            try {
+                mWakeLock.release();
+            } catch (RuntimeException e) {
+                Log.e(TAG, "wakelock over-released by " + mIdentity, e);
             }
         }
     }

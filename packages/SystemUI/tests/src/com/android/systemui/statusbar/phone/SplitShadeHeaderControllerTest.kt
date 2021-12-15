@@ -1,8 +1,8 @@
 package com.android.systemui.statusbar.phone
 
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.view.View
+import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
@@ -42,6 +42,7 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
     var viewVisibility = View.GONE
 
     private lateinit var splitShadeHeaderController: SplitShadeHeaderController
+    private lateinit var carrierIconSlots: List<String>
 
     @Before
     fun setup() {
@@ -67,12 +68,13 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
                 featureFlags,
                 batteryMeterViewController
         )
+        carrierIconSlots = listOf(
+                context.getString(com.android.internal.R.string.status_bar_mobile))
     }
 
     @Test
     fun setVisible_onlyInSplitShade() {
-        splitShadeHeaderController.splitShadeMode = true
-        splitShadeHeaderController.shadeExpanded = true
+        makeShadeVisible()
         assertThat(viewVisibility).isEqualTo(View.VISIBLE)
 
         splitShadeHeaderController.splitShadeMode = false
@@ -81,17 +83,38 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun updateListeners_registersWhenVisible() {
-        splitShadeHeaderController.splitShadeMode = true
-        splitShadeHeaderController.shadeExpanded = true
+        makeShadeVisible()
         verify(qsCarrierGroupController).setListening(true)
         verify(statusBarIconController).addIconGroup(any())
     }
 
     @Test
     fun shadeExpandedFraction_updatesAlpha() {
-        splitShadeHeaderController.splitShadeMode = true
-        splitShadeHeaderController.shadeExpanded = true
+        makeShadeVisible()
         splitShadeHeaderController.shadeExpandedFraction = 0.5f
         verify(view).setAlpha(ShadeInterpolation.getContentAlpha(0.5f))
+    }
+
+    @Test
+    fun singleCarrier_enablesCarrierIconsInStatusIcons() {
+        whenever(qsCarrierGroupController.isSingleCarrier).thenReturn(true)
+
+        makeShadeVisible()
+
+        verify(statusIcons).removeIgnoredSlots(carrierIconSlots)
+    }
+
+    @Test
+    fun dualCarrier_disablesCarrierIconsInStatusIcons() {
+        whenever(qsCarrierGroupController.isSingleCarrier).thenReturn(false)
+
+        makeShadeVisible()
+
+        verify(statusIcons).addIgnoredSlots(carrierIconSlots)
+    }
+
+    private fun makeShadeVisible() {
+        splitShadeHeaderController.splitShadeMode = true
+        splitShadeHeaderController.shadeExpanded = true
     }
 }

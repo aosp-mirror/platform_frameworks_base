@@ -375,6 +375,39 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShowAltAuth_unlockingWithBiometricNotAllowed() {
+        // GIVEN alt auth exists, unlocking with biometric isn't allowed
+        mStatusBarKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
+        when(mBouncer.isShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean()))
+                .thenReturn(false);
+
+        // WHEN showGenericBouncer is called
+        final boolean scrimmed = true;
+        mStatusBarKeyguardViewManager.showGenericBouncer(scrimmed);
+
+        // THEN regular bouncer is shown
+        verify(mBouncer).show(anyBoolean(), eq(scrimmed));
+        verify(mAlternateAuthInterceptor, never()).showAlternateAuthBouncer();
+    }
+
+    @Test
+    public void testShowAltAuth_unlockingWithBiometricAllowed() {
+        // GIVEN alt auth exists, unlocking with biometric is allowed
+        mStatusBarKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
+        when(mBouncer.isShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean()))
+                .thenReturn(true);
+
+        // WHEN showGenericBouncer is called
+        mStatusBarKeyguardViewManager.showGenericBouncer(true);
+
+        // THEN alt auth bouncer is shown
+        verify(mAlternateAuthInterceptor).showAlternateAuthBouncer();
+        verify(mBouncer, never()).show(anyBoolean(), anyBoolean());
+    }
+
+    @Test
     public void testUpdateResources_delegatesToBouncer() {
         mStatusBarKeyguardViewManager.updateResources();
 

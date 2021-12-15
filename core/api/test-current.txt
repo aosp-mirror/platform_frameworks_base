@@ -353,6 +353,10 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void togglePanel();
   }
 
+  public static final class StatusBarManager.DisableInfo {
+    method public boolean isRotationSuggestionDisabled();
+  }
+
   public final class SyncNotedAppOp implements android.os.Parcelable {
     ctor public SyncNotedAppOp(int, @IntRange(from=0L) int, @Nullable String, @NonNull String);
   }

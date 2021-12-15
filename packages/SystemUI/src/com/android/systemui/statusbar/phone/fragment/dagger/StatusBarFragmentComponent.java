@@ -20,6 +20,7 @@ import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.LightsOutNotifController;
+import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarDemoMode;
@@ -35,6 +36,9 @@ import dagger.Subcomponent;
  * and friends. Specifically, the fragment creates a new {@link PhoneStatusBarView} and multiple
  * controllers need access to that view, so those controllers will be re-created whenever the
  * fragment is recreated.
+ *
+ * Anything that depends on {@link CollapsedStatusBarFragment} or {@link PhoneStatusBarView}
+ * should be included here or in {@link StatusBarFragmentModule}.
  *
  * Note that this is completely separate from
  * {@link com.android.systemui.statusbar.phone.dagger.StatusBarComponent}. This component gets
@@ -90,4 +94,8 @@ public interface StatusBarFragmentComponent {
     /** */
     @StatusBarFragmentScope
     StatusBarDemoMode getStatusBarDemoMode();
+
+    /** */
+    @StatusBarFragmentScope
+    PhoneStatusBarTransitions getPhoneStatusBarTransitions();
 }

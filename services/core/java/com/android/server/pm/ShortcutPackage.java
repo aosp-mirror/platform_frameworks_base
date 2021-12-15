@@ -96,8 +96,6 @@ import java.util.stream.Collectors;
 /**
  * Package information used by {@link ShortcutService}.
  * User information used by {@link ShortcutService}.
- *
- * All methods should be guarded by {@code #mShortcutUser.mService.mLock}.
  */
 class ShortcutPackage extends ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
@@ -162,9 +160,17 @@ class ShortcutPackage extends ShortcutPackageItem {
     private final Executor mExecutor;
 
     /**
-     * An temp in-memory copy of shortcuts for this package that was loaded from xml, keyed on IDs.
+     * An in-memory copy of shortcuts for this package that was loaded from xml, keyed on IDs.
      */
+    @GuardedBy("mLock")
     final ArrayMap<String, ShortcutInfo> mShortcuts = new ArrayMap<>();
+
+    /**
+     * A temporary copy of shortcuts that are to be cleared once persisted into AppSearch, keyed on
+     * IDs.
+     */
+    @GuardedBy("mLock")
+    private ArrayMap<String, ShortcutInfo> mTransientShortcuts = new ArrayMap<>(0);
 
     /**
      * All the share targets from the package
@@ -330,6 +336,15 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
     }
 
+    public void ensureAllShortcutsVisibleToLauncher(@NonNull List<ShortcutInfo> shortcuts) {
+        for (ShortcutInfo shortcut : shortcuts) {
+            if (!shortcut.isIncludedIn(ShortcutInfo.SURFACE_LAUNCHER)) {
+                throw new IllegalArgumentException("Shortcut ID=" + shortcut.getId()
+                        + " is hidden from launcher and may not be manipulated via APIs");
+            }
+        }
+    }
+
     /**
      * Delete a shortcut by ID. This will *always* remove it even if it's immutable or invisible.
      */
@@ -384,7 +399,15 @@ class ShortcutPackage extends ShortcutPackageItem {
                     & (ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_CACHED_ALL));
         }
 
-        forceReplaceShortcutInner(newShortcut);
+        if (!newShortcut.isIncludedIn(ShortcutInfo.SURFACE_LAUNCHER)) {
+            if (isAppSearchEnabled()) {
+                synchronized (mLock) {
+                    mTransientShortcuts.put(newShortcut.getId(), newShortcut);
+                }
+            }
+        } else {
+            forceReplaceShortcutInner(newShortcut);
+        }
         return oldShortcut != null;
     }
 
@@ -444,7 +467,15 @@ class ShortcutPackage extends ShortcutPackageItem {
                     & (ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_CACHED_ALL));
         }
 
-        forceReplaceShortcutInner(newShortcut);
+        if (!newShortcut.isIncludedIn(ShortcutInfo.SURFACE_LAUNCHER)) {
+            if (isAppSearchEnabled()) {
+                synchronized (mLock) {
+                    mTransientShortcuts.put(newShortcut.getId(), newShortcut);
+                }
+            }
+        } else {
+            forceReplaceShortcutInner(newShortcut);
+        }
         if (isAppSearchEnabled()) {
             runAsSystem(() -> fromAppSearch().thenAccept(session ->
                     session.reportUsage(new ReportUsageRequest.Builder(
@@ -669,7 +700,6 @@ class ShortcutPackage extends ShortcutPackageItem {
         forEachShortcutMutate(si -> {
             if (!pinnedShortcuts.contains(si.getId()) && si.isPinned()) {
                 si.clearFlags(ShortcutInfo.FLAG_PINNED);
-                return;
             }
         });
 
@@ -1704,8 +1734,15 @@ class ShortcutPackage extends ShortcutPackageItem {
             for (int j = 0; j < shareTargetSize; j++) {
                 mShareTargets.get(j).saveToXml(out);
             }
-            saveShortcutsAsync(mShortcuts.values().stream().filter(ShortcutInfo::usesQuota)
-                    .collect(Collectors.toList()));
+            synchronized (mLock) {
+                final Map<String, ShortcutInfo> copy = mShortcuts;
+                if (!mTransientShortcuts.isEmpty()) {
+                    copy.putAll(mTransientShortcuts);
+                    mTransientShortcuts.clear();
+                }
+                saveShortcutsAsync(copy.values().stream().filter(ShortcutInfo::usesQuota).collect(
+                        Collectors.toList()));
+            }
         }
 
         out.endTag(null, TAG_ROOT);
@@ -2233,26 +2270,6 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
     }
 
-    void updateVisibility(String packageName, byte[] certificate, boolean visible) {
-        if (!isAppSearchEnabled()) {
-            return;
-        }
-        if (visible) {
-            mPackageIdentifiers.put(packageName, new PackageIdentifier(packageName, certificate));
-        } else {
-            mPackageIdentifiers.remove(packageName);
-        }
-        synchronized (mLock) {
-            mIsAppSearchSchemaUpToDate = false;
-        }
-        final long callingIdentity = Binder.clearCallingIdentity();
-        try {
-            fromAppSearch();
-        } finally {
-            Binder.restoreCallingIdentity(callingIdentity);
-        }
-    }
-
     void mutateShortcut(@NonNull final String id, @Nullable final ShortcutInfo shortcut,
             @NonNull final Consumer<ShortcutInfo> transform) {
         Objects.requireNonNull(id);
@@ -2358,6 +2375,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 .addFilterSchemas(AppSearchShortcutInfo.SCHEMA_TYPE)
                 .addFilterNamespaces(getPackageName())
                 .setTermMatch(SearchSpec.TERM_MATCH_EXACT_ONLY)
+                .setResultCountPerPage(mShortcutUser.mService.getMaxActivityShortcuts())
                 .build();
     }
 
@@ -2451,6 +2469,9 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     @VisibleForTesting
     void getTopShortcutsFromPersistence(AndroidFuture<List<ShortcutInfo>> cb) {
+        if (!isAppSearchEnabled()) {
+            cb.complete(null);
+        }
         runAsSystem(() -> fromAppSearch().thenAccept(session -> {
             SearchResults res = session.search("", getSearchSpec());
             res.getNextPage(mShortcutUser.mExecutor, results -> {

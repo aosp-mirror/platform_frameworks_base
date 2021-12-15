@@ -20,19 +20,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/keyguard_bouncer_user_switcher"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:orientation="vertical"
     android:gravity="center"
-    android:paddingTop="12dp"
     android:importantForAccessibility="yes"> <!-- Needed because TYPE_WINDOW_STATE_CHANGED is sent
                                                   from this view when bouncer is shown -->
 
-  <ImageView
-      android:id="@+id/user_icon"
-      android:layout_width="@dimen/keyguard_user_switcher_icon_size"
-      android:layout_height="@dimen/keyguard_user_switcher_icon_size" />
+    <ImageView
+        android:id="@+id/user_icon"
+        android:layout_width="@dimen/keyguard_user_switcher_icon_size"
+        android:layout_height="@dimen/keyguard_user_switcher_icon_size" />
 
     <!-- need to keep this outer view in order to have a correctly sized anchor
          for the dropdown menu, as well as dropdown background in the right place -->
@@ -41,7 +40,7 @@
         android:orientation="horizontal"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="30dp"
         android:minHeight="48dp">
       <TextView
           style="@style/Keyguard.UserSwitcher.Spinner.Header"

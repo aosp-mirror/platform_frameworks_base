@@ -16,6 +16,8 @@
 
 package com.android.server.location.gnss;
 
+import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
+
 import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
@@ -32,7 +34,6 @@ import android.util.Log;
 import com.android.server.location.gnss.hal.GnssNative;
 import com.android.server.location.injector.AppOpsHelper;
 import com.android.server.location.injector.Injector;
-import com.android.server.location.injector.LocationAttributionHelper;
 import com.android.server.location.injector.LocationUsageLogger;
 import com.android.server.location.injector.SettingsHelper;
 
@@ -68,25 +69,23 @@ public final class GnssMeasurementsProvider extends
         @Nullable
         @Override
         protected void onActive() {
-            mLocationAttributionHelper.reportHighPowerLocationStart(getIdentity());
+            mAppOpsHelper.startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, getIdentity());
         }
 
         @Nullable
         @Override
         protected void onInactive() {
-            mLocationAttributionHelper.reportHighPowerLocationStop(getIdentity());
+            mAppOpsHelper.finishOp(OP_MONITOR_HIGH_POWER_LOCATION, getIdentity());
         }
     }
 
     private final AppOpsHelper mAppOpsHelper;
-    private final LocationAttributionHelper mLocationAttributionHelper;
     private final LocationUsageLogger mLogger;
     private final GnssNative mGnssNative;
 
     public GnssMeasurementsProvider(Injector injector, GnssNative gnssNative) {
         super(injector);
         mAppOpsHelper = injector.getAppOpsHelper();
-        mLocationAttributionHelper = injector.getLocationAttributionHelper();
         mLogger = injector.getLocationUsageLogger();
         mGnssNative = gnssNative;
 

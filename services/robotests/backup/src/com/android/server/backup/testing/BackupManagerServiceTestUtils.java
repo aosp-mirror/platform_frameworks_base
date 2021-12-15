@@ -120,7 +120,6 @@ public class BackupManagerServiceTestUtils {
         when(backupManagerService.getTransportManager()).thenReturn(transportManager);
         when(backupManagerService.getPackageManager()).thenReturn(packageManager);
         when(backupManagerService.getBackupHandler()).thenReturn(backupHandler);
-        when(backupManagerService.getCurrentOpLock()).thenReturn(new Object());
         when(backupManagerService.getQueueLock()).thenReturn(new Object());
         when(backupManagerService.getActivityManager()).thenReturn(mock(IActivityManager.class));
         when(backupManagerService.getWakelock()).thenReturn(wakeLock);

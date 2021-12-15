@@ -165,7 +165,7 @@ public class StatusBarManager {
      *
      * @hide
      */
-    public static final int DEFAULT_SETUP_DISABLE2_FLAGS = DISABLE2_ROTATE_SUGGESTIONS;
+    public static final int DEFAULT_SETUP_DISABLE2_FLAGS = DISABLE2_NONE;
 
     /**
      * disable flags to be applied when the device is sim-locked.
@@ -712,6 +712,7 @@ public class StatusBarManager {
         private boolean mSystemIcons;
         private boolean mClock;
         private boolean mNotificationIcons;
+        private boolean mRotationSuggestion;
 
         /** @hide */
         public DisableInfo(int flags1, int flags2) {
@@ -723,6 +724,7 @@ public class StatusBarManager {
             mSystemIcons = (flags1 & DISABLE_SYSTEM_INFO) != 0;
             mClock = (flags1 & DISABLE_CLOCK) != 0;
             mNotificationIcons = (flags1 & DISABLE_NOTIFICATION_ICONS) != 0;
+            mRotationSuggestion = (flags2 & DISABLE2_ROTATE_SUGGESTIONS) != 0;
         }
 
         /** @hide */
@@ -846,14 +848,24 @@ public class StatusBarManager {
         }
 
         /**
-         * @return {@code true} if no components are disabled (default state)
+         * Returns whether the rotation suggestion is disabled.
          *
+         * @hide
+         */
+        @TestApi
+        public boolean isRotationSuggestionDisabled() {
+            return mRotationSuggestion;
+        }
+
+        /**
+         * @return {@code true} if no components are disabled (default state)
          * @hide
          */
         @SystemApi
         public boolean areAllComponentsEnabled() {
             return !mStatusBarExpansion && !mNavigateHome && !mNotificationPeeking && !mRecents
-                    && !mSearch && !mSystemIcons && !mClock && !mNotificationIcons;
+                    && !mSearch && !mSystemIcons && !mClock && !mNotificationIcons
+                    && !mRotationSuggestion;
         }
 
         /** @hide */
@@ -866,6 +878,7 @@ public class StatusBarManager {
             mSystemIcons = false;
             mClock = false;
             mNotificationIcons = false;
+            mRotationSuggestion = false;
         }
 
         /**
@@ -875,7 +888,8 @@ public class StatusBarManager {
          */
         public boolean areAllComponentsDisabled() {
             return mStatusBarExpansion && mNavigateHome && mNotificationPeeking
-                    && mRecents && mSearch && mSystemIcons && mClock && mNotificationIcons;
+                    && mRecents && mSearch && mSystemIcons && mClock && mNotificationIcons
+                    && mRotationSuggestion;
         }
 
         /** @hide */
@@ -888,6 +902,7 @@ public class StatusBarManager {
             mSystemIcons = true;
             mClock = true;
             mNotificationIcons = true;
+            mRotationSuggestion = true;
         }
 
         @NonNull
@@ -904,6 +919,7 @@ public class StatusBarManager {
             sb.append(" mSystemIcons=").append(mSystemIcons ? "disabled" : "enabled");
             sb.append(" mClock=").append(mClock ? "disabled" : "enabled");
             sb.append(" mNotificationIcons=").append(mNotificationIcons ? "disabled" : "enabled");
+            sb.append(" mRotationSuggestion=").append(mRotationSuggestion ? "disabled" : "enabled");
 
             return sb.toString();
 
@@ -927,6 +943,7 @@ public class StatusBarManager {
             if (mSystemIcons) disable1 |= DISABLE_SYSTEM_INFO;
             if (mClock) disable1 |= DISABLE_CLOCK;
             if (mNotificationIcons) disable1 |= DISABLE_NOTIFICATION_ICONS;
+            if (mRotationSuggestion) disable2 |= DISABLE2_ROTATE_SUGGESTIONS;
 
             return new Pair<Integer, Integer>(disable1, disable2);
         }

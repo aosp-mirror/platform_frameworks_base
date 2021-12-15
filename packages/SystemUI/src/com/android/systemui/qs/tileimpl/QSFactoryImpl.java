@@ -169,7 +169,7 @@ public class QSFactoryImpl implements QSFactory {
         mFgsManagerTileProvider = fgsManagerTileProvider;
     }
 
-    public QSTile createTile(String tileSpec) {
+    public final QSTile createTile(String tileSpec) {
         QSTileImpl tile = createTileInternal(tileSpec);
         if (tile != null) {
             tile.initialize();
@@ -178,7 +178,7 @@ public class QSFactoryImpl implements QSFactory {
         return tile;
     }
 
-    private QSTileImpl createTileInternal(String tileSpec) {
+    protected QSTileImpl createTileInternal(String tileSpec) {
         // Stock tiles.
         switch (tileSpec) {
             case "wifi":

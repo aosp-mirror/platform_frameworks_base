@@ -2066,7 +2066,7 @@
     <permission android:name="android.permission.BLUETOOTH_PRIVILEGED"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Control access to email providers exclusively for Bluetooth
+    <!-- @SystemApi Control access to email providers exclusively for Bluetooth
          @hide
     -->
     <permission android:name="android.permission.BLUETOOTH_MAP"
@@ -6049,6 +6049,13 @@
         -->
     <permission android:name="android.permission.SEND_SAFETY_CENTER_UPDATE"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an application to launch device manager setup screens.
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.LAUNCH_DEVICE_MANAGER_SETUP"
+        android:protectionLevel="signature|role" />
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

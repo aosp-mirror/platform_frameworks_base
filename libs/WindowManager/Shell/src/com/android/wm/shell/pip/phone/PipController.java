@@ -843,9 +843,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void setPipExclusionBoundsChangeListener(Consumer<Rect> listener) {
+        public void addPipExclusionBoundsChangeListener(Consumer<Rect> listener) {
             mMainExecutor.execute(() -> {
-                mPipBoundsState.setPipExclusionBoundsChangeCallback(listener);
+                mPipBoundsState.addPipExclusionBoundsChangeCallback(listener);
+            });
+        }
+
+        @Override
+        public void removePipExclusionBoundsChangeListener(Consumer<Rect> listener) {
+            mMainExecutor.execute(() -> {
+                mPipBoundsState.removePipExclusionBoundsChangeCallback(listener);
             });
         }
 
