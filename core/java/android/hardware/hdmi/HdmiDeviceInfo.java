@@ -124,6 +124,7 @@ public class HdmiDeviceInfo implements Parcelable {
     private final int mVendorId;
     private final String mDisplayName;
     private final int mDevicePowerStatus;
+    private final DeviceFeatures mDeviceFeatures;
 
     // MHL only parameters.
     private final int mDeviceId;
@@ -198,6 +199,7 @@ public class HdmiDeviceInfo implements Parcelable {
         mDevicePowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
         mDisplayName = "Inactive";
         mVendorId = 0;
+        mDeviceFeatures = DeviceFeatures.ALL_FEATURES_SUPPORT_UNKNOWN;
 
         mDeviceId = -1;
         mAdopterId = -1;
@@ -222,6 +224,7 @@ public class HdmiDeviceInfo implements Parcelable {
         this.mVendorId = builder.mVendorId;
         this.mDisplayName = builder.mDisplayName;
         this.mDevicePowerStatus = builder.mDevicePowerStatus;
+        this.mDeviceFeatures = builder.mDeviceFeatures;
         this.mDeviceId = builder.mDeviceId;
         this.mAdopterId = builder.mAdopterId;
 
@@ -292,6 +295,15 @@ public class HdmiDeviceInfo implements Parcelable {
      */
     public int getId() {
         return mId;
+    }
+
+    /**
+     * Returns the CEC features that this device supports.
+     *
+     * @hide
+     */
+    public DeviceFeatures getDeviceFeatures() {
+        return mDeviceFeatures;
     }
 
     /**
@@ -521,6 +533,11 @@ public class HdmiDeviceInfo implements Parcelable {
         s.append("physical_address: ").append(String.format("0x%04X", mPhysicalAddress));
         s.append(" ");
         s.append("port_id: ").append(mPortId);
+
+        if (mHdmiDeviceType == HDMI_DEVICE_TYPE_CEC) {
+            s.append("\n  ").append(mDeviceFeatures.toString());
+        }
+
         return s.toString();
     }
 
@@ -581,6 +598,7 @@ public class HdmiDeviceInfo implements Parcelable {
         private int mVendorId = VENDOR_ID_UNKNOWN;
         private String mDisplayName = "";
         private int mDevicePowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
+        private DeviceFeatures mDeviceFeatures;
 
         // MHL parameters
         private int mDeviceId = -1;
@@ -588,6 +606,11 @@ public class HdmiDeviceInfo implements Parcelable {
 
         private Builder(int hdmiDeviceType) {
             mHdmiDeviceType = hdmiDeviceType;
+            if (hdmiDeviceType == HDMI_DEVICE_TYPE_CEC) {
+                mDeviceFeatures = DeviceFeatures.ALL_FEATURES_SUPPORT_UNKNOWN;
+            } else {
+                mDeviceFeatures = DeviceFeatures.NO_FEATURES_SUPPORTED;
+            }
         }
 
         private Builder(@NonNull HdmiDeviceInfo hdmiDeviceInfo) {
@@ -602,6 +625,7 @@ public class HdmiDeviceInfo implements Parcelable {
             mDevicePowerStatus = hdmiDeviceInfo.mDevicePowerStatus;
             mDeviceId = hdmiDeviceInfo.mDeviceId;
             mAdopterId = hdmiDeviceInfo.mAdopterId;
+            mDeviceFeatures = hdmiDeviceInfo.mDeviceFeatures;
         }
 
         /**
@@ -681,6 +705,15 @@ public class HdmiDeviceInfo implements Parcelable {
         @NonNull
         public Builder setDevicePowerStatus(int devicePowerStatus) {
             mDevicePowerStatus = devicePowerStatus;
+            return this;
+        }
+
+        /**
+         * Sets the value for {@link #getDeviceFeatures()}.
+         */
+        @NonNull
+        public Builder setDeviceFeatures(DeviceFeatures deviceFeatures) {
+            this.mDeviceFeatures = deviceFeatures;
             return this;
         }
 
