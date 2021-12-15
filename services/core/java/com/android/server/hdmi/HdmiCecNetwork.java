@@ -57,7 +57,8 @@ import java.util.concurrent.ArrayBlockingQueue;
  * This class should not take any active action in sending CEC messages.
  *
  * Note that the information cached in this class is not guaranteed to be up-to-date, especially OSD
- * names, power states can be outdated.
+ * names, power states can be outdated. For local devices, more up-to-date information can be
+ * accessed through {@link HdmiCecLocalDevice#getDeviceInfo()}.
  */
 @VisibleForTesting
 public class HdmiCecNetwork {
@@ -721,10 +722,7 @@ public class HdmiCecNetwork {
 
     /**
      * Returns the {@link HdmiDeviceInfo} instance whose physical address matches
-     *
-     *
-     *
-     * qq   * the given routing path. CEC devices use routing path for its physical address to
+     * the given routing path. CEC devices use routing path for its physical address to
      * describe the hierarchy of the devices in the network.
      *
      * @param path routing path or physical address

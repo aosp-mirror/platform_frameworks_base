@@ -20,6 +20,7 @@ package com.android.server.hdmi;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
+import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -517,9 +518,11 @@ public class HdmiCecNetworkTest {
                 HdmiCecMessageBuilder.buildReportFeatures(logicalAddress,
                         cecVersion, Collections.emptyList(),
                         Constants.RC_PROFILE_SOURCE, Collections.emptyList(),
-                        Collections.emptyList()));
+                        DeviceFeatures.NO_FEATURES_SUPPORTED));
 
-        assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+        synchronized (mHdmiCecNetwork.mLock) {
+            assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+        }
 
         HdmiDeviceInfo cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
@@ -534,9 +537,11 @@ public class HdmiCecNetworkTest {
                 HdmiCecMessageBuilder.buildReportFeatures(logicalAddress,
                         cecVersion, Collections.emptyList(),
                         Constants.RC_PROFILE_SOURCE, Collections.emptyList(),
-                        Collections.emptyList()));
+                        DeviceFeatures.NO_FEATURES_SUPPORTED));
 
-        assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+        synchronized (mHdmiCecNetwork.mLock) {
+            assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+        }
 
         HdmiDeviceInfo cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);

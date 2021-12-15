@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 
@@ -699,7 +700,7 @@ public class HdmiCecMessageBuilder {
             @HdmiControlManager.HdmiCecVersion int cecVersion,
             List<Integer> allDeviceTypes, @Constants.RcProfile int rcProfile,
             List<Integer> rcFeatures,
-            List<Integer> deviceFeatures) {
+            DeviceFeatures deviceFeatures) {
         byte cecVersionByte = (byte) (cecVersion & 0xFF);
         byte deviceTypes = 0;
         for (Integer deviceType : allDeviceTypes) {
@@ -717,12 +718,15 @@ public class HdmiCecMessageBuilder {
             rcProfileByte |= rcProfileTv;
         }
 
-        byte deviceFeaturesByte = 0;
-        for (@Constants.DeviceFeature Integer deviceFeature : deviceFeatures) {
-            deviceFeaturesByte |= 1 << deviceFeature;
-        }
+        byte[] fixedOperands = {cecVersionByte, deviceTypes, rcProfileByte};
+        byte[] deviceFeaturesBytes = deviceFeatures.toOperand();
 
-        byte[] params = {cecVersionByte, deviceTypes, rcProfileByte, deviceFeaturesByte};
+        // Concatenate fixed length operands and [Device Features]
+        byte[] params = Arrays.copyOf(fixedOperands,
+                fixedOperands.length + deviceFeaturesBytes.length);
+        System.arraycopy(deviceFeaturesBytes, 0, params,
+                fixedOperands.length, deviceFeaturesBytes.length);
+
         return buildCommand(src, Constants.ADDR_BROADCAST, Constants.MESSAGE_REPORT_FEATURES,
                 params);
     }

@@ -109,11 +109,6 @@ public class HdmiCecLocalDeviceTest {
         protected List<Integer> getRcFeatures() {
             return Collections.emptyList();
         }
-
-        @Override
-        protected List<Integer> getDeviceFeatures() {
-            return Collections.emptyList();
-        }
     }
 
     private MyHdmiCecLocalDevice mHdmiLocalDevice;

@@ -28,8 +28,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.Constants.LocalActivePort;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
-import com.google.android.collect.Lists;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -356,11 +354,6 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
             features.add(Constants.RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU);
         }
         return features;
-    }
-
-    @Override
-    protected List<Integer> getDeviceFeatures() {
-        return Lists.newArrayList();
     }
 
     // Active source claiming needs to be handled in Service
