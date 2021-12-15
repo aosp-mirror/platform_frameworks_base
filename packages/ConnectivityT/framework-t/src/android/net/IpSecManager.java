@@ -86,6 +86,7 @@ public final class IpSecManager {
      *
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final int DIRECTION_FWD = 2;
 
     /**
