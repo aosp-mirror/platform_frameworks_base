@@ -16,6 +16,7 @@
 
 package android.media.tv.interactive;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
@@ -26,6 +27,7 @@ import android.media.tv.TvInputManager;
 import android.media.tv.TvView;
 import android.media.tv.interactive.TvIAppManager.Session;
 import android.media.tv.interactive.TvIAppManager.SessionCallback;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -301,6 +303,38 @@ public class TvIAppView extends ViewGroup {
         }
     }
 
+    /**
+     * Creates broadcast-independent(BI) interactive application.
+     *
+     * @see #destroyBiInteractiveApp(String)
+     * @hide
+     */
+    public void createBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
+        if (DEBUG) {
+            Log.d(TAG, "createBiInteractiveApp Uri=" + biIAppUri + ", params=" + params);
+        }
+        if (mSession != null) {
+            mSession.createBiInteractiveApp(biIAppUri, params);
+        }
+    }
+
+    /**
+     * Destroys broadcast-independent(BI) interactive application.
+     *
+     * @param biIAppId the BI interactive app ID from {@link #createBiInteractiveApp(Uri, Bundle)}
+     *
+     * @see #createBiInteractiveApp(Uri, Bundle)
+     * @hide
+     */
+    public void destroyBiInteractiveApp(@NonNull String biIAppId) {
+        if (DEBUG) {
+            Log.d(TAG, "destroyBiInteractiveApp biIAppId=" + biIAppId);
+        }
+        if (mSession != null) {
+            mSession.destroyBiInteractiveApp(biIAppId);
+        }
+    }
+
     public Session getIAppSession() {
         return mSession;
     }
@@ -348,6 +382,28 @@ public class TvIAppView extends ViewGroup {
          */
         public void onCommandRequest(String iAppServiceId,
                 @TvIAppService.IAppServiceCommandType String cmdType, Bundle parameters) {
+        }
+
+        /**
+         * This is called when the session state is changed.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param state current session state.
+         */
+        public void onSessionStateChanged(String iAppServiceId, int state) {
+        }
+
+        /**
+         * This is called when broadcast-independent (BI) interactive app is created.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param biIAppUri URI associated this BI interactive app. This is the same URI in
+         *                  {@link Session#createBiInteractiveApp(Uri, Bundle)}
+         * @param biIAppId BI interactive app ID, which can be used to destroy the BI interactive
+         *                 app.
+         */
+        public void onBiInteractiveAppCreated(String iAppServiceId, Uri biIAppUri,
+                String biIAppId) {
         }
     }
 
@@ -438,6 +494,35 @@ public class TvIAppView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onCommandRequest(mIAppServiceId, cmdType, parameters);
+            }
+        }
+
+        @Override
+        public void onSessionStateChanged(Session session, int state) {
+            if (DEBUG) {
+                Log.d(TAG, "onSessionStateChanged (state=" + state +  ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onSessionStateChanged - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onSessionStateChanged(mIAppServiceId, state);
+            }
+        }
+
+        @Override
+        public void onBiInteractiveAppCreated(Session session, Uri biIAppUri, String biIAppId) {
+            if (DEBUG) {
+                Log.d(TAG, "onBiInteractiveAppCreated (biIAppUri=" + biIAppUri + ", biIAppId="
+                        + biIAppId + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onBiInteractiveAppCreated - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onBiInteractiveAppCreated(mIAppServiceId, biIAppUri, biIAppId);
             }
         }
     }

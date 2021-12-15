@@ -17,10 +17,10 @@
 package android.media.tv.interactive;
 
 import android.graphics.Rect;
+import android.media.tv.BroadcastInfoResponse;
 import android.net.Uri;
-import android.media.tv.BroadcastInfoResponse;
+import android.os.Bundle;
 import android.view.Surface;
-import android.media.tv.BroadcastInfoResponse;
 
 /**
  * Sub-interface of ITvIAppService.aidl which is created per session and has its own context.
@@ -28,6 +28,8 @@ import android.media.tv.BroadcastInfoResponse;
  */
 oneway interface ITvIAppSession {
     void startIApp();
+    void createBiInteractiveApp(in Uri biIAppUri, in Bundle params);
+    void destroyBiInteractiveApp(in String biIAppId);
     void release();
     void notifyTuned(in Uri channelUri);
     void setSurface(in Surface surface);

@@ -288,6 +288,28 @@ public abstract class TvIAppService extends Service {
         }
 
         /**
+         * Creates broadcast-independent(BI) interactive application.
+         *
+         * @see #onDestroyBiInteractiveApp(String)
+         * @hide
+         */
+        public void onCreateBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
+        }
+
+
+        /**
+         * Destroys broadcast-independent(BI) interactive application.
+         *
+         * @param biIAppId the BI interactive app ID from
+         *        {@link #createBiInteractiveApp(Uri, Bundle)}
+         *
+         * @see #onCreateBiInteractiveApp(Uri, Bundle)
+         * @hide
+         */
+        public void onDestroyBiInteractiveApp(@NonNull String biIAppId) {
+        }
+
+        /**
          * Called when the application sets the surface.
          *
          * <p>The TV IApp service should render interactive app UI onto the given surface. When
@@ -497,6 +519,14 @@ public abstract class TvIAppService extends Service {
             onStartIApp();
         }
 
+        void createBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
+            onCreateBiInteractiveApp(biIAppUri, params);
+        }
+
+        void destroyBiInteractiveApp(@NonNull String biIAppId) {
+            onDestroyBiInteractiveApp(biIAppId);
+        }
+
         void release() {
             onRelease();
             if (mSurface != null) {
@@ -550,6 +580,32 @@ public abstract class TvIAppService extends Service {
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifySessionStateChanged", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Notifies the broadcast-independent(BI) interactive application has been created.
+         * @param biIAppId BI interactive app ID, which can be used to destroy the BI interactive
+         *                 app.
+         * @hide
+         */
+        public final void notifyBiInteractiveAppCreated(Uri biIAppUri, String biIAppId) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "notifyBiInteractiveAppCreated (biIAppId="
+                                    + biIAppId + ")");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onBiInteractiveAppCreated(biIAppUri, biIAppId);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyBiInteractiveAppCreated", e);
                     }
                 }
             });
@@ -790,6 +846,16 @@ public abstract class TvIAppService extends Service {
         @Override
         public void startIApp() {
             mSessionImpl.startIApp();
+        }
+
+        @Override
+        public void createBiInteractiveApp(Uri biIAppUri, Bundle params) {
+            mSessionImpl.createBiInteractiveApp(biIAppUri, params);
+        }
+
+        @Override
+        public void destroyBiInteractiveApp(String biIAppId) {
+            mSessionImpl.destroyBiInteractiveApp(biIAppId);
         }
 
         @Override

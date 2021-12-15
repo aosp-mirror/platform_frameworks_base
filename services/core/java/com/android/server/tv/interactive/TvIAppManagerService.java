@@ -652,11 +652,13 @@ public class TvIAppManagerService extends SystemService {
                         serviceState = new ServiceState(
                                 componentName, tiasId, resolvedUserId, true, type);
                         userState.mServiceStateMap.put(componentName, serviceState);
+                        updateServiceConnectionLocked(componentName, resolvedUserId);
                     } else if (serviceState.mService != null) {
                         serviceState.mService.prepare(type);
                     } else {
                         serviceState.mPendingPrepare = true;
                         serviceState.mPendingPrepareType = type;
+                        updateServiceConnectionLocked(componentName, resolvedUserId);
                     }
                 }
             } catch (RemoteException e) {
@@ -687,10 +689,12 @@ public class TvIAppManagerService extends SystemService {
                                 componentName, tiasId, resolvedUserId);
                         serviceState.addPendingAppLink(appLinkInfo);
                         userState.mServiceStateMap.put(componentName, serviceState);
+                        updateServiceConnectionLocked(componentName, resolvedUserId);
                     } else if (serviceState.mService != null) {
                         serviceState.mService.notifyAppLinkInfo(appLinkInfo);
                     } else {
                         serviceState.addPendingAppLink(appLinkInfo);
+                        updateServiceConnectionLocked(componentName, resolvedUserId);
                     }
                 }
             } catch (RemoteException e) {
@@ -850,7 +854,7 @@ public class TvIAppManagerService extends SystemService {
             }
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "notifyTuned");
+                    userId, "startIApp");
             SessionState sessionState = null;
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -861,6 +865,58 @@ public class TvIAppManagerService extends SystemService {
                         getSessionLocked(sessionState).startIApp();
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slogf.e(TAG, "error in start", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void createBiInteractiveApp(
+                IBinder sessionToken, Uri biIAppUri, Bundle params, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "createBiInteractiveApp(biIAppUri=%s,params=%s)", biIAppUri, params);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "createBiInteractiveApp");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).createBiInteractiveApp(
+                                biIAppUri, params);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in createBiInteractiveApp", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void destroyBiInteractiveApp(IBinder sessionToken, String biIAppId, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "destroyBiInteractiveApp(biIAppId=%s)", biIAppId);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "destroyBiInteractiveApp");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).destroyBiInteractiveApp(biIAppId);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in destroyBiInteractiveApp", e);
                     }
                 }
             } finally {
@@ -1164,7 +1220,8 @@ public class TvIAppManagerService extends SystemService {
             serviceState.mReconnecting = false;
         }
 
-        boolean shouldBind = !serviceState.mSessionTokens.isEmpty();
+        boolean shouldBind = (!serviceState.mSessionTokens.isEmpty())
+                || (serviceState.mPendingPrepare) || (!serviceState.mPendingAppLinkInfo.isEmpty());
 
         if (serviceState.mService == null && shouldBind) {
             // This means that the service is not yet connected but its state indicates that we
@@ -1580,6 +1637,25 @@ public class TvIAppManagerService extends SystemService {
                     mSessionState.mClient.onSessionStateChanged(state, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onSessionStateChanged", e);
+                }
+            }
+        }
+
+        @Override
+        public void onBiInteractiveAppCreated(Uri biIAppUri, String biIAppId) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onBiInteractiveAppCreated (biIAppUri=" + biIAppUri
+                            + ", biIAppId=" + biIAppId + ")");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onBiInteractiveAppCreated(
+                            biIAppUri, biIAppId, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onBiInteractiveAppCreated", e);
                 }
             }
         }

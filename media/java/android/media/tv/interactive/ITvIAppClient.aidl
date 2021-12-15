@@ -17,6 +17,7 @@
 package android.media.tv.interactive;
 
 import android.media.tv.BroadcastInfoRequest;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.InputChannel;
 
@@ -31,5 +32,6 @@ oneway interface ITvIAppClient {
     void onLayoutSurface(int left, int top, int right, int bottom, int seq);
     void onBroadcastInfoRequest(in BroadcastInfoRequest request, int seq);
     void onSessionStateChanged(int state, int seq);
+    void onBiInteractiveAppCreated(in Uri biIAppUri, in String biIAppId, int seq);
     void onCommandRequest(in String cmdType, in Bundle parameters, int seq);
 }

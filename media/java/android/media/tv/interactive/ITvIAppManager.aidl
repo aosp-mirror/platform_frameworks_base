@@ -35,6 +35,9 @@ interface ITvIAppManager {
     void notifyAppLinkInfo(String tiasId, in Bundle info, int userId);
     void sendAppLinkCommand(String tiasId, in Bundle command, int userId);
     void startIApp(in IBinder sessionToken, int userId);
+    void createBiInteractiveApp(
+            in IBinder sessionToken, in Uri biIAppUri, in Bundle params, int userId);
+    void destroyBiInteractiveApp(in IBinder sessionToken, in String biIAppId, int userId);
     void createSession(
             in ITvIAppClient client, in String iAppServiceId, int type, int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
