@@ -29,10 +29,23 @@ import android.media.audio.common.AudioFormatDescription;
 parcelable AudioPortDeviceExt {
     /** Audio device specification. */
     AudioDevice device;
+    /** Bitmask indexed by 'FLAG_INDEX_' constants. */
+    int flags;
     /**
      * List of supported encoded formats. Specified for ports that perform
      * hardware-accelerated decoding or transcoding, or connected to external
      * hardware.
      */
     AudioFormatDescription[] encodedFormats;
+
+    /**
+     * A default device port is fallback used when the preference for the device
+     * to use has not been specified (AudioDeviceType.type == {IN|OUT}_DEFAULT),
+     * or the specified device does not satisfy routing criteria based on audio
+     * stream attributes and use cases. The device port for which the ID is
+     * returned must be associated with a permanently attached device
+     * (AudioDeviceDescription.connection == ''). There can be no more than one
+     * default device port in a HAL module in each I/O direction.
+     */
+    const int FLAG_INDEX_DEFAULT_DEVICE = 0;
 }
