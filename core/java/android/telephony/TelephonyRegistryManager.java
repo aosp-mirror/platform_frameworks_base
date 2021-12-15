@@ -247,8 +247,8 @@ public class TelephonyRegistryManager {
             } else if (listener.mSubId != null) {
                 subId = listener.mSubId;
             }
-            sRegistry.listenWithEventList(
-                    subId, pkg, featureId, listener.callback, eventsList, notifyNow);
+            sRegistry.listenWithEventList(false, false, subId, pkg, featureId,
+                    listener.callback, eventsList, notifyNow);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -263,11 +263,13 @@ public class TelephonyRegistryManager {
      * @param events List events
      * @param notifyNow Whether to notify instantly
      */
-    private void listenFromCallback(int subId, @NonNull String pkg, @NonNull String featureId,
+    private void listenFromCallback(boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess, int subId,
+            @NonNull String pkg, @NonNull String featureId,
             @NonNull TelephonyCallback telephonyCallback, @NonNull int[] events,
             boolean notifyNow) {
         try {
-            sRegistry.listenWithEventList(
+            sRegistry.listenWithEventList(renounceFineLocationAccess, renounceCoarseLocationAccess,
                     subId, pkg, featureId, telephonyCallback.callback, events, notifyNow);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1161,14 +1163,17 @@ public class TelephonyRegistryManager {
      *
      * @param callback The {@link TelephonyCallback} object to register.
      */
-    public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
+    public void registerTelephonyCallback(boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess,
+            @NonNull @CallbackExecutor Executor executor,
             int subId, String pkgName, String attributionTag, @NonNull TelephonyCallback callback,
             boolean notifyNow) {
         if (callback == null) {
             throw new IllegalStateException("telephony service is null.");
         }
         callback.init(executor);
-        listenFromCallback(subId, pkgName, attributionTag, callback,
+        listenFromCallback(renounceFineLocationAccess, renounceCoarseLocationAccess, subId,
+                pkgName, attributionTag, callback,
                 getEventsFromCallback(callback).stream().mapToInt(i -> i).toArray(), notifyNow);
     }
 
@@ -1179,6 +1184,7 @@ public class TelephonyRegistryManager {
      */
     public void unregisterTelephonyCallback(int subId, String pkgName, String attributionTag,
             @NonNull TelephonyCallback callback, boolean notifyNow) {
-        listenFromCallback(subId, pkgName, attributionTag, callback, new int[0], notifyNow);
+        listenFromCallback(false, false, subId,
+                pkgName, attributionTag, callback, new int[0], notifyNow);
     }
 }
