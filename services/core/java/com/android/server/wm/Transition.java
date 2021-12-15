@@ -365,6 +365,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 t.setPosition(targetLeash, tmpPos.x, tmpPos.y);
                 t.setCornerRadius(targetLeash, 0);
                 t.setShadowRadius(targetLeash, 0);
+                t.setMatrix(targetLeash, 1, 0, 0, 1);
                 // The bounds sent to the transition is always a real bounds. This means we lose
                 // information about "null" bounds (inheriting from parent). Core will fix-up
                 // non-organized window surface bounds; however, since Core can't touch organized

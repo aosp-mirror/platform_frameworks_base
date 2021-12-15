@@ -62,6 +62,7 @@ public class PipTransition extends PipTransitionController {
 
     private final PipTransitionState mPipTransitionState;
     private final int mEnterExitAnimationDuration;
+    private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private @PipAnimationController.AnimationType int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
     private Transitions.TransitionFinishCallback mFinishCallback;
     private Rect mExitDestinationBounds = new Rect();
@@ -74,12 +75,14 @@ public class PipTransition extends PipTransitionController {
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
             Transitions transitions,
-            @NonNull ShellTaskOrganizer shellTaskOrganizer) {
+            @NonNull ShellTaskOrganizer shellTaskOrganizer,
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper) {
         super(pipBoundsState, pipMenuController, pipBoundsAlgorithm,
                 pipAnimationController, transitions, shellTaskOrganizer);
         mPipTransitionState = pipTransitionState;
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
+        mSurfaceTransactionHelper = pipSurfaceTransactionHelper;
     }
 
     @Override
@@ -286,7 +289,10 @@ public class PipTransition extends PipTransitionController {
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         final Rect currentBounds = taskInfo.configuration.windowConfiguration.getBounds();
         PipAnimationController.PipTransitionAnimator animator;
-        finishTransaction.setPosition(leash, destinationBounds.left, destinationBounds.top);
+        // Set corner radius for entering pip.
+        mSurfaceTransactionHelper
+                .crop(finishTransaction, leash, destinationBounds)
+                .round(finishTransaction, leash, true /* applyCornerRadius */);
         if (taskInfo.pictureInPictureParams != null
                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()
                 && mPipTransitionState.getInSwipePipToHomeTransition()) {
