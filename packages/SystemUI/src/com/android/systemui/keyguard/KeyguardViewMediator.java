@@ -2107,15 +2107,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     private final Runnable mKeyguardGoingAwayRunnable = new Runnable() {
         @Override
         public void run() {
-            // If the keyguard is already going away, or it's about to because we are going to
-            // trigger the going-away remote animation to show the surface behind, don't do it
-            // again. That will cause the current animation to be cancelled unnecessarily.
-            if (mKeyguardStateController.isKeyguardGoingAway()
-                    || mSurfaceBehindRemoteAnimationRequested
-                    || mSurfaceBehindRemoteAnimationRunning) {
-                return;
-            }
-
             Trace.beginSection("KeyguardViewMediator.mKeyGuardGoingAwayRunnable");
             if (DEBUG) Log.d(TAG, "keyguardGoingAway");
             mKeyguardViewControllerLazy.get().keyguardGoingAway();
