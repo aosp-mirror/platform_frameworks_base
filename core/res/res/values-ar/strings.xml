@@ -628,6 +628,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"انقر لحذف نموذج الوجه ثم أضِف نموذجًا لوجهك مرة أخرى."</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"إعداد ميزة \"فتح الجهاز بالتعرف على الوجه\""</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"يمكنك فتح قفل هاتفك بمجرّد النظر إلى الشاشة."</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"‏لاستخدام ميزة \"فتح الجهاز بالتعرف على الوجه\"، عليك منح إذن "<b>"الوصول إلى الكاميرا"</b>" في الإعدادات &gt; الخصوصية."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"إعداد المزيد من الطرق لفتح قفل الجهاز"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"انقر لإضافة بصمة إصبع."</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"فتح الجهاز ببصمة الإصبع"</string>
@@ -1718,7 +1719,7 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"النظام"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"صوت بلوتوث"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"عرض شاشة لاسلكي"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"إرسال"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"البث"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"الاتصال بجهاز"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"بث الشاشة على الجهاز"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"جارٍ البحث عن الأجهزة…"</string>

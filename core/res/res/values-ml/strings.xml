@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"നിങ്ങളുടെ മുഖ മോഡൽ ഇല്ലാതാക്കാൻ ടാപ്പ് ചെയ്യുക, തുടർന്ന് അത് വീണ്ടും ചേർക്കുക"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ഫെയ്‌സ് അൺലോക്ക് സജ്ജീകരിക്കുക"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ഫോണിലേക്ക് നോക്കി അത് അൺലോക്ക് ചെയ്യുക"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ഫെയ്‌സ് അൺലോക്ക് ഉപയോഗിക്കാൻ, ക്രമീകരണം &gt; സ്വകാര്യത എന്നതിൽ "<b>"ക്യാമറാ ആക്‌സസ്"</b>" ഓണാക്കുക"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"അൺലോക്ക് ചെയ്യുന്നതിനുള്ള കൂടുതൽ വഴികൾ സജ്ജീകരിക്കുക"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ഫിംഗർപ്രിന്റ് ചേർക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ഫിംഗർപ്രിന്റ് അൺലോക്ക്"</string>

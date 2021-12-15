@@ -622,6 +622,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Нажмите, чтобы удалить модель лица, а затем добавьте ее снова."</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Настройка фейсконтроля"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Вы сможете разблокировать телефон, просто посмотрев на него."</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Чтобы использовать фейсконтроль, разрешите "<b>"доступ к камере"</b>". Для этого перейдите в настройки и нажмите \"Конфиденциальность\"."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Настройте другие способы разблокировки"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Нажмите, чтобы добавить отпечаток пальца."</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Разблокировка по отпечатку пальца"</string>

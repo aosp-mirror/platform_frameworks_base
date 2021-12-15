@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Trykk for å slette ansiktsmodellen din, og legg deretter til ansiktet på nytt"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfigurer ansiktslås"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Lås opp telefonen ved å se på den"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"For å bruke ansiktslås, slå på "<b>"Kameratilgang"</b>" i Innstillinger &gt; Personvern"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfigurer flere måter å låse opp på"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Trykk for å legge til et fingeravtrykk"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Opplåsing med fingeravtrykk"</string>

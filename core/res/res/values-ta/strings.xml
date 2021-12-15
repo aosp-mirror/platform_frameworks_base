@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"முகத் தோற்றப் பதிவைத் தட்டி நீக்கிவிட்டு உங்கள் முகத்தை மீண்டும் சேர்க்கவும்"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை அமைத்தல்"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"மொபைலைப் பார்ப்பதன் மூலம் அதை அன்லாக் செய்யலாம்"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"முகம் காட்டித் திறத்தல் அம்சத்தைப் பயன்படுத்த, அமைப்புகள் &gt; தனியுரிமை என்பதற்குச் சென்று "<b>"கேமரா அணுகலை"</b>" இயக்கவும்"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"அன்லாக் செய்ய மேலும் பல வழிகளை அமையுங்கள்"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"கைரேகையைச் சேர்க்கத் தட்டுங்கள்"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"கைரேகை அன்லாக்"</string>

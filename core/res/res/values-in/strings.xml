@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ketuk untuk menghapus model wajah, lalu tambahkan wajah Anda lagi"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Siapkan Face Unlock"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci ponsel dengan melihat ke ponsel"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Untuk menggunakan Face Unlock, aktifkan "<b>"Akses kamera"</b>" di Setelan &gt; Privasi"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Siapkan lebih banyak cara untuk membuka kunci"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketuk untuk menambahkan sidik jari"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingerprint Unlock"</string>

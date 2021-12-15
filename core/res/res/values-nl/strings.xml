@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tik om je gezichtsmodel te verwijderen en voeg je gezicht opnieuw toe"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Ontgrendelen via gezichtsherkenning instellen"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ontgrendel je telefoon door ernaar te kijken"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Als je Ontgrendelen via gezichtsherkenning wilt gebruiken, zet je "<b>"Cameratoegang"</b>" aan via Instellingen &gt; Privacy"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Stel meer manieren in om te ontgrendelen"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tik om een vingerafdruk toe te voegen"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Ontgrendelen met vingerafdruk"</string>

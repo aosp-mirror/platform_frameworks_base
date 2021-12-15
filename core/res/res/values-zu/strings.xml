@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Thepha ukuze usule imodeli yakho yobuso, bese wengeza futhi ubuso"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Setha Ukuvula ngobuso"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Vula ifoni yakho ngokuyibheka"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Ukuze usebenzise Ukuvula ngobuso, vula "<b>"Ukufinyelela kwekhamera"</b>" kokuthi Amasethingi &gt; Ubumfihlo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Setha izindlela eziningi zokuvula"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Thepha ukuze ungeze izigxivizo zomunwe"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Ukuvula ngesigxivizo somunwe"</string>

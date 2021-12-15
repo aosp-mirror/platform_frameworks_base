@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Yüz modelinizi silmek için dokunup ardından yüzünüzü yeniden ekleyin"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Yüz Tanıma Kilidi\'ni kurma"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonunuza bakarak kilidini açın"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Yüz Tanıma Kilidi\'ni kullanmak için Ayarlar &gt; Gizlilik bölümünden "<b>"Kamera erişimi"</b>"\'ni açın"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Kilidi açmak için daha fazla yöntem ayarlayın"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Parmak izi eklemek için dokunun"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Parmak İzi Kilidi"</string>

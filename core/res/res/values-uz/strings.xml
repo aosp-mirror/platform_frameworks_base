@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Yuz modelini oʻchirish uchun bosing va keyin yana yuzni qoʻshing"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Yuz bilan ochishni sozlash"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefoningizni yuz tekshiruvi yordamida qulfdan chiqaring"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Yuz bilan ochish uchun Sozlamalar va maxfiylik orqali "<b>"kameraga kirishga ruxsat bering"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Qulfdan chiqarishning boshqa usullarini sozlang"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Barmoq izi kiritish uchun bosing"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Barmoq izi bilan ochish"</string>

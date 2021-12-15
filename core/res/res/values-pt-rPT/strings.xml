@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toque para eliminar o seu modelo de rosto e, em seguida, adicione o seu rosto novamente"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configure o Desbloqueio facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloqueie o telemóvel ao olhar para ele"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para utilizar o Desbloqueio facial, ative o "<b>"Acesso à câmara"</b>" em Definições &gt; Privacidade"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configure mais formas de desbloquear"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toque para adicionar uma impressão digital"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueio por impressão digital"</string>
