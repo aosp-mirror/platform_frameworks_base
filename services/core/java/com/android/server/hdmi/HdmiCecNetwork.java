@@ -505,6 +505,12 @@ public class HdmiCecNetwork {
             addCecDevice(newDevice);
         }
 
+        // If a message type has its own class, all valid messages of that type
+        // will be represented by an instance of that class.
+        if (message instanceof ReportFeaturesMessage) {
+            handleReportFeatures((ReportFeaturesMessage) message);
+        }
+
         switch (message.getOpcode()) {
             case Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS:
                 handleReportPhysicalAddress(message);
@@ -521,18 +527,20 @@ public class HdmiCecNetwork {
             case Constants.MESSAGE_CEC_VERSION:
                 handleCecVersion(message);
                 break;
-            case Constants.MESSAGE_REPORT_FEATURES:
-                handleReportFeatures(message);
-                break;
         }
     }
 
     @ServiceThreadOnly
-    private void handleReportFeatures(HdmiCecMessage message) {
+    private void handleReportFeatures(ReportFeaturesMessage message) {
         assertRunOnServiceThread();
 
-        int version = Byte.toUnsignedInt(message.getParams()[0]);
-        updateDeviceCecVersion(message.getSource(), version);
+        HdmiDeviceInfo currentDeviceInfo = getCecDeviceInfo(message.getSource());
+        HdmiDeviceInfo newDeviceInfo = currentDeviceInfo.toBuilder()
+                .setCecVersion(message.getCecVersion())
+                .updateDeviceFeatures(message.getDeviceFeatures())
+                .build();
+
+        updateCecDevice(newDeviceInfo);
     }
 
     @ServiceThreadOnly

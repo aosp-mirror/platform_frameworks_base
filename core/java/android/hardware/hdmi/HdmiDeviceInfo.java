@@ -734,5 +734,15 @@ public class HdmiDeviceInfo implements Parcelable {
             mAdopterId = adopterId;
             return this;
         }
+
+        /**
+         * Updates the value for {@link #getDeviceFeatures()} with a new set of device features.
+         * New information overrides the old, except when feature support was unknown.
+         */
+        @NonNull
+        public Builder updateDeviceFeatures(DeviceFeatures deviceFeatures) {
+            mDeviceFeatures = mDeviceFeatures.toBuilder().update(deviceFeatures).build();
+            return this;
+        }
     }
 }

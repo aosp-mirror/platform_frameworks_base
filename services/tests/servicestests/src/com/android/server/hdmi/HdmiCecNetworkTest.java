@@ -17,6 +17,8 @@
 package com.android.server.hdmi;
 
 
+import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
@@ -545,6 +547,31 @@ public class HdmiCecNetworkTest {
         HdmiDeviceInfo cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
         assertThat(cecDeviceInfo.getCecVersion()).isEqualTo(cecVersion);
+    }
+
+    @Test
+    public void cecDevices_tracking_reportFeatures_updatesDeviceFeatures() {
+        // Features should be set correctly with the initial <Report Features>
+        int logicalAddress = Constants.ADDR_PLAYBACK_1;
+        int cecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
+        DeviceFeatures deviceFeatures = DeviceFeatures.NO_FEATURES_SUPPORTED;
+        mHdmiCecNetwork.handleCecMessage(
+                ReportFeaturesMessage.build(logicalAddress,
+                        cecVersion, Collections.emptyList(),
+                        Constants.RC_PROFILE_SOURCE, Collections.emptyList(), deviceFeatures));
+
+        HdmiDeviceInfo cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
+        assertThat(cecDeviceInfo.getDeviceFeatures()).isEqualTo(deviceFeatures);
+
+        // New information from <Report Features> should override old information
+        DeviceFeatures updatedFeatures = DeviceFeatures.NO_FEATURES_SUPPORTED.toBuilder()
+                .setSetAudioVolumeLevelSupport(FEATURE_SUPPORTED).build();
+        mHdmiCecNetwork.handleCecMessage(
+                ReportFeaturesMessage.build(logicalAddress,
+                        cecVersion, Collections.emptyList(),
+                        Constants.RC_PROFILE_SOURCE, Collections.emptyList(), updatedFeatures));
+        cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
+        assertThat(cecDeviceInfo.getDeviceFeatures()).isEqualTo(updatedFeatures);
     }
 
     @Test

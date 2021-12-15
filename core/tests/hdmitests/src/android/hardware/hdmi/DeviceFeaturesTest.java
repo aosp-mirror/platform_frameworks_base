@@ -18,6 +18,7 @@ package android.hardware.hdmi;
 
 import static android.hardware.hdmi.DeviceFeatures.FEATURE_NOT_SUPPORTED;
 import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
+import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORT_UNKNOWN;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -73,5 +74,41 @@ public class DeviceFeaturesTest {
         assertThat(info.getSetAudioVolumeLevelSupport()).isEqualTo(FEATURE_NOT_SUPPORTED);
 
         assertThat(info.toOperand()).isEqualTo(new byte[]{(byte) 0b0111_0000});
+    }
+
+    @Test
+    public void testUpdate() {
+        DeviceFeatures oldFeatures = DeviceFeatures.ALL_FEATURES_SUPPORT_UNKNOWN.toBuilder()
+                .setRecordTvScreenSupport(FEATURE_SUPPORTED)
+                .setSetOsdStringSupport(FEATURE_SUPPORTED)
+                .setDeckControlSupport(FEATURE_NOT_SUPPORTED)
+                .setSetAudioRateSupport(FEATURE_NOT_SUPPORTED)
+                .setArcTxSupport(FEATURE_SUPPORT_UNKNOWN)
+                .setArcRxSupport(FEATURE_SUPPORT_UNKNOWN)
+                .setSetAudioVolumeLevelSupport(FEATURE_SUPPORT_UNKNOWN)
+                .build();
+
+        DeviceFeatures newFeatures = DeviceFeatures.ALL_FEATURES_SUPPORT_UNKNOWN.toBuilder()
+                .setRecordTvScreenSupport(FEATURE_NOT_SUPPORTED)
+                .setSetOsdStringSupport(FEATURE_SUPPORT_UNKNOWN)
+                .setDeckControlSupport(FEATURE_SUPPORTED)
+                .setSetAudioRateSupport(FEATURE_SUPPORT_UNKNOWN)
+                .setArcTxSupport(FEATURE_SUPPORTED)
+                .setArcRxSupport(FEATURE_NOT_SUPPORTED)
+                .setSetAudioVolumeLevelSupport(FEATURE_SUPPORT_UNKNOWN)
+                .build();
+
+        // Always take the field from newFeatures, unless it's FEATURE_SUPPORT_UNKNOWN
+        DeviceFeatures updatedFeatures = DeviceFeatures.ALL_FEATURES_SUPPORT_UNKNOWN.toBuilder()
+                .setRecordTvScreenSupport(FEATURE_NOT_SUPPORTED)
+                .setSetOsdStringSupport(FEATURE_SUPPORTED)
+                .setDeckControlSupport(FEATURE_SUPPORTED)
+                .setSetAudioRateSupport(FEATURE_NOT_SUPPORTED)
+                .setArcTxSupport(FEATURE_SUPPORTED)
+                .setArcRxSupport(FEATURE_NOT_SUPPORTED)
+                .setSetAudioVolumeLevelSupport(FEATURE_SUPPORT_UNKNOWN)
+                .build();
+
+        assertThat(oldFeatures.toBuilder().update(newFeatures).build()).isEqualTo(updatedFeatures);
     }
 }

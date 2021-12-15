@@ -107,6 +107,19 @@ public class DeviceFeatures {
     }
 
     /**
+     * Returns the input that is not {@link #FEATURE_SUPPORT_UNKNOWN}. If neither is equal to
+     * {@link #FEATURE_SUPPORT_UNKNOWN}, returns the second input.
+     */
+    private static @FeatureSupportStatus int updateFeatureSupportStatus(
+            @FeatureSupportStatus int oldStatus, @FeatureSupportStatus int newStatus) {
+        if (newStatus == FEATURE_SUPPORT_UNKNOWN) {
+            return oldStatus;
+        } else {
+            return newStatus;
+        }
+    }
+
+    /**
      * Returns the [Device Features] operand corresponding to this instance.
      * {@link #FEATURE_SUPPORT_UNKNOWN} maps to 0, indicating no support.
      *
@@ -352,6 +365,30 @@ public class DeviceFeatures {
         public Builder setSetAudioVolumeLevelSupport(
                 @FeatureSupportStatus int setAudioVolumeLevelSupport) {
             mSetAudioVolumeLevelSupport = setAudioVolumeLevelSupport;
+            return this;
+        }
+
+        /**
+         * Updates all fields with those in a 'new' instance of {@link DeviceFeatures}.
+         * All fields are replaced with those in the new instance, except when the field is
+         * {@link #FEATURE_SUPPORT_UNKNOWN} in the new instance.
+         */
+        @NonNull
+        public Builder update(DeviceFeatures newDeviceFeatures) {
+            mRecordTvScreenSupport = updateFeatureSupportStatus(mRecordTvScreenSupport,
+                    newDeviceFeatures.getRecordTvScreenSupport());
+            mOsdStringSupport = updateFeatureSupportStatus(mOsdStringSupport,
+                    newDeviceFeatures.getSetOsdStringSupport());
+            mDeckControlSupport = updateFeatureSupportStatus(mDeckControlSupport,
+                    newDeviceFeatures.getDeckControlSupport());
+            mSetAudioRateSupport = updateFeatureSupportStatus(mSetAudioRateSupport,
+                    newDeviceFeatures.getSetAudioRateSupport());
+            mArcTxSupport = updateFeatureSupportStatus(mArcTxSupport,
+                    newDeviceFeatures.getArcTxSupport());
+            mArcRxSupport = updateFeatureSupportStatus(mArcRxSupport,
+                    newDeviceFeatures.getArcRxSupport());
+            mSetAudioVolumeLevelSupport = updateFeatureSupportStatus(mSetAudioVolumeLevelSupport,
+                    newDeviceFeatures.getSetAudioVolumeLevelSupport());
             return this;
         }
     }
