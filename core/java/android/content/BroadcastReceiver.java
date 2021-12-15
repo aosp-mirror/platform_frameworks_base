@@ -392,7 +392,7 @@ public abstract class BroadcastReceiver {
         PendingResult res = mPendingResult;
         mPendingResult = null;
 
-        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+        if (res != null && Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
             res.mReceiverClassName = getClass().getName();
             Trace.traceCounter(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                     "BroadcastReceiver#goAsync#ClassName:" + res.mReceiverClassName,
