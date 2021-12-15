@@ -128,10 +128,8 @@ public class DeviceSelectActionFromPlaybackTest {
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiMhlControllerStub = HdmiMhlControllerStub.create(mHdmiControlService);
         mHdmiControlService.setHdmiMhlController(mHdmiMhlControllerStub);
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(mHdmiMhlControllerStub);
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mHdmiCecNetwork = new HdmiCecNetwork(mHdmiControlService,
                 mHdmiCecController, mHdmiMhlControllerStub);
         mHdmiControlService.setHdmiCecNetwork(mHdmiCecNetwork);
@@ -156,13 +154,13 @@ public class DeviceSelectActionFromPlaybackTest {
         mPlaybackLogicalAddress3 = mPlaybackLogicalAddress1 == ADDR_PLAYBACK_3
                 ? ADDR_PLAYBACK_1 : ADDR_PLAYBACK_3;
 
-        mReportPowerStatusOn = new HdmiCecMessage(
+        mReportPowerStatusOn = HdmiCecMessage.build(
                 mPlaybackLogicalAddress2, mPlaybackLogicalAddress1,
                 Constants.MESSAGE_REPORT_POWER_STATUS, POWER_ON);
-        mReportPowerStatusStandby = new HdmiCecMessage(
+        mReportPowerStatusStandby = HdmiCecMessage.build(
                 mPlaybackLogicalAddress2, mPlaybackLogicalAddress1,
                 Constants.MESSAGE_REPORT_POWER_STATUS, POWER_STANDBY);
-        mReportPowerStatusTransientToOn = new HdmiCecMessage(
+        mReportPowerStatusTransientToOn = HdmiCecMessage.build(
                 mPlaybackLogicalAddress2, mPlaybackLogicalAddress1,
                 Constants.MESSAGE_REPORT_POWER_STATUS, POWER_TRANSIENT_TO_ON);
         mSetStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(

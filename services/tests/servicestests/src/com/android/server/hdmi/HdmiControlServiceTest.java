@@ -111,8 +111,6 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.setCecController(mHdmiCecController);
         mHdmiControlServiceSpy.setHdmiMhlController(HdmiMhlControllerStub.create(
                 mHdmiControlServiceSpy));
-        mHdmiControlServiceSpy.setMessageValidator(new HdmiCecMessageValidator(
-                mHdmiControlServiceSpy));
 
         mLocalDevices.add(mAudioSystemDeviceSpy);
         mLocalDevices.add(mPlaybackDeviceSpy);

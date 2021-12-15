@@ -121,7 +121,6 @@ public class HdmiCecLocalDeviceTvTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDeviceTv);
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[2];
         hdmiPortInfos[0] =
@@ -252,7 +251,7 @@ public class HdmiCecLocalDeviceTvTest {
                 HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED);
         mTestLooper.dispatchAll();
         mPowerManager.setInteractive(false);
-        HdmiCecMessage imageViewOn = new HdmiCecMessage(ADDR_PLAYBACK_1, mTvLogicalAddress,
+        HdmiCecMessage imageViewOn = HdmiCecMessage.build(ADDR_PLAYBACK_1, mTvLogicalAddress,
                 Constants.MESSAGE_IMAGE_VIEW_ON, HdmiCecMessage.EMPTY_PARAM);
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(imageViewOn)).isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
@@ -280,7 +279,7 @@ public class HdmiCecLocalDeviceTvTest {
                 HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_DISABLED);
         mTestLooper.dispatchAll();
         mPowerManager.setInteractive(false);
-        HdmiCecMessage imageViewOn = new HdmiCecMessage(ADDR_PLAYBACK_1, mTvLogicalAddress,
+        HdmiCecMessage imageViewOn = HdmiCecMessage.build(ADDR_PLAYBACK_1, mTvLogicalAddress,
                 Constants.MESSAGE_IMAGE_VIEW_ON, HdmiCecMessage.EMPTY_PARAM);
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(imageViewOn)).isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
@@ -490,7 +489,7 @@ public class HdmiCecLocalDeviceTvTest {
 
     @Test
     public void supportsRecordTvScreen() {
-        HdmiCecMessage recordTvScreen = new HdmiCecMessage(ADDR_RECORDER_1, mTvLogicalAddress,
+        HdmiCecMessage recordTvScreen = HdmiCecMessage.build(ADDR_RECORDER_1, mTvLogicalAddress,
                 Constants.MESSAGE_RECORD_TV_SCREEN, HdmiCecMessage.EMPTY_PARAM);
 
         mNativeWrapper.onCecMessage(recordTvScreen);

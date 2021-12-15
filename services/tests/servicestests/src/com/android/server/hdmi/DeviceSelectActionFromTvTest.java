@@ -64,11 +64,11 @@ public class DeviceSelectActionFromTvTest {
     private static final byte[] POWER_ON = new byte[] { POWER_STATUS_ON };
     private static final byte[] POWER_STANDBY = new byte[] { POWER_STATUS_STANDBY };
     private static final byte[] POWER_TRANSIENT_TO_ON = new byte[] { POWER_STATUS_TRANSIENT_TO_ON };
-    private static final HdmiCecMessage REPORT_POWER_STATUS_ON = new HdmiCecMessage(
+    private static final HdmiCecMessage REPORT_POWER_STATUS_ON = HdmiCecMessage.build(
             ADDR_PLAYBACK_1, ADDR_TV, Constants.MESSAGE_REPORT_POWER_STATUS, POWER_ON);
-    private static final HdmiCecMessage REPORT_POWER_STATUS_STANDBY = new HdmiCecMessage(
+    private static final HdmiCecMessage REPORT_POWER_STATUS_STANDBY = HdmiCecMessage.build(
             ADDR_PLAYBACK_1, ADDR_TV, Constants.MESSAGE_REPORT_POWER_STATUS, POWER_STANDBY);
-    private static final HdmiCecMessage REPORT_POWER_STATUS_TRANSIENT_TO_ON = new HdmiCecMessage(
+    private static final HdmiCecMessage REPORT_POWER_STATUS_TRANSIENT_TO_ON = HdmiCecMessage.build(
             ADDR_PLAYBACK_1, ADDR_TV, Constants.MESSAGE_REPORT_POWER_STATUS, POWER_TRANSIENT_TO_ON);
     private static final HdmiCecMessage SET_STREAM_PATH = HdmiCecMessageBuilder.buildSetStreamPath(
                         ADDR_TV, PHYSICAL_ADDRESS_PLAYBACK_1);
@@ -135,7 +135,6 @@ public class DeviceSelectActionFromTvTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDeviceTv);
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[2];
         hdmiPortInfos[0] =

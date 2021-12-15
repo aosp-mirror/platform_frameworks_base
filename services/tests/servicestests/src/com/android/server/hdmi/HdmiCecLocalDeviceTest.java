@@ -182,14 +182,6 @@ public class HdmiCecLocalDeviceTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiLocalDevice = new MyHdmiCecLocalDevice(mHdmiControlService, DEVICE_TV);
-        mMessageValidator =
-                new HdmiCecMessageValidator(mHdmiControlService) {
-                    @Override
-                    int isValid(HdmiCecMessage message, boolean isMessageReceived) {
-                        return HdmiCecMessageValidator.OK;
-                    }
-                };
-        mHdmiControlService.setMessageValidator(mMessageValidator);
 
         mLocalDevices.add(mHdmiLocalDevice);
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
@@ -225,7 +217,7 @@ public class HdmiCecLocalDeviceTest {
     @Test
     public void dispatchMessage_logicalAddressDoesNotMatch() {
         HdmiCecMessage msg =
-                new HdmiCecMessage(
+                HdmiCecMessage.build(
                         ADDR_TV,
                         ADDR_PLAYBACK_1,
                         Constants.MESSAGE_CEC_VERSION,

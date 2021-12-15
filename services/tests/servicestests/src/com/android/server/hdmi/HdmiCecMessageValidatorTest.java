@@ -54,7 +54,6 @@ public class HdmiCecMessageValidatorTest {
                 InstrumentationRegistry.getTargetContext(), Collections.emptyList());
 
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
-        mHdmiCecMessageValidator = new HdmiCecMessageValidator(mHdmiControlService);
     }
 
     @Test
@@ -649,6 +648,6 @@ public class HdmiCecMessageValidatorTest {
     }
 
     private IntegerSubject assertMessageValidity(String message) {
-        return assertThat(mHdmiCecMessageValidator.isValid(HdmiUtils.buildMessage(message), false));
+        return assertThat(HdmiUtils.buildMessage(message).getValidationResult());
     }
 }

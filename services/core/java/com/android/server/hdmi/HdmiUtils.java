@@ -461,7 +461,7 @@ final class HdmiUtils {
     }
 
     /**
-     * Method to parse target physical address to the port number on the current device.
+     * Method to build target physical address to the port number on the current device.
      *
      * <p>This check assumes target address is valid.
      *
@@ -553,7 +553,7 @@ final class HdmiUtils {
         for (int i = 0; i < params.length; i++) {
             params[i] = (byte) Integer.parseInt(parts[i + 2], 16);
         }
-        return new HdmiCecMessage(src, dest, opcode, params);
+        return HdmiCecMessage.build(src, dest, opcode, params);
     }
 
     public static class ShortAudioDescriptorXmlParser {

@@ -119,7 +119,6 @@ public class OneTouchPlayActionTest {
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(hdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mHdmiControlService.initService();
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
@@ -171,7 +170,7 @@ public class OneTouchPlayActionTest {
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAITING_FOR_REPORT_POWER_STATUS);
         HdmiCecMessage reportPowerStatusOn =
-                new HdmiCecMessage(
+                HdmiCecMessage.build(
                         ADDR_TV,
                         playbackDevice.getDeviceInfo().getLogicalAddress(),
                         Constants.MESSAGE_REPORT_POWER_STATUS,
@@ -224,7 +223,7 @@ public class OneTouchPlayActionTest {
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAITING_FOR_REPORT_POWER_STATUS);
         HdmiCecMessage reportPowerStatusOn =
-                new HdmiCecMessage(
+                HdmiCecMessage.build(
                         ADDR_TV,
                         playbackDevice.getDeviceInfo().getLogicalAddress(),
                         Constants.MESSAGE_REPORT_POWER_STATUS,
@@ -277,7 +276,7 @@ public class OneTouchPlayActionTest {
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAITING_FOR_REPORT_POWER_STATUS);
         HdmiCecMessage reportPowerStatusTransientToOn =
-                new HdmiCecMessage(
+                HdmiCecMessage.build(
                         ADDR_TV,
                         playbackDevice.getDeviceInfo().getLogicalAddress(),
                         Constants.MESSAGE_REPORT_POWER_STATUS,
@@ -290,7 +289,7 @@ public class OneTouchPlayActionTest {
         mNativeWrapper.clearResultMessages();
 
         HdmiCecMessage reportPowerStatusOn =
-                new HdmiCecMessage(
+                HdmiCecMessage.build(
                         ADDR_TV,
                         playbackDevice.getDeviceInfo().getLogicalAddress(),
                         Constants.MESSAGE_REPORT_POWER_STATUS,
@@ -434,7 +433,7 @@ public class OneTouchPlayActionTest {
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAITING_FOR_REPORT_POWER_STATUS);
         HdmiCecMessage reportPowerStatusOn =
-                new HdmiCecMessage(
+                HdmiCecMessage.build(
                         ADDR_TV,
                         playbackDevice.getDeviceInfo().getLogicalAddress(),
                         Constants.MESSAGE_REPORT_POWER_STATUS,
@@ -488,7 +487,7 @@ public class OneTouchPlayActionTest {
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAITING_FOR_REPORT_POWER_STATUS);
         HdmiCecMessage reportPowerStatusOn =
-                new HdmiCecMessage(
+                HdmiCecMessage.build(
                         ADDR_TV,
                         playbackDevice.getDeviceInfo().getLogicalAddress(),
                         Constants.MESSAGE_REPORT_POWER_STATUS,

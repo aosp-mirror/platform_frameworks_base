@@ -144,7 +144,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDevicePlayback);
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
@@ -1958,7 +1957,7 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void doesNotSupportRecordTvScreen() {
-        HdmiCecMessage recordTvScreen = new HdmiCecMessage(ADDR_TV, mPlaybackLogicalAddress,
+        HdmiCecMessage recordTvScreen = HdmiCecMessage.build(ADDR_TV, mPlaybackLogicalAddress,
                 Constants.MESSAGE_RECORD_TV_SCREEN, HdmiCecMessage.EMPTY_PARAM);
 
         mNativeWrapper.onCecMessage(recordTvScreen);

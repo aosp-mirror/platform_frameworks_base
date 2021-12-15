@@ -81,7 +81,6 @@ public class HdmiCecNetworkTest {
         mHdmiMhlControllerStub = HdmiMhlControllerStub.create(mHdmiControlService);
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(mHdmiMhlControllerStub);
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
 
         mHdmiCecNetwork = new HdmiCecNetwork(mHdmiControlService,
                 mHdmiCecController, mHdmiMhlControllerStub);
