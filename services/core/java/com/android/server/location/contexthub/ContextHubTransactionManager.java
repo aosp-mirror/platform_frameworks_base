@@ -463,8 +463,12 @@ import java.util.concurrent.atomic.AtomicInteger;
                 };
 
                 long timeoutSeconds = transaction.getTimeout(TimeUnit.SECONDS);
-                mTimeoutFuture = mTimeoutExecutor.schedule(onTimeoutFunc, timeoutSeconds,
+                try {
+                    mTimeoutFuture = mTimeoutExecutor.schedule(onTimeoutFunc, timeoutSeconds,
                         TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error when schedule a timer", e);
+                }
             } else {
                 transaction.onTransactionComplete(
                         ContextHubServiceUtil.toTransactionResult(result));
