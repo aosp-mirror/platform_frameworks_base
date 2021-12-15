@@ -173,21 +173,36 @@ public class DeviceSelectActionFromPlaybackTest {
         mActiveSource = HdmiCecMessageBuilder.buildActiveSource(
                 mPlaybackLogicalAddress2, PHYSICAL_ADDRESS_PLAYBACK_2);
 
-        HdmiDeviceInfo infoPlayback1 = new HdmiDeviceInfo(
-                mPlaybackLogicalAddress1, PHYSICAL_ADDRESS_PLAYBACK_1, PORT_1,
-                HdmiDeviceInfo.DEVICE_PLAYBACK,
-                0x1234, "Playback 1",
-                HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-        HdmiDeviceInfo infoPlayback2 = new HdmiDeviceInfo(
-                mPlaybackLogicalAddress2, PHYSICAL_ADDRESS_PLAYBACK_2, PORT_2,
-                HdmiDeviceInfo.DEVICE_PLAYBACK,
-                0x1234, "Playback 2",
-                HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-        HdmiDeviceInfo infoPlayback3 = new HdmiDeviceInfo(
-                mPlaybackLogicalAddress3, PHYSICAL_ADDRESS_PLAYBACK_3, PORT_3,
-                HdmiDeviceInfo.DEVICE_PLAYBACK,
-                0x1234, "Playback 3",
-                HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+        HdmiDeviceInfo infoPlayback1 = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(mPlaybackLogicalAddress1)
+                .setPhysicalAddress(PHYSICAL_ADDRESS_PLAYBACK_1)
+                .setPortId(PORT_1)
+                .setDeviceType(HdmiDeviceInfo.DEVICE_PLAYBACK)
+                .setVendorId(0x1234)
+                .setDisplayName("Playback 1")
+                .setDevicePowerStatus(HdmiControlManager.POWER_STATUS_ON)
+                .setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_1_4_B)
+                .build();
+        HdmiDeviceInfo infoPlayback2 = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(mPlaybackLogicalAddress2)
+                .setPhysicalAddress(PHYSICAL_ADDRESS_PLAYBACK_2)
+                .setPortId(PORT_2)
+                .setDeviceType(HdmiDeviceInfo.DEVICE_PLAYBACK)
+                .setVendorId(0x1234)
+                .setDisplayName("Playback 2")
+                .setDevicePowerStatus(HdmiControlManager.POWER_STATUS_ON)
+                .setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_1_4_B)
+                .build();
+        HdmiDeviceInfo infoPlayback3 = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(mPlaybackLogicalAddress3)
+                .setPhysicalAddress(PHYSICAL_ADDRESS_PLAYBACK_3)
+                .setPortId(PORT_3)
+                .setDeviceType(HdmiDeviceInfo.DEVICE_PLAYBACK)
+                .setVendorId(0x1234)
+                .setDisplayName("Playback 3")
+                .setDevicePowerStatus(HdmiControlManager.POWER_STATUS_ON)
+                .setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_1_4_B)
+                .build();
 
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(infoPlayback1);
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(infoPlayback2);

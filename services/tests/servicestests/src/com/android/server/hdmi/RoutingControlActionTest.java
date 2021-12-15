@@ -101,12 +101,22 @@ public class RoutingControlActionTest {
     private static final byte[] PLAYER_PARAM =
             new byte[]{(PHYSICAL_ADDRESS_PLAYER >> 8) & 0xFF, PHYSICAL_ADDRESS_PLAYER & 0xFF};
 
-    private static final HdmiDeviceInfo DEVICE_INFO_AVR =
-            new HdmiDeviceInfo(ADDR_AUDIO_SYSTEM, PHYSICAL_ADDRESS_AVR, PORT_1,
-                    HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM, VENDOR_ID_AVR, "Audio");
-    private static final HdmiDeviceInfo DEVICE_INFO_PLAYER =
-            new HdmiDeviceInfo(ADDR_PLAYBACK_1, PHYSICAL_ADDRESS_PLAYER, PORT_1,
-                    HdmiDeviceInfo.DEVICE_PLAYBACK, VENDOR_ID_AVR, "Player");
+    private static final HdmiDeviceInfo DEVICE_INFO_AVR = HdmiDeviceInfo.cecDeviceBuilder()
+            .setLogicalAddress(ADDR_AUDIO_SYSTEM)
+            .setPhysicalAddress(PHYSICAL_ADDRESS_AVR)
+            .setPortId(PORT_1)
+            .setDeviceType(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
+            .setVendorId(VENDOR_ID_AVR)
+            .setDisplayName("Audio")
+            .build();
+    private static final HdmiDeviceInfo DEVICE_INFO_PLAYER = HdmiDeviceInfo.cecDeviceBuilder()
+            .setLogicalAddress(ADDR_PLAYBACK_1)
+            .setPhysicalAddress(PHYSICAL_ADDRESS_PLAYER)
+            .setPortId(PORT_1)
+            .setDeviceType(HdmiDeviceInfo.DEVICE_PLAYBACK)
+            .setVendorId(VENDOR_ID_AVR)
+            .setDisplayName("Player")
+            .build();
     private static final HdmiCecMessage ROUTING_INFORMATION_TUNER = new HdmiCecMessage(
             ADDR_UNREGISTERED, ADDR_BROADCAST, MESSAGE_ROUTING_INFORMATION, TUNER_PARAM);
     private static final HdmiCecMessage ROUTING_INFORMATION_PLAYER = new HdmiCecMessage(

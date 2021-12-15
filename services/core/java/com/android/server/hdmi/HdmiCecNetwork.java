@@ -390,7 +390,7 @@ public class HdmiCecNetwork {
             return;
         }
 
-        updateCecDevice(HdmiUtils.cloneHdmiDeviceInfo(info, newPowerStatus));
+        updateCecDevice(info.toBuilder().setDevicePowerStatus(newPowerStatus).build());
     }
 
     /**
@@ -427,7 +427,8 @@ public class HdmiCecNetwork {
         for (HdmiPortInfo info : cecPortInfo) {
             portIdMap.put(info.getAddress(), info.getId());
             portInfoMap.put(info.getId(), info);
-            portDeviceMap.put(info.getId(), new HdmiDeviceInfo(info.getAddress(), info.getId()));
+            portDeviceMap.put(info.getId(),
+                    HdmiDeviceInfo.hardwarePort(info.getAddress(), info.getId()));
         }
         mPortIdMap = new UnmodifiableSparseIntArray(portIdMap);
         mPortInfoMap = new UnmodifiableSparseArray<>(portInfoMap);
@@ -496,10 +497,10 @@ public class HdmiCecNetwork {
         // Add device by logical address if it's not already known
         int sourceAddress = message.getSource();
         if (getCecDeviceInfo(sourceAddress) == null) {
-            HdmiDeviceInfo newDevice = new HdmiDeviceInfo(sourceAddress,
-                    HdmiDeviceInfo.PATH_INVALID, HdmiDeviceInfo.PORT_INVALID,
-                    HdmiDeviceInfo.DEVICE_RESERVED, Constants.UNKNOWN_VENDOR_ID,
-                    HdmiUtils.getDefaultDeviceName(sourceAddress));
+            HdmiDeviceInfo newDevice = HdmiDeviceInfo.cecDeviceBuilder()
+                    .setLogicalAddress(sourceAddress)
+                    .setDisplayName(HdmiUtils.getDefaultDeviceName(sourceAddress))
+                    .build();
             addCecDevice(newDevice);
         }
 
@@ -554,11 +555,11 @@ public class HdmiCecNetwork {
         if (deviceInfo == null) {
             Slog.i(TAG, "Unknown source device info for <Report Physical Address> " + message);
         } else {
-            HdmiDeviceInfo updatedDeviceInfo = new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
-                    physicalAddress,
-                    physicalAddressToPortId(physicalAddress), type, deviceInfo.getVendorId(),
-                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus(),
-                    deviceInfo.getCecVersion());
+            HdmiDeviceInfo updatedDeviceInfo = deviceInfo.toBuilder()
+                    .setPhysicalAddress(physicalAddress)
+                    .setPortId(physicalAddressToPortId(physicalAddress))
+                    .setDeviceType(type)
+                    .build();
             updateCecDevice(updatedDeviceInfo);
         }
     }
@@ -588,11 +589,9 @@ public class HdmiCecNetwork {
             return;
         }
 
-        HdmiDeviceInfo updatedDeviceInfo = new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
-                deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(), deviceInfo.getDeviceType(),
-                deviceInfo.getVendorId(),
-                deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus(),
-                hdmiCecVersion);
+        HdmiDeviceInfo updatedDeviceInfo = deviceInfo.toBuilder()
+                .setCecVersion(hdmiCecVersion)
+                .build();
         updateCecDevice(updatedDeviceInfo);
     }
 
@@ -623,10 +622,11 @@ public class HdmiCecNetwork {
         Slog.d(TAG, "Updating device OSD name from "
                 + deviceInfo.getDisplayName()
                 + " to " + osdName);
-        updateCecDevice(new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
-                deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(),
-                deviceInfo.getDeviceType(), deviceInfo.getVendorId(), osdName,
-                deviceInfo.getDevicePowerStatus(), deviceInfo.getCecVersion()));
+
+        HdmiDeviceInfo updatedDeviceInfo = deviceInfo.toBuilder()
+                .setDisplayName(osdName)
+                .build();
+        updateCecDevice(updatedDeviceInfo);
     }
 
     @ServiceThreadOnly
@@ -639,11 +639,9 @@ public class HdmiCecNetwork {
         if (deviceInfo == null) {
             Slog.i(TAG, "Unknown source device info for <Device Vendor ID> " + message);
         } else {
-            HdmiDeviceInfo updatedDeviceInfo = new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
-                    deviceInfo.getPhysicalAddress(),
-                    deviceInfo.getPortId(), deviceInfo.getDeviceType(), vendorId,
-                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus(),
-                    deviceInfo.getCecVersion());
+            HdmiDeviceInfo updatedDeviceInfo = deviceInfo.toBuilder()
+                    .setVendorId(vendorId)
+                    .build();
             updateCecDevice(updatedDeviceInfo);
         }
     }

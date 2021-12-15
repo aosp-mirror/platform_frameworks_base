@@ -1409,9 +1409,16 @@ public class HdmiControlService extends SystemService {
     private HdmiDeviceInfo createDeviceInfo(int logicalAddress, int deviceType, int powerStatus,
             int cecVersion) {
         String displayName = readStringSetting(Global.DEVICE_NAME, Build.MODEL);
-        return new HdmiDeviceInfo(logicalAddress,
-                getPhysicalAddress(), pathToPortId(getPhysicalAddress()), deviceType,
-                getVendorId(), displayName, powerStatus, cecVersion);
+        return HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(logicalAddress)
+                .setPhysicalAddress(getPhysicalAddress())
+                .setPortId(pathToPortId(getPhysicalAddress()))
+                .setDeviceType(deviceType)
+                .setVendorId(getVendorId())
+                .setDisplayName(displayName)
+                .setDevicePowerStatus(powerStatus)
+                .setCecVersion(cecVersion)
+                .build();
     }
 
     // Set the display name in HdmiDeviceInfo of the current devices to content provided by
@@ -1422,10 +1429,9 @@ public class HdmiControlService extends SystemService {
             if (deviceInfo.getDisplayName().equals(newDisplayName)) {
                 continue;
             }
-            device.setDeviceInfo(new HdmiDeviceInfo(
-                    deviceInfo.getLogicalAddress(), deviceInfo.getPhysicalAddress(),
-                    deviceInfo.getPortId(), deviceInfo.getDeviceType(), deviceInfo.getVendorId(),
-                    newDisplayName, deviceInfo.getDevicePowerStatus(), deviceInfo.getCecVersion()));
+            synchronized (device.mLock) {
+                device.setDeviceInfo(deviceInfo.toBuilder().setDisplayName(newDisplayName).build());
+            }
             sendCecCommand(
                     HdmiCecMessageBuilder.buildSetOsdNameCommand(
                             deviceInfo.getLogicalAddress(), Constants.ADDR_TV, newDisplayName));
@@ -2629,7 +2635,7 @@ public class HdmiControlService extends SystemService {
                 return activeSourceInfo;
             }
 
-            return new HdmiDeviceInfo(activeSource.physicalAddress,
+            return HdmiDeviceInfo.hardwarePort(activeSource.physicalAddress,
                     pathToPortId(activeSource.physicalAddress));
         }
 
@@ -2637,7 +2643,7 @@ public class HdmiControlService extends SystemService {
             int activePath = tv().getActivePath();
             if (activePath != HdmiDeviceInfo.PATH_INVALID) {
                 HdmiDeviceInfo info = mHdmiCecNetwork.getSafeDeviceInfoByPath(activePath);
-                return (info != null) ? info : new HdmiDeviceInfo(activePath,
+                return (info != null) ? info : HdmiDeviceInfo.hardwarePort(activePath,
                         tv().getActivePortId());
             }
         }

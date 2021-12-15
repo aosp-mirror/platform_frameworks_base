@@ -178,7 +178,7 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_RESERVED);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(
                 HdmiUtils.getDefaultDeviceName(logicalAddress));
-        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.UNKNOWN_VENDOR_ID);
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.VENDOR_ID_UNKNOWN);
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(
                 HdmiControlManager.POWER_STATUS_UNKNOWN);
 
@@ -216,7 +216,7 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(type);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(
                 HdmiUtils.getDefaultDeviceName(logicalAddress));
-        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.UNKNOWN_VENDOR_ID);
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.VENDOR_ID_UNKNOWN);
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(
                 HdmiControlManager.POWER_STATUS_UNKNOWN);
     }
@@ -258,7 +258,7 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(
                 Constants.INVALID_PHYSICAL_ADDRESS);
         assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_RESERVED);
-        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.UNKNOWN_VENDOR_ID);
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.VENDOR_ID_UNKNOWN);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(
                 HdmiUtils.getDefaultDeviceName(logicalAddress));
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(powerStatus);
@@ -279,7 +279,7 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(
                 Constants.INVALID_PHYSICAL_ADDRESS);
         assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_RESERVED);
-        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.UNKNOWN_VENDOR_ID);
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.VENDOR_ID_UNKNOWN);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(osdName);
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(
                 HdmiControlManager.POWER_STATUS_UNKNOWN);
@@ -471,7 +471,7 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(
                 Constants.INVALID_PHYSICAL_ADDRESS);
         assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_RESERVED);
-        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.UNKNOWN_VENDOR_ID);
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.VENDOR_ID_UNKNOWN);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(
                 HdmiUtils.getDefaultDeviceName(logicalAddress));
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(powerStatus);
@@ -545,9 +545,7 @@ public class HdmiCecNetworkTest {
 
     @Test
     public void getSafeCecDevicesLocked_addDevice_sizeOne() {
-        HdmiDeviceInfo cecDeviceInfo = new HdmiDeviceInfo();
-
-        mHdmiCecNetwork.addCecDevice(cecDeviceInfo);
+        mHdmiCecNetwork.addCecDevice(HdmiDeviceInfo.INACTIVE_DEVICE);
 
         assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
     }

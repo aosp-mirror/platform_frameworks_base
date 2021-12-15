@@ -81,7 +81,7 @@ final class Constants {
     public static final int ADDR_BROADCAST = 15;
 
     /** Logical address used to indicate it is not initialized or invalid. */
-    public static final int ADDR_INVALID = -1;
+    public static final int ADDR_INVALID = HdmiDeviceInfo.ADDR_INVALID;
 
     /** Logical address used to indicate the source comes from internal device. */
     public static final int ADDR_INTERNAL = HdmiDeviceInfo.ADDR_INTERNAL;
@@ -243,7 +243,7 @@ final class Constants {
     static final int MESSAGE_CDC_MESSAGE = 0xF8;
     static final int MESSAGE_ABORT = 0xFF;
 
-    static final int UNKNOWN_VENDOR_ID = 0xFFFFFF;
+    static final int VENDOR_ID_UNKNOWN = HdmiDeviceInfo.VENDOR_ID_UNKNOWN;
 
     static final int TRUE = 1;
     static final int FALSE = 0;

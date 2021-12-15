@@ -172,8 +172,14 @@ public class HdmiCecLocalDeviceTvTest {
 
     @Test
     public void getActiveSource_deviceInNetworkIsActiveSource() {
-        HdmiDeviceInfo externalDevice = new HdmiDeviceInfo(Constants.ADDR_PLAYBACK_3, 0x1000, 0,
-                Constants.ADDR_PLAYBACK_1, 0, "Test Device");
+        HdmiDeviceInfo externalDevice = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(Constants.ADDR_PLAYBACK_3)
+                .setPhysicalAddress(0x3000)
+                .setPortId(0)
+                .setDeviceType(Constants.ADDR_PLAYBACK_1)
+                .setVendorId(0)
+                .setDisplayName("Test Device")
+                .build();
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(externalDevice);
         mTestLooper.dispatchAll();
 
@@ -185,7 +191,7 @@ public class HdmiCecLocalDeviceTvTest {
 
     @Test
     public void getActiveSource_unknownLogicalAddressInNetworkIsActiveSource() {
-        HdmiDeviceInfo externalDevice = new HdmiDeviceInfo(0x1000, 1);
+        HdmiDeviceInfo externalDevice = HdmiDeviceInfo.hardwarePort(0x1000, 1);
 
         mHdmiControlService.setActiveSource(Constants.ADDR_UNREGISTERED,
                 externalDevice.getPhysicalAddress(), "HdmiControlServiceTest");
@@ -197,8 +203,14 @@ public class HdmiCecLocalDeviceTvTest {
 
     @Test
     public void getActiveSource_unknownDeviceIsActiveSource() {
-        HdmiDeviceInfo externalDevice = new HdmiDeviceInfo(Constants.ADDR_PLAYBACK_3, 0x1000, 0,
-                Constants.ADDR_PLAYBACK_1, 0, "Test Device");
+        HdmiDeviceInfo externalDevice = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(Constants.ADDR_PLAYBACK_3)
+                .setPhysicalAddress(0x0000)
+                .setPortId(0)
+                .setDeviceType(ADDR_PLAYBACK_1)
+                .setVendorId(0)
+                .setDisplayName("Test Device")
+                .build();
 
         mHdmiControlService.setActiveSource(externalDevice.getLogicalAddress(),
                 externalDevice.getPhysicalAddress(), "HdmiControlServiceTest");

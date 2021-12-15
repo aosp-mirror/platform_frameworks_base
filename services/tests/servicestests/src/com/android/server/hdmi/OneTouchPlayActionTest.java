@@ -57,10 +57,16 @@ public class OneTouchPlayActionTest {
             new byte[]{HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON};
 
     private static final int PORT_1 = 1;
-    private static final HdmiDeviceInfo INFO_TV = new HdmiDeviceInfo(
-            ADDR_TV, 0x0000, PORT_1, HdmiDeviceInfo.DEVICE_TV,
-            0x1234, "TV",
-            HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+    private static final HdmiDeviceInfo INFO_TV = HdmiDeviceInfo.cecDeviceBuilder()
+            .setLogicalAddress(ADDR_TV)
+            .setPhysicalAddress(0x0000)
+            .setPortId(PORT_1)
+            .setDeviceType(HdmiDeviceInfo.DEVICE_TV)
+            .setVendorId(0x1234)
+            .setDisplayName("TV")
+            .setDevicePowerStatus(HdmiControlManager.POWER_STATUS_ON)
+            .setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_1_4_B)
+            .build();
 
     private Context mContextSpy;
     private HdmiControlService mHdmiControlService;
