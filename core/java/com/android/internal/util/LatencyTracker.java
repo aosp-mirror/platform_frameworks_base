@@ -122,6 +122,11 @@ public class LatencyTracker {
      */
     public static final int ACTION_USER_SWITCH = 12;
 
+    /**
+     * Time it takes to turn on the inner screen for a foldable device.
+     */
+    public static final int ACTION_SWITCH_DISPLAY_UNFOLD = 13;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -135,7 +140,8 @@ public class LatencyTracker {
         ACTION_ROTATE_SCREEN_SENSOR,
         ACTION_ROTATE_SCREEN_CAMERA_CHECK,
         ACTION_LOCKSCREEN_UNLOCK,
-        ACTION_USER_SWITCH
+        ACTION_USER_SWITCH,
+        ACTION_SWITCH_DISPLAY_UNFOLD
     };
 
     /** @hide */
@@ -152,7 +158,8 @@ public class LatencyTracker {
         ACTION_ROTATE_SCREEN_SENSOR,
         ACTION_ROTATE_SCREEN_CAMERA_CHECK,
         ACTION_LOCKSCREEN_UNLOCK,
-        ACTION_USER_SWITCH
+        ACTION_USER_SWITCH,
+        ACTION_SWITCH_DISPLAY_UNFOLD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -171,7 +178,8 @@ public class LatencyTracker {
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK,
-            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_USER_SWITCH
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_USER_SWITCH,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SWITCH_DISPLAY_UNFOLD
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -257,6 +265,8 @@ public class LatencyTracker {
                 return "ACTION_LOCKSCREEN_UNLOCK";
             case 13:
                 return "ACTION_USER_SWITCH";
+            case 14:
+                return "ACTION_SWITCH_DISPLAY_UNFOLD";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }

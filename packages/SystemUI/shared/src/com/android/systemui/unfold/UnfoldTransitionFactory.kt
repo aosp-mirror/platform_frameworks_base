@@ -33,6 +33,12 @@ import com.android.systemui.unfold.updates.hinge.HingeSensorAngleProvider
 import java.lang.IllegalStateException
 import java.util.concurrent.Executor
 
+/**
+ * Factory for [UnfoldTransitionProgressProvider].
+ *
+ * This is needed as Launcher has to create the object manually.
+ * Sysui create it using dagger (see [UnfoldTransitionModule]).
+ */
 fun createUnfoldTransitionProgressProvider(
     context: Context,
     config: UnfoldTransitionConfig,
