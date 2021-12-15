@@ -16,15 +16,9 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.DeviceFeatures;
-import android.hardware.hdmi.HdmiControlManager;
-import android.hardware.hdmi.HdmiDeviceInfo;
-
 import com.android.server.hdmi.Constants.AudioCodec;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * A helper class to build {@link HdmiCecMessage} from various cec commands.
@@ -689,41 +683,6 @@ public class HdmiCecMessageBuilder {
         return HdmiCecMessage.build(src, dest, Constants.MESSAGE_GIVE_FEATURES);
     }
 
-    static HdmiCecMessage buildReportFeatures(int src,
-            @HdmiControlManager.HdmiCecVersion int cecVersion,
-            List<Integer> allDeviceTypes, @Constants.RcProfile int rcProfile,
-            List<Integer> rcFeatures,
-            DeviceFeatures deviceFeatures) {
-        byte cecVersionByte = (byte) (cecVersion & 0xFF);
-        byte deviceTypes = 0;
-        for (Integer deviceType : allDeviceTypes) {
-            deviceTypes |= 1 << hdmiDeviceInfoDeviceTypeToShiftValue(deviceType);
-        }
-
-        byte rcProfileByte = 0;
-        rcProfileByte |= rcProfile << 6;
-        if (rcProfile == Constants.RC_PROFILE_SOURCE) {
-            for (@Constants.RcProfileSource Integer rcFeature : rcFeatures) {
-                rcProfileByte |= 1 << rcFeature;
-            }
-        } else {
-            @Constants.RcProfileTv byte rcProfileTv = (byte) (rcFeatures.get(0) & 0xFFFF);
-            rcProfileByte |= rcProfileTv;
-        }
-
-        byte[] fixedOperands = {cecVersionByte, deviceTypes, rcProfileByte};
-        byte[] deviceFeaturesBytes = deviceFeatures.toOperand();
-
-        // Concatenate fixed length operands and [Device Features]
-        byte[] params = Arrays.copyOf(fixedOperands,
-                fixedOperands.length + deviceFeaturesBytes.length);
-        System.arraycopy(deviceFeaturesBytes, 0, params,
-                fixedOperands.length, deviceFeaturesBytes.length);
-
-        return HdmiCecMessage.build(
-                src, Constants.ADDR_BROADCAST, Constants.MESSAGE_REPORT_FEATURES, params);
-    }
-
     /***** Please ADD new buildXXX() methods above. ******/
 
     /**
@@ -748,25 +707,5 @@ public class HdmiCecMessageBuilder {
                 (byte) ((physicalAddress >> 8) & 0xFF),
                 (byte) (physicalAddress & 0xFF)
         };
-    }
-
-    @Constants.DeviceType
-    private static int hdmiDeviceInfoDeviceTypeToShiftValue(int deviceType) {
-        switch (deviceType) {
-            case HdmiDeviceInfo.DEVICE_TV:
-                return Constants.ALL_DEVICE_TYPES_TV;
-            case HdmiDeviceInfo.DEVICE_RECORDER:
-                return Constants.ALL_DEVICE_TYPES_RECORDER;
-            case HdmiDeviceInfo.DEVICE_TUNER:
-                return Constants.ALL_DEVICE_TYPES_TUNER;
-            case HdmiDeviceInfo.DEVICE_PLAYBACK:
-                return Constants.ALL_DEVICE_TYPES_PLAYBACK;
-            case HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM:
-                return Constants.ALL_DEVICE_TYPES_AUDIO_SYSTEM;
-            case HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH:
-                return Constants.ALL_DEVICE_TYPES_SWITCH;
-            default:
-                throw new IllegalArgumentException("Unhandled device type: " + deviceType);
-        }
     }
 }

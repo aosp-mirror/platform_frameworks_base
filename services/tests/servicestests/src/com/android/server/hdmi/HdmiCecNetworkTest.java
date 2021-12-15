@@ -514,7 +514,7 @@ public class HdmiCecNetworkTest {
         int logicalAddress = Constants.ADDR_PLAYBACK_1;
         int cecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
         mHdmiCecNetwork.handleCecMessage(
-                HdmiCecMessageBuilder.buildReportFeatures(logicalAddress,
+                ReportFeaturesMessage.build(logicalAddress,
                         cecVersion, Collections.emptyList(),
                         Constants.RC_PROFILE_SOURCE, Collections.emptyList(),
                         DeviceFeatures.NO_FEATURES_SUPPORTED));
@@ -533,7 +533,7 @@ public class HdmiCecNetworkTest {
         int logicalAddress = Constants.ADDR_PLAYBACK_1;
         int cecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
         mHdmiCecNetwork.handleCecMessage(
-                HdmiCecMessageBuilder.buildReportFeatures(logicalAddress,
+                ReportFeaturesMessage.build(logicalAddress,
                         cecVersion, Collections.emptyList(),
                         Constants.RC_PROFILE_SOURCE, Collections.emptyList(),
                         DeviceFeatures.NO_FEATURES_SUPPORTED));

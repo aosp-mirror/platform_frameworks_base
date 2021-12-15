@@ -245,8 +245,6 @@ public class HdmiCecMessageValidator {
         // Messages for Feature Discovery.
         addValidationInfo(Constants.MESSAGE_GIVE_FEATURES, noneValidator,
                 DEST_DIRECT | SRC_UNREGISTERED);
-        addValidationInfo(Constants.MESSAGE_REPORT_FEATURES, new VariableLengthValidator(4, 14),
-                DEST_BROADCAST);
 
         // Messages for Dynamic Auto Lipsync
         addValidationInfo(Constants.MESSAGE_REQUEST_CURRENT_LATENCY, physicalAddressValidator,

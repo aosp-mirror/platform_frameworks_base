@@ -399,16 +399,6 @@ public class HdmiCecMessageValidatorTest {
     }
 
     @Test
-    public void isValid_reportFeatures() {
-        assertMessageValidity("0F:A6:05:80:00:00").isEqualTo(OK);
-
-        assertMessageValidity("04:A6:05:80:00:00").isEqualTo(ERROR_DESTINATION);
-        assertMessageValidity("FF:A6:05:80:00:00").isEqualTo(ERROR_SOURCE);
-
-        assertMessageValidity("0F:A6").isEqualTo(ERROR_PARAMETER_SHORT);
-    }
-
-    @Test
     public void isValid_deckControl() {
         assertMessageValidity("40:42:01:6E").isEqualTo(OK);
         assertMessageValidity("40:42:04").isEqualTo(OK);

@@ -685,9 +685,15 @@ abstract class HdmiCecLocalDevice {
         List<Integer> rcFeatures = getRcFeatures();
         DeviceFeatures deviceFeatures = getDeviceFeatures();
 
+
+        int logicalAddress;
+        synchronized (mLock) {
+            logicalAddress = mDeviceInfo.getLogicalAddress();
+        }
+
         mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildReportFeatures(
-                        mDeviceInfo.getLogicalAddress(),
+                ReportFeaturesMessage.build(
+                        logicalAddress,
                         mService.getCecVersion(),
                         localDeviceTypes,
                         rcProfile,

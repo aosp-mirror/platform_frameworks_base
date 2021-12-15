@@ -485,7 +485,7 @@ public class HdmiControlServiceTest {
                 Constants.ADDR_PLAYBACK_1));
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage reportFeatures = HdmiCecMessageBuilder.buildReportFeatures(
+        HdmiCecMessage reportFeatures = ReportFeaturesMessage.build(
                 Constants.ADDR_PLAYBACK_1, HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
                 mPlaybackDeviceSpy.getRcProfile(), mPlaybackDeviceSpy.getRcFeatures(),
@@ -503,7 +503,7 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage reportFeatures = HdmiCecMessageBuilder.buildReportFeatures(
+        HdmiCecMessage reportFeatures = ReportFeaturesMessage.build(
                 Constants.ADDR_PLAYBACK_1, HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
                 mPlaybackDeviceSpy.getRcProfile(), mPlaybackDeviceSpy.getRcFeatures(),
@@ -520,7 +520,7 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage reportFeatures = HdmiCecMessageBuilder.buildReportFeatures(
+        HdmiCecMessage reportFeatures = ReportFeaturesMessage.build(
                 Constants.ADDR_PLAYBACK_1, HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
                 mPlaybackDeviceSpy.getRcProfile(), mPlaybackDeviceSpy.getRcFeatures(),

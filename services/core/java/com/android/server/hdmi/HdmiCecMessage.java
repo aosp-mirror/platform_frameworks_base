@@ -74,7 +74,12 @@ public class HdmiCecMessage {
      * instance of that class that exposes parsed parameters.
      */
     static HdmiCecMessage build(int source, int destination, int opcode, byte[] params) {
-        return new HdmiCecMessage(source, destination, opcode, params);
+        switch (opcode & 0xFF) {
+            case Constants.MESSAGE_REPORT_FEATURES:
+                return ReportFeaturesMessage.build(source, destination, params);
+            default:
+                return new HdmiCecMessage(source, destination, opcode & 0xFF, params);
+        }
     }
 
     static HdmiCecMessage build(int source, int destination, int opcode) {
