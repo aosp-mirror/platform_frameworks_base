@@ -30,8 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 final class LetterboxConfiguration {
 
     /**
-     * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
-     * set-fixed-orientation-letterbox-aspect-ratio or via {@link
+     * Override of aspect ratio for fixed orientation letterboxing that is set via {@link
      * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio} will be ignored
      * if it is <= this value.
      */
@@ -251,7 +250,7 @@ final class LetterboxConfiguration {
 
     /**
      * Gets {@link LetterboxBackgroundType} specified in {@link
-     * com.android.internal.R.integer.config_letterboxBackgroundType} or over via ADB command.
+     * com.android.internal.R.integer.config_letterboxBackgroundType}.
      */
     @LetterboxBackgroundType
     int getLetterboxBackgroundType() {
@@ -359,9 +358,8 @@ final class LetterboxConfiguration {
 
     /*
      * Gets horizontal position of a center of the letterboxed app window specified
-     * in {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier}
-     * or via an ADB command. 0 corresponds to the left side of the screen and 1 to the
-     * right side.
+     * in {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier}.
+     * 0 corresponds to the left side of the screen and 1 to the right side.
      */
     float getLetterboxHorizontalPositionMultiplier() {
         return (mLetterboxHorizontalPositionMultiplier < 0.0f
@@ -416,8 +414,7 @@ final class LetterboxConfiguration {
 
     /*
      * Gets default horizontal position of the letterboxed app window when reachability is enabled.
-     * Specified in {@link R.integer.config_letterboxDefaultPositionForReachability} or via an ADB
-     * command.
+     * Specified in {@link R.integer.config_letterboxDefaultPositionForReachability}.
      */
     @LetterboxReachabilityPosition
     int getDefaultPositionForReachability() {
