@@ -128,7 +128,6 @@ import android.os.Environment;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -207,6 +206,7 @@ final class InstallPackageHelper {
     private final PackageDexOptimizer mPackageDexOptimizer;
     private final PackageAbiHelper mPackageAbiHelper;
     private final ViewCompiler mViewCompiler;
+    private final IBackupManager mIBackupManager;
 
     // TODO(b/198166813): remove PMS dependency
     InstallPackageHelper(PackageManagerService pm, AppDataHelper appDataHelper) {
@@ -225,6 +225,7 @@ final class InstallPackageHelper {
         mPackageDexOptimizer = pm.mInjector.getPackageDexOptimizer();
         mPackageAbiHelper = pm.mInjector.getAbiHelper();
         mViewCompiler = pm.mInjector.getViewCompiler();
+        mIBackupManager = pm.mInjector.getIBackupManager();
     }
 
     InstallPackageHelper(PackageManagerService pm) {
@@ -689,9 +690,7 @@ final class InstallPackageHelper {
      * Returns whether the restore successfully completed.
      */
     private boolean performBackupManagerRestore(int userId, int token, PackageInstalledInfo res) {
-        IBackupManager bm = IBackupManager.Stub.asInterface(
-                ServiceManager.getService(Context.BACKUP_SERVICE));
-        if (bm != null) {
+        if (mIBackupManager != null) {
             // For backwards compatibility as USER_ALL previously routed directly to USER_SYSTEM
             // in the BackupManager. USER_ALL is used in compatibility tests.
             if (userId == UserHandle.USER_ALL) {
@@ -702,8 +701,8 @@ final class InstallPackageHelper {
             }
             Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
             try {
-                if (bm.isUserReadyForBackup(userId)) {
-                    bm.restoreAtInstallForUser(
+                if (mIBackupManager.isUserReadyForBackup(userId)) {
+                    mIBackupManager.restoreAtInstallForUser(
                             userId, res.mPkg.getPackageName(), token);
                 } else {
                     Slog.w(TAG, "User " + userId + " is not ready. Restore at install "

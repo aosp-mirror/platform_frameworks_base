@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.app.ActivityManagerInternal;
+import android.app.backup.IBackupManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
@@ -135,6 +136,7 @@ public class PackageManagerServiceInjector {
             mDomainVerificationManagerInternalProducer;
     private final Singleton<Handler> mHandlerProducer;
     private final Singleton<BackgroundDexOptService> mBackgroundDexOptService;
+    private final Singleton<IBackupManager> mIBackupManager;
 
     PackageManagerServiceInjector(Context context, PackageManagerTracedLock lock,
             Installer installer, Object installLock, PackageAbiHelper abiHelper,
@@ -170,7 +172,8 @@ public class PackageManagerServiceInjector {
             SystemWrapper systemWrapper,
             ServiceProducer getLocalServiceProducer,
             ServiceProducer getSystemServiceProducer,
-            Producer<BackgroundDexOptService> backgroundDexOptService) {
+            Producer<BackgroundDexOptService> backgroundDexOptService,
+            Producer<IBackupManager> iBackupManager) {
         mContext = context;
         mLock = lock;
         mInstaller = installer;
@@ -220,6 +223,7 @@ public class PackageManagerServiceInjector {
                         domainVerificationManagerInternalProducer);
         mHandlerProducer = new Singleton<>(handlerProducer);
         mBackgroundDexOptService = new Singleton<>(backgroundDexOptService);
+        mIBackupManager = new Singleton<>(iBackupManager);
     }
 
     /**
@@ -382,6 +386,10 @@ public class PackageManagerServiceInjector {
 
     public BackgroundDexOptService getBackgroundDexOptService() {
         return mBackgroundDexOptService.get(this, mPackageManager);
+    }
+
+    public IBackupManager getIBackupManager() {
+        return mIBackupManager.get(this, mPackageManager);
     }
 
     /** Provides an abstraction to static access to system state. */

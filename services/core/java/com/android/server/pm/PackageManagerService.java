@@ -57,6 +57,7 @@ import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
+import android.app.backup.IBackupManager;
 import android.app.role.RoleManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -1519,7 +1520,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 new DefaultSystemWrapper(),
                 LocalServices::getService,
                 context::getSystemService,
-                (i, pm) -> new BackgroundDexOptService(i.getContext(), i.getDexManager(), pm));
+                (i, pm) -> new BackgroundDexOptService(i.getContext(), i.getDexManager(), pm),
+                (i, pm) -> IBackupManager.Stub.asInterface(ServiceManager.getService(
+                        Context.BACKUP_SERVICE)));
 
         if (Build.VERSION.SDK_INT <= 0) {
             Slog.w(TAG, "**** ro.build.version.sdk not set!");
