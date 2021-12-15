@@ -1194,7 +1194,7 @@
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Abrir links com"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Abrir links com <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Abrir links do domínio <xliff:g id="HOST">%1$s</xliff:g> usando <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
-    <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Conceder acesso"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Permitir acesso"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Editar com"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Editar com %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"Editar"</string>
@@ -2096,12 +2096,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Esta notificação foi rebaixada a Silenciosa. Toque para enviar seu feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificação foi classificada com maior prioridade. Toque para enviar seu feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificação foi classificada com menor prioridade. Toque para enviar seu feedback."</string>
-    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notificações aprimoradas"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"As ações e respostas sugeridas agora são fornecidas pelas notificações aprimoradas. As Notificações adaptáveis do Android não estão mais disponíveis."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notificações avançadas"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"As ações e respostas sugeridas agora são fornecidas pelas notificações avançadas. As Notificações adaptáveis do Android não estão mais disponíveis."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desativar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saiba mais"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"No Android 12, as notificações aprimoradas substituíram as notificações adaptáveis. Esse recurso exibe ações e respostas sugeridas, além de organizar suas notificações.\n\nAs notificações aprimoradas podem acessar o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Elas também podem dispensar ou responder às notificações, como atender chamadas telefônicas e controlar o Não perturbe."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"No Android 12, as notificações avançadas substituíram as notificações adaptáveis. Esse recurso exibe ações e respostas sugeridas, além de organizar suas notificações.\n\nAs notificações avançadas podem acessar o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Elas também podem dispensar ou responder às notificações, como atender chamadas telefônicas e controlar o Não perturbe."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificação de informação do modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A bateria pode acabar antes da recarga normal"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"A Economia de bateria foi ativada para aumentar a duração da carga"</string>

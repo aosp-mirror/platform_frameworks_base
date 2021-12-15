@@ -1713,7 +1713,7 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"النظام"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"صوت بلوتوث"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"عرض شاشة لاسلكي"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"إرسال"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"البث"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"الاتصال بجهاز"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"بث الشاشة على الجهاز"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"جارٍ البحث عن الأجهزة…"</string>

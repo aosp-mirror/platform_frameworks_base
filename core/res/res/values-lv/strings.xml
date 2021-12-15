@@ -221,7 +221,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"Ieslēgt bezvadu tīklu"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Izslēgt bezvadu tīklu"</string>
     <string name="screen_lock" msgid="2072642720826409809">"Bloķēt ekrānu"</string>
-    <string name="power_off" msgid="4111692782492232778">"Strāvas padeve ir izslēgta."</string>
+    <string name="power_off" msgid="4111692782492232778">"Izslēgt tālruni"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Zvanītājs izslēgts"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Zvanītājs vibrācijas režīmā"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"Zvanītājs ieslēgts"</string>
@@ -245,7 +245,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV opcijas"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Tālruņa opcijas"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Ekrāna bloķētājs"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"Strāvas padeve izslēgta."</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"Izslēgt strāvas padevi"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Barošana"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Restartēt"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Ārkārtas situācija"</string>
