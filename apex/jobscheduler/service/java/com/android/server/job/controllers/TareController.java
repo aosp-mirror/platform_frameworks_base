@@ -16,6 +16,8 @@
 
 package com.android.server.job.controllers;
 
+import static android.app.job.JobInfo.getPriorityString;
+
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.annotation.NonNull;
@@ -31,6 +33,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
+import com.android.server.tare.EconomicPolicy;
 import com.android.server.tare.EconomyManagerInternal;
 import com.android.server.tare.EconomyManagerInternal.ActionBill;
 import com.android.server.tare.JobSchedulerEconomicPolicy;
@@ -195,7 +198,7 @@ public class TareController extends StateController {
                             JobSchedulerEconomicPolicy.ACTION_JOB_MAX_RUNNING, 0, 1_000L)
             ));
 
- /**
+    /**
      * Bill to use while we're waiting to start a job. If a job isn't running yet, don't consider it
      * eligible to run unless it can pay for a job start and at least some period of execution time.
      */
@@ -285,6 +288,14 @@ public class TareController extends StateController {
                 }
             };
 
+    /**
+     * List of jobs that started while the UID was in the TOP state. There will be no more than
+     * 16 ({@link JobSchedulerService#MAX_JOB_CONTEXTS_COUNT}) running at once, so an ArraySet is
+     * fine.
+     */
+    @GuardedBy("mLock")
+    private final ArraySet<JobStatus> mTopStartedJobs = new ArraySet<>();
+
     @GuardedBy("mLock")
     private boolean mIsEnabled;
 
@@ -299,6 +310,7 @@ public class TareController extends StateController {
     }
 
     @Override
+    @GuardedBy("mLock")
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         final long nowElapsed = sElapsedRealtimeClock.millis();
         jobStatus.setTareWealthConstraintSatisfied(nowElapsed, hasEnoughWealthLocked(jobStatus));
@@ -312,6 +324,7 @@ public class TareController extends StateController {
     }
 
     @Override
+    @GuardedBy("mLock")
     public void prepareForExecutionLocked(JobStatus jobStatus) {
         final int userId = jobStatus.getSourceUserId();
         final String pkgName = jobStatus.getSourcePackageName();
@@ -325,12 +338,29 @@ public class TareController extends StateController {
             }
         }
         addJobToBillList(jobStatus, getRunningBill(jobStatus));
+
+        final int uid = jobStatus.getSourceUid();
+        if (mService.getUidBias(uid) == JobInfo.BIAS_TOP_APP) {
+            if (DEBUG) {
+                Slog.d(TAG, jobStatus.toShortString() + " is top started job");
+            }
+            mTopStartedJobs.add(jobStatus);
+            // Top jobs won't count towards quota so there's no need to involve the EconomyManager.
+        } else {
+            mEconomyManagerInternal.noteOngoingEventStarted(userId, pkgName,
+                    getRunningActionId(jobStatus), String.valueOf(jobStatus.getJobId()));
+        }
     }
 
     @Override
+    @GuardedBy("mLock")
     public void unprepareFromExecutionLocked(JobStatus jobStatus) {
         final int userId = jobStatus.getSourceUserId();
         final String pkgName = jobStatus.getSourcePackageName();
+        mEconomyManagerInternal.noteOngoingEventStopped(userId, pkgName,
+                getRunningActionId(jobStatus), String.valueOf(jobStatus.getJobId()));
+        mTopStartedJobs.remove(jobStatus);
+
         final ArraySet<ActionBill> bills = getPossibleStartBills(jobStatus);
         ArrayMap<ActionBill, ArraySet<JobStatus>> billToJobMap =
                 mRegisteredBillsAndJobs.get(userId, pkgName);
@@ -347,10 +377,14 @@ public class TareController extends StateController {
     }
 
     @Override
+    @GuardedBy("mLock")
     public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
             boolean forUpdate) {
         final int userId = jobStatus.getSourceUserId();
         final String pkgName = jobStatus.getSourcePackageName();
+        mEconomyManagerInternal.noteOngoingEventStopped(userId, pkgName,
+                getRunningActionId(jobStatus), String.valueOf(jobStatus.getJobId()));
+        mTopStartedJobs.remove(jobStatus);
         ArrayMap<ActionBill, ArraySet<JobStatus>> billToJobMap =
                 mRegisteredBillsAndJobs.get(userId, pkgName);
         if (billToJobMap != null) {
@@ -391,7 +425,16 @@ public class TareController extends StateController {
         if (!mIsEnabled) {
             return true;
         }
-        return canAffordBillLocked(jobStatus, BILL_JOB_START_MAX_EXPEDITED);
+        if (jobStatus.getEffectivePriority() == JobInfo.PRIORITY_MAX) {
+            return canAffordBillLocked(jobStatus, BILL_JOB_START_MAX_EXPEDITED);
+        }
+        return canAffordBillLocked(jobStatus, BILL_JOB_START_HIGH_EXPEDITED);
+    }
+
+    /** @return true if the job was started while the app was in the TOP state. */
+    @GuardedBy("mLock")
+    private boolean isTopStartedJobLocked(@NonNull final JobStatus jobStatus) {
+        return mTopStartedJobs.contains(jobStatus);
     }
 
     @GuardedBy("mLock")
@@ -459,6 +502,9 @@ public class TareController extends StateController {
             }
         }
         switch (jobStatus.getEffectivePriority()) {
+            case JobInfo.PRIORITY_MAX:
+                bills.add(BILL_JOB_START_MAX);
+                break;
             case JobInfo.PRIORITY_HIGH:
                 bills.add(BILL_JOB_START_HIGH);
                 break;
@@ -470,6 +516,10 @@ public class TareController extends StateController {
                 break;
             case JobInfo.PRIORITY_MIN:
                 bills.add(BILL_JOB_START_MIN);
+                break;
+            default:
+                Slog.wtf(TAG, "Unexpected priority: "
+                        + JobInfo.getPriorityString(jobStatus.getEffectivePriority()));
                 break;
         }
         return bills;
@@ -502,9 +552,34 @@ public class TareController extends StateController {
         }
     }
 
+    @EconomicPolicy.AppAction
+    private static int getRunningActionId(@NonNull JobStatus job) {
+        switch (job.getEffectivePriority()) {
+            case JobInfo.PRIORITY_MAX:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_MAX_RUNNING;
+            case JobInfo.PRIORITY_HIGH:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_RUNNING;
+            case JobInfo.PRIORITY_LOW:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_LOW_RUNNING;
+            case JobInfo.PRIORITY_MIN:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_MIN_RUNNING;
+            default:
+                Slog.wtf(TAG, "Unknown priority: " + getPriorityString(job.getEffectivePriority()));
+                // Intentional fallthrough
+            case JobInfo.PRIORITY_DEFAULT:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING;
+        }
+    }
+
     @GuardedBy("mLock")
     private boolean canAffordBillLocked(@NonNull JobStatus jobStatus, @NonNull ActionBill bill) {
         if (!mIsEnabled) {
+            return true;
+        }
+        if (mService.getUidBias(jobStatus.getSourceUid()) == JobInfo.BIAS_TOP_APP
+                || isTopStartedJobLocked(jobStatus)) {
+            // Jobs for the top app should always be allowed to run, and any jobs started while
+            // the app is on top shouldn't consume any credits.
             return true;
         }
         final int userId = jobStatus.getSourceUserId();
@@ -533,6 +608,12 @@ public class TareController extends StateController {
         if (!jobStatus.isRequestedExpeditedJob()) {
             return false;
         }
+        if (mService.getUidBias(jobStatus.getSourceUid()) == JobInfo.BIAS_TOP_APP
+                || isTopStartedJobLocked(jobStatus)) {
+            // Jobs for the top app should always be allowed to run, and any jobs started while
+            // the app is on top shouldn't consume any credits.
+            return true;
+        }
         if (mService.isCurrentlyRunningLocked(jobStatus)) {
             return canAffordBillLocked(jobStatus, getRunningBill(jobStatus));
         }
@@ -546,6 +627,12 @@ public class TareController extends StateController {
     @GuardedBy("mLock")
     private boolean hasEnoughWealthLocked(@NonNull JobStatus jobStatus) {
         if (!mIsEnabled) {
+            return true;
+        }
+        if (mService.getUidBias(jobStatus.getSourceUid()) == JobInfo.BIAS_TOP_APP
+                || isTopStartedJobLocked(jobStatus)) {
+            // Jobs for the top app should always be allowed to run, and any jobs started while
+            // the app is on top shouldn't consume any credits.
             return true;
         }
         if (mService.isCurrentlyRunningLocked(jobStatus)) {

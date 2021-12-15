@@ -366,9 +366,6 @@ public final class JobServiceContext implements ServiceConnection {
             } catch (RemoteException e) {
                 // Whatever.
             }
-            mEconomyManagerInternal.noteOngoingEventStarted(
-                    job.getSourceUserId(), job.getSourcePackageName(),
-                    getRunningActionId(job), String.valueOf(job.getJobId()));
             final String jobPackage = job.getSourcePackageName();
             final int jobUserId = job.getSourceUserId();
             UsageStatsManagerInternal usageStats =
@@ -398,25 +395,6 @@ public final class JobServiceContext implements ServiceConnection {
                 // Intentional fallthrough
             case JobInfo.PRIORITY_DEFAULT:
                 return JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_START;
-        }
-    }
-
-    @EconomicPolicy.AppAction
-    private static int getRunningActionId(@NonNull JobStatus job) {
-        switch (job.getEffectivePriority()) {
-            case JobInfo.PRIORITY_MAX:
-                return JobSchedulerEconomicPolicy.ACTION_JOB_MAX_RUNNING;
-            case JobInfo.PRIORITY_HIGH:
-                return JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_RUNNING;
-            case JobInfo.PRIORITY_LOW:
-                return JobSchedulerEconomicPolicy.ACTION_JOB_LOW_RUNNING;
-            case JobInfo.PRIORITY_MIN:
-                return JobSchedulerEconomicPolicy.ACTION_JOB_MIN_RUNNING;
-            default:
-                Slog.wtf(TAG, "Unknown priority: " + getPriorityString(job.getEffectivePriority()));
-                // Intentional fallthrough
-            case JobInfo.PRIORITY_DEFAULT:
-                return JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING;
         }
     }
 
@@ -1043,9 +1021,6 @@ public final class JobServiceContext implements ServiceConnection {
         } catch (RemoteException e) {
             // Whatever.
         }
-        mEconomyManagerInternal.noteOngoingEventStopped(
-                mRunningJob.getSourceUserId(), mRunningJob.getSourcePackageName(),
-                getRunningActionId(mRunningJob), String.valueOf(mRunningJob.getJobId()));
         if (mParams.getStopReason() == JobParameters.STOP_REASON_TIMEOUT) {
             mEconomyManagerInternal.noteInstantaneousEvent(
                     mRunningJob.getSourceUserId(), mRunningJob.getSourcePackageName(),
