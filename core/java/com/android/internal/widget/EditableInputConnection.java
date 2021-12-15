@@ -92,7 +92,7 @@ public class EditableInputConnection extends BaseInputConnection
                 // contribution to mTextView's nested batch edit count is zero.
                 mTextView.endBatchEdit();
                 mBatchEditNesting--;
-                return true;
+                return mBatchEditNesting > 0;
             }
         }
         return false;
