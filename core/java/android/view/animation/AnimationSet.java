@@ -517,4 +517,15 @@ public class AnimationSet extends Animation {
     public boolean willChangeBounds() {
         return (mFlags & PROPERTY_CHANGE_BOUNDS_MASK) == PROPERTY_CHANGE_BOUNDS_MASK;
     }
+
+    /** @hide */
+    @Override
+    public boolean hasExtension() {
+        for (Animation animation : mAnimations) {
+            if (animation.hasExtension()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -865,6 +865,15 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
+     * @return if a window animation has outsets applied to it.
+     *
+     * @hide
+     */
+    public boolean hasExtension() {
+        return false;
+    }
+
+    /**
      * If showBackground is {@code true} and this animation is applied on a window, then the windows
      * in the animation will animate with the background associated with this window behind them.
      *
