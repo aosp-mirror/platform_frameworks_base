@@ -132,7 +132,7 @@ public class IpSecService extends IIpSecService.Stub {
     interface IpSecServiceConfiguration {
         INetd getNetdInstance() throws RemoteException;
 
-        static IpSecServiceConfiguration GETSRVINSTANCE =
+        IpSecServiceConfiguration GETSRVINSTANCE =
                 new IpSecServiceConfiguration() {
                     @Override
                     public INetd getNetdInstance() throws RemoteException {
@@ -491,8 +491,8 @@ public class IpSecService extends IIpSecService.Stub {
      * <p>This class associates kernel resources with the UID that owns and controls them.
      */
     private abstract class OwnedResourceRecord implements IResource {
-        final int pid;
-        final int uid;
+        final int mPid;
+        final int mUid;
         protected final int mResourceId;
 
         OwnedResourceRecord(int resourceId) {
@@ -501,8 +501,8 @@ public class IpSecService extends IIpSecService.Stub {
                 throw new IllegalArgumentException("Resource ID must not be INVALID_RESOURCE_ID");
             }
             mResourceId = resourceId;
-            pid = Binder.getCallingPid();
-            uid = Binder.getCallingUid();
+            mPid = Binder.getCallingPid();
+            mUid = Binder.getCallingUid();
 
             getResourceTracker().take();
         }
@@ -512,7 +512,7 @@ public class IpSecService extends IIpSecService.Stub {
 
         /** Convenience method; retrieves the user resource record for the stored UID. */
         protected UserRecord getUserRecord() {
-            return mUserResourceTracker.getUserRecord(uid);
+            return mUserResourceTracker.getUserRecord(mUid);
         }
 
         @Override
@@ -527,9 +527,9 @@ public class IpSecService extends IIpSecService.Stub {
                     .append("{mResourceId=")
                     .append(mResourceId)
                     .append(", pid=")
-                    .append(pid)
+                    .append(mPid)
                     .append(", uid=")
-                    .append(uid)
+                    .append(mUid)
                     .append("}")
                     .toString();
         }
@@ -545,7 +545,7 @@ public class IpSecService extends IIpSecService.Stub {
         SparseArray<RefcountedResource<T>> mArray = new SparseArray<>();
         private final String mTypeName;
 
-        public RefcountedResourceArray(String typeName) {
+        RefcountedResourceArray(String typeName) {
             this.mTypeName = typeName;
         }
 
@@ -628,7 +628,7 @@ public class IpSecService extends IIpSecService.Stub {
                 mSrvConfig
                         .getNetdInstance()
                         .ipSecDeleteSecurityAssociation(
-                                uid,
+                                mUid,
                                 mConfig.getSourceAddress(),
                                 mConfig.getDestinationAddress(),
                                 spi,
@@ -696,7 +696,7 @@ public class IpSecService extends IIpSecService.Stub {
                     mSrvConfig
                             .getNetdInstance()
                             .ipSecDeleteSecurityAssociation(
-                                    uid, mSourceAddress, mDestinationAddress, mSpi, 0 /* mark */,
+                                    mUid, mSourceAddress, mDestinationAddress, mSpi, 0 /* mark */,
                                     0 /* mask */, 0 /* if_id */);
                 }
             } catch (ServiceSpecificException | RemoteException e) {
@@ -849,14 +849,14 @@ public class IpSecService extends IIpSecService.Stub {
 
                 for (int selAddrFamily : ADDRESS_FAMILIES) {
                     netd.ipSecDeleteSecurityPolicy(
-                            uid,
+                            mUid,
                             selAddrFamily,
                             IpSecManager.DIRECTION_OUT,
                             mOkey,
                             0xffffffff,
                             mIfId);
                     netd.ipSecDeleteSecurityPolicy(
-                            uid,
+                            mUid,
                             selAddrFamily,
                             IpSecManager.DIRECTION_IN,
                             mIkey,
@@ -1025,7 +1025,7 @@ public class IpSecService extends IIpSecService.Stub {
     @NonNull
     private AppOpsManager getAppOpsManager() {
         AppOpsManager appOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
-        if(appOps == null) throw new RuntimeException("System Server couldn't get AppOps");
+        if (appOps == null) throw new RuntimeException("System Server couldn't get AppOps");
         return appOps;
     }
 
@@ -1054,6 +1054,7 @@ public class IpSecService extends IIpSecService.Stub {
         mUidFdTagger = uidFdTagger;
     }
 
+    /** Called by system server when system is ready. */
     public void systemReady() {
         if (isNetdAlive()) {
             Log.d(TAG, "IpSecService is ready");
@@ -1229,7 +1230,7 @@ public class IpSecService extends IIpSecService.Stub {
          * <p>Since the socket is created on behalf of an unprivileged application, all traffic
          * should be accounted to the UID of the unprivileged application.
          */
-        public void tag(FileDescriptor fd, int uid) throws IOException;
+        void tag(FileDescriptor fd, int uid) throws IOException;
     }
 
     /**
@@ -1771,7 +1772,7 @@ public class IpSecService extends IIpSecService.Stub {
         TransformRecord info = userRecord.mTransformRecords.getResourceOrThrow(resourceId);
 
         // TODO: make this a function.
-        if (info.pid != getCallingPid() || info.uid != callingUid) {
+        if (info.mPid != getCallingPid() || info.mUid != callingUid) {
             throw new SecurityException("Only the owner of an IpSec Transform may apply it!");
         }
 

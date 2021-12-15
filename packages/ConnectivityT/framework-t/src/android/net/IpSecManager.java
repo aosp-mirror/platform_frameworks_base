@@ -99,9 +99,9 @@ public final class IpSecManager {
 
     /** @hide */
     public interface Status {
-        public static final int OK = 0;
-        public static final int RESOURCE_UNAVAILABLE = 1;
-        public static final int SPI_UNAVAILABLE = 2;
+        int OK = 0;
+        int RESOURCE_UNAVAILABLE = 1;
+        int SPI_UNAVAILABLE = 2;
     }
 
     /** @hide */
@@ -276,7 +276,7 @@ public final class IpSecManager {
      * @param destinationAddress the destination address for traffic bearing the requested SPI.
      *     For inbound traffic, the destination should be an address currently assigned on-device.
      * @return the reserved SecurityParameterIndex
-     * @throws {@link #ResourceUnavailableException} indicating that too many SPIs are
+     * @throws ResourceUnavailableException indicating that too many SPIs are
      *     currently allocated for this user
      */
     @NonNull
@@ -307,9 +307,9 @@ public final class IpSecManager {
      * @param requestedSpi the requested SPI. The range 1-255 is reserved and may not be used. See
      *     RFC 4303 Section 2.1.
      * @return the reserved SecurityParameterIndex
-     * @throws {@link #ResourceUnavailableException} indicating that too many SPIs are
+     * @throws ResourceUnavailableException indicating that too many SPIs are
      *     currently allocated for this user
-     * @throws {@link #SpiUnavailableException} indicating that the requested SPI could not be
+     * @throws SpiUnavailableException indicating that the requested SPI could not be
      *     reserved
      */
     @NonNull

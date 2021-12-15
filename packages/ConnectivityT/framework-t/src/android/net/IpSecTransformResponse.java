@@ -60,7 +60,8 @@ public final class IpSecTransformResponse implements Parcelable {
         resourceId = in.readInt();
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<IpSecTransformResponse> CREATOR =
+    @android.annotation.NonNull
+    public static final Parcelable.Creator<IpSecTransformResponse> CREATOR =
             new Parcelable.Creator<IpSecTransformResponse>() {
                 public IpSecTransformResponse createFromParcel(Parcel in) {
                     return new IpSecTransformResponse(in);
