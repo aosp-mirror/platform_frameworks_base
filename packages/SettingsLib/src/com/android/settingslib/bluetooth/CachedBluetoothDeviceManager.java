@@ -230,9 +230,10 @@ public class CachedBluetoothDeviceManager {
     private void clearNonBondedSubDevices() {
         for (int i = mCachedDevices.size() - 1; i >= 0; i--) {
             CachedBluetoothDevice cachedDevice = mCachedDevices.get(i);
-            final Set<CachedBluetoothDevice> memberDevices = cachedDevice.getMemberDevice();
+            Set<CachedBluetoothDevice> memberDevices = cachedDevice.getMemberDevice();
             if (!memberDevices.isEmpty()) {
-                for (CachedBluetoothDevice memberDevice : memberDevices) {
+                for (Object it : memberDevices.toArray()) {
+                    CachedBluetoothDevice memberDevice = (CachedBluetoothDevice) it;
                     // Member device exists and it is not bonded
                     if (memberDevice.getDevice().getBondState() == BluetoothDevice.BOND_NONE) {
                         cachedDevice.removeMemberDevice(memberDevice);
