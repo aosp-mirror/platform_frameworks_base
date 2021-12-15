@@ -16,7 +16,6 @@
 package android.telephony.euicc;
 
 import android.Manifest;
-import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,7 +28,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.TelephonyFrameworkInitializer;
@@ -37,13 +35,11 @@ import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccCardManager.ResetOption;
 
 import com.android.internal.telephony.euicc.IEuiccController;
-import com.android.internal.telephony.euicc.IResultCallback;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 /**
@@ -217,20 +213,6 @@ public class EuiccManager {
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_START_EUICC_ACTIVATION =
             "android.telephony.euicc.action.START_EUICC_ACTIVATION";
-
-    /**
-     * Result codes passed to the ResultListener by
-     * {@link #switchToSubscription(int, int, Executor, ResultListener)}
-     *
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"EMBEDDED_SUBSCRIPTION_RESULT_"}, value = {
-            EMBEDDED_SUBSCRIPTION_RESULT_OK,
-            EMBEDDED_SUBSCRIPTION_RESULT_ERROR,
-            EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR
-    })
-    public @interface ResultCode{}
 
     /**
      * Result code for an operation indicating that the operation succeeded.
@@ -1145,7 +1127,7 @@ public class EuiccManager {
      * @param callbackIntent a PendingIntent to launch when the operation completes.
      *
      * @deprecated From T, callers should use
-     * {@link #switchToSubscription(int, int, Executor, ResultListener)} instead to specify a port
+     * {@link #switchToSubscription(int, int, PendingIntent)} instead to specify a port
      * index on the card to switch to.
      */
     @Deprecated
@@ -1188,44 +1170,21 @@ public class EuiccManager {
      *     permission, or the calling app must be authorized to manage the active subscription on
      *     the target eUICC.
      * @param portIndex the index of the port to target for the enabled subscription
-     * @param executor an Executor on which to run the callback
-     * @param callback a {@link ResultListener} which will run when the operation completes
+     * @param callbackIntent a PendingIntent to launch when the operation completes.
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subscriptionId, int portIndex,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull ResultListener callback) {
+            @NonNull PendingIntent callbackIntent) {
         if (!isEnabled()) {
-            sendUnavailableErrorToCallback(executor, callback);
+            sendUnavailableError(callbackIntent);
             return;
         }
         try {
-            IResultCallback internalCallback = new IResultCallback.Stub() {
-                @Override
-                public void onComplete(int result, Intent resultIntent) {
-                    executor.execute(() -> Binder.withCleanCallingIdentity(
-                            () -> callback.onComplete(result, resultIntent)));
-                }
-            };
-            getIEuiccController().switchToSubscriptionWithPort(mCardId, portIndex,
-                    subscriptionId, mContext.getOpPackageName(), internalCallback);
+            getIEuiccController().switchToSubscriptionWithPort(mCardId,
+                    subscriptionId, portIndex, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Callback to receive the result of an EuiccManager API.
-     */
-    public interface ResultListener {
-        /**
-         * Called on completion of some operation.
-         * @param resultCode representing success or specific failure of the operation
-         *                   (See {@link ResultCode})
-         * @param resultIntent an intent used to start a resolution activity when an error
-         *                     occurs that can be resolved by the user
-         */
-        void onComplete(@ResultCode int resultCode, @Nullable Intent resultIntent);
     }
 
     /**
@@ -1497,13 +1456,6 @@ public class EuiccManager {
         } catch (PendingIntent.CanceledException e) {
             // Caller canceled the callback; do nothing.
         }
-    }
-
-    private static void sendUnavailableErrorToCallback(@NonNull Executor executor,
-            ResultListener callback) {
-        Integer result = EMBEDDED_SUBSCRIPTION_RESULT_ERROR;
-        executor.execute(() ->
-                Binder.withCleanCallingIdentity(() -> callback.onComplete(result, null)));
     }
 
     private static IEuiccController getIEuiccController() {
