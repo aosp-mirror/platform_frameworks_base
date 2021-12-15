@@ -199,6 +199,7 @@ final class Constants {
     static final int MESSAGE_SET_SYSTEM_AUDIO_MODE = 0x72;
     static final int MESSAGE_REPORT_AUDIO_STATUS = 0x7A;
     static final int MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS = 0x7D;
+    static final int MESSAGE_SET_AUDIO_VOLUME_LEVEL = 0x73;
     static final int MESSAGE_SYSTEM_AUDIO_MODE_STATUS = 0x7E;
     static final int MESSAGE_ROUTING_CHANGE = 0x80;
     static final int MESSAGE_ROUTING_INFORMATION = 0x81;
@@ -388,6 +389,17 @@ final class Constants {
     static final int POLL_ITERATION_REVERSE_ORDER = 0x20000;
 
     static final int UNKNOWN_VOLUME = -1;
+
+    // This constant is used in two operands in the CEC spec.
+    //
+    // CEC 1.4: [Audio Volume Status] (part of [Audio Status]) - operand for <Report Audio Status>
+    // Indicates that the current audio volume status is unknown.
+    //
+    // CEC 2.1a: [Audio Volume Level] - operand for <Set Audio Volume Level>
+    // Part of the Absolute Volume Control feature. Indicates that no change shall be made to the
+    // volume level of the recipient. This allows <Set Audio Volume Level> to be sent to determine
+    // whether the recipient supports Absolute Volume Control.
+    static final int AUDIO_VOLUME_STATUS_UNKNOWN = 0x7F;
 
     // States of property PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON
     // to decide if turn on the system audio control when power on the device

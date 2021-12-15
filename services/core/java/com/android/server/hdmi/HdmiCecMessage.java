@@ -75,6 +75,8 @@ public class HdmiCecMessage {
      */
     static HdmiCecMessage build(int source, int destination, int opcode, byte[] params) {
         switch (opcode & 0xFF) {
+            case Constants.MESSAGE_SET_AUDIO_VOLUME_LEVEL:
+                return SetAudioVolumeLevelMessage.build(source, destination, params);
             case Constants.MESSAGE_REPORT_FEATURES:
                 return ReportFeaturesMessage.build(source, destination, params);
             default:
