@@ -1903,7 +1903,7 @@ public class ActivityManager {
         public void readFromParcel(Parcel source) {
             id = source.readInt();
             persistentId = source.readInt();
-            childrenTaskInfos = source.readArrayList(RecentTaskInfo.class.getClassLoader());
+            childrenTaskInfos = source.readArrayList(RecentTaskInfo.class.getClassLoader(), android.app.ActivityManager.RecentTaskInfo.class);
             lastSnapshotData.taskSize = source.readTypedObject(Point.CREATOR);
             lastSnapshotData.contentInsets = source.readTypedObject(Rect.CREATOR);
             lastSnapshotData.bufferSize = source.readTypedObject(Point.CREATOR);

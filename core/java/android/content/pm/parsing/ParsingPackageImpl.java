@@ -1408,7 +1408,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         this.processes = in.readHashMap(boot);
         this.metaData = in.readBundle(boot);
         this.volumeUuid = sForInternedString.unparcel(in);
-        this.signingDetails = in.readParcelable(boot);
+        this.signingDetails = in.readParcelable(boot, android.content.pm.SigningDetails.class);
         this.mPath = in.readString();
         this.queriesIntents = in.createTypedArrayList(Intent.CREATOR);
         this.queriesPackages = sForInternedStringList.unparcel(in);

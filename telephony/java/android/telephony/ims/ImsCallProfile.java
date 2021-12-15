@@ -839,7 +839,7 @@ public final class ImsCallProfile implements Parcelable {
         mServiceType = in.readInt();
         mCallType = in.readInt();
         mCallExtras = in.readBundle();
-        mMediaProfile = in.readParcelable(ImsStreamMediaProfile.class.getClassLoader());
+        mMediaProfile = in.readParcelable(ImsStreamMediaProfile.class.getClassLoader(), android.telephony.ims.ImsStreamMediaProfile.class);
         mEmergencyServiceCategories = in.readInt();
         mEmergencyUrns = in.createStringArrayList();
         mEmergencyCallRouting = in.readInt();

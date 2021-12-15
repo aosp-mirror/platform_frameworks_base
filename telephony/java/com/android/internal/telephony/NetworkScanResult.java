@@ -83,7 +83,7 @@ public final class NetworkScanResult implements Parcelable {
         scanStatus = in.readInt();
         scanError = in.readInt();
         List<CellInfo> ni = new ArrayList<>();
-        in.readParcelableList(ni, Object.class.getClassLoader());
+        in.readParcelableList(ni, Object.class.getClassLoader(), android.telephony.CellInfo.class);
         networkInfos = ni;
     }
 

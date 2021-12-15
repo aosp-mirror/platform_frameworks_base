@@ -576,7 +576,7 @@ public abstract class VibrationEffect implements Parcelable {
         private final int mRepeatIndex;
 
         Composed(@NonNull Parcel in) {
-            this(in.readArrayList(VibrationEffectSegment.class.getClassLoader()), in.readInt());
+            this(in.readArrayList(VibrationEffectSegment.class.getClassLoader(), android.os.vibrator.VibrationEffectSegment.class), in.readInt());
         }
 
         Composed(@NonNull VibrationEffectSegment segment) {

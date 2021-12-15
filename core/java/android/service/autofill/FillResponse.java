@@ -834,35 +834,35 @@ public final class FillResponse implements Parcelable {
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
             final Builder builder = new Builder();
-            final ParceledListSlice<Dataset> datasetSlice = parcel.readParcelable(null);
+            final ParceledListSlice<Dataset> datasetSlice = parcel.readParcelable(null, android.content.pm.ParceledListSlice.class);
             final List<Dataset> datasets = (datasetSlice != null) ? datasetSlice.getList() : null;
             final int datasetCount = (datasets != null) ? datasets.size() : 0;
             for (int i = 0; i < datasetCount; i++) {
                 builder.addDataset(datasets.get(i));
             }
-            builder.setSaveInfo(parcel.readParcelable(null));
-            builder.setClientState(parcel.readParcelable(null));
+            builder.setSaveInfo(parcel.readParcelable(null, android.service.autofill.SaveInfo.class));
+            builder.setClientState(parcel.readParcelable(null, android.os.Bundle.class));
 
             // Sets authentication state.
             final AutofillId[] authenticationIds = parcel.readParcelableArray(null,
                     AutofillId.class);
-            final IntentSender authentication = parcel.readParcelable(null);
-            final RemoteViews presentation = parcel.readParcelable(null);
-            final InlinePresentation inlinePresentation = parcel.readParcelable(null);
-            final InlinePresentation inlineTooltipPresentation = parcel.readParcelable(null);
+            final IntentSender authentication = parcel.readParcelable(null, android.content.IntentSender.class);
+            final RemoteViews presentation = parcel.readParcelable(null, android.widget.RemoteViews.class);
+            final InlinePresentation inlinePresentation = parcel.readParcelable(null, android.service.autofill.InlinePresentation.class);
+            final InlinePresentation inlineTooltipPresentation = parcel.readParcelable(null, android.service.autofill.InlinePresentation.class);
             if (authenticationIds != null) {
                 builder.setAuthentication(authenticationIds, authentication, presentation,
                         inlinePresentation, inlineTooltipPresentation);
             }
-            final RemoteViews header = parcel.readParcelable(null);
+            final RemoteViews header = parcel.readParcelable(null, android.widget.RemoteViews.class);
             if (header != null) {
                 builder.setHeader(header);
             }
-            final RemoteViews footer = parcel.readParcelable(null);
+            final RemoteViews footer = parcel.readParcelable(null, android.widget.RemoteViews.class);
             if (footer != null) {
                 builder.setFooter(footer);
             }
-            final UserData userData = parcel.readParcelable(null);
+            final UserData userData = parcel.readParcelable(null, android.service.autofill.UserData.class);
             if (userData != null) {
                 builder.setUserData(userData);
             }

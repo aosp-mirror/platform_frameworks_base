@@ -140,7 +140,7 @@ public final class CursorAnchorInfo implements Parcelable {
         mInsertionMarkerTop = source.readFloat();
         mInsertionMarkerBaseline = source.readFloat();
         mInsertionMarkerBottom = source.readFloat();
-        mCharacterBoundsArray = source.readParcelable(SparseRectFArray.class.getClassLoader());
+        mCharacterBoundsArray = source.readParcelable(SparseRectFArray.class.getClassLoader(), android.view.inputmethod.SparseRectFArray.class);
         mMatrixValues = source.createFloatArray();
     }
 

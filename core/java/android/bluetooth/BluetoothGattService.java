@@ -180,7 +180,7 @@ public class BluetoothGattService implements Parcelable {
     };
 
     private BluetoothGattService(Parcel in) {
-        mUuid = ((ParcelUuid) in.readParcelable(null)).getUuid();
+        mUuid = ((ParcelUuid) in.readParcelable(null, android.os.ParcelUuid.class)).getUuid();
         mInstanceId = in.readInt();
         mServiceType = in.readInt();
 

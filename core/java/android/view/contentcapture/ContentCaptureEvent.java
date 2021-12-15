@@ -620,7 +620,7 @@ public final class ContentCaptureEvent implements Parcelable {
             final int type = parcel.readInt();
             final long eventTime  = parcel.readLong();
             final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, type, eventTime);
-            final AutofillId id = parcel.readParcelable(null);
+            final AutofillId id = parcel.readParcelable(null, android.view.autofill.AutofillId.class);
             if (id != null) {
                 event.setAutofillId(id);
             }
@@ -637,13 +637,13 @@ public final class ContentCaptureEvent implements Parcelable {
                 event.setParentSessionId(parcel.readInt());
             }
             if (type == TYPE_SESSION_STARTED || type == TYPE_CONTEXT_UPDATED) {
-                event.setClientContext(parcel.readParcelable(null));
+                event.setClientContext(parcel.readParcelable(null, android.view.contentcapture.ContentCaptureContext.class));
             }
             if (type == TYPE_VIEW_INSETS_CHANGED) {
-                event.setInsets(parcel.readParcelable(null));
+                event.setInsets(parcel.readParcelable(null, android.graphics.Insets.class));
             }
             if (type == TYPE_WINDOW_BOUNDS_CHANGED) {
-                event.setBounds(parcel.readParcelable(null));
+                event.setBounds(parcel.readParcelable(null, android.graphics.Rect.class));
             }
             if (type == TYPE_VIEW_TEXT_CHANGED) {
                 event.setComposingIndex(parcel.readInt(), parcel.readInt());

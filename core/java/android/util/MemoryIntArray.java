@@ -80,7 +80,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
 
     private MemoryIntArray(Parcel parcel) throws IOException {
         mIsOwner = false;
-        ParcelFileDescriptor pfd = parcel.readParcelable(null);
+        ParcelFileDescriptor pfd = parcel.readParcelable(null, android.os.ParcelFileDescriptor.class);
         if (pfd == null) {
             throw new IOException("No backing file descriptor");
         }

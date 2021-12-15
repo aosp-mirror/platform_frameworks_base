@@ -313,7 +313,7 @@ public class BluetoothGattCharacteristic implements Parcelable {
     };
 
     private BluetoothGattCharacteristic(Parcel in) {
-        mUuid = ((ParcelUuid) in.readParcelable(null)).getUuid();
+        mUuid = ((ParcelUuid) in.readParcelable(null, android.os.ParcelUuid.class)).getUuid();
         mInstance = in.readInt();
         mProperties = in.readInt();
         mPermissions = in.readInt();
