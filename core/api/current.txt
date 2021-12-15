@@ -5443,10 +5443,28 @@ package android.app {
 
   public final class GameManager {
     method public int getGameMode();
+    method public void setGameState(@NonNull android.app.GameState);
     field public static final int GAME_MODE_BATTERY = 3; // 0x3
     field public static final int GAME_MODE_PERFORMANCE = 2; // 0x2
     field public static final int GAME_MODE_STANDARD = 1; // 0x1
     field public static final int GAME_MODE_UNSUPPORTED = 0; // 0x0
+  }
+
+  public final class GameState implements android.os.Parcelable {
+    ctor public GameState(boolean, int);
+    ctor public GameState(boolean, int, @Nullable String, @NonNull android.os.Bundle);
+    method public int describeContents();
+    method @Nullable public String getDescription();
+    method @NonNull public android.os.Bundle getMetadata();
+    method public int getMode();
+    method public boolean isLoading();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.GameState> CREATOR;
+    field public static final int MODE_CONTENT = 4; // 0x4
+    field public static final int MODE_GAMEPLAY_INTERRUPTIBLE = 2; // 0x2
+    field public static final int MODE_GAMEPLAY_UNINTERRUPTIBLE = 3; // 0x3
+    field public static final int MODE_NONE = 1; // 0x1
+    field public static final int MODE_UNKNOWN = 0; // 0x0
   }
 
   public class Instrumentation {
