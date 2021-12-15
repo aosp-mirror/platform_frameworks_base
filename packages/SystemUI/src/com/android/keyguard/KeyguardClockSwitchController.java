@@ -354,8 +354,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 mKeyguardUnlockAnimationController.updateLockscreenSmartSpacePosition();
             }
         }
-
-        mKeyguardSliceViewController.updatePosition(x, props, animate);
     }
 
     /** Sets an alpha value on every child view except for the smartspace. */
