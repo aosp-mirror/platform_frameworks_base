@@ -14,28 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.back;
-
-import android.os.SystemProperties;
-import android.view.IWindowManager;
-
-import javax.inject.Inject;
+package android.window;
 
 /**
- * Handle the preview of what a back gesture will lead to.
+ * @hide
  */
-public class BackPreviewHandler {
-
-    private static final String BACK_PREDICTABILITY_PROP = "persist.debug.back_predictability";
-
-    public static boolean isEnabled() {
-        return SystemProperties.getInt(BACK_PREDICTABILITY_PROP, 0) > 0;
-    }
-
-    private final IWindowManager mWmService;
-
-    @Inject
-    public BackPreviewHandler(IWindowManager windowManagerService) {
-        mWmService = windowManagerService;
-    }
-}
+parcelable BackNavigationInfo;
