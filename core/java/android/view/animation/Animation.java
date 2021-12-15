@@ -951,6 +951,21 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
+     * Gets the transformation to apply a specific point in time. Implementations of this method
+     * should always be kept in sync with getTransformation.
+     *
+     * @param normalizedTime time between 0 and 1 where 0 is the start of the animation and 1 the
+     *                       end.
+     * @param outTransformation A transformation object that is provided by the
+     *        caller and will be filled in by the animation.
+     * @hide
+     */
+    public void getTransformationAt(float normalizedTime, Transformation outTransformation) {
+        final float interpolatedTime = mInterpolator.getInterpolation(normalizedTime);
+        applyTransformation(interpolatedTime, outTransformation);
+    }
+
+    /**
      * Gets the transformation to apply at a specified point in time. Implementations of this
      * method should always replace the specified Transformation or document they are doing
      * otherwise.
@@ -996,8 +1011,7 @@ public abstract class Animation implements Cloneable {
                 normalizedTime = 1.0f - normalizedTime;
             }
 
-            final float interpolatedTime = mInterpolator.getInterpolation(normalizedTime);
-            applyTransformation(interpolatedTime, outTransformation);
+            getTransformationAt(normalizedTime, outTransformation);
         }
 
         if (expired) {
