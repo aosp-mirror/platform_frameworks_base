@@ -16,6 +16,7 @@
 
 package android.view.accessibility;
 
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.MagnificationConfig;
@@ -142,6 +143,10 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public boolean switchToInputMethod(String imeId) {
         return false;
+    }
+
+    public int setInputMethodEnabled(String imeId, boolean enabled) {
+        return AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
     }
 
     public boolean isAccessibilityButtonAvailable() {

@@ -102,6 +102,8 @@ interface IAccessibilityServiceConnection {
 
     boolean switchToInputMethod(String imeId);
 
+    int setInputMethodEnabled(String imeId, boolean enabled);
+
     boolean isAccessibilityButtonAvailable();
 
     void sendGesture(int sequence, in ParceledListSlice gestureSteps);

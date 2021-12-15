@@ -3148,8 +3148,12 @@ package android.accessibilityservice {
     method public void addOnShowModeChangedListener(@NonNull android.accessibilityservice.AccessibilityService.SoftKeyboardController.OnShowModeChangedListener, @Nullable android.os.Handler);
     method public int getShowMode();
     method public boolean removeOnShowModeChangedListener(@NonNull android.accessibilityservice.AccessibilityService.SoftKeyboardController.OnShowModeChangedListener);
+    method @CheckResult public int setInputMethodEnabled(@NonNull String, boolean) throws java.lang.SecurityException;
     method public boolean setShowMode(int);
     method public boolean switchToInputMethod(@NonNull String);
+    field public static final int ENABLE_IME_FAIL_BY_ADMIN = 1; // 0x1
+    field public static final int ENABLE_IME_FAIL_UNKNOWN = 2; // 0x2
+    field public static final int ENABLE_IME_SUCCESS = 0; // 0x0
   }
 
   public static interface AccessibilityService.SoftKeyboardController.OnShowModeChangedListener {

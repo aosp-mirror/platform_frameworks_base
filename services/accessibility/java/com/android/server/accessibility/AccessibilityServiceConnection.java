@@ -16,9 +16,13 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
+import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_SUCCESS;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
@@ -307,6 +311,41 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             Binder.restoreCallingIdentity(identity);
         }
         return result;
+    }
+
+    @Override
+    @AccessibilityService.SoftKeyboardController.EnableImeResult
+    public int setInputMethodEnabled(String imeId, boolean enabled) throws SecurityException {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("switchToInputMethod", "imeId=" + imeId);
+        }
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return ENABLE_IME_FAIL_UNKNOWN;
+            }
+        }
+
+        final int callingUserId = UserHandle.getCallingUserId();
+        final InputMethodManagerInternal inputMethodManagerInternal =
+                InputMethodManagerInternal.get();
+
+        final @AccessibilityService.SoftKeyboardController.EnableImeResult int checkResult;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                checkResult = mSecurityPolicy.canEnableDisableInputMethod(imeId, this);
+            }
+            if (checkResult != ENABLE_IME_SUCCESS) {
+                return checkResult;
+            }
+            if (inputMethodManagerInternal.setInputMethodEnabled(imeId,
+                        enabled, callingUserId)) {
+                return ENABLE_IME_SUCCESS;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return ENABLE_IME_FAIL_UNKNOWN;
     }
 
     @Override
