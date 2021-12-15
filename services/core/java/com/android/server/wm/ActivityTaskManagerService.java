@@ -436,9 +436,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final long START_AS_CALLER_TOKEN_EXPIRED_TIMEOUT =
             START_AS_CALLER_TOKEN_TIMEOUT_IMPL + 20 * MINUTE_IN_MILLIS;
 
-    // Activity tokens of system activities that are delegating their call to
-    // #startActivityByCaller, keyed by the permissionToken granted to the delegate.
-    final HashMap<IBinder, IBinder> mStartActivitySources = new HashMap<>();
+    // The component name of the delegated activities that are allowed to call
+    // #startActivityAsCaller with the one-time used permission token.
+    final HashMap<IBinder, ComponentName> mStartActivitySources = new HashMap<>();
 
     // Permission tokens that have expired, but we remember for error reporting.
     final ArrayList<IBinder> mExpiredStartAsCallerTokens = new ArrayList<>();
@@ -1512,7 +1512,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public IBinder requestStartActivityPermissionToken(IBinder delegatorToken) {
+    public IBinder requestStartActivityPermissionToken(ComponentName componentName) {
         int callingUid = Binder.getCallingUid();
         if (UserHandle.getAppId(callingUid) != SYSTEM_UID) {
             throw new SecurityException("Only the system process can request a permission token, "
@@ -1520,7 +1520,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         IBinder permissionToken = new Binder();
         synchronized (mGlobalLock) {
-            mStartActivitySources.put(permissionToken, delegatorToken);
+            mStartActivitySources.put(permissionToken, componentName);
         }
 
         Message expireMsg = PooledLambda.obtainMessage(
@@ -1545,7 +1545,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // 1)  The caller is an activity that is part of the core framework, and then only when it
         //     is running as the system.
         // 2)  The caller provides a valid permissionToken.  Permission tokens are one-time use and
-        //     can only be requested by a system activity, which may then delegate this call to
+        //     can only be requested from system uid, which may then delegate this call to
         //     another app.
         final ActivityRecord sourceRecord;
         final int targetUid;
@@ -1556,18 +1556,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (resultTo == null) {
                 throw new SecurityException("Must be called from an activity");
             }
-            final IBinder sourceToken;
+
+            sourceRecord = ActivityRecord.isInAnyTask(resultTo);
+            if (sourceRecord == null) {
+                throw new SecurityException("Called with bad activity token: " + resultTo);
+            }
+            if (sourceRecord.app == null) {
+                throw new SecurityException("Called without a process attached to activity");
+            }
+
+            final ComponentName componentName;
             if (permissionToken != null) {
                 // To even attempt to use a permissionToken, an app must also have this signature
                 // permission.
                 mAmInternal.enforceCallingPermission(
                         android.Manifest.permission.START_ACTIVITY_AS_CALLER,
                         "startActivityAsCaller");
-                // If called with a permissionToken, we want the sourceRecord from the delegator
-                // activity that requested this token.
-                sourceToken = mStartActivitySources.remove(permissionToken);
-                if (sourceToken == null) {
-                    // Invalid permissionToken, check if it recently expired.
+                // If called with a permissionToken, the caller must be the same component that
+                // was allowed to use the permissionToken.
+                componentName = mStartActivitySources.remove(permissionToken);
+                if (!sourceRecord.mActivityComponent.equals(componentName)) {
                     if (mExpiredStartAsCallerTokens.contains(permissionToken)) {
                         throw new SecurityException("Called with expired permission token: "
                                 + permissionToken);
@@ -1577,33 +1585,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                 }
             } else {
-                // This method was called directly by the source.
-                sourceToken = resultTo;
-            }
-
-            sourceRecord = ActivityRecord.isInAnyTask(sourceToken);
-            if (sourceRecord == null) {
-                throw new SecurityException("Called with bad activity token: " + sourceToken);
-            }
-            if (sourceRecord.app == null) {
-                throw new SecurityException("Called without a process attached to activity");
-            }
-
-            // Whether called directly or from a delegate, the source activity must be from the
-            // android package.
-            if (!sourceRecord.info.packageName.equals("android")) {
-                throw new SecurityException("Must be called from an activity that is "
-                        + "declared in the android package");
-            }
-
-            if (UserHandle.getAppId(sourceRecord.app.mUid) != SYSTEM_UID) {
-                // This is still okay, as long as this activity is running under the
-                // uid of the original calling activity.
-                if (sourceRecord.app.mUid != sourceRecord.launchedFromUid) {
-                    throw new SecurityException(
-                            "Calling activity in uid " + sourceRecord.app.mUid
-                                    + " must be system uid or original calling uid "
-                                    + sourceRecord.launchedFromUid);
+                // Whether called directly or from a delegate, the source activity must be from the
+                // android package.
+                if (!sourceRecord.info.packageName.equals("android")) {
+                    throw new SecurityException("Must be called from an activity that is "
+                            + "declared in the android package");
+                }
+                if (UserHandle.getAppId(sourceRecord.app.mUid) != SYSTEM_UID) {
+                    // This is still okay, as long as this activity is running under the
+                    // uid of the original calling activity.
+                    if (sourceRecord.app.mUid != sourceRecord.launchedFromUid) {
+                        throw new SecurityException(
+                                "Calling activity in uid " + sourceRecord.app.mUid
+                                        + " must be system uid or original calling uid "
+                                        + sourceRecord.launchedFromUid);
+                    }
                 }
             }
             if (ignoreTargetSecurity) {

@@ -178,17 +178,16 @@ interface IActivityTaskManager {
     Point getAppTaskThumbnailSize();
     /**
      * Only callable from the system. This token grants a temporary permission to call
-     * #startActivityAsCallerWithToken. The token will time out after
-     * START_AS_CALLER_TOKEN_TIMEOUT if it is not used.
+     * #startActivityAsCaller. The token will time out after START_AS_CALLER_TOKEN_TIMEOUT
+     * if it is not used.
      *
-     * @param delegatorToken The Binder token referencing the system Activity that wants to delegate
-     *        the #startActivityAsCaller to another app. The "caller" will be the caller of this
-     *        activity's token, not the delegate's caller (which is probably the delegator itself).
+     * @param componentName The component name of the delegated component that is allowed to
+     *                      call #startActivityAsCaller with the returned token.
      *
      * @return Returns a token that can be given to a "delegate" app that may call
      *         #startActivityAsCaller
      */
-    IBinder requestStartActivityPermissionToken(in IBinder delegatorToken);
+    IBinder requestStartActivityPermissionToken(in ComponentName componentName);
 
     oneway void releaseSomeActivities(in IApplicationThread app);
     Bitmap getTaskDescriptionIcon(in String filename, int userId);
