@@ -2033,7 +2033,7 @@
     <string name="demo_restarting_message" msgid="1160053183701746766">"Vraćanje uređaja na početne postavke…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"Onemogućen <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="5731633152336490471">"Konferencijski poziv"</string>
-    <string name="tooltip_popup_title" msgid="7863719020269945722">"Savjet za alat"</string>
+    <string name="tooltip_popup_title" msgid="7863719020269945722">"Skočni opis"</string>
     <string name="app_category_game" msgid="4534216074910244790">"Igre"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"Muzika i zvuk"</string>
     <string name="app_category_video" msgid="2590183854839565814">"Filmovi i videozapisi"</string>
