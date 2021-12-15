@@ -39,11 +39,13 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ExitTransitionCoordinator;
 import android.app.ExitTransitionCoordinator.ExitTransitionCallbacks;
+import android.app.ICompatCameraControlCallback;
 import android.app.Notification;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
@@ -72,6 +74,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.ScrollCaptureResponse;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
@@ -597,19 +600,34 @@ public class ScreenshotController {
         withWindowAttached(() -> {
             requestScrollCapture();
             mWindow.peekDecorView().getViewRootImpl().setActivityConfigCallback(
-                    (overrideConfig, newDisplayId) -> {
-                        if (mConfigChanges.applyNewConfig(mContext.getResources())) {
-                            // Hide the scroll chip until we know it's available in this orientation
-                            mScreenshotView.hideScrollChip();
-                            // Delay scroll capture eval a bit to allow the underlying activity
-                            // to set up in the new orientation.
-                            mScreenshotHandler.postDelayed(this::requestScrollCapture, 150);
-                            mScreenshotView.updateInsets(
-                                    mWindowManager.getCurrentWindowMetrics().getWindowInsets());
-                            // screenshot animation calculations won't be valid anymore, so just end
-                            if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
-                                mScreenshotAnimation.end();
+                    new ViewRootImpl.ActivityConfigCallback() {
+                        @Override
+                        public void onConfigurationChanged(Configuration overrideConfig,
+                                int newDisplayId) {
+                            if (mConfigChanges.applyNewConfig(mContext.getResources())) {
+                                // Hide the scroll chip until we know it's available in this
+                                // orientation
+                                mScreenshotView.hideScrollChip();
+                                // Delay scroll capture eval a bit to allow the underlying activity
+                                // to set up in the new orientation.
+                                mScreenshotHandler.postDelayed(
+                                        ScreenshotController.this::requestScrollCapture, 150);
+                                mScreenshotView.updateInsets(
+                                        mWindowManager.getCurrentWindowMetrics()
+                                                .getWindowInsets());
+                                // Screenshot animation calculations won't be valid anymore,
+                                // so just end
+                                if (mScreenshotAnimation != null
+                                        && mScreenshotAnimation.isRunning()) {
+                                    mScreenshotAnimation.end();
+                                }
                             }
+                        }
+                        @Override
+                        public void requestCompatCameraControl(boolean showControl,
+                                boolean transformationApplied,
+                                ICompatCameraControlCallback callback) {
+                            Log.w(TAG, "Unexpected requestCompatCameraControl callback");
                         }
                     });
         });

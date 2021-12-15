@@ -458,7 +458,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 newListener.onTaskInfoChanged(taskInfo);
             }
             notifyLocusVisibilityIfNeeded(taskInfo);
-            if (updated || !taskInfo.equalsForSizeCompat(data.getTaskInfo())) {
+            if (updated || !taskInfo.equalsForCompatUi(data.getTaskInfo())) {
                 // Notify the compat UI if the listener or task info changed.
                 notifyCompatUI(taskInfo, newListener);
             }
@@ -633,7 +633,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         // The task is vanished or doesn't support compat UI, notify to remove compat UI
         // on this Task if there is any.
         if (taskListener == null || !taskListener.supportCompatUI()
-                || !taskInfo.topActivityInSizeCompat || !taskInfo.isVisible) {
+                || !taskInfo.hasCompatUI() || !taskInfo.isVisible) {
             mCompatUI.onCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
                     null /* taskConfig */, null /* taskListener */);
             return;

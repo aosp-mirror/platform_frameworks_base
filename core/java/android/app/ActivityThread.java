@@ -561,8 +561,8 @@ public final class ActivityThread extends ClientTransactionHandler
         private Configuration mPendingOverrideConfig;
         // Used for consolidating configs before sending on to Activity.
         private Configuration tmpConfig = new Configuration();
-        // Callback used for updating activity override config.
-        ViewRootImpl.ActivityConfigCallback configCallback;
+        // Callback used for updating activity override config and camera compat control state.
+        ViewRootImpl.ActivityConfigCallback activityConfigCallback;
         ActivityClientRecord nextIdle;
 
         // Indicates whether this activity is currently the topmost resumed one in the system.
@@ -660,13 +660,30 @@ public final class ActivityThread extends ClientTransactionHandler
             stopped = false;
             hideForNow = false;
             nextIdle = null;
-            configCallback = (Configuration overrideConfig, int newDisplayId) -> {
-                if (activity == null) {
-                    throw new IllegalStateException(
-                            "Received config update for non-existing activity");
+            activityConfigCallback = new ViewRootImpl.ActivityConfigCallback() {
+                @Override
+                public void onConfigurationChanged(Configuration overrideConfig,
+                        int newDisplayId) {
+                    if (activity == null) {
+                        throw new IllegalStateException(
+                                "Received config update for non-existing activity");
+                    }
+                    activity.mMainThread.handleActivityConfigurationChanged(
+                            ActivityClientRecord.this, overrideConfig, newDisplayId);
                 }
-                activity.mMainThread.handleActivityConfigurationChanged(this, overrideConfig,
-                        newDisplayId);
+
+                @Override
+                public void requestCompatCameraControl(boolean showControl,
+                        boolean transformationApplied, ICompatCameraControlCallback callback) {
+                    if (activity == null) {
+                        throw new IllegalStateException(
+                                "Received camera compat control update for non-existing activity");
+                    }
+                    ActivityClient.getInstance().requestCompatCameraControl(
+                            activity.getResources(), token, showControl, transformationApplied,
+                            callback);
+                }
+
             };
         }
 
@@ -3647,7 +3664,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 activity.attach(appContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
                         r.embeddedID, r.lastNonConfigurationInstances, config,
-                        r.referrer, r.voiceInteractor, window, r.configCallback,
+                        r.referrer, r.voiceInteractor, window, r.activityConfigCallback,
                         r.assistToken, r.shareableActivityToken);
 
                 if (customIntent != null) {
@@ -5489,8 +5506,8 @@ public final class ActivityThread extends ClientTransactionHandler
                 } else {
                     final ViewRootImpl viewRoot = v.getViewRootImpl();
                     if (viewRoot != null) {
-                        // Clear the callback to avoid the destroyed activity from receiving
-                        // configuration changes that are no longer effective.
+                        // Clear callbacks to avoid the destroyed activity from receiving
+                        // configuration or camera compat changes that are no longer effective.
                         viewRoot.setActivityConfigCallback(null);
                     }
                     wm.removeViewImmediate(v);
