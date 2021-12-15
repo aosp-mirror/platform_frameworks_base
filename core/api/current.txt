@@ -20245,6 +20245,7 @@ package android.location {
 
   public final class GnssMeasurementRequest implements android.os.Parcelable {
     method public int describeContents();
+    method @IntRange(from=0) public int getIntervalMillis();
     method public boolean isFullTracking();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurementRequest> CREATOR;
@@ -20255,6 +20256,7 @@ package android.location {
     ctor public GnssMeasurementRequest.Builder(@NonNull android.location.GnssMeasurementRequest);
     method @NonNull public android.location.GnssMeasurementRequest build();
     method @NonNull public android.location.GnssMeasurementRequest.Builder setFullTracking(boolean);
+    method @NonNull public android.location.GnssMeasurementRequest.Builder setIntervalMillis(@IntRange(from=0) int);
   }
 
   public final class GnssMeasurementsEvent implements android.os.Parcelable {
