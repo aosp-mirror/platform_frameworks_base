@@ -385,7 +385,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
 
             public boolean isValid() {
-                return mGameMode == GameManager.GAME_MODE_PERFORMANCE
+                return mGameMode == GameManager.GAME_MODE_STANDARD
+                        || mGameMode == GameManager.GAME_MODE_PERFORMANCE
                         || mGameMode == GameManager.GAME_MODE_BATTERY;
             }
 
