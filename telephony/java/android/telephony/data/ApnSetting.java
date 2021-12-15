@@ -521,11 +521,11 @@ public class ApnSetting implements Parcelable {
     private final boolean mAlwaysOn;
 
     /**
-     * Returns the MTU size of the IPv4 mobile interface to which the APN connected. Note this value
-     * is used only if MTU size is not provided in {@link DataCallResponse}.
+     * Returns the default MTU (Maximum Transmission Unit) size in bytes of the IPv4 routes brought
+     * up by this APN setting. Note this value will only be used when MTU size is not provided
+     * in {@link DataCallResponse#getMtuV4()} during network bring up.
      *
-     * @return the MTU size of the APN
-     * @hide
+     * @return the MTU size in bytes of the route.
      */
     public int getMtuV4() {
         return mMtuV4;
@@ -533,10 +533,10 @@ public class ApnSetting implements Parcelable {
 
     /**
      * Returns the MTU size of the IPv6 mobile interface to which the APN connected. Note this value
-     * is used only if MTU size is not provided in {@link DataCallResponse}.
+     * will only be used when MTU size is not provided in {@link DataCallResponse#getMtuV6()}
+     * during network bring up.
      *
-     * @return the MTU size of the APN
-     * @hide
+     * @return the MTU size in bytes of the route.
      */
     public int getMtuV6() {
         return mMtuV6;
@@ -1753,25 +1753,25 @@ public class ApnSetting implements Parcelable {
         }
 
         /**
-         * Set the MTU size of the IPv4 mobile interface to which the APN connected. Note this value
-         * is used only if MTU size is not provided in {@link DataCallResponse}.
+         * Set the default MTU (Maximum Transmission Unit) size in bytes of the IPv4 routes brought
+         * up by this APN setting. Note this value will only be used when MTU size is not provided
+         * in {@link DataCallResponse#getMtuV4()} during network bring up.
          *
-         * @param mtuV4 the MTU size to set for the APN
-         * @hide
+         * @param mtuV4 the MTU size in bytes of the route.
          */
-        public Builder setMtuV4(int mtuV4) {
+        public @NonNull Builder setMtuV4(int mtuV4) {
             this.mMtuV4 = mtuV4;
             return this;
         }
 
         /**
-         * Set the MTU size of the IPv6 mobile interface to which the APN connected. Note this value
-         * is used only if MTU size is not provided in {@link DataCallResponse}.
+         * Set the default MTU (Maximum Transmission Unit) size in bytes of the IPv6 routes brought
+         * up by this APN setting. Note this value will only be used when MTU size is not provided
+         * in {@link DataCallResponse#getMtuV6()} during network bring up.
          *
-         * @param mtuV6 the MTU size to set for the APN
-         * @hide
+         * @param mtuV6 the MTU size in bytes of the route.
          */
-        public Builder setMtuV6(int mtuV6) {
+        public @NonNull Builder setMtuV6(int mtuV6) {
             this.mMtuV6 = mtuV6;
             return this;
         }
@@ -1779,12 +1779,22 @@ public class ApnSetting implements Parcelable {
         /**
          * Sets the profile id to which the APN saved in modem.
          *
-         * @param profileId the profile id to set for the APN
-         * @hide
+         * @param profileId the profile id to set for the APN.
          */
-        public Builder setProfileId(int profileId) {
+        public @NonNull Builder setProfileId(int profileId) {
             this.mProfileId = profileId;
             return this;
+        }
+
+        /**
+         * Set if the APN setting should be persistent/non-persistent in modem.
+         *
+         * @param isPersistent {@code true} if this APN setting should be persistent/non-persistent
+         * in modem.
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setPersistent(boolean isPersistent) {
+            return setModemCognitive(isPersistent);
         }
 
         /**
