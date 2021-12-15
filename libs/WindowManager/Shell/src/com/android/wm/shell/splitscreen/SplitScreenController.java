@@ -318,8 +318,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             startIntentLegacy(intent, fillInIntent, position, options);
             return;
         }
-        mStageCoordinator.startIntent(intent, fillInIntent, STAGE_TYPE_UNDEFINED, position, options,
-                null /* remote */);
+
+        try {
+            options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options,
+                    null /* wct */);
+            intent.send(mContext, 0, fillInIntent, null /* onFinished */, null /* handler */,
+                    null /* requiredPermission */, options);
+        } catch (PendingIntent.CanceledException e) {
+            Slog.e(TAG, "Failed to launch task", e);
+        }
     }
 
     private void startIntentLegacy(PendingIntent intent, Intent fillInIntent,

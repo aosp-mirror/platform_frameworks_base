@@ -44,7 +44,6 @@ import static com.android.wm.shell.splitscreen.SplitScreenController.exitReasonT
 import static com.android.wm.shell.splitscreen.SplitScreenTransitions.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS_SNAP;
-import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
 import static com.android.wm.shell.transition.Transitions.isClosingType;
 import static com.android.wm.shell.transition.Transitions.isOpeningType;
@@ -54,10 +53,8 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
-import android.app.PendingIntent;
 import android.app.WindowConfiguration;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Rect;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Bundle;
@@ -434,17 +431,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         // Using legacy transitions, so we can't use blast sync since it conflicts.
         mTaskOrganizer.applyTransaction(wct);
-    }
-
-    public void startIntent(PendingIntent intent, Intent fillInIntent,
-            @StageType int stage, @SplitPosition int position,
-            @androidx.annotation.Nullable Bundle options,
-            @Nullable RemoteTransition remoteTransition) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        options = resolveStartStage(stage, position, options, wct);
-        wct.sendPendingIntent(intent, fillInIntent, options);
-        mSplitTransitions.startEnterTransition(
-                TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE, wct, remoteTransition, this);
     }
 
     /**
@@ -1158,12 +1144,14 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSplitTransitions.mPendingDismiss = transition;
             }
         } else {
-            // Not in split mode, so look for an open into a split stage just so we can whine and
-            // complain about how this isn't a supported operation.
+            // Not in split mode, so look for an open into a split stage to active split screen.
             if ((type == TRANSIT_OPEN || type == TRANSIT_TO_FRONT)) {
                 if (getStageOfTask(triggerTask) != null) {
-                    throw new IllegalStateException("Entering split implicitly with only one task"
-                            + " isn't supported.");
+                    // One task is appearing in split, prepare to enter split screen.
+                    out = new WindowContainerTransaction();
+                    mSplitTransitions.mPendingEnter = transition;
+                    mMainStage.activate(getMainStageBounds(), out, true /* includingTopTask */);
+                    mSideStage.moveToTop(getSideStageBounds(), out);
                 }
             }
         }
@@ -1232,57 +1220,50 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private boolean startPendingEnterAnimation(@NonNull IBinder transition,
             @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction t) {
-        if (info.getType() == TRANSIT_SPLIT_SCREEN_PAIR_OPEN) {
-            // First, verify that we actually have opened 2 apps in split.
-            TransitionInfo.Change mainChild = null;
-            TransitionInfo.Change sideChild = null;
-            for (int iC = 0; iC < info.getChanges().size(); ++iC) {
-                final TransitionInfo.Change change = info.getChanges().get(iC);
-                final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-                if (taskInfo == null || !taskInfo.hasParentTask()) continue;
-                final @StageType int stageType = getStageType(getStageOfTask(taskInfo));
-                if (stageType == STAGE_TYPE_MAIN) {
-                    mainChild = change;
-                } else if (stageType == STAGE_TYPE_SIDE) {
-                    sideChild = change;
-                }
+        // First, verify that we actually have opened apps in both splits.
+        TransitionInfo.Change mainChild = null;
+        TransitionInfo.Change sideChild = null;
+        for (int iC = 0; iC < info.getChanges().size(); ++iC) {
+            final TransitionInfo.Change change = info.getChanges().get(iC);
+            final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+            if (taskInfo == null || !taskInfo.hasParentTask()) continue;
+            final @StageType int stageType = getStageType(getStageOfTask(taskInfo));
+            if (stageType == STAGE_TYPE_MAIN) {
+                mainChild = change;
+            } else if (stageType == STAGE_TYPE_SIDE) {
+                sideChild = change;
             }
-            if (mainChild == null || sideChild == null) {
-                throw new IllegalStateException("Launched 2 tasks in split, but didn't receive"
-                        + " 2 tasks in transition. Possibly one of them failed to launch");
-                // TODO: fallback logic. Probably start a new transition to exit split before
-                //       applying anything here. Ideally consolidate with transition-merging.
-            }
-
-            // Update local states (before animating).
-            setDividerVisibility(true);
-            setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, false /* updateBounds */,
-                    null /* wct */);
-            setSplitsVisible(true);
-
-            addDividerBarToTransition(info, t, true /* show */);
-
-            // Make some noise if things aren't totally expected. These states shouldn't effect
-            // transitions locally, but remotes (like Launcher) may get confused if they were
-            // depending on listener callbacks. This can happen because task-organizer callbacks
-            // aren't serialized with transition callbacks.
-            // TODO(b/184679596): Find a way to either include task-org information in
-            //                    the transition, or synchronize task-org callbacks.
-            if (!mMainStage.containsTask(mainChild.getTaskInfo().taskId)) {
-                Log.w(TAG, "Expected onTaskAppeared on " + mMainStage
-                        + " to have been called with " + mainChild.getTaskInfo().taskId
-                        + " before startAnimation().");
-            }
-            if (!mSideStage.containsTask(sideChild.getTaskInfo().taskId)) {
-                Log.w(TAG, "Expected onTaskAppeared on " + mSideStage
-                        + " to have been called with " + sideChild.getTaskInfo().taskId
-                        + " before startAnimation().");
-            }
-            return true;
-        } else {
-            // TODO: other entry method animations
-            throw new RuntimeException("Unsupported split-entry");
         }
+        if (mainChild == null || sideChild == null) {
+            throw new IllegalStateException("Launched 2 tasks in split, but didn't receive"
+                    + " 2 tasks in transition. Possibly one of them failed to launch");
+            // TODO: fallback logic. Probably start a new transition to exit split before
+            //       applying anything here. Ideally consolidate with transition-merging.
+        }
+
+        // Update local states (before animating).
+        setDividerVisibility(true);
+        setSplitsVisible(true);
+
+        addDividerBarToTransition(info, t, true /* show */);
+
+        // Make some noise if things aren't totally expected. These states shouldn't effect
+        // transitions locally, but remotes (like Launcher) may get confused if they were
+        // depending on listener callbacks. This can happen because task-organizer callbacks
+        // aren't serialized with transition callbacks.
+        // TODO(b/184679596): Find a way to either include task-org information in
+        //                    the transition, or synchronize task-org callbacks.
+        if (!mMainStage.containsTask(mainChild.getTaskInfo().taskId)) {
+            Log.w(TAG, "Expected onTaskAppeared on " + mMainStage
+                    + " to have been called with " + mainChild.getTaskInfo().taskId
+                    + " before startAnimation().");
+        }
+        if (!mSideStage.containsTask(sideChild.getTaskInfo().taskId)) {
+            Log.w(TAG, "Expected onTaskAppeared on " + mSideStage
+                    + " to have been called with " + sideChild.getTaskInfo().taskId
+                    + " before startAnimation().");
+        }
+        return true;
     }
 
     private boolean startPendingDismissAnimation(@NonNull IBinder transition,

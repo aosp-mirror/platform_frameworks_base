@@ -24,6 +24,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
 import static com.android.wm.shell.splitscreen.SplitTestUtils.createMockSurface;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
@@ -66,7 +67,6 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
-import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -130,6 +130,40 @@ public class SplitTransitionTests extends ShellTestCase {
                 .setParentTaskId(mMainStage.mRootTaskInfo.taskId).build();
         mSideChild = new TestRunningTaskInfoBuilder()
                 .setParentTaskId(mSideStage.mRootTaskInfo.taskId).build();
+    }
+
+    @Test
+    public void testLaunchToSide() {
+        ActivityManager.RunningTaskInfo newTask = new TestRunningTaskInfoBuilder()
+                .setParentTaskId(mSideStage.mRootTaskInfo.taskId).build();
+        ActivityManager.RunningTaskInfo reparentTask = new TestRunningTaskInfoBuilder()
+                .setParentTaskId(mMainStage.mRootTaskInfo.taskId).build();
+
+        // Create a request to start a new task in side stage
+        TransitionRequestInfo request = new TransitionRequestInfo(TRANSIT_TO_FRONT, newTask, null);
+        IBinder transition = mock(IBinder.class);
+        WindowContainerTransaction result =
+                mStageCoordinator.handleRequest(transition, request);
+
+        // it should handle the transition to enter split screen.
+        assertNotNull(result);
+        assertTrue(containsSplitEnter(result));
+
+        // simulate the transition
+        TransitionInfo.Change openChange = createChange(TRANSIT_OPEN, newTask);
+        TransitionInfo.Change reparentChange = createChange(TRANSIT_CHANGE, reparentTask);
+
+        TransitionInfo info = new TransitionInfo(TRANSIT_TO_FRONT, 0);
+        info.addChange(openChange);
+        info.addChange(reparentChange);
+        mSideStage.onTaskAppeared(newTask, createMockSurface());
+        mMainStage.onTaskAppeared(reparentTask, createMockSurface());
+        boolean accepted = mStageCoordinator.startAnimation(transition, info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(Transitions.TransitionFinishCallback.class));
+        assertTrue(accepted);
+        assertTrue(mStageCoordinator.isSplitScreenVisible());
     }
 
     @Test
@@ -322,6 +356,22 @@ public class SplitTransitionTests extends ShellTestCase {
                 mock(Transitions.TransitionFinishCallback.class));
         mMainStage.activate(new Rect(0, 0, 100, 100), new WindowContainerTransaction(),
                 true /* includingTopTask */);
+    }
+
+    private boolean containsSplitEnter(@NonNull WindowContainerTransaction wct) {
+        boolean movedMainToFront = false;
+        boolean movedSideToFront = false;
+        for (int i = 0; i < wct.getHierarchyOps().size(); ++i) {
+            WindowContainerTransaction.HierarchyOp op = wct.getHierarchyOps().get(i);
+            if (op.getType() == HIERARCHY_OP_TYPE_REORDER) {
+                if (op.getContainer() == mMainStage.mRootTaskInfo.token.asBinder()) {
+                    movedMainToFront = true;
+                } else if (op.getContainer() == mSideStage.mRootTaskInfo.token.asBinder()) {
+                    movedSideToFront = true;
+                }
+            }
+        }
+        return movedMainToFront && movedSideToFront;
     }
 
     private boolean containsSplitExit(@NonNull WindowContainerTransaction wct) {
