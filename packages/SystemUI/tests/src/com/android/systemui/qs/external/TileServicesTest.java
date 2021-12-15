@@ -45,13 +45,11 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.connectivity.StatusBarFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -106,10 +104,6 @@ public class TileServicesTest extends SysuiTestCase {
     private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
     @Mock
     private TileServiceRequestController mTileServiceRequestController;
-    @Mock
-    private FeatureFlags mFeatureFlags;
-    @Mock
-    private StatusBarFlags mStatusBarFlags;
 
     @Before
     public void setUp() throws Exception {
@@ -136,9 +130,7 @@ public class TileServicesTest extends SysuiTestCase {
                 mUserTracker,
                 mSecureSettings,
                 mock(CustomTileStatePersister.class),
-                mTileServiceRequestControllerBuilder,
-                mFeatureFlags,
-                mStatusBarFlags);
+                mTileServiceRequestControllerBuilder);
         mTileService = new TestTileServices(host, Looper.getMainLooper(), mBroadcastDispatcher,
                 mUserTracker);
     }

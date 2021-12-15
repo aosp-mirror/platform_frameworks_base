@@ -98,9 +98,6 @@ public class Flags {
 
     /***************************************/
     // 600- status bar
-    public static final BooleanFlag STATUS_BAR_PROVIDER_MODEL =
-            new BooleanFlag(600, false);
-
     public static final BooleanFlag COMBINED_STATUS_BAR_SIGNAL_ICONS =
             new BooleanFlag(601, false);
 

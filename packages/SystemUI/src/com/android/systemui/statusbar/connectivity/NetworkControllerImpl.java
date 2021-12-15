@@ -75,7 +75,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
-import com.android.systemui.qs.tiles.dialog.InternetDialogUtil;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -132,11 +131,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final DemoModeController mDemoModeController;
     private final Object mLock = new Object();
     private final boolean mProviderModelBehavior;
-    private final boolean mProviderModelSetting;
     private Config mConfig;
     private final CarrierConfigTracker mCarrierConfigTracker;
     private final FeatureFlags mFeatureFlags;
-    private final StatusBarFlags mStatusBarFlags;
     private final DumpManager mDumpManager;
 
     private TelephonyCallback.ActiveDataSubscriptionIdListener mPhoneStateListener;
@@ -236,7 +233,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             @Main Handler handler,
             InternetDialogFactory internetDialogFactory,
             FeatureFlags featureFlags,
-            StatusBarFlags statusBarFlags,
             DumpManager dumpManager) {
         this(context, connectivityManager,
                 telephonyManager,
@@ -256,7 +252,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 demoModeController,
                 carrierConfigTracker,
                 featureFlags,
-                statusBarFlags,
                 dumpManager);
         mReceiverHandler.post(mRegisterListeners);
         mMainHandler = handler;
@@ -280,7 +275,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             DemoModeController demoModeController,
             CarrierConfigTracker carrierConfigTracker,
             FeatureFlags featureFlags,
-            StatusBarFlags statusBarFlags,
             DumpManager dumpManager
     ) {
         mContext = context;
@@ -300,7 +294,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mDemoModeController = demoModeController;
         mCarrierConfigTracker = carrierConfigTracker;
         mFeatureFlags = featureFlags;
-        mStatusBarFlags = statusBarFlags;
         mDumpManager = dumpManager;
 
         // telephony
@@ -322,8 +315,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
         });
         mWifiSignalController = new WifiSignalController(mContext, mHasMobileDataFeature,
-                mCallbackHandler, this, mWifiManager, mConnectivityManager, networkScoreManager,
-                mStatusBarFlags);
+                mCallbackHandler, this, mWifiManager, mConnectivityManager, networkScoreManager);
 
         mEthernetSignalController = new EthernetSignalController(mContext, mCallbackHandler, this);
 
@@ -449,7 +441,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         mDemoModeController.addCallback(this);
         mProviderModelBehavior = mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS);
-        mProviderModelSetting = mStatusBarFlags.isProviderModelSettingEnabled();
 
         mDumpManager.registerDumpable(TAG, this);
     }
@@ -499,9 +490,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         filter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
-        if (InternetDialogUtil.isProviderModelEnabled(mContext)) {
-            filter.addAction(Settings.Panel.ACTION_INTERNET_CONNECTIVITY);
-        }
+        filter.addAction(Settings.Panel.ACTION_INTERNET_CONNECTIVITY);
         mBroadcastDispatcher.registerReceiverWithHandler(this, filter, mReceiverHandler);
         mListening = true;
 
@@ -734,9 +723,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         TelephonyIcons.FLIGHT_MODE_ICON,
                         mContext.getString(R.string.accessibility_airplane_mode)));
         cb.setNoSims(mHasNoSubs, mSimDetected);
-        if (mProviderModelSetting) {
-            cb.setConnectivityStatus(mNoDefaultNetwork, !mInetCondition, mNoNetworksAvailable);
-        }
+        cb.setConnectivityStatus(mNoDefaultNetwork, !mInetCondition, mNoNetworksAvailable);
         mWifiSignalController.notifyListeners(cb);
         mEthernetSignalController.notifyListeners(cb);
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
@@ -965,7 +952,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         mHasMobileDataFeature, mPhone.createForSubscriptionId(subId),
                         mCallbackHandler, this, subscriptions.get(i),
                         mSubDefaults, mReceiverHandler.getLooper(), mCarrierConfigTracker,
-                        mFeatureFlags, mStatusBarFlags);
+                        mFeatureFlags);
                 controller.setUserSetupComplete(mUserSetup);
                 mMobileSignalControllers.put(subId, controller);
                 if (subscriptions.get(i).getSimSlotIndex() == 0) {
@@ -1125,8 +1112,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mobileSignalController.updateNoCallingState();
             }
             notifyAllListeners();
-        } else if (mProviderModelSetting) {
-            // TODO(b/191903788): Replace the flag name once the new flag is added.
+        } else {
             mNoDefaultNetwork = !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_CELLULAR)
                     && !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_WIFI)
                     && !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_ETHERNET);
@@ -1443,7 +1429,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mConfig, mHasMobileDataFeature,
                 mPhone.createForSubscriptionId(info.getSubscriptionId()), mCallbackHandler, this,
                 info, mSubDefaults, mReceiverHandler.getLooper(), mCarrierConfigTracker,
-                mFeatureFlags, mStatusBarFlags);
+                mFeatureFlags);
         mMobileSignalControllers.put(id, controller);
         controller.getState().userSetup = true;
         return info;

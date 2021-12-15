@@ -70,7 +70,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
                 mDemoModeController, mock(CarrierConfigTracker.class), mFeatureFlags,
-                mStatusBarFlags, mock(DumpManager.class));
+                mock(DumpManager.class));
         setupNetworkController();
 
         verifyLastMobileDataIndicators(false, -1, 0);
@@ -91,7 +91,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
                 mDemoModeController, mock(CarrierConfigTracker.class), mFeatureFlags,
-                mStatusBarFlags, mock(DumpManager.class));
+                mock(DumpManager.class));
         mNetworkController.registerListeners();
 
         // Wait for the main looper to execute the previous command
@@ -160,7 +160,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
                 mDemoModeController, mock(CarrierConfigTracker.class), mFeatureFlags,
-                mStatusBarFlags, mock(DumpManager.class));
+                mock(DumpManager.class));
         setupNetworkController();
 
         // No Subscriptions.
