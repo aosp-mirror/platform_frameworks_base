@@ -19,9 +19,12 @@ package com.android.systemui.media.taptotransfer
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
+import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.PrintWriter
+import java.util.concurrent.FutureTask
 import javax.inject.Inject
 
 /**
@@ -31,7 +34,8 @@ import javax.inject.Inject
 @SysUISingleton
 class MediaTttCommandLineHelper @Inject constructor(
     commandRegistry: CommandRegistry,
-    private val mediaTttChipController: MediaTttChipController
+    private val mediaTttChipController: MediaTttChipController,
+    @Main private val mainExecutor: DelayableExecutor,
 ) {
     init {
         commandRegistry.registerCommand(ADD_CHIP_COMMAND_TAG) { AddChipCommand() }
@@ -46,7 +50,12 @@ class MediaTttCommandLineHelper @Inject constructor(
                     mediaTttChipController.displayChip(MoveCloserToTransfer(otherDeviceName))
                 }
                 TRANSFER_INITIATED_COMMAND_NAME -> {
-                    mediaTttChipController.displayChip(TransferInitiated(otherDeviceName))
+                    val futureTask = FutureTask { fakeUndoRunnable }
+                    mediaTttChipController.displayChip(
+                        TransferInitiated(otherDeviceName, futureTask)
+                    )
+                    mainExecutor.executeDelayed({ futureTask.run() }, FUTURE_WAIT_TIME)
+
                 }
                 TRANSFER_SUCCEEDED_COMMAND_NAME -> {
                     mediaTttChipController.displayChip(
@@ -94,3 +103,5 @@ val MOVE_CLOSER_TO_TRANSFER_COMMAND_NAME = MoveCloserToTransfer::class.simpleNam
 val TRANSFER_INITIATED_COMMAND_NAME = TransferInitiated::class.simpleName!!
 @VisibleForTesting
 val TRANSFER_SUCCEEDED_COMMAND_NAME = TransferSucceeded::class.simpleName!!
+
+private const val FUTURE_WAIT_TIME = 2000L
