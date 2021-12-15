@@ -56,7 +56,7 @@ import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
+import android.sysprop.BluetoothProperties;
 import android.util.Log;
 import android.util.Pair;
 
@@ -1337,7 +1337,7 @@ public final class BluetoothAdapter {
                 return true;
             }
             Log.e(TAG, "factoryReset(): Setting persist.bluetooth.factoryreset to retry later");
-            SystemProperties.set("persist.bluetooth.factoryreset", "true");
+            BluetoothProperties.factory_reset(true);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         } finally {
