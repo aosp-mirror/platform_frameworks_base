@@ -1543,11 +1543,25 @@ public class JobInfo implements Parcelable {
          *
          * <p>Note that trigger URIs can not be used in combination with
          * {@link #setPeriodic(long)} or {@link #setPersisted(boolean)}.  To continually monitor
-         * for content changes, you need to schedule a new JobInfo observing the same URIs
-         * before you finish execution of the JobService handling the most recent changes.
+         * for content changes, you need to schedule a new JobInfo using the same job ID and
+         * observing the same URIs in place of calling
+         * {@link JobService#jobFinished(JobParameters, boolean)}. Remember that
+         * {@link JobScheduler#schedule(JobInfo)} stops a running job if it uses the same job ID,
+         * so only call it after you've finished processing the most recent changes (in other words,
+         * call {@link JobScheduler#schedule(JobInfo)} where you would have normally called
+         * {@link JobService#jobFinished(JobParameters, boolean)}.
          * Following this pattern will ensure you do not lose any content changes: while your
          * job is running, the system will continue monitoring for content changes, and propagate
-         * any it sees over to the next job you schedule.</p>
+         * any changes it sees over to the next job you schedule, so you do not have to worry
+         * about missing new changes. <b>Scheduling the new job
+         * before or during processing will cause the current job to be stopped (as described in
+         * {@link JobScheduler#schedule(JobInfo)}), meaning the wakelock will be released for the
+         * current job and your app process may be killed since it will no longer be in a valid
+         * component lifecycle.</b>
+         * Since {@link JobScheduler#schedule(JobInfo)} stops the current job, you do not
+         * need to call {@link JobService#jobFinished(JobParameters, boolean)} if you call
+         * {@link JobScheduler#schedule(JobInfo)} using the same job ID as the
+         * currently running job.</p>
          *
          * <p>Because setting this property is not compatible with periodic or
          * persisted jobs, doing so will throw an {@link java.lang.IllegalArgumentException} when
