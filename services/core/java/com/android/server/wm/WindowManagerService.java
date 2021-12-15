@@ -7941,18 +7941,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void addNonHighRefreshRatePackage(@NonNull String packageName) {
+        public void addRefreshRateRangeForPackage(@NonNull String packageName,
+                float minRefreshRate, float maxRefreshRate) {
             synchronized (mGlobalLock) {
                 mRoot.forAllDisplays(dc -> dc.getDisplayPolicy().getRefreshRatePolicy()
-                        .addNonHighRefreshRatePackage(packageName));
+                        .addRefreshRateRangeForPackage(
+                                packageName, minRefreshRate, maxRefreshRate));
             }
         }
 
         @Override
-        public void removeNonHighRefreshRatePackage(@NonNull String packageName) {
+        public void removeRefreshRateRangeForPackage(@NonNull String packageName) {
             synchronized (mGlobalLock) {
                 mRoot.forAllDisplays(dc -> dc.getDisplayPolicy().getRefreshRatePolicy()
-                        .removeNonHighRefreshRatePackage(packageName));
+                        .removeRefreshRateRangeForPackage(packageName));
             }
         }
 
