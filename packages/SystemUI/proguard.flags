@@ -33,10 +33,14 @@
     *;
 }
 
--keep class com.android.systemui.dagger.GlobalRootComponent { *; }
--keep class com.android.systemui.dagger.GlobalRootComponent$SysUIComponentImpl { *; }
--keep class com.android.systemui.dagger.Dagger** { *; }
--keep class com.android.systemui.tv.Dagger** { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.systemui.dagger.GlobalRootComponent { !synthetic *; }
+-keep,allowoptimization,allowaccessmodification class com.android.systemui.dagger.GlobalRootComponent$SysUIComponentImpl { !synthetic *; }
+-keep,allowoptimization,allowaccessmodification class com.android.systemui.dagger.Dagger** { !synthetic *; }
+-keep,allowoptimization,allowaccessmodification class com.android.systemui.tv.Dagger** { !synthetic *; }
+
+# Allows proguard to make private and protected methods and fields public as
+# part of optimization. This lets proguard inline trivial getter/setter methods.
+-allowaccessmodification
 
 # Removes runtime checks added through Kotlin to JVM code genereration to
 # avoid linear growth as more Kotlin code is converted / added to the codebase.
