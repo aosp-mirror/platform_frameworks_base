@@ -1033,7 +1033,10 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 if (!mExternallyEnabled) {
                     hideLocked();
                 }
-            } else if (mShowing) {
+            } else if (mShowing && !mKeyguardStateController.isKeyguardGoingAway()) {
+                // If we are going to sleep but the keyguard is showing (and will continue to be
+                // showing, not in the process of going away) then reset its state. Otherwise, let
+                // this fall through and explicitly re-lock the keyguard.
                 mPendingReset = true;
             } else if (
                     (offReason == WindowManagerPolicyConstants.OFF_BECAUSE_OF_TIMEOUT
