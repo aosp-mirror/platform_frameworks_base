@@ -13374,12 +13374,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         !intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false);
                                 final boolean fullUninstall = removed && !replacing;
                                 if (removed) {
-                                    if (killProcess) {
-                                        forceStopPackageLocked(ssp, UserHandle.getAppId(
-                                                intent.getIntExtra(Intent.EXTRA_UID, -1)),
-                                                false, true, true, false, fullUninstall, userId,
-                                                removed ? "pkg removed" : "pkg changed");
-                                    } else {
+                                    if (!killProcess) {
                                         // Kill any app zygotes always, since they can't fork new
                                         // processes with references to the old code
                                         forceStopAppZygoteLocked(ssp, UserHandle.getAppId(
