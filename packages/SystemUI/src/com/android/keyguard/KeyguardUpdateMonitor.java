@@ -830,7 +830,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
             lockedOutStateChanged |= !mFingerprintLockedOutPermanent;
             mFingerprintLockedOutPermanent = true;
-            requireStrongAuthIfAllLockedOut();
+            Log.d(TAG, "Fingerprint locked out - requiring strong auth");
+            mLockPatternUtils.requireStrongAuth(
+                    STRONG_AUTH_REQUIRED_AFTER_LOCKOUT, getCurrentUser());
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT
@@ -840,6 +842,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             if (isUdfpsEnrolled()) {
                 updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
             }
+            stopListeningForFace();
         }
 
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -1049,7 +1052,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
             lockedOutStateChanged = !mFaceLockedOutPermanent;
             mFaceLockedOutPermanent = true;
-            requireStrongAuthIfAllLockedOut();
         }
 
         if (isHwUnavailable && cameraPrivacyEnabled) {
@@ -1161,19 +1163,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             faceAuthenticated = bioFaceAuthenticated.mAuthenticated;
         }
         return faceAuthenticated;
-    }
-
-    private void requireStrongAuthIfAllLockedOut() {
-        final boolean faceLock =
-                (mFaceLockedOutPermanent || !shouldListenForFace()) && !getIsFaceAuthenticated();
-        final boolean fpLock =
-                mFingerprintLockedOutPermanent || !shouldListenForFingerprint(isUdfpsEnrolled());
-
-        if (faceLock && fpLock) {
-            Log.d(TAG, "All biometrics locked out - requiring strong auth");
-            mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
-                    getCurrentUser());
-        }
     }
 
     public boolean getUserCanSkipBouncer(int userId) {
@@ -2373,6 +2362,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT)
                         || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_TIMEOUT);
 
+        // TODO: always disallow when fp is already locked out?
+        final boolean fpLockedout = mFingerprintLockedOut || mFingerprintLockedOutPermanent;
+
         final boolean canBypass = mKeyguardBypassController != null
                 && mKeyguardBypassController.canBypass();
         // There's no reason to ask the HAL for authentication when the user can dismiss the
@@ -2407,7 +2399,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && !mKeyguardGoingAway && biometricEnabledForUser && !mLockIconPressed
                 && strongAuthAllowsScanning && mIsPrimaryUser
                 && (!mSecureCameraLaunched || mOccludingAppRequestingFace)
-                && !faceAuthenticated;
+                && !faceAuthenticated
+                && !fpLockedout;
 
         // Aggregate relevant fields for debug logging.
         if (DEBUG_FACE || DEBUG_SPEW) {
