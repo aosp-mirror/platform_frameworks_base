@@ -13682,6 +13682,7 @@ package android.telephony.ims {
     field public static final int PUBLISH_STATE_NOT_PUBLISHED = 2; // 0x2
     field public static final int PUBLISH_STATE_OK = 1; // 0x1
     field public static final int PUBLISH_STATE_OTHER_ERROR = 6; // 0x6
+    field public static final int PUBLISH_STATE_PUBLISHING = 7; // 0x7
     field public static final int PUBLISH_STATE_RCS_PROVISION_ERROR = 4; // 0x4
     field public static final int PUBLISH_STATE_REQUEST_TIMEOUT = 5; // 0x5
     field public static final int PUBLISH_STATE_VOICE_PROVISION_ERROR = 3; // 0x3
@@ -13944,6 +13945,7 @@ package android.telephony.ims.feature {
 package android.telephony.ims.stub {
 
   public interface CapabilityExchangeEventListener {
+    method public default void onPublishUpdated(int, @NonNull String, int, @NonNull String) throws android.telephony.ims.ImsException;
     method public void onRemoteCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.Set<java.lang.String>, @NonNull android.telephony.ims.stub.CapabilityExchangeEventListener.OptionsRequestCallback) throws android.telephony.ims.ImsException;
     method public void onRequestPublishCapabilities(int) throws android.telephony.ims.ImsException;
     method public void onUnpublish() throws android.telephony.ims.ImsException;
