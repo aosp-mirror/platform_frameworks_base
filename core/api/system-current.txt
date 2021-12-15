@@ -11729,11 +11729,18 @@ package android.telephony {
     method public int getCallDuration();
     method public int getCodecType();
     method public int getDownlinkCallQualityLevel();
+    method public long getMaxPlayoutDelayMillis();
     method public int getMaxRelativeJitter();
+    method public long getMinPlayoutDelayMillis();
+    method public int getNumDroppedRtpPackets();
+    method public int getNumNoDataFrames();
+    method public int getNumRtpDuplicatePackets();
     method public int getNumRtpPacketsNotReceived();
     method public int getNumRtpPacketsReceived();
     method public int getNumRtpPacketsTransmitted();
     method public int getNumRtpPacketsTransmittedLost();
+    method public int getNumRtpSidPacketsRx();
+    method public int getNumVoiceFrames();
     method public int getUplinkCallQualityLevel();
     method public boolean isIncomingSilenceDetectedAtCallSetup();
     method public boolean isOutgoingSilenceDetectedAtCallSetup();
@@ -11746,6 +11753,32 @@ package android.telephony {
     field public static final int CALL_QUALITY_NOT_AVAILABLE = 5; // 0x5
     field public static final int CALL_QUALITY_POOR = 3; // 0x3
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallQuality> CREATOR;
+  }
+
+  public static final class CallQuality.Builder {
+    ctor public CallQuality.Builder();
+    method @NonNull public android.telephony.CallQuality build();
+    method @NonNull public android.telephony.CallQuality.Builder setAverageRelativeJitter(int);
+    method @NonNull public android.telephony.CallQuality.Builder setAverageRoundTripTime(int);
+    method @NonNull public android.telephony.CallQuality.Builder setCallDuration(int);
+    method @NonNull public android.telephony.CallQuality.Builder setCodecType(int);
+    method @NonNull public android.telephony.CallQuality.Builder setDownlinkCallQualityLevel(int);
+    method @NonNull public android.telephony.CallQuality.Builder setIncomingSilenceDetectedAtCallSetup(boolean);
+    method @NonNull public android.telephony.CallQuality.Builder setMaxPlayoutDelayMillis(long);
+    method @NonNull public android.telephony.CallQuality.Builder setMaxRelativeJitter(int);
+    method @NonNull public android.telephony.CallQuality.Builder setMinPlayoutDelayMillis(long);
+    method @NonNull public android.telephony.CallQuality.Builder setNumDroppedRtpPackets(int);
+    method @NonNull public android.telephony.CallQuality.Builder setNumNoDataFrames(int);
+    method @NonNull public android.telephony.CallQuality.Builder setNumRtpDuplicatePackets(int);
+    method @NonNull public android.telephony.CallQuality.Builder setNumRtpPacketsNotReceived(int);
+    method @NonNull public android.telephony.CallQuality.Builder setNumRtpPacketsReceived(int);
+    method @NonNull public android.telephony.CallQuality.Builder setNumRtpPacketsTransmitted(int);
+    method @NonNull public android.telephony.CallQuality.Builder setNumRtpPacketsTransmittedLost(int);
+    method @NonNull public android.telephony.CallQuality.Builder setNumRtpSidPacketsRx(int);
+    method @NonNull public android.telephony.CallQuality.Builder setNumVoiceFrames(int);
+    method @NonNull public android.telephony.CallQuality.Builder setOutgoingSilenceDetectedAtCallSetup(boolean);
+    method @NonNull public android.telephony.CallQuality.Builder setRtpInactivityDetected(boolean);
+    method @NonNull public android.telephony.CallQuality.Builder setUplinkCallQualityLevel(int);
   }
 
   public class CarrierConfigManager {
