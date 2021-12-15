@@ -13476,6 +13476,7 @@ package android.content.pm {
   }
 
   public final class ShortcutInfo implements android.os.Parcelable {
+    method @NonNull public static android.content.pm.ShortcutInfo createFromGenericDocument(@NonNull android.content.Context, @NonNull android.app.appsearch.GenericDocument);
     method public int describeContents();
     method @Nullable public android.content.ComponentName getActivity();
     method @NonNull public java.util.List<java.lang.String> getCapabilityParameterValues(@NonNull String, @NonNull String);
