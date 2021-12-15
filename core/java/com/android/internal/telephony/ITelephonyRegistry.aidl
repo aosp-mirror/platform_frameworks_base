@@ -43,7 +43,8 @@ interface ITelephonyRegistry {
     void removeOnSubscriptionsChangedListener(String pkg,
             IOnSubscriptionsChangedListener callback);
 
-    void listenWithEventList(in int subId, String pkg, String featureId,
+    void listenWithEventList(in boolean renounceFineLocationAccess,
+            in boolean renounceCoarseLocationAccess, in int subId, String pkg, String featureId,
             IPhoneStateListener callback, in int[] events, boolean notifyNow);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void notifyCallStateForAllSubs(int state, String incomingNumber);

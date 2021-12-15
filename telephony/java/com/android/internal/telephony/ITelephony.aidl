@@ -900,6 +900,8 @@ interface ITelephony {
      * Perform a radio network scan and return the id of this scan.
      *
      * @param subId the id of the subscription.
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to
+     * receive fine location related information
      * @param request Defines all the configs for network scan.
      * @param messenger Callback messages will be sent using this messenger.
      * @param binder the binder object instantiated in TelephonyManager.
@@ -907,8 +909,9 @@ interface ITelephony {
      * @param callingFeatureId The feature in the package
      * @return An id for this scan.
      */
-    int requestNetworkScan(int subId, in NetworkScanRequest request, in Messenger messenger,
-            in IBinder binder, in String callingPackage, String callingFeatureId);
+    int requestNetworkScan(int subId, in boolean renounceFineLocationAccess,
+            in NetworkScanRequest request, in Messenger messenger, in IBinder binder,
+	    in String callingPackage, String callingFeatureId);
 
     /**
      * Stop an existing radio network scan.
@@ -1387,12 +1390,17 @@ interface ITelephony {
     /**
      * Get the service state on specified subscription
      * @param subId Subscription id
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to
+     * receive fine location related information
+     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
+     * receive coarse location related information
      * @param callingPackage The package making the call
      * @param callingFeatureId The feature in the package
      * @return Service state on specified subscription.
      */
-    ServiceState getServiceStateForSubscriber(int subId, String callingPackage,
-            String callingFeatureId);
+    ServiceState getServiceStateForSubscriber(int subId, boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess,
+            String callingPackage, String callingFeatureId);
 
     /**
      * Returns the URI for the per-account voicemail ringtone set in Phone settings.
