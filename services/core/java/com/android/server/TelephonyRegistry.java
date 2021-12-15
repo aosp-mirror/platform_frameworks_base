@@ -152,6 +152,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         int callerUid;
         int callerPid;
+        boolean renounceFineLocationAccess;
+        boolean renounceCoarseLocationAccess;
 
         Set<Integer> eventList;
 
@@ -995,14 +997,25 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void listenWithEventList(int subId, String callingPackage, String callingFeatureId,
-            IPhoneStateListener callback, int[] events, boolean notifyNow) {
+    public void listenWithEventList(boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess, int subId, String callingPackage,
+            String callingFeatureId, IPhoneStateListener callback,
+            int[] events, boolean notifyNow) {
         Set<Integer> eventList = Arrays.stream(events).boxed().collect(Collectors.toSet());
-        listen(callingPackage, callingFeatureId, callback, eventList, notifyNow, subId);
+        listen(renounceFineLocationAccess, renounceFineLocationAccess, callingPackage,
+                callingFeatureId, callback, eventList, notifyNow, subId);
     }
 
     private void listen(String callingPackage, @Nullable String callingFeatureId,
             IPhoneStateListener callback, Set<Integer> events, boolean notifyNow, int subId) {
+        listen(false, false, callingPackage,
+                callingFeatureId, callback, events, notifyNow, subId);
+    }
+
+    private void listen(boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess, String callingPackage,
+            @Nullable String callingFeatureId, IPhoneStateListener callback,
+            Set<Integer> events, boolean notifyNow, int subId) {
         int callerUserId = UserHandle.getCallingUserId();
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         String str = "listen: E pkg=" + pii(callingPackage) + " uid=" + Binder.getCallingUid()
@@ -1047,6 +1060,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             r.callback = callback;
             r.callingPackage = callingPackage;
             r.callingFeatureId = callingFeatureId;
+            r.renounceCoarseLocationAccess = renounceCoarseLocationAccess;
+            r.renounceFineLocationAccess = renounceFineLocationAccess;
             r.callerUid = Binder.getCallingUid();
             r.callerPid = Binder.getCallingPid();
             // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
@@ -3199,6 +3214,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
      * If you don't need app compat logic, use {@link #checkFineLocationAccess(Record)}.
      */
     private boolean checkFineLocationAccess(Record r, int minSdk) {
+        if (r.renounceFineLocationAccess) {
+            return false;
+        }
         LocationAccessPolicy.LocationPermissionQuery query =
                 new LocationAccessPolicy.LocationPermissionQuery.Builder()
                         .setCallingPackage(r.callingPackage)
@@ -3225,6 +3243,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
      * If you don't need app compat logic, use {@link #checkCoarseLocationAccess(Record)}.
      */
     private boolean checkCoarseLocationAccess(Record r, int minSdk) {
+        if (r.renounceCoarseLocationAccess) {
+            return false;
+        }
         LocationAccessPolicy.LocationPermissionQuery query =
                 new LocationAccessPolicy.LocationPermissionQuery.Builder()
                         .setCallingPackage(r.callingPackage)
