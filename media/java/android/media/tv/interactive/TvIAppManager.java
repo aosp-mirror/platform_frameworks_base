@@ -93,6 +93,7 @@ public final class TvIAppManager {
      * <p>Type: String
      *
      * @see #notifyAppLinkInfo(String, Bundle)
+     * @see #sendAppLinkCommand(String, Bundle)
      * @hide
      */
     public static final String KEY_PACKAGE_NAME = "package_name";
@@ -102,6 +103,7 @@ public final class TvIAppManager {
      * <p>Type: String
      *
      * @see #notifyAppLinkInfo(String, Bundle)
+     * @see #sendAppLinkCommand(String, Bundle)
      * @hide
      */
     public static final String KEY_CLASS_NAME = "class_name";
@@ -132,6 +134,33 @@ public final class TvIAppManager {
      * @hide
      */
     public static final String KEY_URI_PREFIX = "uri_prefix";
+
+    /**
+     * Key for command type in app link command.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @hide
+     */
+    public static final String KEY_COMMAND_TYPE = "command_type";
+
+    /**
+     * Key for service ID in app link command.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @hide
+     */
+    public static final String KEY_SERVICE_ID = "service_id";
+
+    /**
+     * Key for back URI in app link command.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @hide
+     */
+    public static final String KEY_BACK_URI = "back_uri";
 
     private final ITvIAppManager mService;
     private final int mUserId;
@@ -470,6 +499,18 @@ public final class TvIAppManager {
     public void notifyAppLinkInfo(String tvIAppServiceId, Bundle appLinkInfo) {
         try {
             mService.notifyAppLinkInfo(tvIAppServiceId, appLinkInfo, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sends app link command.
+     * @hide
+     */
+    public void sendAppLinkCommand(String tvIAppServiceId, Bundle command) {
+        try {
+            mService.sendAppLinkCommand(tvIAppServiceId, command, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

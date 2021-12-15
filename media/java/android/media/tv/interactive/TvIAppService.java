@@ -129,6 +129,11 @@ public abstract class TvIAppService extends Service {
             public void notifyAppLinkInfo(Bundle appLinkInfo) {
                 onAppLinkInfo(appLinkInfo);
             }
+
+            @Override
+            public void sendAppLinkCommand(Bundle command) {
+                onAppLinkCommand(command);
+            }
         };
         return tvIAppServiceBinder;
     }
@@ -146,6 +151,14 @@ public abstract class TvIAppService extends Service {
      * @hide
      */
     public void onAppLinkInfo(Bundle appLinkInfo) {
+        // TODO: make it abstract when unhide
+    }
+
+    /**
+     * Sends App link info.
+     * @hide
+     */
+    public void onAppLinkCommand(Bundle command) {
         // TODO: make it abstract when unhide
     }
 
