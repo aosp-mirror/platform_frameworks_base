@@ -507,6 +507,13 @@ final class VerificationParams extends HandlerParams {
                 requiredVerifierPackage, verificationTimeout,
                 verifierUserId, false,
                 REASON_PACKAGE_VERIFIER, "package verifier");
+
+        if (streaming) {
+            // For streaming installations, count verification timeout from the broadcast.
+            startVerificationTimeoutCountdown(verificationId, streaming, response,
+                    verificationTimeout);
+        }
+
         mPm.mContext.sendOrderedBroadcastAsUser(verification, verifierUser,
                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
                 /* appOp= */ AppOpsManager.OP_NONE,
@@ -514,12 +521,12 @@ final class VerificationParams extends HandlerParams {
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        final Message msg = mPm.mHandler
-                                .obtainMessage(CHECK_PENDING_VERIFICATION);
-                        msg.arg1 = verificationId;
-                        msg.arg2 = streaming ? 1 : 0;
-                        msg.obj = response;
-                        mPm.mHandler.sendMessageDelayed(msg, verificationTimeout);
+                        if (!streaming) {
+                            // For NON-streaming installations, count verification timeout from
+                            // the broadcast was processed by all receivers.
+                            startVerificationTimeoutCountdown(verificationId, streaming, response,
+                                    verificationTimeout);
+                        }
                     }
                 }, null, 0, null, null);
 
@@ -530,6 +537,15 @@ final class VerificationParams extends HandlerParams {
          * succeeds.
          */
         mWaitForVerificationToComplete = true;
+    }
+
+    private void startVerificationTimeoutCountdown(int verificationId, boolean streaming,
+            PackageVerificationResponse response, long verificationTimeout) {
+        final Message msg = mPm.mHandler.obtainMessage(CHECK_PENDING_VERIFICATION);
+        msg.arg1 = verificationId;
+        msg.arg2 = streaming ? 1 : 0;
+        msg.obj = response;
+        mPm.mHandler.sendMessageDelayed(msg, verificationTimeout);
     }
 
     /**
