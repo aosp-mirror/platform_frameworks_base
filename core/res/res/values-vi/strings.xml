@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Nhấn để xóa mẫu khuôn mặt, sau đó thêm lại khuôn mặt của bạn"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Thiết lập tính năng Mở khóa bằng khuôn mặt"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Mở khóa điện thoại bằng cách nhìn vào điện thoại"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Để dùng tính năng Mở khoá bằng khuôn mặt, hãy bật tuỳ chọn "<b>"Truy cập máy ảnh"</b>" trong phần Cài đặt &gt; Quyền riêng tư"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Thiết lập thêm những cách mở khóa khác"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Nhấn để thêm vân tay"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Mở khóa bằng vân tay"</string>

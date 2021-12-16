@@ -622,6 +622,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Dotaknite se, da izbrišete model obraza, in nato znova dodajte obraz."</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Nastavitev odklepanja z obrazom"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Odklenite telefon tako, da ga pogledate."</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Če želite uporabljati odklepanje z obrazom, v meniju »Nastavitve« &gt; »Zasebnost« vklopite možnost "<b>"Dostop do fotoaparata"</b>"."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Nastavite več načinov odklepanja"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Dotaknite se, da dodate prstni odtis."</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Odklepanje s prstnim odtisom"</string>

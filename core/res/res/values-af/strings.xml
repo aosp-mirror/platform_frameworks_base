@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tik om jou gesigmodel uit te vee en voeg jou gesig dan weer by"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Stel Gesigslot op"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ontsluit jou foon deur daarna te kyk"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Skakel "<b>"kameratoegang"</b>" in Instellings &gt; Privaatheid aan om Gesigslot te gebruik"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Stel meer maniere op om te ontsluit"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tik om \'n vingerafdruk by te voeg"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Vingerafdrukslot"</string>

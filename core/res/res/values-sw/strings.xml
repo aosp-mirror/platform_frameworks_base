@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Gusa ili ufute muundo wa uso wako, kisha uweke uso wako tena"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Weka mipangilio ya Kufungua kwa Uso"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Fungua simu yako kwa kuiangalia"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Ili utumie kipengele cha kufungua kwa uso, washa kipengele cha "<b>"ufikiaji wa Kamera"</b>" katika Mipangilio na Faragha"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Weka mipangilio ya mbinu zaidi za kufungua"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Gusa ili uweke alama ya kidole"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Kufungua kwa Alama ya Kidole"</string>

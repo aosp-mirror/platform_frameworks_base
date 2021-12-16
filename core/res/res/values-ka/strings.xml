@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"შეეხეთ თქვენი სახის მოდელის წასაშლელად, შემდეგ დაამატეთ სახე ხელახლა"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"სახით განბლოკვის პარამეტრების დაყენება"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"განბლოკეთ თქვენი ტელეფონი შეხედვით"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"იმისთვის, რომ სახით განბლოკვით ისარგებლოთ, ჩართეთ "<b>"კამერაზე წვდომა"</b>" პარამეტრებსა და კონფიდენციალურობაში"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"დააყენეთ განბლოკვის სხვა ხერხები"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"შეეხეთ თითის ანაბეჭდის დასამატებლად"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"თითის ანაბეჭდით განბლოკვა"</string>

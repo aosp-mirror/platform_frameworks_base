@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tippe, um dein Gesichtsmodell zu löschen, und füge es dann noch einmal hinzu"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Entsperrung per Gesichtserkennung einrichten"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Entsperre dein Smartphone, indem du es ansiehst"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Wenn du die Entsperrung per Gesichtserkennung verwenden möchtest, aktiviere in den Einstellungen unter „Datenschutz“ die Option "<b>"Kamerazugriff"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Weitere Möglichkeiten zum Entsperren einrichten"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tippe, um einen Fingerabdruck hinzuzufügen"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Entsperrung per Fingerabdruck"</string>

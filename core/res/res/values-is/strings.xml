@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ýttu til að eyða andlitslíkaninu og skráðu svo andlitið aftur"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Setja upp andlitskenni"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Taktu símann úr lás með því að horfa á hann"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Þú verður að kveikja á "<b>"aðgangi að myndavél"</b>" í „Stillingar &gt; persónuvernd“ til að nota andlitskenni"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Settu upp fleiri leiðir til að taka úr lás"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ýttu til að bæta við fingrafari"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingrafarskenni"</string>
