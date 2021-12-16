@@ -151,6 +151,7 @@ import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.NativeTombstoneManagerService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.people.PeopleService;
+import com.android.server.pm.ApexManager;
 import com.android.server.pm.CrossProfileAppsService;
 import com.android.server.pm.DataLoaderManagerService;
 import com.android.server.pm.DynamicCodeLoggingService;
@@ -220,6 +221,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
@@ -918,6 +920,13 @@ public final class SystemServer implements Dumpable {
             startBootstrapServices(t);
             startCoreServices(t);
             startOtherServices(t);
+            // Apex services must be the last category of services to start. No other service must
+            // be starting after this point. This is to prevent unnessary stability issues when
+            // these apexes are updated outside of OTA; and to avoid breaking dependencies from
+            // system into apexes.
+            // TODO(satayev): lock mSystemServiceManager.startService to stop accepting new services
+            // after this step
+            startApexServices(t);
         } catch (Throwable ex) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting system services", ex);
@@ -3049,6 +3058,27 @@ public final class SystemServer implements Dumpable {
         t.traceEnd();
 
         t.traceEnd(); // startOtherServices
+    }
+
+    /**
+     * Starts system services defined in apexes.
+     */
+    private void startApexServices(@NonNull TimingsTraceAndSlog t) {
+        t.traceBegin("startApexServices");
+        Map<String, String> services = ApexManager.getInstance().getApexSystemServices();
+        // TODO(satayev): filter out already started services
+        // TODO(satayev): introduce android:order for services coming the same apexes
+        for (String name : new TreeSet<>(services.keySet())) {
+            String jarPath = services.get(name);
+            t.traceBegin("starting " + name);
+            if (TextUtils.isEmpty(jarPath)) {
+                mSystemServiceManager.startService(name);
+            } else {
+                mSystemServiceManager.startServiceFromJar(name, jarPath);
+            }
+            t.traceEnd();
+        }
+        t.traceEnd(); // startApexServices
     }
 
     private boolean deviceHasConfigString(@NonNull Context context, @StringRes int resId) {
