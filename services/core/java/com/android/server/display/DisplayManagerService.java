@@ -678,7 +678,6 @@ public final class DisplayManagerService extends SystemService {
                         display.getDisplayInfoLocked().shouldConstrainMetricsForLauncher;
                 if (display.setDisplayInfoOverrideFromWindowManagerLocked(info)) {
                     handleLogicalDisplayChangedLocked(display);
-                    scheduleTraversalLocked(false);
                 }
             }
         }
