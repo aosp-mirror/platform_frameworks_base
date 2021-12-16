@@ -321,8 +321,13 @@ public class TelephonyManager {
     public static final int UNINITIALIZED_CARD_ID = -2;
 
     /**
-     * Default port index for the UICC Card
-     * @hide
+     * Default port index for a UICC.
+     *
+     * On physical SIM cards the only available port is 0.
+     * See {@link android.telephony.UiccPortInfo} for more information on ports.
+     *
+     * See {@link android.telephony.euicc.EuiccManager#isSimPortAvailable(int)} for information on
+     * how portIndex is used on eUICCs.
      */
     public static final int DEFAULT_PORT_INDEX = 0;
 

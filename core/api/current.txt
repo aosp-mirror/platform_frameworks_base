@@ -43446,6 +43446,7 @@ package android.telephony {
     field public static final int DATA_ENABLED_REASON_USER = 0; // 0x0
     field public static final int DATA_SUSPENDED = 3; // 0x3
     field public static final int DATA_UNKNOWN = -1; // 0xffffffff
+    field public static final int DEFAULT_PORT_INDEX = 0; // 0x0
     field public static final int ERI_FLASH = 2; // 0x2
     field public static final int ERI_OFF = 1; // 0x1
     field public static final int ERI_ON = 0; // 0x0
