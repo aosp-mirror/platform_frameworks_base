@@ -262,8 +262,6 @@ EGLConfig EglManager::loadA8Config(EGLDisplay display, EglManager::SwapBehavior 
                         0,
                         EGL_DEPTH_SIZE,
                         0,
-                        EGL_STENCIL_SIZE,
-                        STENCIL_BUFFER_SIZE,
                         EGL_SURFACE_TYPE,
                         EGL_WINDOW_BIT | eglSwapBehavior,
                         EGL_NONE};
