@@ -17,6 +17,19 @@
   ],
   "presubmit": [
     {
+      "file_patterns": [
+        "ApexManager\\.java",
+        "SystemServer\\.java",
+        "services/tests/apexsystemservices/.*"
+      ],
+      "name": "ApexSystemServicesTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
       "name": "FrameworksUiServicesTests",
       "options": [
         {
