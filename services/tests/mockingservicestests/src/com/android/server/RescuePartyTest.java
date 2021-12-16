@@ -37,6 +37,8 @@ import static org.mockito.Mockito.times;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.os.Bundle;
 import android.os.RecoverySystem;
@@ -83,6 +85,8 @@ public class RescuePartyTest {
     private static final String CALLING_PACKAGE1 = "com.package.name1";
     private static final String CALLING_PACKAGE2 = "com.package.name2";
     private static final String CALLING_PACKAGE3 = "com.package.name3";
+    private static final String PERSISTENT_PACKAGE = "com.persistent.package";
+    private static final String NON_PERSISTENT_PACKAGE = "com.nonpersistent.package";
     private static final String NAMESPACE1 = "namespace1";
     private static final String NAMESPACE2 = "namespace2";
     private static final String NAMESPACE3 = "namespace3";
@@ -103,6 +107,8 @@ public class RescuePartyTest {
     private PackageWatchdog mMockPackageWatchdog;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private ContentResolver mMockContentResolver;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private PackageManager mPackageManager;
 
     @Captor
     private ArgumentCaptor<RemoteCallback> mMonitorCallbackCaptor;
@@ -129,6 +135,17 @@ public class RescuePartyTest {
         mNamespacesWiped = new HashSet<>();
 
         when(mMockContext.getContentResolver()).thenReturn(mMockContentResolver);
+        when(mMockContext.getPackageManager()).thenReturn(mPackageManager);
+        ApplicationInfo persistentApplicationInfo = new ApplicationInfo();
+        persistentApplicationInfo.flags |=
+                ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_PERSISTENT;
+
+        // If the package name is PERSISTENT_PACKAGE, then set the flags to be persistent and
+        // system. Don't set any flags otherwise.
+        when(mPackageManager.getApplicationInfo(eq(PERSISTENT_PACKAGE),
+                anyInt())).thenReturn(persistentApplicationInfo);
+        when(mPackageManager.getApplicationInfo(eq(NON_PERSISTENT_PACKAGE),
+                anyInt())).thenReturn(new ApplicationInfo());
         // Reset observer instance to get new mock context on every run
         RescuePartyObserver.reset();
 
@@ -241,26 +258,50 @@ public class RescuePartyTest {
 
     @Test
     public void testPersistentAppCrashDetectionWithExecutionForAllRescueLevels() {
-        notePersistentAppCrash(1);
+        noteAppCrash(1, true);
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, /*resetNamespaces=*/ null,
                 /*configResetVerifiedTimesMap=*/ null);
 
-        notePersistentAppCrash(2);
+        noteAppCrash(2, true);
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_CHANGES, /*resetNamespaces=*/ null,
                 /*configResetVerifiedTimesMap=*/ null);
 
-        notePersistentAppCrash(3);
+        noteAppCrash(3, true);
 
         verifySettingsResets(Settings.RESET_MODE_TRUSTED_DEFAULTS, /*resetNamespaces=*/ null,
                 /*configResetVerifiedTimesMap=*/ null);
 
-        notePersistentAppCrash(4);
+        noteAppCrash(4, true);
         assertTrue(RescueParty.isRebootPropertySet());
 
-        notePersistentAppCrash(5);
+        noteAppCrash(5, true);
         assertTrue(RescueParty.isFactoryResetPropertySet());
+    }
+
+    @Test
+    public void testNonPersistentAppOnlyPerformsFlagResets() {
+        noteAppCrash(1, false);
+
+        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, /*resetNamespaces=*/ null,
+                /*configResetVerifiedTimesMap=*/ null);
+
+        noteAppCrash(2, false);
+
+        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_CHANGES, /*resetNamespaces=*/ null,
+                /*configResetVerifiedTimesMap=*/ null);
+
+        noteAppCrash(3, false);
+
+        verifySettingsResets(Settings.RESET_MODE_TRUSTED_DEFAULTS, /*resetNamespaces=*/ null,
+                /*configResetVerifiedTimesMap=*/ null);
+
+        noteAppCrash(4, false);
+        assertFalse(RescueParty.isRebootPropertySet());
+
+        noteAppCrash(5, false);
+        assertFalse(RescueParty.isFactoryResetPropertySet());
     }
 
     @Test
@@ -311,11 +352,11 @@ public class RescuePartyTest {
 
         observer.execute(new VersionedPackage(
                 CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 4);
-        assertTrue(RescueParty.isRebootPropertySet());
+        assertFalse(RescueParty.isRebootPropertySet());
 
         observer.execute(new VersionedPackage(
                 CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 5);
-        assertTrue(RescueParty.isFactoryResetPropertySet());
+        assertFalse(RescueParty.isFactoryResetPropertySet());
     }
 
     @Test
@@ -376,11 +417,11 @@ public class RescuePartyTest {
 
         observer.execute(new VersionedPackage(
                 CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 4);
-        assertTrue(RescueParty.isRebootPropertySet());
+        assertFalse(RescueParty.isRebootPropertySet());
 
         observer.execute(new VersionedPackage(
                 CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 5);
-        assertTrue(RescueParty.isFactoryResetPropertySet());
+        assertFalse(RescueParty.isFactoryResetPropertySet());
     }
 
     @Test
@@ -627,9 +668,10 @@ public class RescuePartyTest {
         RescuePartyObserver.getInstance(mMockContext).executeBootLoopMitigation(mitigationCount);
     }
 
-    private void notePersistentAppCrash(int mitigationCount) {
+    private void noteAppCrash(int mitigationCount, boolean isPersistent) {
+        String packageName = isPersistent ? PERSISTENT_PACKAGE : NON_PERSISTENT_PACKAGE;
         RescuePartyObserver.getInstance(mMockContext).execute(new VersionedPackage(
-                "com.package.name", 1), PackageWatchdog.FAILURE_REASON_APP_CRASH, mitigationCount);
+                packageName, 1), PackageWatchdog.FAILURE_REASON_APP_CRASH, mitigationCount);
     }
 
     private Bundle getConfigAccessBundle(String callingPackage, String namespace) {

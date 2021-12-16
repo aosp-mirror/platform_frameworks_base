@@ -19,6 +19,7 @@ android_library {
         "com.google.android.material_material",
         "SettingsLibSettingsTransition",
         "SettingsLibUtils",
+        "SettingsLibSettingsTheme",
     ],
     sdk_version: "system_current",
     min_sdk_version: "29",

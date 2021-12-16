@@ -221,6 +221,18 @@ class OngoingCallControllerTest : SysuiTestCase() {
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
     }
 
+    /** Regression test for b/201097913. */
+    @Test
+    fun onEntryCleanUp_callNotifAddedThenRemoved_listenerNotified() {
+        val ongoingCallNotifEntry = createOngoingCallNotifEntry()
+        notifCollectionListener.onEntryAdded(ongoingCallNotifEntry)
+        reset(mockOngoingCallListener)
+
+        notifCollectionListener.onEntryCleanUp(ongoingCallNotifEntry)
+
+        verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
+    }
+
     /** Regression test for b/188491504. */
     @Test
     fun onEntryRemoved_removedNotifHasSameKeyAsAddedNotif_listenerNotified() {

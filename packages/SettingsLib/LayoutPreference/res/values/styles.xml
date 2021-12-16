@@ -24,14 +24,13 @@
     </style>
 
     <style name="TextAppearance.EntityHeaderTitle"
-           parent="@android:style/TextAppearance.Material.Subhead">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+           parent="@android:style/TextAppearance.DeviceDefault.WindowTitle">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">20sp</item>
     </style>
 
     <style name="TextAppearance.EntityHeaderSummary"
-           parent="@*android:style/TextAppearance.DeviceDefault.Body1">
+           parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:textAlignment">viewStart</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:singleLine">true</item>

@@ -115,7 +115,7 @@ public abstract class RecognitionService extends Service {
             @NonNull AttributionSource attributionSource) {
         try {
             if (mCurrentCallback == null) {
-                boolean preflightPermissionCheckPassed = checkPermissionForPreflight(
+                boolean preflightPermissionCheckPassed = checkPermissionForPreflightNotHardDenied(
                         attributionSource);
                 if (preflightPermissionCheckPassed) {
                     if (DBG) {
@@ -470,10 +470,11 @@ public abstract class RecognitionService extends Service {
         return mStartedDataDelivery;
     }
 
-    private boolean checkPermissionForPreflight(AttributionSource attributionSource) {
-        return PermissionChecker.checkPermissionForPreflight(RecognitionService.this,
-                Manifest.permission.RECORD_AUDIO, attributionSource)
-                == PermissionChecker.PERMISSION_GRANTED;
+    private boolean checkPermissionForPreflightNotHardDenied(AttributionSource attributionSource) {
+        int result = PermissionChecker.checkPermissionForPreflight(RecognitionService.this,
+                Manifest.permission.RECORD_AUDIO, attributionSource);
+        return result == PermissionChecker.PERMISSION_GRANTED
+                || result == PermissionChecker.PERMISSION_SOFT_DENIED;
     }
 
     void finishDataDelivery() {

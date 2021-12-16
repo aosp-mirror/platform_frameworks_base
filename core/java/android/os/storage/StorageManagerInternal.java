@@ -18,6 +18,7 @@ package android.os.storage;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.os.IVold;
 
 import java.util.List;
@@ -135,4 +136,19 @@ public abstract class StorageManagerInternal {
      * {@link VolumeInfo#isPrimary()}
      */
     public abstract List<String> getPrimaryVolumeIds();
+
+    /**
+     * Tells StorageManager that CE storage for this user has been prepared.
+     *
+     * @param userId userId for which CE storage has been prepared
+     */
+    public abstract void markCeStoragePrepared(@UserIdInt int userId);
+
+    /**
+     * Returns true when CE storage for this user has been prepared.
+     *
+     * When the user key is unlocked and CE storage has been prepared,
+     * it's ok to access and modify CE directories on volumes for this user.
+     */
+    public abstract boolean isCeStoragePrepared(@UserIdInt int userId);
 }

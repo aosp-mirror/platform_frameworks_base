@@ -1884,6 +1884,14 @@ public class Notification implements Parcelable
              * clicks. To launch an activity in those cases, provide a {@link PendingIntent} for the
              * activity itself.
              *
+             * <p>How an Action is displayed, including whether the {@code icon}, {@code text}, or
+             * both are displayed or required, depends on where and how the action is used, and the
+             * {@link Style} applied to the Notification.
+             *
+             * <p>When the {@code title} is a {@link android.text.Spanned}, any colors set by a
+             * {@link ForegroundColorSpan} or {@link TextAppearanceSpan} may be removed or displayed
+             * with an altered in luminance to ensure proper contrast within the Notification.
+             *
              * @param icon icon to show for this action
              * @param title the title of the action
              * @param intent the {@link PendingIntent} to fire when users trigger this action
@@ -5387,8 +5395,8 @@ public class Notification implements Parcelable
             contentView.setInt(R.id.expand_button, "setDefaultPillColor", pillColor);
             // Use different highlighted colors for conversations' unread count
             if (p.mHighlightExpander) {
-                pillColor = Colors.flattenAlpha(getPrimaryAccentColor(p), bgColor);
-                textColor = Colors.flattenAlpha(bgColor, pillColor);
+                pillColor = Colors.flattenAlpha(getColors(p).getTertiaryAccentColor(), bgColor);
+                textColor = Colors.flattenAlpha(getColors(p).getOnAccentTextColor(), pillColor);
             }
             contentView.setInt(R.id.expand_button, "setHighlightTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setHighlightPillColor", pillColor);
@@ -6121,21 +6129,22 @@ public class Notification implements Parcelable
             if (emphasizedMode) {
                 // change the background bgColor
                 CharSequence title = action.title;
-                ColorStateList[] outResultColor = new ColorStateList[1];
                 int buttonFillColor = getColors(p).getSecondaryAccentColor();
                 if (isLegacy()) {
                     title = ContrastColorUtil.clearColorSpans(title);
                 } else {
-                    int notifBackgroundColor = getColors(p).getBackgroundColor();
-                    title = ensureColorSpanContrast(title, notifBackgroundColor, outResultColor);
+                    // Check for a full-length span color to use as the button fill color.
+                    Integer fullLengthColor = getFullLengthSpanColor(title);
+                    if (fullLengthColor != null) {
+                        // Ensure the custom button fill has 1.3:1 contrast w/ notification bg.
+                        int notifBackgroundColor = getColors(p).getBackgroundColor();
+                        buttonFillColor = ensureButtonFillContrast(
+                                fullLengthColor, notifBackgroundColor);
+                    }
+                    // Remove full-length color spans and ensure text contrast with the button fill.
+                    title = ensureColorSpanContrast(title, buttonFillColor);
                 }
                 button.setTextViewText(R.id.action0, processTextSpans(title));
-                boolean hasColorOverride = outResultColor[0] != null;
-                if (hasColorOverride) {
-                    // There's a span spanning the full text, let's take it and use it as the
-                    // background color
-                    buttonFillColor = outResultColor[0].getDefaultColor();
-                }
                 final int textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
                         buttonFillColor, mInNightMode);
                 button.setTextColor(R.id.action0, textColor);
@@ -6168,17 +6177,58 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Ensures contrast on color spans against a background color. also returns the color of the
-         * text if a span was found that spans over the whole text.
+         * Extract the color from a full-length span from the text.
+         *
+         * @param charSequence the charSequence containing spans
+         * @return the raw color of the text's last full-length span containing a color, or null if
+         * no full-length span sets the text color.
+         * @hide
+         */
+        @VisibleForTesting
+        @Nullable
+        public static Integer getFullLengthSpanColor(CharSequence charSequence) {
+            // NOTE: this method preserves the functionality that for a CharSequence with multiple
+            // full-length spans, the color of the last one is used.
+            Integer result = null;
+            if (charSequence instanceof Spanned) {
+                Spanned ss = (Spanned) charSequence;
+                Object[] spans = ss.getSpans(0, ss.length(), Object.class);
+                // First read through all full-length spans to get the button fill color, which will
+                //  be used as the background color for ensuring contrast of non-full-length spans.
+                for (Object span : spans) {
+                    int spanStart = ss.getSpanStart(span);
+                    int spanEnd = ss.getSpanEnd(span);
+                    boolean fullLength = (spanEnd - spanStart) == charSequence.length();
+                    if (!fullLength) {
+                        continue;
+                    }
+                    if (span instanceof TextAppearanceSpan) {
+                        TextAppearanceSpan originalSpan = (TextAppearanceSpan) span;
+                        ColorStateList textColor = originalSpan.getTextColor();
+                        if (textColor != null) {
+                            result = textColor.getDefaultColor();
+                        }
+                    } else if (span instanceof ForegroundColorSpan) {
+                        ForegroundColorSpan originalSpan = (ForegroundColorSpan) span;
+                        result = originalSpan.getForegroundColor();
+                    }
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Ensures contrast on color spans against a background color.
+         * Note that any full-length color spans will be removed instead of being contrasted.
          *
          * @param charSequence the charSequence on which the spans are
          * @param background the background color to ensure the contrast against
-         * @param outResultColor an array in which a color will be returned as the first element if
-         *                    there exists a full length color span.
          * @return the contrasted charSequence
+         * @hide
          */
-        private static CharSequence ensureColorSpanContrast(CharSequence charSequence,
-                int background, ColorStateList[] outResultColor) {
+        @VisibleForTesting
+        public static CharSequence ensureColorSpanContrast(CharSequence charSequence,
+                int background) {
             if (charSequence instanceof Spanned) {
                 Spanned ss = (Spanned) charSequence;
                 Object[] spans = ss.getSpans(0, ss.length(), Object.class);
@@ -6195,19 +6245,19 @@ public class Notification implements Parcelable
                         TextAppearanceSpan originalSpan = (TextAppearanceSpan) resultSpan;
                         ColorStateList textColor = originalSpan.getTextColor();
                         if (textColor != null) {
-                            int[] colors = textColor.getColors();
-                            int[] newColors = new int[colors.length];
-                            for (int i = 0; i < newColors.length; i++) {
-                                boolean isBgDark = isColorDark(background);
-                                newColors[i] = ContrastColorUtil.ensureLargeTextContrast(
-                                        colors[i], background, isBgDark);
-                            }
-                            textColor = new ColorStateList(textColor.getStates().clone(),
-                                    newColors);
                             if (fullLength) {
-                                outResultColor[0] = textColor;
                                 // Let's drop the color from the span
                                 textColor = null;
+                            } else {
+                                int[] colors = textColor.getColors();
+                                int[] newColors = new int[colors.length];
+                                for (int i = 0; i < newColors.length; i++) {
+                                    boolean isBgDark = isColorDark(background);
+                                    newColors[i] = ContrastColorUtil.ensureLargeTextContrast(
+                                            colors[i], background, isBgDark);
+                                }
+                                textColor = new ColorStateList(textColor.getStates().clone(),
+                                        newColors);
                             }
                             resultSpan = new TextAppearanceSpan(
                                     originalSpan.getFamily(),
@@ -6217,15 +6267,14 @@ public class Notification implements Parcelable
                                     originalSpan.getLinkTextColor());
                         }
                     } else if (resultSpan instanceof ForegroundColorSpan) {
-                        ForegroundColorSpan originalSpan = (ForegroundColorSpan) resultSpan;
-                        int foregroundColor = originalSpan.getForegroundColor();
-                        boolean isBgDark = isColorDark(background);
-                        foregroundColor = ContrastColorUtil.ensureLargeTextContrast(
-                                foregroundColor, background, isBgDark);
                         if (fullLength) {
-                            outResultColor[0] = ColorStateList.valueOf(foregroundColor);
                             resultSpan = null;
                         } else {
+                            ForegroundColorSpan originalSpan = (ForegroundColorSpan) resultSpan;
+                            int foregroundColor = originalSpan.getForegroundColor();
+                            boolean isBgDark = isColorDark(background);
+                            foregroundColor = ContrastColorUtil.ensureLargeTextContrast(
+                                    foregroundColor, background, isBgDark);
                             resultSpan = new ForegroundColorSpan(foregroundColor);
                         }
                     } else {
@@ -6247,11 +6296,27 @@ public class Notification implements Parcelable
          *
          * @param color the color to check
          * @return true if the color has higher contrast with white than black
+         * @hide
          */
-        private static boolean isColorDark(int color) {
+        public static boolean isColorDark(int color) {
             // as per ContrastColorUtil.shouldUseDark, this uses the color contrast midpoint.
             return ContrastColorUtil.calculateLuminance(color) <= 0.17912878474;
         }
+
+        /**
+         * Finds a button fill color with sufficient contrast over bg (1.3:1) that has the same hue
+         * as the original color, but is lightened or darkened depending on whether the background
+         * is dark or light.
+         *
+         * @hide
+         */
+        @VisibleForTesting
+        public static int ensureButtonFillContrast(int color, int bg) {
+            return isColorDark(bg)
+                    ? ContrastColorUtil.findContrastColorAgainstDark(color, bg, true, 1.3)
+                    : ContrastColorUtil.findContrastColor(color, bg, true, 1.3);
+        }
+
 
         /**
          * @return Whether we are currently building a notification from a legacy (an app that
@@ -6441,25 +6506,34 @@ public class Notification implements Parcelable
 
             if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N
                     && !styleDisplaysCustomViewInline()) {
-                if (mN.contentView == null) {
-                    mN.contentView = createContentView();
+                RemoteViews newContentView = mN.contentView;
+                RemoteViews newBigContentView = mN.bigContentView;
+                RemoteViews newHeadsUpContentView = mN.headsUpContentView;
+                if (newContentView == null) {
+                    newContentView = createContentView();
                     mN.extras.putInt(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT,
-                            mN.contentView.getSequenceNumber());
+                            newContentView.getSequenceNumber());
                 }
-                if (mN.bigContentView == null) {
-                    mN.bigContentView = createBigContentView();
-                    if (mN.bigContentView != null) {
+                if (newBigContentView == null) {
+                    newBigContentView = createBigContentView();
+                    if (newBigContentView != null) {
                         mN.extras.putInt(EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT,
-                                mN.bigContentView.getSequenceNumber());
+                                newBigContentView.getSequenceNumber());
                     }
                 }
-                if (mN.headsUpContentView == null) {
-                    mN.headsUpContentView = createHeadsUpContentView();
-                    if (mN.headsUpContentView != null) {
+                if (newHeadsUpContentView == null) {
+                    newHeadsUpContentView = createHeadsUpContentView();
+                    if (newHeadsUpContentView != null) {
                         mN.extras.putInt(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT,
-                                mN.headsUpContentView.getSequenceNumber());
+                                newHeadsUpContentView.getSequenceNumber());
                     }
                 }
+                // Don't set any of the content views until after they have all been generated,
+                //  to avoid the generated .contentView triggering the logic which skips generating
+                //  the .bigContentView.
+                mN.contentView = newContentView;
+                mN.bigContentView = newBigContentView;
+                mN.headsUpContentView = newHeadsUpContentView;
             }
 
             if ((mN.defaults & DEFAULT_LIGHTS) != 0) {
@@ -12305,6 +12379,8 @@ public class Notification implements Parcelable
         private int mSecondaryTextColor = COLOR_INVALID;
         private int mPrimaryAccentColor = COLOR_INVALID;
         private int mSecondaryAccentColor = COLOR_INVALID;
+        private int mTertiaryAccentColor = COLOR_INVALID;
+        private int mOnAccentTextColor = COLOR_INVALID;
         private int mErrorColor = COLOR_INVALID;
         private int mContrastColor = COLOR_INVALID;
         private int mRippleAlpha = 0x33;
@@ -12362,7 +12438,7 @@ public class Notification implements Parcelable
 
             if (isColorized) {
                 if (rawColor == COLOR_DEFAULT) {
-                    int[] attrs = {R.attr.colorAccentTertiary};
+                    int[] attrs = {R.attr.colorAccentSecondary};
                     try (TypedArray ta = obtainDayNightAttributes(ctx, attrs)) {
                         mBackgroundColor = getColor(ta, 0, Color.WHITE);
                     }
@@ -12379,6 +12455,8 @@ public class Notification implements Parcelable
                 mContrastColor = mPrimaryTextColor;
                 mPrimaryAccentColor = mPrimaryTextColor;
                 mSecondaryAccentColor = mSecondaryTextColor;
+                mTertiaryAccentColor = flattenAlpha(mPrimaryTextColor, mBackgroundColor);
+                mOnAccentTextColor = mBackgroundColor;
                 mErrorColor = mPrimaryTextColor;
                 mRippleAlpha = 0x33;
             } else {
@@ -12389,6 +12467,8 @@ public class Notification implements Parcelable
                         R.attr.textColorSecondary,
                         R.attr.colorAccent,
                         R.attr.colorAccentSecondary,
+                        R.attr.colorAccentTertiary,
+                        R.attr.textColorOnAccent,
                         R.attr.colorError,
                         R.attr.colorControlHighlight
                 };
@@ -12399,8 +12479,10 @@ public class Notification implements Parcelable
                     mSecondaryTextColor = getColor(ta, 3, COLOR_INVALID);
                     mPrimaryAccentColor = getColor(ta, 4, COLOR_INVALID);
                     mSecondaryAccentColor = getColor(ta, 5, COLOR_INVALID);
-                    mErrorColor = getColor(ta, 6, COLOR_INVALID);
-                    mRippleAlpha = Color.alpha(getColor(ta, 7, 0x33ffffff));
+                    mTertiaryAccentColor = getColor(ta, 6, COLOR_INVALID);
+                    mOnAccentTextColor = getColor(ta, 7, COLOR_INVALID);
+                    mErrorColor = getColor(ta, 8, COLOR_INVALID);
+                    mRippleAlpha = Color.alpha(getColor(ta, 9, 0x33ffffff));
                 }
                 mContrastColor = calculateContrastColor(ctx, rawColor, mPrimaryAccentColor,
                         mBackgroundColor, nightMode);
@@ -12419,6 +12501,14 @@ public class Notification implements Parcelable
                 }
                 if (mSecondaryAccentColor == COLOR_INVALID) {
                     mSecondaryAccentColor = mContrastColor;
+                }
+                if (mTertiaryAccentColor == COLOR_INVALID) {
+                    mTertiaryAccentColor = mContrastColor;
+                }
+                if (mOnAccentTextColor == COLOR_INVALID) {
+                    mOnAccentTextColor = ColorUtils.setAlphaComponent(
+                            ContrastColorUtil.resolvePrimaryColor(
+                                    ctx, mTertiaryAccentColor, nightMode), 0xFF);
                 }
                 if (mErrorColor == COLOR_INVALID) {
                     mErrorColor = mPrimaryTextColor;
@@ -12483,6 +12573,16 @@ public class Notification implements Parcelable
         /** @return the theme's secondary accent color for colored UI elements. */
         public @ColorInt int getSecondaryAccentColor() {
             return mSecondaryAccentColor;
+        }
+
+        /** @return the theme's tertiary accent color for colored UI elements. */
+        public @ColorInt int getTertiaryAccentColor() {
+            return mTertiaryAccentColor;
+        }
+
+        /** @return the theme's text color to be used on the tertiary accent color. */
+        public @ColorInt int getOnAccentTextColor() {
+            return mOnAccentTextColor;
         }
 
         /**

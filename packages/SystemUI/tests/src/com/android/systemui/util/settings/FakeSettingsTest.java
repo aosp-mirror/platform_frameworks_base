@@ -25,6 +25,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.database.ContentObserver;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 
@@ -89,8 +90,30 @@ public class FakeSettingsTest extends SysuiTestCase {
     }
 
     @Test
+    public void testRegisterContentObserverAllUsers() {
+        mFakeSettings.registerContentObserverForUser(
+                mFakeSettings.getUriFor("cat"), false, mContentObserver, UserHandle.USER_ALL);
+
+        mFakeSettings.putString("cat", "hat");
+
+        verify(mContentObserver).dispatchChange(anyBoolean(), any(Collection.class), anyInt());
+    }
+
+    @Test
     public void testUnregisterContentObserver() {
         mFakeSettings.registerContentObserver("cat", mContentObserver);
+        mFakeSettings.unregisterContentObserver(mContentObserver);
+
+        mFakeSettings.putString("cat", "hat");
+
+        verify(mContentObserver, never()).dispatchChange(
+                anyBoolean(), any(Collection.class), anyInt());
+    }
+
+    @Test
+    public void testUnregisterContentObserverAllUsers() {
+        mFakeSettings.registerContentObserverForUser(
+                mFakeSettings.getUriFor("cat"), false, mContentObserver, UserHandle.USER_ALL);
         mFakeSettings.unregisterContentObserver(mContentObserver);
 
         mFakeSettings.putString("cat", "hat");

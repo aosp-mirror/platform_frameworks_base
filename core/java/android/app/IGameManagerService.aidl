@@ -23,4 +23,5 @@ interface IGameManagerService {
     int getGameMode(String packageName, int userId);
     void setGameMode(String packageName, int gameMode, int userId);
     int[] getAvailableGameModes(String packageName);
+    boolean getAngleEnabled(String packageName, int userId);
 }

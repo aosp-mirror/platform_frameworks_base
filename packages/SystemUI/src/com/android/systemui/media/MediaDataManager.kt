@@ -76,12 +76,13 @@ private val ART_URIS = arrayOf(
 
 private const val TAG = "MediaDataManager"
 private const val DEBUG = true
+private const val EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY = "dismiss_intent"
 
 private val LOADING = MediaData(-1, false, 0, null, null, null, null, null,
         emptyList(), emptyList(), "INVALID", null, null, null, true, null)
 @VisibleForTesting
 internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData("INVALID", false, false,
-    "INVALID", null, emptyList(), 0)
+    "INVALID", null, emptyList(), null, 0)
 
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
     if (!sbn.notification.hasMediaSession()) {
@@ -212,8 +213,8 @@ class MediaDataManager(
         mediaDataCombineLatest.addListener(mediaDataFilter)
 
         // Set up links back into the pipeline for listeners that need to send events upstream.
-        mediaTimeoutListener.timeoutCallback = { token: String, timedOut: Boolean ->
-            setTimedOut(token, timedOut) }
+        mediaTimeoutListener.timeoutCallback = { key: String, timedOut: Boolean ->
+            setTimedOut(key, timedOut) }
         mediaResumeListener.setManager(this)
         mediaDataFilter.mediaDataManager = this
 
@@ -414,14 +415,18 @@ class MediaDataManager(
      * This will make the player not active anymore, hiding it from QQS and Keyguard.
      * @see MediaData.active
      */
-    internal fun setTimedOut(token: String, timedOut: Boolean, forceUpdate: Boolean = false) {
-        mediaEntries[token]?.let {
+    internal fun setTimedOut(key: String, timedOut: Boolean, forceUpdate: Boolean = false) {
+        mediaEntries[key]?.let {
             if (it.active == !timedOut && !forceUpdate) {
+                if (it.resumption) {
+                    if (DEBUG) Log.d(TAG, "timing out resume player $key")
+                    dismissMediaData(key, 0L /* delay */)
+                }
                 return
             }
             it.active = !timedOut
-            if (DEBUG) Log.d(TAG, "Updating $token timedOut: $timedOut")
-            onMediaDataLoaded(token, token, it)
+            if (DEBUG) Log.d(TAG, "Updating $key timedOut: $timedOut")
+            onMediaDataLoaded(key, key, it)
         }
     }
 
@@ -879,12 +884,22 @@ class MediaDataManager(
         target: SmartspaceTarget,
         isActive: Boolean
     ): SmartspaceMediaData {
+        var dismissIntent: Intent? = null
+        if (target.baseAction != null && target.baseAction.extras != null) {
+            dismissIntent = target
+                .baseAction
+                .extras
+                .getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY) as Intent
+        }
         packageName(target)?.let {
             return SmartspaceMediaData(target.smartspaceTargetId, isActive, true, it,
-                target.baseAction, target.iconGrid, 0)
+                target.baseAction, target.iconGrid,
+                dismissIntent, 0)
         }
         return EMPTY_SMARTSPACE_MEDIA_DATA
-            .copy(targetId = target.smartspaceTargetId, isActive = isActive)
+            .copy(targetId = target.smartspaceTargetId,
+                isActive = isActive,
+                dismissIntent = dismissIntent)
     }
 
     private fun packageName(target: SmartspaceTarget): String? {

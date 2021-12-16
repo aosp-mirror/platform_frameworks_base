@@ -125,6 +125,7 @@ import android.media.tv.TvInputManager;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.net.ConnectivityFrameworkInitializer;
+import android.net.ConnectivityFrameworkInitializerTiramisu;
 import android.net.EthernetManager;
 import android.net.IEthernetManager;
 import android.net.IIpSecService;
@@ -140,8 +141,6 @@ import android.net.TetheringManager;
 import android.net.VpnManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
-import android.net.nsd.INsdManager;
-import android.net.nsd.NsdManager;
 import android.net.vcn.IVcnManagementService;
 import android.net.vcn.VcnManager;
 import android.net.wifi.WifiFrameworkInitializer;
@@ -564,15 +563,6 @@ public final class SystemServiceRegistry {
                                     com.android.internal.R.style.Theme_DeviceDefault_Dialog,
                                     com.android.internal.R.style.Theme_DeviceDefault_Light_Dialog)),
                     ctx.mMainThread.getHandler());
-            }});
-
-        registerService(Context.NSD_SERVICE, NsdManager.class,
-                new CachedServiceFetcher<NsdManager>() {
-            @Override
-            public NsdManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.NSD_SERVICE);
-                INsdManager service = INsdManager.Stub.asInterface(b);
-                return new NsdManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.PEOPLE_SERVICE, PeopleManager.class,
@@ -1486,6 +1476,7 @@ public final class SystemServiceRegistry {
             MediaFrameworkInitializer.registerServiceWrappers();
             RoleFrameworkInitializer.registerServiceWrappers();
             SchedulingFrameworkInitializer.registerServiceWrappers();
+            ConnectivityFrameworkInitializerTiramisu.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...

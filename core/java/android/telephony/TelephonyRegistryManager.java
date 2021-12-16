@@ -247,8 +247,8 @@ public class TelephonyRegistryManager {
             } else if (listener.mSubId != null) {
                 subId = listener.mSubId;
             }
-            sRegistry.listenWithEventList(
-                    subId, pkg, featureId, listener.callback, eventsList, notifyNow);
+            sRegistry.listenWithEventList(false, false, subId, pkg, featureId,
+                    listener.callback, eventsList, notifyNow);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -263,11 +263,13 @@ public class TelephonyRegistryManager {
      * @param events List events
      * @param notifyNow Whether to notify instantly
      */
-    private void listenFromCallback(int subId, @NonNull String pkg, @NonNull String featureId,
+    private void listenFromCallback(boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess, int subId,
+            @NonNull String pkg, @NonNull String featureId,
             @NonNull TelephonyCallback telephonyCallback, @NonNull int[] events,
             boolean notifyNow) {
         try {
-            sRegistry.listenWithEventList(
+            sRegistry.listenWithEventList(renounceFineLocationAccess, renounceCoarseLocationAccess,
                     subId, pkg, featureId, telephonyCallback.callback, events, notifyNow);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -283,6 +285,8 @@ public class TelephonyRegistryManager {
      * UI. There is no timeout associated with showing this UX, so a carrier app must be sure to
      * call with active set to false sometime after calling with it set to {@code true}.
      * <p>
+     * This will apply to all subscriptions the carrier app has carrier privileges on.
+     * <p>
      * Requires Permission: calling app has carrier privileges.
      *
      * @param active Whether the carrier network change is or shortly will be
@@ -292,6 +296,31 @@ public class TelephonyRegistryManager {
     public void notifyCarrierNetworkChange(boolean active) {
         try {
             sRegistry.notifyCarrierNetworkChange(active);
+        } catch (RemoteException ex) {
+            // system server crash
+        }
+    }
+
+    /**
+     * Informs the system of an intentional upcoming carrier network change by a carrier app on the
+     * given {@code subscriptionId}. This call only used to allow the system to provide alternative
+     * UI while telephony is performing an action that may result in intentional, temporary network
+     * lack of connectivity.
+     * <p>
+     * Based on the active parameter passed in, this method will either show or hide the
+     * alternative UI. There is no timeout associated with showing this UX, so a carrier app must be
+     * sure to call with active set to false sometime after calling with it set to {@code true}.
+     * <p>
+     * Requires Permission: calling app has carrier privileges.
+     *
+     * @param subscriptionId the subscription of the carrier network.
+     * @param active whether the carrier network change is or shortly will be active. Set this value
+     *              to true to begin showing alternative UI and false to stop.
+     * @see TelephonyManager#hasCarrierPrivileges
+     */
+    public void notifyCarrierNetworkChange(int subscriptionId, boolean active) {
+        try {
+            sRegistry.notifyCarrierNetworkChangeWithSubId(subscriptionId, active);
         } catch (RemoteException ex) {
             // system server crash
         }
@@ -1161,14 +1190,17 @@ public class TelephonyRegistryManager {
      *
      * @param callback The {@link TelephonyCallback} object to register.
      */
-    public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
+    public void registerTelephonyCallback(boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess,
+            @NonNull @CallbackExecutor Executor executor,
             int subId, String pkgName, String attributionTag, @NonNull TelephonyCallback callback,
             boolean notifyNow) {
         if (callback == null) {
             throw new IllegalStateException("telephony service is null.");
         }
         callback.init(executor);
-        listenFromCallback(subId, pkgName, attributionTag, callback,
+        listenFromCallback(renounceFineLocationAccess, renounceCoarseLocationAccess, subId,
+                pkgName, attributionTag, callback,
                 getEventsFromCallback(callback).stream().mapToInt(i -> i).toArray(), notifyNow);
     }
 
@@ -1179,6 +1211,7 @@ public class TelephonyRegistryManager {
      */
     public void unregisterTelephonyCallback(int subId, String pkgName, String attributionTag,
             @NonNull TelephonyCallback callback, boolean notifyNow) {
-        listenFromCallback(subId, pkgName, attributionTag, callback, new int[0], notifyNow);
+        listenFromCallback(false, false, subId,
+                pkgName, attributionTag, callback, new int[0], notifyNow);
     }
 }

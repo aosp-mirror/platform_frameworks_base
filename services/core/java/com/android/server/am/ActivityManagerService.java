@@ -91,6 +91,7 @@ import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
+import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
@@ -300,6 +301,7 @@ import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.FeatureFlagUtils;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
@@ -7743,6 +7745,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                         } else {
                             killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
                                     "Too many Binders sent to SYSTEM");
+                            // We need to run a GC here, because killing the processes involved
+                            // actually isn't guaranteed to free up the proxies; in fact, if the
+                            // GC doesn't run for a long time, we may even exceed the global
+                            // proxy limit for a process (20000), resulting in system_server itself
+                            // being killed.
+                            // Note that the GC here might not actually clean up all the proxies,
+                            // because the binder reference decrements will come in asynchronously;
+                            // but if new processes belonging to the UID keep adding proxies, we
+                            // will get another callback here, and run the GC again - this time
+                            // cleaning up the old proxies.
+                            VMRuntime.getRuntime().requestConcurrentGC();
                         }
                     }, mHandler);
             t.traceEnd(); // setBinderProxies
@@ -14246,6 +14259,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     private void checkExcessivePowerUsage() {
         updateCpuStatsNow();
 
+        final boolean monitorPhantomProcs = mSystemReady && FeatureFlagUtils.isEnabled(mContext,
+                SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);
         synchronized (mProcLock) {
             final boolean doCpuKills = mLastPowerCheckUptime != 0;
             final long curUptime = SystemClock.uptimeMillis();
@@ -14271,9 +14286,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     updateAppProcessCpuTimeLPr(uptimeSince, doCpuKills, checkDur, cpuLimit, app);
 
-                    // Also check the phantom processes if there is any
-                    updatePhantomProcessCpuTimeLPr(
-                            uptimeSince, doCpuKills, checkDur, cpuLimit, app);
+                    if (monitorPhantomProcs) {
+                        // Also check the phantom processes if there is any
+                        updatePhantomProcessCpuTimeLPr(
+                                uptimeSince, doCpuKills, checkDur, cpuLimit, app);
+                    }
                 }
             });
         }
@@ -15413,12 +15430,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void updateDeviceIdleTempAllowlist(int[] appids, int changingUid, boolean adding,
-                long durationMs, @TempAllowListType int type, @ReasonCode int reasonCode,
-                @Nullable String reason, int callingUid) {
+        public void updateDeviceIdleTempAllowlist(@Nullable int[] appids, int changingUid,
+                boolean adding, long durationMs, @TempAllowListType int type,
+                @ReasonCode int reasonCode, @Nullable String reason, int callingUid) {
             synchronized (ActivityManagerService.this) {
                 synchronized (mProcLock) {
-                    mDeviceIdleTempAllowlist = appids;
+                    if (appids != null) {
+                        mDeviceIdleTempAllowlist = appids;
+                    }
                     if (adding) {
                         if (type == TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
                             // Note, the device idle temp-allowlist are by app-ids, but here
@@ -15428,12 +15447,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     callingUid));
                         }
                     } else {
-                        // Note in the removing case, we need to remove all the UIDs matching
-                        // the appId, because DeviceIdle's temp-allowlist are based on AppIds,
-                        // not UIDs.
-                        // For eacmple, "cmd deviceidle tempallowlist -r PACKAGE" will
-                        // not only remove this app for user 0, but for all users.
-                        mFgsStartTempAllowList.removeAppId(UserHandle.getAppId(changingUid));
+                        mFgsStartTempAllowList.removeUid(changingUid);
                     }
                     setAppIdTempAllowlistStateLSP(changingUid, adding);
                 }

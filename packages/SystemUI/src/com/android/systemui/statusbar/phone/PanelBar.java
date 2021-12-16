@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static java.lang.Float.isNaN;
 
+import android.annotation.CallSuper;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -162,7 +163,13 @@ public abstract class PanelBar extends FrameLayout {
         return mPanel == null || mPanel.getView().dispatchTouchEvent(event);
     }
 
-    public abstract void panelScrimMinFractionChanged(float minFraction);
+    /**
+     * Percentage of panel expansion offset, caused by pulling down on a heads-up.
+     */
+    @CallSuper
+    public void onPanelMinFractionChanged(float minFraction) {
+        mPanel.setMinFraction(minFraction);
+    }
 
     /**
      * @param frac the fraction from the expansion in [0, 1]

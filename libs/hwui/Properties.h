@@ -232,6 +232,7 @@ public:
     static bool skipEmptyFrames;
     static bool useBufferAge;
     static bool enablePartialUpdates;
+    static bool enableRenderEffectCache;
 
     // TODO: Move somewhere else?
     static constexpr float textGamma = 1.45f;

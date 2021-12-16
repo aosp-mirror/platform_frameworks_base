@@ -797,6 +797,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
         public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
         }
         @Override
+        public void onImeDrawnOnTask(int taskId) throws RemoteException {
+        }
+        @Override
         public void onAppSplashScreenViewRemoved(int taskId) {
         }
     };

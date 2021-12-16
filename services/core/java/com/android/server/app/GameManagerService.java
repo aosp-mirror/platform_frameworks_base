@@ -272,6 +272,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 "com.android.graphics.intervention.wm.allowDownscale";
 
         /**
+         * Metadata that can be included in the app manifest to allow/disallow any ANGLE
+         * interventions. Default value is TRUE.
+         */
+        public static final String METADATA_ANGLE_ALLOW_ANGLE =
+                "com.android.graphics.intervention.angle.allowAngle";
+
+        /**
          * Metadata that needs to be included in the app manifest to OPT-IN to PERFORMANCE mode.
          * This means the app will assume full responsibility for the experience provided by this
          * mode and the system will enable no window manager downscaling.
@@ -294,6 +301,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         private boolean mPerfModeOptedIn;
         private boolean mBatteryModeOptedIn;
         private boolean mAllowDownscale;
+        private boolean mAllowAngle;
 
         GamePackageConfiguration(String packageName, int userId) {
             mPackageName = packageName;
@@ -305,10 +313,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     mPerfModeOptedIn = ai.metaData.getBoolean(METADATA_PERFORMANCE_MODE_ENABLE);
                     mBatteryModeOptedIn = ai.metaData.getBoolean(METADATA_BATTERY_MODE_ENABLE);
                     mAllowDownscale = ai.metaData.getBoolean(METADATA_WM_ALLOW_DOWNSCALE, true);
+                    mAllowAngle = ai.metaData.getBoolean(METADATA_ANGLE_ALLOW_ANGLE, true);
                 } else {
                     mPerfModeOptedIn = false;
                     mBatteryModeOptedIn = false;
                     mAllowDownscale = true;
+                    mAllowAngle = true;
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 // Not all packages are installed, hence ignore those that are not installed yet.
@@ -340,14 +350,26 @@ public final class GameManagerService extends IGameManagerService.Stub {
             public static final String MODE_KEY = "mode";
             public static final String SCALING_KEY = "downscaleFactor";
             public static final String DEFAULT_SCALING = "1.0";
+            public static final String ANGLE_KEY = "useAngle";
 
             private final @GameMode int mGameMode;
             private final String mScaling;
+            private final boolean mUseAngle;
 
             GameModeConfiguration(KeyValueListParser parser) {
                 mGameMode = parser.getInt(MODE_KEY, GameManager.GAME_MODE_UNSUPPORTED);
-                mScaling = !mAllowDownscale || isGameModeOptedIn(mGameMode)
+                // isGameModeOptedIn() returns if an app will handle all of the changes necessary
+                // for a particular game mode. If so, the Android framework (i.e.
+                // GameManagerService) will not do anything for the app (like window scaling or
+                // using ANGLE).
+                mScaling = !mAllowDownscale || willGamePerformOptimizations(mGameMode)
                         ? DEFAULT_SCALING : parser.getString(SCALING_KEY, DEFAULT_SCALING);
+                // We only want to use ANGLE if:
+                // - We're allowed to use ANGLE (the app hasn't opted out via the manifest) AND
+                // - The app has not opted in to performing the work itself AND
+                // - The Phenotype config has enabled it.
+                mUseAngle = mAllowAngle && !willGamePerformOptimizations(mGameMode)
+                        && parser.getBoolean(ANGLE_KEY, false);
             }
 
             public int getGameMode() {
@@ -356,6 +378,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
             public String getScaling() {
                 return mScaling;
+            }
+
+            public boolean getUseAngle() {
+                return mUseAngle;
             }
 
             public boolean isValid() {
@@ -368,7 +394,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
              * @hide
              */
             public String toString() {
-                return "[Game Mode:" + mGameMode + ",Scaling:" + mScaling + "]";
+                return "[Game Mode:" + mGameMode + ",Scaling:" + mScaling + ",Use Angle:"
+                        + mUseAngle + "]";
             }
 
             /**
@@ -384,13 +411,14 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
 
         /**
-         * Gets whether a package has opted into a game mode via its manifest.
+         * Returns if the app will assume full responsibility for the experience provided by this
+         * mode. If True, the system will not perform any interventions for the app.
          *
          * @return True if the app package has specified in its metadata either:
          * "com.android.app.gamemode.performance.enabled" or
          * "com.android.app.gamemode.battery.enabled" with a value of "true"
          */
-        public boolean isGameModeOptedIn(@GameMode int gameMode) {
+        public boolean willGamePerformOptimizations(@GameMode int gameMode) {
             return (mBatteryModeOptedIn && gameMode == GameManager.GAME_MODE_BATTERY)
                     || (mPerfModeOptedIn && gameMode == GameManager.GAME_MODE_PERFORMANCE);
         }
@@ -631,7 +659,34 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 mHandler.sendMessageDelayed(msg, WRITE_SETTINGS_DELAY);
             }
         }
-        updateCompatModeDownscale(packageName, gameMode);
+        updateInterventions(packageName, gameMode);
+    }
+
+    /**
+     * Get if ANGLE is enabled for the package for the currently enabled game mode.
+     * Checks that the caller has {@link android.Manifest.permission#MANAGE_GAME_MODE}.
+     */
+    @Override
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public @GameMode boolean getAngleEnabled(String packageName, int userId)
+            throws SecurityException {
+        final int gameMode = getGameMode(packageName, userId);
+        if (gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
+            return false;
+        }
+
+        synchronized (mDeviceConfigLock) {
+            final GamePackageConfiguration config = mConfigs.get(packageName);
+            if (config == null) {
+                return false;
+            }
+            GamePackageConfiguration.GameModeConfiguration gameModeConfiguration =
+                    config.getGameModeConfiguration(gameMode);
+            if (gameModeConfiguration == null) {
+                return false;
+            }
+            return gameModeConfiguration.getUseAngle();
+        }
     }
 
     /**
@@ -753,7 +808,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             if (DEBUG) {
                 Slog.v(TAG, dumpDeviceConfigs());
             }
-            if (packageConfig.isGameModeOptedIn(gameMode)) {
+            if (packageConfig.willGamePerformOptimizations(gameMode)) {
                 disableCompatScale(packageName);
                 return;
             }
@@ -780,6 +835,17 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
     private boolean bitFieldContainsModeBitmask(int bitField, @GameMode int gameMode) {
         return (bitField & modeToBitmask(gameMode)) != 0;
+    }
+
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    private void updateUseAngle(String packageName, @GameMode int gameMode) {
+        // TODO (b/188475576): Nothing to do yet. Remove if it's still empty when we're ready to
+        // ship.
+    }
+
+    private void updateInterventions(String packageName, @GameMode int gameMode) {
+        updateCompatModeDownscale(packageName, gameMode);
+        updateUseAngle(packageName, gameMode);
     }
 
     /**
@@ -839,11 +905,11 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     if (newGameMode != gameMode) {
                         setGameMode(packageName, newGameMode, userId);
                     }
-                    updateCompatModeDownscale(packageName, gameMode);
+                    updateInterventions(packageName, gameMode);
                 }
             }
         } catch (Exception e) {
-            Slog.e(TAG, "Failed to update compat modes for user: " + userId);
+            Slog.e(TAG, "Failed to update compat modes for user " + userId + ": " + e);
         }
     }
 
@@ -851,7 +917,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         final List<PackageInfo> packages =
                 mPackageManager.getInstalledPackagesAsUser(0, userId);
         return packages.stream().filter(e -> e.applicationInfo != null && e.applicationInfo.category
-                        == ApplicationInfo.CATEGORY_GAME)
+                == ApplicationInfo.CATEGORY_GAME)
                 .map(e -> e.packageName)
                 .toArray(String[]::new);
     }
