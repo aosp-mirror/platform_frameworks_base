@@ -973,7 +973,8 @@ package android.app.admin {
   }
 
   public class DevicePolicyManager {
-    method public int checkProvisioningPreCondition(@NonNull String, @NonNull String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public int checkProvisioningPreCondition(@NonNull String, @NonNull String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public android.os.UserHandle createAndProvisionManagedProfile(@NonNull android.app.admin.ManagedProfileProvisioningParams) throws android.app.admin.ProvisioningException;
     method @Nullable public android.content.Intent createProvisioningIntentFromNfcIntent(@NonNull android.content.Intent);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public boolean getBluetoothContactSharingDisabled(@NonNull android.os.UserHandle);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getDeviceOwner();
@@ -995,6 +996,7 @@ package android.app.admin {
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long);
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long, boolean);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean packageHasActiveAdmins(String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void provisionFullyManagedDevice(@NonNull android.app.admin.FullyManagedDeviceProvisioningParams) throws android.app.admin.ProvisioningException;
     method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public boolean setActiveProfileOwner(@NonNull android.content.ComponentName, String) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setDeviceProvisioningConfigApplied();
     method @Deprecated @RequiresPermission(value=android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS, conditional=true) public void setProfileOwnerCanAccessDeviceIds(@NonNull android.content.ComponentName);
@@ -1060,6 +1062,65 @@ package android.app.admin {
     field public static final int STATE_USER_SETUP_FINALIZED = 3; // 0x3
     field public static final int STATE_USER_SETUP_INCOMPLETE = 1; // 0x1
     field public static final int STATE_USER_UNMANAGED = 0; // 0x0
+  }
+
+  public final class FullyManagedDeviceProvisioningParams implements android.os.Parcelable {
+    method public boolean canDeviceOwnerGrantSensorsPermissions();
+    method public int describeContents();
+    method @NonNull public android.content.ComponentName getDeviceAdminComponentName();
+    method public long getLocalTime();
+    method @Nullable public java.util.Locale getLocale();
+    method @NonNull public String getOwnerName();
+    method @Nullable public String getTimeZone();
+    method public boolean isLeaveAllSystemAppsEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, @Nullable int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.FullyManagedDeviceProvisioningParams> CREATOR;
+  }
+
+  public static final class FullyManagedDeviceProvisioningParams.Builder {
+    ctor public FullyManagedDeviceProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams build();
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setCanDeviceOwnerGrantSensorsPermissions(boolean);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocalTime(long);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocale(@Nullable java.util.Locale);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setTimeZone(@Nullable String);
+  }
+
+  public final class ManagedProfileProvisioningParams implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.accounts.Account getAccountToMigrate();
+    method @NonNull public String getOwnerName();
+    method @NonNull public android.content.ComponentName getProfileAdminComponentName();
+    method @Nullable public String getProfileName();
+    method public boolean isKeepingAccountOnMigration();
+    method public boolean isLeaveAllSystemAppsEnabled();
+    method public boolean isOrganizationOwnedProvisioning();
+    method public void writeToParcel(@NonNull android.os.Parcel, @Nullable int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.ManagedProfileProvisioningParams> CREATOR;
+  }
+
+  public static final class ManagedProfileProvisioningParams.Builder {
+    ctor public ManagedProfileProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams build();
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setAccountToMigrate(@Nullable android.accounts.Account);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setKeepingAccountOnMigration(boolean);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setOrganizationOwnedProvisioning(boolean);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setProfileName(@Nullable String);
+  }
+
+  public class ProvisioningException extends android.util.AndroidException {
+    ctor public ProvisioningException(@NonNull Exception, int);
+    method public int getProvisioningError();
+    field public static final int ERROR_ADMIN_PACKAGE_INSTALLATION_FAILED = 3; // 0x3
+    field public static final int ERROR_PRE_CONDITION_FAILED = 1; // 0x1
+    field public static final int ERROR_PROFILE_CREATION_FAILED = 2; // 0x2
+    field public static final int ERROR_REMOVE_NON_REQUIRED_APPS_FAILED = 6; // 0x6
+    field public static final int ERROR_SETTING_PROFILE_OWNER_FAILED = 4; // 0x4
+    field public static final int ERROR_SET_DEVICE_OWNER_FAILED = 7; // 0x7
+    field public static final int ERROR_STARTING_PROFILE_FAILED = 5; // 0x5
+    field public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
   public final class SystemUpdatePolicy implements android.os.Parcelable {
