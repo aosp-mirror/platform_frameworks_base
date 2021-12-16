@@ -146,8 +146,10 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String ATTR_PERSON_IS_IMPORTANT = "is-important";
 
     private static final String NAME_CATEGORIES = "categories";
+    private static final String NAME_CAPABILITY = "capability";
 
     private static final String TAG_STRING_ARRAY_XMLUTILS = "string-array";
+    private static final String TAG_MAP_XMLUTILS = "map";
     private static final String ATTR_NAME_XMLUTILS = "name";
 
     private static final String KEY_DYNAMIC = "dynamic";
@@ -1829,6 +1831,12 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
 
             ShortcutService.writeTagExtra(out, TAG_EXTRAS, si.getExtras());
+
+            final Map<String, Map<String, List<String>>> capabilityBindings =
+                    si.getCapabilityBindings();
+            if (capabilityBindings != null && !capabilityBindings.isEmpty()) {
+                XmlUtils.writeMapXml(si.getCapabilityBindings(), NAME_CAPABILITY, out);
+            }
         }
 
         out.endTag(null, TAG_SHORTCUT);
@@ -1961,6 +1969,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         int backupVersionCode;
         ArraySet<String> categories = null;
         ArrayList<Person> persons = new ArrayList<>();
+        Map<String, Map<String, List<String>>> capabilityBindings = null;
 
         id = ShortcutService.parseStringAttribute(parser, ATTR_ID);
         activityComponent = ShortcutService.parseComponentNameAttribute(parser,
@@ -2029,6 +2038,13 @@ class ShortcutPackage extends ShortcutPackageItem {
                         }
                     }
                     continue;
+                case TAG_MAP_XMLUTILS:
+                    if (NAME_CAPABILITY.equals(ShortcutService.parseStringAttribute(parser,
+                            ATTR_NAME_XMLUTILS))) {
+                        capabilityBindings = (Map<String, Map<String, List<String>>>)
+                                XmlUtils.readValueXml(parser, new String[1]);
+                    }
+                    continue;
             }
             throw ShortcutService.throwForInvalidTag(depth, tag);
         }
@@ -2064,7 +2080,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 rank, extras, lastChangedTimestamp, flags,
                 iconResId, iconResName, bitmapPath, iconUri,
                 disabledReason, persons.toArray(new Person[persons.size()]), locusId,
-                splashScreenThemeResName);
+                splashScreenThemeResName, capabilityBindings);
     }
 
     private static Intent parseIntent(TypedXmlPullParser parser)
