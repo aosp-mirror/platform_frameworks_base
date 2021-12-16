@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles.dialog;
 
 import static com.android.settingslib.mobile.MobileMappings.getIconKey;
 import static com.android.settingslib.mobile.MobileMappings.mapIconSets;
+import static com.android.wifitrackerlib.WifiEntry.CONNECTED_STATE_CONNECTED;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -125,7 +126,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             R.string.all_network_unavailable;
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    static final int MAX_WIFI_ENTRY_COUNT = 4;
+    static final int MAX_WIFI_ENTRY_COUNT = 3;
 
     private WifiManager mWifiManager;
     private Context mContext;
@@ -143,8 +144,6 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     private AccessPointController mAccessPointController;
     private IntentFilter mConnectionStateFilter;
     private InternetDialogCallback mCallback;
-    private WifiEntry mConnectedEntry;
-    private int mWifiEntriesCount;
     private UiEventLogger mUiEventLogger;
     private BroadcastDispatcher mBroadcastDispatcher;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -156,6 +155,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     private SignalDrawable mSignalDrawable;
     private LocationController mLocationController;
     private DialogLaunchAnimator mDialogLaunchAnimator;
+    private boolean mHasWifiEntries;
 
     @VisibleForTesting
     static final float TOAST_PARAMS_HORIZONTAL_WEIGHT = 1.0f;
@@ -177,6 +177,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     protected KeyguardStateController mKeyguardStateController;
     @VisibleForTesting
     protected boolean mHasEthernet = false;
+    @VisibleForTesting
+    protected ConnectedWifiInternetMonitor mConnectedWifiInternetMonitor;
 
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -237,6 +239,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mSignalDrawable = new SignalDrawable(mContext);
         mLocationController = locationController;
         mDialogLaunchAnimator = dialogLaunchAnimator;
+        mConnectedWifiInternetMonitor = new ConnectedWifiInternetMonitor();
     }
 
     void onStart(@NonNull InternetDialogCallback callback, boolean canConfigWifi) {
@@ -277,6 +280,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mAccessPointController.removeAccessPointCallback(this);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
         mConnectivityManager.unregisterNetworkCallback(mConnectivityManagerNetworkCallback);
+        mConnectedWifiInternetMonitor.unregisterCallback();
     }
 
     @VisibleForTesting
@@ -334,7 +338,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             return mContext.getText(SUBTITLE_TEXT_UNLOCK_TO_VIEW_NETWORKS);
         }
 
-        if (mConnectedEntry != null || mWifiEntriesCount > 0) {
+        if (mHasWifiEntries) {
             return mCanConfigWifi ? mContext.getText(SUBTITLE_TEXT_TAP_A_NETWORK_TO_CONNECT) : null;
         }
 
@@ -875,43 +879,30 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             return;
         }
 
-        if (accessPoints == null || accessPoints.size() == 0) {
-            mConnectedEntry = null;
-            mWifiEntriesCount = 0;
-            mCallback.onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry */,
-                    false /* hasMoreEntry */);
-            return;
-        }
-
-        boolean hasMoreEntry = false;
-        int count = MAX_WIFI_ENTRY_COUNT;
-        if (mHasEthernet) {
-            count -= 1;
-        }
-        if (hasActiveSubId() || isCarrierNetworkActive()) {
-            count -= 1;
-        }
-        final int wifiTotalCount = accessPoints.size();
-        if (count > wifiTotalCount) {
-            count = wifiTotalCount;
-        } else if (count < wifiTotalCount) {
-            hasMoreEntry = true;
-        }
-
         WifiEntry connectedEntry = null;
-        final List<WifiEntry> wifiEntries = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            WifiEntry entry = accessPoints.get(i);
-            if (connectedEntry == null && entry.isDefaultNetwork() && entry.hasInternetAccess()) {
-                connectedEntry = entry;
-            } else {
-                wifiEntries.add(entry);
+        List<WifiEntry> wifiEntries = null;
+        final int accessPointsSize = (accessPoints == null) ? 0 : accessPoints.size();
+        final boolean hasMoreWifiEntries = (accessPointsSize > MAX_WIFI_ENTRY_COUNT);
+        if (accessPointsSize > 0) {
+            wifiEntries = new ArrayList<>();
+            final int count = hasMoreWifiEntries ? MAX_WIFI_ENTRY_COUNT : accessPointsSize;
+            mConnectedWifiInternetMonitor.unregisterCallback();
+            for (int i = 0; i < count; i++) {
+                WifiEntry entry = accessPoints.get(i);
+                mConnectedWifiInternetMonitor.registerCallbackIfNeed(entry);
+                if (connectedEntry == null && entry.isDefaultNetwork()
+                        && entry.hasInternetAccess()) {
+                    connectedEntry = entry;
+                } else {
+                    wifiEntries.add(entry);
+                }
             }
+            mHasWifiEntries = true;
+        } else {
+            mHasWifiEntries = false;
         }
-        mConnectedEntry = connectedEntry;
-        mWifiEntriesCount = wifiEntries.size();
 
-        mCallback.onAccessPointsChanged(wifiEntries, mConnectedEntry, hasMoreEntry);
+        mCallback.onAccessPointsChanged(wifiEntries, connectedEntry, hasMoreWifiEntries);
     }
 
     @Override
@@ -983,6 +974,55 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         public void onLost(@NonNull Network network) {
             mHasEthernet = false;
             mCallback.onLost(network);
+        }
+    }
+
+    /**
+     * Helper class for monitoring the Internet access of the connected WifiEntry.
+     */
+    @VisibleForTesting
+    protected class ConnectedWifiInternetMonitor implements WifiEntry.WifiEntryCallback {
+
+        private WifiEntry mWifiEntry;
+
+        public void registerCallbackIfNeed(WifiEntry entry) {
+            if (entry == null || mWifiEntry != null) {
+                return;
+            }
+            // If the Wi-Fi is not connected yet, or it's the connected Wi-Fi with Internet
+            // access. Then we don't need to listen to the callback to update the Wi-Fi entries.
+            if (entry.getConnectedState() != CONNECTED_STATE_CONNECTED
+                    || (entry.isDefaultNetwork() && entry.hasInternetAccess())) {
+                return;
+            }
+            mWifiEntry = entry;
+            entry.setListener(this);
+        }
+
+        public void unregisterCallback() {
+            if (mWifiEntry == null) {
+                return;
+            }
+            mWifiEntry.setListener(null);
+            mWifiEntry = null;
+        }
+
+        @MainThread
+        @Override
+        public void onUpdated() {
+            if (mWifiEntry == null) {
+                return;
+            }
+            WifiEntry entry = mWifiEntry;
+            if (entry.getConnectedState() != CONNECTED_STATE_CONNECTED) {
+                unregisterCallback();
+                return;
+            }
+            if (entry.isDefaultNetwork() && entry.hasInternetAccess()) {
+                unregisterCallback();
+                // Trigger onAccessPointsChanged() to update the Wi-Fi entries.
+                scanWifiAccessPoints();
+            }
         }
     }
 
@@ -1061,7 +1101,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         void dismissDialog();
 
         void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
-                @Nullable WifiEntry connectedEntry, boolean hasMoreEntry);
+                @Nullable WifiEntry connectedEntry, boolean hasMoreWifiEntries);
     }
 
     void makeOverlayToast(int stringId) {

@@ -54,6 +54,10 @@ public class FeatureFlagUtils {
     /** @hide */
     public static final String SETTINGS_SUPPORT_LARGE_SCREEN = "settings_support_large_screen";
 
+    /** @hide */
+    public static final String SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS =
+            "settings_enable_monitor_phantom_procs";
+
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
@@ -76,6 +80,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "true");
         DEFAULT_FLAGS.put(SETTINGS_SUPPORT_LARGE_SCREEN, "true");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
@@ -83,6 +88,7 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS = new HashSet<>();
         PERSISTENT_FLAGS.add(SETTINGS_PROVIDER_MODEL);
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
+        PERSISTENT_FLAGS.add(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);
     }
 
     /**

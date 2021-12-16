@@ -40,6 +40,7 @@ import android.app.StatusBarManager.WindowVisibleState;
 import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
@@ -68,9 +69,12 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
+import com.android.wm.shell.pip.Pip;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -91,6 +95,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private AutoHideController mAutoHideController;
     private LightBarController mLightBarController;
     private LightBarTransitionsController mLightBarTransitionsController;
+    private Optional<Pip> mPipOptional;
     private int mDisplayId;
     private int mNavigationIconHints;
     private final NavBarHelper.NavbarTaskbarStateUpdater mNavbarTaskbarStateUpdater =
@@ -113,6 +118,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private Context mWindowContext;
     private ScreenPinningNotify mScreenPinningNotify;
     private int mNavigationMode;
+    private final Consumer<Rect> mPipListener;
 
     /**
      * Tracks the system calls for when taskbar should transiently show or hide so we can return
@@ -143,6 +149,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 .create(context);
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
+        mPipListener = mEdgeBackGestureHandler::setPipStashExclusionBounds;
     }
 
     public void setDependencies(CommandQueue commandQueue,
@@ -151,7 +158,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             NavigationModeController navigationModeController,
             SysUiState sysUiState, DumpManager dumpManager,
             AutoHideController autoHideController,
-            LightBarController lightBarController) {
+            LightBarController lightBarController,
+            Optional<Pip> pipOptional) {
         // TODO: adding this in the ctor results in a dagger dependency cycle :(
         mCommandQueue = commandQueue;
         mOverviewProxyService = overviewProxyService;
@@ -162,6 +170,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mAutoHideController = autoHideController;
         mLightBarController = lightBarController;
         mLightBarTransitionsController = createLightBarTransitionsController();
+        mPipOptional = pipOptional;
     }
 
     // Separated into a method to keep setDependencies() clean/readable.
@@ -207,6 +216,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         updateSysuiFlags();
         mAutoHideController.setNavigationBar(mAutoHideUiElement);
         mLightBarController.setNavigationBar(mLightBarTransitionsController);
+        mPipOptional.ifPresent(this::addPipExclusionBoundsChangeListener);
         mInitialized = true;
     }
 
@@ -228,7 +238,16 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mAutoHideController.setNavigationBar(null);
         mLightBarTransitionsController.destroy(mContext);
         mLightBarController.setNavigationBar(null);
+        mPipOptional.ifPresent(this::removePipExclusionBoundsChangeListener);
         mInitialized = false;
+    }
+
+    void addPipExclusionBoundsChangeListener(Pip pip) {
+        pip.addPipExclusionBoundsChangeListener(mPipListener);
+    }
+
+    void removePipExclusionBoundsChangeListener(Pip pip) {
+        pip.removePipExclusionBoundsChangeListener(mPipListener);
     }
 
     /**

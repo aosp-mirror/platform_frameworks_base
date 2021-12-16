@@ -188,7 +188,7 @@ public class PipBoundsStateTest extends ShellTestCase {
         final Rect newBounds = new Rect(50, 50, 100, 75);
         mPipBoundsState.setBounds(currentBounds);
 
-        mPipBoundsState.setPipExclusionBoundsChangeCallback(callback);
+        mPipBoundsState.addPipExclusionBoundsChangeCallback(callback);
         // Setting the listener immediately calls back with the current bounds.
         verify(callback).accept(currentBounds);
 
