@@ -896,15 +896,21 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE) public void addOnProjectionStateChangedListener(int, @NonNull java.util.concurrent.Executor, @NonNull android.app.UiModeManager.OnProjectionStateChangedListener);
     method @RequiresPermission(android.Manifest.permission.ENTER_CAR_MODE_PRIORITIZED) public void enableCarMode(@IntRange(from=0) int, int);
     method @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE) public int getActiveProjectionTypes();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE) public int getNightModeCustomType();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE) public java.util.Set<java.lang.String> getProjectingPackages(int);
     method @RequiresPermission(value=android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION, conditional=true) public boolean releaseProjection(int);
     method @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE) public void removeOnProjectionStateChangedListener(@NonNull android.app.UiModeManager.OnProjectionStateChangedListener);
     method @RequiresPermission(value=android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION, conditional=true) public boolean requestProjection(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE) public boolean setNightModeActivatedForCustomMode(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE) public void setNightModeCustomType(int);
     field public static final String ACTION_ENTER_CAR_MODE_PRIORITIZED = "android.app.action.ENTER_CAR_MODE_PRIORITIZED";
     field public static final String ACTION_EXIT_CAR_MODE_PRIORITIZED = "android.app.action.EXIT_CAR_MODE_PRIORITIZED";
     field public static final int DEFAULT_PRIORITY = 0; // 0x0
     field public static final String EXTRA_CALLING_PACKAGE = "android.app.extra.CALLING_PACKAGE";
     field public static final String EXTRA_PRIORITY = "android.app.extra.PRIORITY";
+    field public static final int MODE_NIGHT_CUSTOM_TYPE_BEDTIME = 1; // 0x1
+    field public static final int MODE_NIGHT_CUSTOM_TYPE_SCHEDULE = 0; // 0x0
+    field public static final int MODE_NIGHT_CUSTOM_TYPE_UNKNOWN = -1; // 0xffffffff
     field public static final int PROJECTION_TYPE_ALL = -1; // 0xffffffff
     field public static final int PROJECTION_TYPE_AUTOMOTIVE = 1; // 0x1
     field public static final int PROJECTION_TYPE_NONE = 0; // 0x0
