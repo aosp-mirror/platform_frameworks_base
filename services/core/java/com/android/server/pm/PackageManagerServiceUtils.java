@@ -18,9 +18,11 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 
+import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
@@ -60,6 +62,7 @@ import android.os.FileUtils;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.incremental.IncrementalManager;
+import android.os.incremental.IncrementalStorage;
 import android.os.incremental.V4Signature;
 import android.os.incremental.V4Signature.HashingInfo;
 import android.os.storage.DiskInfo;
@@ -84,6 +87,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.HexDump;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
+import com.android.server.Watchdog;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -646,6 +650,58 @@ public class PackageManagerServiceUtils {
             }
         }
         return compatMatch;
+    }
+
+    /**
+     * Extract native libraries to a target path
+     */
+    public static int extractNativeBinaries(File dstCodePath, String packageName) {
+        final File libraryRoot = new File(dstCodePath, LIB_DIR_NAME);
+        NativeLibraryHelper.Handle handle = null;
+        try {
+            handle = NativeLibraryHelper.Handle.create(dstCodePath);
+            return NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libraryRoot,
+                    null /*abiOverride*/, false /*isIncremental*/);
+        } catch (IOException e) {
+            logCriticalInfo(Log.ERROR, "Failed to extract native libraries"
+                    + "; pkg: " + packageName);
+            return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+        } finally {
+            IoUtils.closeQuietly(handle);
+        }
+    }
+
+    /**
+     * Remove native libraries of a given package
+     */
+    public static void removeNativeBinariesLI(PackageSetting ps) {
+        if (ps != null) {
+            NativeLibraryHelper.removeNativeBinariesLI(ps.getLegacyNativeLibraryPath());
+        }
+    }
+
+    /**
+     * Wait for native library extraction to be done in IncrementalService
+     */
+    public static void waitForNativeBinariesExtractionForIncremental(
+            ArraySet<IncrementalStorage> incrementalStorages) {
+        if (incrementalStorages.isEmpty()) {
+            return;
+        }
+        try {
+            // Native library extraction may take very long time: each page could potentially
+            // wait for either 10s or 100ms (adb vs non-adb data loader), and that easily adds
+            // up to a full watchdog timeout of 1 min, killing the system after that. It doesn't
+            // make much sense as blocking here doesn't lock up the framework, but only blocks
+            // the installation session and the following ones.
+            Watchdog.getInstance().pauseWatchingCurrentThread("native_lib_extract");
+            for (int i = 0; i < incrementalStorages.size(); ++i) {
+                IncrementalStorage storage = incrementalStorages.valueAtUnchecked(i);
+                storage.waitForNativeBinariesExtraction();
+            }
+        } finally {
+            Watchdog.getInstance().resumeWatchingCurrentThread("native_lib_extract");
+        }
     }
 
     /**
@@ -1279,5 +1335,40 @@ public class PackageManagerServiceUtils {
         }
 
         return cacheDir;
+    }
+
+    /**
+     * Check and throw if the given before/after packages would be considered a
+     * downgrade.
+     */
+    public static void checkDowngrade(AndroidPackage before, PackageInfoLite after)
+            throws PackageManagerException {
+        if (after.getLongVersionCode() < before.getLongVersionCode()) {
+            throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
+                    "Update version code " + after.versionCode + " is older than current "
+                            + before.getLongVersionCode());
+        } else if (after.getLongVersionCode() == before.getLongVersionCode()) {
+            if (after.baseRevisionCode < before.getBaseRevisionCode()) {
+                throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
+                        "Update base revision code " + after.baseRevisionCode
+                                + " is older than current " + before.getBaseRevisionCode());
+            }
+
+            if (!ArrayUtils.isEmpty(after.splitNames)) {
+                for (int i = 0; i < after.splitNames.length; i++) {
+                    final String splitName = after.splitNames[i];
+                    final int j = ArrayUtils.indexOf(before.getSplitNames(), splitName);
+                    if (j != -1) {
+                        if (after.splitRevisionCodes[i] < before.getSplitRevisionCodes()[j]) {
+                            throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
+                                    "Update split " + splitName + " revision code "
+                                            + after.splitRevisionCodes[i]
+                                            + " is older than current "
+                                            + before.getSplitRevisionCodes()[j]);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
