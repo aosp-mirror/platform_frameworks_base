@@ -32,6 +32,7 @@ import android.telephony.PreciseDataConnectionState;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
+import com.android.internal.telephony.ICarrierPrivilegesListener;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 
@@ -100,4 +101,10 @@ interface ITelephonyRegistry {
     void notifyAllowedNetworkTypesChanged(in int phoneId, in int subId, in int reason, in long allowedNetworkType);
     void notifyLinkCapacityEstimateChanged(in int phoneId, in int subId,
             in List<LinkCapacityEstimate> linkCapacityEstimateList);
+
+    void addCarrierPrivilegesListener(
+            int phoneId, ICarrierPrivilegesListener callback, String pkg, String featureId);
+    void removeCarrierPrivilegesListener(ICarrierPrivilegesListener callback, String pkg);
+    void notifyCarrierPrivilegesChanged(
+            int phoneId, in List<String> privilegedPackageNames, in int[] privilegedUids);
 }

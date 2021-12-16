@@ -12617,6 +12617,7 @@ package android.telephony {
   }
 
   public class TelephonyManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void addCarrierPrivilegesListener(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CarrierPrivilegesListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) @WorkerThread public void bootstrapAuthenticationRequest(int, @NonNull android.net.Uri, @NonNull android.telephony.gba.UaSecurityProtocolIdentifier, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.BootstrapAuthenticationCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void call(String, String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult changeIccLockPin(@NonNull String, @NonNull String);
@@ -12718,6 +12719,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyOtaEmergencyNumberDbInstalled();
     method @RequiresPermission(android.Manifest.permission.REBOOT) public int prepareForUnattendedReboot();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean rebootRadio();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void removeCarrierPrivilegesListener(@NonNull android.telephony.TelephonyManager.CarrierPrivilegesListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void reportDefaultNetworkStatus(boolean);
     method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.MODIFY_PHONE_STATE}) public void requestCellInfoUpdate(@NonNull android.os.WorkSource, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void requestModemActivityInfo(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telephony.ModemActivityInfo,android.telephony.TelephonyManager.ModemActivityInfoException>);
@@ -12892,6 +12894,10 @@ package android.telephony {
     field public static final int RESULT_ERROR_NOT_SUPPORTED = 3; // 0x3
     field public static final int RESULT_ERROR_UNKNOWN = 1; // 0x1
     field public static final int RESULT_SUCCESS = 0; // 0x0
+  }
+
+  public static interface TelephonyManager.CarrierPrivilegesListener {
+    method public void onCarrierPrivilegesChanged(@NonNull java.util.List<java.lang.String>, @NonNull int[]);
   }
 
   public static class TelephonyManager.ModemActivityInfoException extends java.lang.Exception {
