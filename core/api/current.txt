@@ -25783,11 +25783,14 @@ package android.media.tv {
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG2 = "internal_provider_flag2";
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG3 = "internal_provider_flag3";
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG4 = "internal_provider_flag4";
+    field public static final String COLUMN_INTERNAL_PROVIDER_ID = "internal_provider_id";
     field public static final String COLUMN_LONG_DESCRIPTION = "long_description";
+    field public static final String COLUMN_MULTI_SERIES_ID = "multi_series_id";
     field public static final String COLUMN_POSTER_ART_URI = "poster_art_uri";
     field public static final String COLUMN_RECORDING_PROHIBITED = "recording_prohibited";
     field public static final String COLUMN_REVIEW_RATING = "review_rating";
     field public static final String COLUMN_REVIEW_RATING_STYLE = "review_rating_style";
+    field public static final String COLUMN_SCRAMBLED = "scrambled";
     field public static final String COLUMN_SEARCHABLE = "searchable";
     field public static final String COLUMN_SEASON_DISPLAY_NUMBER = "season_display_number";
     field @Deprecated public static final String COLUMN_SEASON_NUMBER = "season_number";
@@ -25847,7 +25850,9 @@ package android.media.tv {
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG2 = "internal_provider_flag2";
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG3 = "internal_provider_flag3";
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG4 = "internal_provider_flag4";
+    field public static final String COLUMN_INTERNAL_PROVIDER_ID = "internal_provider_id";
     field public static final String COLUMN_LONG_DESCRIPTION = "long_description";
+    field public static final String COLUMN_MULTI_SERIES_ID = "multi_series_id";
     field public static final String COLUMN_POSTER_ART_URI = "poster_art_uri";
     field public static final String COLUMN_RECORDING_DATA_BYTES = "recording_data_bytes";
     field public static final String COLUMN_RECORDING_DATA_URI = "recording_data_uri";
