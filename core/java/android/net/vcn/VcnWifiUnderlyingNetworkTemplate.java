@@ -211,40 +211,33 @@ public final class VcnWifiUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
         }
 
         /**
-         * Set the minimum accepted entry and exit upstream bandwidth allowed by this template.
+         * Set the minimum upstream bandwidths that this template will match.
          *
-         * <p>The minimum upstream bandwidth condition allows for separate entry and exit
-         * thresholds, allowing for a margin of confidence before matching a network, while
-         * requiring a minimum bandwidth to continue being matching. In order to match this
-         * template, a network must fulfill one of the following two cases, depending on whether the
-         * network being evaluated is the Gateway Connection's underlying network:
+         * <p>This template will not match a network that does not provide at least the bandwidth
+         * passed as the entry bandwidth, except in the case that the network is selected as the VCN
+         * Gateway Connection's underlying network, where it will continue to match until the
+         * bandwidth drops under the exit bandwidth.
          *
-         * <ul>
-         *   <li>Network IS selected, AND the Network's estimated upstream bandwidth is greater than
-         *       or equal to the minExitUpstreamBandwidthKbps provided.
-         *   <li>Network IS NOT selected, AND the Network's estimated upstream bandwidth is greater
-         *       than or equal to the minEntryUpstreamBandwidthKbps provided.
-         * </ul>
-         *
-         * <p>To prevent a network from being selected (fulfilling the entry criteria), and yet be
-         * unable to meet the conditions for staying selected (exit criteria), the entry criteria
-         * MUST be greater than, or equal to the exit criteria.
+         * <p>The entry criteria MUST be greater than, or equal to the exit criteria to avoid the
+         * invalid case where a network fulfills the entry criteria, but at the same time fails the
+         * exit criteria.
          *
          * <p>Estimated bandwidth of a network is provided by the transport layer, and reported in
          * {@link NetworkCapabilities}. The provided estimates will be used without modification.
          *
-         * @param minEntryUpstreamBandwidthKbps the minimum accepted upstream bandwidth for a
-         *     network that IS NOT an already-selected underlying network, or {@code 0} to disable
-         *     this requirement. MUST be greater than, or equal to minExitUpstreamBandwidthKbps.
-         *     Defaults to {@code 0}
+         * @param minEntryUpstreamBandwidthKbps the minimum accepted upstream bandwidth for networks
+         *     that ARE NOT the already-selected underlying network, or {@code 0} to disable this
+         *     requirement. Disabled by default.
          * @param minExitUpstreamBandwidthKbps the minimum accepted upstream bandwidth for a network
          *     that IS the already-selected underlying network, or {@code 0} to disable this
-         *     requirement. MUST be less than, or equal to minEntryUpstreamBandwidthKbps. Defaults
-         *     to {@code 0}
+         *     requirement. Disabled by default.
          * @return this {@link Builder} instance, for chaining
-         * @hide
          */
         @NonNull
+        // The getter for the two integers are separated, and in the superclass. Please see {@link
+        // VcnUnderlyingNetworkTemplate#getMinEntryUpstreamBandwidthKbps()} and {@link
+        // VcnUnderlyingNetworkTemplate#getMinExitUpstreamBandwidthKbps()}
+        @SuppressLint("MissingGetterMatchingBuilder")
         public Builder setMinUpstreamBandwidthKbps(
                 int minEntryUpstreamBandwidthKbps, int minExitUpstreamBandwidthKbps) {
             validateMinBandwidthKbps(minEntryUpstreamBandwidthKbps, minExitUpstreamBandwidthKbps);
@@ -256,40 +249,33 @@ public final class VcnWifiUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
         }
 
         /**
-         * Set the minimum acceptable downstream bandwidths allowed by this template.
+         * Set the minimum upstream bandwidths that this template will match.
          *
-         * <p>The minimum downstream bandwidth condition allows for separate entry and exit
-         * thresholds, allowing for a margin of confidence before matching a network, while
-         * requiring a minimum bandwidth to continue being matching. In order to match this
-         * template, a network must fulfill one of the following two cases, depending on whether the
-         * network being evaluated is the Gateway Connection's underlying network:
+         * <p>This template will not match a network that does not provide at least the bandwidth
+         * passed as the entry bandwidth, except in the case that the network is selected as the VCN
+         * Gateway Connection's underlying network, where it will continue to match until the
+         * bandwidth drops under the exit bandwidth.
          *
-         * <ul>
-         *   <li>Network IS selected, AND the Network's estimated downstream bandwidth is greater
-         *       than or equal to the minExitDownstreamBandwidthKbps provided.
-         *   <li>Network IS NOT selected, AND the Network's estimated downstream bandwidth is
-         *       greater than or equal to the minEntryDownstreamBandwidthKbps provided.
-         * </ul>
-         *
-         * <p>To prevent a network from being selected (fulfilling the entry criteria), and yet be
-         * unable to meet the conditions for staying selected (exit criteria), the entry criteria
-         * MUST be greater than, or equal to the exit criteria.
+         * <p>The entry criteria MUST be greater than, or equal to the exit criteria to avoid the
+         * invalid case where a network fulfills the entry criteria, but at the same time fails the
+         * exit criteria.
          *
          * <p>Estimated bandwidth of a network is provided by the transport layer, and reported in
          * {@link NetworkCapabilities}. The provided estimates will be used without modification.
          *
-         * @param minEntryDownstreamBandwidthKbps the minimum accepted downstream bandwidth for a
-         *     network that IS NOT an already-selected underlying network, or {@code 0} to disable
-         *     this requirement. MUST be greater than, or equal to minExitDownstreamBandwidthKbps.
-         *     Defaults to {@code 0}
+         * @param minEntryDownstreamBandwidthKbps the minimum accepted downstream bandwidth for
+         *     networks that ARE NOT the already-selected underlying network, or {@code 0} to
+         *     disable this requirement. Disabled by default.
          * @param minExitDownstreamBandwidthKbps the minimum accepted downstream bandwidth for a
          *     network that IS the already-selected underlying network, or {@code 0} to disable this
-         *     requirement. MUST be less than, or equal to minEntryDownstreamBandwidthKbps. Defaults
-         *     to {@code 0}
+         *     requirement. Disabled by default.
          * @return this {@link Builder} instance, for chaining
-         * @hide
          */
         @NonNull
+        // The getter for the two integers are separated, and in the superclass. Please see {@link
+        // VcnUnderlyingNetworkTemplate#getMinEntryDownstreamBandwidthKbps()} and {@link
+        // VcnUnderlyingNetworkTemplate#getMinExitDownstreamBandwidthKbps()}
+        @SuppressLint("MissingGetterMatchingBuilder")
         public Builder setMinDownstreamBandwidthKbps(
                 int minEntryDownstreamBandwidthKbps, int minExitDownstreamBandwidthKbps) {
             validateMinBandwidthKbps(
