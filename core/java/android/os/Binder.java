@@ -1308,10 +1308,11 @@ public class Binder implements IBinder {
                         data.readCallingWorkSourceUid());
                 observer.callEnded(callSession, data.dataSize(), reply.dataSize(), workSourceUid);
             }
+
+            checkParcel(this, code, reply, "Unreasonably large binder reply buffer");
+            reply.recycle();
+            data.recycle();
         }
-        checkParcel(this, code, reply, "Unreasonably large binder reply buffer");
-        reply.recycle();
-        data.recycle();
 
         // Just in case -- we are done with the IPC, so there should be no more strict
         // mode violations that have gathered for this thread. Either they have been
