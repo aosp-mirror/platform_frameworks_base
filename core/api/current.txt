@@ -41476,6 +41476,7 @@ package android.telephony {
     field public static final String KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY = "cdma_nonroaming_networks_string_array";
     field public static final String KEY_CDMA_ROAMING_MODE_INT = "cdma_roaming_mode_int";
     field public static final String KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY = "cdma_roaming_networks_string_array";
+    field public static final String KEY_CELLULAR_USAGE_SETTING_INT = "cellular_usage_setting_int";
     field public static final String KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL = "check_pricing_with_carrier_data_roaming_bool";
     field public static final String KEY_CI_ACTION_ON_SYS_UPDATE_BOOL = "ci_action_on_sys_update_bool";
     field public static final String KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING = "ci_action_on_sys_update_extra_string";
@@ -43092,6 +43093,7 @@ package android.telephony {
     method public int getSimSlotIndex();
     method public int getSubscriptionId();
     method public int getSubscriptionType();
+    method public int getUsageSetting();
     method public boolean isEmbedded();
     method public boolean isOpportunistic();
     method public void writeToParcel(android.os.Parcel, int);
@@ -43166,6 +43168,10 @@ package android.telephony {
     field public static final int PHONE_NUMBER_SOURCE_UICC = 1; // 0x1
     field public static final int SUBSCRIPTION_TYPE_LOCAL_SIM = 0; // 0x0
     field public static final int SUBSCRIPTION_TYPE_REMOTE_SIM = 1; // 0x1
+    field public static final int USAGE_SETTING_DATA_CENTRIC = 2; // 0x2
+    field public static final int USAGE_SETTING_DEFAULT = 0; // 0x0
+    field public static final int USAGE_SETTING_UNKNOWN = -1; // 0xffffffff
+    field public static final int USAGE_SETTING_VOICE_CENTRIC = 1; // 0x1
   }
 
   public static class SubscriptionManager.OnOpportunisticSubscriptionsChangedListener {

@@ -4466,6 +4466,29 @@ public class CarrierConfigManager {
             "subscription_group_uuid_string";
 
     /**
+     * Controls the cellular usage setting.
+     *
+     * The usage setting indicates whether a device will remain attached to a network based on
+     * the primary use case for the service. A device will detach and search for a more-preferred
+     * network if the primary use case (voice or data) is not satisfied. Depending on the type
+     * of device, it may operate in a voice or data-centric mode by default.
+     *
+     * <p>Sets the usage setting in accordance with 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
+     * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
+     * Annex A.
+     *
+     * Either omit this key or pass a value of
+     * {@link SubscriptionManager#USAGE_SETTING_UNKNOWN unknown} to preserve the current setting.
+     *
+     * {@link SubscriptionManager#USAGE_SETTING_DEFAULT default},
+     * {@link SubscriptionManager#USAGE_SETTING_VOICE_CENTRIC voice-centric},
+     * or {@link SubscriptionManager#USAGE_SETTING_DATA_CENTRIC data-centric}.
+     * {@see SubscriptionInfo#getUsageSetting}
+     */
+    public static final String KEY_CELLULAR_USAGE_SETTING_INT =
+            "cellular_usage_setting_int";
+
+    /**
      * Data switch validation minimal gap time, in milliseconds.
      *
      * Which means, if the same subscription on the same network (based on MCC+MNC+TAC+subId)
@@ -6087,6 +6110,8 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY, new String[]{
                 "source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, "
                         + "target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"});
+        sDefaults.putInt(KEY_CELLULAR_USAGE_SETTING_INT,
+                SubscriptionManager.USAGE_SETTING_UNKNOWN);
     }
 
     /**
