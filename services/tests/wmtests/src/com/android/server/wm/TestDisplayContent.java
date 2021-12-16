@@ -204,7 +204,6 @@ class TestDisplayContent extends DisplayContent {
                 doReturn(true).when(newDisplay).supportsSystemDecorations();
                 doReturn(true).when(displayPolicy).hasNavigationBar();
                 doReturn(NAV_BAR_BOTTOM).when(displayPolicy).navigationBarPosition(anyInt());
-                doReturn(20).when(displayPolicy).getNavigationBarHeight(anyInt());
             } else {
                 doReturn(false).when(displayPolicy).hasNavigationBar();
                 doReturn(false).when(displayPolicy).hasStatusBar();
