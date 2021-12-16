@@ -326,6 +326,9 @@ public class TelephonyManager {
      */
     public static final int DEFAULT_PORT_INDEX = 0;
 
+    /** @hide */
+    public static final int INVALID_PORT_INDEX = -1;
+
     private final Context mContext;
     private final int mSubId;
     @UnsupportedAppUsage
