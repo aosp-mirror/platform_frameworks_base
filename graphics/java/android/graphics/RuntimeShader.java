@@ -16,13 +16,15 @@
 
 package android.graphics;
 
+import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.NonNull;
 
 import libcore.util.NativeAllocationRegistry;
 
 /**
- * Shader that calculates pixel output with a program (fragment shader) running on a GPU.
- * @hide
+ * Shader that calculates per-pixel color via a user defined Android Graphics Shading Language
+ * (AGSL) function.
  */
 public class RuntimeShader extends Shader {
 
@@ -32,7 +34,7 @@ public class RuntimeShader extends Shader {
                 RuntimeShader.class.getClassLoader(), nativeGetFinalizer());
     }
 
-    private boolean mIsOpaque;
+    private boolean mForceOpaque;
 
     /**
      * Current native shader builder instance.
@@ -42,54 +44,267 @@ public class RuntimeShader extends Shader {
     /**
      * Creates a new RuntimeShader.
      *
-     * @param sksl The text of SKSL program to run on the GPU.
-     * @param uniforms Array of parameters passed by the SKSL shader. Array size depends
-     *                 on number of uniforms declared by sksl.
-     * @param isOpaque True if all pixels have alpha 1.0f.
+     * @param shader The text of AGSL shader program to run.
      */
-    public RuntimeShader(@NonNull String sksl, boolean isOpaque) {
+    public RuntimeShader(@NonNull String shader) {
+        this(shader, false);
+    }
+
+    /**
+     * Creates a new RuntimeShader.
+     *
+     * @param shader The text of AGSL shader program to run.
+     * @param forceOpaque If true then all pixels produced by the AGSL shader program will have an
+     *                    alpha of 1.0f.
+     */
+    public RuntimeShader(@NonNull String shader, boolean forceOpaque) {
+        // colorspace is required, but the RuntimeShader always produces colors in the destination
+        // buffer's colorspace regardless of the value specified here.
         super(ColorSpace.get(ColorSpace.Named.SRGB));
-        mIsOpaque = isOpaque;
-        mNativeInstanceRuntimeShaderBuilder = nativeCreateBuilder(sksl);
+        if (shader == null) {
+            throw new NullPointerException("RuntimeShader requires a non-null AGSL string");
+        }
+        mForceOpaque = forceOpaque;
+        mNativeInstanceRuntimeShaderBuilder = nativeCreateBuilder(shader);
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(
                 this, mNativeInstanceRuntimeShaderBuilder);
     }
 
+    public boolean isForceOpaque() {
+        return mForceOpaque;
+    }
+
     /**
-     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
-     * with that name or if the uniform is declared with a type other than float then an
-     * IllegalArgumentException is thrown.
+     * Sets the uniform color value corresponding to this shader.  If the shader does not have a
+     * uniform with that name or if the uniform is declared with a type other than vec3 or vec4 and
+     * corresponding layout(color) annotation then an IllegalArgumentException is thrown.
      *
-     * @param uniformName name matching the uniform declared in the SKSL shader
-     * @param value
+     * @param uniformName name matching the color uniform declared in the AGSL shader program
+     * @param color the provided sRGB color will be transformed into the shader program's output
+     *              colorspace and will be available as a vec4 uniform in the program.
      */
-    public void setUniform(@NonNull String uniformName, float value) {
-        setUniform(uniformName, new float[] {value});
+    public void setColorUniform(@NonNull String uniformName, @ColorInt int color) {
+        setUniform(uniformName, Color.valueOf(color).getComponents(), true);
+    }
+
+    /**
+     * Sets the uniform color value corresponding to this shader.  If the shader does not have a
+     * uniform with that name or if the uniform is declared with a type other than vec3 or vec4 and
+     * corresponding layout(color) annotation then an IllegalArgumentException is thrown.
+     *
+     * @param uniformName name matching the color uniform declared in the AGSL shader program
+     * @param color the provided sRGB color will be transformed into the shader program's output
+     *              colorspace and will be available as a vec4 uniform in the program.
+     */
+    public void setColorUniform(@NonNull String uniformName, @ColorLong long color) {
+        Color exSRGB = Color.valueOf(color).convert(ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB));
+        setUniform(uniformName, exSRGB.getComponents(), true);
+    }
+
+    /**
+     * Sets the uniform color value corresponding to this shader.  If the shader does not have a
+     * uniform with that name or if the uniform is declared with a type other than vec3 or vec4 and
+     * corresponding layout(color) annotation then an IllegalArgumentException is thrown.
+     *
+     * @param uniformName name matching the color uniform declared in the AGSL shader program
+     * @param color the provided sRGB color will be transformed into the shader program's output
+     *              colorspace and will be available as a vec4 uniform in the program.
+     */
+    public void setColorUniform(@NonNull String uniformName, @NonNull Color color) {
+        if (color == null) {
+            throw new NullPointerException("The color parameter must not be null");
+        }
+        Color exSRGB = color.convert(ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB));
+        setUniform(uniformName, exSRGB.getComponents(), true);
     }
 
     /**
      * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
-     * with that name or if the uniform is declared with a type other than float2/vec2 then an
-     * IllegalArgumentException is thrown.
+     * with that name or if the uniform is declared with a type other than a float or float[1]
+     * then an IllegalArgumentException is thrown.
      *
-     * @param uniformName name matching the uniform declared in the SKSL shader
-     * @param value1
-     * @param value2
+     * @param uniformName name matching the uniform declared in the AGSL shader program
      */
-    public void setUniform(@NonNull String uniformName, float value1, float value2) {
-        setUniform(uniformName, new float[] {value1, value2});
+    public void setFloatUniform(@NonNull String uniformName, float value) {
+        setFloatUniform(uniformName, value, 0.0f, 0.0f, 0.0f, 1);
     }
 
     /**
      * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
-     * with that name or if the uniform is declared with a type other than a vecN/floatN where N is
-     * the size of the values array then an IllegalArgumentException is thrown.
+     * with that name or if the uniform is declared with a type other than vec2 or float[2] then an
+     * IllegalArgumentException is thrown.
      *
-     * @param uniformName name matching the uniform declared in the SKSL shader
-     * @param values
+     * @param uniformName name matching the uniform declared in the AGSL shader program
      */
+    public void setFloatUniform(@NonNull String uniformName, float value1, float value2) {
+        setFloatUniform(uniformName, value1, value2, 0.0f, 0.0f, 2);
+
+    }
+
+    /**
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than vec3 or float[3] then an
+     * IllegalArgumentException is thrown.
+     *
+     * @param uniformName name matching the uniform declared in the AGSL shader program
+     */
+    public void setFloatUniform(@NonNull String uniformName, float value1, float value2,
+            float value3) {
+        setFloatUniform(uniformName, value1, value2, value3, 0.0f, 3);
+
+    }
+
+    /**
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than vec4 or float[4] then an
+     * IllegalArgumentException is thrown.
+     *
+     * @param uniformName name matching the uniform declared in the AGSL shader program
+     */
+    public void setFloatUniform(@NonNull String uniformName, float value1, float value2,
+            float value3, float value4) {
+        setFloatUniform(uniformName, value1, value2, value3, value4, 4);
+    }
+
+    /**
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than a float (for N=1), vecN,
+     * or float[N] where N is the length of the values param then an IllegalArgumentException is
+     * thrown.
+     *
+     * @param uniformName name matching the uniform declared in the AGSL shader program
+     */
+    public void setFloatUniform(@NonNull String uniformName, @NonNull float[] values) {
+        setUniform(uniformName, values, false);
+    }
+
+    /**
+     * Old method signature used by some callers within the platform code
+     * @hide
+     * @deprecated use setFloatUniform instead
+     */
+    @Deprecated
     public void setUniform(@NonNull String uniformName, float[] values) {
+        setFloatUniform(uniformName, values);
+    }
+
+    /**
+     * Old method signature used by some callers within the platform code
+     * @hide
+     * @deprecated use setFloatUniform instead
+     */
+    @Deprecated
+    public void setUniform(@NonNull String uniformName, float value) {
+        setFloatUniform(uniformName, value);
+    }
+
+    /**
+     * Old method signature used by some callers within the platform code
+     * @hide
+     * @deprecated use setFloatUniform instead
+     */
+    @Deprecated
+    public void setUniform(@NonNull String uniformName, float value1, float value2) {
+        setFloatUniform(uniformName, value1, value2);
+    }
+
+    private void setFloatUniform(@NonNull String uniformName, float value1, float value2,
+            float value3, float value4, int count) {
+        if (uniformName == null) {
+            throw new NullPointerException("The uniformName parameter must not be null");
+        }
+
+        nativeUpdateUniforms(mNativeInstanceRuntimeShaderBuilder, uniformName, value1, value2,
+                value3, value4, count);
+        discardNativeInstance();
+    }
+
+    private void setUniform(@NonNull String uniformName, @NonNull float[] values, boolean isColor) {
+        if (uniformName == null) {
+            throw new NullPointerException("The uniformName parameter must not be null");
+        }
+        if (values == null) {
+            throw new NullPointerException("The uniform values parameter must not be null");
+        }
+
+        nativeUpdateUniforms(mNativeInstanceRuntimeShaderBuilder, uniformName, values, isColor);
+        discardNativeInstance();
+    }
+
+    /**
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than an int or int[1]
+     * then an IllegalArgumentException is thrown.
+     *
+     * @param uniformName name matching the uniform declared in the AGSL shader program
+     */
+    public void setIntUniform(@NonNull String uniformName, int value) {
+        setIntUniform(uniformName, value, 0, 0, 0, 1);
+    }
+
+    /**
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than ivec2 or int[2] then an
+     * IllegalArgumentException is thrown.
+     *
+     * @param uniformName name matching the uniform declared in the AGSL shader program
+     */
+    public void setIntUniform(@NonNull String uniformName, int value1, int value2) {
+        setIntUniform(uniformName, value1, value2, 0, 0, 2);
+
+    }
+
+    /**
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than ivec3 or int[3] then an
+     * IllegalArgumentException is thrown.
+     *
+     * @param uniformName name matching the uniform declared in the AGSL shader program
+     */
+    public void setIntUniform(@NonNull String uniformName, int value1, int value2, int value3) {
+        setIntUniform(uniformName, value1, value2, value3, 0, 3);
+
+    }
+
+    /**
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than ivec4 or int[4] then an
+     * IllegalArgumentException is thrown.
+     *
+     * @param uniformName name matching the uniform declared in the AGSL shader program
+     */
+    public void setIntUniform(@NonNull String uniformName, int value1, int value2,
+            int value3, int value4) {
+        setIntUniform(uniformName, value1, value2, value3, value4, 4);
+    }
+
+    /**
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than an int (for N=1), ivecN,
+     * or int[N] where N is the length of the values param then an IllegalArgumentException is
+     * thrown.
+     *
+     * @param uniformName name matching the uniform declared in the AGSL shader program
+     */
+    public void setIntUniform(@NonNull String uniformName, @NonNull int[] values) {
+        if (uniformName == null) {
+            throw new NullPointerException("The uniformName parameter must not be null");
+        }
+        if (values == null) {
+            throw new NullPointerException("The uniform values parameter must not be null");
+        }
         nativeUpdateUniforms(mNativeInstanceRuntimeShaderBuilder, uniformName, values);
+        discardNativeInstance();
+    }
+
+    private void setIntUniform(@NonNull String uniformName, int value1, int value2, int value3,
+            int value4, int count) {
+        if (uniformName == null) {
+            throw new NullPointerException("The uniformName parameter must not be null");
+        }
+
+        nativeUpdateUniforms(mNativeInstanceRuntimeShaderBuilder, uniformName, value1, value2,
+                value3, value4, count);
         discardNativeInstance();
     }
 
@@ -101,6 +316,12 @@ public class RuntimeShader extends Shader {
      * @param shader shader passed into the SKSL shader for sampling
      */
     public void setInputShader(@NonNull String shaderName, @NonNull Shader shader) {
+        if (shaderName == null) {
+            throw new NullPointerException("The shaderName parameter must not be null");
+        }
+        if (shader == null) {
+            throw new NullPointerException("The shader parameter must not be null");
+        }
         nativeUpdateShader(
                     mNativeInstanceRuntimeShaderBuilder, shaderName, shader.getNativeInstance());
         discardNativeInstance();
@@ -109,23 +330,28 @@ public class RuntimeShader extends Shader {
     /** @hide */
     @Override
     protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
-        return nativeCreateShader(mNativeInstanceRuntimeShaderBuilder, nativeMatrix, mIsOpaque);
+        return nativeCreateShader(mNativeInstanceRuntimeShaderBuilder, nativeMatrix, mForceOpaque);
     }
 
-    public long getNativeShaderBuilder() {
+    /** @hide */
+    protected long getNativeShaderBuilder() {
         return mNativeInstanceRuntimeShaderBuilder;
     }
 
-    public boolean isOpaque() {
-        return mIsOpaque;
-    }
-
     private static native long nativeGetFinalizer();
-    private static native long nativeCreateBuilder(String sksl);
+    private static native long nativeCreateBuilder(String agsl);
     private static native long nativeCreateShader(
             long shaderBuilder, long matrix, boolean isOpaque);
     private static native void nativeUpdateUniforms(
-            long shaderBuilder, String uniformName, float[] uniforms);
+            long shaderBuilder, String uniformName, float[] uniforms, boolean isColor);
+    private static native void nativeUpdateUniforms(
+            long shaderBuilder, String uniformName, float value1, float value2, float value3,
+            float value4, int count);
+    private static native void nativeUpdateUniforms(
+            long shaderBuilder, String uniformName, int[] uniforms);
+    private static native void nativeUpdateUniforms(
+            long shaderBuilder, String uniformName, int value1, int value2, int value3,
+            int value4, int count);
     private static native void nativeUpdateShader(
             long shaderBuilder, String shaderName, long shader);
 }
