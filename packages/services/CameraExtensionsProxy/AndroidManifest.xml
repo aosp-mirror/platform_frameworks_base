@@ -8,6 +8,7 @@
         android:directBootAware="true">
 
         <service android:name=".CameraExtensionsProxyService"
+            android:visibleToInstantApps="true"
             android:exported="true">
         </service>
         <uses-library android:name="androidx.camera.extensions.impl" android:required="false" />

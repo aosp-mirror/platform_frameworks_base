@@ -146,7 +146,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         mNotificationShadeWindowController.attach();
 
         clearInvocations(mWindowManager);
-        mNotificationShadeWindowController.setLightRevealScrimAmount(0f);
+        mNotificationShadeWindowController.setLightRevealScrimOpaque(true);
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_SHOW_WALLPAPER) == 0).isTrue();
     }

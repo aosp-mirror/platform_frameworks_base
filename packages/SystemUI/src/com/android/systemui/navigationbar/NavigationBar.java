@@ -410,6 +410,12 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             new Handler(Looper.getMainLooper())) {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
+            // TODO(b/198002034): Content observers currently can still be called back after being
+            // unregistered, and in this case we can ignore the change if the nav bar has been
+            // destroyed already
+            if (mNavigationBarView == null) {
+                return;
+            }
             updateAssistantEntrypoints();
         }
     };
@@ -601,6 +607,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     }
 
     public void destroyView() {
+        setAutoHideController(/* autoHideController */ null);
         mCommandQueue.removeCallback(this);
         mContext.getSystemService(WindowManager.class).removeViewImmediate(
                 mNavigationBarView.getRootView());
@@ -651,7 +658,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         if (mIsOnDefaultDisplay) {
             final RotationButtonController rotationButtonController =
                     mNavigationBarView.getRotationButtonController();
-            rotationButtonController.addRotationCallback(mRotationWatcher);
+            rotationButtonController.setRotationCallback(mRotationWatcher);
 
             // Reset user rotation pref to match that of the WindowManager if starting in locked
             // mode. This will automatically happen when switching from auto-rotate to locked mode.
@@ -690,6 +697,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     @Override
     public void onViewDetachedFromWindow(View v) {
+        final RotationButtonController rotationButtonController =
+                mNavigationBarView.getRotationButtonController();
+        rotationButtonController.setRotationCallback(null);
         mNavigationBarView.getBarTransitions().destroy();
         mNavigationBarView.getLightTransitionsController().destroy(mContext);
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
@@ -937,6 +947,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     @Override
     public void onRotationProposal(final int rotation, boolean isValid) {
+        // The CommandQueue callbacks are added when the view is created to ensure we track other
+        // states, but until the view is attached (at the next traversal), the view's display is
+        // not valid.  Just ignore the rotation in this case.
+        if (!mNavigationBarView.isAttachedToWindow()) return;
+
         final int winRotation = mNavigationBarView.getDisplay().getRotation();
         final boolean rotateSuggestionsDisabled = RotationButtonController
                 .hasDisable2RotateSuggestionFlag(mDisabledFlags2);
@@ -1516,7 +1531,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     }
 
     /** Sets {@link AutoHideController} to the navigation bar. */
-    public void setAutoHideController(AutoHideController autoHideController) {
+    private void setAutoHideController(AutoHideController autoHideController) {
         mAutoHideController = autoHideController;
         if (mAutoHideController != null) {
             mAutoHideController.setNavigationBar(mAutoHideUiElement);

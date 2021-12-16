@@ -228,10 +228,9 @@ Stream* Stream::getPairStream() const
    return mStreamManager->getPairStream(this);
 }
 
-Stream* Stream::playPairStream() {
+Stream* Stream::playPairStream(std::vector<std::any>& garbage) {
     Stream* pairStream = getPairStream();
     LOG_ALWAYS_FATAL_IF(pairStream == nullptr, "No pair stream!");
-    sp<AudioTrack> releaseTracks[2];
     {
         ALOGV("%s: track streamID: %d", __func__, (int)getStreamID());
         // TODO: Do we really want to force a simultaneous synchronization between
@@ -260,7 +259,7 @@ Stream* Stream::playPairStream() {
         const int pairState = pairStream->mState;
         pairStream->play_l(pairStream->mSound, pairStream->mStreamID,
                 pairStream->mLeftVolume, pairStream->mRightVolume, pairStream->mPriority,
-                pairStream->mLoop, pairStream->mRate, releaseTracks);
+                pairStream->mLoop, pairStream->mRate, garbage);
         if (pairStream->mState == IDLE) {
             return nullptr; // AudioTrack error
         }
@@ -269,17 +268,16 @@ Stream* Stream::playPairStream() {
             pairStream->mAudioTrack->pause();
         }
     }
-    // release tracks outside of Stream lock
     return pairStream;
 }
 
 void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
         float leftVolume, float rightVolume, int32_t priority, int32_t loop, float rate,
-        sp<AudioTrack> releaseTracks[2])
+        std::vector<std::any>& garbage)
 {
-    // These tracks are released without the lock.
-    sp<AudioTrack> &oldTrack = releaseTracks[0];
-    sp<AudioTrack> &newTrack = releaseTracks[1];
+    // oldTrack and newTrack are placeholders to be released by garbage without the lock.
+    sp<AudioTrack> oldTrack;
+    sp<AudioTrack> newTrack;
     status_t status = NO_ERROR;
 
     {
@@ -383,8 +381,12 @@ exit:
         mState = IDLE;
         mSoundID = 0;
         mSound.reset();
-        mAudioTrack.clear();  // actual release from releaseTracks[]
+        mAudioTrack.clear();  // actual release from garbage
     }
+
+    // move tracks to garbage to be released later outside of lock.
+    if (newTrack) garbage.emplace_back(std::move(newTrack));
+    if (oldTrack) garbage.emplace_back(std::move(oldTrack));
 }
 
 /* static */

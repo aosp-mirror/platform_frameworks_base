@@ -18,6 +18,7 @@ package android.bluetooth.le;
 
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
+import android.bluetooth.Attributable;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.IBluetoothGatt;
@@ -25,7 +26,6 @@ import android.bluetooth.IBluetoothManager;
 import android.bluetooth.annotations.RequiresBluetoothLocationPermission;
 import android.bluetooth.annotations.RequiresBluetoothScanPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
-import android.content.Attributable;
 import android.content.AttributionSource;
 import android.os.Handler;
 import android.os.Looper;

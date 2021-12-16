@@ -1749,12 +1749,12 @@ public class InputMethodService extends AbstractInputMethodService {
         if (config.orientation != Configuration.ORIENTATION_LANDSCAPE) {
             return false;
         }
-        if ((mInputEditorInfo != null
-                && (mInputEditorInfo.imeOptions & EditorInfo.IME_FLAG_NO_FULLSCREEN) != 0)
+        if (mInputEditorInfo != null
+                && ((mInputEditorInfo.imeOptions & EditorInfo.IME_FLAG_NO_FULLSCREEN) != 0
                 // If app window has portrait orientation, regardless of what display orientation
                 // is, IME shouldn't use fullscreen-mode.
                 || (mInputEditorInfo.internalImeOptions
-                        & EditorInfo.IME_INTERNAL_FLAG_APP_WINDOW_PORTRAIT) != 0) {
+                        & EditorInfo.IME_INTERNAL_FLAG_APP_WINDOW_PORTRAIT) != 0)) {
             return false;
         }
         return true;

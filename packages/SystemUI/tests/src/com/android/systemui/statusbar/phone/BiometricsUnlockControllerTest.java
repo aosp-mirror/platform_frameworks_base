@@ -274,6 +274,26 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBiometricAuthenticated_onLockScreen() {
+        // GIVEN not dozing
+        when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
+
+        // WHEN we want to unlock collapse
+        mBiometricUnlockController.startWakeAndUnlock(
+                BiometricUnlockController.MODE_UNLOCK_COLLAPSING);
+
+        // THEN we collpase the panels and notify authenticated
+        verify(mShadeController).animateCollapsePanels(
+                /* flags */ anyInt(),
+                /* force */ eq(true),
+                /* delayed */ eq(false),
+                /* speedUpFactor */ anyFloat()
+        );
+        verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(
+                /* strongAuth */ eq(false));
+    }
+
+    @Test
     public void onBiometricAuthenticated_whenFace_noBypass_encrypted_doNothing() {
         reset(mUpdateMonitor);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);

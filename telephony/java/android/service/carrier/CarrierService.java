@@ -115,13 +115,43 @@ public abstract class CarrierService extends Service {
      *               active. Set this value to true to begin showing
      *               alternative UI and false to stop.
      * @see android.telephony.TelephonyManager#hasCarrierPrivileges
+     * @deprecated use {@link #notifyCarrierNetworkChange(int, boolean)} instead.
+     *             With no parameter to specify the subscription, this API will
+     *             apply to all subscriptions that the carrier app has carrier
+     *             privileges on.
      */
+    @Deprecated
     public final void notifyCarrierNetworkChange(boolean active) {
         TelephonyRegistryManager telephonyRegistryMgr =
             (TelephonyRegistryManager) this.getSystemService(
                 Context.TELEPHONY_REGISTRY_SERVICE);
         if (telephonyRegistryMgr != null) {
             telephonyRegistryMgr.notifyCarrierNetworkChange(active);
+        }
+    }
+
+    /**
+     * Informs the system of an intentional upcoming carrier network change by a carrier app on the
+     * given {@code subscriptionId}. This call is optional and is only used to allow the system to
+     * provide alternative UI while telephony is performing an action that may result in
+     * intentional, temporary network lack of connectivity.
+     *
+     * <p>Based on the active parameter passed in, this method will either show or hide the
+     * alternative UI. There is no timeout associated with showing this UX, so a carrier app must
+     * be sure to call with active set to false sometime after calling with it set to true.
+     *
+     * <p>Requires Permission: calling app has carrier privileges.
+     *
+     * @param subscriptionId the subscription of the carrier network that trigger the change.
+     * @param active whether the carrier network change is or shortly will be active. Set this
+     *               value to true to begin showing alternative UI and false to stop.
+     * @see android.telephony.TelephonyManager#hasCarrierPrivileges
+     */
+    public final void notifyCarrierNetworkChange(int subscriptionId, boolean active) {
+        TelephonyRegistryManager telephonyRegistryMgr = this.getSystemService(
+                TelephonyRegistryManager.class);
+        if (telephonyRegistryMgr != null) {
+            telephonyRegistryMgr.notifyCarrierNetworkChange(subscriptionId, active);
         }
     }
 

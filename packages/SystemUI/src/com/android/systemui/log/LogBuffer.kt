@@ -16,6 +16,7 @@
 
 package com.android.systemui.log
 
+import android.os.Trace
 import android.util.Log
 import com.android.systemui.log.dagger.LogModule
 import java.io.PrintWriter
@@ -169,7 +170,7 @@ class LogBuffer(
         buffer.add(message as LogMessageImpl)
         if (logcatEchoTracker.isBufferLoggable(name, message.level) ||
                 logcatEchoTracker.isTagLoggable(message.tag, message.level)) {
-            echoToLogcat(message)
+            echo(message)
         }
     }
 
@@ -219,7 +220,7 @@ class LogBuffer(
         pw.println(message.printer(message))
     }
 
-    private fun echoToLogcat(message: LogMessage) {
+    private fun echo(message: LogMessage) {
         val strMessage = message.printer(message)
         when (message.level) {
             LogLevel.VERBOSE -> Log.v(message.tag, strMessage)
@@ -229,6 +230,7 @@ class LogBuffer(
             LogLevel.ERROR -> Log.e(message.tag, strMessage)
             LogLevel.WTF -> Log.wtf(message.tag, strMessage)
         }
+        Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events", strMessage)
     }
 }
 

@@ -57,11 +57,10 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         this(new MockClocks());
     }
 
-    public void initMeasuredEnergyStats() {
+    public void initMeasuredEnergyStats(String[] customBucketNames) {
         final boolean[] supportedStandardBuckets =
                 new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];
         Arrays.fill(supportedStandardBuckets, true);
-        final String[] customBucketNames = {"FOO", "BAR"};
         mGlobalMeasuredEnergyStats =
                 new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
     }
