@@ -44,6 +44,9 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class provides an API to store and manage L3 network IP configuration.
+ */
 public class IpConfigStore {
     private static final String TAG = "IpConfigStore";
     private static final boolean DBG = false;
@@ -78,6 +81,9 @@ public class IpConfigStore {
         return writeConfig(out, configKey, config, IPCONFIG_FILE_VERSION);
     }
 
+    /**
+     *  Write the IP configuration with the given parameters to {@link DataOutputStream}.
+     */
     @VisibleForTesting
     public static boolean writeConfig(DataOutputStream out, String configKey,
                                 IpConfiguration config, int version) throws IOException {
@@ -154,10 +160,10 @@ public class IpConfigStore {
                     break;
                 case UNASSIGNED:
                     /* Ignore */
-                        break;
-                    default:
-                        loge("Ignore invalid proxy settings while writing");
-                        break;
+                    break;
+                default:
+                    loge("Ignore invalid proxy settings while writing");
+                    break;
             }
 
             if (written) {
@@ -177,7 +183,7 @@ public class IpConfigStore {
     }
 
     /**
-     * @Deprecated use {@link #writeIpConfigurations(String, ArrayMap)} instead.
+     * @deprecated use {@link #writeIpConfigurations(String, ArrayMap)} instead.
      * New method uses string as network identifier which could be interface name or MAC address or
      * other token.
      */
@@ -186,22 +192,28 @@ public class IpConfigStore {
                                               final SparseArray<IpConfiguration> networks) {
         mWriter.write(filePath, out -> {
             out.writeInt(IPCONFIG_FILE_VERSION);
-            for(int i = 0; i < networks.size(); i++) {
+            for (int i = 0; i < networks.size(); i++) {
                 writeConfig(out, String.valueOf(networks.keyAt(i)), networks.valueAt(i));
             }
         });
     }
 
+    /**
+     *  Write the IP configuration associated to the target networks to the destination path.
+     */
     public void writeIpConfigurations(String filePath,
                                       ArrayMap<String, IpConfiguration> networks) {
         mWriter.write(filePath, out -> {
             out.writeInt(IPCONFIG_FILE_VERSION);
-            for(int i = 0; i < networks.size(); i++) {
+            for (int i = 0; i < networks.size(); i++) {
                 writeConfig(out, networks.keyAt(i), networks.valueAt(i));
             }
         });
     }
 
+    /**
+     * Read the IP configuration from the destination path to {@link BufferedInputStream}.
+     */
     public static ArrayMap<String, IpConfiguration> readIpConfigurations(String filePath) {
         BufferedInputStream bufferedInputStream;
         try {
@@ -215,7 +227,7 @@ public class IpConfigStore {
         return readIpConfigurations(bufferedInputStream);
     }
 
-    /** @Deprecated use {@link #readIpConfigurations(String)} */
+    /** @deprecated use {@link #readIpConfigurations(String)} */
     @Deprecated
     public static SparseArray<IpConfiguration> readIpAndProxyConfigurations(String filePath) {
         BufferedInputStream bufferedInputStream;
@@ -230,7 +242,7 @@ public class IpConfigStore {
         return readIpAndProxyConfigurations(bufferedInputStream);
     }
 
-    /** @Deprecated use {@link #readIpConfigurations(InputStream)} */
+    /** @deprecated use {@link #readIpConfigurations(InputStream)} */
     @Deprecated
     public static SparseArray<IpConfiguration> readIpAndProxyConfigurations(
             InputStream inputStream) {
@@ -420,7 +432,7 @@ public class IpConfigStore {
             if (in != null) {
                 try {
                     in.close();
-                } catch (Exception e) {}
+                } catch (Exception e) { }
             }
         }
 

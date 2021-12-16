@@ -114,6 +114,23 @@ filegroup {
     ],
 }
 
+// Ethernet related libraries.
+
+filegroup {
+    name: "framework-connectivity-ethernet-sources",
+    srcs: [
+        "src/android/net/EthernetManager.java",
+        "src/android/net/EthernetNetworkSpecifier.java",
+        "src/android/net/IEthernetManager.aidl",
+        "src/android/net/IEthernetServiceListener.aidl",
+        "src/android/net/ITetheredInterfaceCallback.aidl",
+    ],
+    path: "src",
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
 // Connectivity-T common libraries.
 
 filegroup {
@@ -130,6 +147,7 @@ filegroup {
 filegroup {
     name: "framework-connectivity-tiramisu-sources",
     srcs: [
+        ":framework-connectivity-ethernet-sources",
         ":framework-connectivity-ipsec-sources",
         ":framework-connectivity-netstats-sources",
         ":framework-connectivity-nsd-sources",

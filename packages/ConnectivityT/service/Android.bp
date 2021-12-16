@@ -61,11 +61,25 @@ filegroup {
     ],
 }
 
+// Ethernet related libraries.
+
+filegroup {
+    name: "services.connectivity-ethernet-sources",
+    srcs: [
+        "src/com/android/server/net/IpConfigStore.java",
+    ],
+    path: "src",
+    visibility: [
+        "//frameworks/opt/net/ethernet",
+    ],
+}
+
 // Connectivity-T common libraries.
 
 filegroup {
     name: "services.connectivity-tiramisu-sources",
     srcs: [
+        ":services.connectivity-ethernet-sources",
         ":services.connectivity-ipsec-sources",
         ":services.connectivity-netstats-sources",
         ":services.connectivity-nsd-sources",
