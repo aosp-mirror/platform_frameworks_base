@@ -1175,7 +1175,8 @@ public class SystemConfig {
                                 readPrivAppPermissions(parser, mSystemExtPrivAppPermissions,
                                         mSystemExtPrivAppDenyPermissions);
                             } else if (apex) {
-                                readApexPrivAppPermissions(parser, permFile);
+                                readApexPrivAppPermissions(parser, permFile,
+                                        Environment.getApexDirectory().toPath());
                             } else {
                                 readPrivAppPermissions(parser, mPrivAppPermissions,
                                         mPrivAppDenyPermissions);
@@ -1735,8 +1736,7 @@ public class SystemConfig {
     /**
      * Returns the module name for a file in the apex module's partition.
      */
-    private String getApexModuleNameFromFilePath(Path path) {
-        final Path apexDirectoryPath = Environment.getApexDirectory().toPath();
+    private String getApexModuleNameFromFilePath(Path path, Path apexDirectoryPath) {
         if (!path.startsWith(apexDirectoryPath)) {
             throw new IllegalArgumentException("File " + path + " is not part of an APEX.");
         }
@@ -1748,9 +1748,14 @@ public class SystemConfig {
         return path.getName(apexDirectoryPath.getNameCount()).toString();
     }
 
-    private void readApexPrivAppPermissions(XmlPullParser parser, File permFile)
-            throws IOException, XmlPullParserException {
-        final String moduleName = getApexModuleNameFromFilePath(permFile.toPath());
+    /**
+     * Reads the contents of the privileged permission allowlist stored inside an APEX.
+     */
+    @VisibleForTesting
+    public void readApexPrivAppPermissions(XmlPullParser parser, File permFile,
+            Path apexDirectoryPath) throws IOException, XmlPullParserException {
+        final String moduleName =
+                getApexModuleNameFromFilePath(permFile.toPath(), apexDirectoryPath);
         final ArrayMap<String, ArraySet<String>> privAppPermissions;
         if (mApexPrivAppPermissions.containsKey(moduleName)) {
             privAppPermissions = mApexPrivAppPermissions.get(moduleName);
