@@ -826,8 +826,6 @@ public class SubscriptionInfo implements Parcelable {
      * Get the usage setting for this subscription.
      *
      * @return the usage setting used for this subscription.
-     *
-     * @hide
      */
     public @UsageSetting int getUsageSetting() {
         return mUsageSetting;

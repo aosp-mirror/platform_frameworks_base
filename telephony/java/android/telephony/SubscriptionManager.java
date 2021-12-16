@@ -1061,8 +1061,6 @@ public class SubscriptionManager {
      *
      * It may also be provided by a carrier that wishes to provide a value to avoid making any
      * settings changes.
-     *
-     * @hide
      */
     public static final int USAGE_SETTING_UNKNOWN = -1;
 
@@ -1076,22 +1074,24 @@ public class SubscriptionManager {
      * An opportunistic subscription will default to data-centric.
      *
      * {@see SubscriptionInfo#isOpportunistic}
-     *
-     * @hide
      */
     public static final int USAGE_SETTING_DEFAULT = 0;
 
     /**
      * This subscription is forced to voice-centric mode
      *
-     * @hide
+     * <p>Refer to voice-centric mode in 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
+     * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
+     * Annex A.
      */
     public static final int USAGE_SETTING_VOICE_CENTRIC = 1;
 
     /**
      * This subscription is forced to data-centric mode
      *
-     * @hide
+     * <p>Refer to data-centric mode in 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
+     * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
+     * Annex A.
      */
     public static final int USAGE_SETTING_DATA_CENTRIC = 2;
 

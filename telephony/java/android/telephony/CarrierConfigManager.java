@@ -4473,6 +4473,10 @@ public class CarrierConfigManager {
      * network if the primary use case (voice or data) is not satisfied. Depending on the type
      * of device, it may operate in a voice or data-centric mode by default.
      *
+     * <p>Sets the usage setting in accordance with 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
+     * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
+     * Annex A.
+     *
      * Either omit this key or pass a value of
      * {@link SubscriptionManager#USAGE_SETTING_UNKNOWN unknown} to preserve the current setting.
      *
@@ -4480,8 +4484,6 @@ public class CarrierConfigManager {
      * {@link SubscriptionManager#USAGE_SETTING_VOICE_CENTRIC voice-centric},
      * or {@link SubscriptionManager#USAGE_SETTING_DATA_CENTRIC data-centric}.
      * {@see SubscriptionInfo#getUsageSetting}
-     *
-     * @hide
      */
     public static final String KEY_CELLULAR_USAGE_SETTING_INT =
             "cellular_usage_setting_int";
