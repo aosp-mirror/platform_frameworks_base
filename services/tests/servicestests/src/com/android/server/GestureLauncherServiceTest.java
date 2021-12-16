@@ -1450,11 +1450,10 @@ public class GestureLauncherServiceTest {
     }
 
     private void withEmergencyGesturePowerButtonCooldownPeriodMsValue(int period) {
-        Settings.Secure.putIntForUser(
+        Settings.Global.putInt(
                 mContentResolver,
-                Settings.Secure.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
-                period,
-                UserHandle.USER_CURRENT);
+                Settings.Global.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
+                period);
     }
 
     private void withUserSetupCompleteValue(boolean userSetupComplete) {
