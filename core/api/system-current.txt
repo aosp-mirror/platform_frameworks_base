@@ -13799,6 +13799,7 @@ package android.telephony.ims {
     method public void disableIms(int);
     method public void enableIms(int);
     method public android.telephony.ims.stub.ImsConfigImplBase getConfig(int);
+    method @NonNull public java.util.concurrent.Executor getExecutor();
     method public long getImsServiceCapabilities();
     method public android.telephony.ims.stub.ImsRegistrationImplBase getRegistration(int);
     method @Nullable public android.telephony.ims.stub.SipTransportImplBase getSipTransport(int);
@@ -14417,6 +14418,7 @@ package android.telephony.ims.feature {
 
   public class MmTelFeature extends android.telephony.ims.feature.ImsFeature {
     ctor public MmTelFeature();
+    ctor public MmTelFeature(@NonNull java.util.concurrent.Executor);
     method public void changeEnabledCapabilities(@NonNull android.telephony.ims.feature.CapabilityChangeRequest, @NonNull android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
     method public void changeOfferedRtpHeaderExtensionTypes(@NonNull java.util.Set<android.telephony.ims.RtpHeaderExtensionType>);
     method @Nullable public android.telephony.ims.ImsCallProfile createCallProfile(int, int);
@@ -14450,7 +14452,7 @@ package android.telephony.ims.feature {
   }
 
   public class RcsFeature extends android.telephony.ims.feature.ImsFeature {
-    ctor @Deprecated public RcsFeature();
+    ctor public RcsFeature();
     ctor public RcsFeature(@NonNull java.util.concurrent.Executor);
     method public void changeEnabledCapabilities(@NonNull android.telephony.ims.feature.CapabilityChangeRequest, @NonNull android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
     method @NonNull public android.telephony.ims.stub.RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(@NonNull android.telephony.ims.stub.CapabilityExchangeEventListener);
@@ -14555,6 +14557,7 @@ package android.telephony.ims.stub {
   }
 
   public class ImsConfigImplBase {
+    ctor public ImsConfigImplBase(@NonNull java.util.concurrent.Executor);
     ctor public ImsConfigImplBase();
     method public int getConfigInt(int);
     method public String getConfigString(int);
@@ -14607,6 +14610,7 @@ package android.telephony.ims.stub {
 
   public class ImsRegistrationImplBase {
     ctor public ImsRegistrationImplBase();
+    ctor public ImsRegistrationImplBase(@NonNull java.util.concurrent.Executor);
     method public final void onDeregistered(android.telephony.ims.ImsReasonInfo);
     method public final void onRegistered(int);
     method public final void onRegistered(@NonNull android.telephony.ims.ImsRegistrationAttributes);
@@ -14719,6 +14723,7 @@ package android.telephony.ims.stub {
   }
 
   public class SipTransportImplBase {
+    ctor public SipTransportImplBase();
     ctor public SipTransportImplBase(@NonNull java.util.concurrent.Executor);
     method public void createSipDelegate(int, @NonNull android.telephony.ims.DelegateRequest, @NonNull android.telephony.ims.DelegateStateCallback, @NonNull android.telephony.ims.DelegateMessageCallback);
     method public void destroySipDelegate(@NonNull android.telephony.ims.stub.SipDelegate, int);
