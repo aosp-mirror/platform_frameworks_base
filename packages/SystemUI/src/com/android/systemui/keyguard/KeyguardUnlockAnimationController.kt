@@ -24,6 +24,7 @@ import android.graphics.Matrix
 import android.view.RemoteAnimationTarget
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
+import androidx.annotation.VisibleForTesting
 import androidx.core.math.MathUtils
 import com.android.internal.R
 import com.android.keyguard.KeyguardClockSwitchController
@@ -32,6 +33,7 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -91,7 +93,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
     private val keyguardViewMediator: Lazy<KeyguardViewMediator>,
     private val keyguardViewController: KeyguardViewController,
     private val smartspaceTransitionController: SmartspaceTransitionController,
-    private val featureFlags: FeatureFlags
+    private val featureFlags: FeatureFlags,
+    private val biometricUnlockController: BiometricUnlockController
 ) : KeyguardStateController.Callback {
 
     /**
@@ -105,7 +108,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * If we're unlocking via biometrics, PIN entry, or from clicking a notification, a canned
      * animation is started in [notifyStartKeyguardExitAnimation].
      */
-    private var surfaceTransactionApplier: SyncRtSurfaceTransactionApplier? = null
+    @VisibleForTesting
+    var surfaceTransactionApplier: SyncRtSurfaceTransactionApplier? = null
     private var surfaceBehindRemoteAnimationTarget: RemoteAnimationTarget? = null
     private var surfaceBehindRemoteAnimationStartTime: Long = 0
 
@@ -132,7 +136,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * Animator that animates in the surface behind the keyguard. This is used to play a canned
      * animation on the surface, if we're not doing a swipe gesture.
      */
-    private val surfaceBehindEntryAnimator = ValueAnimator.ofFloat(0f, 1f)
+    @VisibleForTesting
+    val surfaceBehindEntryAnimator = ValueAnimator.ofFloat(0f, 1f)
 
     /** Rounded corner radius to apply to the surface behind the keyguard. */
     private var roundedCornerRadius = 0f
@@ -220,7 +225,18 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // to animate it in. Otherwise, the swipe touch events will continue animating it.
         if (!requestedShowSurfaceBehindKeyguard) {
             keyguardViewController.hide(startTime, 350)
-            surfaceBehindEntryAnimator.start()
+
+            // If we're wake and unlocking, we don't want to animate the surface since we're going
+            // to do the light reveal scrim from the black AOD screen. Make it visible and end the
+            // remote aimation.
+            if (biometricUnlockController.isWakeAndUnlock) {
+                setSurfaceBehindAppearAmount(1f)
+                keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(
+                    false /* cancelled */)
+            } else {
+                // Otherwise, animate it in normally.
+                surfaceBehindEntryAnimator.start()
+            }
         }
 
         // Finish the keyguard remote animation if the dismiss amount has crossed the threshold.
@@ -264,7 +280,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * animations and swipe gestures to animate the surface's entry (and exit, if the swipe is
      * cancelled).
      */
-    private fun setSurfaceBehindAppearAmount(amount: Float) {
+    fun setSurfaceBehindAppearAmount(amount: Float) {
         if (surfaceBehindRemoteAnimationTarget == null) {
             return
         }
