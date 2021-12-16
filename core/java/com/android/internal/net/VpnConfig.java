@@ -34,8 +34,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -93,8 +91,8 @@ public class VpnConfig implements Parcelable {
     public String interfaze;
     public String session;
     public int mtu = -1;
-    public List<LinkAddress> addresses = new ArrayList<LinkAddress>();
-    public List<RouteInfo> routes = new ArrayList<RouteInfo>();
+    public List<LinkAddress> addresses = new ArrayList<>();
+    public List<RouteInfo> routes = new ArrayList<>();
     public List<String> dnsServers;
     public List<String> searchDomains;
     public List<String> allowedApplications;
@@ -114,12 +112,32 @@ public class VpnConfig implements Parcelable {
     public VpnConfig() {
     }
 
-    public void updateAllowedFamilies(InetAddress address) {
-        if (address instanceof Inet4Address) {
-            allowIPv4 = true;
-        } else {
-            allowIPv6 = true;
-        }
+    public VpnConfig(VpnConfig other) {
+        user = other.user;
+        interfaze = other.interfaze;
+        session = other.session;
+        mtu = other.mtu;
+        addresses = copyOf(other.addresses);
+        routes = copyOf(other.routes);
+        dnsServers = copyOf(other.dnsServers);
+        searchDomains = copyOf(other.searchDomains);
+        allowedApplications = copyOf(other.allowedApplications);
+        disallowedApplications = copyOf(other.disallowedApplications);
+        configureIntent = other.configureIntent;
+        startTime = other.startTime;
+        legacy = other.legacy;
+        blocking = other.blocking;
+        allowBypass = other.allowBypass;
+        allowIPv4 = other.allowIPv4;
+        allowIPv6 = other.allowIPv6;
+        isMetered = other.isMetered;
+        underlyingNetworks = other.underlyingNetworks != null ? Arrays.copyOf(
+                other.underlyingNetworks, other.underlyingNetworks.length) : null;
+        proxyInfo = other.proxyInfo;
+    }
+
+    private static <T> List<T> copyOf(List<T> list) {
+        return list != null ? new ArrayList<>(list) : null;
     }
 
     public void addLegacyRoutes(String routesStr) {
@@ -131,7 +149,6 @@ public class VpnConfig implements Parcelable {
             //each route is ip/prefix
             RouteInfo info = new RouteInfo(new IpPrefix(route), null, null, RouteInfo.RTN_UNICAST);
             this.routes.add(info);
-            updateAllowedFamilies(info.getDestination().getAddress());
         }
     }
 
@@ -144,7 +161,6 @@ public class VpnConfig implements Parcelable {
             //each address is ip/prefix
             LinkAddress addr = new LinkAddress(address);
             this.addresses.add(addr);
-            updateAllowedFamilies(addr.getAddress());
         }
     }
 
