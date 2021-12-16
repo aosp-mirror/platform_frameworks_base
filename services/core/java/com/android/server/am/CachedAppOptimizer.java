@@ -539,6 +539,8 @@ public final class CachedAppOptimizer {
      */
     static private native void compactProcess(int pid, int compactionFlags);
 
+    static private native void cancelCompaction();
+
     /**
      * Reads the flag value from DeviceConfig to determine whether app compaction
      * should be enabled, and starts the freeze/compaction thread if needed.
@@ -1049,6 +1051,26 @@ public final class CachedAppOptimizer {
         }
     }
 
+    @GuardedBy({"mService", "mProcLock"})
+    void onOomAdjustChanged(int oldAdj, int newAdj, ProcessRecord app) {
+        // Cancel any currently executing compactions
+        // if the process moved out of cached state
+        if (DefaultProcessDependencies.mPidCompacting == app.mPid && newAdj < oldAdj
+                && newAdj < ProcessList.CACHED_APP_MIN_ADJ) {
+            cancelCompaction();
+        }
+
+        // Perform a minor compaction when a perceptible app becomes the prev/home app
+        // Perform a major compaction when any app enters cached
+        if (oldAdj <= ProcessList.PERCEPTIBLE_APP_ADJ
+                && (newAdj == ProcessList.PREVIOUS_APP_ADJ || newAdj == ProcessList.HOME_APP_ADJ)) {
+            compactAppSome(app);
+        } else if (newAdj >= ProcessList.CACHED_APP_MIN_ADJ
+                && newAdj <= ProcessList.CACHED_APP_MAX_ADJ) {
+            compactAppFull(app);
+        }
+    }
+
     @VisibleForTesting
     static final class LastCompactionStats {
         private final long[] mRssAfterCompaction;
@@ -1090,6 +1112,13 @@ public final class CachedAppOptimizer {
                         pid = proc.getPid();
                         name = proc.processName;
                         opt.setHasPendingCompact(false);
+
+                        if (mAm.mInternal.isPendingTopUid(proc.uid)) {
+                            // In case the OOM Adjust has not yet been propagated we see if this is
+                            // pending on becoming top app in which case we should not compact.
+                            Slog.e(TAG_AM, "Skip compaction since UID is active for  " + name);
+                            return;
+                        }
 
                         // don't compact if the process has returned to perceptible
                         // and this is only a cached/home/prev compaction
@@ -1500,6 +1529,8 @@ public final class CachedAppOptimizer {
      * Default implementation for ProcessDependencies, public vor visibility to OomAdjuster class.
      */
     private static final class DefaultProcessDependencies implements ProcessDependencies {
+        public static int mPidCompacting = -1;
+
         // Get memory RSS from process.
         @Override
         public long[] getRss(int pid) {
@@ -1509,6 +1540,7 @@ public final class CachedAppOptimizer {
         // Compact process.
         @Override
         public void performCompaction(String action, int pid) throws IOException {
+            mPidCompacting = pid;
             if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FULL])) {
                 compactProcess(pid, COMPACT_ACTION_FILE_FLAG | COMPACT_ACTION_ANON_FLAG);
             } else if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FILE])) {
@@ -1516,6 +1548,7 @@ public final class CachedAppOptimizer {
             } else if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_ANON])) {
                 compactProcess(pid, COMPACT_ACTION_ANON_FLAG);
             }
+            mPidCompacting = -1;
         }
     }
 }
