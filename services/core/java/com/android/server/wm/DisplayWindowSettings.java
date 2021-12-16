@@ -265,10 +265,6 @@ class DisplayWindowSettings {
         dc.mIsDensityForced = hasDensityOverride;
         dc.mIsSizeForced = hasSizeOverride;
 
-        final boolean ignoreOrientationRequest = settings.mIgnoreOrientationRequest != null
-                ? settings.mIgnoreOrientationRequest : false;
-        dc.setIgnoreOrientationRequest(ignoreOrientationRequest);
-
         final boolean ignoreDisplayCutout = settings.mIgnoreDisplayCutout != null
                 ? settings.mIgnoreDisplayCutout : false;
         dc.mIgnoreDisplayCutout = ignoreDisplayCutout;
@@ -286,6 +282,15 @@ class DisplayWindowSettings {
         boolean dontMoveToTop = settings.mDontMoveToTop != null
                 ? settings.mDontMoveToTop : false;
         dc.mDontMoveToTop = dontMoveToTop;
+    }
+
+    void applyRotationSettingsToDisplayLocked(DisplayContent dc) {
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
+
+        final boolean ignoreOrientationRequest = settings.mIgnoreOrientationRequest != null
+                ? settings.mIgnoreOrientationRequest : false;
+        dc.setIgnoreOrientationRequest(ignoreOrientationRequest);
     }
 
     /**

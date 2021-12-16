@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
@@ -56,7 +55,6 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
 
     static final int DISPLAY_WIDTH = 500;
     static final int DISPLAY_HEIGHT = 1000;
-    static final int DISPLAY_DENSITY = 320;
 
     static final int DISPLAY_CUTOUT_HEIGHT = 8;
     static final int IME_HEIGHT = 415;
@@ -85,12 +83,7 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
         doReturn(true).when(mDisplayPolicy).hasNavigationBar();
         doReturn(true).when(mDisplayPolicy).hasStatusBar();
 
-        final int shortSizeDp =
-                Math.min(DISPLAY_WIDTH, DISPLAY_HEIGHT) * DENSITY_DEFAULT / DISPLAY_DENSITY;
-        final int longSizeDp =
-                Math.min(DISPLAY_WIDTH, DISPLAY_HEIGHT) * DENSITY_DEFAULT / DISPLAY_DENSITY;
-        mDisplayContent.getDisplayRotation().configure(
-                DISPLAY_WIDTH, DISPLAY_HEIGHT, shortSizeDp, longSizeDp);
+        mDisplayContent.getDisplayRotation().configure(DISPLAY_WIDTH, DISPLAY_HEIGHT);
         mDisplayPolicy.onConfigurationChanged();
 
         addWindow(mStatusBarWindow);
