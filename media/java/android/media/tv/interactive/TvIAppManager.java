@@ -244,6 +244,19 @@ public final class TvIAppManager {
             }
 
             @Override
+            public void onCommandRequest(@TvIAppService.IAppServiceCommandType String cmdType,
+                    Bundle parameters, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postCommandRequest(cmdType, parameters);
+                }
+            }
+
+            @Override
             public void onSessionStateChanged(int state, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
@@ -1046,6 +1059,16 @@ public final class TvIAppManager {
             });
         }
 
+        void postCommandRequest(final @TvIAppService.IAppServiceCommandType String cmdType,
+                final Bundle parameters) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onCommandRequest(mSession, cmdType, parameters);
+                }
+            });
+        }
+
         void postSessionStateChanged(int state) {
             mHandler.post(new Runnable() {
                 @Override
@@ -1090,6 +1113,17 @@ public final class TvIAppManager {
          * @param bottom Bottom position.
          */
         public void onLayoutSurface(Session session, int left, int top, int right, int bottom) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#requestCommand} is called.
+         *
+         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param cmdType type of the command.
+         * @param parameters parameters of the command.
+         */
+        public void onCommandRequest(Session session,
+                @TvIAppService.IAppServiceCommandType String cmdType, Bundle parameters) {
         }
 
         /**

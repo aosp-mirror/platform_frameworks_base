@@ -19,6 +19,7 @@ package android.media.tv.interactive;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.interactive.ITvIAppSession;
 import android.media.tv.BroadcastInfoRequest;
+import android.os.Bundle;
 
 /**
  * Helper interface for ITvIAppSession to allow TvIAppService to notify the system service when
@@ -30,4 +31,5 @@ oneway interface ITvIAppSessionCallback {
     void onLayoutSurface(int left, int top, int right, int bottom);
     void onBroadcastInfoRequest(in BroadcastInfoRequest request);
     void onSessionStateChanged(int state);
+    void onCommandRequest(in String cmdType, in Bundle parameters);
 }
