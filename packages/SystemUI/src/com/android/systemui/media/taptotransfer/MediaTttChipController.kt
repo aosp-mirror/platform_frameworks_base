@@ -27,6 +27,10 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
+import java.util.concurrent.Executor
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 const val TAG = "MediaTapToTransfer"
@@ -41,6 +45,8 @@ const val TAG = "MediaTapToTransfer"
 class MediaTttChipController @Inject constructor(
     private val context: Context,
     private val windowManager: WindowManager,
+    @Main private val mainExecutor: Executor,
+    @Background private val backgroundExecutor: Executor,
 ) {
 
     @SuppressLint("WrongConstant") // We're allowed to use TYPE_VOLUME_OVERLAY
@@ -92,6 +98,11 @@ class MediaTttChipController @Inject constructor(
         }
         undoView.setOnClickListener(undoClickListener)
 
+        // Future handling
+        if (chipState is TransferInitiated) {
+            addFutureCallback(chipState)
+        }
+
         // Add view if necessary
         if (oldChipView == null) {
             windowManager.addView(chipView, windowLayoutParams)
@@ -104,4 +115,29 @@ class MediaTttChipController @Inject constructor(
         windowManager.removeView(chipView)
         chipView = null
     }
+
+    /**
+     * Adds the appropriate callbacks to [chipState.future] so that we update the chip correctly
+     * when the future resolves.
+     */
+    private fun addFutureCallback(chipState: TransferInitiated) {
+        // Listen to the future on a background thread so we don't occupy the main thread while we
+        // wait for it to complete.
+        backgroundExecutor.execute {
+            try {
+                val undoRunnable = chipState.future.get(TRANSFER_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                // Make UI changes on the main thread
+                mainExecutor.execute {
+                    displayChip(TransferSucceeded(chipState.otherDeviceName, undoRunnable))
+                }
+            } catch (ex: Exception) {
+                // TODO(b/203800327): Maybe show a failure chip here if UX decides we need one.
+                mainExecutor.execute {
+                    removeChip()
+                }
+            }
+        }
+    }
 }
+
+private const val TRANSFER_TIMEOUT_SECONDS = 10L

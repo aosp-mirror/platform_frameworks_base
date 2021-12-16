@@ -20,7 +20,9 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -46,7 +48,9 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         mediaTttCommandLineHelper =
-            MediaTttCommandLineHelper(commandRegistry, mediaTttChipController)
+            MediaTttCommandLineHelper(
+                commandRegistry, mediaTttChipController, FakeExecutor(FakeSystemClock())
+            )
     }
 
     @Test(expected = IllegalStateException::class)

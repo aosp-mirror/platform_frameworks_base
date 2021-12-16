@@ -190,7 +190,11 @@ open class GhostedViewLaunchAnimatorController(
                 // Making the ghost view invisible will make the ghosted view visible, so order is
                 // important here.
                 ghostView.visibility = View.INVISIBLE
-                ghostedView.visibility = View.INVISIBLE
+
+                // Make the ghosted view invisible again. We use the transition visibility like
+                // GhostView does so that we don't mess up with the accessibility tree (see
+                // b/204944038#comment17).
+                ghostedView.setTransitionVisibility(View.INVISIBLE)
                 backgroundView.visibility = View.INVISIBLE
             }
             return
@@ -261,6 +265,10 @@ open class GhostedViewLaunchAnimatorController(
 
         GhostView.removeGhost(ghostedView)
         launchContainerOverlay.remove(backgroundView)
+
+        // Make sure that the view is considered VISIBLE by accessibility by first making it
+        // INVISIBLE then VISIBLE (see b/204944038#comment17 for more info).
+        ghostedView.visibility = View.INVISIBLE
         ghostedView.visibility = View.VISIBLE
         ghostedView.invalidate()
     }

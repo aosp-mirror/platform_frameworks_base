@@ -98,6 +98,7 @@ import android.view.animation.Interpolator;
 import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.TraceBuffer;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.WindowManagerInternal.AccessibilityControllerInternal;
@@ -275,20 +276,6 @@ final class AccessibilityController {
         if (displayMagnifier != null) {
             displayMagnifier.getMagnificationRegion(outMagnificationRegion);
         }
-    }
-
-    void onRectangleOnScreenRequested(int displayId, Rect rectangle) {
-        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-            mAccessibilityTracing.logTrace(
-                    TAG + ".onRectangleOnScreenRequested",
-                    FLAGS_MAGNIFICATION_CALLBACK,
-                    "displayId=" + displayId + "; rectangle={" + rectangle + "}");
-        }
-        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
-        if (displayMagnifier != null) {
-            displayMagnifier.onRectangleOnScreenRequested(rectangle);
-        }
-        // Not relevant for the window observer.
     }
 
     void onWindowLayersChanged(int displayId) {
@@ -632,31 +619,6 @@ final class AccessibilityController {
                         FLAGS_MAGNIFICATION_CALLBACK);
             }
             return mForceShowMagnifiableBounds;
-        }
-
-        void onRectangleOnScreenRequested(Rect rectangle) {
-            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-                mAccessibilityTracing.logTrace(LOG_TAG + ".onRectangleOnScreenRequested",
-                        FLAGS_MAGNIFICATION_CALLBACK, "rectangle={" + rectangle + "}");
-            }
-            if (DEBUG_RECTANGLE_REQUESTED) {
-                Slog.i(LOG_TAG, "Rectangle on screen requested: " + rectangle);
-            }
-            if (!mMagnifedViewport.isMagnifying()) {
-                return;
-            }
-            Rect magnifiedRegionBounds = mTempRect2;
-            mMagnifedViewport.getMagnifiedFrameInContentCoords(magnifiedRegionBounds);
-            if (magnifiedRegionBounds.contains(rectangle)) {
-                return;
-            }
-            SomeArgs args = SomeArgs.obtain();
-            args.argi1 = rectangle.left;
-            args.argi2 = rectangle.top;
-            args.argi3 = rectangle.right;
-            args.argi4 = rectangle.bottom;
-            mHandler.obtainMessage(MyHandler.MESSAGE_NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED,
-                    args).sendToTarget();
         }
 
         void onWindowLayersChanged() {
@@ -1352,7 +1314,6 @@ final class AccessibilityController {
 
         private class MyHandler extends Handler {
             public static final int MESSAGE_NOTIFY_MAGNIFICATION_REGION_CHANGED = 1;
-            public static final int MESSAGE_NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED = 2;
             public static final int MESSAGE_NOTIFY_USER_CONTEXT_CHANGED = 3;
             public static final int MESSAGE_NOTIFY_DISPLAY_SIZE_CHANGED = 4;
             public static final int MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED = 5;
@@ -1370,16 +1331,6 @@ final class AccessibilityController {
                         final Region magnifiedBounds = (Region) args.arg1;
                         mCallbacks.onMagnificationRegionChanged(magnifiedBounds);
                         magnifiedBounds.recycle();
-                    } break;
-
-                    case MESSAGE_NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED: {
-                        SomeArgs args = (SomeArgs) message.obj;
-                        final int left = args.argi1;
-                        final int top = args.argi2;
-                        final int right = args.argi3;
-                        final int bottom = args.argi4;
-                        mCallbacks.onRectangleOnScreenRequested(left, top, right, bottom);
-                        args.recycle();
                     } break;
 
                     case MESSAGE_NOTIFY_USER_CONTEXT_CHANGED: {
@@ -1902,7 +1853,7 @@ final class AccessibilityController {
         }
     }
 
-    private static final class AccessibilityControllerInternalImpl
+    static final class AccessibilityControllerInternalImpl
             implements AccessibilityControllerInternal {
 
         private static AccessibilityControllerInternalImpl sInstance;
@@ -1917,8 +1868,11 @@ final class AccessibilityController {
 
         private final AccessibilityTracing mTracing;
         private volatile long mEnabledTracingFlags;
+        private UiChangesForAccessibilityCallbacksDispatcher mCallbacksDispatcher;
+        private final Looper mLooper;
 
         private AccessibilityControllerInternalImpl(WindowManagerService service) {
+            mLooper = service.mH.getLooper();
             mTracing = AccessibilityTracing.getInstance(service);
             mEnabledTracingFlags = 0L;
         }
@@ -1971,6 +1925,90 @@ final class AccessibilityController {
                 long threadId, Set<String> ignoreStackEntries) {
             mTracing.logState(where, loggingTypes, callingParams, a11yDump, callingUid, callStack,
                     timeStamp, processId, threadId, ignoreStackEntries);
+        }
+
+        @Override
+        public void setUiChangesForAccessibilityCallbacks(
+                UiChangesForAccessibilityCallbacks callbacks) {
+            if (isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                logTrace(
+                        TAG + ".setAccessibilityWindowManagerCallbacks",
+                        FLAGS_MAGNIFICATION_CALLBACK,
+                        "callbacks={" + callbacks + "}");
+            }
+            if (callbacks != null) {
+                if (mCallbacksDispatcher != null) {
+                    throw new IllegalStateException("Accessibility window manager callback already "
+                            + "set!");
+                }
+                mCallbacksDispatcher =
+                        new UiChangesForAccessibilityCallbacksDispatcher(this, mLooper,
+                                callbacks);
+            } else {
+                if (mCallbacksDispatcher == null) {
+                    throw new IllegalStateException("Accessibility window manager callback already "
+                            + "cleared!");
+                }
+                mCallbacksDispatcher = null;
+            }
+        }
+
+        public boolean hasWindowManagerEventDispatcher() {
+            if (isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK
+                    | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+                logTrace(TAG + ".hasCallbacks",
+                        FLAGS_MAGNIFICATION_CALLBACK | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK);
+            }
+            return mCallbacksDispatcher != null;
+        }
+
+        public void onRectangleOnScreenRequested(int displayId, Rect rectangle) {
+            if (isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                logTrace(
+                        TAG + ".onRectangleOnScreenRequested",
+                        FLAGS_MAGNIFICATION_CALLBACK,
+                        "rectangle={" + rectangle + "}");
+            }
+            if (mCallbacksDispatcher != null) {
+                mCallbacksDispatcher.onRectangleOnScreenRequested(displayId, rectangle);
+            }
+        }
+
+        private static final class UiChangesForAccessibilityCallbacksDispatcher {
+
+            private static final String LOG_TAG = TAG_WITH_CLASS_NAME
+                    ? "WindowManagerEventDispatcher" : TAG_WM;
+
+            private static final boolean DEBUG_RECTANGLE_REQUESTED = false;
+
+            private final AccessibilityControllerInternalImpl mAccessibilityTracing;
+
+            @NonNull
+            private final UiChangesForAccessibilityCallbacks mCallbacks;
+
+            private final Handler mHandler;
+
+            UiChangesForAccessibilityCallbacksDispatcher(
+                    AccessibilityControllerInternalImpl accessibilityControllerInternal,
+                    Looper looper, @NonNull UiChangesForAccessibilityCallbacks callbacks) {
+                mAccessibilityTracing = accessibilityControllerInternal;
+                mCallbacks = callbacks;
+                mHandler = new Handler(looper);
+            }
+
+            void onRectangleOnScreenRequested(int displayId, Rect rectangle) {
+                if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                    mAccessibilityTracing.logTrace(LOG_TAG + ".onRectangleOnScreenRequested",
+                            FLAGS_MAGNIFICATION_CALLBACK, "rectangle={" + rectangle + "}");
+                }
+                if (DEBUG_RECTANGLE_REQUESTED) {
+                    Slog.i(LOG_TAG, "Rectangle on screen requested: " + rectangle);
+                }
+                final Message m = PooledLambda.obtainMessage(
+                        mCallbacks::onRectangleOnScreenRequested, displayId, rectangle.left,
+                        rectangle.top, rectangle.right, rectangle.bottom);
+                mHandler.sendMessage(m);
+            }
         }
     }
 

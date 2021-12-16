@@ -3148,8 +3148,12 @@ package android.accessibilityservice {
     method public void addOnShowModeChangedListener(@NonNull android.accessibilityservice.AccessibilityService.SoftKeyboardController.OnShowModeChangedListener, @Nullable android.os.Handler);
     method public int getShowMode();
     method public boolean removeOnShowModeChangedListener(@NonNull android.accessibilityservice.AccessibilityService.SoftKeyboardController.OnShowModeChangedListener);
+    method @CheckResult public int setInputMethodEnabled(@NonNull String, boolean) throws java.lang.SecurityException;
     method public boolean setShowMode(int);
     method public boolean switchToInputMethod(@NonNull String);
+    field public static final int ENABLE_IME_FAIL_BY_ADMIN = 1; // 0x1
+    field public static final int ENABLE_IME_FAIL_UNKNOWN = 2; // 0x2
+    field public static final int ENABLE_IME_SUCCESS = 0; // 0x0
   }
 
   public static interface AccessibilityService.SoftKeyboardController.OnShowModeChangedListener {
@@ -5443,10 +5447,28 @@ package android.app {
 
   public final class GameManager {
     method public int getGameMode();
+    method public void setGameState(@NonNull android.app.GameState);
     field public static final int GAME_MODE_BATTERY = 3; // 0x3
     field public static final int GAME_MODE_PERFORMANCE = 2; // 0x2
     field public static final int GAME_MODE_STANDARD = 1; // 0x1
     field public static final int GAME_MODE_UNSUPPORTED = 0; // 0x0
+  }
+
+  public final class GameState implements android.os.Parcelable {
+    ctor public GameState(boolean, int);
+    ctor public GameState(boolean, int, @Nullable String, @NonNull android.os.Bundle);
+    method public int describeContents();
+    method @Nullable public String getDescription();
+    method @NonNull public android.os.Bundle getMetadata();
+    method public int getMode();
+    method public boolean isLoading();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.GameState> CREATOR;
+    field public static final int MODE_CONTENT = 4; // 0x4
+    field public static final int MODE_GAMEPLAY_INTERRUPTIBLE = 2; // 0x2
+    field public static final int MODE_GAMEPLAY_UNINTERRUPTIBLE = 3; // 0x3
+    field public static final int MODE_NONE = 1; // 0x1
+    field public static final int MODE_UNKNOWN = 0; // 0x0
   }
 
   public class Instrumentation {
@@ -51724,7 +51746,6 @@ package android.view.accessibility {
   public static final class AccessibilityNodeInfo.CollectionItemInfo {
     ctor public AccessibilityNodeInfo.CollectionItemInfo(int, int, int, int, boolean);
     ctor public AccessibilityNodeInfo.CollectionItemInfo(int, int, int, int, boolean, boolean);
-    ctor public AccessibilityNodeInfo.CollectionItemInfo(@Nullable String, int, int, @Nullable String, int, int, boolean, boolean);
     method public int getColumnIndex();
     method public int getColumnSpan();
     method @Nullable public String getColumnTitle();
@@ -51736,6 +51757,19 @@ package android.view.accessibility {
     method public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean);
     method public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean, boolean);
     method @NonNull public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(@Nullable String, int, int, @Nullable String, int, int, boolean, boolean);
+  }
+
+  public static final class AccessibilityNodeInfo.CollectionItemInfo.Builder {
+    ctor public AccessibilityNodeInfo.CollectionItemInfo.Builder();
+    method @NonNull public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo build();
+    method @NonNull public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo.Builder setColumnIndex(int);
+    method @NonNull public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo.Builder setColumnSpan(int);
+    method @NonNull public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo.Builder setColumnTitle(@Nullable String);
+    method @NonNull public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo.Builder setHeading(boolean);
+    method @NonNull public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo.Builder setRowIndex(int);
+    method @NonNull public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo.Builder setRowSpan(int);
+    method @NonNull public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo.Builder setRowTitle(@Nullable String);
+    method @NonNull public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo.Builder setSelected(boolean);
   }
 
   public static final class AccessibilityNodeInfo.ExtraRenderingInfo {

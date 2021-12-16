@@ -396,6 +396,7 @@ public class SettingsBackupTest {
                     Settings.Global.OTA_DISABLE_AUTOMATIC_UPDATE,
                     Settings.Global.OVERLAY_DISPLAY_DEVICES,
                     Settings.Global.PAC_CHANGE_DELAY,
+                    Settings.Global.PACKAGE_STREAMING_VERIFIER_TIMEOUT,
                     Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE,
                     Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB,
                     Settings.Global.PACKAGE_VERIFIER_SETTING_VISIBLE,

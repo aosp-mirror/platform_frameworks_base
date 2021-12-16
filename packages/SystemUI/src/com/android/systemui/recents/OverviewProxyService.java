@@ -404,6 +404,13 @@ public class OverviewProxyService extends CurrentUserTracker implements
                     () -> mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN));
         }
 
+        @Override
+        public void toggleNotificationPanel() {
+            verifyCallerAndClearCallingIdentityPostMain("toggleNotificationPanel", () ->
+                    mStatusBarOptionalLazy.get().ifPresent(StatusBar::togglePanel));
+        }
+
+
         private boolean verifyCaller(String reason) {
             final int callerId = Binder.getCallingUserHandle().getIdentifier();
             if (callerId != mCurrentBoundedUserId) {

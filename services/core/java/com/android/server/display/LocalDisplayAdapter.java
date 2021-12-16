@@ -426,15 +426,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     : mDefaultModeId;
         }
 
-        private int getLogicalDensity() {
-            DensityMap densityMap = getDisplayDeviceConfig().getDensityMap();
-            if (densityMap == null) {
-                return (int) (mStaticDisplayInfo.density * 160 + 0.5);
-            }
-
-            return densityMap.getDensityForResolution(mInfo.width, mInfo.height);
-        }
-
         private void loadDisplayDeviceConfig() {
             // Load display device config
             final Context context = getOverlayContext();
@@ -600,7 +591,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 final DisplayAddress.Physical physicalAddress =
                         DisplayAddress.fromPhysicalDisplayId(mPhysicalDisplayId);
                 mInfo.address = physicalAddress;
-                mInfo.densityDpi = getLogicalDensity();
+                mInfo.densityDpi = (int) (mStaticDisplayInfo.density * 160 + 0.5f);
                 mInfo.xDpi = mActiveSfDisplayMode.xDpi;
                 mInfo.yDpi = mActiveSfDisplayMode.yDpi;
                 mInfo.deviceProductInfo = mStaticDisplayInfo.deviceProductInfo;
@@ -1038,7 +1029,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             for (int i = 0; i < mSupportedModes.size(); i++) {
                 pw.println("  " + mSupportedModes.valueAt(i));
             }
-            pw.println("mSupportedColorModes=" + mSupportedColorModes);
+            pw.println("mSupportedColorModes=" + mSupportedColorModes.toString());
             pw.println("mDisplayDeviceConfig=" + mDisplayDeviceConfig);
         }
 

@@ -28,6 +28,7 @@ import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.people.PeopleProvider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
+import com.android.systemui.unfold.UnfoldLatencyTracker;
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.TaskViewFactory;
@@ -135,6 +136,7 @@ public interface SysUIComponent {
         // No init method needed, just needs to be gotten so that it's created.
         getMediaTttChipController();
         getMediaTttCommandLineHelper();
+        getUnfoldLatencyTracker().init();
     }
 
     /**
@@ -154,6 +156,12 @@ public interface SysUIComponent {
      */
     @SysUISingleton
     ContextComponentHelper getContextComponentHelper();
+
+    /**
+     * Creates a UnfoldLatencyTracker.
+     */
+    @SysUISingleton
+    UnfoldLatencyTracker getUnfoldLatencyTracker();
 
     /**
      * Main dependency providing module.

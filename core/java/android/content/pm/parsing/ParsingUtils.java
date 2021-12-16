@@ -138,7 +138,7 @@ public class ParsingUtils {
             final List<Pair<String, ParsedIntentInfo>> list = new ArrayList<>(size);
             for (int i = 0; i < size; ++i) {
                 list.add(Pair.create(source.readString(), source.readParcelable(
-                        ParsedIntentInfoImpl.class.getClassLoader())));
+                        ParsedIntentInfoImpl.class.getClassLoader(), android.content.pm.parsing.component.ParsedIntentInfo.class)));
             }
 
             return list;

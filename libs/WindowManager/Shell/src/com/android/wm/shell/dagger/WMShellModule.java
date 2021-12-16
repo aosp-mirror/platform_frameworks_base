@@ -107,6 +107,7 @@ public class WMShellModule {
             UiEventLogger uiEventLogger,
             ShellTaskOrganizer organizer,
             DisplayController displayController,
+            @DynamicOverride Optional<OneHandedController> oneHandedOptional,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             TaskViewTransitions taskViewTransitions,
@@ -114,8 +115,8 @@ public class WMShellModule {
         return BubbleController.create(context, null /* synchronizer */,
                 floatingContentCoordinator, statusBarService, windowManager,
                 windowManagerShellWrapper, launcherApps, taskStackListener,
-                uiEventLogger, organizer, displayController, mainExecutor, mainHandler,
-                taskViewTransitions, syncQueue);
+                uiEventLogger, organizer, displayController, oneHandedOptional,
+                mainExecutor, mainHandler, taskViewTransitions, syncQueue);
     }
 
     //
@@ -142,12 +143,10 @@ public class WMShellModule {
     static OneHandedController provideOneHandedController(Context context,
             WindowManager windowManager, DisplayController displayController,
             DisplayLayout displayLayout, TaskStackListenerImpl taskStackListener,
-            UiEventLogger uiEventLogger,
-            @ShellMainThread ShellExecutor mainExecutor,
+            UiEventLogger uiEventLogger, @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
-        return OneHandedController.create(context, windowManager,
-                displayController, displayLayout, taskStackListener, uiEventLogger, mainExecutor,
-                mainHandler);
+        return OneHandedController.create(context, windowManager, displayController, displayLayout,
+                taskStackListener, uiEventLogger, mainExecutor, mainHandler);
     }
 
     //

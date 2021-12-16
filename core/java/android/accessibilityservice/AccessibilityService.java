@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 
 import android.accessibilityservice.GestureDescription.MotionEventGenerator;
 import android.annotation.CallbackExecutor;
+import android.annotation.CheckResult;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -1733,6 +1734,29 @@ public abstract class AccessibilityService extends Service {
         private ArrayMap<OnShowModeChangedListener, Handler> mListeners;
         private final Object mLock;
 
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                ENABLE_IME_SUCCESS,
+                ENABLE_IME_FAIL_BY_ADMIN,
+                ENABLE_IME_FAIL_UNKNOWN
+        })
+        public @interface EnableImeResult {}
+        /**
+         * Return value for {@link #setInputMethodEnabled(String, boolean)}. The action succeeded.
+         */
+        public static final int ENABLE_IME_SUCCESS = 0;
+        /**
+         * Return value for {@link #setInputMethodEnabled(String, boolean)}. The action failed
+         * because the InputMethod is not permitted by device policy manager.
+         */
+        public static final int ENABLE_IME_FAIL_BY_ADMIN = 1;
+        /**
+         * Return value for {@link #setInputMethodEnabled(String, boolean)}. The action failed
+         * and the reason is unknown.
+         */
+        public static final int ENABLE_IME_FAIL_UNKNOWN = 2;
+
         SoftKeyboardController(@NonNull AccessibilityService service, @NonNull Object lock) {
             mService = service;
             mLock = lock;
@@ -1960,6 +1984,39 @@ public abstract class AccessibilityService extends Service {
                 }
             }
             return false;
+        }
+
+        /**
+         * Enable or disable the specified IME for the user for whom the service is activated. The
+         * IME needs to be in the same package as the service and needs to be allowed by device
+         * policy, if there is one. The change will persist until the specified IME is next
+         * explicitly enabled or disabled by whatever means, such as user choice, and may persist
+         * beyond the life cycle of the requesting service.
+         *
+         * @param imeId The ID of the input method to enable or disable. This IME must be installed.
+         * @param enabled {@code true} if the input method associated with {@code imeId} should be
+         *                enabled.
+         * @return status code for the result of enabling/disabling the input method associated
+         *         with {@code imeId}.
+         * @throws SecurityException if the input method is not in the same package as the service.
+         *
+         * @see android.view.inputmethod.InputMethodInfo#getId()
+         */
+        @CheckResult
+        @EnableImeResult
+        public int setInputMethodEnabled(@NonNull String imeId, boolean enabled)
+                throws SecurityException {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance(mService).getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.setInputMethodEnabled(imeId, enabled);
+                } catch (RemoteException re) {
+                    throw new RuntimeException(re);
+                }
+            }
+            return ENABLE_IME_FAIL_UNKNOWN;
         }
     }
 

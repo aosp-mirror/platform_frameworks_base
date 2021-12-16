@@ -346,6 +346,9 @@ public class ExpandedAnimationController
      * bubble is dragged back into the row.
      */
     public void dragBubbleOut(View bubbleView, float x, float y) {
+        if (mMagnetizedBubbleDraggingOut == null) {
+            return;
+        }
         if (mSpringToTouchOnNextMotionEvent) {
             springBubbleTo(mMagnetizedBubbleDraggingOut.getUnderlyingObject(), x, y);
             mSpringToTouchOnNextMotionEvent = false;

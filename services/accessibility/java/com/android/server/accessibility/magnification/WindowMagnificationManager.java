@@ -45,6 +45,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -57,7 +58,8 @@ import java.lang.annotation.RetentionPolicy;
  * {@link MagnificationScaleProvider#constrainScale(float)}
  */
 public class WindowMagnificationManager implements
-        PanningScalingHandler.MagnificationDelegate {
+        PanningScalingHandler.MagnificationDelegate,
+        WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks {
 
     private static final boolean DBG = false;
 
@@ -261,6 +263,13 @@ public class WindowMagnificationManager implements
                 magnifier.reset();
             }
         }
+    }
+
+    @Override
+    public void onRectangleOnScreenRequested(int displayId, int left, int top, int right,
+            int bottom) {
+        // TODO(b/194668976): We will implement following typing focus in window mode after
+        //  our refactor.
     }
 
     @Override

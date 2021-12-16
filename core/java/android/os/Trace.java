@@ -131,6 +131,10 @@ public final class Trace {
     private static native void nativeAsyncTraceBegin(long tag, String name, int cookie);
     @FastNative
     private static native void nativeAsyncTraceEnd(long tag, String name, int cookie);
+    @FastNative
+    private static native void nativeInstant(long tag, String name);
+    @FastNative
+    private static native void nativeInstantForTrack(long tag, String trackName, String name);
 
     private Trace() {
     }
@@ -254,6 +258,42 @@ public final class Trace {
     public static void asyncTraceEnd(long traceTag, String methodName, int cookie) {
         if (isTagEnabled(traceTag)) {
             nativeAsyncTraceEnd(traceTag, methodName, cookie);
+        }
+    }
+
+    /**
+     * Writes a trace message to indicate that a given section of code was invoked.
+     *
+     * @param traceTag The trace tag.
+     * @param methodName The method name to appear in the trace.
+     * @hide
+     */
+    public static void instant(long traceTag, String methodName) {
+        if (methodName == null) {
+            throw new IllegalArgumentException("methodName cannot be null");
+        }
+        if (isTagEnabled(traceTag)) {
+            nativeInstant(traceTag, methodName);
+        }
+    }
+
+    /**
+     * Writes a trace message to indicate that a given section of code was invoked.
+     *
+     * @param traceTag The trace tag.
+     * @param trackName The track where the event should appear in the trace.
+     * @param methodName The method name to appear in the trace.
+     * @hide
+     */
+    public static void instantForTrack(long traceTag, String trackName, String methodName) {
+        if (trackName == null) {
+            throw new IllegalArgumentException("trackName cannot be null");
+        }
+        if (methodName == null) {
+            throw new IllegalArgumentException("methodName cannot be null");
+        }
+        if (isTagEnabled(traceTag)) {
+            nativeInstantForTrack(traceTag, trackName, methodName);
         }
     }
 

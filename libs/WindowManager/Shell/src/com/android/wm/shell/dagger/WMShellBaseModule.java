@@ -362,7 +362,6 @@ public abstract class WMShellBaseModule {
         return Optional.empty();
     }
 
-
     //
     // Task to Surface communication
     //

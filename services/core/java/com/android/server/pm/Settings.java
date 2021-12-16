@@ -1254,11 +1254,14 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    private void checkAndPruneSharedUserLPw(SharedUserSetting s, boolean skipCheck) {
+    boolean checkAndPruneSharedUserLPw(SharedUserSetting s, boolean skipCheck) {
         if (skipCheck || (s.packages.isEmpty() && s.mDisabledPackages.isEmpty())) {
-            mSharedUsers.remove(s.name);
-            removeAppIdLPw(s.userId);
+            if (mSharedUsers.remove(s.name) != null) {
+                removeAppIdLPw(s.userId);
+                return true;
+            }
         }
+        return false;
     }
 
     int removePackageLPw(String name) {
@@ -1267,7 +1270,9 @@ public final class Settings implements Watchable, Snappable {
             removeInstallerPackageStatus(name);
             if (p.getSharedUser() != null) {
                 p.getSharedUser().removePackage(p);
-                checkAndPruneSharedUserLPw(p.getSharedUser(), false);
+                if (checkAndPruneSharedUserLPw(p.getSharedUser(), false)) {
+                    return p.getSharedUser().userId;
+                }
             } else {
                 removeAppIdLPw(p.getAppId());
                 return p.getAppId();

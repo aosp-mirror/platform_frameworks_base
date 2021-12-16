@@ -1860,7 +1860,7 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mSatelliteInterSignalBiasUncertaintyNanos = parcel.readDouble();
             if (gnssMeasurement.hasSatellitePvt()) {
                 ClassLoader classLoader = getClass().getClassLoader();
-                gnssMeasurement.mSatellitePvt = parcel.readParcelable(classLoader);
+                gnssMeasurement.mSatellitePvt = parcel.readParcelable(classLoader, android.location.SatellitePvt.class);
             }
             if (gnssMeasurement.hasCorrelationVectors()) {
                 CorrelationVector[] correlationVectorsArray =

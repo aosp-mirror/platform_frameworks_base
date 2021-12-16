@@ -449,8 +449,8 @@ public final class DisplayInfo implements Parcelable {
         type = source.readInt();
         displayId = source.readInt();
         displayGroupId = source.readInt();
-        address = source.readParcelable(null);
-        deviceProductInfo = source.readParcelable(null);
+        address = source.readParcelable(null, android.view.DisplayAddress.class);
+        deviceProductInfo = source.readParcelable(null, android.hardware.display.DeviceProductInfo.class);
         name = source.readString8();
         appWidth = source.readInt();
         appHeight = source.readInt();
@@ -475,7 +475,7 @@ public final class DisplayInfo implements Parcelable {
         for (int i = 0; i < nColorModes; i++) {
             supportedColorModes[i] = source.readInt();
         }
-        hdrCapabilities = source.readParcelable(null);
+        hdrCapabilities = source.readParcelable(null, android.view.Display.HdrCapabilities.class);
         minimalPostProcessingSupported = source.readBoolean();
         logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();

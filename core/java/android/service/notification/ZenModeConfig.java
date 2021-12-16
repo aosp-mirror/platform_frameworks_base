@@ -211,7 +211,7 @@ public class ZenModeConfig implements Parcelable {
         allowCallsFrom = source.readInt();
         allowMessagesFrom = source.readInt();
         user = source.readInt();
-        manualRule = source.readParcelable(null);
+        manualRule = source.readParcelable(null, android.service.notification.ZenModeConfig.ZenRule.class);
         final int len = source.readInt();
         if (len > 0) {
             final String[] ids = new String[len];
@@ -1800,10 +1800,10 @@ public class ZenModeConfig implements Parcelable {
                 name = source.readString();
             }
             zenMode = source.readInt();
-            conditionId = source.readParcelable(null);
-            condition = source.readParcelable(null);
-            component = source.readParcelable(null);
-            configurationActivity = source.readParcelable(null);
+            conditionId = source.readParcelable(null, android.net.Uri.class);
+            condition = source.readParcelable(null, android.service.notification.Condition.class);
+            component = source.readParcelable(null, android.content.ComponentName.class);
+            configurationActivity = source.readParcelable(null, android.content.ComponentName.class);
             if (source.readInt() == 1) {
                 id = source.readString();
             }
@@ -1811,7 +1811,7 @@ public class ZenModeConfig implements Parcelable {
             if (source.readInt() == 1) {
                 enabler = source.readString();
             }
-            zenPolicy = source.readParcelable(null);
+            zenPolicy = source.readParcelable(null, android.service.notification.ZenPolicy.class);
             modified = source.readInt() == 1;
             pkg = source.readString();
         }

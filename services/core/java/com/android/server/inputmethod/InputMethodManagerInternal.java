@@ -95,6 +95,21 @@ public abstract class InputMethodManagerInternal {
     public abstract boolean switchToInputMethod(String imeId, @UserIdInt int userId);
 
     /**
+     * Force enable or disable the input method associated with {@code imeId} for given user. If
+     * the input method associated with {@code imeId} is not installed, do nothing.
+     *
+     * @param imeId  The input method ID to be enabled or disabled.
+     * @param enabled {@code true} if the input method associated with {@code imeId} should be
+     *                enabled.
+     * @param userId The user ID to be queried.
+     * @return {@code true} if the input method associated with {@code imeId} was successfully
+     *         enabled or disabled, {@code false} if the input method specified is not installed
+     *         or was unable to be enabled/disabled for some other reason.
+     */
+    public abstract boolean setInputMethodEnabled(String imeId, boolean enabled,
+            @UserIdInt int userId);
+
+    /**
      * Registers a new {@link InputMethodListListener}.
      */
     public abstract void registerInputMethodListListener(InputMethodListListener listener);
@@ -164,6 +179,11 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public boolean switchToInputMethod(String imeId, int userId) {
+                    return false;
+                }
+
+                @Override
+                public boolean setInputMethodEnabled(String imeId, boolean enabled, int userId) {
                     return false;
                 }
 

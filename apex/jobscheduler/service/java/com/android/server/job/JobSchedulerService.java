@@ -1559,6 +1559,13 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    /** Return the current bias of the given UID. */
+    public int getUidBias(int uid) {
+        synchronized (mLock) {
+            return mUidBiasOverride.get(uid, JobInfo.BIAS_DEFAULT);
+        }
+    }
+
     @Override
     public void onDeviceIdleStateChanged(boolean deviceIdle) {
         synchronized (mLock) {

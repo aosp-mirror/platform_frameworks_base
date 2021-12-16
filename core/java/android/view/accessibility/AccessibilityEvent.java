@@ -1332,7 +1332,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         record.mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         record.mBeforeText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         record.mParcelableData = parcel.readParcelable(null);
-        parcel.readList(record.mText, null);
+        parcel.readList(record.mText, null, java.lang.CharSequence.class);
         record.mSourceWindowId = parcel.readInt();
         record.mSourceNodeId = parcel.readLong();
         record.mSourceDisplayId = parcel.readInt();

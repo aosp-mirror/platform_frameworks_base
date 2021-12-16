@@ -167,15 +167,9 @@ public class GameManagerShellCommand extends ShellCommand {
         switch (gameMode.toLowerCase()) {
             case "1":
             case "standard":
-                // Standard should only be available if other game modes are.
-                if (batteryModeSupported || perfModeSupported) {
-                    service.setGameMode(packageName, GameManager.GAME_MODE_STANDARD,
-                            userId);
-                } else {
-                    pw.println("Game mode: " + gameMode + " not supported by "
-                            + packageName);
-                    return -1;
-                }
+                // Standard mode can be used to specify loading ANGLE as the default OpenGL ES
+                // driver, so it should always be available.
+                service.setGameMode(packageName, GameManager.GAME_MODE_STANDARD, userId);
                 break;
             case "2":
             case "performance":

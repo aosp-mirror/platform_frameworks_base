@@ -295,7 +295,7 @@ public final class TextLanguage implements Parcelable {
         private static Request readFromParcel(Parcel in) {
             final CharSequence text = in.readCharSequence();
             final Bundle extra = in.readBundle();
-            final SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null);
+            final SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null, android.view.textclassifier.SystemTextClassifierMetadata.class);
 
             final Request request = new Request(text, extra);
             request.setSystemTextClassifierMetadata(systemTcMetadata);

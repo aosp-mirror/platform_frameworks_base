@@ -163,7 +163,7 @@ cc_defaults {
         "android.hardware.memtrack-V1-ndk",
         "android.hardware.power@1.0",
         "android.hardware.power@1.1",
-        "android.hardware.power-V2-cpp",
+        "android.hardware.power-V3-cpp",
         "android.hardware.power.stats@1.0",
         "android.hardware.power.stats-V1-ndk",
         "android.hardware.thermal@1.0",

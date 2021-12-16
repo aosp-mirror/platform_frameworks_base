@@ -1289,9 +1289,6 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!file.exists()) {
             throw new FileNotFoundException(file.getAbsolutePath());
         }
-        if (TextUtils.isEmpty(installerPackageName)) {
-            throw new FileNotFoundException(file.getAbsolutePath());
-        }
 
         final Executor executor = mInjector.getBackgroundExecutor();
         final Handler handler = mInjector.getBackgroundHandler();
@@ -5223,10 +5220,11 @@ public class PackageManagerService extends IPackageManager.Stub
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
                 "Only package verification agents can verify applications");
+        final int callingUid = Binder.getCallingUid();
 
         final Message msg = mHandler.obtainMessage(PACKAGE_VERIFIED);
         final PackageVerificationResponse response = new PackageVerificationResponse(
-                verificationCode, Binder.getCallingUid());
+                verificationCode, callingUid);
         msg.arg1 = id;
         msg.obj = response;
         mHandler.sendMessage(msg);
@@ -5238,11 +5236,12 @@ public class PackageManagerService extends IPackageManager.Stub
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
                 "Only package verification agents can extend verification timeouts");
+        final int callingUid = Binder.getCallingUid();
 
         mHandler.post(() -> {
             final PackageVerificationState state = mPendingVerification.get(id);
             final PackageVerificationResponse response = new PackageVerificationResponse(
-                    verificationCodeAtTimeout, Binder.getCallingUid());
+                    verificationCodeAtTimeout, callingUid);
 
             long delay = millisecondsToDelay;
             if (delay > PackageManager.MAXIMUM_VERIFICATION_TIMEOUT) {

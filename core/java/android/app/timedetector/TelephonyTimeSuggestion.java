@@ -77,10 +77,10 @@ public final class TelephonyTimeSuggestion implements Parcelable {
     private static TelephonyTimeSuggestion createFromParcel(Parcel in) {
         int slotIndex = in.readInt();
         TelephonyTimeSuggestion suggestion = new TelephonyTimeSuggestion.Builder(slotIndex)
-                .setUtcTime(in.readParcelable(null /* classLoader */))
+                .setUtcTime(in.readParcelable(null /* classLoader */, android.os.TimestampedValue.class))
                 .build();
         @SuppressWarnings("unchecked")
-        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */);
+        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */, java.lang.String.class);
         if (debugInfo != null) {
             suggestion.addDebugInfo(debugInfo);
         }

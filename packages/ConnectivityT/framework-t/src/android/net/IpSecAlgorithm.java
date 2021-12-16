@@ -297,7 +297,7 @@ public final class IpSecAlgorithm implements Parcelable {
         return mTruncLenBits;
     }
 
-    /* Parcelable Implementation */
+    /** Parcelable Implementation */
     public int describeContents() {
         return 0;
     }

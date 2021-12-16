@@ -804,8 +804,8 @@ public final class ZenPolicy implements Parcelable {
         @Override
         public ZenPolicy createFromParcel(Parcel source) {
             ZenPolicy policy = new ZenPolicy();
-            policy.mPriorityCategories = source.readArrayList(Integer.class.getClassLoader());
-            policy.mVisualEffects = source.readArrayList(Integer.class.getClassLoader());
+            policy.mPriorityCategories = source.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class);
+            policy.mVisualEffects = source.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class);
             policy.mPriorityCalls = source.readInt();
             policy.mPriorityMessages = source.readInt();
             policy.mConversationSenders = source.readInt();

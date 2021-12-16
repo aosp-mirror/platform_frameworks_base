@@ -100,7 +100,7 @@ public final class ThermalMitigationRequest implements Parcelable {
 
     private ThermalMitigationRequest(Parcel in) {
         mThermalMitigationAction = in.readInt();
-        mDataThrottlingRequest = in.readParcelable(DataThrottlingRequest.class.getClassLoader());
+        mDataThrottlingRequest = in.readParcelable(DataThrottlingRequest.class.getClassLoader(), android.telephony.DataThrottlingRequest.class);
     }
 
      /**

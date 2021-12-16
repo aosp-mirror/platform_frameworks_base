@@ -33,4 +33,5 @@ oneway interface ITvIAppService {
             in String iAppServiceId, int type);
     void prepare(int type);
     void notifyAppLinkInfo(in Bundle info);
+    void sendAppLinkCommand(in Bundle command);
 }

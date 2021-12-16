@@ -11558,6 +11558,12 @@ public final class Settings {
         @Readable
         public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
 
+        /** Timeout for package verification during streaming installations.
+         * @hide */
+        @Readable
+        public static final String PACKAGE_STREAMING_VERIFIER_TIMEOUT =
+                "streaming_verifier_timeout";
+
         /** Timeout for app integrity verification.
          * @hide */
         @Readable

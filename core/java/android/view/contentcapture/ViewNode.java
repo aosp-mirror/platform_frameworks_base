@@ -124,10 +124,10 @@ public final class ViewNode extends AssistStructure.ViewNode {
         mFlags = nodeFlags;
 
         if ((nodeFlags & FLAGS_HAS_AUTOFILL_ID) != 0) {
-            mAutofillId = parcel.readParcelable(null);
+            mAutofillId = parcel.readParcelable(null, android.view.autofill.AutofillId.class);
         }
         if ((nodeFlags & FLAGS_HAS_AUTOFILL_PARENT_ID) != 0) {
-            mParentAutofillId = parcel.readParcelable(null);
+            mParentAutofillId = parcel.readParcelable(null, android.view.autofill.AutofillId.class);
         }
         if ((nodeFlags & FLAGS_HAS_TEXT) != 0) {
             mText = new ViewNodeText(parcel, (nodeFlags & FLAGS_HAS_COMPLEX_TEXT) == 0);
@@ -169,7 +169,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
             mExtras = parcel.readBundle();
         }
         if ((nodeFlags & FLAGS_HAS_LOCALE_LIST) != 0) {
-            mLocaleList = parcel.readParcelable(null);
+            mLocaleList = parcel.readParcelable(null, android.os.LocaleList.class);
         }
         if ((nodeFlags & FLAGS_HAS_MIME_TYPES) != 0) {
             mReceiveContentMimeTypes = parcel.readStringArray();
@@ -196,7 +196,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
             mAutofillHints = parcel.readStringArray();
         }
         if ((nodeFlags & FLAGS_HAS_AUTOFILL_VALUE) != 0) {
-            mAutofillValue = parcel.readParcelable(null);
+            mAutofillValue = parcel.readParcelable(null, android.view.autofill.AutofillValue.class);
         }
         if ((nodeFlags & FLAGS_HAS_AUTOFILL_OPTIONS) != 0) {
             mAutofillOptions = parcel.readCharSequenceArray();

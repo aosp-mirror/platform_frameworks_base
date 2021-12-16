@@ -168,7 +168,7 @@ public final class StorageVolume implements Parcelable {
         mStub = in.readInt() != 0;
         mAllowMassStorage = in.readInt() != 0;
         mMaxFileSize = in.readLong();
-        mOwner = in.readParcelable(null);
+        mOwner = in.readParcelable(null, android.os.UserHandle.class);
         if (in.readInt() != 0) {
             mUuid = StorageManager.convert(in.readString8());
         } else {
