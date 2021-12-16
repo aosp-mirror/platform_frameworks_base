@@ -9312,10 +9312,10 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void disconnect();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean discoverServices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean executeReliableWrite();
-    method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method public int getConnectionState(android.bluetooth.BluetoothDevice);
+    method @Deprecated public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @Deprecated public int getConnectionState(android.bluetooth.BluetoothDevice);
     method public android.bluetooth.BluetoothDevice getDevice();
-    method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
+    method @Deprecated public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
     method public android.bluetooth.BluetoothGattService getService(java.util.UUID);
     method public java.util.List<android.bluetooth.BluetoothGattService> getServices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean readCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
