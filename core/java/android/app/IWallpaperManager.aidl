@@ -204,4 +204,27 @@ interface IWallpaperManager {
      * @hide
      */
     void notifyGoingToSleep(int x, int y, in Bundle extras);
+
+    /**
+     * Sets the wallpaper dim amount between [0f, 1f] which would be blended with the system default
+     * dimming. 0f doesn't add any additional dimming and 1f makes the wallpaper fully black.
+     *
+     * @hide
+     */
+    oneway void setWallpaperDimAmount(float dimAmount);
+
+    /**
+     * Gets the current additional dim amount set on the wallpaper. 0f means no application has
+     * added any dimming on top of the system default dim amount.
+     *
+     * @hide
+     */
+    float getWallpaperDimAmount();
+
+    /**
+     * Whether the lock screen wallpaper is different from the system wallpaper.
+     *
+     * @hide
+     */
+    boolean lockScreenWallpaperExists();
 }

@@ -5122,6 +5122,11 @@
     <permission android:name="android.permission.SET_WALLPAPER_COMPONENT"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows applications to set the wallpaper dim amount.
+         @hide. -->
+    <permission android:name="android.permission.SET_WALLPAPER_DIM_AMOUNT"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows applications to read dream settings and dream state.
          @hide -->
     <permission android:name="android.permission.READ_DREAM_STATE"
