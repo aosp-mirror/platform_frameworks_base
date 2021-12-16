@@ -10098,6 +10098,7 @@ package android.content {
     method @Nullable public String getPackageName();
     method public int getUid();
     method public boolean isTrusted(@NonNull android.content.Context);
+    method @NonNull public static android.content.AttributionSource myAttributionSource();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.AttributionSource> CREATOR;
   }

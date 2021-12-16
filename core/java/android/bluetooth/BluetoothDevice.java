@@ -1177,7 +1177,7 @@ public final class BluetoothDevice implements Parcelable, Attributable {
 
         mAddress = address;
         mAddressType = ADDRESS_TYPE_PUBLIC;
-        mAttributionSource = BluetoothManager.resolveAttributionSource(null);
+        mAttributionSource = AttributionSource.myAttributionSource();
     }
 
     /** {@hide} */
