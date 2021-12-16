@@ -330,6 +330,6 @@ void AInputQueue_finishEvent(AInputQueue* queue, AInputEvent* event, int handled
     iq->finishEvent(e, handled != 0);
 }
 
-AInputQueue* AInputQueue_fromJava(jobject inputQueue) {
-    return android::android_view_InputQueue_getNativePtr(inputQueue);
+AInputQueue* AInputQueue_fromJava(JNIEnv* env, jobject inputQueue) {
+    return android::android_view_InputQueue_getNativePtr(env, inputQueue);
 }
