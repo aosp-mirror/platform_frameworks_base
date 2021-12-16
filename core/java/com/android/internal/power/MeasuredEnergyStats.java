@@ -589,6 +589,10 @@ public class MeasuredEnergyStats {
         final int numIndices = mConfig.getNumberOfBuckets();
         for (int index = 0; index < numIndices; index++) {
             setValueIfSupported(index, 0L);
+            if (mAccumulatedMultiStateChargeMicroCoulomb != null
+                    && mAccumulatedMultiStateChargeMicroCoulomb[index] != null) {
+                mAccumulatedMultiStateChargeMicroCoulomb[index].reset();
+            }
         }
     }
 
