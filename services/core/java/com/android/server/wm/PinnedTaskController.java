@@ -243,7 +243,8 @@ class PinnedTaskController {
             int oldRotation, int newRotation) {
         final Rect bounds = mDestRotatedBounds;
         final PictureInPictureSurfaceTransaction pipTx = mPipTransaction;
-        if (bounds == null && pipTx == null) {
+        final boolean emptyPipPositionTx = pipTx == null || pipTx.mPosition == null;
+        if (bounds == null && emptyPipPositionTx) {
             return;
         }
         final TaskDisplayArea taskArea = mDisplayContent.getDefaultTaskDisplayArea();
@@ -255,7 +256,7 @@ class PinnedTaskController {
         mDestRotatedBounds = null;
         mPipTransaction = null;
         final Rect areaBounds = taskArea.getBounds();
-        if (pipTx != null && pipTx.mPosition != null) {
+        if (!emptyPipPositionTx) {
             // The transaction from recents animation is in old rotation. So the position needs to
             // be rotated.
             float dx = pipTx.mPosition.x;
