@@ -256,6 +256,7 @@ import android.os.BinderProxy;
 import android.os.BugreportParams;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.ConditionVariable;
 import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.FactoryTest;
@@ -15475,6 +15476,62 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } catch (IOException e) {
                 }
             }
+        }
+    }
+
+    /**
+     * Dump the resources structure for the given process
+     *
+     * @param process The process to dump resource info for
+     * @param fd The FileDescriptor to dump it into
+     * @throws RemoteException
+     */
+    public boolean dumpResources(String process, ParcelFileDescriptor fd, RemoteCallback callback)
+            throws RemoteException {
+        synchronized (this) {
+            ProcessRecord proc = findProcessLOSP(process, UserHandle.USER_CURRENT, "dumpResources");
+            IApplicationThread thread;
+            if (proc == null || (thread = proc.getThread()) == null) {
+                throw new IllegalArgumentException("Unknown process: " + process);
+            }
+            thread.dumpResources(fd, callback);
+            return true;
+        }
+    }
+
+    /**
+     * Dump the resources structure for all processes
+     *
+     * @param fd The FileDescriptor to dump it into
+     * @throws RemoteException
+     */
+    public void dumpAllResources(ParcelFileDescriptor fd, PrintWriter pw) throws RemoteException {
+        synchronized (mProcLock) {
+            mProcessList.forEachLruProcessesLOSP(true, app -> {
+                ConditionVariable lock = new ConditionVariable();
+                RemoteCallback
+                        finishCallback = new RemoteCallback(result -> lock.open(), null);
+
+                pw.println(String.format("------ DUMP RESOURCES %s (%s)  ------",
+                        app.processName,
+                        app.info.packageName));
+                pw.flush();
+                try {
+                    app.getThread().dumpResources(fd.dup(), finishCallback);
+                    lock.block(2000);
+                } catch (Exception e) {
+                    pw.println(String.format(
+                            "------ EXCEPTION DUMPING RESOURCES for %s (%s): %s ------",
+                            app.processName,
+                            app.info.packageName,
+                            e.getMessage()));
+                    pw.flush();
+                }
+                pw.println(String.format("------ END DUMP RESOURCES %s (%s)  ------",
+                        app.processName,
+                        app.info.packageName));
+                pw.flush();
+            });
         }
     }
 

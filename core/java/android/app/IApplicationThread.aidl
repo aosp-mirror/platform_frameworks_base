@@ -113,6 +113,7 @@ oneway interface IApplicationThread {
             in ParcelFileDescriptor fd, in RemoteCallback finishCallback);
     void dumpActivity(in ParcelFileDescriptor fd, IBinder servicetoken, in String prefix,
             in String[] args);
+    void dumpResources(in ParcelFileDescriptor fd, in RemoteCallback finishCallback);
     void clearDnsCache();
     void updateHttpProxy();
     void setCoreSettings(in Bundle coreSettings);

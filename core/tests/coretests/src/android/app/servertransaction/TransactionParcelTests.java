@@ -646,6 +646,10 @@ public class TransactionParcelTests {
         }
 
         @Override
+        public void dumpResources(ParcelFileDescriptor fd, RemoteCallback finishCallback) {
+        }
+
+        @Override
         public final void runIsolatedEntryPoint(String entryPoint, String[] entryPointArgs) {
         }
 
