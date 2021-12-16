@@ -525,6 +525,43 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testAppTransitionWithRotationChange() {
+        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
+        makeWindowVisible(statusBar);
+        mDisplayContent.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
+        final ActivityRecord app = createActivityRecord(mDisplayContent);
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+        final Transition transition = app.mTransitionController.createTransition(TRANSIT_OPEN);
+        app.mTransitionController.requestStartTransition(transition, app.getTask(),
+                null /* remoteTransition */, null /* displayChange */);
+        mDisplayContent.getDisplayRotation().setRotation(mDisplayContent.getRotation() + 1);
+        final int anyChanges = 1;
+        mDisplayContent.requestChangeTransitionIfNeeded(anyChanges, null /* displayChange */);
+        transition.setKnownConfigChanges(mDisplayContent, anyChanges);
+        final FadeRotationAnimationController fadeController =
+                mDisplayContent.getFadeRotationAnimationController();
+        assertNotNull(fadeController);
+        assertTrue(fadeController.shouldFreezeInsetsPosition(statusBar));
+
+        statusBar.setOrientationChanging(true);
+        player.startTransition();
+        // Non-app windows should not be collected.
+        assertFalse(statusBar.mToken.inTransition());
+        assertTrue(app.getTask().inTransition());
+
+        final SurfaceControl.Transaction startTransaction = mock(SurfaceControl.Transaction.class);
+        player.onTransactionReady(startTransaction);
+        // The leash should be unrotated.
+        verify(startTransaction).setMatrix(eq(statusBar.mToken.getAnimationLeash()), any(), any());
+
+        // The redrawn window will be faded in when the transition finishes. And because this test
+        // only use one non-activity window, the fade rotation controller should also be cleared.
+        statusBar.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        player.finish();
+        assertNull(mDisplayContent.getFadeRotationAnimationController());
+    }
+
+    @Test
     public void testIntermediateVisibility() {
         final TaskSnapshotController snapshotController = mock(TaskSnapshotController.class);
         final TransitionController controller = new TransitionController(mAtm, snapshotController);
