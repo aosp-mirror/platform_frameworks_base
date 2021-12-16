@@ -117,7 +117,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     PackageManagerInternal mPmInternal;
 
     /** File storing persisted {@link #mGrantedUriPermissions}. */
-    @GuardedBy("mLock")
     private final AtomicFile mGrantFile;
 
     /** XML constants used in {@link #mGrantFile} */
@@ -1299,15 +1298,14 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         return false;
     }
 
-    @GuardedBy("mLock")
-    private void writeGrantedUriPermissionsLocked() {
+    private void writeGrantedUriPermissions() {
         if (DEBUG) Slog.v(TAG, "writeGrantedUriPermissions()");
 
         final long startTime = SystemClock.uptimeMillis();
 
         // Snapshot permissions so we can persist without lock
         ArrayList<UriPermission.Snapshot> persist = Lists.newArrayList();
-        synchronized (this) {
+        synchronized (mLock) {
             final int size = mGrantedUriPermissions.size();
             for (int i = 0; i < size; i++) {
                 final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.valueAt(i);
@@ -1360,9 +1358,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case PERSIST_URI_GRANTS_MSG: {
-                    synchronized (mLock) {
-                        writeGrantedUriPermissionsLocked();
-                    }
+                    writeGrantedUriPermissions();
                     break;
                 }
             }
