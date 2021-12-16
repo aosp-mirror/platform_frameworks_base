@@ -9396,6 +9396,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final ComponentName doComponent = mOwners.getDeviceOwnerComponent();
             final ComponentName poComponent =
                     mOwners.getProfileOwnerComponent(userHandle.getIdentifier());
+            if (supervisorComponent == null) {
+                return null;
+            }
             if (supervisorComponent.equals(doComponent) || supervisorComponent.equals(
                     poComponent)) {
                 return supervisorComponent;
@@ -12479,6 +12482,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     mWidgetProviderListeners.add(listener);
                 }
             }
+        }
+
+        @Override
+        public @Nullable ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent(
+                @NonNull UserHandle userHandle) {
+            return DevicePolicyManagerService.this.getProfileOwnerOrDeviceOwnerSupervisionComponent(
+                    userHandle);
         }
 
         @Override
