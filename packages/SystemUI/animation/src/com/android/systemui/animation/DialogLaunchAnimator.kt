@@ -299,6 +299,13 @@ private class AnimatedDialog(
             fullscreenTransparentBackground.setOnClickListener { dialog.dismiss() }
             dialogContentWithBackground.isClickable = true
 
+            // Make sure the transparent and dialog backgrounds are not focusable by accessibility
+            // features.
+            fullscreenTransparentBackground.importantForAccessibility =
+                View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            dialogContentWithBackground.importantForAccessibility =
+                View.IMPORTANT_FOR_ACCESSIBILITY_NO
+
             fullscreenTransparentBackground.addView(
                 dialogContentWithBackground,
                 FrameLayout.LayoutParams(
@@ -342,8 +349,10 @@ private class AnimatedDialog(
                 ?.color
                 ?.defaultColor ?: Color.BLACK
 
-        // Make the background view invisible until we start the animation.
-        dialogContentWithBackground.visibility = View.INVISIBLE
+        // Make the background view invisible until we start the animation. We use the transition
+        // visibility like GhostView does so that we don't mess up with the accessibility tree (see
+        // b/204944038#comment17).
+        dialogContentWithBackground.setTransitionVisibility(View.INVISIBLE)
 
         // Make sure the dialog is visible instantly and does not do any window animation.
         window.attributes.windowAnimations = R.style.Animation_LaunchAnimation
