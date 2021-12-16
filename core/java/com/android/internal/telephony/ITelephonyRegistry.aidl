@@ -77,6 +77,7 @@ interface ITelephonyRegistry {
     void notifySubscriptionInfoChanged();
     void notifyOpportunisticSubscriptionInfoChanged();
     void notifyCarrierNetworkChange(in boolean active);
+    void notifyCarrierNetworkChangeWithSubId(in int subId, in boolean active);
     void notifyUserMobileDataStateChangedForPhoneId(in int phoneId, in int subId, in boolean state);
     void notifyDisplayInfoChanged(int slotIndex, int subId, in TelephonyDisplayInfo telephonyDisplayInfo);
     void notifyPhoneCapabilityChanged(in PhoneCapability capability);
