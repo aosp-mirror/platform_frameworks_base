@@ -23,7 +23,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.HexDump;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
