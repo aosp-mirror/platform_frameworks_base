@@ -5523,4 +5523,13 @@
     </string-array>
 
     <integer name="config_chooser_max_targets_per_row">4</integer>
+
+    <!-- Package that provides the supervised user creation flow. This package must include an
+         activity with an intent filter for {@link UserManager.ACTION_CREATE_SUPERVISED_USER}.
+         When this resource is defined, an extra button in user settings screen will be shown
+         with a title defined in @*android:string/supervised_user_creation_label
+         and an icon defined in @*android:drawable/ic_add_supervised_user.
+         That button will fire an intent targeted for this package with the mentioned action.
+         When this resource is empty, that button will not be shown. -->
+    <string name="config_supervisedUserCreationPackage" translatable="false"></string>
 </resources>
