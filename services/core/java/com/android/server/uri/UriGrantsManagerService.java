@@ -1330,8 +1330,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 out.startTag(null, TAG_URI_GRANT);
                 out.attributeInt(null, ATTR_SOURCE_USER_ID, perm.uri.sourceUserId);
                 out.attributeInt(null, ATTR_TARGET_USER_ID, perm.targetUserId);
-                out.attribute(null, ATTR_SOURCE_PKG, perm.sourcePkg);
-                out.attribute(null, ATTR_TARGET_PKG, perm.targetPkg);
+                out.attributeInterned(null, ATTR_SOURCE_PKG, perm.sourcePkg);
+                out.attributeInterned(null, ATTR_TARGET_PKG, perm.targetPkg);
                 out.attribute(null, ATTR_URI, String.valueOf(perm.uri.uri));
                 writeBooleanAttribute(out, ATTR_PREFIX, perm.uri.prefix);
                 out.attributeInt(null, ATTR_MODE_FLAGS, perm.persistedModeFlags);
