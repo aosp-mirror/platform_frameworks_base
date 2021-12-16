@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"អនុញ្ញាតឲ្យកម្មវិធីនេះប្រើសេវាកម្ម IMS ដើម្បីធ្វើការហៅដោយគ្មានការអន្តរាគមន៍ពីអ្នក។"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"អាន​ស្ថានភាព និង​អត្តសញ្ញាណ​ទូរស័ព្ទ"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​លក្ខណៈ​ទូរស័ព្ទ​នៃ​ឧបករណ៍។ សិទ្ធិ​នេះ​​ឲ្យ​កម្មវិធី​កំណត់​លេខ​ទូរស័ព្ទ និង​លេខ​សម្គាល់​ឧបករណ៍ ថា​តើ​ការ​ហៅ​សកម្ម និង​លេខ​ពី​ចម្ងាយ​បាន​ភ្ជាប់​ដោយ​ការ​ហៅ។"</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"អានអត្តសញ្ញាណ និងស្ថានភាពទូរសព្ទគោល"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"អនុញ្ញាតឱ្យកម្មវិធីចូលប្រើមុខងារទូរសព្ទគោលរបស់ឧបករណ៍។"</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"បញ្ជូន​ការ​ហៅ​ទូរសព្ទ​តាមរយៈ​ប្រព័ន្ធ"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​នេះ​បញ្ជូន​ការ​ហៅ​ទូរសព្ទ​របស់វា​តាមរយៈ​ប្រព័ន្ធ ​ដើម្បី​ធ្វើ​ឲ្យ​ការ​ហៅ​ទូរសព្ទ​ប្រសើរ​ជាង​មុន។"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"មើល និង​គ្រប់គ្រង​ការហៅទូរសព្ទ​តាមរយៈប្រព័ន្ធ។"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ចុចដើម្បីលុប​គំរូមុខ​របស់អ្នក រួចបញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"រៀបចំ​ការដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ដោះសោទូរសព្ទ​របស់អ្នកដោយសម្លឹងមើលវា"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ដើម្បីប្រើមុខងារដោះសោតាមទម្រង់មុខ សូមបើក"<b>"ការចូលប្រើកាមេរ៉ា"</b>"នៅក្នុងការកំណត់ &gt; ឯកជនភាព"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"រៀបចំ​វិធីច្រើនទៀត​ដើម្បី​ដោះសោ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ចុច​ដើម្បីបញ្ចូល​ស្នាមម្រាមដៃ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ការដោះសោ​ដោយប្រើ​ស្នាមម្រាមដៃ"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"កំពុងរៀបចំ <xliff:g id="APPNAME">%1$s</xliff:g>។"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ចាប់ផ្ដើម​កម្មវិធី។"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"បញ្ចប់​ការ​ចាប់ផ្ដើម។"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"បិទ​អេក្រង់ឬ?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"នៅពេលរៀបចំ​ស្នាមម្រាមដៃ​របស់អ្នក អ្នកបានចុច​ប៊ូតុងថាមពល។\n\nជាធម្មតា ការធ្វើបែបនេះ​បិទអេក្រង់​របស់អ្នក។"</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"បិទ"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"បោះបង់"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"បន្ត​រៀបចំឬ?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"អ្នកបានចុចប៊ូតុងថាមពល — ជាធម្មតាការធ្វើបែបនេះនឹងបិទអេក្រង់។\n\nសាកល្បងចុចថ្នមៗ ខណៈពេលកំពុងរៀបចំស្នាមម្រាមដៃរបស់អ្នក។"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"បិទ​អេក្រង់"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"បន្ត​រៀបចំ"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"បន្តផ្ទៀងផ្ទាត់ស្នាមម្រាមដៃរបស់អ្នកឬ?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"អ្នកបានចុចប៊ូតុងថាមពល — ជាធម្មតាការធ្វើបែបនេះនឹងបិទអេក្រង់។\n\nសាកល្បងចុចថ្នមៗ ដើម្បីផ្ទៀងផ្ទាត់ស្នាមម្រាមដៃរបស់អ្នក។"</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"បិទ​អេក្រង់"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"បន្ត"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> កំពុង​ដំណើរការ"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ចុច​ដើម្បី​ត្រឡប់​ទៅ​ហ្គេមវិញ"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ជ្រើសរើស​ហ្គេម"</string>

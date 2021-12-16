@@ -221,7 +221,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"Ieslēgt bezvadu tīklu"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Izslēgt bezvadu tīklu"</string>
     <string name="screen_lock" msgid="2072642720826409809">"Bloķēt ekrānu"</string>
-    <string name="power_off" msgid="4111692782492232778">"Strāvas padeve ir izslēgta."</string>
+    <string name="power_off" msgid="4111692782492232778">"Izslēgt tālruni"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Zvanītājs izslēgts"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Zvanītājs vibrācijas režīmā"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"Zvanītājs ieslēgts"</string>
@@ -245,7 +245,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV opcijas"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Tālruņa opcijas"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Ekrāna bloķētājs"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"Strāvas padeve izslēgta."</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"Izslēgt strāvas padevi"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Barošana"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Restartēt"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Ārkārtas situācija"</string>
@@ -474,6 +474,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Ļauj lietotnei izmantot tūlītējās ziņojumapmaiņas pakalpojumu, lai veiktu zvanus bez jūsu ziņas."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lasīt tālruņa statusu un identitāti"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Ļauj lietotnei piekļūt ierīces tālruņa funkcijām. Ar šo atļauju lietotne var noteikt tālruņa numuru un ierīču ID, zvana statusu un attālo numuru, ar ko ir izveidots savienojums, veicot zvanu."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"lasīt telefonijas statusa un identitātes pamatinformāciju"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Lietotnei tiek atļauta piekļuve telefonijas pamatfunkcijām ierīcē."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"maršrutēt zvanus sistēmā"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Ļauj lietotnei maršrutēt tās zvanus sistēmā, lai uzlabotu zvanīšanas pieredzi."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"skatīt un kontrolēt zvanus sistēmā."</string>
@@ -625,6 +627,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Pieskarieties, lai izdzēstu sejas modeli, un pēc tam vēlreiz pievienojiet seju"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Autorizācijas pēc sejas iestatīšana"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Atbloķējiet tālruni, skatoties uz to"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Lai izmantotu autorizāciju pēc sejas, sadaļā Iestatījumi &gt; Konfidencialitāte ieslēdziet opciju "<b>"Piekļuve kamerai"</b>"."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Citi atbloķēšanas veidi"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Pieskarieties, lai pievienotu pirksta nospiedumu"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Autorizācija ar pirksta nospiedumu"</string>
@@ -1296,10 +1299,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Notiek lietotnes <xliff:g id="APPNAME">%1$s</xliff:g> sagatavošana."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Notiek lietotņu palaišana."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Tiek pabeigta sāknēšana."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Vai izslēgt ekrānu?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Iestatot pirksta nospiedumu, jūs nospiedāt barošanas pogu.\n\nTādējādi parasti tiek izslēgts ekrāns."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Izslēgt"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Atcelt"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Vai turpināt iestatīšanu?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Jūs nospiedāt barošanas pogu — tādējādi parasti tiek izslēgts ekrāns.\n\nMēģiniet viegli pieskarties, iestatot pirksta nospiedumu."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Izslēgt ekrānu"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Turpināt iestatīšanu"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vai apstiprināt pirksta nospiedumu?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Jūs nospiedāt barošanas pogu — tādējādi parasti tiek izslēgts ekrāns.\n\nMēģiniet viegli pieskarties, lai apstiprinātu pirksta nospiedumu."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Izslēgt ekrānu"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Turpināt"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> darbojas"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Pieskarieties, lai atgrieztos spēlē"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Spēles izvēlēšanās"</string>

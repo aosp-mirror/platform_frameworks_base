@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Consente all\'app di utilizzare il servizio IMS per fare chiamate senza il tuo intervento."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lettura stato e identità telefono"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Consente all\'applicazione di accedere alle funzioni telefoniche del dispositivo. Questa autorizzazione consente all\'applicazione di determinare il numero di telefono e gli ID dei dispositivi, se una chiamata è attiva e il numero remoto connesso da una chiamata."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"lettura di identità e stato telefonia"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Consente all\'app di accedere alle funzionalità di telefonia di base del dispositivo."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"indirizzamento delle chiamate tramite il sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Consente all\'app di indirizzare le proprie chiamate tramite il sistema al fine di migliorare l\'esperienza di chiamata."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"visualizzazione e controllo delle chiamate tramite il sistema."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tocca per eliminare il tuo modello del volto e poi riaggiungi il tuo volto"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura lo sblocco con il volto"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Sblocca il telefono guardandolo"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Per utilizzare lo sblocco con il volto, attiva "<b>"l\'accesso alla fotocamera"</b>" in Impostazioni &gt; Privacy"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura altri modi per sbloccare"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tocca per aggiungere un\'impronta"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Sblocco con l\'impronta"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> in preparazione."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Avvio app."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Conclusione dell\'avvio."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Vuoi disattivare lo schermo?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Durante la configurazione della tua impronta hai premuto il tasto di accensione.\n\nGeneralmente questa azione comporta la disattivazione dello schermo."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Disattiva"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Annulla"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Vuoi continuare la configurazione?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Hai premuto il tasto di accensione; in genere questa azione disattiva lo schermo.\n\nProva a toccare leggermente il tasto di accensione durante la configurazione della tua impronta."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Disattiva lo schermo"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Continua configuraz."</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vuoi continuare a verificare l\'impronta?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Hai premuto il tasto di accensione; in genere questa azione disattiva lo schermo.\n\nProva a toccare leggermente il tasto di accensione per verificare la tua impronta."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Disattiva lo schermo"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Continua"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> in esecuzione"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Tocca per tornare al gioco"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Scegli gioco"</string>

@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"നിങ്ങളുടെ ഇടപെടൽ ഇല്ലാതെ കോളുകൾ ചെയ്യാൻ IMS സേവനം ഉപയോഗിക്കുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ഫോൺ നിലയും ഐഡന്റിറ്റിയും റീഡുചെയ്യുക"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"ഉപകരണത്തിന്റെ ഫോൺ സവിശേഷതകൾ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഈ അനുമതി ഫോൺ നമ്പർ, ഉപകരണ ഐഡികൾ, ഒരു കോൾ സജീവമാണോയെന്നത്, ഒരു കോൾ കണക്റ്റുചെയ്‌ത വിദൂര നമ്പർ എന്നിവ നിർണ്ണയിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"ടെലിഫോണിന്റെ അടിസ്ഥാന നിലയും ഐഡന്റിറ്റിയും വായിക്കാൻ"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"ഉപകരണത്തിലെ ടെലിഫോൺ സംബന്ധമായ അടിസ്ഥാന ഫീച്ചറുകൾ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"കോളുകൾ സിസ്റ്റത്തിലൂടെ വിടുക"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"കോളിംഗ് അനുഭവം ‌മെച്ചപ്പെടുത്തുന്നതിനായി തങ്ങളുടെ ‌കോളുകൾ സിസ്റ്റത്തിലേയ്ക്ക് വഴിതിരിച്ചുവിടാൻ ആപ്പുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"സിസ്‌റ്റത്തിലൂടെ കോളുകൾ കാണുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"നിങ്ങളുടെ മുഖ മോഡൽ ഇല്ലാതാക്കാൻ ടാപ്പ് ചെയ്യുക, തുടർന്ന് അത് വീണ്ടും ചേർക്കുക"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ഫെയ്‌സ് അൺലോക്ക് സജ്ജീകരിക്കുക"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ഫോണിലേക്ക് നോക്കി അത് അൺലോക്ക് ചെയ്യുക"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ഫെയ്‌സ് അൺലോക്ക് ഉപയോഗിക്കാൻ, ക്രമീകരണം &gt; സ്വകാര്യത എന്നതിൽ "<b>"ക്യാമറാ ആക്‌സസ്"</b>" ഓണാക്കുക"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"അൺലോക്ക് ചെയ്യുന്നതിനുള്ള കൂടുതൽ വഴികൾ സജ്ജീകരിക്കുക"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ഫിംഗർപ്രിന്റ് ചേർക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ഫിംഗർപ്രിന്റ് അൺലോക്ക്"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> തയ്യാറാക്കുന്നു."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"അപ്ലിക്കേഷനുകൾ ആരംഭിക്കുന്നു."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ബൂട്ട് ചെയ്യൽ പൂർത്തിയാകുന്നു."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"സ്‌ക്രീൻ ഓഫാക്കണോ?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"ഫിംഗർപ്രിന്റ് സജ്ജീകരിച്ച് കൊണ്ടിരുന്നപ്പോൾ നിങ്ങൾ പവർ ബട്ടൺ അമർത്തി.\n\nഇത് സാധാരണയായി സ്ക്രീൻ ഓഫാകുന്നതിന് കാരണമാകും."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ഓഫാക്കുക"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"റദ്ദാക്കുക"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"സജ്ജീകരണം തുടരണോ?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"നിങ്ങൾ പവർ ബട്ടൺ അമർത്തി — സാധാരണയായി ഇത് സ്ക്രീൻ ഓഫാകുന്നതിന് കാരണമാകും.\n\nനിങ്ങളുടെ ഫിംഗർപ്രിന്റ് സജ്ജീകരിക്കുമ്പോൾ മൃദുവായി ടാപ്പ് ചെയ്ത് നോക്കുക."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"സ്ക്രീൻ ഓഫാക്കുക"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"സജ്ജീകരണം തുടരുക"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ഫിംഗർപ്രിന്റ് പരിശോധിച്ചുറപ്പിക്കൽ തുടരണോ?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"നിങ്ങൾ പവർ ബട്ടൺ അമർത്തി — സാധാരണയായി ഇത് സ്ക്രീൻ ഓഫാകുന്നതിന് കാരണമാകും.\n\nനിങ്ങളുടെ ഫിംഗർപ്രിന്റ് പരിശോധിച്ചുറപ്പിക്കാൻ മൃദുവായി ടാപ്പ് ചെയ്ത് നോക്കുക."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"സ്ക്രീൻ ഓഫാക്കുക"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"തുടരുക"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> പ്രവർത്തിക്കുന്നു"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ഗെയിമിലേക്ക് മടങ്ങാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ഗെയിം തിരഞ്ഞെടുക്കുക"</string>

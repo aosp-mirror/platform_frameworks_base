@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"‏به برنامه اجازه می‌دهد از سرویس IMS برای برقراری تماس‌ها بدون دخالت شما استفاده کند."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"خواندن وضعیت تلفن و شناسه"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"به برنامه اجازه می‌دهد به ویژگی‌های تلفن دستگاه شما دسترسی پیدا کند. این مجوز به برنامه اجازه می‌دهد شماره تلفن و شناسه‌های دستگاه، فعال بودن یک تماس و شماره راه دوری که با یک تماس متصل شده است را مشخص کند."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"خواندن شناسه و وضعیت اصلی ارتباط دوربرد"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"به برنامه اجازه می‌دهد به ویژگی‌های اصلی ارتباط دوربرد دستگاه دسترسی داشته باشد."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"برقرار کردن تماس‌ها ازطریق سیستم"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"به برنامه امکان می‌دهد برای بهبود تجربه تماس، تماس‌هایش را ازطریق سیستم برقرار کند."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"دیدن و کنترل تماس‌ها ازطریق سیستم."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"برای حذف مدل چهره‌تان ضربه بزنید، سپس چهره‌تان را دوباره اضافه کنید"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"راه‌اندازی «قفل‌گشایی با چهره»"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"برای باز کردن قفل تلفن خود به آن نگاه کنید"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"‏برای استفاده از «قفل‌گشایی با چهره»، "<b>"دسترسی به دوربین"</b>" را در «تنظیمات &gt; حریم‌خصوصی» روشن کنید"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"راه‌اندازی روش‌های بیشتر برای باز کردن قفل"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"برای افزودن اثر انگشت، ضربه بزنید"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"قفل‌گشایی با اثر انگشت"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"آماده‌سازی <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"درحال آغاز کردن برنامه‌ها."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"درحال اتمام راه‌اندازی."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"صفحه‌نمایش خاموش شود؟"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"هنگام راه‌اندازی اثر انگشتتان، دکمه روشن/ خاموش را فشار دادید.\n\nاین کار معمولاً صفحه‌نمایش را خاموش می‌کند."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"خاموش شود"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"لغو شود"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"راه‌اندازی ادامه یابد؟"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"دکمه روشن/ خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nهنگام راه‌اندازی اثر انگشت، آرام ضربه بزنید."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"خاموش کردن صفحه"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ادامه راه‌اندازی"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"تأیید اثر انگشت را ادامه می‌دهید؟"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"دکمه روشن/ خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nبرای تأیید اثر انگشتتان، آرام ضربه بزنید."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"خاموش کردن صفحه"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ادامه"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"برای برگشت به بازی، ضربه بزنید"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"انتخاب بازی"</string>

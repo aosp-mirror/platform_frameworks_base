@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"აპს შეეძლება, გამოიყენოს IMS სერვისი ზარების თქვენი ჩარევის გარეშე განსახორციელებლად."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ტელეფონის სტატუსისა და იდენტობის წაკითხვა"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"აპს შეეძლება ჰქონდეს წვდომა მოწყობილობის სატელეფონო ფუნქციებზე. აპმა მსგავსი უფლებით შეძლებს დაადგინოს ტელეფონის ნომერი, მისი სერიული გამოცემა, აქტიური ზარი, დაკავშირებული ნომერი და მსგავსი."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"წაიკითხეთ ტელეფონის ძირითადი სტატუსი და აიდი"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"აპს აძლევს მოწყობილობის ძირითად სატელეფონო ფუნქციებზე წვდომას."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"ზარების სისტემის მეშვეობით მარშრუტიზაცია"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"დარეკვის ხარისხის გაუმჯობესების მიზნით, აპს ზარების სისტემის მეშვეობით მარშრუტიზაციის საშუალებას აძლევს."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ზარების ნახვა და გაკონტროლება სისტემის მეშვეობით."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"შეეხეთ თქვენი სახის მოდელის წასაშლელად, შემდეგ დაამატეთ სახე ხელახლა"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"სახით განბლოკვის პარამეტრების დაყენება"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"განბლოკეთ თქვენი ტელეფონი შეხედვით"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"იმისთვის, რომ სახით განბლოკვით ისარგებლოთ, ჩართეთ "<b>"კამერაზე წვდომა"</b>" პარამეტრებსა და კონფიდენციალურობაში"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"დააყენეთ განბლოკვის სხვა ხერხები"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"შეეხეთ თითის ანაბეჭდის დასამატებლად"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"თითის ანაბეჭდით განბლოკვა"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"ემზადება <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"აპების ჩართვა"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ჩატვირთვის დასასრული."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"გამოირთოს ეკრანი?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"თითის ანაბეჭდის დაყენებისას ჩართვის ღილაკს დააჭირეთ.\n\nეს, ჩვეულებრივ, თქვენს ეკრანს გამორთავს."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"გამორთვა"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"გაუქმება"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"გსურთ დაყენების გაგრძელება?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"თქვენ დააჭირეთ ჩართვის ღილაკს — ჩვეულებრივ, ის ეკრანს გამორთავს.\n\nთქვენი თითის ანაბეჭდის დაყენებისას ცადეთ მსუბუქად შეხება."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"ეკრანის გამორთვა"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"დაყენების გაგრძელება"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"გსურთ ანაბეჭდის დადასტურების გაგრძელება?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"თქვენ დააჭირეთ ჩართვის ღილაკს — ჩვეულებრივ, ის ეკრანს გამორთავს.\n\nთქვენი თითის ანაბეჭდის დასადასტურებლად ცადეთ მსუბუქად შეხება."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"ეკრანის გამორთვა"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"გაგრძელება"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> გაშვებულია"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"შეეხეთ თამაშში დასაბრუნებლად"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"აირჩიეთ თამაში"</string>

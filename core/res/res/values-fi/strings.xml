@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Antaa sovelluksen soittaa puheluita pikaviestipalvelun avulla ilman käyttäjän toimia."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lue puhelimen tila ja identiteetti"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Antaa sovelluksen käyttää laitteen puhelinominaisuuksia. Sovellus voi määrittää puhelinnumeron ja laitteen tunnuksen, puhelun tilan sekä soitetun numeron."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"lukea tavallisten puheluominaisuuksien tila- ja identiteettitiedot"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Sallii sovellukselle pääsyn laitteen tavallisiin puheluominaisuuksiin."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"ohjata puhelut järjestelmän kautta"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Tämä sallii sovelluksen ohjata puhelut järjestelmän kautta, mikä auttaa parantamaan puhelujen laatua."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"nähdä puhelut ja päättää niistä järjestelmässä"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Poista kasvomalli napauttamalla ja lisää sitten kasvosi uudelleen"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Ota kasvojentunnistusavaus käyttöön"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Avaa puhelimesi lukitus katsomalla laitetta"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Jos haluat käyttää kasvojentunnistusavausta, valitse Asetukset &gt; Yksityisyys ja laita "<b>"Pääsy kameraan"</b>" päälle"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Ota käyttöön lisää tapoja avata lukitus"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Napauta lisätäksesi sormenjälki"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Sormenjälkiavaus"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Valmistellaan: <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Käynnistetään sovelluksia."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Viimeistellään päivitystä."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Sammutetaanko näyttö?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Painoit virtapainiketta ottaessasi sormenjäljen käyttöön.\n\nTämä saa yleensä näytön sammumaan."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Laita pois päältä"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Peru"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Haluatko jatkaa?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Painoit virtapainiketta, mikä yleensä sammuttaa näytön.\n\nKosketa painiketta kevyesti tallentaessasi sormenjälkeä."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Sammuta näyttö"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Jatka käyttöönottoa"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Jatketaanko sormenjäljen vahvistamista?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Painoit virtapainiketta, mikä yleensä sammuttaa näytön.\n\nVahvista sormenjälki koskettamalla painiketta kevyesti."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Sammuta näyttö"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Jatka"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> käynnissä"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Palaa peliin napauttamalla"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Valitse peli"</string>

@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Pinapahintulutan ang app na gamitin ang serbisyo ng IMS upang tumawag nang walang pahintulot mo."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"basahin ang katayuan at pagkakakilanlan ng telepono"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Pinapayagan ang app na i-access ang mga tampok ng telepono ng device. Pinapayagan ng pahintulot na ito ang app na tukuyin ang numero ng telepono at  mga ID ng device, kung aktibo man ang isang tawag, at ang malayuang numerong ikinonekta ng isang tawag."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"basahin ang pangunahing status at pagkakakilanlan sa telephony"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Pinapayagan ang app na i-access ang mga pangunahing feature sa telephony ng device."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"iruta ang mga tawag sa pamamagitan ng system"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Pinapayagan ang app na iruta ang mga tawag nito sa pamamagitan ng system upang mapahusay ang karanasan sa pagtawag."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"tingnan at kontrolin ang mga tawag sa pamamagitan ng system."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"I-tap para i-delete ang iyong face model, pagkatapos ay idagdag ulit ang mukha mo"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"I-set up ang Pag-unlock Gamit ang Mukha"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"I-unlock ang iyong telepono sa pamamagitan ng pagtingin dito"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para magamit ang Pag-unlock Gamit ang Mukha, i-on ang "<b>"Access sa camera"</b>" sa Mga Setting &gt; Privacy"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Mag-set up ng higit pang paraan para mag-unlock"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"I-tap para magdagdag ng fingerprint"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Pag-unlock Gamit ang Fingerprint"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Ihinahanda ang <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Sinisimulan ang apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Pagtatapos ng pag-boot."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"I-off ang screen?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Habang sine-set up ang iyong fingerprint, pinindot mo ang Power button.\n\nKaraniwan nitong ino-off ang iyong screen."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"I-off"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Kanselahin"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Ituloy ang pag-set up?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pinindot mo ang power button — karaniwan nitong ino-off ang screen.\n\nSubukang i-tap habang sine-set up ang iyong fingerprint."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"I-off ang screen"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Ituloy ang setup"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Magpatuloy sa pag-verify ng fingerprint?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pinindot mo ang power button — karaniwan nitong ino-off ang screen.\n\nSubukang i-tap para i-verify ang iyong fingerprint."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"I-off ang screen"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Magpatuloy"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Tumatakbo ang <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Mag-tap upang bumalik sa laro"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Pumili ng laro"</string>

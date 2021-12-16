@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"आपल्‍या हस्तक्षेपाशिवाय अ‍ॅपला कॉल करण्‍यासाठी IMS सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"फोन स्थिती आणि ओळख वाचा"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"डिव्हाइस च्या फोन वैशिष्ट्यांवर अ‍ॅक्सेस करण्यास ॲपला अनुमती देते. ही परवानगी कॉल ॲक्टिव्हेट असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रिमोट नंबर निर्धारित करण्यासाठी ॲपला अनुमती देते."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"टेलिफोनी सुविधांशी संबंधित मूलभूत स्टेटस आणि ओळखीशी संबंधित माहिती वाचा"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"यामुळे ॲपला डिव्हाइसची मूलभूत टेलिफोनी वैशिष्ट्ये अ‍ॅक्सेस करण्याची अनुमती मिळते."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"प्रणालीच्या माध्यमातून कॉल रूट करा"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"कॉल करण्याचा अनुभव सुधारण्यासाठी ॲपला त्याचे कॉल प्रणालीच्या माध्यमातून रूट करू देते."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"सिस्टम वापरून कॉल पहा आणि नियंत्रण ठेवा."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"फेस मॉडेल हटवण्यासाठी टॅप करा, त्यानंतर तुमचा चेहरा पुन्हा जोडा"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"फेस अनलॉक सेट करा"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"तुमच्या फोनकडे पाहून तो अनलॉक करा"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"फेस अनलॉक वापरण्यासाठी, सेटिंग्ज &gt; गोपनीयता येथे "<b>"कॅमेरा अ‍ॅक्सेस"</b>" सुरू करा"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"अनलॉक करण्याच्या आणखी पद्धती सेट करा"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"फिंगरप्रिंट जोडण्यासाठी टॅप करा"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"फिंगरप्रिंट अनलॉक"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> तयार करत आहे."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"अ‍ॅप्स सुरू करत आहे."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बूट समाप्त होत आहे."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"स्क्रीन बंद करायची आहे का?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"तुम्ही तुमची फिंगरप्रिंट सेट करत असताना पॉवर बटण दाबले.\n\nयामुळे सहसा तुमची स्क्रीन बंद होते."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"बंद करा"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"रद्द करा"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"सेट करणे पुढे सुरू ठेवायचे का?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"तुम्ही पॉवर बटण दाबले — हे सहसा स्क्रीन बंद करते.\n\nतुमचे फिंगरप्रिंट सेट करताना हलके टॅप करून पहा."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"स्क्रीन बंद करा"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"सेट करणे सुरू ठेवा"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"फिंगरप्रिंट पडताळणी सुरू ठेवायची का?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"तुम्ही पॉवर बटण दाबले — हे सहसा स्क्रीन बंद करते.\n\nतुमच्या फिंगरप्रिंटची पडताळणी करण्यासाठी हलके टॅप करून पहा."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"स्क्रीन बंद करा"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"पुढे सुरू ठेवा"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"रन होणारे <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"गेमवर परत जाण्यासाठी टॅप करा"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"गेम निवडा"</string>

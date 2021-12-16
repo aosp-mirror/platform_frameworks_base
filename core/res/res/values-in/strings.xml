@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Memungkinkan aplikasi menggunakan layanan IMS untuk melakukan panggilan tanpa campur tangan Anda."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"baca identitas dan status ponsel"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Memungkinkan aplikasi mengakses fitur telepon perangkat. Izin ini memungkinkan aplikasi menentukan nomor telepon dan ID perangkat, apakah suatu panggilan aktif atau tidak, dan nomor jarak jauh yang terhubung oleh sebuah panggilan."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"membaca identitas dan status telepon dasar"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Memungkinkan aplikasi mengakses fitur telepon dasar perangkat."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"sambungkan panggilan telepon melalui sistem"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Mengizinkan aplikasi menyambungkan panggilan telepon melalui sistem untuk menyempurnakan pengalaman menelepon."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"melihat dan mengontrol panggilan melalui sistem."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ketuk untuk menghapus model wajah, lalu tambahkan wajah Anda lagi"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Siapkan Face Unlock"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci ponsel dengan melihat ke ponsel"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Untuk menggunakan Face Unlock, aktifkan "<b>"Akses kamera"</b>" di Setelan &gt; Privasi"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Siapkan lebih banyak cara untuk membuka kunci"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketuk untuk menambahkan sidik jari"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingerprint Unlock"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Menyiapkan <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Memulai aplikasi."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Menyelesaikan boot."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Nonaktifkan layar?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Saat menyiapkan sidik jari, Anda menekan Tombol daya.\n\nTindakan ini biasanya akan menonaktifkan layar."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Nonaktifkan"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Batal"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Lanjutkan penyiapan?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Anda menekan tombol daya; tindakan ini biasanya akan menonaktifkan layar.\n\nCoba ketuk lembut saat menyiapkan sidik jari Anda."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Nonaktifkan layar"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Lanjutkan penyiapan"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Lanjutkan verifikasi sidik jari?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Anda menekan tombol daya; tindakan ini biasanya akan menonaktifkan layar.\n\nCoba ketuk lembut untuk memverifikasi sidik jari Anda."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Nonaktifkan layar"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Lanjutkan"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> sedang berjalan"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Ketuk untuk kembali ke game"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Pilih game"</string>

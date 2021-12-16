@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Hiermee kan de app de IMS-service gebruiken om te bellen zonder je tussenkomst."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefoonstatus en -identiteit lezen"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Hiermee kan de app toegang krijgen tot de telefoonfuncties van het apparaat, Met deze rechten kan de app het telefoonnummer en de apparaat-ID\'s bepalen, of een gesprek actief is, en het andere telefoonnummer waarmee wordt gebeld."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"basistelefoonstatus en -identiteit lezen"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Hiermee geef je de app toegang tot de basistelefoonfuncties van het apparaat."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"gesprekken doorschakelen via het systeem"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Hiermee kan de app de bijbehorende gesprekken doorschakelen via het systeem om de belfunctionaliteit te verbeteren."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"gesprekken via het systeem bekijken en beheren"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tik om je gezichtsmodel te verwijderen en voeg je gezicht opnieuw toe"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Ontgrendelen via gezichtsherkenning instellen"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ontgrendel je telefoon door ernaar te kijken"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Als je Ontgrendelen via gezichtsherkenning wilt gebruiken, zet je "<b>"Cameratoegang"</b>" aan via Instellingen &gt; Privacy"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Stel meer manieren in om te ontgrendelen"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tik om een vingerafdruk toe te voegen"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Ontgrendelen met vingerafdruk"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> voorbereiden."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps starten."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Opstarten afronden."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Scherm uitzetten?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Toen je je vingerafdruk instelde, heb je op de aan/uit-knop gedrukt.\n\nDaarmee wordt het scherm meestal uitgezet."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Uitzetten"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Annuleren"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Doorgaan met instellen?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Je hebt op de aan/uit-knop gedrukt. Zo zet je meestal het scherm uit.\n\nRaak de knop voorzichtig aan terwijl je je vingerafdruk instelt."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Scherm uitzetten"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Doorgaan met instellen"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Doorgaan met verificatie van je vingerafdruk?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Je hebt op de aan/uit-knop gedrukt. Zo zet je meestal het scherm uit.\n\nRaak de knop voorzichtig aan om je vingerafdruk te verifiëren."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Scherm uitzetten"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Doorgaan"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> wordt uitgevoerd"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Tik om terug te keren naar de game"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Game kiezen"</string>

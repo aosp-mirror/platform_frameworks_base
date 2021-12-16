@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Uygulamanın, sizin müdahaleniz olmadan telefon etmek için IMS hizmetini kullanmasına izin verir."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefonun durumunu ve kimliğini okuma"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Uygulamaya cihazdaki telefon özelliklerine erişme izni verir. Bu izin, uygulamanın telefon numarasını ve cihaz kimliğini, etkin bir çağrı olup olmadığını ve çağrıda bağlanılan karşı tarafın numarasını öğrenmesine olanak sağlar."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"temel telefon durumunu ve kimliğini okuma"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Uygulamanın, cihazdaki temel telefon özelliklerine erişmesine izin verir."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"aramaları sistem üzerinden yönlendir"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Uygulamanın, çağrı deneyimini iyileştirmek için çağrılarını sistem üzerinden yönlendirmesine olanak tanır."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"aramaları sistemde görüp denetleme."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Yüz modelinizi silmek için dokunup ardından yüzünüzü yeniden ekleyin"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Yüz Tanıma Kilidi\'ni kurma"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonunuza bakarak kilidini açın"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Yüz Tanıma Kilidi\'ni kullanmak için Ayarlar &gt; Gizlilik bölümünden "<b>"Kamera erişimi"</b>"\'ni açın"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Kilidi açmak için daha fazla yöntem ayarlayın"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Parmak izi eklemek için dokunun"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Parmak İzi Kilidi"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> hazırlanıyor."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Uygulamalar başlatılıyor"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Açılış tamamlanıyor."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Ekran kapatılsın mı?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Parmak izinizi ayarlarken Güç düğmesine bastınız.\n\nBu hareket genellikle ekranınızın kapanmasına neden olur."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Kapat"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"İptal"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Kuruluma devam edilsin mi?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Güç düğmesine bastınız. Bu düğmeye basıldığında genellikle ekran kapanır.\n\nParmak izinizi tanımlarken hafifçe dokunmayı deneyin."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Ekranı kapat"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Kuruluma devam et"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Parmak izi doğrulamaya devam edilsin mi?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Güç düğmesine bastınız. Bu düğmeye basıldığında genellikle ekran kapanır.\n\nParmak izinizi doğrulamak için hafifçe dokunmayı deneyin."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Ekranı kapat"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Devam"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> çalışıyor"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Oyuna geri dönmek için dokunun"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Oyun seçin"</string>

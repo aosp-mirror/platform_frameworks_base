@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permite que o app use o serviço de mensagens instantâneas para fazer chamadas sem sua intervenção."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ler status e identidade do telefone"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Permite que o app acesse os recursos de telefonia do dispositivo. Esta permissão autoriza o app a determinar o número de telefone e IDs de dispositivo, quando uma chamada está ativa, e o número remoto conectado a uma chamada."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"ler status e identidade básicos de telefonia"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Permite que o app acesse os recursos básicos de telefonia do dispositivo."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"encaminhar chamadas pelo sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Permite que o app encaminhe suas chamadas por meio do sistema para melhorar a experiência com chamadas."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ver e controlar chamadas pelo sistema."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toque para excluir seu modelo de rosto e crie um novo"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurar o Desbloqueio facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloqueie o smartphone olhando para ele"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para usar o Desbloqueio facial, ative o "<b>"acesso à câmera"</b>" em Configurações &gt; Privacidade"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configure mais formas de desbloquear a tela"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toque para adicionar uma impressão digital"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueio por impressão digital"</string>
@@ -1208,7 +1211,7 @@
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Abrir links com"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Abrir links com <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Abrir links do domínio <xliff:g id="HOST">%1$s</xliff:g> usando <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
-    <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Conceder acesso"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Permitir acesso"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Editar com"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Editar com %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"Editar"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Concluindo a inicialização."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Desligar a tela?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Durante a configuração da sua impressão digital, você pressionou o botão liga/desliga.\n\nNormalmente, essa ação desliga a tela."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Desligar"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Cancelar"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Continuar a configuração?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Você pressionou o botão liga/desliga. Normalmente, essa ação desliga a tela.\n\nToque levemente na tela durante a configuração da impressão digital."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Desligar a tela"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Continuar configuração"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Continuar a verificação da digital?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Você pressionou o botão liga/desliga. Normalmente, essa ação desliga a tela.\n\nToque levemente na tela para verificar sua impressão digital."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Desligar a tela"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Continuar"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> em execução"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Toque para voltar ao jogo"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Escolha o jogo"</string>
@@ -2110,12 +2117,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Esta notificação foi rebaixada a Silenciosa. Toque para enviar seu feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificação foi classificada com maior prioridade. Toque para enviar seu feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificação foi classificada com menor prioridade. Toque para enviar seu feedback."</string>
-    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notificações aprimoradas"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"As ações e respostas sugeridas agora são fornecidas pelas notificações aprimoradas. As Notificações adaptáveis do Android não estão mais disponíveis."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notificações avançadas"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"As ações e respostas sugeridas agora são fornecidas pelas notificações avançadas. As Notificações adaptáveis do Android não estão mais disponíveis."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desativar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saiba mais"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"No Android 12, as notificações aprimoradas substituíram as notificações adaptáveis. Esse recurso exibe ações e respostas sugeridas, além de organizar suas notificações.\n\nAs notificações aprimoradas podem acessar o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Elas também podem dispensar ou responder às notificações, como atender chamadas telefônicas e controlar o Não perturbe."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"No Android 12, as notificações avançadas substituíram as notificações adaptáveis. Esse recurso exibe ações e respostas sugeridas, além de organizar suas notificações.\n\nAs notificações avançadas podem acessar o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Elas também podem dispensar ou responder às notificações, como atender chamadas telefônicas e controlar o Não perturbe."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificação de informação do modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A bateria pode acabar antes da recarga normal"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"A Economia de bateria foi ativada para aumentar a duração da carga"</string>

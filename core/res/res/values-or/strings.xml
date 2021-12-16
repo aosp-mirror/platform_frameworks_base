@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"ଆପଣଙ୍କ ହସ୍ତକ୍ଷେପ ବିନା କଲ୍‍ କରିପାରିବା ପାଇଁ ଆପ୍‌କୁ IMS ସେବା ବ୍ୟବହାର କରିବାକୁ ଦିଏ।"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ଫୋନ୍‍ ସ୍ଥିତି ଓ ପରିଚୟ ପଢ଼ନ୍ତୁ"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"ଆପ୍‌କୁ ଡିଭାଇସ୍‌ର ଫୋନ୍‌ ବୈଶିଷ୍ଟ୍ୟ ଆକ୍ସେସ୍‍ କରିବାକୁ ଅନୁମତି ଦେଇଥାଏ। ଏହି ଅନୁମତି ଆପ୍‌କୁ ଫୋନ୍‌ ନମ୍ବର୍ ଓ ଡିଭାଇସ୍‌ IDଗୁଡ଼ିକୁ ନିର୍ଦ୍ଧାରଣ କରିବାକୁ ଅନୁମତି ଦେଇଥାଏ, କଲ୍ ସକ୍ରିୟ ଥିଲେ ବି ଏବଂ କଲ୍ ଦ୍ୱାରା ସଂଯୋଗ ଥିବା ରିମୋଟ୍‌ ନମ୍ବର୍‌କୁ ମଧ୍ୟ।"</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"ବେସିକ ଟେଲିଫୋନି ସ୍ଥିତି ଏବଂ ପରିଚୟ ପଢ଼ନ୍ତୁ"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"ଡିଭାଇସର ବେସିକ ଟେଲିଫୋନି ଫିଚରଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଏହା ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"ସିଷ୍ଟମ୍‍ ଜରିଆରେ କଲ୍‌ର ମାର୍ଗ ବଦଳାଇପାରେ"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"କଲ୍‍ କରିବାର ଅନୁଭୂତି ବଢ଼ାଇବାକୁ ସିଷ୍ଟମ୍‍ ଜରିଆରେ ଆପର କଲ୍‍ଗୁଡ଼ିକୁ ରୁଟ୍‍ କରିବାକୁ ଏହାକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ସିଷ୍ଟମ୍‍ ମାଧ୍ୟମରେ କଲ୍‍ଗୁଡ଼ିକୁ ଦେଖିଥାଏ ଏବଂ ନିୟନ୍ତ୍ରଣ କରିଥାଏ।"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ଆପଣଙ୍କ ଫେସ୍ ମଡେଲକୁ ଡିଲିଟ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ, ତା\'ପରେ ପୁଣି ଆପଣଙ୍କ ଫେସ୍ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ଫେସ୍ ଅନଲକ୍ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ଫୋନକୁ ଦେଖି ଏହାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ଫେସ ଅନଲକ ବ୍ୟବହାର କରିବା ପାଇଁ, ସେଟିଂସ ଏବଂ ଗୋପନୀୟତାରେ "<b>"କ୍ୟାମେରା ଆକ୍ସେସ"</b>"କୁ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ଅନଲକ୍ କରିବା ପାଇଁ ଆହୁରି ଅଧିକ ଉପାୟ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ଏକ ଟିପଚିହ୍ନ ଯୋଗ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଅନଲକ୍"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> ପ୍ରସ୍ତୁତ କରାଯାଉଛି।"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ଆପ୍‍ ଆରମ୍ଭ କରାଯାଉଛି।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ବୁଟ୍‍ ସମାପ୍ତ କରୁଛି।"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"ସ୍କ୍ରିନ୍ ବନ୍ଦ କରିବେ?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"ଆପଣଙ୍କ ଟିପଚିହ୍ନ ସେଟ୍ ଅପ୍ କରିବା ସମୟରେ, ଆପଣ ପାୱାର ବଟନ୍ ଦବାଇଛନ୍ତି।\n\nଏହା ସାଧାରଣତଃ ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ ବନ୍ଦ କରେ।"</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"ବାତିଲ୍ କରନ୍ତୁ"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ସେଟଅପ କରିବା ଜାରି ରଖିବେ?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ଆପଣ ପାୱାର ବଟନ ଦବାଇଛନ୍ତି — ଏହା ସାଧାରଣତଃ ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ ବନ୍ଦ କରିଥାଏ।\n\nଆପଣଙ୍କ ଟିପଚିହ୍ନ ସେଟ ଅପ କରିବା ସମୟରେ ଧୀରେ ଟାପ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"ସ୍କ୍ରିନ ବନ୍ଦ କରନ୍ତୁ"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ସେଟଅପ କରିବା ଜାରି ରଖ"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ଆପଣଙ୍କ ଟିପଚିହ୍ନ ଯାଞ୍ଚ କରିବା ଜାରି ରଖିବେ?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ଆପଣ ପାୱାର ବଟନ ଦବାଇଛନ୍ତି — ଏହା ସାଧାରଣତଃ ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ ବନ୍ଦ କରିଥାଏ।\n\nଆପଣଙ୍କ ଟିପଚିହ୍ନ ଯାଞ୍ଚ କରିବା ପାଇଁ ଧୀରେ ଟାପ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"ସ୍କ୍ରିନ ବନ୍ଦ କରନ୍ତୁ"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ଜାରି ରଖନ୍ତୁ"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ଗେମ୍‌କୁ ଫେରିଆସିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ଗେମ୍ ଚୟନ କରନ୍ତୁ"</string>

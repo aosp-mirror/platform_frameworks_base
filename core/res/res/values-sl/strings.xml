@@ -477,6 +477,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Aplikaciji dovoljuje uporabo storitev IMS za opravljanje klicev brez vašega posredovanja."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"branje stanja in identitete telefona"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Aplikaciji omogoča dostop do funkcij telefona v napravi. S tem dovoljenjem lahko aplikacija določi telefonsko številko in ID-je naprave, določi lahko tudi, ali je klic aktiven, in oddaljeno številko, s katero je klic povezan."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"branje stanja osnovne telefonije in identitete"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Aplikaciji omogoča dostop do osnovnih funkcij telefonije v napravi."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"Usmeri klice prek sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Dovoli, da aplikacija usmeri klice prek sistema, da se tako izboljša izkušnja klicanja."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ogled in nadzor klicev prek sistema."</string>
@@ -628,6 +630,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Dotaknite se, da izbrišete model obraza, in nato znova dodajte obraz."</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Nastavitev odklepanja z obrazom"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Odklenite telefon tako, da ga pogledate."</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Če želite uporabljati odklepanje z obrazom, v meniju »Nastavitve« &gt; »Zasebnost« vklopite možnost "<b>"Dostop do fotoaparata"</b>"."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Nastavite več načinov odklepanja"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Dotaknite se, da dodate prstni odtis."</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Odklepanje s prstnim odtisom"</string>
@@ -1316,10 +1319,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Pripravljanje aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Zagon aplikacij."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Dokončevanje zagona."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Želite izklopiti zaslon?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Pri nastavljanju prstnega odtisa ste pritisnili gumb za vklop.\n\nS tem običajno izklopite zaslon."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Izklopi"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Prekliči"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Ali želite nadaljevati nastavitev?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pritisnili ste gumb za vklop, s čimer običajno izklopite zaslon.\n\nPoskusite se narahlo dotakniti med nastavljanjem prstnega odtisa."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Izklopi zaslon"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Nadaljuj nastavitev"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Želite nadaljevati preverjanje prstnega odtisa?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pritisnili ste gumb za vklop, s čimer običajno izklopite zaslon.\n\nZa preverjanje prstnega odtisa se poskusite narahlo dotakniti."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Izklopi zaslon"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Nadaljuj"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> se izvaja"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Dotaknite se za vrnitev v igro"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Izberite igro"</string>

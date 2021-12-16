@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"तपाईँको हस्तक्षेप बिना नै कल गर्न IMS सेवा प्रयोग गर्न एपलाई अनुमति दिन्छ।"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"फोन स्थिति र पहिचान पढ्नुहोस्"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"उपकरणको फोन विशेषताहरूको पहुँच गर्न एपलाई अनुमति दिन्छ। यस अनुमतिले फोन नम्बर र उपकरणको IDs, कल सक्षम छ कि छैन र कलद्वारा जोडिएको टाढाको नम्बर निर्धारण गर्न अनुमति दिन्छ।"</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"टेलिफोन सेवाका आधारभूत स्थिति र त्यसको पहिचानसम्बन्धी जानकारी रिड गर्ने"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"तपाईंले यो अनुमति दिनुभयो भने यो एपले यस डिभाइसको टेलिफोन सेवाका आधारभूत सुविधाहरू प्रयोग गर्न सक्छ।"</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"प्रणाली मार्फत कल गर्न दिनुहोस्‌"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"कल गर्दाको अनुभवलाई सुधार्न यस एपलाई प्रणाली मार्फत कलहरू गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"प्रणालीमार्फत कलहरू हेर्नुका साथै तिनीहरूलाई नियन्त्रण गर्नुहोस्‌।"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"आफ्नो फेस मोडेल मेटाउन ट्याप गर्नुहोस् अनि आफ्नो अनुहार फेरि दर्ता गर्नुहोस्"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"फेस अनलक सेटअप गर्नुहोस्"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"फोनमा हेरेकै भरमा फोन अनलक गर्नुहोस्"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"फेस अनलक प्रयोग गर्न \"सेटिङ तथा गोपनीयता\" मा गई "<b>"क्यामेरा प्रयोग गर्ने अनुमति"</b>" दिनुहोस्"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"अनलक गर्ने अन्य तरिकाहरू सेटअप गर्नुहोस्"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"फिंगरप्रिन्ट हाल्न ट्याप गर्नुहोस्"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"फिंगरप्रिन्ट अनलक"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> तयारी गर्दै।"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"सुरुवात एपहरू।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बुट पुरा हुँदै।"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"स्क्रिन अफ गर्ने हो?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"आफ्नो फिंगरप्रिन्ट सेटअप गर्दा तपाईंले पावर बटन थिच्नुभयो।\n\nयसो गर्दा सामान्यतया तपाईंको स्क्रिन अफ हुन्छ।"</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"अफ गर्नुहोस्"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"रद्द गर्नुहोस्"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"सेटअप गर्ने प्रक्रिया जारी राख्ने हो?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"तपाईंले पावर बटन थिच्नुभयो — सामान्यतया स्क्रिन अफ गर्न यो बटन थिच्ने गरिन्छ।\n\nफिंगरप्रिन्ट सेटअप भइन्जेल हल्का तरिकाले यो बटन ट्याप गर्नुहोस्।"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"स्क्रिन अफ गर्नुहोस्"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"सेटअप जारी राख्नुस्"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"फिंगरप्रिन्ट पुष्टि गर्ने क्रम जारी राख्ने हो?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"तपाईंले पावर बटन थिच्नुभयो — सामान्यतया स्क्रिन अफ गर्न यो बटन थिच्ने गरिन्छ।\n\nतपाईं आफ्नो फिंगरप्रिन्ट पुष्टि गर्न चाहनुहुन्छ भने हल्का तरिकाले यो बटन ट्याप गरी हेर्नुहोस्।"</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"स्क्रिन अफ गर्नुहोस्"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"जारी राख्नुहोस्"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> चलिरहेको छ"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"खेलमा फर्कन ट्याप गर्नुहोस्"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"खेल छनौट गर्नुहोस्‌"</string>
