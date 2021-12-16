@@ -70,6 +70,7 @@ import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.carrier.CarrierIdentifier;
+import android.service.carrier.CarrierService;
 import android.sysprop.TelephonyProperties;
 import android.telecom.CallScreeningService;
 import android.telecom.InCallService;
@@ -9174,6 +9175,57 @@ public class TelephonyManager {
             Rlog.e(TAG, "getCarrierPackageNamesForIntentAndPhone RemoteException", ex);
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "getCarrierPackageNamesForIntentAndPhone NPE", ex);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the package name that provides the {@link CarrierService} implementation for the
+     * current subscription, or {@code null} if no package with carrier privileges declares one.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, then the provided
+     * subscription ID is used. Otherwise, the default subscription ID will be used.
+     *
+     * @return The system-selected package that provides the {@link CarrierService} implementation
+     * for the current subscription, or {@code null} if none is resolved
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable String getCarrierServicePackageName() {
+        // TODO(b/205736323) plumb this through to CarrierPrivilegesTracker, which will cache the
+        // value instead of re-querying every time.
+        List<String> carrierServicePackages =
+                getCarrierPackageNamesForIntent(
+                        new Intent(CarrierService.CARRIER_SERVICE_INTERFACE));
+        if (carrierServicePackages != null && !carrierServicePackages.isEmpty()) {
+            return carrierServicePackages.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the package name that provides the {@link CarrierService} implementation for the
+     * specified {@code logicalSlotIndex}, or {@code null} if no package with carrier privileges
+     * declares one.
+     *
+     * @param logicalSlotIndex The slot index to fetch the {@link CarrierService} package for
+     * @return The system-selected package that provides the {@link CarrierService} implementation
+     * for the slot, or {@code null} if none is resolved
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable String getCarrierServicePackageNameForLogicalSlot(int logicalSlotIndex) {
+        // TODO(b/205736323) plumb this through to CarrierPrivilegesTracker, which will cache the
+        // value instead of re-querying every time.
+        List<String> carrierServicePackages =
+                getCarrierPackageNamesForIntentAndPhone(
+                        new Intent(CarrierService.CARRIER_SERVICE_INTERFACE), logicalSlotIndex);
+        if (carrierServicePackages != null && !carrierServicePackages.isEmpty()) {
+            return carrierServicePackages.get(0);
         }
         return null;
     }
