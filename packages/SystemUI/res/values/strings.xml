@@ -2349,4 +2349,9 @@
     <string name="fgs_manager_dialog_title">Apps running in the background</string>
     <!-- Label of the button to stop the app from running in the background [CHAR LIMIT=12]-->
     <string name="fgs_manager_app_item_stop_button_label">Stop</string>
+
+    <!-- Label for button to copy edited text back to the clipboard [CHAR LIMIT=20] -->
+    <string name="clipboard_edit_text_copy">Copy</string>
+    <!-- Text informing user that content has been copied to the system clipboard [CHAR LIMIT=NONE] -->
+    <string name="clipboard_overlay_text_copied">Copied</string>
 </resources>

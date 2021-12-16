@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             android:id="@+id/preview_border"
+             android:elevation="9dp"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_marginStart="@dimen/screenshot_offset_x"
+             android:layout_marginBottom="@dimen/screenshot_offset_y"
+             android:layout_gravity="bottom|start"
+             app:layout_constraintStart_toStartOf="parent"
+             app:layout_constraintBottom_toBottomOf="parent"
+             android:clipToPadding="false"
+             android:clipChildren="false"
+             android:padding="4dp"
+             android:background="@drawable/screenshot_border"
+             >
+    <FrameLayout
+        android:elevation="0dp"
+        android:background="@drawable/screenshot_preview_background"
+        android:clipChildren="true"
+        android:clipToOutline="true"
+        android:clipToPadding="true"
+        android:layout_width="@dimen/screenshot_x_scale"
+        android:layout_height="wrap_content">
+        <TextView android:id="@+id/text_preview"
+                  android:textFontWeight="500"
+                  android:padding="8dp"
+                  android:gravity="center|start"
+                  android:ellipsize="end"
+                  android:autoSizeTextType="uniform"
+                  android:autoSizeMinTextSize="10sp"
+                  android:autoSizeMaxTextSize="200sp"
+                  android:textColor="?android:attr/textColorPrimary"
+                  android:layout_width="@dimen/screenshot_x_scale"
+                  android:layout_height="@dimen/screenshot_x_scale"/>
+        <ImageView
+            android:id="@+id/image_preview"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </FrameLayout>
+</FrameLayout>

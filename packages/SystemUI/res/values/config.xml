@@ -315,6 +315,7 @@
         <item>com.android.systemui.accessibility.SystemActions</item>
         <item>com.android.systemui.toast.ToastUI</item>
         <item>com.android.systemui.wmshell.WMShell</item>
+        <item>com.android.systemui.clipboardoverlay.ClipboardListener</item>
     </string-array>
 
     <!-- SystemUI Services: The classes of the additional stuff to start. Services here are

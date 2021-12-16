@@ -23,6 +23,7 @@ import com.android.systemui.SliceBroadcastRelayHandler;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.accessibility.WindowMagnification;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.clipboardoverlay.ClipboardListener;
 import com.android.systemui.communal.CommunalManagerUpdater;
 import com.android.systemui.dreams.DreamOverlayRegistrant;
 import com.android.systemui.dreams.appwidgets.ComplicationPrimer;
@@ -71,6 +72,12 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(GarbageMonitor.Service.class)
     public abstract CoreStartable bindGarbageMonitorService(GarbageMonitor.Service sysui);
+
+    /** Inject into ClipboardListener. */
+    @Binds
+    @IntoMap
+    @ClassKey(ClipboardListener.class)
+    public abstract CoreStartable bindClipboardListener(ClipboardListener sysui);
 
     /** Inject into GlobalActionsComponent. */
     @Binds
