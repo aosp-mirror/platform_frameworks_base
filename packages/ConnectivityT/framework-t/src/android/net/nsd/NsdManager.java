@@ -16,6 +16,8 @@
 
 package android.net.nsd;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
@@ -23,6 +25,7 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.Context;
+import android.net.Network;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -634,6 +637,14 @@ public final class NsdManager {
     }
 
     /**
+     * Same as {@link #discoverServices(String, int, Network, DiscoveryListener)} with a null
+     * {@link Network}.
+     */
+    public void discoverServices(String serviceType, int protocolType, DiscoveryListener listener) {
+        discoverServices(serviceType, protocolType, null, listener);
+    }
+
+    /**
      * Initiate service discovery to browse for instances of a service type. Service discovery
      * consumes network bandwidth and will continue until the application calls
      * {@link #stopServiceDiscovery}.
@@ -657,11 +668,13 @@ public final class NsdManager {
      * @param serviceType The service type being discovered. Examples include "_http._tcp" for
      * http services or "_ipp._tcp" for printers
      * @param protocolType The service discovery protocol
+     * @param network Network to discover services on, or null to discover on all available networks
      * @param listener  The listener notifies of a successful discovery and is used
      * to stop discovery on this serviceType through a call on {@link #stopServiceDiscovery}.
      * Cannot be null. Cannot be in use for an active service discovery.
      */
-    public void discoverServices(String serviceType, int protocolType, DiscoveryListener listener) {
+    public void discoverServices(@NonNull String serviceType, int protocolType,
+            @Nullable Network network, @NonNull DiscoveryListener listener) {
         if (TextUtils.isEmpty(serviceType)) {
             throw new IllegalArgumentException("Service type cannot be empty");
         }
@@ -669,6 +682,7 @@ public final class NsdManager {
 
         NsdServiceInfo s = new NsdServiceInfo();
         s.setServiceType(serviceType);
+        s.setNetwork(network);
 
         int key = putListener(listener, s);
         try {
