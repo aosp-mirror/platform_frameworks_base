@@ -274,6 +274,104 @@ public class WindowMagnificationManagerTest {
     }
 
     @Test
+    public void onRectangleOnScreenRequested_trackingDisabledByOnDrag_withoutMovingMagnification()
+            throws RemoteException {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, 50f, 50f);
+        final Region outRegion = new Region();
+        mWindowMagnificationManager.getMagnificationSourceBounds(TEST_DISPLAY, outRegion);
+        final Rect requestedRect = outRegion.getBounds();
+        requestedRect.offsetTo(requestedRect.right + 10, requestedRect.bottom + 10);
+        mMockConnection.getConnectionCallback().onDrag(TEST_DISPLAY);
+
+        mWindowMagnificationManager.onRectangleOnScreenRequested(TEST_DISPLAY,
+                requestedRect.left, requestedRect.top, requestedRect.right, requestedRect.bottom);
+
+        verify(mMockConnection.getConnection(), never()).enableWindowMagnification(eq(TEST_DISPLAY),
+                eq(3f), eq(requestedRect.exactCenterX()), eq(requestedRect.exactCenterY()),
+                eq(0f), eq(0f), notNull());
+    }
+
+
+    @Test
+    public void onRectangleOnScreenRequested_trackingDisabledByScroll_withoutMovingMagnification()
+            throws RemoteException {
+        final float distanceX = 10f;
+        final float distanceY = 10f;
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, 50f, 50f);
+        final Region outRegion = new Region();
+        mWindowMagnificationManager.getMagnificationSourceBounds(TEST_DISPLAY, outRegion);
+        final Rect requestedRect = outRegion.getBounds();
+        requestedRect.offsetTo(requestedRect.right + 10, requestedRect.bottom + 10);
+        mWindowMagnificationManager.processScroll(TEST_DISPLAY, distanceX, distanceY);
+
+        mWindowMagnificationManager.onRectangleOnScreenRequested(TEST_DISPLAY,
+                requestedRect.left, requestedRect.top, requestedRect.right, requestedRect.bottom);
+
+        verify(mMockConnection.getConnection(), never()).enableWindowMagnification(eq(TEST_DISPLAY),
+                eq(3f), eq(requestedRect.exactCenterX()), eq(requestedRect.exactCenterY()),
+                eq(0f), eq(0f), notNull());
+    }
+
+    @Test
+    public void onRectangleOnScreenRequested_requestRectangleInBound_withoutMovingMagnification()
+            throws RemoteException {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, 50f, 50f);
+        final Region outRegion = new Region();
+        mWindowMagnificationManager.getMagnificationSourceBounds(TEST_DISPLAY, outRegion);
+        final Rect requestedRect = outRegion.getBounds();
+        requestedRect.inset(-10, -10);
+
+        mWindowMagnificationManager.onRectangleOnScreenRequested(TEST_DISPLAY,
+                requestedRect.left, requestedRect.top, requestedRect.right, requestedRect.bottom);
+
+        verify(mMockConnection.getConnection(), never()).enableWindowMagnification(eq(TEST_DISPLAY),
+                eq(3f), eq(500f), eq(500f), eq(0f), eq(0f), notNull());
+    }
+
+    @Test
+    public void onRectangleOnScreenRequested_trackingEnabledByDefault_movingMagnification()
+            throws RemoteException {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, 50f, 50f);
+        final Region outRegion = new Region();
+        mWindowMagnificationManager.getMagnificationSourceBounds(TEST_DISPLAY, outRegion);
+        final Rect requestedRect = outRegion.getBounds();
+        requestedRect.offsetTo(requestedRect.right + 10, requestedRect.bottom + 10);
+
+        mWindowMagnificationManager.onRectangleOnScreenRequested(TEST_DISPLAY,
+                requestedRect.left, requestedRect.top, requestedRect.right, requestedRect.bottom);
+
+        verify(mMockConnection.getConnection()).enableWindowMagnification(eq(TEST_DISPLAY), eq(3f),
+                eq(requestedRect.exactCenterX()), eq(requestedRect.exactCenterY()),
+                eq(0f), eq(0f), notNull());
+    }
+
+    @Test
+    public void onRectangleOnScreenRequested_trackingEnabledByDragAndReset_movingMagnification()
+            throws RemoteException {
+        final PointF initialPoint = new PointF(50f, 50f);
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f,
+                initialPoint.x, initialPoint.y);
+        mMockConnection.getConnectionCallback().onDrag(TEST_DISPLAY);
+        mWindowMagnificationManager.onImeWindowVisibilityChanged(true);
+        final Region outRegion = new Region();
+        mWindowMagnificationManager.getMagnificationSourceBounds(TEST_DISPLAY, outRegion);
+        final Rect requestedRect = outRegion.getBounds();
+        requestedRect.offsetTo(requestedRect.right + 10, requestedRect.bottom + 10);
+
+        mWindowMagnificationManager.onRectangleOnScreenRequested(TEST_DISPLAY,
+                requestedRect.left, requestedRect.top, requestedRect.right, requestedRect.bottom);
+
+        verify(mMockConnection.getConnection()).enableWindowMagnification(eq(TEST_DISPLAY),
+                eq(3f), eq(requestedRect.exactCenterX()), eq(requestedRect.exactCenterY()),
+                eq(0f), eq(0f), notNull());
+    }
+
+    @Test
     public void moveWindowMagnifier_enabled_invokeConnectionMethod() throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2f, NaN, NaN);

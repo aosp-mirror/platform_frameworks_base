@@ -291,13 +291,66 @@ public class WindowMagnificationManager implements
     @Override
     public void onRectangleOnScreenRequested(int displayId, int left, int top, int right,
             int bottom) {
-        // TODO(b/194668976): We will implement following typing focus in window mode after
-        //  our refactor.
+
+        float toCenterX = (float) (left + right) / 2;
+        float toCenterY = (float) (top + bottom) / 2;
+
+        if (!isPositionInSourceBounds(displayId, toCenterX, toCenterY)
+                && isTrackingTypingFocusEnabled(displayId)) {
+            enableWindowMagnification(displayId, Float.NaN, toCenterX, toCenterY);
+        }
+    }
+
+    /**
+     * Enable or disable tracking typing focus for the specific magnification window.
+     *
+     * The tracking typing focus should be set to enabled with the following conditions:
+     * 1. IME is shown.
+     *
+     * The tracking typing focus should be set to disabled with the following conditions:
+     * 1. A user drags the magnification window by 1 finger.
+     * 2. A user scroll the magnification window by 2 fingers.
+     *
+     * @param displayId The logical display id.
+     * @param trackingTypingFocusEnabled Enabled or disable the function of tracking typing focus.
+     */
+    private void setTrackingTypingFocusEnabled(int displayId, boolean trackingTypingFocusEnabled) {
+        synchronized (mLock) {
+            WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
+            if (magnifier == null) {
+                return;
+            }
+            magnifier.setTrackingTypingFocusEnabled(trackingTypingFocusEnabled);
+        }
+    }
+
+    /**
+     * Enable tracking typing focus function for all magnifications.
+     */
+    private void enableAllTrackingTypingFocus() {
+        synchronized (mLock) {
+            for (int i = 0; i < mWindowMagnifiers.size(); i++) {
+                WindowMagnifier magnifier = mWindowMagnifiers.valueAt(i);
+                magnifier.setTrackingTypingFocusEnabled(true);
+            }
+        }
+    }
+
+    /**
+     * Called when the IME window visibility changed.
+     *
+     * @param shown {@code true} means the IME window shows on the screen. Otherwise, it's hidden.
+     */
+    void onImeWindowVisibilityChanged(boolean shown) {
+        if (shown) {
+            enableAllTrackingTypingFocus();
+        }
     }
 
     @Override
     public boolean processScroll(int displayId, float distanceX, float distanceY) {
         moveWindowMagnification(displayId, -distanceX, -distanceY);
+        setTrackingTypingFocusEnabled(displayId, false);
         return /* event consumed: */ true;
     }
 
@@ -469,6 +522,16 @@ public class WindowMagnificationManager implements
         }
     }
 
+    boolean isPositionInSourceBounds(int displayId, float x, float y) {
+        synchronized (mLock) {
+            WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
+            if (magnifier == null) {
+                return false;
+            }
+            return magnifier.isPositionInSourceBounds(x, y);
+        }
+    }
+
     /**
      * Indicates whether window magnification is enabled on specified display.
      *
@@ -598,6 +661,16 @@ public class WindowMagnificationManager implements
         }
     }
 
+    boolean isTrackingTypingFocusEnabled(int displayId) {
+        synchronized (mLock) {
+            WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
+            if (magnifier == null) {
+                return false;
+            }
+            return magnifier.isTrackingTypingFocusEnabled();
+        }
+    }
+
     /**
      * Populates magnified bounds on the screen. And the populated magnified bounds would be
      * empty If window magnifier is not activated.
@@ -714,6 +787,17 @@ public class WindowMagnificationManager implements
         }
 
         @Override
+        public void onDrag(int displayId) {
+            if (mTrace.isA11yTracingEnabledForTypes(
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                mTrace.logTrace(TAG + "ConnectionCallback.onDrag",
+                        FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                        "displayId=" + displayId);
+            }
+            setTrackingTypingFocusEnabled(displayId, false);
+        }
+
+        @Override
         public void binderDied() {
             synchronized (mLock) {
                 Slog.w(TAG, "binderDied DeathRecipient :" + mExpiredDeathRecipient);
@@ -749,7 +833,9 @@ public class WindowMagnificationManager implements
 
         private int mIdOfLastServiceToControl = INVALID_SERVICE_ID;
 
-        private PointF mMagnificationFrameOffsetRatio = new PointF(0f, 0f);
+        private final PointF mMagnificationFrameOffsetRatio = new PointF(0f, 0f);
+
+        private boolean mTrackingTypingFocusEnabled = true;
 
         WindowMagnifier(int displayId, WindowMagnificationManager windowMagnificationManager) {
             mDisplayId = displayId;
@@ -790,7 +876,6 @@ public class WindowMagnificationManager implements
             }
         }
 
-        @GuardedBy("mLock")
         boolean disableWindowMagnificationInternal(
                 @Nullable MagnificationAnimationCallback animationResultCallback) {
             if (!mEnabled) {
@@ -800,6 +885,7 @@ public class WindowMagnificationManager implements
                     mDisplayId, animationResultCallback)) {
                 mEnabled = false;
                 mIdOfLastServiceToControl = INVALID_SERVICE_ID;
+                mTrackingTypingFocusEnabled = false;
                 return true;
             }
             return false;
@@ -848,7 +934,18 @@ public class WindowMagnificationManager implements
             return count;
         }
 
-        @GuardedBy("mLock")
+        boolean isPositionInSourceBounds(float x, float y) {
+            return mSourceBounds.contains((int) x, (int) y);
+        }
+
+        void setTrackingTypingFocusEnabled(boolean trackingTypingFocusEnabled) {
+            mTrackingTypingFocusEnabled = trackingTypingFocusEnabled;
+        }
+
+        boolean isTrackingTypingFocusEnabled() {
+            return mTrackingTypingFocusEnabled;
+        }
+
         boolean isEnabled() {
             return mEnabled;
         }
