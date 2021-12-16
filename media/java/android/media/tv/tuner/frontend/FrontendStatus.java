@@ -645,6 +645,8 @@ public class FrontendStatus {
     }
     /**
      * Gets the current Automatic Gain Control value which is normalized from 0 to 255.
+     *
+     * Larger AGC values indicate it is applying more gain.
      */
     public int getAgc() {
         if (mAgc == null) {
@@ -663,6 +665,10 @@ public class FrontendStatus {
     }
     /**
      * Gets the current Error information by layer.
+     *
+     * The order of the vectors is in ascending order of the required CNR (Contrast-to-noise ratio).
+     * The most robust layer is the first. For example, in ISDB-T, vec[0] is the information of
+     * layer A. vec[1] is the information of layer B.
      */
     @NonNull
     public boolean[] getLayerErrors() {
@@ -736,6 +742,10 @@ public class FrontendStatus {
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * The order of the vectors is in ascending order of the required CNR (Contrast-to-noise ratio).
+     * The most robust layer is the first. For example, in ISDB-T, vec[0] is the information of
+     * layer A. vec[1] is the information of layer B.
      */
     @NonNull
     public int[] getBers() {
@@ -752,6 +762,10 @@ public class FrontendStatus {
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * The order of the vectors is in ascending order of the required CNR (Contrast-to-noise ratio).
+     * The most robust layer is the first. For example, in ISDB-T, vec[0] is the information of
+     * layer A. vec[1] is the information of layer B.
      */
     @NonNull
     @FrontendSettings.InnerFec
@@ -849,6 +863,10 @@ public class FrontendStatus {
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * The order of the vectors is in ascending order of the required CNR (Contrast-to-noise ratio).
+     * The most robust layer is the first. For example, in ISDB-T, vec[0] is the information of
+     * layer A. vec[1] is the information of layer B.
      */
     @NonNull
     @FrontendInterleaveMode
@@ -867,6 +885,10 @@ public class FrontendStatus {
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * The order of the vectors is in ascending order of the required CNR (Contrast-to-noise ratio).
+     * The most robust layer is the first. For example, in ISDB-T, vec[0] is the information of
+     * layer A. vec[1] is the information of layer B.
      */
     @NonNull
     @IntRange(from = 0, to = 0xff)
@@ -900,6 +922,10 @@ public class FrontendStatus {
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * The order of the vectors is in ascending order of the required CNR (Contrast-to-noise ratio).
+     * The most robust layer is the first. For example, in ISDB-T, vec[0] is the information of
+     * layer A. vec[1] is the information of layer B.
      */
     @NonNull
     @FrontendModulation
