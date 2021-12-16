@@ -1420,6 +1420,7 @@ package android {
     field public static final int supportsMultipleDisplays = 16844182; // 0x1010596
     field public static final int supportsPictureInPicture = 16844023; // 0x10104f7
     field public static final int supportsRtl = 16843695; // 0x10103af
+    field public static final int supportsStylusHandwriting;
     field public static final int supportsSwitchingToNextInputMethod = 16843755; // 0x10103eb
     field public static final int supportsUploading = 16843419; // 0x101029b
     field public static final int suppressesSpellChecker = 16844355; // 0x1010643
@@ -52857,6 +52858,7 @@ package android.view.inputmethod {
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public CharSequence loadLabel(android.content.pm.PackageManager);
     method public boolean shouldShowInInputMethodPicker();
+    method public boolean supportsStylusHandwriting();
     method public boolean suppressesSpellChecker();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InputMethodInfo> CREATOR;
