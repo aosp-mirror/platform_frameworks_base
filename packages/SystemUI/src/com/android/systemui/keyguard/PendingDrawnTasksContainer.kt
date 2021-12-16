@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicReference
  */
 class PendingDrawnTasksContainer {
 
-    private lateinit var pendingDrawnTasksCount: AtomicInteger
+    private var pendingDrawnTasksCount: AtomicInteger = AtomicInteger(0)
     private var completionCallback: AtomicReference<Runnable> = AtomicReference()
 
     /**
