@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.TaskInfo;
@@ -33,12 +34,13 @@ import java.lang.annotation.RetentionPolicy;
 public abstract class ActivityInterceptorCallback {
     /**
      * Intercept the launch intent based on various signals. If an interception happened, returns
-     * a new/existing non-null {@link Intent} which may redirect to another activity.
+     * a new/existing non-null {@link ActivityInterceptResult} which may redirect to another
+     * activity or with new {@link ActivityOptions}.
      *
-     * @return null if no interception occurred, or a non-null intent which replaces the
-     * existing intent.
+     * @return null if no interception occurred, or a non-null result which replaces the existing
+     * intent and activity options.
      */
-    public abstract @Nullable Intent intercept(ActivityInterceptorInfo info);
+    public abstract @Nullable ActivityInterceptResult intercept(ActivityInterceptorInfo info);
 
     /**
      * Called when an activity is successfully launched.
@@ -106,6 +108,21 @@ public abstract class ActivityInterceptorCallback {
             this.callingPid = callingPid;
             this.callingUid = callingUid;
             this.checkedOptions = checkedOptions;
+        }
+    }
+
+    /**
+     * Data class for storing the intercept result.
+     */
+    public static final class ActivityInterceptResult {
+        @NonNull public final Intent intent;
+        @NonNull public final ActivityOptions activityOptions;
+
+        public ActivityInterceptResult(
+                @NonNull Intent intent,
+                @NonNull ActivityOptions activityOptions) {
+            this.intent = intent;
+            this.activityOptions = activityOptions;
         }
     }
 }
