@@ -16,8 +16,11 @@
 
 package com.android.systemui.media.taptotransfer
 
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 import android.view.View
 import android.view.WindowManager
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.filters.SmallTest
@@ -36,10 +39,11 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import java.util.concurrent.Future
 
 @SmallTest
 class MediaTttChipControllerTest : SysuiTestCase() {
-
+    private lateinit var appIconDrawable: Drawable
     private lateinit var fakeMainClock: FakeSystemClock
     private lateinit var fakeMainExecutor: FakeExecutor
     private lateinit var fakeBackgroundClock: FakeSystemClock
@@ -53,6 +57,7 @@ class MediaTttChipControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        appIconDrawable = Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
         fakeMainClock = FakeSystemClock()
         fakeMainExecutor = FakeExecutor(fakeMainClock)
         fakeBackgroundClock = FakeSystemClock()
@@ -64,24 +69,24 @@ class MediaTttChipControllerTest : SysuiTestCase() {
 
     @Test
     fun displayChip_chipAdded() {
-        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
+        mediaTttChipController.displayChip(moveCloserToTransfer())
 
         verify(windowManager).addView(any(), any())
     }
 
     @Test
     fun displayChip_twice_chipNotAddedTwice() {
-        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
+        mediaTttChipController.displayChip(moveCloserToTransfer())
         reset(windowManager)
 
-        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
+        mediaTttChipController.displayChip(moveCloserToTransfer())
         verify(windowManager, never()).addView(any(), any())
     }
 
     @Test
     fun removeChip_chipRemoved() {
         // First, add the chip
-        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
+        mediaTttChipController.displayChip(moveCloserToTransfer())
 
         // Then, remove it
         mediaTttChipController.removeChip()
@@ -97,24 +102,26 @@ class MediaTttChipControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun moveCloserToTransfer_chipTextContainsDeviceName_noLoadingIcon_noUndo() {
-        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
+    fun moveCloserToTransfer_appIcon_chipTextContainsDeviceName_noLoadingIcon_noUndo() {
+        mediaTttChipController.displayChip(moveCloserToTransfer())
 
         val chipView = getChipView()
+        assertThat(chipView.getAppIconDrawable()).isEqualTo(appIconDrawable)
         assertThat(chipView.getChipText()).contains(DEVICE_NAME)
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
     }
 
     @Test
-    fun transferInitiated_futureNotResolvedYet_loadingIcon_noUndo() {
+    fun transferInitiated_futureNotResolvedYet_appIcon_loadingIcon_noUndo() {
         val future: SettableFuture<Runnable?> = SettableFuture.create()
-        mediaTttChipController.displayChip(TransferInitiated(DEVICE_NAME, future))
+        mediaTttChipController.displayChip(transferInitiated(future))
 
         // Don't resolve the future in any way and don't run our executors
 
         // Assert we're still in the loading state
         val chipView = getChipView()
+        assertThat(chipView.getAppIconDrawable()).isEqualTo(appIconDrawable)
         assertThat(chipView.getChipText()).contains(DEVICE_NAME)
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
@@ -125,7 +132,7 @@ class MediaTttChipControllerTest : SysuiTestCase() {
         val future: SettableFuture<Runnable?> = SettableFuture.create()
         val undoRunnable = Runnable { }
 
-        mediaTttChipController.displayChip(TransferInitiated(DEVICE_NAME, future))
+        mediaTttChipController.displayChip(transferInitiated(future))
 
         future.set(undoRunnable)
         fakeBackgroundExecutor.advanceClockToLast()
@@ -146,7 +153,7 @@ class MediaTttChipControllerTest : SysuiTestCase() {
     fun transferInitiated_futureCancelled_chipRemoved() {
         val future: SettableFuture<Runnable?> = SettableFuture.create()
 
-        mediaTttChipController.displayChip(TransferInitiated(DEVICE_NAME, future))
+        mediaTttChipController.displayChip(transferInitiated(future))
 
         future.cancel(true)
         fakeBackgroundExecutor.advanceClockToLast()
@@ -163,7 +170,7 @@ class MediaTttChipControllerTest : SysuiTestCase() {
     @Test
     fun transferInitiated_futureNotResolvedAfterTimeout_chipRemoved() {
         val future: SettableFuture<Runnable?> = SettableFuture.create()
-        mediaTttChipController.displayChip(TransferInitiated(DEVICE_NAME, future))
+        mediaTttChipController.displayChip(transferInitiated(future))
 
         // We won't set anything on the future, but we will still run the executors so that we're
         // waiting on the future resolving. If we have a bug in our code, then this test will time
@@ -180,22 +187,28 @@ class MediaTttChipControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun transferSucceededNullUndoRunnable_chipTextContainsDeviceName_noLoadingIcon_noUndo() {
-        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME, undoRunnable = null))
+    fun transferSucceeded_appIcon_chipTextContainsDeviceName_noLoadingIcon() {
+        mediaTttChipController.displayChip(transferSucceeded())
 
         val chipView = getChipView()
+        assertThat(chipView.getAppIconDrawable()).isEqualTo(appIconDrawable)
         assertThat(chipView.getChipText()).contains(DEVICE_NAME)
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
+    }
+
+    @Test
+    fun transferSucceededNullUndoRunnable_noUndo() {
+        mediaTttChipController.displayChip(transferSucceeded(undoRunnable = null))
+
+        val chipView = getChipView()
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
     }
 
     @Test
-    fun transferSucceededWithUndoRunnable_chipTextContainsDeviceName_noLoadingIcon_undoWithClick() {
-        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME) { })
+    fun transferSucceededWithUndoRunnable_undoWithClick() {
+        mediaTttChipController.displayChip(transferSucceeded { })
 
         val chipView = getChipView()
-        assertThat(chipView.getChipText()).contains(DEVICE_NAME)
-        assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.VISIBLE)
         assertThat(chipView.getUndoButton().hasOnClickListeners()).isTrue()
     }
@@ -205,7 +218,7 @@ class MediaTttChipControllerTest : SysuiTestCase() {
         var runnableRun = false
         val runnable = Runnable { runnableRun = true }
 
-        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME, runnable))
+        mediaTttChipController.displayChip(transferSucceeded(undoRunnable = runnable))
         getChipView().getUndoButton().performClick()
 
         assertThat(runnableRun).isTrue()
@@ -213,35 +226,38 @@ class MediaTttChipControllerTest : SysuiTestCase() {
 
     @Test
     fun changeFromCloserToTransferToTransferInitiated_loadingIconAppears() {
-        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
-        mediaTttChipController.displayChip(TransferInitiated(DEVICE_NAME, TEST_FUTURE))
+        mediaTttChipController.displayChip(moveCloserToTransfer())
+        mediaTttChipController.displayChip(transferInitiated())
 
         assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
     }
 
     @Test
     fun changeFromTransferInitiatedToTransferSucceeded_loadingIconDisappears() {
-        mediaTttChipController.displayChip(TransferInitiated(DEVICE_NAME, TEST_FUTURE))
-        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME))
+        mediaTttChipController.displayChip(transferInitiated())
+        mediaTttChipController.displayChip(transferSucceeded())
 
         assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.GONE)
     }
 
     @Test
     fun changeFromTransferInitiatedToTransferSucceeded_undoButtonAppears() {
-        mediaTttChipController.displayChip(TransferInitiated(DEVICE_NAME, TEST_FUTURE))
-        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME) { })
+        mediaTttChipController.displayChip(transferInitiated())
+        mediaTttChipController.displayChip(transferSucceeded { })
 
         assertThat(getChipView().getUndoButton().visibility).isEqualTo(View.VISIBLE)
     }
 
     @Test
     fun changeFromTransferSucceededToMoveCloser_undoButtonDisappears() {
-        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME))
-        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
+        mediaTttChipController.displayChip(transferSucceeded())
+        mediaTttChipController.displayChip(moveCloserToTransfer())
 
         assertThat(getChipView().getUndoButton().visibility).isEqualTo(View.GONE)
     }
+
+    private fun LinearLayout.getAppIconDrawable(): Drawable =
+        (this.requireViewById<ImageView>(R.id.app_icon)).drawable
 
     private fun LinearLayout.getChipText(): String =
         (this.requireViewById<TextView>(R.id.text)).text as String
@@ -256,6 +272,19 @@ class MediaTttChipControllerTest : SysuiTestCase() {
         verify(windowManager).addView(viewCaptor.capture(), any())
         return viewCaptor.value as LinearLayout
     }
+
+    /** Helper method providing default parameters to not clutter up the tests. */
+    private fun moveCloserToTransfer() = MoveCloserToTransfer(DEVICE_NAME, appIconDrawable)
+
+    /** Helper method providing default parameters to not clutter up the tests. */
+    private fun transferInitiated(
+        future: Future<Runnable?> = TEST_FUTURE
+    ) = TransferInitiated(DEVICE_NAME, appIconDrawable, future)
+
+    /** Helper method providing default parameters to not clutter up the tests. */
+    private fun transferSucceeded(
+        undoRunnable: Runnable? = null
+    ) = TransferSucceeded(DEVICE_NAME, appIconDrawable, undoRunnable)
 }
 
 private const val DEVICE_NAME = "My Tablet"
