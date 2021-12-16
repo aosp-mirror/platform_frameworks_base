@@ -49,6 +49,7 @@ final class PackageRemovedInfo {
     boolean mDataRemoved;
     boolean mRemovedForAllUsers;
     boolean mIsStaticSharedLib;
+    boolean mAppIdChanging = false;
     // a two dimensional array mapping userId to the set of appIds that can receive notice
     // of package changes
     SparseArray<int[]> mBroadcastAllowList;
@@ -64,33 +65,43 @@ final class PackageRemovedInfo {
         sendPackageRemovedBroadcastInternal(killApp, removedBySystem);
     }
 
-    void sendSystemPackageUpdatedBroadcasts() {
+    void sendSystemPackageUpdatedBroadcasts(int newAppId) {
         if (mIsRemovedPackageSystemUpdate) {
-            sendSystemPackageUpdatedBroadcastsInternal();
+            sendSystemPackageUpdatedBroadcastsInternal(newAppId);
         }
     }
 
-    private void sendSystemPackageUpdatedBroadcastsInternal() {
+    private void sendSystemPackageUpdatedBroadcastsInternal(int newAppId) {
         Bundle extras = new Bundle(2);
-        extras.putInt(Intent.EXTRA_UID, mRemovedAppId >= 0 ? mRemovedAppId : mUid);
-        extras.putBoolean(Intent.EXTRA_REPLACING, true);
+        extras.putInt(Intent.EXTRA_UID, newAppId);
+        // When appId changes, do not set the replacing extra
+        if (mAppIdChanging) {
+            extras.putBoolean(Intent.EXTRA_UID_CHANGING, true);
+            extras.putInt(Intent.EXTRA_PREVIOUS_UID, mRemovedAppId >= 0 ? mRemovedAppId : mUid);
+        } else {
+            extras.putBoolean(Intent.EXTRA_REPLACING, true);
+        }
         mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, mRemovedPackage, extras,
                 0, null /*targetPackage*/, null, null, null, mBroadcastAllowList, null);
-        mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, mRemovedPackage,
-                extras, 0, null /*targetPackage*/, null, null, null, mBroadcastAllowList, null);
-        mPackageSender.sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED, null, null, 0,
-                mRemovedPackage, null, null, null, null /* broadcastAllowList */,
-                getTemporaryAppAllowlistBroadcastOptions(REASON_PACKAGE_REPLACED).toBundle());
         if (mInstallerPackageName != null) {
             mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                     mRemovedPackage, extras, 0 /*flags*/,
                     mInstallerPackageName, null, null, null, null /* broadcastAllowList */,
                     null);
-            mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
-                    mRemovedPackage, extras, 0 /*flags*/,
-                    mInstallerPackageName, null, null, null, null /* broadcastAllowList */,
-                    null);
         }
+        if (!mAppIdChanging) {
+            mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, mRemovedPackage,
+                    extras, 0, null /*targetPackage*/, null, null, null, mBroadcastAllowList, null);
+            if (mInstallerPackageName != null) {
+                mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
+                        mRemovedPackage, extras, 0 /*flags*/,
+                        mInstallerPackageName, null, null, null, null /* broadcastAllowList */,
+                        null);
+            }
+        }
+        mPackageSender.sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED, null, null, 0,
+                mRemovedPackage, null, null, null, null /* broadcastAllowList */,
+                getTemporaryAppAllowlistBroadcastOptions(REASON_PACKAGE_REPLACED).toBundle());
     }
 
     private static @NonNull BroadcastOptions getTemporaryAppAllowlistBroadcastOptions(
@@ -115,15 +126,20 @@ final class PackageRemovedInfo {
         if (mIsStaticSharedLib) {
             return;
         }
-        Bundle extras = new Bundle(2);
+        Bundle extras = new Bundle();
         final int removedUid = mRemovedAppId >= 0  ? mRemovedAppId : mUid;
         extras.putInt(Intent.EXTRA_UID, removedUid);
         extras.putBoolean(Intent.EXTRA_DATA_REMOVED, mDataRemoved);
         extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, !killApp);
         extras.putBoolean(Intent.EXTRA_USER_INITIATED, !removedBySystem);
-        if (mIsUpdate || mIsRemovedPackageSystemUpdate) {
+
+        // When appId changes, do not set the replacing extra
+        if (mAppIdChanging) {
+            extras.putBoolean(Intent.EXTRA_UID_CHANGING, true);
+        } else if (mIsUpdate || mIsRemovedPackageSystemUpdate) {
             extras.putBoolean(Intent.EXTRA_REPLACING, true);
         }
+
         extras.putBoolean(Intent.EXTRA_REMOVED_FOR_ALL_USERS, mRemovedForAllUsers);
         if (mRemovedPackage != null) {
             mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
@@ -146,9 +162,9 @@ final class PackageRemovedInfo {
             }
         }
         if (mRemovedAppId >= 0) {
-            // If a system app's updates are uninstalled the UID is not actually removed. Some
-            // services need to know the package name affected.
-            if (extras.getBoolean(Intent.EXTRA_REPLACING, false)) {
+            // If the package is not actually removed, some services need to know the
+            // package name affected.
+            if (mAppIdChanging || mIsUpdate || mIsRemovedPackageSystemUpdate) {
                 extras.putString(Intent.EXTRA_PACKAGE_NAME, mRemovedPackage);
             }
 
