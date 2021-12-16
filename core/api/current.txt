@@ -26948,11 +26948,13 @@ package android.net {
     method @NonNull public android.net.VpnService.Builder addDnsServer(@NonNull java.net.InetAddress);
     method @NonNull public android.net.VpnService.Builder addDnsServer(@NonNull String);
     method @NonNull public android.net.VpnService.Builder addRoute(@NonNull java.net.InetAddress, int);
+    method @NonNull public android.net.VpnService.Builder addRoute(@NonNull android.net.IpPrefix);
     method @NonNull public android.net.VpnService.Builder addRoute(@NonNull String, int);
     method @NonNull public android.net.VpnService.Builder addSearchDomain(@NonNull String);
     method @NonNull public android.net.VpnService.Builder allowBypass();
     method @NonNull public android.net.VpnService.Builder allowFamily(int);
     method @Nullable public android.os.ParcelFileDescriptor establish();
+    method @NonNull public android.net.VpnService.Builder excludeRoute(@NonNull android.net.IpPrefix);
     method @NonNull public android.net.VpnService.Builder setBlocking(boolean);
     method @NonNull public android.net.VpnService.Builder setConfigureIntent(@NonNull android.app.PendingIntent);
     method @NonNull public android.net.VpnService.Builder setHttpProxy(@NonNull android.net.ProxyInfo);
