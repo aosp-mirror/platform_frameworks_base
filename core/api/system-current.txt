@@ -359,6 +359,7 @@ package android {
     field public static final int config_showDefaultAssistant = 17891329; // 0x1110001
     field public static final int config_showDefaultEmergency = 17891330; // 0x1110002
     field public static final int config_showDefaultHome = 17891331; // 0x1110003
+    field public static final int config_systemCaptionsServiceCallsEnabled;
   }
 
   public static final class R.color {
@@ -725,6 +726,8 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND) public void setBackgroundActivityStartsAllowed(boolean);
     method public void setDontSendToRestrictedApps(boolean);
     method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
+    method public void setRequireAllOfPermissions(@Nullable String[]);
+    method public void setRequireNoneOfPermissions(@Nullable String[]);
     method @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppAllowlist(long, int, int, @Nullable String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(long);
     method public android.os.Bundle toBundle();
@@ -1968,8 +1971,8 @@ package android.app.usage {
     method public void reportUsageStop(@NonNull android.app.Activity, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE) public void setAppStandbyBucket(String, int);
     method @RequiresPermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE) public void setAppStandbyBuckets(java.util.Map<java.lang.String,java.lang.Integer>);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE) public void setEstimatedLaunchTime(@NonNull String, long);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE) public void setEstimatedLaunchTimes(@NonNull java.util.Map<java.lang.String,java.lang.Long>);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE) public void setEstimatedLaunchTimeMillis(@NonNull String, long);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE) public void setEstimatedLaunchTimesMillis(@NonNull java.util.Map<java.lang.String,java.lang.Long>);
     method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void unregisterAppUsageLimitObserver(int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void unregisterAppUsageObserver(int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void unregisterUsageSessionObserver(int);
@@ -4363,13 +4366,24 @@ package android.hardware.location {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppMessage> CREATOR;
   }
 
+  public final class NanoAppRpcService implements android.os.Parcelable {
+    ctor public NanoAppRpcService(long, int);
+    method public int describeContents();
+    method public long getId();
+    method public int getVersion();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppRpcService> CREATOR;
+  }
+
   public final class NanoAppState implements android.os.Parcelable {
     ctor public NanoAppState(long, int, boolean);
     ctor public NanoAppState(long, int, boolean, @NonNull java.util.List<java.lang.String>);
+    ctor public NanoAppState(long, int, boolean, @NonNull java.util.List<java.lang.String>, @NonNull java.util.List<android.hardware.location.NanoAppRpcService>);
     method public int describeContents();
     method public long getNanoAppId();
     method @NonNull public java.util.List<java.lang.String> getNanoAppPermissions();
     method public long getNanoAppVersion();
+    method @NonNull public java.util.List<android.hardware.location.NanoAppRpcService> getRpcServices();
     method public boolean isEnabled();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppState> CREATOR;

@@ -669,7 +669,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback
                 .onAuthenticationError(FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT, "");
 
-        verify(mLockPatternUtils, never()).requireStrongAuth(anyInt(), anyInt());
+        verify(mLockPatternUtils).requireStrongAuth(anyInt(), anyInt());
     }
 
 

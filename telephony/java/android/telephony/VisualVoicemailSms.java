@@ -121,7 +121,7 @@ public final class VisualVoicemailSms implements Parcelable {
                 @Override
                 public VisualVoicemailSms createFromParcel(Parcel in) {
                     return new Builder()
-                            .setPhoneAccountHandle((PhoneAccountHandle) in.readParcelable(null))
+                            .setPhoneAccountHandle((PhoneAccountHandle) in.readParcelable(null, android.telecom.PhoneAccountHandle.class))
                             .setPrefix(in.readString())
                             .setFields(in.readBundle())
                             .setMessageBody(in.readString())

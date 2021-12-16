@@ -96,8 +96,8 @@ public final class RegexValidator extends InternalValidator implements Validator
             new Parcelable.Creator<RegexValidator>() {
         @Override
         public RegexValidator createFromParcel(Parcel parcel) {
-            return new RegexValidator(parcel.readParcelable(null),
-                    (Pattern) parcel.readSerializable());
+            return new RegexValidator(parcel.readParcelable(null, android.view.autofill.AutofillId.class),
+                    (Pattern) parcel.readSerializable(java.util.regex.Pattern.class.getClassLoader(), java.util.regex.Pattern.class));
         }
 
         @Override

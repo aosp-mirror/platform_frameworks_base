@@ -89,6 +89,8 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.onehanded.OneHandedController;
+import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 
 import java.io.FileDescriptor;
@@ -98,6 +100,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -198,6 +201,9 @@ public class BubbleController {
     /** True when user is in status bar unlock shade. */
     private boolean mIsStatusBarShade = true;
 
+    /** One handed mode controller to register transition listener. */
+    private Optional<OneHandedController> mOneHandedOptional;
+
     /**
      * Creates an instance of the BubbleController.
      */
@@ -212,6 +218,7 @@ public class BubbleController {
             UiEventLogger uiEventLogger,
             ShellTaskOrganizer organizer,
             DisplayController displayController,
+            Optional<OneHandedController> oneHandedOptional,
             ShellExecutor mainExecutor,
             Handler mainHandler,
             TaskViewTransitions taskViewTransitions,
@@ -222,8 +229,9 @@ public class BubbleController {
         return new BubbleController(context, data, synchronizer, floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
-                logger, taskStackListener, organizer, positioner, displayController, mainExecutor,
-                mainHandler, taskViewTransitions, syncQueue);
+                logger, taskStackListener, organizer, positioner, displayController,
+                oneHandedOptional, mainExecutor, mainHandler, taskViewTransitions,
+                syncQueue);
     }
 
     /**
@@ -244,6 +252,7 @@ public class BubbleController {
             ShellTaskOrganizer organizer,
             BubblePositioner positioner,
             DisplayController displayController,
+            Optional<OneHandedController> oneHandedOptional,
             ShellExecutor mainExecutor,
             Handler mainHandler,
             TaskViewTransitions taskViewTransitions,
@@ -271,7 +280,23 @@ public class BubbleController {
         mBubbleIconFactory = new BubbleIconFactory(context);
         mDisplayController = displayController;
         mTaskViewTransitions = taskViewTransitions;
+        mOneHandedOptional = oneHandedOptional;
         mSyncQueue = syncQueue;
+    }
+
+    private static void registerOneHandedState(OneHandedController oneHanded) {
+        oneHanded.registerTransitionCallback(
+                new OneHandedTransitionCallback() {
+                    @Override
+                    public void onStartFinished(Rect bounds) {
+                        // TODO(b/198403767) mStackView.offSetY(int bounds.top)
+                    }
+
+                    @Override
+                    public void onStopFinished(Rect bounds) {
+                        // TODO(b/198403767) mStackView.offSetY(int bounds.top)
+                    }
+                });
     }
 
     public void initialize() {
@@ -397,6 +422,8 @@ public class BubbleController {
                         }
                     }
                 });
+
+        mOneHandedOptional.ifPresent(BubbleController::registerOneHandedState);
     }
 
     @VisibleForTesting

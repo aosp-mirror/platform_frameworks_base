@@ -3156,7 +3156,7 @@ public class ComputerEngine implements Computer {
                 try {
                     mDomainVerificationManager.printState(writer, packageName,
                             UserHandle.USER_ALL, mSettings::getPackage);
-                } catch (PackageManager.NameNotFoundException e) {
+                } catch (Exception e) {
                     pw.println("Failure printing domain verification information");
                     Slog.e(TAG, "Failure printing domain verification information", e);
                 }

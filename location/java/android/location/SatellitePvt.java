@@ -465,9 +465,9 @@ public final class SatellitePvt implements Parcelable {
                 public SatellitePvt createFromParcel(Parcel in) {
                     int flags = in.readInt();
                     ClassLoader classLoader = getClass().getClassLoader();
-                    PositionEcef positionEcef = in.readParcelable(classLoader);
-                    VelocityEcef velocityEcef = in.readParcelable(classLoader);
-                    ClockInfo clockInfo = in.readParcelable(classLoader);
+                    PositionEcef positionEcef = in.readParcelable(classLoader, android.location.SatellitePvt.PositionEcef.class);
+                    VelocityEcef velocityEcef = in.readParcelable(classLoader, android.location.SatellitePvt.VelocityEcef.class);
+                    ClockInfo clockInfo = in.readParcelable(classLoader, android.location.SatellitePvt.ClockInfo.class);
                     double ionoDelayMeters = in.readDouble();
                     double tropoDelayMeters = in.readDouble();
 

@@ -156,7 +156,7 @@ public final class GnssMeasurementsEvent implements Parcelable {
         public GnssMeasurementsEvent createFromParcel(Parcel in) {
             ClassLoader classLoader = getClass().getClassLoader();
 
-            GnssClock clock = in.readParcelable(classLoader);
+            GnssClock clock = in.readParcelable(classLoader, android.location.GnssClock.class);
 
             int measurementsLength = in.readInt();
             GnssMeasurement[] measurementsArray = new GnssMeasurement[measurementsLength];

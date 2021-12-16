@@ -155,5 +155,10 @@ interface ISystemUiProxy {
      */
     void onImeSwitcherPressed() = 49;
 
-    // Next id = 50
+    /**
+     * Notifies to toggle notification panel.
+     */
+    void toggleNotificationPanel() = 50;
+
+    // Next id = 51
 }

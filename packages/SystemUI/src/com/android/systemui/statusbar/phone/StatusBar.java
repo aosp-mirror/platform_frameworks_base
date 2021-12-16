@@ -434,6 +434,10 @@ public class StatusBar extends CoreStartable implements
         mCommandQueueCallbacks.animateCollapsePanels(flags, force);
     }
 
+    /** */
+    public void togglePanel() {
+        mCommandQueueCallbacks.togglePanel();
+    }
     /**
      * The {@link StatusBarState} of the status bar.
      */

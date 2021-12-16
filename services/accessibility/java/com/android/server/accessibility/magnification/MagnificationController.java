@@ -40,7 +40,9 @@ import android.view.accessibility.MagnificationAnimationCallback;
 import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
+import com.android.server.wm.WindowManagerInternal;
 
 /**
  * Handles all magnification controllers initialization, generic interactions,
@@ -68,7 +70,8 @@ import com.android.server.accessibility.AccessibilityManagerService;
  */
 public class MagnificationController implements WindowMagnificationManager.Callback,
         MagnificationGestureHandler.Callback,
-        FullScreenMagnificationController.MagnificationInfoChangedCallback {
+        FullScreenMagnificationController.MagnificationInfoChangedCallback,
+        WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "MagnificationController";
@@ -96,6 +99,11 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     private long mWindowModeEnabledTime = 0;
     private long mFullScreenModeEnabledTime = 0;
 
+    @GuardedBy("mLock")
+    @Nullable
+    private WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks
+            mAccessibilityCallbacksDelegate;
+
     /**
      * A callback to inform the magnification transition result on the given display.
      */
@@ -115,6 +123,8 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         mLock = lock;
         mContext = context;
         mScaleProvider = scaleProvider;
+        LocalServices.getService(WindowManagerInternal.class)
+                .getAccessibilityController().setUiChangesForAccessibilityCallbacks(this);
     }
 
     @VisibleForTesting
@@ -292,6 +302,37 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         return false;
     }
 
+    @GuardedBy("mLock")
+    private void setActivatedModeAndSwitchDelegate(int mode) {
+        mActivatedMode = mode;
+        assignMagnificationWindowManagerDelegateByMode(mode);
+    }
+
+    private void assignMagnificationWindowManagerDelegateByMode(int mode) {
+        synchronized (mLock) {
+            if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN) {
+                mAccessibilityCallbacksDelegate = getFullScreenMagnificationController();
+            } else if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW) {
+                mAccessibilityCallbacksDelegate = getWindowMagnificationMgr();
+            } else {
+                mAccessibilityCallbacksDelegate = null;
+            }
+        }
+    }
+
+    @Override
+    public void onRectangleOnScreenRequested(int displayId, int left, int top, int right,
+            int bottom) {
+        WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks
+                delegate;
+        synchronized (mLock) {
+            delegate = mAccessibilityCallbacksDelegate;
+        }
+        if (delegate != null) {
+            delegate.onRectangleOnScreenRequested(displayId, left, top, right, bottom);
+        }
+    }
+
     @Override
     public void onRequestMagnificationSpec(int displayId, int serviceId) {
         final WindowMagnificationManager windowMagnificationManager;
@@ -314,7 +355,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
             mWindowModeEnabledTime = SystemClock.uptimeMillis();
 
             synchronized (mLock) {
-                mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+                setActivatedModeAndSwitchDelegate(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
                 mLastActivatedMode = mActivatedMode;
             }
             logMagnificationModeWithImeOnIfNeeded();
@@ -324,7 +365,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                     SystemClock.uptimeMillis() - mWindowModeEnabledTime);
 
             synchronized (mLock) {
-                mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
+                setActivatedModeAndSwitchDelegate(ACCESSIBILITY_MAGNIFICATION_MODE_NONE);
             }
         }
         updateMagnificationButton(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
@@ -353,7 +394,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
             mFullScreenModeEnabledTime = SystemClock.uptimeMillis();
 
             synchronized (mLock) {
-                mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+                setActivatedModeAndSwitchDelegate(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
                 mLastActivatedMode = mActivatedMode;
             }
             logMagnificationModeWithImeOnIfNeeded();
@@ -363,7 +404,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                     SystemClock.uptimeMillis() - mFullScreenModeEnabledTime);
 
             synchronized (mLock) {
-                mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
+                setActivatedModeAndSwitchDelegate(ACCESSIBILITY_MAGNIFICATION_MODE_NONE);
             }
         }
         updateMagnificationButton(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);

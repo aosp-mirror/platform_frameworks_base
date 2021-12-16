@@ -20,6 +20,8 @@ import android.content.Context;
 import android.view.WindowManager;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
@@ -28,8 +30,10 @@ import com.android.systemui.media.taptotransfer.MediaTttChipController;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 
@@ -79,11 +83,14 @@ public interface MediaModule {
     static Optional<MediaTttChipController> providesMediaTttChipController(
             MediaTttFlags mediaTttFlags,
             Context context,
-            WindowManager windowManager) {
+            WindowManager windowManager,
+            @Main Executor mainExecutor,
+            @Background Executor backgroundExecutor) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(new MediaTttChipController(context, windowManager));
+        return Optional.of(new MediaTttChipController(
+                context, windowManager, mainExecutor, backgroundExecutor));
     }
 
     /** */
@@ -92,10 +99,12 @@ public interface MediaModule {
     static Optional<MediaTttCommandLineHelper> providesMediaTttCommandLineHelper(
             MediaTttFlags mediaTttFlags,
             CommandRegistry commandRegistry,
-            MediaTttChipController mediaTttChipController) {
+            MediaTttChipController mediaTttChipController,
+            @Main DelayableExecutor mainExecutor) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(new MediaTttCommandLineHelper(commandRegistry, mediaTttChipController));
+        return Optional.of(new MediaTttCommandLineHelper(
+                commandRegistry, mediaTttChipController, mainExecutor));
     }
 }

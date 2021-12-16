@@ -198,7 +198,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         OneHandedSettingsUtil settingsUtil = new OneHandedSettingsUtil();
         OneHandedAccessibilityUtil accessibilityUtil = new OneHandedAccessibilityUtil(context);
         OneHandedTimeoutHandler timeoutHandler = new OneHandedTimeoutHandler(mainExecutor);
-        OneHandedState transitionState = new OneHandedState();
+        OneHandedState oneHandedState = new OneHandedState();
         OneHandedTutorialHandler tutorialHandler = new OneHandedTutorialHandler(context,
                 settingsUtil, windowManager);
         OneHandedAnimationController animationController =
@@ -216,7 +216,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
         return new OneHandedController(context, displayController,
                 oneHandedBackgroundPanelOrganizer, organizer, touchHandler, tutorialHandler,
-                settingsUtil, accessibilityUtil, timeoutHandler, transitionState,
+                settingsUtil, accessibilityUtil, timeoutHandler, oneHandedState,
                 oneHandedUiEventsLogger, overlayManager, taskStackListener, mainExecutor,
                 mainHandler);
     }
@@ -392,8 +392,10 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         mEventCallback = callback;
     }
 
-    @VisibleForTesting
-    void registerTransitionCallback(OneHandedTransitionCallback callback) {
+    /**
+     * Registers {@link OneHandedTransitionCallback} to monitor the transition status
+     */
+    public void registerTransitionCallback(OneHandedTransitionCallback callback) {
         mDisplayAreaOrganizer.registerTransitionCallback(callback);
     }
 

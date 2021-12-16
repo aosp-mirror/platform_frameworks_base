@@ -292,24 +292,24 @@ public final class ParcelableConference implements Parcelable {
         @Override
         public ParcelableConference createFromParcel(Parcel source) {
             ClassLoader classLoader = ParcelableConference.class.getClassLoader();
-            PhoneAccountHandle phoneAccount = source.readParcelable(classLoader);
+            PhoneAccountHandle phoneAccount = source.readParcelable(classLoader, android.telecom.PhoneAccountHandle.class);
             int state = source.readInt();
             int capabilities = source.readInt();
             List<String> connectionIds = new ArrayList<>(2);
-            source.readList(connectionIds, classLoader);
+            source.readList(connectionIds, classLoader, java.lang.String.class);
             long connectTimeMillis = source.readLong();
             IVideoProvider videoCallProvider =
                     IVideoProvider.Stub.asInterface(source.readStrongBinder());
             int videoState = source.readInt();
-            StatusHints statusHints = source.readParcelable(classLoader);
+            StatusHints statusHints = source.readParcelable(classLoader, android.telecom.StatusHints.class);
             Bundle extras = source.readBundle(classLoader);
             int properties = source.readInt();
             long connectElapsedTimeMillis = source.readLong();
-            Uri address = source.readParcelable(classLoader);
+            Uri address = source.readParcelable(classLoader, android.net.Uri.class);
             int addressPresentation = source.readInt();
             String callerDisplayName = source.readString();
             int callerDisplayNamePresentation = source.readInt();
-            DisconnectCause disconnectCause = source.readParcelable(classLoader);
+            DisconnectCause disconnectCause = source.readParcelable(classLoader, android.telecom.DisconnectCause.class);
             boolean isRingbackRequested = source.readInt() == 1;
             int callDirection = source.readInt();
 

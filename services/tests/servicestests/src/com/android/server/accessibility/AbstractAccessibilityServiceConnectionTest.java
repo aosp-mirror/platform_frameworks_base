@@ -66,6 +66,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
@@ -839,6 +840,11 @@ public class AbstractAccessibilityServiceConnectionTest {
         @Override
         public boolean switchToInputMethod(String imeId) {
             return false;
+        }
+
+        @Override
+        public int setInputMethodEnabled(String imeId, boolean enabled) throws RemoteException {
+            return AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
         }
 
         @Override

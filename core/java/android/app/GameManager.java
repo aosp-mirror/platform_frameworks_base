@@ -167,4 +167,16 @@ public final class GameManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Called by games to communicate the current state to the platform.
+     * @param gameState An object set to the current state.
+     */
+    public void setGameState(@NonNull GameState gameState) {
+        try {
+            mService.setGameState(mContext.getPackageName(), gameState, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

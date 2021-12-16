@@ -234,9 +234,36 @@ android_library {
     plugins: ["dagger2-compiler"],
 }
 
+soong_config_module_type_import {
+    from: "frameworks/base/services/Android.bp",
+    module_types: ["system_optimized_java_defaults"],
+}
+
+system_optimized_java_defaults {
+    name: "SystemUI_app_defaults",
+    soong_config_variables: {
+        SYSTEM_OPTIMIZE_JAVA: {
+            optimize: {
+                enabled: true,
+                optimize: true,
+                shrink: true,
+                proguard_flags_files: ["proguard.flags"],
+            },
+            conditions_default: {
+                optimize: {
+                    proguard_flags_files: ["proguard.flags"],
+                },
+            },
+        },
+    },
+}
+
 android_app {
     name: "SystemUI",
-    defaults: ["platform_app_defaults"],
+    defaults: [
+        "platform_app_defaults",
+        "SystemUI_app_defaults",
+    ],
     static_libs: [
         "SystemUI-core",
     ],
@@ -246,10 +273,6 @@ android_app {
     system_ext_specific: true,
     certificate: "platform",
     privileged: true,
-
-    optimize: {
-        proguard_flags_files: ["proguard.flags"],
-    },
 
     kotlincflags: ["-Xjvm-default=enable"],
 

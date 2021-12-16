@@ -3718,7 +3718,6 @@ public class UserBackupManagerService {
      * only be called from the {@link ActivityManager}.
      */
     public void agentDisconnected(String packageName) {
-        // TODO: handle backup being interrupted
         synchronized (mAgentConnectLock) {
             if (Binder.getCallingUid() == Process.SYSTEM_UID) {
                 mConnectedAgent = null;
@@ -3731,6 +3730,20 @@ public class UserBackupManagerService {
                                 "Non-system process uid="
                                         + Binder.getCallingUid()
                                         + " claiming agent disconnected"));
+            }
+            Slog.w(TAG, "agentDisconnected: the backup agent for " + packageName
+                    + " died: cancel current operations");
+
+            // handleCancel() causes the PerformFullTransportBackupTask to go on to
+            // tearDownAgentAndKill: that will unbindBackupAgent in the Activity Manager, so
+            // that the package being backed up doesn't get stuck in restricted mode until the
+            // backup time-out elapses.
+            for (int token : mOperationStorage.operationTokensForPackage(packageName)) {
+                if (MORE_DEBUG) {
+                    Slog.d(TAG, "agentDisconnected: will handleCancel(all) for token:"
+                            + Integer.toHexString(token));
+                }
+                handleCancel(token, true /* cancelAll */);
             }
             mAgentConnectLock.notifyAll();
         }

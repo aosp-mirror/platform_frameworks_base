@@ -2984,7 +2984,7 @@ public final class StrictMode {
          *     should be removed.
          */
         public ViolationInfo(Parcel in, boolean unsetGatheringBit) {
-            mViolation = (Violation) in.readSerializable();
+            mViolation = (Violation) in.readSerializable(android.os.strictmode.Violation.class.getClassLoader(), android.os.strictmode.Violation.class);
             int binderStackSize = in.readInt();
             for (int i = 0; i < binderStackSize; i++) {
                 StackTraceElement[] traceElements = new StackTraceElement[in.readInt()];

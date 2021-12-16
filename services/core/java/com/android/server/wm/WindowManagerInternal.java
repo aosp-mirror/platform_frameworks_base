@@ -104,6 +104,32 @@ public abstract class WindowManagerInternal {
         void logTrace(String where, long loggingTypeFlags, String callingParams,
                 byte[] a11yDump, int callingUid, StackTraceElement[] callStack, long timeStamp,
                 int processId, long threadId, Set<String> ignoreStackEntries);
+
+        /**
+         * Set by the accessibility related modules which want to listen the event dispatched from
+         * window manager. Accessibility modules can use these callbacks to handle some display
+         * manipulations.
+         * @param callbacks The callbacks to invoke.
+         */
+        void setUiChangesForAccessibilityCallbacks(UiChangesForAccessibilityCallbacks callbacks);
+
+        /**
+         * This interface is used by window manager to dispatch some ui change events which may
+         * affect the screen accessibility features.
+         */
+        interface UiChangesForAccessibilityCallbacks {
+            /**
+             * Called when an application requests a rectangle focus on the screen.
+             *
+             * @param displayId The logical display id
+             * @param left The rectangle left.
+             * @param top The rectangle top.
+             * @param right The rectangle right.
+             * @param bottom The rectangle bottom.
+             */
+            void onRectangleOnScreenRequested(int displayId, int left, int top, int right,
+                    int bottom);
+        }
     }
 
     /**

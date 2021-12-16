@@ -916,10 +916,26 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
     }
 
+    private boolean checkOpenSessionAccess(final PackageInstallerSession session) {
+        if (session == null) {
+            return false;
+        }
+        if (isCallingUidOwner(session)) {
+            return true;
+        }
+        // Package verifiers have access to openSession for sealed sessions.
+        if (session.isSealed() && mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.PACKAGE_VERIFICATION_AGENT)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        return false;
+    }
+
     private IPackageInstallerSession openSessionInternal(int sessionId) throws IOException {
         synchronized (mSessions) {
             final PackageInstallerSession session = mSessions.get(sessionId);
-            if (session == null || !isCallingUidOwner(session)) {
+            if (!checkOpenSessionAccess(session)) {
                 throw new SecurityException("Caller has no access to session " + sessionId);
             }
             session.open();

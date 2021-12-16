@@ -116,7 +116,7 @@ public class ParsedPermissionImpl extends ParsedComponentImpl implements ParsedP
         this.requestRes = in.readInt();
         this.protectionLevel = in.readInt();
         this.tree = in.readBoolean();
-        this.parsedPermissionGroup = in.readParcelable(boot);
+        this.parsedPermissionGroup = in.readParcelable(boot, android.content.pm.parsing.component.ParsedPermissionGroup.class);
         this.knownCerts = sForStringSet.unparcel(in);
     }
 

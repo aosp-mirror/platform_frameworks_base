@@ -29,7 +29,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.app.ActivityThread;
 import android.app.PropertyInvalidatedCache;
 import android.bluetooth.BluetoothDevice.Transport;
 import android.bluetooth.BluetoothProfile.ConnectionPolicy;
@@ -1001,7 +1000,6 @@ public final class BluetoothAdapter {
         if (!isBleScanAlwaysAvailable()) {
             return false;
         }
-        String packageName = ActivityThread.currentPackageName();
         try {
             return mManagerService.disableBle(mAttributionSource, mToken);
         } catch (RemoteException e) {
@@ -1048,7 +1046,6 @@ public final class BluetoothAdapter {
         if (!isBleScanAlwaysAvailable()) {
             return false;
         }
-        String packageName = ActivityThread.currentPackageName();
         try {
             return mManagerService.enableBle(mAttributionSource, mToken);
         } catch (RemoteException e) {

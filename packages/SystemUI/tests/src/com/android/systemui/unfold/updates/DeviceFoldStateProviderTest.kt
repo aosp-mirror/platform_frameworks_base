@@ -26,9 +26,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenListener
+import com.android.systemui.unfold.util.FoldableDeviceStates
+import com.android.systemui.unfold.util.FoldableTestUtils
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
-import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -70,8 +71,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     private val foldUpdates: MutableList<Int> = arrayListOf()
     private val hingeAngleUpdates: MutableList<Float> = arrayListOf()
 
-    private var foldedDeviceState: Int = 0
-    private var unfoldedDeviceState: Int = 0
+    private lateinit var deviceStates: FoldableDeviceStates
 
     private var scheduledRunnable: Runnable? = null
     private var scheduledRunnableDelay: Long? = null
@@ -79,13 +79,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        val foldedDeviceStates: IntArray = context.resources.getIntArray(
-            com.android.internal.R.array.config_foldedDeviceStates)
-        assumeTrue("Test should be launched on a foldable device",
-            foldedDeviceStates.isNotEmpty())
-
-        foldedDeviceState = foldedDeviceStates.maxOrNull()!!
-        unfoldedDeviceState = foldedDeviceState + 1
+        deviceStates = FoldableTestUtils.findDeviceStates(context)
 
         foldStateProvider = DeviceFoldStateProvider(
             context,
@@ -282,7 +276,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     private fun setFoldState(folded: Boolean) {
-        val state = if (folded) foldedDeviceState else unfoldedDeviceState
+        val state = if (folded) deviceStates.folded else deviceStates.unfolded
         foldStateListenerCaptor.value.onStateChanged(state)
     }
 

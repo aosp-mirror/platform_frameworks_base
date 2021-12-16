@@ -224,6 +224,7 @@ import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.window.DisplayWindowPolicyController;
 import android.window.IDisplayAreaOrganizer;
+import android.window.TransitionRequestInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -1422,7 +1423,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (configChanged) {
             mWaitingForConfig = true;
             if (mTransitionController.isShellTransitionsEnabled()) {
-                requestChangeTransitionIfNeeded(changes);
+                requestChangeTransitionIfNeeded(changes, null /* displayChange */);
             } else {
                 mWmService.startFreezingDisplay(0 /* exitAnim */, 0 /* enterAnim */, this);
             }
@@ -2828,14 +2829,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mBaseDisplayDensity = baseDensity;
 
         if (mMaxUiWidth > 0 && mBaseDisplayWidth > mMaxUiWidth) {
-            final float ratio = mMaxUiWidth / (float) mBaseDisplayWidth;
-            mBaseDisplayHeight = (int) (mBaseDisplayHeight * ratio);
+            mBaseDisplayHeight = (mMaxUiWidth * mBaseDisplayHeight) / mBaseDisplayWidth;
             mBaseDisplayWidth = mMaxUiWidth;
-            if (!mIsDensityForced) {
-                // Update the density proportionally so the size of the UI elements won't change
-                // from the user's perspective.
-                mBaseDisplayDensity = (int) (mBaseDisplayDensity * ratio);
-            }
 
             if (DEBUG_DISPLAY) {
                 Slog.v(TAG_WM, "Applying config restraints:" + mBaseDisplayWidth + "x"
@@ -2892,13 +2887,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** If the given width and height equal to initial size, the setting will be cleared. */
     void setForcedSize(int width, int height) {
-        // Can't force size higher than the maximal allowed
-        if (mMaxUiWidth > 0 && width > mMaxUiWidth) {
-            final float ratio = mMaxUiWidth / (float) width;
-            height = (int) (height * ratio);
-            width = mMaxUiWidth;
-        }
-
         mIsSizeForced = mInitialDisplayWidth != width || mInitialDisplayHeight != height;
         if (mIsSizeForced) {
             // Set some sort of reasonable bounds on the size of the display that we will try
@@ -3217,15 +3205,20 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Requests to start a transition for the display configuration change. The given changes must
      * be non-zero. This method is no-op if the display has been collected.
      */
-    void requestChangeTransitionIfNeeded(@ActivityInfo.Config int changes) {
+    void requestChangeTransitionIfNeeded(@ActivityInfo.Config int changes,
+            @Nullable TransitionRequestInfo.DisplayChange displayChange) {
         final TransitionController controller = mTransitionController;
         if (controller.isCollecting()) {
+            if (displayChange != null) {
+                throw new IllegalArgumentException("Provided displayChange for non-new transition");
+            }
             if (!controller.isCollecting(this)) {
                 controller.collect(this);
             }
             return;
         }
-        final Transition t = controller.requestTransitionIfNeeded(TRANSIT_CHANGE, this);
+        final Transition t = controller.requestTransitionIfNeeded(TRANSIT_CHANGE, 0 /* flags */,
+                this, this, null /* remoteTransition */, displayChange);
         if (t != null) {
             mAtmService.startLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
             if (getRotation() != getWindowConfiguration().getRotation()) {
@@ -5692,7 +5685,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mWmService.mDisplayNotificationController.dispatchDisplayChanged(
                     this, getConfiguration());
             if (isReady() && mTransitionController.isShellTransitionsEnabled()) {
-                requestChangeTransitionIfNeeded(changes);
+                requestChangeTransitionIfNeeded(changes, null /* displayChange */);
             }
         }
         return changes;

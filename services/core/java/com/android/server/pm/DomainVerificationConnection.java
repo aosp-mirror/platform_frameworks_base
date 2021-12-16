@@ -76,7 +76,7 @@ public final class DomainVerificationConnection implements DomainVerificationSer
 
     @Override
     public long getPowerSaveTempWhitelistAppDuration() {
-        return VerificationUtils.getVerificationTimeout(mPm.mContext);
+        return VerificationUtils.getDefaultVerificationTimeout(mPm.mContext);
     }
 
     @Override

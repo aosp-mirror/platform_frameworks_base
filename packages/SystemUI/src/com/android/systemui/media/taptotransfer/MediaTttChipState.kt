@@ -18,6 +18,7 @@ package com.android.systemui.media.taptotransfer
 
 import androidx.annotation.StringRes
 import com.android.systemui.R
+import java.util.concurrent.Future
 
 /**
  * A class that stores all the information necessary to display the media tap-to-transfer chip in
@@ -43,9 +44,15 @@ class MoveCloserToTransfer(
 
 /**
  * A state representing that a transfer has been initiated (but not completed).
+ *
+ * @property future a future that will be resolved when the transfer has either succeeded or failed.
+ *   If the transfer succeeded, the future can optionally return an undo runnable (see
+ *   [TransferSucceeded.undoRunnable]). [MediaTttChipController] is responsible for transitioning
+ *   the chip to the [TransferSucceeded] state if the future resolves successfully.
  */
 class TransferInitiated(
-    otherDeviceName: String
+    otherDeviceName: String,
+    val future: Future<Runnable?>
 ) : MediaTttChipState(R.string.media_transfer_playing, otherDeviceName)
 
 /**

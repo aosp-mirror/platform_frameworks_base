@@ -913,10 +913,10 @@ public final class Dataset implements Parcelable {
     public static final @NonNull Creator<Dataset> CREATOR = new Creator<Dataset>() {
         @Override
         public Dataset createFromParcel(Parcel parcel) {
-            final RemoteViews presentation = parcel.readParcelable(null);
-            final InlinePresentation inlinePresentation = parcel.readParcelable(null);
+            final RemoteViews presentation = parcel.readParcelable(null, android.widget.RemoteViews.class);
+            final InlinePresentation inlinePresentation = parcel.readParcelable(null, android.service.autofill.InlinePresentation.class);
             final InlinePresentation inlineTooltipPresentation =
-                    parcel.readParcelable(null);
+                    parcel.readParcelable(null, android.service.autofill.InlinePresentation.class);
             final ArrayList<AutofillId> ids =
                     parcel.createTypedArrayList(AutofillId.CREATOR);
             final ArrayList<AutofillValue> values =
@@ -929,8 +929,8 @@ public final class Dataset implements Parcelable {
                     parcel.createTypedArrayList(InlinePresentation.CREATOR);
             final ArrayList<DatasetFieldFilter> filters =
                     parcel.createTypedArrayList(DatasetFieldFilter.CREATOR);
-            final ClipData fieldContent = parcel.readParcelable(null);
-            final IntentSender authentication = parcel.readParcelable(null);
+            final ClipData fieldContent = parcel.readParcelable(null, android.content.ClipData.class);
+            final IntentSender authentication = parcel.readParcelable(null, android.content.IntentSender.class);
             final String datasetId = parcel.readString();
 
             // Always go through the builder to ensure the data ingested by
@@ -1014,7 +1014,7 @@ public final class Dataset implements Parcelable {
 
             @Override
             public DatasetFieldFilter createFromParcel(Parcel parcel) {
-                return new DatasetFieldFilter((Pattern) parcel.readSerializable());
+                return new DatasetFieldFilter((Pattern) parcel.readSerializable(java.util.regex.Pattern.class.getClassLoader(), java.util.regex.Pattern.class));
             }
 
             @Override

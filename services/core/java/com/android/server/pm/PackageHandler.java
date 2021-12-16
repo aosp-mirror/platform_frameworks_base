@@ -22,7 +22,6 @@ import static com.android.server.pm.PackageManagerService.CHECK_PENDING_INTEGRIT
 import static com.android.server.pm.PackageManagerService.CHECK_PENDING_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD;
-import static com.android.server.pm.PackageManagerService.DEFAULT_VERIFICATION_RESPONSE;
 import static com.android.server.pm.PackageManagerService.DEFERRED_NO_KILL_INSTALL_OBSERVER;
 import static com.android.server.pm.PackageManagerService.DEFERRED_NO_KILL_POST_DELETE;
 import static com.android.server.pm.PackageManagerService.DOMAIN_VERIFICATION;
@@ -47,14 +46,12 @@ import android.content.pm.InstantAppRequest;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
@@ -154,45 +151,50 @@ final class PackageHandler extends Handler {
             } break;
             case CHECK_PENDING_VERIFICATION: {
                 final int verificationId = msg.arg1;
+                final boolean streaming = msg.arg2 != 0;
                 final PackageVerificationState state = mPm.mPendingVerification.get(verificationId);
 
-                if ((state != null) && !state.isVerificationComplete()
-                        && !state.timeoutExtended()) {
-                    final VerificationParams params = state.getVerificationParams();
-                    final Uri originUri = Uri.fromFile(params.mOriginInfo.mResolvedFile);
-
-                    String errorMsg = "Verification timed out for " + originUri;
-                    Slog.i(TAG, errorMsg);
-
-                    final UserHandle user = params.getUser();
-                    if (getDefaultVerificationResponse(user)
-                            == PackageManager.VERIFICATION_ALLOW) {
-                        Slog.i(TAG, "Continuing with installation of " + originUri);
-                        state.setVerifierResponse(Binder.getCallingUid(),
-                                PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
-                        VerificationUtils.broadcastPackageVerified(verificationId, originUri,
-                                PackageManager.VERIFICATION_ALLOW, null, params.mDataLoaderType,
-                                user, mPm.mContext);
-                    } else {
-                        VerificationUtils.broadcastPackageVerified(verificationId, originUri,
-                                PackageManager.VERIFICATION_REJECT, null,
-                                params.mDataLoaderType, user, mPm.mContext);
-                        params.setReturnCode(
-                                PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE, errorMsg);
-                        state.setVerifierResponse(Binder.getCallingUid(),
-                                PackageManager.VERIFICATION_REJECT);
-                    }
-
-                    if (state.areAllVerificationsComplete()) {
-                        mPm.mPendingVerification.remove(verificationId);
-                    }
-
-                    Trace.asyncTraceEnd(
-                            TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
-
-                    params.handleVerificationFinished();
-
+                if (state == null || state.isVerificationComplete()) {
+                    // Not found or complete.
+                    break;
                 }
+                if (!streaming && state.timeoutExtended()) {
+                    // Timeout extended.
+                    break;
+                }
+
+                final PackageVerificationResponse response = (PackageVerificationResponse) msg.obj;
+
+                final VerificationParams params = state.getVerificationParams();
+                final Uri originUri = Uri.fromFile(params.mOriginInfo.mResolvedFile);
+
+                String errorMsg = "Verification timed out for " + originUri;
+                Slog.i(TAG, errorMsg);
+
+                final UserHandle user = params.getUser();
+                if (response.code != PackageManager.VERIFICATION_REJECT) {
+                    Slog.i(TAG, "Continuing with installation of " + originUri);
+                    state.setVerifierResponse(response.callerUid, response.code);
+                    VerificationUtils.broadcastPackageVerified(verificationId, originUri,
+                            PackageManager.VERIFICATION_ALLOW, null, params.mDataLoaderType,
+                            user, mPm.mContext);
+                } else {
+                    VerificationUtils.broadcastPackageVerified(verificationId, originUri,
+                            PackageManager.VERIFICATION_REJECT, null,
+                            params.mDataLoaderType, user, mPm.mContext);
+                    params.setReturnCode(
+                            PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE, errorMsg);
+                    state.setVerifierResponse(response.callerUid, response.code);
+                }
+
+                if (state.areAllVerificationsComplete()) {
+                    mPm.mPendingVerification.remove(verificationId);
+                }
+
+                Trace.asyncTraceEnd(
+                        TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
+
+                params.handleVerificationFinished();
                 break;
             }
             case CHECK_PENDING_INTEGRITY_VERIFICATION: {
@@ -241,9 +243,12 @@ final class PackageHandler extends Handler {
                             + " It may be invalid or overridden by integrity verification");
                     break;
                 }
+                if (state.isVerificationComplete()) {
+                    Slog.w(TAG, "Verification with id " + verificationId + " already complete.");
+                    break;
+                }
 
                 final PackageVerificationResponse response = (PackageVerificationResponse) msg.obj;
-
                 state.setVerifierResponse(response.callerUid, response.code);
 
                 if (state.isVerificationComplete()) {
@@ -394,21 +399,6 @@ final class PackageHandler extends Handler {
                 break;
             }
         }
-    }
-
-    /**
-     * Get the default verification agent response code.
-     *
-     * @return default verification response code
-     */
-    private int getDefaultVerificationResponse(UserHandle user) {
-        if (mPm.mUserManager.hasUserRestriction(UserManager.ENSURE_VERIFY_APPS,
-                user.getIdentifier())) {
-            return PackageManager.VERIFICATION_REJECT;
-        }
-        return android.provider.Settings.Global.getInt(mPm.mContext.getContentResolver(),
-                android.provider.Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE,
-                DEFAULT_VERIFICATION_RESPONSE);
     }
 
     /**

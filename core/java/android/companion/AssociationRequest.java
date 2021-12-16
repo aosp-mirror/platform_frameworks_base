@@ -595,7 +595,7 @@ public final class AssociationRequest implements Parcelable {
         boolean forceConfirmation = (flg & 0x20) != 0;
         boolean skipPrompt = (flg & 0x400) != 0;
         List<DeviceFilter<?>> deviceFilters = new ArrayList<>();
-        in.readParcelableList(deviceFilters, DeviceFilter.class.getClassLoader());
+        in.readParcelableList(deviceFilters, DeviceFilter.class.getClassLoader(), (Class<android.companion.DeviceFilter<?>>) (Class<?>) android.companion.DeviceFilter.class);
         String deviceProfile = (flg & 0x4) == 0 ? null : in.readString();
         CharSequence displayName = (flg & 0x8) == 0 ? null : (CharSequence) in.readCharSequence();
         String packageName = (flg & 0x40) == 0 ? null : in.readString();

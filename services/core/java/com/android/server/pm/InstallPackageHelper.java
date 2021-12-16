@@ -56,7 +56,6 @@ import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
-import static com.android.server.pm.PackageManagerService.DEBUG_VERIFY;
 import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.POST_INSTALL;
@@ -90,7 +89,6 @@ import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
@@ -190,11 +188,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 final class InstallPackageHelper {
-    /**
-     * Whether verification is enabled by default.
-     */
-    private static final boolean DEFAULT_VERIFY_ENABLE = true;
-
     private final PackageManagerService mPm;
     private final AppDataHelper mAppDataHelper;
     private final PackageManagerServiceInjector mInjector;
@@ -494,7 +487,13 @@ final class InstallPackageHelper {
         if (request.mPkgSetting != null && request.mPkgSetting.getSharedUser() != null
                 && request.mPkgSetting.getSharedUser() != result.mPkgSetting.getSharedUser()) {
             // shared user changed, remove from old shared user
-            request.mPkgSetting.getSharedUser().removePackage(request.mPkgSetting);
+            final SharedUserSetting sus = request.mPkgSetting.getSharedUser();
+            sus.removePackage(request.mPkgSetting);
+            // Prune unused SharedUserSetting
+            if (mPm.mSettings.checkAndPruneSharedUserLPw(sus, false)) {
+                // Set the app ID in removed info for UID_REMOVED broadcasts
+                reconciledPkg.mInstallResult.mRemovedInfo.mRemovedAppId = sus.userId;
+            }
         }
         if (result.mExistingSettingCopied) {
             pkgSetting = request.mPkgSetting;
@@ -2829,56 +2828,6 @@ final class InstallPackageHelper {
         }
     }
 
-    /**
-     * Check whether or not package verification has been enabled.
-     *
-     * @return true if verification should be performed
-     */
-    boolean isVerificationEnabled(PackageInfoLite pkgInfoLite, int userId, int installFlags,
-            int installerUid) {
-        if (!DEFAULT_VERIFY_ENABLE) {
-            return false;
-        }
-
-        // Check if installing from ADB
-        if ((installFlags & PackageManager.INSTALL_FROM_ADB) != 0) {
-            if (mPm.isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS)) {
-                return true;
-            }
-            // Check if the developer wants to skip verification for ADB installs
-            if ((installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0) {
-                synchronized (mPm.mLock) {
-                    if (mPm.mSettings.getPackageLPr(pkgInfoLite.packageName) == null) {
-                        // Always verify fresh install
-                        return true;
-                    }
-                }
-                // Only skip when apk is debuggable
-                return !pkgInfoLite.debuggable;
-            }
-            return android.provider.Settings.Global.getInt(mPm.mContext.getContentResolver(),
-                    android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
-        }
-
-        // only when not installed from ADB, skip verification for instant apps when
-        // the installer and verifier are the same.
-        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-            if (mPm.mInstantAppInstallerActivity != null
-                    && mPm.mInstantAppInstallerActivity.packageName.equals(
-                    mPm.mRequiredVerifierPackage)) {
-                try {
-                    mPm.mInjector.getSystemService(AppOpsManager.class)
-                            .checkPackage(installerUid, mPm.mRequiredVerifierPackage);
-                    if (DEBUG_VERIFY) {
-                        Slog.i(TAG, "disable verification for instant app");
-                    }
-                    return false;
-                } catch (SecurityException ignore) { }
-            }
-        }
-        return true;
-    }
-
     public void sendPendingBroadcasts() {
         String[] packages;
         ArrayList<String>[] components;
@@ -3455,14 +3404,12 @@ final class InstallPackageHelper {
     /**
      * Tries to restore the disabled system package after an update has been deleted.
      */
-    @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
     public void restoreDisabledSystemPackageLIF(DeletePackageAction action,
-            PackageSetting deletedPs, @NonNull int[] allUserHandles,
-            @Nullable PackageRemovedInfo outInfo,
-            boolean writeSettings,
-            PackageSetting disabledPs)
-            throws SystemDeleteException {
-        // writer
+            @NonNull int[] allUserHandles, boolean writeSettings) throws SystemDeleteException {
+        final PackageSetting deletedPs = action.mDeletingPs;
+        final PackageRemovedInfo outInfo = action.mRemovedInfo;
+        final PackageSetting disabledPs = action.mDisabledPs;
+
         synchronized (mPm.mLock) {
             // NOTE: The system package always needs to be enabled; even if it's for
             // a compressed stub. If we don't, installing the system package fails
@@ -3472,24 +3419,26 @@ final class InstallPackageHelper {
             mPm.mSettings.enableSystemPackageLPw(disabledPs.getPkg().getPackageName());
             // Remove any native libraries from the upgraded package.
             removeNativeBinariesLI(deletedPs);
-        }
 
-        // Install the system package
-        if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
-        try {
-            installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
-                    outInfo == null ? null : outInfo.mOrigUsers, writeSettings);
-        } catch (PackageManagerException e) {
-            Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
-                    + e.getMessage());
-            // TODO(b/194319951): can we avoid this; throw would come from scan...
-            throw new SystemDeleteException(e);
-        } finally {
-            if (disabledPs.getPkg().isStub()) {
-                // We've re-installed the stub; make sure it's disabled here. If package was
-                // originally enabled, we'll install the compressed version of the application
-                // and re-enable it afterward.
-                disableStubPackage(action, deletedPs, allUserHandles);
+            // Install the system package
+            if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
+            try {
+                synchronized (mPm.mInstallLock) {
+                    installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
+                            outInfo == null ? null : outInfo.mOrigUsers, writeSettings);
+                }
+            } catch (PackageManagerException e) {
+                Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
+                        + e.getMessage());
+                // TODO(b/194319951): can we avoid this; throw would come from scan...
+                throw new SystemDeleteException(e);
+            } finally {
+                if (disabledPs.getPkg().isStub()) {
+                    // We've re-installed the stub; make sure it's disabled here. If package was
+                    // originally enabled, we'll install the compressed version of the application
+                    // and re-enable it afterward.
+                    disableStubPackage(action, deletedPs, allUserHandles);
+                }
             }
         }
     }

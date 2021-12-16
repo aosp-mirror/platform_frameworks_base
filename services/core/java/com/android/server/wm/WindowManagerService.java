@@ -2144,11 +2144,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void onRectangleOnScreenRequested(IBinder token, Rect rectangle) {
+        final AccessibilityController.AccessibilityControllerInternalImpl a11yControllerInternal =
+                AccessibilityController.getAccessibilityControllerInternal(this);
         synchronized (mGlobalLock) {
-            if (mAccessibilityController.hasCallbacks()) {
+            if (a11yControllerInternal.hasWindowManagerEventDispatcher()) {
                 WindowState window = mWindowMap.get(token);
                 if (window != null) {
-                    mAccessibilityController.onRectangleOnScreenRequested(
+                    a11yControllerInternal.onRectangleOnScreenRequested(
                             window.getDisplayId(), rectangle);
                 }
             }

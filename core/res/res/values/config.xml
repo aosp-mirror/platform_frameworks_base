@@ -4019,6 +4019,11 @@
     -->
     <string name="config_defaultSystemCaptionsManagerService" translatable="false"></string>
 
+    <!-- Indicates whether the system wide captions service should also support
+         call captioning.
+    -->
+    <bool name="config_systemCaptionsServiceCallsEnabled" translatable="false"></bool>
+
     <!-- The package name for the incident report approver app.
         This app is usually PermissionController or an app that replaces it.  When
         a bugreport or incident report with EXPLICT-level sharing flags is going to be
