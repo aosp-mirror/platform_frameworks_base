@@ -34,6 +34,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.component.ParsedApexSystemService;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Binder;
@@ -53,6 +54,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.build.UnboundedSdkLevel;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
@@ -411,6 +413,11 @@ public abstract class ApexManager {
             throws PackageManagerException;
 
     /**
+     * Get a map of system services defined in an apex mapped to the jar files they reside in.
+     */
+    public abstract Map<String, String> getApexSystemServices();
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
@@ -436,6 +443,12 @@ public abstract class ApexManager {
 
         @GuardedBy("mLock")
         private Set<ActiveApexInfo> mActiveApexInfosCache;
+
+        /**
+         * Map of all apex system services to the jar files they are contained in.
+         */
+        @GuardedBy("mLock")
+        private Map<String, String> mApexSystemServices = new ArrayMap<>();
 
         /**
          * Contains the list of {@code packageName}s of apks-in-apex for given
@@ -573,6 +586,32 @@ public abstract class ApexManager {
                                 + ai.modulePath);
                     }
                     mAllPackagesCache.add(packageInfo);
+                    for (ParsedApexSystemService service :
+                            parseResult.parsedPackage.getApexSystemServices()) {
+                        String minSdkVersion = service.getMinSdkVersion();
+                        if (minSdkVersion != null && !UnboundedSdkLevel.isAtLeast(minSdkVersion)) {
+                            Slog.d(TAG, String.format(
+                                    "ApexSystemService %s with min_sdk_version=%s is skipped",
+                                    service.getName(), service.getMinSdkVersion()));
+                            continue;
+                        }
+                        String maxSdkVersion = service.getMaxSdkVersion();
+                        if (maxSdkVersion != null && !UnboundedSdkLevel.isAtMost(maxSdkVersion)) {
+                            Slog.d(TAG, String.format(
+                                    "ApexSystemService %s with max_sdk_version=%s is skipped",
+                                    service.getName(), service.getMaxSdkVersion()));
+                            continue;
+                        }
+
+                        String name = service.getName();
+                        if (mApexSystemServices.containsKey(name)) {
+                            throw new IllegalStateException(String.format(
+                                    "Duplicate apex-system-service %s from %s, %s",
+                                    name, mApexSystemServices.get(name), service.getJarPath()));
+                        }
+
+                        mApexSystemServices.put(name, service.getJarPath());
+                    }
                     mPackageNameToApexModuleName.put(packageInfo.packageName, ai.moduleName);
                     if (ai.isActive) {
                         if (activePackagesSet.contains(packageInfo.packageName)) {
@@ -1092,6 +1131,15 @@ public abstract class ApexManager {
             }
         }
 
+        @Override
+        public Map<String, String> getApexSystemServices() {
+            synchronized (mLock) {
+                Preconditions.checkState(mApexSystemServices != null,
+                        "APEX packages have not been scanned");
+                return mApexSystemServices;
+            }
+        }
+
         /**
          * Dump information about the packages contained in a particular cache
          * @param packagesCache the cache to print information about.
@@ -1367,6 +1415,13 @@ public abstract class ApexManager {
         @Override
         void installPackage(File apexFile, PackageParser2 packageParser) {
             throw new UnsupportedOperationException("APEX updates are not supported");
+        }
+
+        @Override
+        public Map<String, String> getApexSystemServices() {
+            // TODO(satayev): we can't really support flattened apex use case, and need to migrate
+            // the manifest entries into system's manifest asap.
+            return Collections.emptyMap();
         }
 
         @Override
