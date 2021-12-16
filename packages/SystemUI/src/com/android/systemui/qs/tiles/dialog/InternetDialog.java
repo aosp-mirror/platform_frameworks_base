@@ -41,6 +41,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -126,8 +127,8 @@ public class InternetDialog extends SystemUIDialog implements
     private Switch mMobileDataToggle;
     private View mMobileToggleDivider;
     private Switch mWiFiToggle;
-    private FrameLayout mDoneLayout;
-    private FrameLayout mAirplaneModeLayout;
+    private Button mDoneButton;
+    private Button mAirplaneModeButton;
     private Drawable mBackgroundOn;
     private Drawable mBackgroundOff = null;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -217,8 +218,8 @@ public class InternetDialog extends SystemUIDialog implements
         mWifiSettingsIcon = mDialogView.requireViewById(R.id.wifi_settings_icon);
         mWifiRecyclerView = mDialogView.requireViewById(R.id.wifi_list_layout);
         mSeeAllLayout = mDialogView.requireViewById(R.id.see_all_layout);
-        mDoneLayout = mDialogView.requireViewById(R.id.done_layout);
-        mAirplaneModeLayout = mDialogView.requireViewById(R.id.apm_layout);
+        mDoneButton = mDialogView.requireViewById(R.id.done_button);
+        mAirplaneModeButton = mDialogView.requireViewById(R.id.apm_button);
         mSignalIcon = mDialogView.requireViewById(R.id.signal_icon);
         mMobileTitleText = mDialogView.requireViewById(R.id.mobile_title);
         mMobileSummaryText = mDialogView.requireViewById(R.id.mobile_summary);
@@ -240,7 +241,7 @@ public class InternetDialog extends SystemUIDialog implements
 
         setOnClickListener();
         mTurnWifiOnLayout.setBackground(null);
-        mAirplaneModeLayout.setVisibility(
+        mAirplaneModeButton.setVisibility(
                 mInternetDialogController.isAirplaneModeEnabled() ? View.VISIBLE : View.GONE);
         mWifiRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mWifiRecyclerView.setAdapter(mAdapter);
@@ -280,8 +281,8 @@ public class InternetDialog extends SystemUIDialog implements
         mConnectedWifListLayout.setOnClickListener(null);
         mSeeAllLayout.setOnClickListener(null);
         mWiFiToggle.setOnCheckedChangeListener(null);
-        mDoneLayout.setOnClickListener(null);
-        mAirplaneModeLayout.setOnClickListener(null);
+        mDoneButton.setOnClickListener(null);
+        mAirplaneModeButton.setOnClickListener(null);
         mInternetDialogController.onStop();
         mInternetDialogFactory.destroyDialog();
     }
@@ -307,7 +308,7 @@ public class InternetDialog extends SystemUIDialog implements
         }
         mInternetDialogTitle.setText(getDialogTitleText());
         mInternetDialogSubTitle.setText(getSubtitleText());
-        mAirplaneModeLayout.setVisibility(
+        mAirplaneModeButton.setVisibility(
                 mInternetDialogController.isAirplaneModeEnabled() ? View.VISIBLE : View.GONE);
 
         updateEthernet();
@@ -356,8 +357,8 @@ public class InternetDialog extends SystemUIDialog implements
                     buttonView.setChecked(isChecked);
                     mWifiManager.setWifiEnabled(isChecked);
                 });
-        mDoneLayout.setOnClickListener(v -> dismiss());
-        mAirplaneModeLayout.setOnClickListener(v -> {
+        mDoneButton.setOnClickListener(v -> dismiss());
+        mAirplaneModeButton.setOnClickListener(v -> {
             mInternetDialogController.setAirplaneModeDisabled();
         });
     }
