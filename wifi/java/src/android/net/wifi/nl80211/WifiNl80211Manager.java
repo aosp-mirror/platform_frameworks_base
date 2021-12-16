@@ -493,6 +493,8 @@ public class WifiNl80211Manager {
                     return SoftApInfo.CHANNEL_WIDTH_80MHZ_PLUS_MHZ;
                 case IApInterfaceEventCallback.BANDWIDTH_160:
                     return SoftApInfo.CHANNEL_WIDTH_160MHZ;
+                case IApInterfaceEventCallback.BANDWIDTH_320:
+                    return SoftApInfo.CHANNEL_WIDTH_320MHZ;
                 default:
                     return SoftApInfo.CHANNEL_WIDTH_INVALID;
             }
