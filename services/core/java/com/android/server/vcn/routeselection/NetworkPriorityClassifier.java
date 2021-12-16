@@ -22,8 +22,6 @@ import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_FORBIDDEN;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_REQUIRED;
-import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_ANY;
-import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_OK;
 
 import static com.android.server.VcnManagementService.LOCAL_LOG;
 
@@ -47,6 +45,7 @@ import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscription
 import com.android.server.vcn.VcnContext;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /** @hide */
@@ -121,14 +120,32 @@ class NetworkPriorityClassifier {
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
             PersistableBundle carrierConfig) {
-        // TODO: Check Network Quality reported by metric monitors/probers.
-
         final NetworkCapabilities caps = networkRecord.networkCapabilities;
+        final boolean isSelectedUnderlyingNetwork =
+                currentlySelected != null
+                        && Objects.equals(currentlySelected.network, networkRecord.network);
 
         final int meteredMatch = networkPriority.getMetered();
         final boolean isMetered = !caps.hasCapability(NET_CAPABILITY_NOT_METERED);
         if (meteredMatch == MATCH_REQUIRED && !isMetered
                 || meteredMatch == MATCH_FORBIDDEN && isMetered) {
+            return false;
+        }
+
+        // Fails bandwidth requirements if either (a) less than exit threshold, or (b), not
+        // selected, but less than entry threshold
+        if (caps.getLinkUpstreamBandwidthKbps() < networkPriority.getMinExitUpstreamBandwidthKbps()
+                || (caps.getLinkUpstreamBandwidthKbps()
+                                < networkPriority.getMinEntryUpstreamBandwidthKbps()
+                        && !isSelectedUnderlyingNetwork)) {
+            return false;
+        }
+
+        if (caps.getLinkDownstreamBandwidthKbps()
+                        < networkPriority.getMinExitDownstreamBandwidthKbps()
+                || (caps.getLinkDownstreamBandwidthKbps()
+                                < networkPriority.getMinEntryDownstreamBandwidthKbps()
+                        && !isSelectedUnderlyingNetwork)) {
             return false;
         }
 
@@ -172,8 +189,7 @@ class NetworkPriorityClassifier {
         }
 
         // TODO: Move the Network Quality check to the network metric monitor framework.
-        if (networkPriority.getNetworkQuality()
-                > getWifiQuality(networkRecord, currentlySelected, carrierConfig)) {
+        if (!isWifiRssiAcceptable(networkRecord, currentlySelected, carrierConfig)) {
             return false;
         }
 
@@ -185,7 +201,7 @@ class NetworkPriorityClassifier {
         return true;
     }
 
-    private static int getWifiQuality(
+    private static boolean isWifiRssiAcceptable(
             UnderlyingNetworkRecord networkRecord,
             UnderlyingNetworkRecord currentlySelected,
             PersistableBundle carrierConfig) {
@@ -196,14 +212,14 @@ class NetworkPriorityClassifier {
 
         if (isSelectedNetwork
                 && caps.getSignalStrength() >= getWifiExitRssiThreshold(carrierConfig)) {
-            return NETWORK_QUALITY_OK;
+            return true;
         }
 
         if (caps.getSignalStrength() >= getWifiEntryRssiThreshold(carrierConfig)) {
-            return NETWORK_QUALITY_OK;
+            return true;
         }
 
-        return NETWORK_QUALITY_ANY;
+        return false;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
