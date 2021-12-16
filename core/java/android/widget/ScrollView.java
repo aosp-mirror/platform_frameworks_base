@@ -939,13 +939,36 @@ public class ScrollView extends FrameLayout {
                     final int range = getScrollRange();
                     int oldScrollY = mScrollY;
                     int newScrollY = oldScrollY - delta;
+
+                    final int overscrollMode = getOverScrollMode();
+                    boolean canOverscroll = !event.isFromSource(InputDevice.SOURCE_MOUSE)
+                            && (overscrollMode == OVER_SCROLL_ALWAYS
+                            || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0));
+                    boolean absorbed = false;
+
                     if (newScrollY < 0) {
+                        if (canOverscroll) {
+                            mEdgeGlowTop.onPullDistance(-(float) newScrollY / getHeight(), 0.5f);
+                            mEdgeGlowTop.onRelease();
+                            invalidate();
+                            absorbed = true;
+                        }
                         newScrollY = 0;
                     } else if (newScrollY > range) {
+                        if (canOverscroll) {
+                            mEdgeGlowBottom.onPullDistance(
+                                    (float) (newScrollY - range) / getHeight(), 0.5f);
+                            mEdgeGlowBottom.onRelease();
+                            invalidate();
+                            absorbed = true;
+                        }
                         newScrollY = range;
                     }
                     if (newScrollY != oldScrollY) {
                         super.scrollTo(mScrollX, newScrollY);
+                        return true;
+                    }
+                    if (absorbed) {
                         return true;
                     }
                 }
