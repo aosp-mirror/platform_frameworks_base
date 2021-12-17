@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"탭하여 얼굴 모델을 삭제한 후 다시 얼굴을 추가하세요"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"얼굴 인식 잠금 해제 설정"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"휴대전화의 화면을 응시하여 잠금 해제할 수 있습니다."</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"얼굴 인식 잠금 해제를 사용하려면 설정 &gt; 개인 정보 보호에서 "<b>"카메라 액세스"</b>"를 사용 설정하세요."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"다른 잠금 해제 방법 설정"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"지문을 추가하려면 탭하세요."</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"지문 잠금 해제"</string>

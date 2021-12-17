@@ -622,6 +622,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"יש להקיש כדי למחוק את התבנית לזיהוי הפנים, ואז להוסיף תבנית חדשה לזיהוי הפנים"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"הגדרת התכונה \'פתיחה ע\"י זיהוי הפנים\'"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"יש להביט בטלפון כדי לבטל את נעילתו"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"‏כדי להשתמש בתכונה \'פתיחה ע\"י זיהוי הפנים\', יש להפעיל את ה"<b>"גישה למצלמה"</b>" בהגדרות &gt; פרטיות"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"אפשר להגדיר דרכים נוספות לביטול נעילה"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"יש להקיש כדי להוסיף טביעת אצבע"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ביטול הנעילה בטביעת אצבע"</string>

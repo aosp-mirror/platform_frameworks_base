@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Πατήστε για να διαγράψετε το μοντέλο προσώπου και, στη συνέχεια, προσθέστε το πρόσωπό σας ξανά."</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Ρύθμιση της λειτουργίας Ξεκλείδωμα με το πρόσωπο"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ξεκλειδώστε το τηλέφωνό σας απλώς κοιτώντας το"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Για να χρησιμοποιήσετε τη λειτουργία Ξεκλείδωμα με το πρόσωπο, ενεργοποιήστε την επιλογή "<b>"Πρόσβαση στην κάμερα"</b>" από το μενού Ρυθμίσεις &gt; Απόρρητο"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Ρυθμίστε περισσότερους τρόπους ξεκλειδώματος"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Πατήστε για να προσθέσετε δακτυλικό αποτύπωμα"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Ξεκλείδωμα με δακτυλικό αποτύπωμα"</string>

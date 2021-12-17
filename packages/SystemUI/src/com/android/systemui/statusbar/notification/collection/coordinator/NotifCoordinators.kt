@@ -73,7 +73,6 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(bubbleCoordinator)
         mCoordinators.add(conversationCoordinator)
         mCoordinators.add(mediaCoordinator)
-        mCoordinators.add(remoteInputCoordinator)
         mCoordinators.add(shadeEventCoordinator)
         mCoordinators.add(viewConfigCoordinator)
         mCoordinators.add(visualStabilityCoordinator)
@@ -85,6 +84,7 @@ class NotifCoordinatorsImpl @Inject constructor(
             mCoordinators.add(headsUpCoordinator)
             mCoordinators.add(gutsCoordinator)
             mCoordinators.add(preparationCoordinator)
+            mCoordinators.add(remoteInputCoordinator)
         }
 
         // Manually add Ordered Sections

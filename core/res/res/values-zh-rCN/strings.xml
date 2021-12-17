@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"请点按以删除您的脸部模型，然后再添加您的脸部模型"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"设置人脸解锁"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"脸部对准手机即可将其解锁"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"如需使用人脸解锁功能，请在“设置”&gt;“隐私权”中开启"<b>"摄像头使用权限"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"设置更多解锁方式"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"点按即可添加指纹"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"指纹解锁"</string>

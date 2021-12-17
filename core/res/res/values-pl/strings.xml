@@ -622,6 +622,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Kliknij, aby usunąć model twarzy, a następnie ponownie dodaj skan twarzy"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Skonfiguruj rozpoznawanie twarzy"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Popatrz na ekran telefonu, aby go odblokować"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Aby używać rozpoznawania twarzy, włącz "<b>"dostęp do aparatu"</b>" w Ustawieniach i prywatności"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Skonfiguruj więcej sposobów odblokowywania"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Kliknij, aby dodać odcisk palca"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Odblokowywanie odciskiem palca"</string>

@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Докоснете, за да изтриете модела на лицето си, след което добавете лицето си отново"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Настройване на отключването с лице"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отключвайте телефона си, като го погледнете"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"За да използвате функцията „Отключване с лице“, включете "<b>"достъпа до камерата"</b>" от „Настройки &gt; Поверителност“"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Настройване на още начини за отключване на телефона"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Докоснете, за да добавите отпечатък"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отключване с отпечатък"</string>
