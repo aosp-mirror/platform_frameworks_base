@@ -427,7 +427,6 @@ applications that come with the platform
         <permission name="android.permission.COMPANION_APPROVE_WIFI_CONNECTIONS" />
         <permission name="android.permission.MANAGE_COMPANION_DEVICES" />
         <permission name="android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING" />
-        <permission name="android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION" />
         <permission name="android.permission.REQUEST_COMPANION_PROFILE_WATCH" />
         <permission name="android.permission.REQUEST_COMPANION_SELF_MANAGED" />
         <!-- Permission required for testing registering pull atom callbacks. -->
