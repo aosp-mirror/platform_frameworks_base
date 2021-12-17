@@ -135,7 +135,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     private final List<UidBatteryConsumer> mUidBatteryConsumers;
     private final List<UserBatteryConsumer> mUserBatteryConsumers;
     private final AggregateBatteryConsumer[] mAggregateBatteryConsumers;
-    private final Parcel mHistoryBuffer;
+    private final BatteryStatsHistory mBatteryStatsHistory;
     private CursorWindow mBatteryConsumersCursorWindow;
 
     private BatteryUsageStats(@NonNull Builder builder) {
@@ -146,7 +146,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         mDischargePercentage = builder.mDischargePercentage;
         mDischargedPowerLowerBound = builder.mDischargedPowerLowerBoundMah;
         mDischargedPowerUpperBound = builder.mDischargedPowerUpperBoundMah;
-        mHistoryBuffer = builder.mHistoryBuffer;
+        mBatteryStatsHistory = builder.mBatteryStatsHistory;
         mBatteryTimeRemainingMs = builder.mBatteryTimeRemainingMs;
         mChargeTimeRemainingMs = builder.mChargeTimeRemainingMs;
         mCustomPowerComponentNames = builder.mCustomPowerComponentNames;
@@ -301,11 +301,11 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
      */
     @NonNull
     public BatteryStatsHistoryIterator iterateBatteryStatsHistory() {
-        if (mHistoryBuffer == null) {
+        if (mBatteryStatsHistory == null) {
             throw new IllegalStateException(
                     "Battery history was not requested in the BatteryUsageStatsQuery");
         }
-        return new BatteryStatsHistoryIterator(new BatteryStatsHistory(mHistoryBuffer));
+        return new BatteryStatsHistoryIterator(mBatteryStatsHistory);
     }
 
     @Override
@@ -363,12 +363,9 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         }
 
         if (source.readBoolean()) {
-            final byte[] historyBlob = source.readBlob();
-
-            mHistoryBuffer = Parcel.obtain();
-            mHistoryBuffer.unmarshall(historyBlob, 0, historyBlob.length);
+            mBatteryStatsHistory = BatteryStatsHistory.createFromBatteryUsageStatsParcel(source);
         } else {
-            mHistoryBuffer = null;
+            mBatteryStatsHistory = null;
         }
     }
 
@@ -389,9 +386,9 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
 
         mBatteryConsumersCursorWindow.writeToParcel(dest, flags);
 
-        if (mHistoryBuffer != null) {
+        if (mBatteryStatsHistory != null) {
             dest.writeBoolean(true);
-            dest.writeBlob(mHistoryBuffer.marshall());
+            mBatteryStatsHistory.writeToBatteryUsageStatsParcel(dest);
         } else {
             dest.writeBoolean(false);
         }
@@ -770,7 +767,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                 new SparseArray<>();
         private final SparseArray<UserBatteryConsumer.Builder> mUserBatteryConsumerBuilders =
                 new SparseArray<>();
-        private Parcel mHistoryBuffer;
+        private BatteryStatsHistory mBatteryStatsHistory;
 
         public Builder(@NonNull String[] customPowerComponentNames) {
             this(customPowerComponentNames, false, false);
@@ -895,8 +892,8 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
          * Sets the parceled recent history.
          */
         @NonNull
-        public Builder setBatteryHistory(Parcel historyBuffer) {
-            mHistoryBuffer = historyBuffer;
+        public Builder setBatteryHistory(BatteryStatsHistory batteryStatsHistory) {
+            mBatteryStatsHistory = batteryStatsHistory;
             return this;
         }
 
