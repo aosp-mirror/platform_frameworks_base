@@ -97,6 +97,10 @@
     <uses-permission
         android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"/>
 
+    <queries>
+        <package android:name="com.android.servicestests.apps.suspendtestapp" />
+    </queries>
+
     <!-- Uses API introduced in O (26) -->
     <uses-sdk android:minSdkVersion="1"
          android:targetSdkVersion="26"/>
