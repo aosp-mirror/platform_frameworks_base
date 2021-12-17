@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Апп нь дуудлага хийхдээ таны оролцоогүйгээр IMS үйлчилгээг ашиглах боломжтой."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"утасны статус ба таниулбарыг унших"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Апп нь төхөөрөмжийн утасны функцд хандах боломжтой. Энэ зөвшөөрөл нь апп-д утасны дугаар болон төхөөрөмжийн ID-г, дуудлага идэвхтэй эсэх, холын дугаар дуудлагаар холбогдсон байгаа эсэхийг тогтоох боломжийг олгоно,"</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"утасны үндсэн статус болон таних мэдээллийг уншуулна уу"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Аппад төхөөрөмжийн утасны үндсэн онцлогт хандах боломжийг олгоно."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"системээр дамжуулах дуудлага"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Дуудлагыг сайжруулахын тулд дуудлагаа системээр дамжуулах зөвшөөрлийг апп-д олгодог."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"систем дэх дуудлагыг харах болон хянах."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Нүүрний загвараа устгахын тулд товшоод, дараа нь царайгаа дахин нэмнэ үү"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Царайгаар түгжээ тайлахыг тохируулах"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Утас руугаа харж түгжээг нь тайлна уу"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Царайгаар түгжээ тайлахыг ашиглахын тулд Тохиргоо &gt; Нууцлал хэсэгт "<b>" Камерын хандалтыг "</b>" асаана уу"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Түгжээ тайлах илүү олон арга тохируулна уу"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Хурууны хээ нэмэхийн тулд товшино уу"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Хурууны хээгээр түгжээ тайлах"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Бэлдэж байна <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Апп-г эхлүүлж байна."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Эхлэлийг дуусгаж байна."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Дэлгэцийг унтраах уу?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Та хурууны хээгээ тохируулж байх үед Асаах/унтраах товчийг дарсан байна.\n\nЭнэ нь ихэвчлэн таны дэлгэцийг унтраана."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Унтраах"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Цуцлах"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Тохируулгыг үргэлжлүүлэх үү?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Та асаах/унтраах товчийг дарсан байна — энэ нь ихэвчлэн дэлгэцийг унтраадаг.\n\nХурууны хээгээ тохируулж байх үедээ зөөлөн товшиж үзнэ үү."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Дэлгэцийг унтраах"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Тохируулгыг үргэлжлүүлэх"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Хурууны хээгээ үргэлжлүүлэн баталгаажуулах уу?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Та асаах/унтраах товчийг дарсан байна — энэ нь ихэвчлэн дэлгэцийг унтраадаг.\n\nХурууны хээгээ баталгаажуулахын тулд зөөлөн товшиж үзнэ үү."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Дэлгэцийг унтраах"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Үргэлжлүүлэх"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ажиллаж байна"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Тоглоом руу буцахын тулд товших"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Тоглоом сонгох"</string>

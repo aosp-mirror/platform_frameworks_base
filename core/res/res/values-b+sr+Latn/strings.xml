@@ -474,6 +474,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Dozvoljava aplikaciji da koristi uslugu razmene trenutnih poruka da bi upućivala pozive bez vaše intervencije."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"čitanje statusa i identiteta telefona"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Dozvoljava aplikaciji da pristupa funkcijama telefona na uređaju. Ova dozvola omogućava aplikaciji da utvrdi broj telefona i ID-ove uređaja, zatim da li je poziv aktivan, kao i broj daljinskog uređaja sa kojim je uspostavljen poziv."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"očitavanje osnovnog telefonskog statusa i identiteta"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Omogućava aplikaciji da pristupa osnovnim telefonskim funkcijama uređaja."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"preusmeravanje poziva preko sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Dozvoljava aplikaciji da preusmerava pozive preko sistema da bi poboljšala doživljaj pozivanja."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"pregled i kontrola poziva preko sistema."</string>
@@ -625,6 +627,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Dodirnite da biste izbrisali model lica, pa ponovo dodajte svoje lice"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Podesite otključavanje licem"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Otključajte telefon tako što ćete ga pogledati"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Da biste koristili otključavanje licem, uključite "<b>"pristup kameri"</b>" u odeljku Podešavanja &gt; Privatnost"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Podesite još načina za otključavanje"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Dodirnite da biste dodali otisak prsta"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Otključavanje otiskom prsta"</string>
@@ -1296,10 +1299,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Priprema se <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Pokretanje aplikacija."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Završavanje pokretanja."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Želite da isključite ekran?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Pritisli ste dugme za uključivanje tokom podešavanja otiska prsta.\n\nTako se najčešće isključuje ekran."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Isključi"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Otkaži"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Želite li da nastavite sa podešavanjem?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pritisnuli ste dugme za uključivanje – time obično isključujete ekran.\n\nProbajte lagano da dodirnete dok podešavate otisak prsta."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Isključi ekran"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Nastavi podešavanje"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Nastavljate verifikaciju otiska prsta?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pritisnuli ste dugme za uključivanje – time obično isključujete ekran.\n\nProbajte lagano da dodirnete da biste verifikovali otisak prsta."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Isključi ekran"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Nastavi"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> je pokrenuta"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Dodirnite da biste se vratili u igru"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Odaberite igru"</string>

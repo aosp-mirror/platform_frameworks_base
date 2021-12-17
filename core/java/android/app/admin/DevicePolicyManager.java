@@ -2354,88 +2354,6 @@ public class DevicePolicyManager {
     public @interface ProvisioningPreCondition {}
 
     /**
-     * Service-specific error code for {@link #provisionFullyManagedDevice} and
-     * {@link #createAndProvisionManagedProfile}:
-     * Indicates the call to {@link #checkProvisioningPreCondition} returned an error code.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_PRE_CONDITION_FAILED = 1;
-
-    /**
-     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
-     * Indicates the call to {@link UserManager#createProfileForUserEvenWhenDisallowed}
-     * returned {@code null}.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_PROFILE_CREATION_FAILED = 2;
-
-    /**
-     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
-     * Indicates the call to {@link PackageManager#installExistingPackageAsUser} has failed.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED = 3;
-
-    /**
-     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
-     * Indicates the call to {@link #setProfileOwner} returned {@code false}.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED = 4;
-
-    /**
-     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
-     * Indicates that starting the newly created profile has failed.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_STARTING_PROFILE_FAILED = 5;
-
-    /**
-     * Service-specific error code for {@link #provisionFullyManagedDevice}:
-     * Indicates that removing the non required apps have failed.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED = 6;
-
-    /**
-     * Service-specific error code for {@link #provisionFullyManagedDevice}:
-     * Indicates the call to {@link #setDeviceOwner} returned {@code false}.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final int PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED = 7;
-
-    /**
-     * Service-specific error codes for {@link #createAndProvisionManagedProfile} and
-     * {@link #provisionFullyManagedDevice} indicating all the errors during provisioning.
-     *
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "PROVISIONING_RESULT_" }, value = {
-            PROVISIONING_RESULT_PRE_CONDITION_FAILED, PROVISIONING_RESULT_PROFILE_CREATION_FAILED,
-            PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED,
-            PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED,
-            PROVISIONING_RESULT_STARTING_PROFILE_FAILED,
-            PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED,
-            PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED
-    })
-    public @interface ProvisioningResult {}
-
-    /**
      * Disable all configurable SystemUI features during LockTask mode. This includes,
      * <ul>
      *     <li>system info area in the status bar (connectivity icons, clock, etc.)
@@ -5821,13 +5739,23 @@ public class DevicePolicyManager {
             "android.app.action.CHECK_POLICY_COMPLIANCE";
 
     /**
-     * Broadcast action: notify managed provisioning that new managed user is created.
+     * Broadcast action: notify managed provisioning that PO/DO provisioning has completed.
      *
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_MANAGED_USER_CREATED =
-            "android.app.action.MANAGED_USER_CREATED";
+    public static final String ACTION_PROVISIONING_COMPLETED =
+            "android.app.action.PROVISIONING_COMPLETED";
+
+    /**
+     * Extra for {@link #ACTION_PROVISIONING_COMPLETED} to indicate the provisioning action that has
+     * been completed, this can either be {@link #ACTION_PROVISION_MANAGED_PROFILE},
+     * {@link #ACTION_PROVISION_MANAGED_DEVICE}, or {@link #ACTION_PROVISION_MANAGED_USER}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_PROVISIONING_ACTION =
+            "android.app.extra.PROVISIONING_ACTION";
 
     /**
      * Broadcast action: notify system that a new (Android) user was added when the device is
@@ -11424,6 +11352,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
     public @ProvisioningPreCondition int checkProvisioningPreCondition(
             @NonNull String action, @NonNull String packageName) {
         try {
@@ -14125,7 +14054,8 @@ public class DevicePolicyManager {
      * @hide
      */
     @Nullable
-    @TestApi
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
     public UserHandle createAndProvisionManagedProfile(
             @NonNull ManagedProfileProvisioningParams provisioningParams)
             throws ProvisioningException {
@@ -14158,7 +14088,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
     public void provisionFullyManagedDevice(
             @NonNull FullyManagedDeviceProvisioningParams provisioningParams)

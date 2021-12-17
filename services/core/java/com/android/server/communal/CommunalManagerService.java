@@ -87,7 +87,7 @@ public final class CommunalManagerService extends SystemService {
             new ActivityInterceptorCallback() {
                 @Nullable
                 @Override
-                public Intent intercept(ActivityInterceptorInfo info) {
+                public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
                     if (!shouldIntercept(info.aInfo)) {
                         if (DEBUG) {
                             Slog.d(TAG, "Activity allowed, not intercepting: "
@@ -110,8 +110,10 @@ public final class CommunalManagerService extends SystemService {
                             PendingIntent.FLAG_IMMUTABLE,
                             /* bOptions= */ null);
 
-                    return LaunchAfterAuthenticationActivity.createLaunchAfterAuthenticationIntent(
-                            new IntentSender(target));
+                    return new ActivityInterceptResult(
+                            LaunchAfterAuthenticationActivity.createLaunchAfterAuthenticationIntent(
+                                    new IntentSender(target)),
+                            info.checkedOptions);
 
                 }
             };

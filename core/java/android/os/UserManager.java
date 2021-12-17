@@ -1546,6 +1546,17 @@ public class UserManager {
     private static final String ACTION_CREATE_USER = "android.os.action.CREATE_USER";
 
     /**
+     * Action to start an activity to create a supervised user.
+     * Only devices with non-empty config_supervisedUserCreationPackage support this.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USERS)
+    public static final String ACTION_CREATE_SUPERVISED_USER =
+            "android.os.action.CREATE_SUPERVISED_USER";
+
+    /**
      * Extra containing a name for the user being created. Optional parameter passed to
      * ACTION_CREATE_USER activity.
      * @hide

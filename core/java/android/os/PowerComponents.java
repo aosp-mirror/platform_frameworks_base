@@ -18,6 +18,7 @@ package android.os;
 import static android.os.BatteryConsumer.POWER_COMPONENT_ANY;
 import static android.os.BatteryConsumer.POWER_COMPONENT_COUNT;
 import static android.os.BatteryConsumer.PROCESS_STATE_ANY;
+import static android.os.BatteryConsumer.PROCESS_STATE_UNSPECIFIED;
 import static android.os.BatteryConsumer.convertMahToDeciCoulombs;
 
 import android.annotation.NonNull;
@@ -339,7 +340,7 @@ class PowerComponents {
 
                 serializer.startTag(null, BatteryUsageStats.XML_TAG_COMPONENT);
                 serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_ID, componentId);
-                if (key.processState != PROCESS_STATE_ANY) {
+                if (key.processState != PROCESS_STATE_UNSPECIFIED) {
                     serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_PROCESS_STATE,
                             key.processState);
                 }
@@ -398,7 +399,7 @@ class PowerComponents {
                 switch (parser.getName()) {
                     case BatteryUsageStats.XML_TAG_COMPONENT: {
                         int componentId = -1;
-                        int processState = PROCESS_STATE_ANY;
+                        int processState = PROCESS_STATE_UNSPECIFIED;
                         double powerMah = 0;
                         long durationMs = 0;
                         int model = BatteryConsumer.POWER_MODEL_UNDEFINED;

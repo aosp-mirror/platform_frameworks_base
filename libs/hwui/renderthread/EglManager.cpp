@@ -262,8 +262,6 @@ EGLConfig EglManager::loadA8Config(EGLDisplay display, EglManager::SwapBehavior 
                         0,
                         EGL_DEPTH_SIZE,
                         0,
-                        EGL_STENCIL_SIZE,
-                        STENCIL_BUFFER_SIZE,
                         EGL_SURFACE_TYPE,
                         EGL_WINDOW_BIT | eglSwapBehavior,
                         EGL_NONE};
@@ -354,10 +352,6 @@ void EglManager::loadConfigs() {
         ALOGW("Failed to initialize 101010-2 format, error = %s",
               eglErrorString());
     }
-    mEglConfigA8 = loadA8Config(mEglDisplay, mSwapBehavior);
-    if (mEglConfigA8 == EGL_NO_CONFIG_KHR) {
-        ALOGE("Failed to initialize A8 format, error = %s", eglErrorString());
-    }
 }
 
 void EglManager::createContext() {
@@ -431,9 +425,13 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
     EGLConfig config = mEglConfig;
     if (colorMode == ColorMode::A8) {
         // A8 doesn't use a color space
+        if (!mEglConfigA8) {
+            mEglConfigA8 = loadA8Config(mEglDisplay, mSwapBehavior);
+            LOG_ALWAYS_FATAL_IF(!mEglConfigA8,
+                                "Requested ColorMode::A8, but EGL lacks support! error = %s",
+                                eglErrorString());
+        }
         config = mEglConfigA8;
-
-        LOG_ALWAYS_FATAL_IF(!mEglConfigA8, "Requested ColorMode::A8, but EGL lacks support!");
     } else {
         if (!mHasWideColorGamutSupport) {
             colorMode = ColorMode::Default;

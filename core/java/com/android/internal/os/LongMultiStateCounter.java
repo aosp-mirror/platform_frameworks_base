@@ -122,6 +122,13 @@ public final class LongMultiStateCounter implements Parcelable {
     /**
      * Adds the supplied values to the current accumulated values in the counter.
      */
+    public void incrementValue(long count, long timestampMs) {
+        native_incrementValue(mNativeObject, count, timestampMs);
+    }
+
+    /**
+     * Adds the supplied values to the current accumulated values in the counter.
+     */
     public void addCount(long count) {
         native_addCount(mNativeObject, count);
     }
@@ -142,6 +149,17 @@ public final class LongMultiStateCounter implements Parcelable {
                     "State: " + state + ", outside the range: [0-" + mStateCount + "]");
         }
         return native_getCount(mNativeObject, state);
+    }
+
+    /**
+     * Returns the total accumulated count across all states.
+     */
+    public long getTotalCount() {
+        long total = 0;
+        for (int state = 0; state < mStateCount; state++) {
+            total += native_getCount(mNativeObject, state);
+        }
+        return total;
     }
 
     @Override
@@ -188,6 +206,10 @@ public final class LongMultiStateCounter implements Parcelable {
 
     @CriticalNative
     private static native long native_updateValue(long nativeObject, long value, long timestampMs);
+
+    @CriticalNative
+    private static native void native_incrementValue(long nativeObject, long increment,
+            long timestampMs);
 
     @CriticalNative
     private static native void native_addCount(long nativeObject, long count);

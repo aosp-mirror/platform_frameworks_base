@@ -26,6 +26,7 @@ import android.media.tv.TvInputManager;
 import android.media.tv.TvView;
 import android.media.tv.interactive.TvIAppManager.Session;
 import android.media.tv.interactive.TvIAppManager.SessionCallback;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -53,6 +54,7 @@ public class TvIAppView extends ViewGroup {
     private final Handler mHandler = new Handler();
     private Session mSession;
     private MySessionCallback mSessionCallback;
+    private TvIAppCallback mCallback;
     private SurfaceView mSurfaceView;
     private Surface mSurface;
 
@@ -121,6 +123,16 @@ public class TvIAppView extends ViewGroup {
         mDefStyleAttr = defStyleAttr;
         resetSurfaceView();
         mTvIAppManager = (TvIAppManager) getContext().getSystemService("tv_interactive_app");
+    }
+
+    /**
+     * Sets the callback to be invoked when an event is dispatched to this TvIAppView.
+     *
+     * @param callback The callback to receive events. A value of {@code null} removes the existing
+     *            callback.
+     */
+    public void setCallback(@Nullable TvIAppCallback callback) {
+        mCallback = callback;
     }
 
     @Override
@@ -322,6 +334,23 @@ public class TvIAppView extends ViewGroup {
         return UNSET_TVVIEW_SUCCESS;
     }
 
+    /**
+     * Callback used to receive various status updates on the {@link TvIAppView}.
+     */
+    public abstract static class TvIAppCallback {
+
+        /**
+         * This is called when a command is requested to be processed by the related TV input.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param cmdType type of the command
+         * @param parameters parameters of the command
+         */
+        public void onCommandRequest(String iAppServiceId,
+                @TvIAppService.IAppServiceCommandType String cmdType, Bundle parameters) {
+        }
+    }
+
     private class MySessionCallback extends SessionCallback {
         final String mIAppServiceId;
         int mType;
@@ -394,6 +423,22 @@ public class TvIAppView extends ViewGroup {
             mSurfaceViewBottom = bottom;
             mUseRequestedSurfaceLayout = true;
             requestLayout();
+        }
+
+        @Override
+        public void onCommandRequest(Session session,
+                @TvIAppService.IAppServiceCommandType String cmdType, Bundle parameters) {
+            if (DEBUG) {
+                Log.d(TAG, "onCommandRequest (cmdType=" + cmdType + ", parameters="
+                        + parameters.toString() + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onCommandRequest - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onCommandRequest(mIAppServiceId, cmdType, parameters);
+            }
         }
     }
 }

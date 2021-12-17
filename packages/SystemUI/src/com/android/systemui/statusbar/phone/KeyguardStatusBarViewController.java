@@ -392,7 +392,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         }
 
         float alphaQsExpansion = 1 - Math.min(
-                1, mNotificationPanelViewStateProvider.getQsExpansionFraction() * 2);
+                1, mNotificationPanelViewStateProvider.getLockscreenShadeDragProgress() * 2);
         float newAlpha = Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
                 * mKeyguardStatusBarAnimateAlpha
                 * (1.0f - mKeyguardHeadsUpShowingAmount);

@@ -171,8 +171,8 @@ public final class PhoneStateMonitor {
         return mStatusBarStateController.isDozing();
     }
 
-    private boolean isLauncherShowing(ActivityManager.RunningTaskInfo runningTaskInfo) {
-        if (runningTaskInfo == null) {
+    private boolean isLauncherShowing(@Nullable ActivityManager.RunningTaskInfo runningTaskInfo) {
+        if (runningTaskInfo == null || runningTaskInfo.topActivity == null) {
             return false;
         } else {
             return runningTaskInfo.topActivity.equals(mDefaultHome);

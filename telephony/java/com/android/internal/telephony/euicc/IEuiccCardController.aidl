@@ -45,6 +45,8 @@ interface IEuiccCardController {
         in IGetAllProfilesCallback callback);
     oneway void getProfile(String callingPackage, String cardId, String iccid,
         in IGetProfileCallback callback);
+    oneway void getEnabledProfile(String callingPackage, String cardId, int portIndex,
+        in IGetProfileCallback callback);
     oneway void disableProfile(String callingPackage, String cardId, String iccid, int portIndex,
             boolean refresh, in IDisableProfileCallback callback);
     oneway void switchToProfile(String callingPackage, String cardId, String iccid, int portIndex,

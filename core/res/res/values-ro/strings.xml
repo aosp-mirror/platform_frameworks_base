@@ -474,6 +474,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permite aplicației să folosească serviciul IMS pentru apeluri, fără intervenția dvs."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"citește starea și identitatea telefonului"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Permite aplicației să acceseze funcțiile de telefon ale dispozitivului. Cu această permisiune aplicația stabilește numărul de telefon și ID-urile de dispozitiv, dacă un apel este activ, precum și numărul de la distanță conectat printr-un apel."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"să citească informații de bază, precum activitatea și starea telefonului"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Permite ca aplicația să acceseze funcțiile de telefonie de bază ale dispozitivului."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"să direcționeze apelurile prin intermediul sistemului"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Permiteți aplicației să direcționeze apelurile prin intermediul sistemului pentru a îmbunătăți calitatea apelurilor."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"Vedeți și controlați apelurile prin intermediul sistemului."</string>
@@ -625,6 +627,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Atingeți pentru a șterge modelul facial, apoi adăugați din nou fața"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurați Deblocarea facială"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Deblocați-vă telefonul uitându-vă la acesta"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Pentru a folosi Deblocarea facială, activați "<b>"Accesul la cameră"</b>" în Setări și confidențialitate"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configurați mai multe moduri de deblocare"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Atingeți ca să adăugați o amprentă"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Deblocare cu amprenta"</string>
@@ -1296,10 +1299,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Se pregătește <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Se pornesc aplicațiile."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Se finalizează pornirea."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Dezactivați ecranul?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Ați apăsat butonul de pornire în timpul configurării amprentei.\n\nDe obicei, această acțiune dezactivează ecranul."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Dezactivați"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Anulați"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Continuați configurarea?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Ați apăsat butonul de pornire. De obicei, această acțiune dezactivează ecranul.\n\nAtingeți ușor când vă configurați amprenta."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Dezactivați ecranul"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Continuați configurarea"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Continuați cu verificarea amprentei?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Ați apăsat butonul de pornire. De obicei, această acțiune dezactivează ecranul.\n\nAtingeți ușor pentru verificarea amprentei."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Dezactivați ecranul"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Continuați"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Rulează <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Atingeți pentru a reveni la joc"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Alegeți jocul"</string>

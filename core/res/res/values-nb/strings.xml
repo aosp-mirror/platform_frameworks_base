@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Lar appen bruke nettprattjenesten til å ringe uten at du gjør noe."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lese telefonstatus og -identitet"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Lar appen bruke enhetens telefonfunksjoner. Med denne tillatelsen kan appen finne telefonnummer og enhets-ID-er, registrere om en samtale pågår, og se det eksterne nummeret det opprettes en forbindelse med via oppringing."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"lese grunnleggende telefonstatus og identitet"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Gir appen tilgang til de grunnleggende telefonfunksjonene på enheten."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"send anrop gjennom systemet"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Lar appen sende anrop gjennom systemet for å forbedre anropsopplevelsen."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"se og kontrollere anrop i systemet."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Trykk for å slette ansiktsmodellen din, og legg deretter til ansiktet på nytt"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfigurer ansiktslås"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Lås opp telefonen ved å se på den"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"For å bruke ansiktslås, slå på "<b>"Kameratilgang"</b>" i Innstillinger &gt; Personvern"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfigurer flere måter å låse opp på"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Trykk for å legge til et fingeravtrykk"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Opplåsing med fingeravtrykk"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Forbereder <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Starter apper."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Ferdigstiller oppstart."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Vil du slå av skjermen?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Da du konfigurerte fingeravtrykket, trykket du på av/på-knappen.\n\nDette slår vanligvis av skjermen."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Slå av"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Avbryt"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Vil du fortsette konfigureringen?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du har trykket på av/på-knappen – dette slår vanligvis av skjermen.\n\nPrøv å trykke lett mens du konfigurerer fingeravtrykket ditt."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Slå av skjermen"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Fortsett konfig."</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Fortsett bekreftelse av fingeravtrykket?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du har trykket på av/på-knappen – dette slår vanligvis av skjermen.\n\nPrøv å trykke lett for å bekrefte fingeravtrykket ditt."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Slå av skjermen"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortsett"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> kjører"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Trykk for å gå tilbake til spillet"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Velg et spill"</string>

@@ -34,7 +34,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -141,7 +141,7 @@ public class PackageManagerServiceUtils {
      * allow 3P apps to trigger internal-only functionality.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     /**

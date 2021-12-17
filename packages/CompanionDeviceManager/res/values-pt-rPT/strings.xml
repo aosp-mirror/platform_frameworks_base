@@ -17,11 +17,25 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Gestor de dispositivos associados"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Escolha um <xliff:g id="PROFILE_NAME">%1$s</xliff:g> para ser gerido pela app &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="profile_name_generic" msgid="6851028682723034988">"dispositivo"</string>
-    <string name="profile_name_watch" msgid="576290739483672360">"relógio"</string>
     <string name="confirmation_title" msgid="8455544820286920304">"Permita que a app &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; faça a gestão do seu &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="profile_summary" msgid="2059360676631420073">"Esta app é necessária para gerir o seu <xliff:g id="PROFILE_NAME">%1$s</xliff:g>. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"relógio"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"Escolha um <xliff:g id="PROFILE_NAME">%1$s</xliff:g> para ser gerido pela app &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <!-- no translation found for summary_watch (7113724443198337683) -->
+    <skip />
+    <!-- no translation found for summary_watch (7113724443198337683) -->
+    <skip />
+    <!-- no translation found for title_app_streaming (4459136600249308574) -->
+    <skip />
+    <!-- no translation found for summary_app_streaming (6105916810614498138) -->
+    <skip />
+    <!-- no translation found for summary_app_streaming (2996373715966272792) -->
+    <skip />
+    <!-- no translation found for summary_app_streaming (7614171699434639963) -->
+    <skip />
+    <string name="title_automotive_projection" msgid="3296005598978412847"></string>
+    <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"dispositivo"</string>
+    <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"Permitir"</string>
     <string name="consent_no" msgid="2640796915611404382">"Não permitir"</string>
 </resources>

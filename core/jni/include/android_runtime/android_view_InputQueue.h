@@ -80,7 +80,7 @@ private:
     Vector<key_value_pair_t<InputEvent*, bool> > mFinishedEvents;
 };
 
-extern AInputQueue* android_view_InputQueue_getNativePtr(jobject inputQueue);
+extern AInputQueue* android_view_InputQueue_getNativePtr(JNIEnv* env, jobject inputQueue);
 
 } // namespace android
 

@@ -269,8 +269,7 @@ int register_android_view_InputQueue(JNIEnv* env)
     return RegisterMethodsOrDie(env, kInputQueuePathName, g_methods, NELEM(g_methods));
 }
 
-AInputQueue* android_view_InputQueue_getNativePtr(jobject inputQueue) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+AInputQueue* android_view_InputQueue_getNativePtr(JNIEnv* env, jobject inputQueue) {
     jlong ptr = env->CallLongMethod(inputQueue, gInputQueueClassInfo.getNativePtr);
     return reinterpret_cast<AInputQueue*>(ptr);
 }

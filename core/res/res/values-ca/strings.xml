@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permet que l\'aplicació utilitzi el servei IMS per fer trucades sense la teva intervenció."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"veure l\'estat i la identitat del telèfon"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Permet que l\'aplicació accedeixi a les funcions de telèfon del dispositiu. Aquest permís permet que l\'aplicació determini el número de telèfon i els identificadors del dispositiu, si hi ha una trucada activa i el número remot connectat amb una trucada."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"llegir la identitat i l\'estat bàsics de telefonia"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Permet que l\'aplicació accedeixi a les funcions de telefonia bàsiques del dispositiu."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"encaminar trucades a través del sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Permet que l\'aplicació encamini les trucades a través del sistema per millorar-ne l\'experiència."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"consulta i controla les trucades a través del sistema."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toca per suprimir el teu model facial i, a continuació, torna a afegir la teva cara"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura Desbloqueig facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Mira el telèfon per desbloquejar-lo"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Per utilitzar Desbloqueig facial, activa "<b>"Accés a la càmera"</b>" a Configuració &gt; Privadesa"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura més maneres de desbloquejar el dispositiu"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toca per afegir una empremta digital"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueig amb empremta digital"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"S\'està preparant <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"S\'estan iniciant les aplicacions."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"S\'està finalitzant l\'actualització."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Vols apagar la pantalla?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Mentre configuraves la teva empremta digital has premut el botó d\'engegada.\n\nAixò normalment apaga la pantalla."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Desactiva"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Cancel·la"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Vols continuar amb la configuració?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Has premut el botó d\'engegada, fet que sol apagar la pantalla.\n\nProva de tocar-lo lleugerament en configurar l\'empremta digital."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Apaga la pantalla"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Continua configurant"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vols continuar verificant l\'empremta?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Has premut el botó d\'engegada, fet que sol apagar la pantalla.\n\nProva de tocar-lo lleugerament per verificar l\'empremta digital."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Apaga la pantalla"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Continua"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> s\'està executant"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Toca per tornar al joc"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Tria el joc"</string>

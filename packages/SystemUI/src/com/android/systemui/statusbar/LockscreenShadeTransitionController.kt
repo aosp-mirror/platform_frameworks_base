@@ -298,8 +298,8 @@ class LockscreenShadeTransitionController @Inject constructor(
                     nsslController.setTransitionToFullShadeAmount(field)
                     notificationPanelController.setTransitionToFullShadeAmount(field,
                             false /* animate */, 0 /* delay */)
-                    val progress = MathUtils.saturate(dragDownAmount / scrimTransitionDistance)
-                    qS.setTransitionToFullShadeAmount(field, progress)
+                    dragProgress = MathUtils.saturate(dragDownAmount / scrimTransitionDistance)
+                    qS.setTransitionToFullShadeAmount(field, dragProgress)
                     // TODO: appear media also in split shade
                     val mediaAmount = if (useSplitShade) 0f else field
                     mediaHierarchyManager.setTransitionToFullShadeAmount(mediaAmount)
@@ -307,6 +307,9 @@ class LockscreenShadeTransitionController @Inject constructor(
                 }
             }
         }
+
+    var dragProgress = 0f
+        private set
 
     private fun transitionToShadeAmountCommon(dragDownAmount: Float) {
         val scrimProgress = MathUtils.saturate(dragDownAmount / scrimTransitionDistance)

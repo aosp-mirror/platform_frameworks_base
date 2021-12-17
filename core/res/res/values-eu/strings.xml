@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Zuk ezer egin beharrik gabe deiak egiteko IMS zerbitzua erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"irakurri telefonoaren egoera eta identitatea"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Gailuaren telefono-eginbideak atzitzeko baimena ematen die aplikazioei. Baimen horrek aplikazioari telefono-zenbakia eta gailu IDak zein diren, deirik aktibo dagoen eta deia zer zenbakirekin konektatuta dagoen zehazteko baimena ematen die aplikazioei."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"irakurri oinarrizko egoera telefonikoa eta identitatea"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Gailuaren oinarrizko eginbide telefonikoak atzitzeko baimena ematen dio aplikazioari."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"bideratu deiak sistemaren bidez"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Deiak sistemaren bidez bideratzea baimentzen die aplikazioei, deien zerbitzua ahal bezain ona izan dadin."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ikusi eta kontrolatu deiak sistemaren bidez."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Sakatu hau aurpegi-eredua ezabatzeko eta, gero, gehitu aurpegia berriro"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfiguratu aurpegi bidez desblokeatzeko eginbidea"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonoa desblokeatzeko, begira iezaiozu"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Aurpegi bidez desblokeatzeko aukera erabiltzeko, aktibatu "<b>"kamera atzitzeko baimena"</b>" Ezarpenak &gt; Pribatutasuna atalean"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfiguratu telefonoa desblokeatzeko modu gehiago"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Sakatu hau hatz-marka bat gehitzeko"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Hatz-marka bidez desblokeatzea"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> prestatzen."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Aplikazioak abiarazten."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Bertsio-berritzea amaitzen."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Pantaila itzali nahi duzu?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Hatz-marka konfiguratzean, etengailua sakatu duzu.\n\nNormalean, horren ondorioz pantaila itzali egiten da."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Desaktibatu"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Utzi"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Konfiguratzen jarraitu nahi duzu?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Etengailua sakatu duzu; pantaila itzaltzeko balio du horrek.\n\nUki ezazu arin, hatz-marka konfiguratu bitartean."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Itzali pantaila"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Jarraitu konfiguratzen"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Hatz-marka egiaztatzen jarraitu nahi duzu?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Etengailua sakatu duzu; pantaila itzaltzeko balio du horrek.\n\nUki ezazu arin, hatz-marka egiaztatzeko."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Itzali pantaila"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Egin aurrera"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> abian da"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Sakatu jokora itzultzeko"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Aukeratu joko bat"</string>

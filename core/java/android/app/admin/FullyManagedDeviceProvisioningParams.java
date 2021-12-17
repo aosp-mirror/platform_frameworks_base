@@ -21,7 +21,7 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.annotation.TestApi;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,9 +32,10 @@ import java.util.Locale;
 /**
  * Params required to provision a fully managed device, see
  * {@link DevicePolicyManager#provisionFullyManagedDevice}.
+ *
  * @hide
  */
-@TestApi
+@SystemApi
 public final class FullyManagedDeviceProvisioningParams implements Parcelable {
     private static final String LEAVE_ALL_SYSTEM_APPS_ENABLED_PARAM =
             "LEAVE_ALL_SYSTEM_APPS_ENABLED";
@@ -92,29 +93,50 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
         return localeStr == null ? null : Locale.forLanguageTag(localeStr);
     }
 
+    /**
+     * Returns the device owner's {@link ComponentName}.
+     */
     @NonNull
     public ComponentName getDeviceAdminComponentName() {
         return mDeviceAdminComponentName;
     }
 
+    /**
+     * Returns the device owner's name.
+     */
     @NonNull
     public String getOwnerName() {
         return mOwnerName;
     }
 
+    /**
+     * Returns {@code true} if system apps should be left enabled after provisioning.
+     */
     public boolean isLeaveAllSystemAppsEnabled() {
         return mLeaveAllSystemAppsEnabled;
     }
 
+    /**
+     * If set, it returns the time zone to set for the device after provisioning, otherwise returns
+     * {@code null};
+     */
     @Nullable
     public String getTimeZone() {
         return mTimeZone;
     }
 
+    /**
+     * If set, it returns the local time to set for the device after provisioning, otherwise returns
+     * 0.
+     */
     public long getLocalTime() {
         return mLocalTime;
     }
 
+    /**
+     * If set, it returns the {@link Locale} to set for the device after provisioning, otherwise
+     * returns {@code null}.
+     */
     @Nullable
     public @SuppressLint("UseIcu") Locale getLocale() {
         return mLocale;
@@ -130,6 +152,8 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
 
     /**
      * Logs the provisioning params using {@link DevicePolicyEventLogger}.
+     *
+     * @hide
      */
     public void logParams(@NonNull String callerPackage) {
         requireNonNull(callerPackage);
@@ -232,8 +256,7 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
          * See {@link DevicePolicyManager#EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT}.
          */
         @NonNull
-        @SuppressLint("MissingGetterMatchingBuilder")
-        public Builder setDeviceOwnerCanGrantSensorsPermissions(boolean mayGrant) {
+        public Builder setCanDeviceOwnerGrantSensorsPermissions(boolean mayGrant) {
             mDeviceOwnerCanGrantSensorsPermissions = mayGrant;
             return this;
         }
@@ -261,6 +284,9 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
         return 0;
     }
 
+    /**
+     * @hide
+     */
     @Override
     public String toString() {
         return "FullyManagedDeviceProvisioningParams{"

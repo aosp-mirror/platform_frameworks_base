@@ -130,6 +130,9 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     @GuardedBy("this")
     private Future<?> mBatteryLevelSync;
 
+    @GuardedBy("this")
+    private Future<?> mProcessStateSync;
+
     // If both mStats and mWorkerLock need to be synchronized, mWorkerLock must be acquired first.
     private final Object mWorkerLock = new Object();
 
@@ -316,6 +319,25 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     }
 
     @Override
+    public Future<?> scheduleSyncDueToProcessStateChange(long delayMillis) {
+        synchronized (BatteryExternalStatsWorker.this) {
+            mProcessStateSync = scheduleDelayedSyncLocked(mProcessStateSync,
+                    () -> scheduleSync("procstate-change", UPDATE_ON_PROC_STATE_CHANGE),
+                    delayMillis);
+            return mProcessStateSync;
+        }
+    }
+
+    public void cancelSyncDueToProcessStateChange() {
+        synchronized (BatteryExternalStatsWorker.this) {
+            if (mProcessStateSync != null) {
+                mProcessStateSync.cancel(false);
+                mProcessStateSync = null;
+            }
+        }
+    }
+
+    @Override
     public Future<?> scheduleCleanupDueToRemovedUser(int userId) {
         synchronized (BatteryExternalStatsWorker.this) {
             return mExecutorService.schedule(() -> {
@@ -433,6 +455,9 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 }
                 if ((updateFlags & UPDATE_CPU) != 0) {
                     cancelCpuSyncDueToWakelockChange();
+                }
+                if ((updateFlags & UPDATE_ON_PROC_STATE_CHANGE) == UPDATE_ON_PROC_STATE_CHANGE) {
+                    cancelSyncDueToProcessStateChange();
                 }
             }
 

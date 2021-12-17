@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Membenarkan apl menggunakan perkhidmatan IMS untuk membuat panggilan tanpa campur tangan anda."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"baca status dan identiti telefon"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Membenarkan apl mengakses ciri telefon pada peranti. Kebenaran ini membolehkan apl menentukan nombor telefon dan ID peranti, sama ada panggilan aktif dan nombor jauh yang dihubungkan dengan panggilan."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"membaca status telefoni asas dan identiti"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Membenarkan apl mengakses ciri telefoni asas peranti."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"halakan panggilan menerusi sistem"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Membenarkan apl menghalakan panggilan menerusi sistem untuk meningkatkan pengalaman panggilan."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"lihat dan kawal panggilan melalui sistem."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ketik untuk memadamkan model wajah anda, kemudian tambahkan wajah anda semula"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Sediakan Buka Kunci Wajah"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci telefon anda dengan melihat telefon anda"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Untuk menggunakan Buka Kunci Wajah, hidupkan "<b>"akses Kamera"</b>" dalam Tetapan &gt; Privasi"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Sediakan lebih banyak cara untuk membuka kunci"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketik untuk menambahkan cap jari"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Buka Kunci Cap Jari"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Menyediakan <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Memulakan apl."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"But akhir."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Matikan skrin?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Semasa menyediakan cap jari anda, anda menekan butang Kuasa.\n\nTindakan ini biasanya mematikan skrin anda."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Matikan"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Batal"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Teruskan persediaan?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Anda menekan butang kuasa — tindakan ini biasanya mematikan skrin.\n\nCuba ketik dengan perlahan semasa menetapkan cap jari anda."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Matikan skrin"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Teruskan persediaan"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Terus mengesahkan cap jari anda?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Anda menekan butang kuasa — tindakan ini biasanya mematikan skrin.\n\nCuba ketik dengan perlahan untuk mengesahkan cap jari anda."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Matikan skrin"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Teruskan"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> dijalankan"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Ketik untuk kembali ke permainan"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Pilih permainan"</string>

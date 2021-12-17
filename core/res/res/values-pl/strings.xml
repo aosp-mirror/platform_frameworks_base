@@ -477,6 +477,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Zezwala aplikacji na korzystanie z usługi komunikatora, by nawiązywać połączenia bez Twojego udziału."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"odczytywanie stanu i informacji o telefonie"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Pozwala aplikacji na dostęp do funkcji telefonicznych urządzenia. Aplikacja z tym uprawnieniem może odczytać numer telefonu i identyfikator urządzenia, sprawdzić, czy połączenie jest aktywne, oraz poznać numer, z którym jest nawiązane połączenie."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"odczyt podstawowych informacji na temat stanu usług telefonicznych i tożsamości"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Zezwól na dostęp aplikacji do podstawowych funkcji telefonicznych na urządzeniu."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"przekazywanie połączeń przez system"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Zezwala aplikacji na przekazywanie połączeń przez system, by poprawić ich jakość."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"przeglądanie i kontrolowanie połączeń w systemie."</string>
@@ -628,6 +630,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Kliknij, aby usunąć model twarzy, a następnie ponownie dodaj skan twarzy"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Skonfiguruj rozpoznawanie twarzy"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Popatrz na ekran telefonu, aby go odblokować"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Aby używać rozpoznawania twarzy, włącz "<b>"dostęp do aparatu"</b>" w Ustawieniach i prywatności"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Skonfiguruj więcej sposobów odblokowywania"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Kliknij, aby dodać odcisk palca"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Odblokowywanie odciskiem palca"</string>
@@ -1316,10 +1319,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Przygotowuję aplikację <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Uruchamianie aplikacji."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Kończenie uruchamiania."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Wyłączyć ekran?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Podczas konfigurowania odcisku palca naciśnięto przycisk zasilania.\n\nZwykle powoduje to wyłączenie ekranu."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Wyłącz"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Anuluj"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Kontynuować konfigurowanie?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Naciśnięto przycisk zasilania — zwykle powoduje to wyłączenie ekranu.\n\nKlikaj delikatnie podczas konfigurowania odcisku palca."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Wyłącz ekran"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Konfiguruj dalej"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Kontynuować weryfikację odcisku palca?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Naciśnięto przycisk zasilania — zwykle powoduje to wyłączenie ekranu.\n\nKliknij delikatnie, aby zweryfikować odcisk palca."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Wyłącz ekran"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Dalej"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Działa <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Kliknij, by wrócić do gry"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Wybierz grę"</string>

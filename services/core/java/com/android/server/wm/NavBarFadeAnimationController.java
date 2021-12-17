@@ -95,14 +95,6 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
             } else {
                 fadeAnim.run();
             }
-        } else {
-            // If fade rotation animation is running and controlling the nav bar, make sure we empty
-            // the mDeferredFinishCallbacks and defer the runnable until fade rotation animation
-            // finishes.
-            final Runnable runnable = mDeferredFinishCallbacks.remove(mNavigationBar.mToken);
-            if (runnable != null) {
-                controller.setOnShowRunnable(runnable);
-            }
         }
     }
 

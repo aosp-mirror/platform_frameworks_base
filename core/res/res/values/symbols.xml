@@ -4629,4 +4629,6 @@
   <java-symbol type="integer" name="config_mashPressVibrateTimeOnPowerButton" />
 
   <java-symbol type="string" name="config_systemGameService" />
+
+  <java-symbol type="string" name="config_supervisedUserCreationPackage"/>
 </resources>

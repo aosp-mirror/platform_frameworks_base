@@ -9312,10 +9312,10 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void disconnect();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean discoverServices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean executeReliableWrite();
-    method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method public int getConnectionState(android.bluetooth.BluetoothDevice);
+    method @Deprecated public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @Deprecated public int getConnectionState(android.bluetooth.BluetoothDevice);
     method public android.bluetooth.BluetoothDevice getDevice();
-    method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
+    method @Deprecated public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
     method public android.bluetooth.BluetoothGattService getService(java.util.UUID);
     method public java.util.List<android.bluetooth.BluetoothGattService> getServices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean readCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
@@ -16587,6 +16587,26 @@ package android.graphics {
     method public boolean setTranslationY(float);
     method public boolean setTranslationZ(float);
     method public boolean setUseCompositingLayer(boolean, @Nullable android.graphics.Paint);
+  }
+
+  public class RuntimeShader extends android.graphics.Shader {
+    ctor public RuntimeShader(@NonNull String);
+    ctor public RuntimeShader(@NonNull String, boolean);
+    method public boolean isForceOpaque();
+    method public void setColorUniform(@NonNull String, @ColorInt int);
+    method public void setColorUniform(@NonNull String, @ColorLong long);
+    method public void setColorUniform(@NonNull String, @NonNull android.graphics.Color);
+    method public void setFloatUniform(@NonNull String, float);
+    method public void setFloatUniform(@NonNull String, float, float);
+    method public void setFloatUniform(@NonNull String, float, float, float);
+    method public void setFloatUniform(@NonNull String, float, float, float, float);
+    method public void setFloatUniform(@NonNull String, @NonNull float[]);
+    method public void setInputShader(@NonNull String, @NonNull android.graphics.Shader);
+    method public void setIntUniform(@NonNull String, int);
+    method public void setIntUniform(@NonNull String, int, int);
+    method public void setIntUniform(@NonNull String, int, int, int);
+    method public void setIntUniform(@NonNull String, int, int, int, int);
+    method public void setIntUniform(@NonNull String, @NonNull int[]);
   }
 
   public class Shader {
@@ -37894,6 +37914,28 @@ package android.security {
     method @Deprecated @NonNull public android.security.KeyPairGeneratorSpec.Builder setSubject(@NonNull javax.security.auth.x500.X500Principal);
   }
 
+  public class KeyStoreException extends java.lang.Exception {
+    method public int getNumericErrorCode();
+    method public boolean isSystemError();
+    method public boolean isTransientFailure();
+    method public boolean requiresUserAuthentication();
+    field public static final int ERROR_ATTESTATION_CHALLENGE_TOO_LARGE = 9; // 0x9
+    field public static final int ERROR_ID_ATTESTATION_FAILURE = 8; // 0x8
+    field public static final int ERROR_INCORRECT_USAGE = 13; // 0xd
+    field public static final int ERROR_INTERNAL_SYSTEM_ERROR = 4; // 0x4
+    field public static final int ERROR_KEYMINT_FAILURE = 10; // 0xa
+    field public static final int ERROR_KEYSTORE_FAILURE = 11; // 0xb
+    field public static final int ERROR_KEYSTORE_UNINITIALIZED = 3; // 0x3
+    field public static final int ERROR_KEY_CORRUPTED = 7; // 0x7
+    field public static final int ERROR_KEY_DOES_NOT_EXIST = 6; // 0x6
+    field public static final int ERROR_KEY_NOT_TEMPORALLY_VALID = 14; // 0xe
+    field public static final int ERROR_KEY_OPERATION_EXPIRED = 15; // 0xf
+    field public static final int ERROR_OTHER = 1; // 0x1
+    field public static final int ERROR_PERMISSION_DENIED = 5; // 0x5
+    field public static final int ERROR_UNIMPLEMENTED = 12; // 0xc
+    field public static final int ERROR_USER_AUTHENTICATION_REQUIRED = 2; // 0x2
+  }
+
   @Deprecated public final class KeyStoreParameter implements java.security.KeyStore.ProtectionParameter {
     method @Deprecated public boolean isEncryptionRequired();
   }
@@ -38728,9 +38770,11 @@ package android.service.carrier {
 
   public abstract class CarrierService extends android.app.Service {
     ctor public CarrierService();
-    method public final void notifyCarrierNetworkChange(boolean);
+    method @Deprecated public final void notifyCarrierNetworkChange(boolean);
+    method public final void notifyCarrierNetworkChange(int, boolean);
     method @CallSuper public android.os.IBinder onBind(android.content.Intent);
-    method public abstract android.os.PersistableBundle onLoadConfig(android.service.carrier.CarrierIdentifier);
+    method @Deprecated public abstract android.os.PersistableBundle onLoadConfig(android.service.carrier.CarrierIdentifier);
+    method @Nullable public android.os.PersistableBundle onLoadConfig(int, @Nullable android.service.carrier.CarrierIdentifier);
     field public static final String CARRIER_SERVICE_INTERFACE = "android.service.carrier.CarrierService";
   }
 
@@ -43444,6 +43488,7 @@ package android.telephony {
     field public static final int DATA_ENABLED_REASON_USER = 0; // 0x0
     field public static final int DATA_SUSPENDED = 3; // 0x3
     field public static final int DATA_UNKNOWN = -1; // 0xffffffff
+    field public static final int DEFAULT_PORT_INDEX = 0; // 0x0
     field public static final int ERI_FLASH = 2; // 0x2
     field public static final int ERI_OFF = 1; // 0x1
     field public static final int ERI_ON = 0; // 0x0

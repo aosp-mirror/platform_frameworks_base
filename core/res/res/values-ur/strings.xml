@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"‏آپ کی مداخلت کے بغیر کالیں کرنے کیلئے ایپ کو IMS سروس استعمال کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"فون کے اسٹیٹس اور شناخت کو پڑھیں"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"‏ایپ کو آلے کی فون والی خصوصیات تک رسائی حاصل کرنے کی اجازت دیتا ہے۔ یہ اجازت ایپ کو فون نمبر اور آلے کے IDs کا تعین کرنے، آیا کوئی کال فعال ہے، اور کال کے ذریعہ مربوط ریموٹ نمبر کا تعین کرنے دیتی ہے۔"</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"بنیادی ٹیلیفونی صورتحال اور شناخت کو پڑھیں"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"اس سے ایپ کو آلے کی بنیادی ٹیلیفونی خصوصیات تک رسائی کی اجازت ملتی ہے۔"</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"سسٹم کے ذریعہ کالز روٹ کریں"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"کالںگ کا تجربہ بہتر بنانے کے لیے سسٹم کے ذریعہ ایپ کو کالز روٹ کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"سسٹم کے ذریعے کالز دیکھیں اور کنٹرول کریں۔"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"اپنے چہرے کا ماڈل حذف کرنے کے لیے تھپتھپائیں پھر اپنا چہرہ دوبارہ شامل کریں"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"فیس اَنلاک سیٹ اپ کریں"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"اپنے فون کی طرف دیکھ کر اسے غیر مقفل کریں"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"فیس اَنلاک کا استعمال کرنے کے لیے، ترتیبات اور رازداری میں "<b>"کیمرے تک رسائی"</b>" کو آن کریں"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"غیر مقفل کرنے کے مزید طریقے سیٹ اپ کریں"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"فنگر پرنٹ شامل کرنے کیلئے تھپتھپائیں"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"فنگر پرنٹ اَن لاک"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> تیار ہو رہی ہے۔"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ایپس شروع ہو رہی ہیں۔"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"بوٹ مکمل ہو رہا ہے۔"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"اسکرین آف کریں؟"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"اپنی فنگر پرنٹ سیٹ اپ کرنے کے دوران آپ نے پاور بٹن دبایا۔\n\n یہ عام طور پر آپ کی اسکرین کو آف کرتی ہے۔"</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"آف کریں"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"منسوخ کریں"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"سیٹ اپ جاری رکھیں؟"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"آپ نے پاور بٹن دبایا — اس سے عام طور پر اسکرین آف ہو جاتی ہے۔\n\nاپنے فنگر پرنٹ کو سیٹ اپ کرنے کے دوران ہلکا سا تھپتھپانے کی کوشش کریں۔"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"اسکرین آف کریں"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"سیٹ اپ جاری رکھیں"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"اپنے فنگر پرنٹ کی توثیق کرنا جاری رکھیں؟"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"آپ نے پاور بٹن دبایا — اس سے عام طور پر اسکرین آف ہو جاتی ہے۔\n\nاپنے فنگر پرنٹ کی توثیق کرنے کے لیے ہلکا سا تھپتھپانے کی کوشش کریں۔"</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"اسکرین آف کریں"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"جاری رکھیں"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> چل رہی ہے"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"گیم پر واپس جانے کے لیے تھپتھپائیں"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"گیم کا انتخاب کریں"</string>
