@@ -21,6 +21,8 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PRO
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
+import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.SCAN_RESULTS_OBSERVABLE;
+import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.TIMEOUT_OBSERVABLE;
 import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 import static com.android.companiondevicemanager.Utils.prepareResultReceiverForIpc;
@@ -91,10 +93,13 @@ public class CompanionDeviceActivity extends Activity {
 
     // The flag used to prevent double taps, that may lead to sending several requests for creating
     // an association to CDM.
-    private boolean mAssociationApproved;
+    private boolean mApproved;
+    private boolean mCancelled;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if (DEBUG) Log.d(TAG, "onCreate()");
+
         super.onCreate(savedInstanceState);
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
     }
@@ -117,23 +122,10 @@ public class CompanionDeviceActivity extends Activity {
         // Start discovery services if needed.
         if (!mRequest.isSelfManaged()) {
             CompanionDeviceDiscoveryService.startForRequest(this, mRequest);
+            TIMEOUT_OBSERVABLE.addObserver((o, arg) -> cancel(true));
         }
         // Init UI.
         initUI();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (DEBUG) Log.d(TAG, "onStop(), finishing=" + isFinishing());
-
-        // TODO: handle config changes without cancelling.
-        if (!isFinishing()) {
-            cancel(); // will finish()
-        }
-
-        // mAdapter may be observing - need to remove it.
-        CompanionDeviceDiscoveryService.SCAN_RESULTS_OBSERVABLE.deleteObservers();
     }
 
     @Override
@@ -153,6 +145,39 @@ public class CompanionDeviceActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (DEBUG) Log.d(TAG, "onStop(), finishing=" + isFinishing());
+
+        // TODO: handle config changes without cancelling.
+        if (!isDone()) {
+            cancel(false); // will finish()
+        }
+
+        TIMEOUT_OBSERVABLE.deleteObservers();
+        // mAdapter may also be observing - need to remove it.
+        SCAN_RESULTS_OBSERVABLE.deleteObservers();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (DEBUG) Log.d(TAG, "onDestroy()");
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (DEBUG) Log.d(TAG, "onBackPressed()");
+        super.onBackPressed();
+    }
+
+    @Override
+    public void finish() {
+        if (DEBUG) Log.d(TAG, "finish()", new Exception("Stack Trace Dump"));
+        super.finish();
+    }
+
     private void initUI() {
         if (DEBUG) Log.d(TAG, "initUI(), request=" + mRequest);
 
@@ -164,10 +189,9 @@ public class CompanionDeviceActivity extends Activity {
         mListView = findViewById(R.id.device_list);
         mListView.setOnItemClickListener((av, iv, position, id) -> onListItemClick(position));
 
-        mButtonAllow = findViewById(R.id.button_allow);
-        mButtonAllow.setOnClickListener(this::onAllowButtonClick);
-
-        findViewById(R.id.button_cancel).setOnClickListener(v -> cancel());
+        mButtonAllow = findViewById(R.id.btn_positive);
+        mButtonAllow.setOnClickListener(this::onPositiveButtonClick);
+        findViewById(R.id.btn_negative).setOnClickListener(this::onNegativeButtonClick);
 
         final CharSequence appLabel = getApplicationLabel(this, mRequest.getPackageName());
         if (mRequest.isSelfManaged()) {
@@ -179,6 +203,33 @@ public class CompanionDeviceActivity extends Activity {
         }
     }
 
+    private void onAssociationApproved(@Nullable MacAddress macAddress) {
+        if (isDone()) {
+            if (DEBUG) Log.w(TAG, "Already done: " + (mApproved ? "Approved" : "Cancelled"));
+            return;
+        }
+        mApproved = true;
+
+        if (DEBUG) Log.i(TAG, "onAssociationApproved() macAddress=" + macAddress);
+
+        if (!mRequest.isSelfManaged()) {
+            requireNonNull(macAddress);
+            CompanionDeviceDiscoveryService.stop(this);
+        }
+
+        final Bundle data = new Bundle();
+        data.putParcelable(EXTRA_ASSOCIATION_REQUEST, mRequest);
+        data.putBinder(EXTRA_APPLICATION_CALLBACK, mAppCallback.asBinder());
+        if (macAddress != null) {
+            data.putParcelable(EXTRA_MAC_ADDRESS, macAddress);
+        }
+
+        data.putParcelable(EXTRA_RESULT_RECEIVER,
+                prepareResultReceiverForIpc(mOnAssociationCreatedReceiver));
+
+        mCdmServiceReceiver.send(RESULT_CODE_ASSOCIATION_APPROVED, data);
+    }
+
     private void onAssociationCreated(@NonNull AssociationInfo association) {
         if (DEBUG) Log.i(TAG, "onAssociationCreated(), association=" + association);
 
@@ -186,17 +237,26 @@ public class CompanionDeviceActivity extends Activity {
         setResultAndFinish(association);
     }
 
-    private void cancel() {
-        if (DEBUG) Log.i(TAG, "cancel()");
+    private void cancel(boolean discoveryTimeout) {
+        if (DEBUG) {
+            Log.i(TAG, "cancel(), discoveryTimeout=" + discoveryTimeout,
+                    new Exception("Stack Trace Dump"));
+        }
+
+        if (isDone()) {
+            if (DEBUG) Log.w(TAG, "Already done: " + (mApproved ? "Approved" : "Cancelled"));
+            return;
+        }
+        mCancelled = true;
 
         // Stop discovery service if it was used.
-        if (!mRequest.isSelfManaged()) {
+        if (!mRequest.isSelfManaged() || discoveryTimeout) {
             CompanionDeviceDiscoveryService.stop(this);
         }
 
         // First send callback to the app directly...
         try {
-            mAppCallback.onFailure("Cancelled.");
+            mAppCallback.onFailure(discoveryTimeout ? "Timeout." : "Cancelled.");
         } catch (RemoteException ignore) {
         }
 
@@ -297,7 +357,7 @@ public class CompanionDeviceActivity extends Activity {
         mSummary.setText(summary);
 
         mAdapter = new DeviceListAdapter(this);
-        CompanionDeviceDiscoveryService.SCAN_RESULTS_OBSERVABLE.addObserver(mAdapter);
+        SCAN_RESULTS_OBSERVABLE.addObserver(mAdapter);
         // TODO: hide the list and show a spinner until a first device matching device is found.
         mListView.setAdapter(mAdapter);
 
@@ -313,8 +373,8 @@ public class CompanionDeviceActivity extends Activity {
         onAssociationApproved(macAddress);
     }
 
-    private void onAllowButtonClick(View v) {
-        if (DEBUG) Log.d(TAG, "onAllowButtonClick()");
+    private void onPositiveButtonClick(View v) {
+        if (DEBUG) Log.d(TAG, "on_Positive_ButtonClick()");
 
         // Disable the button, to prevent more clicks.
         v.setEnabled(false);
@@ -330,28 +390,17 @@ public class CompanionDeviceActivity extends Activity {
         onAssociationApproved(macAddress);
     }
 
-    private void onAssociationApproved(@Nullable MacAddress macAddress) {
-        if (mAssociationApproved) return;
-        mAssociationApproved = true;
+    private void onNegativeButtonClick(View v) {
+        if (DEBUG) Log.d(TAG, "on_Negative_ButtonClick()");
 
-        if (DEBUG) Log.i(TAG, "onAssociationApproved() macAddress=" + macAddress);
+        // Disable the button, to prevent more clicks.
+        v.setEnabled(false);
 
-        if (!mRequest.isSelfManaged()) {
-            requireNonNull(macAddress);
-            CompanionDeviceDiscoveryService.stop(this);
-        }
+        cancel(false);
+    }
 
-        final Bundle data = new Bundle();
-        data.putParcelable(EXTRA_ASSOCIATION_REQUEST, mRequest);
-        data.putBinder(EXTRA_APPLICATION_CALLBACK, mAppCallback.asBinder());
-        if (macAddress != null) {
-            data.putParcelable(EXTRA_MAC_ADDRESS, macAddress);
-        }
-
-        data.putParcelable(EXTRA_RESULT_RECEIVER,
-                prepareResultReceiverForIpc(mOnAssociationCreatedReceiver));
-
-        mCdmServiceReceiver.send(RESULT_CODE_ASSOCIATION_APPROVED, data);
+    private boolean isDone() {
+        return mApproved || mCancelled;
     }
 
     private final ResultReceiver mOnAssociationCreatedReceiver =
