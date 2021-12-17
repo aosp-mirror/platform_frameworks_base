@@ -51,13 +51,13 @@ public abstract class SectionSettings extends Settings {
      *
      * If {@code false}, for {@link SectionSettingsWithTableInfo}, HAL filters out all sections
      * based on {@link SectionSettingsWithTableInfo} TableId and Version, and stops filtering data.
-     * For {@linkSectionSettingsWithSectionBits}, HAL filters out the first section which matches
-     * the {@linkSectionSettingsWithSectionBits} configuration, and stops filtering data.
+     * For {@link SectionSettingsWithSectionBits}, HAL filters out the first section which matches
+     * the {@link SectionSettingsWithSectionBits} configuration, and stops filtering data.
      *
      * If {@code true}, for {@link SectionSettingsWithTableInfo}, HAL filters out all sections based
      * on {@link SectionSettingsWithTableInfo} TableId and Version, and repeats. For
-     * {@linkSectionSettingsWithSectionBits}, HAL filters out sections which match the
-     * {@linkSectionSettingsWithSectionBits} configuration, and repeats.
+     * {@link SectionSettingsWithSectionBits}, HAL filters out sections which match the
+     * {@link SectionSettingsWithSectionBits} configuration, and repeats.
      */
     public boolean isRepeat() {
         return mIsRepeat;
@@ -100,14 +100,14 @@ public abstract class SectionSettings extends Settings {
          *
          * If {@code false}, for {@link SectionSettingsWithTableInfo}, HAL filters out all sections
          * based on {@link SectionSettingsWithTableInfo} TableId and Version, and stops filtering
-         * data. For {@linkSectionSettingsWithSectionBits}, HAL filters out the first section which
-         * matches the {@linkSectionSettingsWithSectionBits} configuration, and stops filtering
+         * data. For {@link SectionSettingsWithSectionBits}, HAL filters out the first section which
+         * matches the {@link SectionSettingsWithSectionBits} configuration, and stops filtering
          * data.
          *
          * If {@code true}, for {@link SectionSettingsWithTableInfo}, HAL filters out all sections
          * based on {@link SectionSettingsWithTableInfo} TableId and Version, and repeats. For
-         * {@linkSectionSettingsWithSectionBits}, HAL filters out sections which match the
-         * {@linkSectionSettingsWithSectionBits} configuration, and repeats.
+         * {@link SectionSettingsWithSectionBits}, HAL filters out sections which match the
+         * {@link SectionSettingsWithSectionBits} configuration, and repeats.
          */
         @NonNull
         public T setRepeat(boolean isRepeat) {
