@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Puudutage näomudeli kustutamiseks, seejärel lisage oma nägu uuesti"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Näoga avamise seadistamine"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Avage telefon seda vaadates"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Näoga avamise kasutamiseks lülitage menüüs Seaded &gt; Privaatsus sisse "<b>"juurdepääs kaamerale"</b>"."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Seadistage rohkem viise avamiseks"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Puudutage sõrmejälje lisamiseks"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Sõrmejäljega avamine"</string>

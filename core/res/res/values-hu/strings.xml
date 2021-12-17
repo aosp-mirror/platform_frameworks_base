@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Koppintson arcmodellje törléséhez, majd készítsen újat"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Az Arcalapú feloldás beállítása"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Feloldhatja a zárolást úgy, hogy ránéz a telefonra"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Az Arcalapú feloldás funkció használatához kapcsolja be a "<b>"Hozzáférés a kamerához"</b>" beállítást a Beállítások &gt; Adatvédelem szakaszban."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"További feloldási módszerek beállítása"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Koppintson ide ujjlenyomat hozzáadásához"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Feloldás ujjlenyomattal"</string>

@@ -327,17 +327,17 @@
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensores corporales"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"acceder a los datos del sensor acerca de tus signos vitales"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperar el contenido de las ventanas"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspecciona el contenido de la ventana con la que estés interactuando."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspeccionará el contenido de la ventana con la que estés interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activar la Exploración táctil"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Los elementos que presiones se dirán en voz alta y podrás explorar la pantalla mediante gestos."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Observar el texto que escribes"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Incluye datos personales, como números de tarjeta de crédito y contraseñas."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Controlar la ampliación de pantalla"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controla el posicionamiento y el nivel de zoom de la pantalla."</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controlará el posicionamiento y el nivel de zoom de la pantalla."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Usar gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Permite presionar, deslizar, pellizcar y usar otros gestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos del sensor de huellas dactilares"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Captura los gestos que se hacen en el sensor de huellas dactilares del dispositivo."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Capturará los gestos que se hacen en el sensor de huellas dactilares del dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Tomar captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puede tomar una captura de la pantalla."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra de estado"</string>
@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Presiona para borrar el modelo de rostro y, luego, vuelve a agregar tu rostro"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura Desbloqueo facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloquea el teléfono con solo mirarlo"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para usar Desbloqueo facial, activa el "<b>"Acceso a la cámara"</b>" en Configuración y privacidad"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura más formas de desbloquear el dispositivo"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Presiona para agregar una huella dactilar"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueo con huellas dactilares"</string>

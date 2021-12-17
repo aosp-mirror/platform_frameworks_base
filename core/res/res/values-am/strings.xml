@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"የእርስዎ የመልክ ሞዴል ለመሰረዝ መታ ያድርጉ፣ ከዚያ መልክዎን እንደገና ያክሉ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"በመልክ መክፈትን ያዋቅሩ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ስልክዎን በመመልከት ያስከፍቱት"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"በመልክ መክፈትን ለመጠቀም "<b>"የካሜራ መዳረሻ"</b>"ን በቅንብሮች እና ግላዊነት ውስጥ ያብሩ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"የሚከፍቱባቸው ተጨማሪ መንገዶችን ያቀናብሩ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"የጣት አሻራን ለማከል መታ ያድርጉ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"በጣት አሻራ መክፈቻ"</string>

@@ -616,6 +616,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ඔබගේ මුහුණත ආකෘතිය මැකීමට තට්ටු කරන්න, අනතුරුව ඔබගේ මුහුණ නැවත එක් කරන්න"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"මුහුණෙන් අගුළු හැරීම පිහිටුවන්න"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ඔබගේ දුරකථනය දෙස බැලීමෙන් එහි අගුලු හරින්න"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"මුහුණෙන් අගුලු හැරීම භාවිත කිරීමට, සැකසීම් &gt; පෞද්ගලිකත්වය තුළ "<b>"කැමරා ප්‍රවේශය"</b>" ක්‍රියාත්මක කරන්න"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"අගුලු හැරීමට තවත් ක්‍රම සකසන්න"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ඇඟිලි සලකුණක් එක් කිරීමට තට්ටු කරන්න"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ඇඟිලි සලකුණු අගුළු හැරීම"</string>
