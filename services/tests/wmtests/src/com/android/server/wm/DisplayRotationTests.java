@@ -681,7 +681,7 @@ public class DisplayRotationTests {
     }
 
     /**
-     * Call {@link DisplayRotation#configure(int, int, int, int)} to configure {@link #mTarget}
+     * Call {@link DisplayRotation#configure(int, int)} to configure {@link #mTarget}
      * according to given parameters.
      */
     private void configureDisplayRotation(int displayOrientation, boolean isCar, boolean isTv) {
@@ -709,9 +709,7 @@ public class DisplayRotationTests {
         when(mockPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK))
                 .thenReturn(isTv);
 
-        final int shortSizeDp = (isCar || isTv) ? 540 : 720;
-        final int longSizeDp = 960;
-        mTarget.configure(width, height, shortSizeDp, longSizeDp);
+        mTarget.configure(width, height);
     }
 
     private void freezeRotation(int rotation) {

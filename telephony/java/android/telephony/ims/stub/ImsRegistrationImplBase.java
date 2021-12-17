@@ -31,10 +31,19 @@ import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.util.Log;
 
 import com.android.internal.telephony.util.RemoteCallbackListExt;
+import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.internal.util.ArrayUtils;
+
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 /**
  * Controls IMS registration for this ImsService and notifies the framework when the IMS
@@ -92,39 +101,114 @@ public class ImsRegistrationImplBase {
     // yet.
     private static final int REGISTRATION_STATE_UNKNOWN = -1;
 
+    private Executor mExecutor;
+
+    /**
+     * Create a new ImsRegistration.
+     * <p>
+     * Method stubs called from the framework will be called asynchronously. To specify the
+     * {@link Executor} that the methods stubs will be called, use
+     * {@link ImsRegistrationImplBase#ImsRegistrationImplBase(Executor)} instead.
+     */
+    public ImsRegistrationImplBase() {
+        super();
+    }
+
+    /**
+     * Create a ImsRegistration using the Executor specified for methods being called by the
+     * framework.
+     * @param executor The executor for the framework to use when executing the methods overridden
+     * by the implementation of ImsRegistration.
+     */
+    public ImsRegistrationImplBase(@NonNull Executor executor) {
+        super();
+        mExecutor = executor;
+    }
+
     private final IImsRegistration mBinder = new IImsRegistration.Stub() {
 
         @Override
         public @ImsRegistrationTech int getRegistrationTechnology() throws RemoteException {
-            synchronized (mLock) {
-                return (mRegistrationAttributes == null) ? REGISTRATION_TECH_NONE
-                        : mRegistrationAttributes.getRegistrationTechnology();
-            }
+            return executeMethodAsyncForResult(() -> (mRegistrationAttributes == null)
+                    ? REGISTRATION_TECH_NONE : mRegistrationAttributes.getRegistrationTechnology(),
+                    "getRegistrationTechnology");
         }
 
         @Override
         public void addRegistrationCallback(IImsRegistrationCallback c) throws RemoteException {
-            ImsRegistrationImplBase.this.addRegistrationCallback(c);
+            AtomicReference<RemoteException> exceptionRef = new AtomicReference<>();
+            executeMethodAsync(() -> {
+                try {
+                    ImsRegistrationImplBase.this.addRegistrationCallback(c);
+                } catch (RemoteException e) {
+                    exceptionRef.set(e);
+                }
+            }, "addRegistrationCallback");
+
+            if (exceptionRef.get() != null) {
+                throw exceptionRef.get();
+            }
         }
 
         @Override
         public void removeRegistrationCallback(IImsRegistrationCallback c) throws RemoteException {
-            ImsRegistrationImplBase.this.removeRegistrationCallback(c);
+            executeMethodAsync(() -> ImsRegistrationImplBase.this.removeRegistrationCallback(c),
+                    "removeRegistrationCallback");
         }
 
         @Override
         public void triggerFullNetworkRegistration(int sipCode, String sipReason) {
-            ImsRegistrationImplBase.this.triggerFullNetworkRegistration(sipCode, sipReason);
+            executeMethodAsyncNoException(() -> ImsRegistrationImplBase.this
+                    .triggerFullNetworkRegistration(sipCode, sipReason),
+                    "triggerFullNetworkRegistration");
         }
 
         @Override
         public void triggerUpdateSipDelegateRegistration() {
-            ImsRegistrationImplBase.this.updateSipDelegateRegistration();
+            executeMethodAsyncNoException(() -> ImsRegistrationImplBase.this
+                    .updateSipDelegateRegistration(), "triggerUpdateSipDelegateRegistration");
         }
 
         @Override
         public void triggerSipDelegateDeregistration() {
-            ImsRegistrationImplBase.this.triggerSipDelegateDeregistration();
+            executeMethodAsyncNoException(() -> ImsRegistrationImplBase.this
+                    .triggerSipDelegateDeregistration(), "triggerSipDelegateDeregistration");
+        }
+
+        // Call the methods with a clean calling identity on the executor and wait indefinitely for
+        // the future to return.
+        private void executeMethodAsync(Runnable r, String errorLogName) throws RemoteException {
+            try {
+                CompletableFuture.runAsync(
+                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
+            } catch (CancellationException | CompletionException e) {
+                Log.w(LOG_TAG, "ImsRegistrationImplBase Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+                throw new RemoteException(e.getMessage());
+            }
+        }
+
+        private void executeMethodAsyncNoException(Runnable r, String errorLogName) {
+            try {
+                CompletableFuture.runAsync(
+                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
+            } catch (CancellationException | CompletionException e) {
+                Log.w(LOG_TAG, "ImsRegistrationImplBase Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+            }
+        }
+
+        private <T> T executeMethodAsyncForResult(Supplier<T> r,
+                String errorLogName) throws RemoteException {
+            CompletableFuture<T> future = CompletableFuture.supplyAsync(
+                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
+            try {
+                return future.get();
+            } catch (ExecutionException | InterruptedException e) {
+                Log.w(LOG_TAG, "ImsRegistrationImplBase Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+                throw new RemoteException(e.getMessage());
+            }
         }
     };
 
@@ -392,6 +476,18 @@ public class ImsRegistrationImplBase {
         }
         if (urisSet) {
             onSubscriberAssociatedUriChanged(c, uris);
+        }
+    }
+
+    /**
+     * Set default Executor from ImsService.
+     * @param executor The default executor for the framework to use when executing the methods
+     * overridden by the implementation of Registration.
+     * @hide
+     */
+    public final void setDefaultExecutor(@NonNull Executor executor) {
+        if (mExecutor == null) {
+            mExecutor = executor;
         }
     }
 }

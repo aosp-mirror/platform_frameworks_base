@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Колдонмого сизди катыштырбай туруп, IMS кызматынын жардамы менен, чалууларды жасоо мүмкүнчүлүгүн берет."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"телефондун абалын жана аныктыгын окуу"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Колдонмого түзмөктүн чалуу мүмкүнчүлүктөрүнө жетки алуу уруксатын берет. Бул уруксат колдонмого, телефондун номурун, түзмөктүн ID-син, чалуунун абалын жана байланышта чыккан номурду аныктоого жол берет."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"негизги телефония статусун окуу жана аныктоо"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Колдонмого түзмөктүн негизги телефония функцияларын колдонууга мүмкүнчүлүк берет."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"чалууларды тутум аркылуу өткөрүү"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Чалуунун сапатын жакшыртуу максатында колдонмого чалууларын тутум аркылуу өткөрүүгө уруксат берет."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"тутум аркылуу чалууларды көрүп, көзөмөлдөө."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Жүзүңүздүн үлгүсүн өчүрүү үчүн басып, жаңы үлгүнү кошуңуз"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну жөндөө"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефонуңузду карап туруп эле кулпусун ачып алыңыз"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Жүзүнөн таанып ачуу функциясын колдонуу үчүн Жөндөөлөр &gt; Купуялык бөлүмүнө өтүп, "<b>"Камераны колдонууну"</b>" күйгүзүңүз"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Кулпусун ачуунун көбүрөөк жолдорун жөндөңүз"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Манжа изин кошуу үчүн басыңыз"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Кулпуланган түзмөктү манжа изи менен ачуу"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> даярдалууда."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Колдонмолорду иштетип баштоо"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Жүктөлүүдө"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Экран өчүрүлсүнбү?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Манжаңыздын изин жөндөп жатканда күйгүзүү/өчүрүү баскычын басып алдыңыз.\n\nБул адатта экранды өчүрөт."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Өчүрүү"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Жок"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Жөндөөнү улантасызбы?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Кубат баскычын бастыңыз — адатта, бул экранды өчүрөт.\n\nМанжаңыздын изин жөндөп жатканда аны акырын басып көрүңүз."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Экранды өчүрүү"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Жөндөөнү улантуу"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Манжаңыздын изин ырастоону улантасызбы?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Кубат баскычын бастыңыз — адатта, бул экранды өчүрөт.\n\nМанжаңыздын изин ырастоо үчүн аны акырын басып көрүңүз."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Экранды өчүрүү"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Улантуу"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> иштеп жатат"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Оюнга кайтуу үчүн таптаңыз"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Оюн тандоо"</string>

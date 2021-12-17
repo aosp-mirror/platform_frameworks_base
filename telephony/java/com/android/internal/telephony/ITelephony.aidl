@@ -2513,4 +2513,14 @@ interface ITelephony {
 
     /** Check if telephony new data stack is enabled. */
     boolean isUsingNewDataStack();
+
+    /**
+     *  @return true if the modem service is set successfully, false otherwise.
+     */
+    boolean setModemService(in String serviceName);
+
+    /**
+     * @return the service name of the modem service which bind to.
+     */
+    String getModemService();
 }

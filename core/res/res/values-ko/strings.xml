@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"앱이 IMS 서비스를 사용하여 자동으로 전화를 걸 수 있도록 허용합니다."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"휴대전화 상태 및 ID 읽기"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"앱이 기기의 휴대전화 기능에 접근할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 전화번호 및 기기의 ID, 활성 통화인지 여부, 통화가 연결된 원격 번호 등을 확인할 수 있습니다."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"기본 전화 상태 및 ID 읽기"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"앱이 기기의 기본 전화 기능에 액세스할 수 있도록 허용합니다."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"시스템을 통해 통화 연결"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"통화 환경을 개선하기 위해 앱이 시스템을 통해 통화를 연결하도록 허용합니다."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"시스템을 통해 통화 확인 및 제어"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"탭하여 얼굴 모델을 삭제한 후 다시 얼굴을 추가하세요"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"얼굴 인식 잠금 해제 설정"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"휴대전화의 화면을 응시하여 잠금 해제할 수 있습니다."</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"얼굴 인식 잠금 해제를 사용하려면 설정 &gt; 개인 정보 보호에서 "<b>"카메라 액세스"</b>"를 사용 설정하세요."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"다른 잠금 해제 방법 설정"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"지문을 추가하려면 탭하세요."</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"지문 잠금 해제"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> 준비 중..."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"앱을 시작하는 중입니다."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"부팅 완료"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"화면을 끄시겠습니까?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"지문을 설정하는 중에 전원 버튼이 눌렸습니다.\n\n이렇게 하면 보통 화면이 꺼집니다."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"끄기"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"취소"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"설정을 계속하시겠어요?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"전원 버튼을 눌렀습니다. 이러면 보통 화면이 꺼집니다.\n\n지문 설정 중에 가볍게 탭하세요."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"화면 끄기"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"설정 계속"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"지문 인증을 계속할까요?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"전원 버튼을 눌렀습니다. 이러면 보통 화면이 꺼집니다.\n\n지문을 인식하려면 화면을 가볍게 탭하세요."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"화면 끄기"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"계속"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> 실행 중"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"게임으로 돌아가려면 탭하세요."</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"게임 선택"</string>

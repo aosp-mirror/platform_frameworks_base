@@ -233,6 +233,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         public Future<?> scheduleSyncDueToBatteryLevelChange(long delayMillis) {
             return null;
         }
+
+        @Override
+        public Future<?> scheduleSyncDueToProcessStateChange(long delayMillis) {
+            return null;
+        }
     }
 }
 

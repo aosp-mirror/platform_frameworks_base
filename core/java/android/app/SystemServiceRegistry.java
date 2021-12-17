@@ -136,6 +136,7 @@ import android.net.EthernetManager;
 import android.net.IEthernetManager;
 import android.net.IIpSecService;
 import android.net.INetworkPolicyManager;
+import android.net.INetworkStatsService;
 import android.net.IPacProxyManager;
 import android.net.IVpnManager;
 import android.net.IpSecManager;
@@ -227,6 +228,8 @@ import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.IContentCaptureManager;
 import android.view.displayhash.DisplayHashManager;
 import android.view.inputmethod.InputMethodManager;
+import android.view.selectiontoolbar.ISelectionToolbarManager;
+import android.view.selectiontoolbar.SelectionToolbarManager;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textservice.TextServicesManager;
 import android.view.translation.ITranslationManager;
@@ -365,6 +368,15 @@ public final class SystemServiceRegistry {
             public TextClassificationManager createService(ContextImpl ctx) {
                 return new TextClassificationManager(ctx);
             }});
+
+        registerService(Context.SELECTION_TOOLBAR_SERVICE, SelectionToolbarManager.class,
+                new CachedServiceFetcher<SelectionToolbarManager>() {
+                    @Override
+                    public SelectionToolbarManager createService(ContextImpl ctx) {
+                        IBinder b = ServiceManager.getService(Context.SELECTION_TOOLBAR_SERVICE);
+                        return new SelectionToolbarManager(ctx.getOuterContext(),
+                                ISelectionToolbarManager.Stub.asInterface(b));
+                    }});
 
         registerService(Context.FONT_SERVICE, FontManager.class,
                 new CachedServiceFetcher<FontManager>() {
@@ -1002,7 +1014,11 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<NetworkStatsManager>() {
             @Override
             public NetworkStatsManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                return new NetworkStatsManager(ctx.getOuterContext());
+                // TODO: Replace with an initializer in the module, see
+                //  {@code ConnectivityFrameworkInitializer}.
+                final INetworkStatsService service = INetworkStatsService.Stub.asInterface(
+                        ServiceManager.getServiceOrThrow(Context.NETWORK_STATS_SERVICE));
+                return new NetworkStatsManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.PERSISTENT_DATA_BLOCK_SERVICE, PersistentDataBlockManager.class,

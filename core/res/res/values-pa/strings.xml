@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਕਾਲਾਂ ਕਰਨ ਲਈ IMS ਸੇਵਾ ਵਰਤਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ਫ਼ੋਨ ਸਥਿਤੀ ਅਤੇ ਪਛਾਣ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"ਐਪ ਨੂੰ ਡੀਵਾਈਸ ਦੀਆਂ ਫ਼ੋਨ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਇਜਾਜ਼ਤ ਐਪ ਨੂੰ ਫ਼ੋਨ ਨੰਬਰ ਅਤੇ ਡੀਵਾਈਸ ਆਈ.ਡੀ. ਨਿਰਧਾਰਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ, ਇੱਕ ਕਾਲ ਕਿਰਿਆਸ਼ੀਲ ਹੈ ਜਾਂ ਨਹੀਂ ਅਤੇ ਰਿਮੋਟ ਨੰਬਰ ਇੱਕ ਕਾਲ ਨਾਲ ਕਨੈਕਟ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"ਮੂਲ ਟੈਲੀਫ਼ੋਨੀ ਸਥਿਤੀ ਅਤੇ ਪਛਾਣ ਨੂੰ ਪੜ੍ਹੋ"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"ਐਪ ਨੂੰ ਡੀਵਾਈਸ \'ਤੇ ਮੂਲ ਟੈਲੀਫ਼ੋਨੀ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"ਸਿਸਟਮ ਰਾਹੀਂ ਕਾਲਾਂ ਰੂਟ ਕਰੋ"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"ਕਾਲ ਕਰਨ ਦੇ ਅਨੁਭਵ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ ਐਪ ਨੂੰ ਇਸਦੀਆਂ ਕਾਲਾਂ ਨੂੰ ਸਿਸਟਮ ਰਾਹੀਂ ਰੂਟ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ਸਿਸਟਮ ਰਾਹੀਂ ਕਾਲਾਂ ਦੇਖੋ ਅਤੇ ਕੰਟਰੋਲ ਕਰੋ।"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ਆਪਣੇ ਚਿਹਰੇ ਦਾ ਮਾਡਲ ਮਿਟਾਉਣ ਲਈ ਟੈਪ ਕਰੋ, ਫਿਰ ਆਪਣਾ ਚਿਹਰਾ ਦੁਬਾਰਾ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ਫ਼ੇਸ ਅਣਲਾਕ ਦਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ਆਪਣੇ ਫ਼ੋਨ ਵੱਲ ਦੇਖ ਕੇ ਇਸਨੂੰ ਅਣਲਾਕ ਕਰੋ"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ਫ਼ੇਸ ਅਣਲਾਕ ਨੂੰ ਵਰਤਣ ਲਈ, ਸੈਟਿੰਗਾਂ &gt; ਪਰਦੇਦਾਰੀ ਵਿੱਚ ਜਾ ਕੇ "<b>"ਕੈਮਰਾ ਪਹੁੰਚ"</b>" ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ਅਣਲਾਕ ਕਰਨ ਦੇ ਹੋਰ ਤਰੀਕਿਆਂ ਦਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਣਲਾਕ"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ।"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ਐਪਸ ਚਾਲੂ ਕਰ ਰਿਹਾ ਹੈ।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ਬੂਟ ਪੂਰਾ ਕਰ ਰਿਹਾ ਹੈ।"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"ਕੀ ਸਕ੍ਰੀਨ ਬੰਦ ਕਰਨੀ ਹੈ?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"ਆਪਣੇ ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਸੈੱਟਅੱਪ ਕਰਨ ਵੇਲੇ, ਤੁਸੀਂ ਪਾਵਰ ਬਟਨ ਨੂੰ ਦਬਾਇਆ ਹੈ।\n\nਇਹ ਆਮ ਤੌਰ \'ਤੇ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ ਨੂੰ ਬੰਦ ਕਰ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ਬੰਦ ਕਰੋ"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"ਰੱਦ ਕਰੋ"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ਕੀ ਸੈੱਟਅੱਪ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ਤੁਸੀਂ ਪਾਵਰ ਬਟਨ ਨੂੰ ਦਬਾਇਆ ਹੈ — ਇਹ ਆਮ ਤੌਰ \'ਤੇ ਸਕ੍ਰੀਨ ਨੂੰ ਬੰਦ ਕਰ ਦਿੰਦਾ ਹੈ।\n\nਆਪਣੇ ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਸੈੱਟਅੱਪ ਕਰਦੇ ਸਮੇਂ ਹਲਕਾ ਜਿਹਾ ਟੈਪ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"ਸਕ੍ਰੀਨ ਬੰਦ ਕਰੋ"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ਸੈੱਟਅੱਪ ਜਾਰੀ ਰੱਖੋ"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ਕੀ ਆਪਣੇ ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ਤੁਸੀਂ ਪਾਵਰ ਬਟਨ ਨੂੰ ਦਬਾਇਆ ਹੈ — ਇਹ ਆਮ ਤੌਰ \'ਤੇ ਸਕ੍ਰੀਨ ਨੂੰ ਬੰਦ ਕਰ ਦਿੰਦਾ ਹੈ।\n\nਆਪਣੇ ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨ ਲਈ ਹਲਕਾ ਜਿਹਾ ਟੈਪ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"ਸਕ੍ਰੀਨ ਬੰਦ ਕਰੋ"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ਚੱਲ ਰਿਹਾ ਹੈ"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ਗੇਮ \'ਤੇ ਵਾਪਸ ਜਾਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ਗੇਮ ਚੁਣੋ"</string>

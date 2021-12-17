@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Leyfir forriti að nota IMS-þjónustu til að hringja án inngrips frá þér."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lesa stöðu símans og auðkenni"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Leyfir forriti að fá aðgang að símaeiginleikum tækisins. Þessi heimild gerir forritinu kleift að komast að símanúmeri og auðkennum tækisins, hvort símtal er í gangi og símanúmeri viðmælanda í símtali."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"lesa stöðu og auðkenni grunneiginleika símaþjónustu"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Leyfir forritinu að fá aðgang að grunneiginleikum símaþjónustu tækisins."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"senda símtöl gegnum kerfið"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Heimilar forritinu að senda símtöl sín gegnum kerfið til að bæta gæði símtalsins."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"sjá og stjórna símtölum í gegnum kerfið."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ýttu til að eyða andlitslíkaninu og skráðu svo andlitið aftur"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Setja upp andlitskenni"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Taktu símann úr lás með því að horfa á hann"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Þú verður að kveikja á "<b>"aðgangi að myndavél"</b>" í „Stillingar &gt; persónuvernd“ til að nota andlitskenni"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Settu upp fleiri leiðir til að taka úr lás"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ýttu til að bæta við fingrafari"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingrafarskenni"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Undirbýr <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Ræsir forrit."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Lýkur ræsingu."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Slökkva á skjá?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Þú ýttir á aflrofann þegar þú varst að skrá fingrafarið þitt.\n\nYfirleitt slekkur það á skjánum."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Slökkva"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Hætta við"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Halda uppsetningu áfram?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Þú ýttir á aflrofann. Yfirleitt slekkur það á skjánum.\n\nPrófaðu að ýta laust þegar þú setur upp fingrafarið."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Slökkva á skjá"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Halda uppsetningu áfram"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Halda áfram að staðfesta fingrafarið?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Þú ýttir á aflrofann. Yfirleitt slekkur það á skjánum.\n\nPrófaðu að ýta laust til að staðfesta fingrafarið þitt."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Slökkva á skjá"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Áfram"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> er í gangi"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Ýttu til að fara aftur í leik"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Velja leik"</string>

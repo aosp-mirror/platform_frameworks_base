@@ -556,7 +556,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                 }
 
                 String label = BatteryConsumer.powerComponentIdToString(componentId);
-                if (key.processState != BatteryConsumer.PROCESS_STATE_ANY) {
+                if (key.processState != BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
                     label = label
                             + "(" + BatteryConsumer.processStateToString(key.processState) + ")";
                 }

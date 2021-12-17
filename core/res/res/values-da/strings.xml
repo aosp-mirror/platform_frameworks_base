@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Tillader, at appen kan bruge chat-tjenesten til at foretage opkald, uden du gør noget."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"læse telefonens status og identitet"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Tillader, at appen kan få adgang til telefonfunktionerne på enheden. Med denne tilladelse kan appen fastslå telefonnummeret og enheds-id\'erne, hvorvidt et opkald er aktivt samt det eksterne nummer, der oprettes forbindelse til via et opkald."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"tilgå grundlæggende oplysninger om telefonistatus og -identitet"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Giver appen adgang til enhedens grundlæggende telefonifunktioner."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"dirigere opkald gennem systemet"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Tillader appen at dirigere sine opkald gennem systemet for at forbedre opkaldsoplevelsen."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"se og styre opkald via systemet."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tryk for at slette din ansigtsmodel, og tilføj derefter dit ansigt igen"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfigurer ansigtslås"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Lås din telefon op ved at kigge på den"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Hvis du vil bruge ansigtslåsen, skal du aktivere "<b>"Kameraadgang"</b>" under Indstillinger &gt; Privatliv"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfigurer flere måder at låse op på"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tryk for at tilføje et fingeraftryk"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Oplåsning med fingeraftryk"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Forbereder <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Åbner dine apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Gennemfører start."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Vil du slukke skærmen?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Ved konfigurationen af dit fingeraftryk trykkede du på afbryderknappen.\n\nDet medfører normalt, at din skærm slukkes."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Sluk"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Annuller"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Vil du fortsætte konfigurationen?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen, mens du konfigurerer dit fingeraftryk."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Sluk skærm"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Fortsæt"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du bekræfte dit fingeraftryk?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen for at bekræfte dit fingeraftryk."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Sluk skærm"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortsæt"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> er i gang"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Tryk for at vende tilbage til spillet"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Vælg et spil"</string>

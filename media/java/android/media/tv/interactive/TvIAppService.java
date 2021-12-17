@@ -19,6 +19,7 @@ package android.media.tv.interactive;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.Service;
@@ -53,6 +54,8 @@ import android.widget.FrameLayout;
 
 import com.android.internal.os.SomeArgs;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,6 +85,28 @@ public abstract class TvIAppService extends Service {
      * tag.
      */
     public static final String SERVICE_META_DATA = "android.media.tv.interactive.app";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(prefix = "IAPP_SERVICE_COMMAND_TYPE_", value = {
+            IAPP_SERVICE_COMMAND_TYPE_TUNE,
+            IAPP_SERVICE_COMMAND_TYPE_TUNENEXT,
+            IAPP_SERVICE_COMMAND_TYPE_TUNEPREV,
+            IAPP_SERVICE_COMMAND_TYPE_STOP,
+            IAPP_SERVICE_COMMAND_TYPE_SETSTREAMVOLUME
+    })
+    public @interface IAppServiceCommandType {}
+
+    /** @hide */
+    public static final String IAPP_SERVICE_COMMAND_TYPE_TUNE = "Tune";
+    /** @hide */
+    public static final String IAPP_SERVICE_COMMAND_TYPE_TUNENEXT = "TuneNext";
+    /** @hide */
+    public static final String IAPP_SERVICE_COMMAND_TYPE_TUNEPREV = "TunePrevious";
+    /** @hide */
+    public static final String IAPP_SERVICE_COMMAND_TYPE_STOP = "Stop";
+    /** @hide */
+    public static final String IAPP_SERVICE_COMMAND_TYPE_SETSTREAMVOLUME = "setStreamVolume";
 
     private final Handler mServiceHandler = new ServiceHandler();
     private final RemoteCallbackList<ITvIAppServiceCallback> mCallbacks =
@@ -438,6 +463,31 @@ public abstract class TvIAppService extends Service {
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in requestBroadcastInfo", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * requests a specific command to be processed by the related TV input.
+         * @param cmdType type of the specific command
+         * @param parameters parameters of the specific command
+         */
+        public void requestCommand(@IAppServiceCommandType String cmdType, Bundle parameters) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestCommand (cmdType=" + cmdType + ", parameters="
+                                    + parameters.toString() + ")");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onCommandRequest(cmdType, parameters);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestCommand", e);
                     }
                 }
             });

@@ -143,6 +143,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     /** The final animation targets derived from participants after promotion. */
     private ArraySet<WindowContainer> mTargets = null;
 
+    /** The main display running this transition. */
+    private DisplayContent mTargetDisplay;
+
     /**
      * Set of participating windowtokens (activity/wallpaper) which are visible at the end of
      * the transition animation.
@@ -473,6 +476,12 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     mController.mAtm.mRootWindowContainer.getDisplayContent(mRecentsDisplayId);
             dc.getInputMonitor().setActiveRecents(null /* activity */, null /* layer */);
         }
+
+        final FadeRotationAnimationController fadeRotationController =
+                mTargetDisplay.getFadeRotationAnimationController();
+        if (fadeRotationController != null) {
+            fadeRotationController.onTransitionFinished();
+        }
     }
 
     void abort() {
@@ -514,6 +523,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
         }
         if (dc == null) dc = mController.mAtm.mRootWindowContainer.getDefaultDisplay();
+        mTargetDisplay = dc;
 
         if (mState == STATE_ABORT) {
             mController.abort(this);

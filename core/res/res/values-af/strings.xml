@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Laat die program toe om die kitsboodskapdiens te gebruik om oproepe sonder jou ingryping te maak."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lees foonstatus en identiteit"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Laat die program toe om toegang tot die foonfunksies van die toestel te verkry. Hierdie toestemming laat die program toe om te bepaal wat die foonnommer en toestel-IDs is, of die oproep aan die gang is, en die afgeleë nommer wat deur \'n oproep verbind word."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"lees basiese telefoniestatus en -identiteit"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Gee die program toegang tot die toestel se basiese telefoniekenmerke."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"roeteer oproepe deur die stelsel"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Laat die program toe om sy oproepe deur die stelsel te stuur om die oproepervaring te verbeter."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"sien en beheer oproepe deur die stelsel."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tik om jou gesigmodel uit te vee en voeg jou gesig dan weer by"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Stel Gesigslot op"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ontsluit jou foon deur daarna te kyk"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Skakel "<b>"kameratoegang"</b>" in Instellings &gt; Privaatheid aan om Gesigslot te gebruik"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Stel meer maniere op om te ontsluit"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tik om \'n vingerafdruk by te voeg"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Vingerafdrukslot"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Berei tans <xliff:g id="APPNAME">%1$s</xliff:g> voor."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Begin programme."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Voltooi herlaai."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Skakel skerm af?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Jy het die aan/af-skakelaar gedruk terwyl jy jou vingerafdruk gestel het.\n\nDit skakel gewoonlik jou skerm af."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Skakel af"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Kanselleer"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Gaan voort met opstelling?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Jy het die aan/af-skakelaar gedruk – dit skakel gewoonlik die skerm af.\n\nProbeer liggies tik terwyl jy jou vingerafdruk opstel."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Skakel skerm af"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Doen opstelling"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Gaan voort met vingerafdrukverifiëring?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Jy het die aan/af-skakelaar gedruk – dit skakel gewoonlik die skerm af.\n\nProbeer liggies tik om jou vingerafdruk te verifieer."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Skakel skerm af"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Gaan voort"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> loop"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Tik om na die speletjie terug te keer"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Kies speletjie"</string>

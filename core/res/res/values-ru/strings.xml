@@ -477,6 +477,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Позволяет приложению совершать звонки с помощью службы IMS без вашего вмешательства."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"Получение данных о статусе телефона"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Приложение получит доступ к функциям телефона на устройстве. Кроме того, оно сможет определять номера телефонов и серийные номера моделей, состояние активности вызова, а также удаленные номера, с которыми установлено соединение."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"Считывание статуса и идентификационной информации телефонии"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Приложение получит доступ к основным функциям телефонии на устройстве."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"перенаправлять звонки в системе"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Приложение сможет перенаправлять звонки в системе с целью улучшения качества связи."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"Управление вызовами через систему"</string>
@@ -628,6 +630,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Нажмите, чтобы удалить модель лица, а затем добавьте ее снова."</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Настройка фейсконтроля"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Вы сможете разблокировать телефон, просто посмотрев на него."</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Чтобы использовать фейсконтроль, разрешите "<b>"доступ к камере"</b>". Для этого перейдите в настройки и нажмите \"Конфиденциальность\"."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Настройте другие способы разблокировки"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Нажмите, чтобы добавить отпечаток пальца."</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Разблокировка по отпечатку пальца"</string>
@@ -1316,10 +1319,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Подготовка приложения \"<xliff:g id="APPNAME">%1$s</xliff:g>\"..."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Запуск приложений."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Окончание загрузки..."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Отключить экран?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Во время настройки отпечатка пальца вы нажали кнопку питания.\n\nОбычно это действие приводит к отключению экрана."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Отключить"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Отмена"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Продолжить настройку?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Вы нажали кнопку питания. Обычно это приводит к отключению экрана.\n\nПри добавлении отпечатка пальца слегка прикоснитесь к кнопке."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Отключить экран"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Продолжить настройку"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Продолжить сканирование отпечатка?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Вы нажали кнопку питания. Обычно это приводит к отключению экрана.\n\nЧтобы отсканировать отпечаток пальца, слегка прикоснитесь к кнопке."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Отключить экран"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Продолжить"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Приложение <xliff:g id="APP">%1$s</xliff:g> запущено"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Нажмите, чтобы вернуться в игру."</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Выберите игру"</string>

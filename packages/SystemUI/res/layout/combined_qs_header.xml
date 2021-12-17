@@ -101,4 +101,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
     />
 
+    <FrameLayout
+        android:id="@+id/privacy_container"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/date"
+        app:layout_constraintBottom_toBottomOf="@id/date"
+        >
+        <include layout="@layout/ongoing_privacy_chip"/>
+    </FrameLayout>
+
 </androidx.constraintlayout.motion.widget.MotionLayout>

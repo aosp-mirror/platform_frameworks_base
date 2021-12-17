@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"သင့်ရဲ့ဝင်ရောက်စွက်ဖက်မှုမပါဘဲ IMS ဝန်ဆောင်မှုကိုအသုံးပြုပြီး ဖုန်းခေါ်ဆိုနိုင်ရန် အပ်ဖ်ကို ခွင့်ပြုထားပါ။"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ဖုန်းရဲ့ အခြေအနေ နှင့် အမှတ်သညာအား ဖတ်ခြင်း"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"အပလီကေးရှင်းအား ဖုန်းရဲ့ စွမ်းဆောင်ချက်များအား သုံးခွင့်ပြုပါ။ အပလီကေးရှင်းအနေဖြင့် ဖုန်းနံပါတ်၊ စက်နံပါတ်၊ ဖုန်းခေါ်နေမှု ရှိမရှိနှင့် တဖက်မှ ဖုန်းနံပါတ် များအား သိရှိနိုင်ပါသည်"</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"အခြေခံတယ်လီဖုန်းအခြေအနေနှင့် အထောက်အထားကို ဖတ်ခြင်း"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"စက်၏ အခြေခံတယ်လီဖုန်းဝန်ဆောင်မှုများသုံးရန် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"ခေါ်ဆိုမှုများကို စနစ်မှတစ်ဆင့် ဖြတ်သန်းခွင့်ပြုပါ"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"ခေါ်ဆိုမှု အတွေ့အကြုံ ပိုမိုကောင်းမွန်လာစေရန်အတွက် အက်ပ်၏ ခေါ်ဆိုမှုအား စနစ်မှတစ်ဆင့် ဖြတ်သန်းရန် ခွင့်ပြုပါသည်။"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"စနစ်မှတစ်ဆင့် ခေါ်ဆိုမှုများကို ကြည့်ရှုထိန်းချုပ်ပါ။"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"သင်၏မျက်နှာနမူနာကို ဖျက်ရန် တို့ပါ။ ထို့နောက် သင့်မျက်နှာကို ထပ်ထည့်ပါ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို ထည့်သွင်းပါ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"သင့်ဖုန်းကိုကြည့်၍ သော့ဖွင့်ပါ"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို သုံးရန် "<b>"ကင်မရာ သုံးခွင့်"</b>" ကို ‘ဆက်တင်များ &gt; ကန့်သတ်ဆက်တင်’ တွင်ဖွင့်ပါ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"သော့ဖွင့်ရန် နောက်ထပ်နည်းလမ်းများကို စနစ်ထည့်သွင်းပါ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"လက်ဗွေထည့်ရန် တို့ပါ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"လက်ဗွေသုံး လော့ခ်ဖွင့်ခြင်း"</string>
@@ -1172,8 +1175,8 @@
     <string name="delete" msgid="1514113991712129054">"ဖျက်ရန်"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URLအား ကူးခြင်း"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"စာသား ရွေးရန်"</string>
-    <string name="undo" msgid="3175318090002654673">"တစ်ဆင့်နောက်ပြန်ရန်"</string>
-    <string name="redo" msgid="7231448494008532233">"ထပ်လုပ်ပါ"</string>
+    <string name="undo" msgid="3175318090002654673">"နောက်ပြန်ရန်"</string>
+    <string name="redo" msgid="7231448494008532233">"ပြန်လုပ်ရန်"</string>
     <string name="autofill" msgid="511224882647795296">"အော်တိုဖြည့်"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"စာတိုရွေးချယ်မှု"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"အဘိဓာန်ထဲ ထည့်ပါ"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> အားပြင်ဆင်နေသည်။"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"အက်ပ်များကို စတင်နေ"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"လုပ်ငန်းစနစ်ထည့်သွင်း၍ ပြန်လည်စတင်ရန် ပြီးပါပြီ"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"ဖန်သားပြင်ကို ပိတ်မလား။"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"သင့်လက်ဗွေကို စနစ်ထည့်သွင်းနေစဉ် ဖွင့်ပိတ်ခလုတ်ကို ဖိထားပါ။\n\n၎င်းက အများအားဖြင့် သင့်ဖန်သားပြင်ကို ပိတ်ပါသည်။"</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ပိတ်ရန်"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"မလုပ်တော့"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ဆက်လက်၍ စနစ်ထည့်သွင်းလိုပါသလား။"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ဖွင့်ပိတ်ခလုတ်ကို သင်နှိပ်ခဲ့သည် — ၎င်းက ပုံမှန်အားဖြင့် စခရင်ကို ပိတ်စေသည်။\n\nသင့်လက်ဗွေကို ထည့်သွင်းသောအခါ ဖွဖွတို့ကြည့်ပါ။"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"စခရင် ပိတ်ရန်"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"စနစ်ဆက်ထည့်သွင်းရန်"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"သင့်လက်ဗွေကို ဆက်၍ အတည်ပြုမလား။"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ဖွင့်ပိတ်ခလုတ်ကို သင်နှိပ်ခဲ့သည် — ၎င်းက ပုံမှန်အားဖြင့် စခရင်ကို ပိတ်စေသည်။\n\nသင့်လက်ဗွေကို အတည်ပြုရန် ဖွဖွတို့ကြည့်ပါ။"</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"စခရင် ပိတ်ရန်"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ရှေ့ဆက်ရန်"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> က အလုပ်လုပ်နေသည်"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ဂိမ်းသို့ ပြန်သွားရန် တို့ပါ"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ဂိမ်းကို ရွေးခြင်း"</string>
@@ -1549,7 +1556,7 @@
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"ပယ်ဖျက်မည့်ကန့်သတ်နှုန်းကျော်လွန်သည်"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>၊  account <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> အတွက် စုစုပေါင်း <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> အရာဖျက်ထားပါသည်။ သင်ဘာလုပ်ချင်ပါလဲ?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"ဤအရာများကိုဖျက်ပါ"</string>
-    <string name="sync_undo_deletes" msgid="5786033331266418896">"ဖျက်ပီးသည်များကို ပယ်ဖျက်ရန်"</string>
+    <string name="sync_undo_deletes" msgid="5786033331266418896">"အားလုံးကို မဖျက်တော့ရန်"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"လက်ရှိ ဘာမှမလုပ်ရန်"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"အကောင့် တစ်ခု ရွေးပါ"</string>
     <string name="add_account_label" msgid="4067610644298737417">"အကောင့်တစ်ခုထည့်ရန်"</string>

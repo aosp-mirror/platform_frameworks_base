@@ -1549,6 +1549,25 @@ public class TvIAppManagerService extends SystemService {
         }
 
         @Override
+        public void onCommandRequest(@TvIAppService.IAppServiceCommandType String cmdType,
+                Bundle parameters) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onCommandRequest (cmdType=" + cmdType + ", parameters="
+                            + parameters.toString() + ")");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onCommandRequest(cmdType, parameters, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onCommandRequest", e);
+                }
+            }
+        }
+
+        @Override
         public void onSessionStateChanged(int state) {
             synchronized (mLock) {
                 if (DEBUG) {

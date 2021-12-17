@@ -58,7 +58,7 @@ public final class NanoAppState implements Parcelable {
      * @param nanoAppId The unique ID of this nanoapp, see {#getNanoAppId()}.
      * @param appVersion The software version of this nanoapp, see {#getNanoAppVersion()}.
      * @param enabled True if the nanoapp is enabled and running on the Context Hub.
-     * @param nanoAppPersmissions The list of permissions required to communicate with this
+     * @param nanoAppPermissions The list of permissions required to communicate with this
      *   nanoapp.
      */
     public NanoAppState(long nanoAppId, int appVersion, boolean enabled,
@@ -73,7 +73,7 @@ public final class NanoAppState implements Parcelable {
      * @param nanoAppId The unique ID of this nanoapp, see {#getNanoAppId()}.
      * @param appVersion The software version of this nanoapp, see {#getNanoAppVersion()}.
      * @param enabled True if the nanoapp is enabled and running on the Context Hub.
-     * @param nanoAppPersmissions The list of permissions required to communicate with this
+     * @param nanoAppPermissions The list of permissions required to communicate with this
      *   nanoapp.
      * @param nanoAppRpcServiceList The list of RPC services published by this nanoapp, see
      *   {@link NanoAppRpcService} for additional details.

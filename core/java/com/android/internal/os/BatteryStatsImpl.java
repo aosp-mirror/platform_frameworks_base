@@ -161,7 +161,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 204;
+    static final int VERSION = 205;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -240,6 +240,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private static final int[] SUPPORTED_PER_PROCESS_STATE_STANDARD_ENERGY_BUCKETS = {
             MeasuredEnergyStats.POWER_BUCKET_CPU,
+            MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO,
     };
 
     // TimeInState counters need NUM_PROCESS_STATE states in order to accommodate
@@ -582,6 +583,8 @@ public class BatteryStatsImpl extends BatteryStats {
         int UPDATE_ALL =
                 UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM | UPDATE_DISPLAY;
 
+        int UPDATE_ON_PROC_STATE_CHANGE = UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT;
+
         @IntDef(flag = true, prefix = "UPDATE_", value = {
                 UPDATE_CPU,
                 UPDATE_WIFI,
@@ -608,6 +611,8 @@ public class BatteryStatsImpl extends BatteryStats {
         Future<?> scheduleSyncDueToBatteryLevelChange(long delayMillis);
         /** Schedule removal of UIDs corresponding to a removed user */
         Future<?> scheduleCleanupDueToRemovedUser(int userId);
+        /** Schedule a sync because of a process state change */
+        Future<?> scheduleSyncDueToProcessStateChange(long delayMillis);
     }
 
     public Handler mHandler;
@@ -1703,7 +1708,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-
     private static class TimeMultiStateCounter implements TimeBaseObs {
         private final TimeBase mTimeBase;
         private final LongMultiStateCounter mCounter;
@@ -1736,10 +1740,6 @@ public class BatteryStatsImpl extends BatteryStats {
             mCounter.setEnabled(false, elapsedRealtimeUs / 1000);
         }
 
-        public LongMultiStateCounter getCounter() {
-            return mCounter;
-        }
-
         public int getStateCount() {
             return mCounter.getStateCount();
         }
@@ -1753,8 +1753,8 @@ public class BatteryStatsImpl extends BatteryStats {
             return mCounter.updateValue(value, timestampMs);
         }
 
-        public void addCount(long delta) {
-            mCounter.addCount(delta);
+        private void increment(long increment, long timestampMs) {
+            mCounter.incrementValue(increment, timestampMs);
         }
 
         /**
@@ -1762,6 +1762,10 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         public long getCountLocked(int procState) {
             return mCounter.getCount(procState);
+        }
+
+        public long getTotalCountLocked() {
+            return mCounter.getTotalCount();
         }
 
         public void logState(Printer pw, String prefix) {
@@ -7985,7 +7989,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         LongSamplingCounter[] mNetworkByteActivityCounters;
         LongSamplingCounter[] mNetworkPacketActivityCounters;
-        LongSamplingCounter mMobileRadioActiveTime;
+        TimeMultiStateCounter mMobileRadioActiveTime;
         LongSamplingCounter mMobileRadioActiveCount;
 
         /**
@@ -8195,6 +8199,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final int batteryConsumerProcessState =
                     mapUidProcessStateToBatteryConsumerProcessState(procState);
             getCpuActiveTimeCounter().setState(batteryConsumerProcessState, elapsedTimeMs);
+            getMobileRadioActiveTimeCounter().setState(batteryConsumerProcessState, elapsedTimeMs);
             final MeasuredEnergyStats energyStats =
                     getOrCreateMeasuredEnergyStatsIfSupportedLocked();
             if (energyStats != null) {
@@ -8594,11 +8599,10 @@ public class BatteryStatsImpl extends BatteryStats {
         /** Adds the given charge to the given standard power bucket for this uid. */
         @GuardedBy("mBsi")
         private void addChargeToStandardBucketLocked(long chargeDeltaUC,
-                @StandardPowerBucket int powerBucket) {
+                @StandardPowerBucket int powerBucket, long timestampMs) {
             final MeasuredEnergyStats measuredEnergyStats =
                     getOrCreateMeasuredEnergyStatsLocked();
-            measuredEnergyStats.updateStandardBucket(powerBucket, chargeDeltaUC,
-                    mBsi.mClock.elapsedRealtime());
+            measuredEnergyStats.updateStandardBucket(powerBucket, chargeDeltaUC, timestampMs);
         }
 
         /** Adds the given charge to the given custom power bucket for this uid. */
@@ -8686,6 +8690,13 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public long getMobileRadioMeasuredBatteryConsumptionUC() {
             return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO);
+        }
+
+        @GuardedBy("mBsi")
+        @Override
+        public long getMobileRadioMeasuredBatteryConsumptionUC(int processState) {
+            return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO,
+                    processState);
         }
 
         @GuardedBy("mBsi")
@@ -9228,9 +9239,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         void noteNetworkActivityLocked(int type, long deltaBytes, long deltaPackets) {
-            if (mNetworkByteActivityCounters == null) {
-                initNetworkActivityLocked();
-            }
+            ensureNetworkActivityLocked();
             if (type >= 0 && type < NUM_NETWORK_ACTIVITY_TYPES) {
                 mNetworkByteActivityCounters[type].addCountLocked(deltaBytes);
                 mNetworkPacketActivityCounters[type].addCountLocked(deltaPackets);
@@ -9240,12 +9249,23 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        void noteMobileRadioActiveTimeLocked(long batteryUptime) {
-            if (mNetworkByteActivityCounters == null) {
-                initNetworkActivityLocked();
-            }
-            mMobileRadioActiveTime.addCountLocked(batteryUptime);
+        void noteMobileRadioActiveTimeLocked(long batteryUptimeDeltaUs, long elapsedTimeMs) {
+            ensureNetworkActivityLocked();
+            getMobileRadioActiveTimeCounter().increment(batteryUptimeDeltaUs, elapsedTimeMs);
             mMobileRadioActiveCount.addCountLocked(1);
+        }
+
+        private TimeMultiStateCounter getMobileRadioActiveTimeCounter() {
+            if (mMobileRadioActiveTime == null) {
+                final long timestampMs = mBsi.mClock.elapsedRealtime();
+                mMobileRadioActiveTime = new TimeMultiStateCounter(
+                        mBsi.mOnBatteryTimeBase, BatteryConsumer.PROCESS_STATE_COUNT, timestampMs);
+                mMobileRadioActiveTime.setState(
+                        mapUidProcessStateToBatteryConsumerProcessState(mProcessState),
+                        timestampMs);
+                mMobileRadioActiveTime.update(0, timestampMs);
+            }
+            return mMobileRadioActiveTime;
         }
 
         @Override
@@ -9275,8 +9295,20 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public long getMobileRadioActiveTime(int which) {
-            return mMobileRadioActiveTime != null
-                    ? mMobileRadioActiveTime.getCountLocked(which) : 0;
+            return getMobileRadioActiveTimeInProcessState(BatteryConsumer.PROCESS_STATE_ANY);
+        }
+
+        @Override
+        public long getMobileRadioActiveTimeInProcessState(
+                @BatteryConsumer.ProcessState int processState) {
+            if (mMobileRadioActiveTime == null) {
+                return 0;
+            }
+            if (processState == BatteryConsumer.PROCESS_STATE_ANY) {
+                return mMobileRadioActiveTime.getTotalCountLocked();
+            } else {
+                return mMobileRadioActiveTime.getCountLocked(processState);
+            }
         }
 
         @Override
@@ -9388,18 +9420,17 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        void initNetworkActivityLocked() {
-            detachIfNotNull(mNetworkByteActivityCounters);
+        void ensureNetworkActivityLocked() {
+            if (mNetworkByteActivityCounters != null) {
+                return;
+            }
+
             mNetworkByteActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
-            detachIfNotNull(mNetworkPacketActivityCounters);
             mNetworkPacketActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
             for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
                 mNetworkByteActivityCounters[i] = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
                 mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
             }
-            detachIfNotNull(mMobileRadioActiveTime);
-            mMobileRadioActiveTime = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
-            detachIfNotNull(mMobileRadioActiveCount);
             mMobileRadioActiveCount = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
         }
 
@@ -9896,7 +9927,12 @@ public class BatteryStatsImpl extends BatteryStats {
                     mNetworkByteActivityCounters[i].writeToParcel(out);
                     mNetworkPacketActivityCounters[i].writeToParcel(out);
                 }
-                mMobileRadioActiveTime.writeToParcel(out);
+                if (mMobileRadioActiveTime != null) {
+                    out.writeBoolean(true);
+                    mMobileRadioActiveTime.writeToParcel(out);
+                } else {
+                    out.writeBoolean(false);
+                }
                 mMobileRadioActiveCount.writeToParcel(out);
             } else {
                 out.writeInt(0);
@@ -9996,6 +10032,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @GuardedBy("mBsi")
         void readFromParcelLocked(TimeBase timeBase, TimeBase screenOffTimeBase, Parcel in) {
+            final long timestampMs = mBsi.mClock.elapsedRealtime();
             mOnBatteryBackgroundTimeBase.readFromParcel(in);
             mOnBatteryScreenOffBackgroundTimeBase.readFromParcel(in);
 
@@ -10205,7 +10242,14 @@ public class BatteryStatsImpl extends BatteryStats {
                     mNetworkPacketActivityCounters[i]
                             = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
                 }
-                mMobileRadioActiveTime = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
+                if (in.readBoolean()) {
+                    final TimeMultiStateCounter counter =
+                            new TimeMultiStateCounter(mBsi.mOnBatteryTimeBase, in, timestampMs);
+                    if (counter.getStateCount() == BatteryConsumer.PROCESS_STATE_COUNT) {
+                        mMobileRadioActiveTime = counter;
+                    }
+                }
+
                 mMobileRadioActiveCount = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
             } else {
                 mNetworkByteActivityCounters = null;
@@ -10247,7 +10291,6 @@ public class BatteryStatsImpl extends BatteryStats {
             mScreenOffCpuFreqTimeMs = LongSamplingCounterArray.readFromParcel(
                     in, mBsi.mOnBatteryScreenOffTimeBase);
 
-            final long timestampMs = mBsi.mClock.elapsedRealtime();
             int stateCount = in.readInt();
             if (stateCount != 0) {
                 final TimeMultiStateCounter counter = new TimeMultiStateCounter(
@@ -11182,6 +11225,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     onBatteryScreenOffCounter.setState(uidRunningState, elapsedRealtimeMs);
                 }
 
+                final int prevBatteryConsumerProcessState =
+                        mapUidProcessStateToBatteryConsumerProcessState(mProcessState);
+
                 mProcessState = uidRunningState;
 
                 updateOnBatteryBgTimeBase(uptimeMs * 1000, elapsedRealtimeMs * 1000);
@@ -11191,11 +11237,15 @@ public class BatteryStatsImpl extends BatteryStats {
                         mapUidProcessStateToBatteryConsumerProcessState(uidRunningState);
                 getCpuActiveTimeCounter().setState(batteryConsumerProcessState, elapsedRealtimeMs);
 
+                getMobileRadioActiveTimeCounter()
+                        .setState(batteryConsumerProcessState, elapsedRealtimeMs);
                 final MeasuredEnergyStats energyStats =
                         getOrCreateMeasuredEnergyStatsIfSupportedLocked();
                 if (energyStats != null) {
                     energyStats.setState(batteryConsumerProcessState, elapsedRealtimeMs);
                 }
+                maybeScheduleExternalStatsSync(prevBatteryConsumerProcessState,
+                        batteryConsumerProcessState);
             }
 
             if (userAwareService != mInForegroundService) {
@@ -11206,6 +11256,27 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
                 mInForegroundService = userAwareService;
             }
+        }
+
+        @GuardedBy("mBsi")
+        private void maybeScheduleExternalStatsSync(
+                @BatteryConsumer.ProcessState int oldProcessState,
+                @BatteryConsumer.ProcessState int newProcessState) {
+            if (oldProcessState == newProcessState) {
+                return;
+            }
+            // Transitions between BACKGROUND and such non-foreground states like cached
+            // or nonexistent do not warrant doing a sync.  If some of the stats for those
+            // proc states bleed into the PROCESS_STATE_BACKGROUND, that's ok.
+            if ((oldProcessState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED
+                    && newProcessState == BatteryConsumer.PROCESS_STATE_BACKGROUND)
+                    || (oldProcessState == BatteryConsumer.PROCESS_STATE_BACKGROUND
+                    && newProcessState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED)) {
+                return;
+            }
+
+            mBsi.mExternalSync.scheduleSyncDueToProcessStateChange(
+                    mBsi.mConstants.PROC_STATE_CHANGE_COLLECTION_DELAY_MS);
         }
 
         /** Whether to consider Uid to be in the background for background timebase purposes. */
@@ -12805,7 +12876,8 @@ public class BatteryStatsImpl extends BatteryStats {
                             .calcGlobalPowerWithoutControllerDataMah(globalTimeMs);
                 }
                 distributeEnergyToUidsLocked(MeasuredEnergyStats.POWER_BUCKET_WIFI,
-                        consumedChargeUC, uidEstimatedConsumptionMah, totalEstimatedConsumptionMah);
+                        consumedChargeUC, uidEstimatedConsumptionMah, totalEstimatedConsumptionMah,
+                        elapsedRealtimeMs);
             }
         }
     }
@@ -12963,7 +13035,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         final long appPackets = entry.rxPackets + entry.txPackets;
                         final long appRadioTimeUs =
                                 (totalAppRadioTimeUs * appPackets) / totalPackets;
-                        u.noteMobileRadioActiveTimeLocked(appRadioTimeUs);
+                        u.noteMobileRadioActiveTimeLocked(appRadioTimeUs, elapsedRealtimeMs);
 
                         // Distribute measured mobile radio charge consumption based on app radio
                         // active time
@@ -13042,7 +13114,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
                     distributeEnergyToUidsLocked(MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO,
                             consumedChargeUC, uidEstimatedConsumptionMah,
-                            totalEstimatedConsumptionMah);
+                            totalEstimatedConsumptionMah, elapsedRealtimeMs);
                 }
 
                 mNetworkStatsPool.release(delta);
@@ -13330,7 +13402,8 @@ public class BatteryStatsImpl extends BatteryStats {
                     = mBluetoothPowerCalculator.calculatePowerMah(rxTimeMs, txTimeMs, idleTimeMs);
             totalEstimatedMah = Math.max(totalEstimatedMah, controllerMaMs / MILLISECONDS_IN_HOUR);
             distributeEnergyToUidsLocked(MeasuredEnergyStats.POWER_BUCKET_BLUETOOTH,
-                    consumedChargeUC, uidEstimatedConsumptionMah, totalEstimatedMah);
+                    consumedChargeUC, uidEstimatedConsumptionMah, totalEstimatedMah,
+                    elapsedRealtimeMs);
         }
 
         mLastBluetoothActivityInfo.set(info);
@@ -13433,8 +13506,10 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         if (totalCpuChargeUC <= 0) return;
 
+        final long timestampMs = mClock.elapsedRealtime();
+
         mGlobalMeasuredEnergyStats.updateStandardBucket(MeasuredEnergyStats.POWER_BUCKET_CPU,
-                totalCpuChargeUC, mClock.elapsedRealtime());
+                totalCpuChargeUC, timestampMs);
 
         // Calculate the measured microcoulombs/calculated milliamp-hour charge ratio for each
         // cluster to normalize  each uid's estimated power usage against actual power usage for
@@ -13483,7 +13558,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             uid.addChargeToStandardBucketLocked(uidCpuChargeUC,
-                    MeasuredEnergyStats.POWER_BUCKET_CPU);
+                    MeasuredEnergyStats.POWER_BUCKET_CPU, timestampMs);
         }
     }
 
@@ -13583,7 +13658,7 @@ public class BatteryStatsImpl extends BatteryStats {
             fgTimeUsArray.put(uid.getUid(), (double) fgTimeUs);
         }
         distributeEnergyToUidsLocked(MeasuredEnergyStats.POWER_BUCKET_SCREEN_ON,
-                totalScreenOnChargeUC, fgTimeUsArray, 0);
+                totalScreenOnChargeUC, fgTimeUsArray, 0, elapsedRealtimeMs);
     }
 
     /**
@@ -13627,7 +13702,7 @@ public class BatteryStatsImpl extends BatteryStats {
             gnssTimeUsArray.put(uid.getUid(), (double) gnssTimeUs);
         }
         distributeEnergyToUidsLocked(MeasuredEnergyStats.POWER_BUCKET_GNSS, chargeUC,
-                gnssTimeUsArray, 0);
+                gnssTimeUsArray, 0, elapsedRealtimeMs);
     }
 
     /**
@@ -13699,7 +13774,7 @@ public class BatteryStatsImpl extends BatteryStats {
     @SuppressWarnings("GuardedBy") // errorprone false positive on u.addChargeToStandardBucketLocked
     private void distributeEnergyToUidsLocked(@StandardPowerBucket int bucket,
             long totalConsumedChargeUC, SparseDoubleArray ratioNumerators,
-            double minRatioDenominator) {
+            double minRatioDenominator, long timestampMs) {
 
         // If the sum of all app usage was greater than the total, use that instead:
         double sumRatioNumerators = 0;
@@ -13714,7 +13789,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final double ratioNumerator = ratioNumerators.valueAt(i);
             final long uidActualUC
                     = (long) (totalConsumedChargeUC * ratioNumerator / ratioDenominator + 0.5);
-            uid.addChargeToStandardBucketLocked(uidActualUC, bucket);
+            uid.addChargeToStandardBucketLocked(uidActualUC, bucket, timestampMs);
         }
     }
 
@@ -14433,7 +14508,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (childUid != null) {
                     final long delta =
                             childUid.cpuActiveCounter.update(cpuActiveTimesMs, elapsedRealtimeMs);
-                    u.getCpuActiveTimeCounter().addCount(delta);
+                    u.getCpuActiveTimeCounter().increment(delta, elapsedRealtimeMs);
                 }
             }
         });
@@ -15627,7 +15702,6 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int procState = 0; procState < BatteryConsumer.PROCESS_STATE_COUNT; procState++) {
             procStateNames[procState] = BatteryConsumer.processStateToString(procState);
         }
-        procStateNames[BatteryConsumer.PROCESS_STATE_ANY] = "untracked";
         return procStateNames;
     }
 
@@ -15651,6 +15725,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 = "external_stats_collection_rate_limit_ms";
         public static final String KEY_BATTERY_LEVEL_COLLECTION_DELAY_MS
                 = "battery_level_collection_delay_ms";
+        public static final String KEY_PROC_STATE_CHANGE_COLLECTION_DELAY_MS =
+                "procstate_change_collection_delay_ms";
         public static final String KEY_MAX_HISTORY_FILES = "max_history_files";
         public static final String KEY_MAX_HISTORY_BUFFER_KB = "max_history_buffer_kb";
         public static final String KEY_BATTERY_CHARGED_DELAY_MS =
@@ -15661,6 +15737,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private static final long DEFAULT_UID_REMOVE_DELAY_MS = 5L * 60L * 1000L;
         private static final long DEFAULT_EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS = 600_000;
         private static final long DEFAULT_BATTERY_LEVEL_COLLECTION_DELAY_MS = 300_000;
+        private static final long DEFAULT_PROC_STATE_CHANGE_COLLECTION_DELAY_MS = 60_000;
         private static final int DEFAULT_MAX_HISTORY_FILES = 32;
         private static final int DEFAULT_MAX_HISTORY_BUFFER_KB = 128; /*Kilo Bytes*/
         private static final int DEFAULT_MAX_HISTORY_FILES_LOW_RAM_DEVICE = 64;
@@ -15676,6 +15753,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 = DEFAULT_EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS;
         public long BATTERY_LEVEL_COLLECTION_DELAY_MS
                 = DEFAULT_BATTERY_LEVEL_COLLECTION_DELAY_MS;
+        public long PROC_STATE_CHANGE_COLLECTION_DELAY_MS =
+                DEFAULT_PROC_STATE_CHANGE_COLLECTION_DELAY_MS;
         public int MAX_HISTORY_FILES;
         public int MAX_HISTORY_BUFFER; /*Bytes*/
         public int BATTERY_CHARGED_DELAY_MS = DEFAULT_BATTERY_CHARGED_DELAY_MS;
@@ -15742,6 +15821,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 BATTERY_LEVEL_COLLECTION_DELAY_MS = mParser.getLong(
                         KEY_BATTERY_LEVEL_COLLECTION_DELAY_MS,
                         DEFAULT_BATTERY_LEVEL_COLLECTION_DELAY_MS);
+                PROC_STATE_CHANGE_COLLECTION_DELAY_MS = mParser.getLong(
+                        KEY_PROC_STATE_CHANGE_COLLECTION_DELAY_MS,
+                        DEFAULT_PROC_STATE_CHANGE_COLLECTION_DELAY_MS);
 
                 MAX_HISTORY_FILES = mParser.getInt(KEY_MAX_HISTORY_FILES,
                         ActivityManager.isLowRamDeviceStatic() ?
@@ -15793,6 +15875,8 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.println(EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS);
             pw.print(KEY_BATTERY_LEVEL_COLLECTION_DELAY_MS); pw.print("=");
             pw.println(BATTERY_LEVEL_COLLECTION_DELAY_MS);
+            pw.print(KEY_PROC_STATE_CHANGE_COLLECTION_DELAY_MS); pw.print("=");
+            pw.println(PROC_STATE_CHANGE_COLLECTION_DELAY_MS);
             pw.print(KEY_MAX_HISTORY_FILES); pw.print("=");
             pw.println(MAX_HISTORY_FILES);
             pw.print(KEY_MAX_HISTORY_BUFFER_KB); pw.print("=");
@@ -16476,14 +16560,18 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             if (in.readInt() != 0) {
-                if (u.mNetworkByteActivityCounters == null) {
-                    u.initNetworkActivityLocked();
-                }
+                u.ensureNetworkActivityLocked();
                 for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
                     u.mNetworkByteActivityCounters[i].readSummaryFromParcelLocked(in);
                     u.mNetworkPacketActivityCounters[i].readSummaryFromParcelLocked(in);
                 }
-                u.mMobileRadioActiveTime.readSummaryFromParcelLocked(in);
+                if (in.readBoolean()) {
+                    TimeMultiStateCounter counter = new TimeMultiStateCounter(
+                            mOnBatteryTimeBase, in, elapsedRealtimeMs);
+                    if (counter.getStateCount() == BatteryConsumer.PROCESS_STATE_COUNT) {
+                        u.mMobileRadioActiveTime = counter;
+                    }
+                }
                 u.mMobileRadioActiveCount.readSummaryFromParcelLocked(in);
             }
 
@@ -17033,7 +17121,12 @@ public class BatteryStatsImpl extends BatteryStats {
                     u.mNetworkByteActivityCounters[i].writeSummaryFromParcelLocked(out);
                     u.mNetworkPacketActivityCounters[i].writeSummaryFromParcelLocked(out);
                 }
-                u.mMobileRadioActiveTime.writeSummaryFromParcelLocked(out);
+                if (u.mMobileRadioActiveTime != null) {
+                    out.writeBoolean(true);
+                    u.mMobileRadioActiveTime.writeToParcel(out);
+                } else {
+                    out.writeBoolean(false);
+                }
                 u.mMobileRadioActiveCount.writeSummaryFromParcelLocked(out);
             }
 

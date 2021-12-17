@@ -23,6 +23,14 @@
 // and comparing them against the checked in API signature, and also checking compatibility
 // with the latest frozen API signature.
 
+// TODO(b/21090328): Remove filter after we are ready to.
+soong_config_module_type_import {
+    from: "frameworks/base/Android.bp",
+    module_types: [
+        "java_library_with_nonpublic_deps",
+    ],
+}
+
 /////////////////////////////////////////////////////////////////////
 // Common metalava configs
 /////////////////////////////////////////////////////////////////////
@@ -299,21 +307,35 @@ java_defaults {
     visibility: ["//visibility:private"],
 }
 
-java_library {
+java_library_with_nonpublic_deps {
     name: "android-non-updatable.stubs",
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":api-stubs-docs-non-updatable"],
     libs: modules_public_stubs,
+    soong_config_variables: {
+        include_nonpublic_framework_api: {
+            libs: [
+                "framework-supplementalapi.stubs",
+            ],
+        },
+    },
     dist: {
         dir: "apistubs/android/public",
     },
 }
 
-java_library {
+java_library_with_nonpublic_deps {
     name: "android-non-updatable.stubs.system",
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":system-api-stubs-docs-non-updatable"],
     libs: modules_system_stubs,
+    soong_config_variables: {
+        include_nonpublic_framework_api: {
+            libs: [
+                "framework-supplementalapi.stubs",
+            ],
+        },
+    },
     dist: {
         dir: "apistubs/android/system",
     },
@@ -334,11 +356,18 @@ java_library {
     },
 }
 
-java_library {
+java_library_with_nonpublic_deps {
     name: "android-non-updatable.stubs.test",
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":test-api-stubs-docs-non-updatable"],
     libs: modules_system_stubs,
+    soong_config_variables: {
+        include_nonpublic_framework_api: {
+            libs: [
+                "framework-supplementalapi.stubs",
+            ],
+        },
+    },
     dist: {
         dir: "apistubs/android/test",
     },
@@ -357,21 +386,35 @@ java_defaults {
     defaults_visibility: ["//frameworks/base/services"],
 }
 
-java_library {
+java_library_with_nonpublic_deps {
     name: "android_stubs_current",
     static_libs: modules_public_stubs + [
         "android-non-updatable.stubs",
         "private-stub-annotations-jar",
     ],
+    soong_config_variables: {
+        include_nonpublic_framework_api: {
+            static_libs: [
+                "framework-supplementalapi.stubs",
+            ],
+        },
+    },
     defaults: ["android.jar_defaults"],
 }
 
-java_library {
+java_library_with_nonpublic_deps {
     name: "android_system_stubs_current",
     static_libs: modules_system_stubs + [
         "android-non-updatable.stubs.system",
         "private-stub-annotations-jar",
     ],
+    soong_config_variables: {
+        include_nonpublic_framework_api: {
+            static_libs: [
+                "framework-supplementalapi.stubs",
+            ],
+        },
+    },
     defaults: [
         "android.jar_defaults",
         "android_stubs_dists_default",
@@ -392,7 +435,7 @@ java_library {
     ],
 }
 
-java_library {
+java_library_with_nonpublic_deps {
     name: "android_test_stubs_current",
     // Modules do not have test APIs, but we want to include their SystemApis, like we include
     // the SystemApi of framework-non-updatable-sources.
@@ -400,6 +443,13 @@ java_library {
         "android-non-updatable.stubs.test",
         "private-stub-annotations-jar",
     ],
+    soong_config_variables: {
+        include_nonpublic_framework_api: {
+            static_libs: [
+                "framework-supplementalapi.stubs",
+            ],
+        },
+    },
     defaults: [
         "android.jar_defaults",
         "android_stubs_dists_default",

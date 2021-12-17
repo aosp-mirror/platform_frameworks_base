@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Ivumela uhlelo lokusebenza ukuthi lusebenzise isevisi ye-IMS ukuze yenze amakholi ngaphandle kokungenelela kwakho."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"funda isimo sefoni kanye nesazisi"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Ivumela uhlelo lokusebenza ukufinyelela izici zefoni zedivayisi. Le mvume ivumela uhlelo lokusebenza ukucacisa inombolo yefoni nobunikazi bedivayisi, ukuthi noma ikholi iyasebenza, futhi nenombolo yesilawuli kude zixhunywe ngekholi."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"funda isimo nokuhlonza ucingo okuyisisekelo"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Ivumela i-app ukufinyelela izakhi zocingo eziyisisekelo zedivayisi."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"yanza imizila yamakholi ngesistimu"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Ivumela uhlelo lokusebenza ukwenza imizila yamakholi ngesistimu ukuze ithuthukise umuzwa wokushaya."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"bona futhi ulawule amakholi ngesistimu."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Thepha ukuze usule imodeli yakho yobuso, bese wengeza futhi ubuso"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Setha Ukuvula ngobuso"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Vula ifoni yakho ngokuyibheka"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Ukuze usebenzise Ukuvula ngobuso, vula "<b>"Ukufinyelela kwekhamera"</b>" kokuthi Amasethingi &gt; Ubumfihlo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Setha izindlela eziningi zokuvula"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Thepha ukuze ungeze izigxivizo zomunwe"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Ukuvula ngesigxivizo somunwe"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Ukulungisela i-<xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Qalisa izinhlelo zokusebenza."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Qedela ukuqala kabusha."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Vala isikrini?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Lapho usetha izigxivizo zeminwe yakho, ucindezele Inkinobho yamandla.\n\nLokhu kuvame ukuvala isikrini sakho."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Vala"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Khansela"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Qhubeka nokusetha?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Ucindezele inkinobho yamandla — lokhu kuvame ukuvala isikrini.\n\nZama ukuthepha kancane ngenkathi usetha isigxivizo sakho somunwe."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Vala isikrini"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Qhubeka nokusetha"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Qhubeka uqinisekise isigxivizo sakho somunwe?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Ucindezele inkinobho yamandla — lokhu kuvame ukuvala isikrini.\n\nZama ukuthepha kancane ukuze uqinisekise isigxivizo sakho somunwe."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Vala isikrini"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Qhubeka"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> iyasebenza"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Thepha ukuze ubuyele emuva kwigeyimu"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Khetha igeyimu"</string>

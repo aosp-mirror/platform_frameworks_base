@@ -5317,6 +5317,13 @@ public final class Telephony {
         public static final String COLUMN_PROFILE_CLASS = "profile_class";
 
         /**
+         * TelephonyProvider column name for the port index of the active UICC port.
+         * <P>Type: INTEGER (int)</P>
+         * @hide
+         */
+        public static final String COLUMN_PORT_INDEX = "port_index";
+
+        /**
          * A testing profile can be pre-loaded or downloaded onto
          * the eUICC and provides connectivity to test equipment
          * for the purpose of testing the device and the eUICC. It

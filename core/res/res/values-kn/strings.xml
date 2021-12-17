@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"ನಿಮ್ಮ ಮಧ್ಯಸ್ಥಿಕೆ ಇಲ್ಲದೆಯೇ ಕರೆಗಳನ್ನು ಮಾಡಲು IMS ಸೇವೆಯನ್ನು ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ಫೋನ್ ಸ್ಥಿತಿ ಮತ್ತು ಗುರುತಿಸುವಿಕೆಯನ್ನು ಓದಿ"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"ಸಾಧನದ ಫೋನ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಈ ಅನುಮತಿಯು ಫೋನ್ ಸಂಖ್ಯೆ ಮತ್ತು ಸಾಧನದ ID ಗಳನ್ನು ನಿರ್ಧರಿಸಲು, ಕರೆಯು ಸಕ್ರಿಯವಾಗಿದೆಯೇ ಮತ್ತು ಕರೆಯ ಮೂಲಕ ರಿಮೋಟ್ ಸಂಖ್ಯೆಯು ಸಂಪರ್ಕಗೊಂಡಿವೆಯೇ ಎಂಬುದನ್ನೂ ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಕಲ್ಪಿಸುತ್ತದೆ."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"ಮೂಲ ಟೆಲಿಫೋನ್ ಸ್ಥಿತಿ ಮತ್ತು ಗುರುತನ್ನು ಓದಿ"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"ಸಾಧನದ ಮೂಲ ಟೆಲಿಫೋನ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"ಕರೆಗಳನ್ನು ಸಿಸ್ಟಂ ಮೂಲಕ ರವಾನಿಸಿ"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"ಕರೆಯ ಅನುಭವವನ್ನು ಸುಧಾರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ನ ಕರೆಗಳನ್ನು ಸಿಸ್ಟಂ ಮೂಲಕ ರವಾನಿಸಲು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ಸಿಸ್ಟಂ ಮೂಲಕ ಕರೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ನಿಮ್ಮ ಫೇಸ್ ಮಾಡೆಲ್ ಅನ್ನು ಅಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ, ನಂತರ ನಿಮ್ಮ ಫೇಸ್ ಮಾಡೆಲ್ ಅನ್ನು ಪುನಃ ಸೇರಿಸಿ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ಫೋನ್ ಅನ್ನು ನೋಡುವ ಮೂಲಕ ಅನ್‌ಲಾಕ್‌ ಮಾಡಿ"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಬಳಸಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಗೌಪ್ಯತೆ ಎಂಬಲ್ಲಿ "<b>"ಕ್ಯಾಮರಾ ಪ್ರವೇಶವನ್ನು"</b>" ಆನ್ ಮಾಡಿ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಹೆಚ್ಚಿನ ಮಾರ್ಗಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್ ಸೇರಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್‌ಲಾಕ್"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ಬೂಟ್ ಪೂರ್ಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"ಸ್ಕ್ರೀನ್ ಆಫ್ ಮಾಡಬೇಕೇ?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್ ಅನ್ನು ಸೆಟ್ಟಪ್ ಮಾಡುವಾಗ ನೀವು ಪವರ್ ಬಟನ್‌ಅನ್ನು ಒತ್ತಿದ್ದೀರಿ \n\nಸಾಮಾನ್ಯವಾಗಿ ಇದರಿಂದ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಆಫ್ ಆಗುತ್ತದೆ."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ಆಫ್ ಮಾಡಿ"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"ರದ್ದುಗೊಳಿಸಿ"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ಸೆಟಪ್ ಮುಂದುವರಿಸಬೇಕೆ?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ನೀವು ಪವರ್ ಬಟನ್ ಒತ್ತಿದ್ದೀರಿ — ಇದು ಸಾಮಾನ್ಯವಾಗಿ ಸ್ಕ್ರೀನ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ.\n\nನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಹೊಂದಿಸುವಾಗ ಲಘುವಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"ಸ್ಕ್ರೀನ್ ಆಫ್ ಮಾಡಿ"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ಸೆಟಪ್ ಮುಂದುವರಿಸಿ"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪರಿಶೀಲನೆ ಮುಂದುವರಿಸುವುದೇ?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ನೀವು ಪವರ್ ಬಟನ್ ಒತ್ತಿದ್ದೀರಿ — ಇದು ಸಾಮಾನ್ಯವಾಗಿ ಸ್ಕ್ರೀನ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ.\n\nನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಪರಿಶೀಲಿಸಲು ಲಘುವಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"ಸ್ಕ್ರೀನ್ ಆಫ್ ಮಾಡಿ"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ಮುಂದುವರಿಸಿ"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ರನ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ಆಟಕ್ಕೆ ಹಿಂತಿರುಗಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ಆಟವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>

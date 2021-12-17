@@ -1843,6 +1843,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
+    /** Returns {@code true} if the decided new rotation has not applied to configuration yet. */
+    private boolean isRotationChanging() {
+        return mDisplayRotation.getRotation() != getWindowConfiguration().getRotation();
+    }
+
+    private void startFadeRotationAnimationIfNeeded() {
+        if (isRotationChanging()) {
+            startFadeRotationAnimation(false /* shouldDebounce */);
+        }
+    }
+
     /**
      * Starts the hide animation for the windows which will be rotated seamlessly.
      *
@@ -1996,23 +2007,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void configureDisplayPolicy() {
-        final int width = mBaseDisplayWidth;
-        final int height = mBaseDisplayHeight;
-        final int shortSize;
-        final int longSize;
-        if (width > height) {
-            shortSize = height;
-            longSize = width;
-        } else {
-            shortSize = width;
-            longSize = height;
-        }
-
-        final int shortSizeDp = shortSize * DENSITY_DEFAULT / mBaseDisplayDensity;
-        final int longSizeDp = longSize * DENSITY_DEFAULT / mBaseDisplayDensity;
-
         mDisplayPolicy.updateConfigurationAndScreenSizeDependentBehaviors();
-        mDisplayRotation.configure(width, height, shortSizeDp, longSizeDp);
+        mDisplayRotation.configure(mBaseDisplayWidth, mBaseDisplayHeight);
     }
 
     /**
@@ -2795,6 +2791,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mIsSizeForced ? mBaseDisplayHeight : newHeight,
                     mIsDensityForced ? mBaseDisplayDensity : newDensity);
 
+            configureDisplayPolicy();
+
+            if (physicalDisplayChanged) {
+                // Reapply the rotation window settings, we are doing this after updating
+                // the screen size and configuring display policy as the rotation depends
+                // on the display size
+                mWmService.mDisplayWindowSettings.applyRotationSettingsToDisplayLocked(this);
+            }
+
             // Real display metrics changed, so we should also update initial values.
             mInitialDisplayWidth = newWidth;
             mInitialDisplayHeight = newHeight;
@@ -3189,11 +3194,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         // Hide the windows which are not significant in rotation animation. So that the windows
         // don't need to block the unfreeze time.
-        if (screenRotationAnimation != null && screenRotationAnimation.hasScreenshot()
-                // Do not fade for freezing without rotation change.
-                && mDisplayRotation.getRotation() != getWindowConfiguration().getRotation()
-                && mFadeRotationAnimationController == null) {
-            startFadeRotationAnimation(false /* shouldDebounce */);
+        if (screenRotationAnimation != null && screenRotationAnimation.hasScreenshot()) {
+            startFadeRotationAnimationIfNeeded();
         }
     }
 
@@ -3214,6 +3216,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             if (!controller.isCollecting(this)) {
                 controller.collect(this);
+                startFadeRotationAnimationIfNeeded();
             }
             return;
         }
@@ -3221,7 +3224,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 this, this, null /* remoteTransition */, displayChange);
         if (t != null) {
             mAtmService.startLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
-            if (getRotation() != getWindowConfiguration().getRotation()) {
+            if (isRotationChanging()) {
                 mWmService.mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
                 controller.mTransitionMetricsReporter.associate(t,
                         startTime -> mWmService.mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN));

@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permite que la aplicación utilice el servicio IMS para realizar llamadas sin tu intervención."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"consultar la identidad y el estado del teléfono"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Permite que la aplicación acceda a las funciones de teléfono del dispositivo. La aplicación puede utilizar este permiso para descubrir identificadores de dispositivos y números de teléfono, para saber si una llamada está activa y para conocer el número remoto con el que se ha establecido conexión mediante una llamada."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"leer el estado y la identidad básicos de telefonía"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Permite que la aplicación acceda a las funciones de telefonía básicas del dispositivo."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"direccionar llamadas a través del sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Permite a la aplicación direccionar sus llamadas hacia el sistema para mejorar la calidad de estas."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ver y controlar llamadas a través del sistema."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toca para eliminar tu modelo facial y luego añade de nuevo tu cara"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura Desbloqueo facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloquea el teléfono con solo mirarlo"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para usar Desbloqueo Facial, habilita el "<b>"acceso a la cámara"</b>" en Ajustes y privacidad"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura más formas de desbloqueo"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toca para añadir una huella digital"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueo con huella digital"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando aplicaciones"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Finalizando inicio..."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"¿Apagar pantalla?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Has pulsado el botón de encendido mientras configurabas tu huella digital.\n\nAl hacer esto, se suele apagar la pantalla."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Desactivar"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Cancelar"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"¿Quieres seguir con la configuración?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Has pulsado el botón de encendido, lo que suele apagar la pantalla.\n\nPrueba a apoyar el dedo ligeramente para verificar tu huella digital."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Apagar pantalla"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Seguir configurando"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"¿Seguir verificando tu huella digital?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Has pulsado el botón de encendido, lo que suele apagar la pantalla.\n\nPrueba a apoyar el dedo ligeramente para verificar tu huella digital."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Apagar pantalla"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Continuar"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> en ejecución"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Toca para volver al juego"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Elegir juego"</string>

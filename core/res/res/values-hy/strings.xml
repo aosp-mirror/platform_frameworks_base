@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Թույլ է տալիս հավելվածին IMS ծառայության միջոցով կատարել զանգեր՝ առանց ձեր միջամտության:"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"կարդալ հեռախոսի կարգավիճակը և ինքնությունը"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Թույլ է տալիս հավելվածին օգտագործել սարքի հեռախոսային գործիքները: Այս թույլտվությունը հավելվածին հնարավորություն է տալիս որոշել հեռախոսահամարը և սարքի ID-ները, արդյոք զանգը ակտիվ է և միացված զանգի հեռակա հեռախոսահամարը:"</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"Կարդալ հիմնական հեռախոսային գործառույթների կարգավիճակը և նույնականացնող տվյալներ"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Հավելվածին հասանելի է դարձնում սարքի հիմնական հեռախոսային գործառույթները:"</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"զանգերն ուղարկել համակարգի միջոցով"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Հավելվածին թույլ է տալիս իր զանգերն ուղարկել համակարգի միջոցով՝ կապի որակը բարձրացնելու նպատակով։"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"Զանգերի դիտում և վերահսկում համակարգի միջոցով"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Հպեք՝ ձեր դեմքի նմուշը ջնջելու համար, այնուհետև նորից ավելացրեք այն:"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Կարգավորեք դեմքով ապակողպումը"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ապակողպելու համար պարզապես նայեք հեռախոսին"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Դեմքով ապակողպումն օգտագործելու համար անցեք Կարգավորումներ &gt; Գաղտնիություն և տրամադրեք "<b>"տեսախցիկն օգտագործելու թույլտվություն"</b>"։"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Կարգավորեք ապակողպելու այլ եղանակներ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Հպեք՝ մատնահետք ավելացնելու համար"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Մատնահետքով ապակողպում"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> հավելվածը պատրաստվում է:"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Հավելվածները մեկնարկում են:"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Բեռնումն ավարտվում է:"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Անջատե՞լ էկրանը"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Մատնահետքը կարգավորելու ժամանակ դուք սեղմել եք սնուցման կոճակը։\n\nՍովորաբար դրա արդյունքում էկրանն անջատվում է։"</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Անջատել"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Չեղարկել"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Շարունակե՞լ կարգավորումը"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Դուք սեղմել եք սնուցման կոճակը։ Սովորաբար դրա արդյունքում էկրանն անջատվում է։\n\nՄատնահետքը ավելացնելու համար թեթևակի հպեք կոճակին։"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Անջատել էկրանը"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Շարունակել գրանցումը"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Շարունակե՞լ մատնահետքի սկանավորումը"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Դուք սեղմել եք սնուցման կոճակը։ Սովորաբար դրա արդյունքում էկրանն անջատվում է։\n\nՄատնահետքը սկանավորելու համար թեթևակի հպեք կոճակին։"</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Անջատել էկրանը"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Շարունակել"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g>-ն աշխատում է"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Հպեք՝ խաղին վերադառնալու համար"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Ընտրեք խաղ"</string>

@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"允许应用自行使用即时通讯服务拨打电话。"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"读取手机状态和身份"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"允许该应用访问设备的电话功能。此权限可让该应用确定本机号码和设备 ID、是否正处于通话状态以及拨打的号码。"</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"读取基本电话状态和身份信息"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"允许该应用使用设备的基本电话功能。"</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"通过系统转接来电"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"允许该应用通过系统转接来电，以改善通话体验。"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"查看并控制通过系统拨打的电话。"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"请点按以删除您的脸部模型，然后再添加您的脸部模型"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"设置人脸解锁"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"脸部对准手机即可将其解锁"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"如需使用人脸解锁功能，请在“设置”&gt;“隐私权”中开启"<b>"摄像头使用权限"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"设置更多解锁方式"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"点按即可添加指纹"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"指纹解锁"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"正在准备升级<xliff:g id="APPNAME">%1$s</xliff:g>。"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"正在启动应用。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"即将完成启动。"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"要关闭屏幕吗？"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"您在设置指纹时按了电源按钮。\n\n此操作通常会关闭屏幕。"</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"关闭"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"取消"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"要继续设置吗？"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"您已按电源按钮，这通常会关闭屏幕。\n\n请尝试在设置指纹时轻轻按一下。"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"关闭屏幕"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"继续设置"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"要继续验证您的指纹吗？"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"您已按电源按钮，这通常会关闭屏幕。\n\n请尝试轻轻按一下来验证您的指纹。"</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"关闭屏幕"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"继续"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g>正在运行"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"点按即可返回游戏"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"选择游戏"</string>

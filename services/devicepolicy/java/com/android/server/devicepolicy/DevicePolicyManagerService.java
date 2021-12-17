@@ -91,18 +91,18 @@ import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_UNKNOWN;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_ERROR_FAILURE_SETTING;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_NO_ERROR;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
-import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED;
-import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_PRE_CONDITION_FAILED;
-import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_PROFILE_CREATION_FAILED;
-import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED;
-import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED;
-import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED;
-import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_STARTING_PROFILE_FAILED;
 import static android.app.admin.DevicePolicyManager.STATE_USER_UNMANAGED;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.app.admin.DevicePolicyManager.WIPE_SILENTLY;
+import static android.app.admin.ProvisioningException.ERROR_ADMIN_PACKAGE_INSTALLATION_FAILED;
+import static android.app.admin.ProvisioningException.ERROR_PRE_CONDITION_FAILED;
+import static android.app.admin.ProvisioningException.ERROR_PROFILE_CREATION_FAILED;
+import static android.app.admin.ProvisioningException.ERROR_REMOVE_NON_REQUIRED_APPS_FAILED;
+import static android.app.admin.ProvisioningException.ERROR_SETTING_PROFILE_OWNER_FAILED;
+import static android.app.admin.ProvisioningException.ERROR_SET_DEVICE_OWNER_FAILED;
+import static android.app.admin.ProvisioningException.ERROR_STARTING_PROFILE_FAILED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
@@ -10653,15 +10653,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         final int userHandle = user.getIdentifier();
-        final Intent intent = new Intent(DevicePolicyManager.ACTION_MANAGED_USER_CREATED)
-                .putExtra(Intent.EXTRA_USER_HANDLE, userHandle)
-                .putExtra(
-                        DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
-                        leaveAllSystemAppsEnabled)
-                .setPackage(getManagedProvisioningPackage(mContext))
-                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
-
         final long id = mInjector.binderClearCallingIdentity();
         try {
             manageUserUnchecked(admin, profileOwner, userHandle, adminExtras,
@@ -10671,6 +10662,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
                         Settings.Secure.USER_SETUP_COMPLETE, 1, userHandle);
             }
+
+            sendProvisioningCompletedBroadcast(
+                    userHandle, ACTION_PROVISION_MANAGED_USER, leaveAllSystemAppsEnabled);
 
             return user;
         } catch (Throwable re) {
@@ -10684,6 +10678,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
+    }
+
+    private void sendProvisioningCompletedBroadcast(
+            int user, String action, boolean leaveAllSystemAppsEnabled) {
+        final Intent intent = new Intent(DevicePolicyManager.ACTION_PROVISIONING_COMPLETED)
+                .putExtra(Intent.EXTRA_USER_HANDLE, user)
+                .putExtra(
+                        DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
+                        leaveAllSystemAppsEnabled)
+                .putExtra(DevicePolicyManager.EXTRA_PROVISIONING_ACTION,
+                        action)
+                .setPackage(getManagedProvisioningPackage(mContext))
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
     }
 
     private void manageUserUnchecked(ComponentName admin, ComponentName profileOwner,
@@ -17230,7 +17238,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     ACTION_PROVISION_MANAGED_PROFILE, admin.getPackageName());
             if (result != CODE_OK) {
                 throw new ServiceSpecificException(
-                        PROVISIONING_RESULT_PRE_CONDITION_FAILED,
+                        ERROR_PRE_CONDITION_FAILED,
                         "Provisioning preconditions failed with result: " + result);
             }
 
@@ -17247,7 +17255,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     nonRequiredApps.toArray(new String[nonRequiredApps.size()]));
             if (userInfo == null) {
                 throw new ServiceSpecificException(
-                        PROVISIONING_RESULT_PROFILE_CREATION_FAILED,
+                        ERROR_PROFILE_CREATION_FAILED,
                         "Error creating profile, createProfileForUserEvenWhenDisallowed "
                                 + "returned null.");
             }
@@ -17261,7 +17269,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (!enableAdminAndSetProfileOwner(
                     userInfo.id, caller.getUserId(), admin, provisioningParams.getOwnerName())) {
                 throw new ServiceSpecificException(
-                        PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED,
+                        ERROR_SETTING_PROFILE_OWNER_FAILED,
                         "Error setting profile owner.");
             }
             setUserSetupComplete(userInfo.id);
@@ -17269,13 +17277,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             startUser(userInfo.id, callerPackage);
             maybeMigrateAccount(
                     userInfo.id, caller.getUserId(), provisioningParams.getAccountToMigrate(),
-                    provisioningParams.isKeepAccountMigrated(), callerPackage);
+                    provisioningParams.isKeepingAccountOnMigration(), callerPackage);
 
             if (provisioningParams.isOrganizationOwnedProvisioning()) {
                 synchronized (getLockObject()) {
                     markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(admin, userInfo.id);
                 }
             }
+
+            sendProvisioningCompletedBroadcast(
+                    userInfo.id,
+                    ACTION_PROVISION_MANAGED_PROFILE,
+                    provisioningParams.isLeaveAllSystemAppsEnabled());
 
             return userInfo.getUserHandle();
         } catch (Exception e) {
@@ -17336,14 +17349,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     userId);
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 throw new ServiceSpecificException(
-                        PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED,
+                        ERROR_ADMIN_PACKAGE_INSTALLATION_FAILED,
                         String.format("Failed to install existing package %s for user %d with "
                                         + "result code %d",
                                 packageName, userId, status));
             }
         } catch (NameNotFoundException e) {
             throw new ServiceSpecificException(
-                    PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED,
+                    ERROR_ADMIN_PACKAGE_INSTALLATION_FAILED,
                     String.format("Failed to install existing package %s for user %d: %s",
                             packageName, userId, e.getMessage()));
         }
@@ -17401,12 +17414,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 /* scheduler= */ null);
         try {
             if (!mInjector.getIActivityManager().startUserInBackground(userId)) {
-                throw new ServiceSpecificException(PROVISIONING_RESULT_STARTING_PROFILE_FAILED,
+                throw new ServiceSpecificException(ERROR_STARTING_PROFILE_FAILED,
                         String.format("Unable to start user %d in background", userId));
             }
 
             if (!unlockedReceiver.waitForUserUnlocked()) {
-                throw new ServiceSpecificException(PROVISIONING_RESULT_STARTING_PROFILE_FAILED,
+                throw new ServiceSpecificException(ERROR_STARTING_PROFILE_FAILED,
                         String.format("Timeout whilst waiting for unlock of user %d.", userId));
             }
             logEventDuration(
@@ -17529,7 +17542,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     ACTION_PROVISION_MANAGED_DEVICE, deviceAdmin.getPackageName());
             if (result != CODE_OK) {
                 throw new ServiceSpecificException(
-                        PROVISIONING_RESULT_PRE_CONDITION_FAILED,
+                        ERROR_PRE_CONDITION_FAILED,
                         "Provisioning preconditions failed with result: " + result);
             }
             setTimeAndTimezone(provisioningParams.getTimeZone(), provisioningParams.getLocalTime());
@@ -17542,7 +17555,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     provisioningParams.isLeaveAllSystemAppsEnabled(),
                     deviceAdmin)) {
                 throw new ServiceSpecificException(
-                        PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED,
+                        ERROR_REMOVE_NON_REQUIRED_APPS_FAILED,
                         "PackageManager failed to remove non required apps.");
             }
 
@@ -17550,13 +17563,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (!setActiveAdminAndDeviceOwner(
                     deviceOwnerUserId, deviceAdmin, provisioningParams.getOwnerName())) {
                 throw new ServiceSpecificException(
-                        PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED,
+                        ERROR_SET_DEVICE_OWNER_FAILED,
                         "Failed to set device owner.");
             }
 
             disallowAddUser();
             setAdminCanGrantSensorsPermissionForUserUnchecked(deviceOwnerUserId,
                     provisioningParams.canDeviceOwnerGrantSensorsPermissions());
+            sendProvisioningCompletedBroadcast(
+                    deviceOwnerUserId,
+                    ACTION_PROVISION_MANAGED_DEVICE,
+                    provisioningParams.isLeaveAllSystemAppsEnabled());
         } catch (Exception e) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.PLATFORM_PROVISIONING_ERROR)

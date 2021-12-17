@@ -28,7 +28,12 @@ import android.annotation.SystemApi;
 @SystemApi
 public interface ScanCallback {
 
-    /** Scan locked the signal. */
+    /**
+     * Scan locked the signal.
+     *
+     * It can also be notified after signal is locked if the signal attributes transmission
+     * parameter of the signal is changed (e.g., Modulation).
+     */
     void onLocked();
 
     /** Scan stopped. */

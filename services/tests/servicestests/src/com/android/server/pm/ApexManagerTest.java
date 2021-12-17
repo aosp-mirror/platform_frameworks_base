@@ -61,6 +61,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 
 @SmallTest
 @Presubmit
@@ -127,6 +128,17 @@ public class ApexManagerTest {
                 ParallelPackageParser.makeExecutorService());
 
         assertThat(mApexManager.getPackageInfo(TEST_APEX_PKG, 0)).isNull();
+    }
+
+    @Test
+    public void testGetApexSystemServices() throws RemoteException {
+        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(true, false));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
+
+        Map<String, String> services = mApexManager.getApexSystemServices();
+        assertThat(services).hasSize(1);
+        assertThat(services).containsKey("com.android.apex.test.ApexSystemService");
     }
 
     @Test

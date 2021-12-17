@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"আপোনাৰ হস্তক্ষেপৰ অবিহনে আইএমএছ সেৱা ব্যৱহাৰ কৰি কল কৰিবলৈ এপক অনুমতি দিয়ে।"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ফ\'নৰ স্থিতি আৰু পৰিচয় পঢ়ক"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"ডিভাইচত থকা ফ\'নৰ সুবিধাসমূহ ব্য়ৱহাৰ কৰিবলৈ এপটোক অনুমতি দিয়ে৷ এই অনুমতিয়ে কোনো কল সক্ৰিয় হৈ থাককেই বা নাথাকক আৰু দূৰবৰ্তী নম্বৰটো কলৰ দ্বাৰা সংযোজিত হওকেই বা নহওক এপটোক ফ\'ন নম্বৰ আৰু ডিভাইচৰ পৰিচয় নিৰ্ধাৰণ কৰিবলৈ অনুমতি দিয়ে৷"</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"প্ৰাথমিক টেলিফ\'নী স্থিতি আৰু পৰিচয় পঢ়ক"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"এপ্‌টোক ডিভাইচটোৰ প্ৰাথমিক টেলিফ’নী সুবিধাসমূহ এক্সেছ কৰাৰ অনুমতি দিয়ে।"</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"ছিষ্টেমৰ জৰিয়তে কল কৰিব পাৰে"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"কল কৰাৰ অভিজ্ঞতাক উন্নত কৰিবলৈ এপটোক ছিষ্টেমৰ জৰিয়তে কলসমূহ কৰিবলৈ দিয়ে।"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ছিষ্টেমৰ জৰিয়তে কলবোৰ চোৱা আৰু নিয়ন্ত্ৰণ কৰা।"</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"আপোনাৰ মুখাৱয়বৰ মডেলটো মচিবলৈ টিপক, তাৰ পাছত পুনৰ আপোনাৰ মুখাৱয়ব যোগ দিয়ক"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ফেচ আনলক সুবিধাটো ছেট আপ কৰক"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"আপোনাৰ ফ’নটোলৈ চাই সেইটো আনলক কৰক"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ফেচ আনলক সুবিধাটো ব্যৱহাৰ কৰিবলৈ ছেটিং &gt; গোপনীয়তাত "<b>"কেমেৰাৰ এক্সেছ"</b>" অন কৰক"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"আনলক কৰাৰ অধিক উপায় ছেট আপ কৰক"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"এটা ফিংগাৰপ্ৰিণ্ট যোগ দিবলৈ টিপক"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ফিংগাৰপ্ৰিন্ট আনলক"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>সাজু কৰি থকা হৈছে।"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"আৰম্ভ হৈ থকা এপসমূহ।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"বুট কাৰ্য সমাপ্ত কৰিছে।"</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"স্ক্ৰীন অফ কৰিবনে?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"আপোনাৰ ফিংগাৰপ্ৰিণ্ট ছেট আপ কৰাৰ সময়ত, আপুনি পাৱাৰ বুটামটো টিপিছে।\n\nএইটোৱে সচৰাচৰ আপোনাৰ স্ক্ৰীনখন অফ কৰে।"</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"অফ কৰক"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"বাতিল কৰক"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ছেট আপ অব্যাহত ৰাখিবনে?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"আপুনি পাৱাৰ বুটামটো টিপিছে — এইটোৱে সাধাৰণতে স্ক্ৰীনখন অফ কৰে।\n\nআপোনাৰ ফিংগাৰপ্ৰিণ্টটো ছেট আপ কৰাৰ সময়ত লাহেকৈ টিপি চাওক।"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"স্ক্ৰীন অফ কৰক"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ছেট আপ অব্যাহত ৰাখক"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ফিংগাৰপ্ৰিণ্ট সত্যাপন কৰা জাৰি ৰাখিবনে?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"আপুনি পাৱাৰ বুটামটো টিপিছে — এইটোৱে সাধাৰণতে স্ক্ৰীনখন অফ কৰে।\n\nআপোনাৰ ফিংগাৰপ্ৰিণ্টটো সত্যাপন কৰিবলৈ লাহেকৈ টিপি চাওক।"</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"স্ক্ৰীন অফ কৰক"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"অব্যাহত ৰাখক"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> চলি আছে"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"গেইমলৈ উভতি যাওক"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"গেইম বাছনি কৰক"</string>

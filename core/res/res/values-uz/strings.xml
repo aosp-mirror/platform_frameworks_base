@@ -471,6 +471,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Ilovaga sizning ishtirokingizsiz qo‘ng‘iroqlarni amalga oshirish uchun IMS xizmatidan foydalanishga ruxsat beradi."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefon holati haqidagi ma’lumotlarni olish"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Ilovaga qurilmangizdagi telefon xususiyatlariga kirishga ruxsat beradi. Bu ruxsat ilovaga telefon raqami va qurilma nomlari, qo‘ng‘iroq faol yoki faolsizligi va masofadagi raqam qo‘ng‘rioq orqali bog‘langanligini aniqlashga imkon beradi."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"oddiy telefoniya holatini oʻqish va aniqlash"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Ilovaga qurilmadagi oddiy telefoniya funksiyalaridan foydalanish imkonini beradi."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"chaqiruvlarni tizim orqali yo‘naltirish"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Ilova aloqa sifatini yaxshilash maqsadida chaqiruvlarni tizim orqali yo‘naltirishi mumkin."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"tizim orqali chaqiruvlarni tekshirish va boshqarish."</string>
@@ -622,6 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Yuz modelini oʻchirish uchun bosing va keyin yana yuzni qoʻshing"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Yuz bilan ochishni sozlash"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefoningizni yuz tekshiruvi yordamida qulfdan chiqaring"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Yuz bilan ochish uchun Sozlamalar va maxfiylik orqali "<b>"kameraga kirishga ruxsat bering"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Qulfdan chiqarishning boshqa usullarini sozlang"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Barmoq izi kiritish uchun bosing"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Barmoq izi bilan ochish"</string>
@@ -1276,10 +1279,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> tayyorlanmoqda."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Ilovalar ishga tushirilmoqda."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Tizimni yuklashni tugatish."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Ekran oʻchirilsinmi?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Barmoq izini sozlayotganda Quvvat tugmasini bosdingiz.\n\nBunda odatda ekran oʻchib qoladi."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Oʻchirish"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Bekor qilish"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Sozlashni davom ettirasizmi?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Quvvat tugmasini bosdingiz — bu odatda ekranni oʻchiradi.\n\nBarmoq izini qoʻshish vaqtida tugmaga yengilgina tegining."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Ekranni oʻchirish"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Sozlashni davom ettirish"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Barmoq izi tasdiqlashda davom etilsinmi?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Quvvat tugmasini bosdingiz. Bu odatda ekranni oʻchiradi.\n\nBarmoq izingizni tasdiqlash uchun tugmaga yengilgina tegining."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Ekranni oʻchirish"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Davom etish"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ishlamoqda"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"O‘yinga qaytish uchun bosing"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"O‘yinni tanlang"</string>
