@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import static android.bluetooth.BluetoothUtils.getSyncTimeout;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -29,14 +31,16 @@ import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
 import android.content.Context;
-import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.modules.utils.SynchronousResultReceiver;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This class provides the public APIs to control the Bluetooth A2DP Sink
@@ -86,7 +90,7 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
                     "BluetoothA2dpSink", IBluetoothA2dpSink.class.getName()) {
                 @Override
                 public IBluetoothA2dpSink getServiceInterface(IBinder service) {
-                    return IBluetoothA2dpSink.Stub.asInterface(Binder.allowBlocking(service));
+                    return IBluetoothA2dpSink.Stub.asInterface(service);
                 }
     };
 
@@ -140,16 +144,20 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         final IBluetoothA2dpSink service = getService();
-        if (service != null && isEnabled() && isValidDevice(device)) {
+        final boolean defaultValue = false;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (isEnabled() && isValidDevice(device)) {
             try {
-                return service.connect(device, mAttributionSource);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-                return false;
+                final SynchronousResultReceiver<Boolean> recv = new SynchronousResultReceiver();
+                service.connect(device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
         }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return false;
+        return defaultValue;
     }
 
     /**
@@ -181,16 +189,20 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothA2dpSink service = getService();
-        if (service != null && isEnabled() && isValidDevice(device)) {
+        final boolean defaultValue = false;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (isEnabled() && isValidDevice(device)) {
             try {
-                return service.disconnect(device, mAttributionSource);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-                return false;
+                final SynchronousResultReceiver<Boolean> recv = new SynchronousResultReceiver();
+                service.disconnect(device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
         }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return false;
+        return defaultValue;
     }
 
     /**
@@ -204,17 +216,23 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         final IBluetoothA2dpSink service = getService();
-        if (service != null && isEnabled()) {
+        final List<BluetoothDevice> defaultValue = new ArrayList<BluetoothDevice>();
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (isEnabled()) {
             try {
+                final SynchronousResultReceiver<List<BluetoothDevice>> recv =
+                        new SynchronousResultReceiver();
+                service.getConnectedDevices(mAttributionSource, recv);
                 return Attributable.setAttributionSource(
-                        service.getConnectedDevices(mAttributionSource), mAttributionSource);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-                return new ArrayList<BluetoothDevice>();
+                        recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue),
+                        mAttributionSource);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
         }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return new ArrayList<BluetoothDevice>();
+        return defaultValue;
     }
 
     /**
@@ -228,18 +246,23 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
         final IBluetoothA2dpSink service = getService();
-        if (service != null && isEnabled()) {
+        final List<BluetoothDevice> defaultValue = new ArrayList<BluetoothDevice>();
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (isEnabled()) {
             try {
+                final SynchronousResultReceiver<List<BluetoothDevice>> recv =
+                        new SynchronousResultReceiver();
+                service.getDevicesMatchingConnectionStates(states, mAttributionSource, recv);
                 return Attributable.setAttributionSource(
-                        service.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                        recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue),
                         mAttributionSource);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-                return new ArrayList<BluetoothDevice>();
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
         }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return new ArrayList<BluetoothDevice>();
+        return defaultValue;
     }
 
     /**
@@ -251,18 +274,22 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
     @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getConnectionState(BluetoothDevice device) {
-        if (VDBG) log("getState(" + device + ")");
+        if (VDBG) log("getConnectionState(" + device + ")");
         final IBluetoothA2dpSink service = getService();
-        if (service != null && isEnabled() && isValidDevice(device)) {
+        final int defaultValue = BluetoothProfile.STATE_DISCONNECTED;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (isEnabled() && isValidDevice(device)) {
             try {
-                return service.getConnectionState(device, mAttributionSource);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-                return BluetoothProfile.STATE_DISCONNECTED;
+                final SynchronousResultReceiver<Integer> recv = new SynchronousResultReceiver();
+                service.getConnectionState(device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
         }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return BluetoothProfile.STATE_DISCONNECTED;
+        return defaultValue;
     }
 
     /**
@@ -282,16 +309,21 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
     public BluetoothAudioConfig getAudioConfig(BluetoothDevice device) {
         if (VDBG) log("getAudioConfig(" + device + ")");
         final IBluetoothA2dpSink service = getService();
-        if (service != null && isEnabled() && isValidDevice(device)) {
+        final BluetoothAudioConfig defaultValue = null;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (isEnabled() && isValidDevice(device)) {
             try {
-                return service.getAudioConfig(device, mAttributionSource);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-                return null;
+                final SynchronousResultReceiver<BluetoothAudioConfig> recv =
+                        new SynchronousResultReceiver();
+                service.getAudioConfig(device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
         }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return null;
+        return defaultValue;
     }
 
     /**
@@ -337,20 +369,22 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
         final IBluetoothA2dpSink service = getService();
-        if (service != null && isEnabled() && isValidDevice(device)) {
-            if (connectionPolicy != BluetoothProfile.CONNECTION_POLICY_FORBIDDEN
-                    && connectionPolicy != BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
-                return false;
-            }
+        final boolean defaultValue = false;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (isEnabled() && isValidDevice(device)
+                && (connectionPolicy == BluetoothProfile.CONNECTION_POLICY_FORBIDDEN
+                    || connectionPolicy == BluetoothProfile.CONNECTION_POLICY_ALLOWED)) {
             try {
-                return service.setConnectionPolicy(device, connectionPolicy, mAttributionSource);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-                return false;
+                final SynchronousResultReceiver<Boolean> recv = new SynchronousResultReceiver();
+                service.setConnectionPolicy(device, connectionPolicy, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
         }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return false;
+        return defaultValue;
     }
 
     /**
@@ -393,16 +427,20 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
     public @ConnectionPolicy int getConnectionPolicy(@NonNull BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         final IBluetoothA2dpSink service = getService();
-        if (service != null && isEnabled() && isValidDevice(device)) {
+        final int defaultValue = BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (isEnabled() && isValidDevice(device)) {
             try {
-                return service.getConnectionPolicy(device, mAttributionSource);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-                return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+                final SynchronousResultReceiver<Integer> recv = new SynchronousResultReceiver();
+                service.getConnectionPolicy(device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
         }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+        return defaultValue;
     }
 
     /**
@@ -420,17 +458,22 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
     })
     public boolean isAudioPlaying(@NonNull BluetoothDevice device) {
+        if (VDBG) log("isAudioPlaying(" + device + ")");
         final IBluetoothA2dpSink service = getService();
-        if (service != null && isEnabled() && isValidDevice(device)) {
+        final boolean defaultValue = false;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (isEnabled() && isValidDevice(device)) {
             try {
-                return service.isA2dpPlaying(device, mAttributionSource);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-                return false;
+                final SynchronousResultReceiver<Boolean> recv = new SynchronousResultReceiver();
+                service.isA2dpPlaying(device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
         }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return false;
+        return defaultValue;
     }
 
     /**
