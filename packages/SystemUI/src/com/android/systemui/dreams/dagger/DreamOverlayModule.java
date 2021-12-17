@@ -44,6 +44,7 @@ public abstract class DreamOverlayModule {
     private static final String DREAM_OVERLAY_BATTERY_VIEW = "dream_overlay_battery_view";
     public static final String DREAM_OVERLAY_BATTERY_CONTROLLER =
             "dream_overlay_battery_controller";
+    public static final String DREAM_OVERLAY_CONTENT_VIEW = "dream_overlay_content_view";
 
     /** */
     @Provides
@@ -58,6 +59,7 @@ public abstract class DreamOverlayModule {
     /** */
     @Provides
     @DreamOverlayComponent.DreamOverlayScope
+    @Named(DREAM_OVERLAY_CONTENT_VIEW)
     public static ViewGroup providesDreamOverlayContentView(DreamOverlayContainerView view) {
         return Preconditions.checkNotNull(view.findViewById(R.id.dream_overlay_content),
                 "R.id.dream_overlay_content must not be null");

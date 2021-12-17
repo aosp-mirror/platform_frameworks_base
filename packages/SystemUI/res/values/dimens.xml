@@ -1309,4 +1309,7 @@
     <dimen name="dream_overlay_status_bar_height">80dp</dimen>
     <dimen name="dream_overlay_status_bar_margin">40dp</dimen>
     <dimen name="dream_overlay_status_icon_margin">8dp</dimen>
+    <!-- Height of the area at the top of the dream overlay to allow dragging down the notifications
+         shade. -->
+    <dimen name="dream_overlay_notifications_drag_area_height">100dp</dimen>
 </resources>
