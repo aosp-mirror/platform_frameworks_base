@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
@@ -493,6 +494,28 @@ public class ActivityClient {
     void reportSplashScreenAttached(IBinder token) {
         try {
             getActivityClientController().splashScreenAttached(token);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Shows or hides a Camera app compat toggle for stretched issues with the requested state.
+     *
+     * @param token The token for the window that needs a control.
+     * @param showControl Whether the control should be shown or hidden.
+     * @param transformationApplied Whether the treatment is already applied.
+     * @param callback The callback executed when the user clicks on a control.
+     */
+    void requestCompatCameraControl(Resources res, IBinder token, boolean showControl,
+            boolean transformationApplied, ICompatCameraControlCallback callback) {
+        if (!res.getBoolean(com.android.internal.R.bool
+                .config_isCameraCompatControlForStretchedIssuesEnabled)) {
+            return;
+        }
+        try {
+            getActivityClientController().requestCompatCameraControl(
+                    token, showControl, transformationApplied, callback);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

@@ -4938,6 +4938,10 @@
         If given value is outside of this range, the option 1 (center) is assummed. -->
     <integer name="config_letterboxDefaultPositionForReachability">1</integer>
 
+    <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
+         treatment for stretched issues in camera viewfinder. -->
+    <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>
+
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
 

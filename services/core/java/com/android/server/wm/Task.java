@@ -3463,11 +3463,18 @@ class Task extends TaskFragment {
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
+
+        boolean isTopActivityResumed = mReuseActivitiesReport.top != null
+                 && mReuseActivitiesReport.top.getOrganizedTask() == this
+                 && mReuseActivitiesReport.top.isState(RESUMED);
         // Whether the direct top activity is in size compat mode on foreground.
-        info.topActivityInSizeCompat = mReuseActivitiesReport.top != null
-                && mReuseActivitiesReport.top.getOrganizedTask() == this
-                && mReuseActivitiesReport.top.inSizeCompatMode()
-                && mReuseActivitiesReport.top.isState(RESUMED);
+        info.topActivityInSizeCompat = isTopActivityResumed
+                && mReuseActivitiesReport.top.inSizeCompatMode();
+        // Whether the direct top activity requested showing camera compat control.
+        info.cameraCompatControlState = isTopActivityResumed
+                ? mReuseActivitiesReport.top.getCameraCompatControlState()
+                : TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+
         info.launchCookies.clear();
         info.addLaunchCookie(mLaunchCookie);
         forAllActivities(r -> {
