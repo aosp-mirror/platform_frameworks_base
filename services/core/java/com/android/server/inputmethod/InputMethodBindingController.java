@@ -82,6 +82,7 @@ final class InputMethodBindingController {
     private IBinder mCurToken;
     private int mCurSeq;
     private boolean mVisibleBound;
+    private boolean mSupportsStylusHw;
 
     /**
      * Binding flags for establishing connection to the {@link InputMethodService}.
@@ -294,6 +295,10 @@ final class InputMethodBindingController {
                                     mCurMethod, mCurToken));
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
                     mService.reRequestCurrentClientSessionLocked();
+                }
+                mSupportsStylusHw = mMethodMap.get(mSelectedMethodId).supportsStylusHandwriting();
+                if (mSupportsStylusHw) {
+                    // TODO init Handwriting spy.
                 }
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);

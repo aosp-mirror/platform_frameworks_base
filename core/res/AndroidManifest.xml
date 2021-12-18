@@ -6065,6 +6065,12 @@
     <permission android:name="android.permission.LAUNCH_DEVICE_MANAGER_SETUP"
         android:protectionLevel="signature|role" />
 
+    <!-- @SystemApi Allows an application to update certain device management related system
+         resources.
+         @hide -->
+    <permission android:name="android.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES"
+                android:protectionLevel="signature|role" />
+    
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
@@ -6563,6 +6569,16 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.LOAD_DATA"/>
+            </intent-filter>
+        </service>
+
+        <!-- TODO: Move to ExtServices or relevant component. -->
+        <service android:name="com.android.server.selectiontoolbar.DefaultSelectionToolbarRenderService"
+                 android:permission="android.permission.BIND_SELECTION_TOOLBAR_RENDER_SERVICE"
+                 android:process=":ui"
+                 android:exported="false">
+            <intent-filter>
+                <action android:name="android.service.selectiontoolbar.SelectionToolbarRenderService"/>
             </intent-filter>
         </service>
 

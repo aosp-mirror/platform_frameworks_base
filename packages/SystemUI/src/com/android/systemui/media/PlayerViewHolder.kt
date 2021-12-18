@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +26,8 @@ import android.widget.SeekBar
 import android.widget.TextView
 import com.android.systemui.R
 import com.android.systemui.util.animation.TransitionLayout
+
+private const val TAG = "PlayerViewHolder"
 
 /**
  * ViewHolder for a media player.
@@ -94,7 +97,12 @@ class PlayerViewHolder private constructor(itemView: View) {
     }
 
     fun marquee(start: Boolean, delay: Long) {
-        longPressText.getHandler().postDelayed({ longPressText.setSelected(start) }, delay)
+        val longPressTextHandler = longPressText.getHandler()
+        if (longPressTextHandler == null) {
+            Log.d(TAG, "marquee while longPressText.getHandler() is null", Exception())
+            return
+        }
+        longPressTextHandler.postDelayed({ longPressText.setSelected(start) }, delay)
     }
 
     companion object {

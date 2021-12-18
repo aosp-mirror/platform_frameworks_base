@@ -1872,7 +1872,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             float x, float y, float pressure, float size, int metaState,
             float xPrecision, float yPrecision, int deviceId, int edgeFlags) {
         return obtain(downTime, eventTime, action, x, y, pressure, size, metaState,
-                xPrecision, yPrecision, deviceId, edgeFlags, InputDevice.SOURCE_UNKNOWN,
+                xPrecision, yPrecision, deviceId, edgeFlags, InputDevice.SOURCE_CLASS_POINTER,
                 DEFAULT_DISPLAY);
     }
 

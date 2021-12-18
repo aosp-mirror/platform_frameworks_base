@@ -1420,6 +1420,7 @@ package android {
     field public static final int supportsMultipleDisplays = 16844182; // 0x1010596
     field public static final int supportsPictureInPicture = 16844023; // 0x10104f7
     field public static final int supportsRtl = 16843695; // 0x10103af
+    field public static final int supportsStylusHandwriting;
     field public static final int supportsSwitchingToNextInputMethod = 16843755; // 0x10103eb
     field public static final int supportsUploading = 16843419; // 0x101029b
     field public static final int suppressesSpellChecker = 16844355; // 0x1010643
@@ -10249,6 +10250,7 @@ package android.content {
     method @Nullable public String getPackageName();
     method public int getUid();
     method public boolean isTrusted(@NonNull android.content.Context);
+    method @NonNull public static android.content.AttributionSource myAttributionSource();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.AttributionSource> CREATOR;
   }
@@ -11566,6 +11568,7 @@ package android.content {
     field public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
     field public static final String EXTRA_PERMISSION_GROUP_NAME = "android.intent.extra.PERMISSION_GROUP_NAME";
     field public static final String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
+    field public static final String EXTRA_PREVIOUS_UID = "android.intent.extra.PREVIOUS_UID";
     field public static final String EXTRA_PROCESS_TEXT = "android.intent.extra.PROCESS_TEXT";
     field public static final String EXTRA_PROCESS_TEXT_READONLY = "android.intent.extra.PROCESS_TEXT_READONLY";
     field public static final String EXTRA_QUICK_VIEW_FEATURES = "android.intent.extra.QUICK_VIEW_FEATURES";
@@ -11597,6 +11600,7 @@ package android.content {
     field public static final String EXTRA_TIMEZONE = "time-zone";
     field public static final String EXTRA_TITLE = "android.intent.extra.TITLE";
     field public static final String EXTRA_UID = "android.intent.extra.UID";
+    field public static final String EXTRA_UID_CHANGING = "android.intent.extra.UID_CHANGING";
     field public static final String EXTRA_USER = "android.intent.extra.USER";
     field public static final String EXTRA_USER_INITIATED = "android.intent.extra.USER_INITIATED";
     field public static final int FILL_IN_ACTION = 1; // 0x1
@@ -26146,11 +26150,14 @@ package android.media.tv {
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG2 = "internal_provider_flag2";
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG3 = "internal_provider_flag3";
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG4 = "internal_provider_flag4";
+    field public static final String COLUMN_INTERNAL_PROVIDER_ID = "internal_provider_id";
     field public static final String COLUMN_LONG_DESCRIPTION = "long_description";
+    field public static final String COLUMN_MULTI_SERIES_ID = "multi_series_id";
     field public static final String COLUMN_POSTER_ART_URI = "poster_art_uri";
     field public static final String COLUMN_RECORDING_PROHIBITED = "recording_prohibited";
     field public static final String COLUMN_REVIEW_RATING = "review_rating";
     field public static final String COLUMN_REVIEW_RATING_STYLE = "review_rating_style";
+    field public static final String COLUMN_SCRAMBLED = "scrambled";
     field public static final String COLUMN_SEARCHABLE = "searchable";
     field public static final String COLUMN_SEASON_DISPLAY_NUMBER = "season_display_number";
     field @Deprecated public static final String COLUMN_SEASON_NUMBER = "season_number";
@@ -26210,7 +26217,9 @@ package android.media.tv {
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG2 = "internal_provider_flag2";
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG3 = "internal_provider_flag3";
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG4 = "internal_provider_flag4";
+    field public static final String COLUMN_INTERNAL_PROVIDER_ID = "internal_provider_id";
     field public static final String COLUMN_LONG_DESCRIPTION = "long_description";
+    field public static final String COLUMN_MULTI_SERIES_ID = "multi_series_id";
     field public static final String COLUMN_POSTER_ART_URI = "poster_art_uri";
     field public static final String COLUMN_RECORDING_DATA_BYTES = "recording_data_bytes";
     field public static final String COLUMN_RECORDING_DATA_URI = "recording_data_uri";
@@ -41469,6 +41478,7 @@ package android.telephony {
     field public static final String KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY = "cdma_nonroaming_networks_string_array";
     field public static final String KEY_CDMA_ROAMING_MODE_INT = "cdma_roaming_mode_int";
     field public static final String KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY = "cdma_roaming_networks_string_array";
+    field public static final String KEY_CELLULAR_USAGE_SETTING_INT = "cellular_usage_setting_int";
     field public static final String KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL = "check_pricing_with_carrier_data_roaming_bool";
     field public static final String KEY_CI_ACTION_ON_SYS_UPDATE_BOOL = "ci_action_on_sys_update_bool";
     field public static final String KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING = "ci_action_on_sys_update_extra_string";
@@ -43085,6 +43095,7 @@ package android.telephony {
     method public int getSimSlotIndex();
     method public int getSubscriptionId();
     method public int getSubscriptionType();
+    method public int getUsageSetting();
     method public boolean isEmbedded();
     method public boolean isOpportunistic();
     method public void writeToParcel(android.os.Parcel, int);
@@ -43159,6 +43170,10 @@ package android.telephony {
     field public static final int PHONE_NUMBER_SOURCE_UICC = 1; // 0x1
     field public static final int SUBSCRIPTION_TYPE_LOCAL_SIM = 0; // 0x0
     field public static final int SUBSCRIPTION_TYPE_REMOTE_SIM = 1; // 0x1
+    field public static final int USAGE_SETTING_DATA_CENTRIC = 2; // 0x2
+    field public static final int USAGE_SETTING_DEFAULT = 0; // 0x0
+    field public static final int USAGE_SETTING_UNKNOWN = -1; // 0xffffffff
+    field public static final int USAGE_SETTING_VOICE_CENTRIC = 1; // 0x1
   }
 
   public static class SubscriptionManager.OnOpportunisticSubscriptionsChangedListener {
@@ -52852,6 +52867,7 @@ package android.view.inputmethod {
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public CharSequence loadLabel(android.content.pm.PackageManager);
     method public boolean shouldShowInInputMethodPicker();
+    method public boolean supportsStylusHandwriting();
     method public boolean suppressesSpellChecker();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InputMethodInfo> CREATOR;

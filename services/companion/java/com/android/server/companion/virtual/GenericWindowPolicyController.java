@@ -29,6 +29,7 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.window.DisplayWindowPolicyController;
 
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -44,6 +45,8 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long ALLOW_SECURE_ACTIVITY_DISPLAY_ON_REMOTE_DEVICE = 201712607L;
+
+    @NonNull final HashSet<Integer> mRunningUids = new HashSet<>();
 
     GenericWindowPolicyController(int windowFlags, int systemWindowFlags) {
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
@@ -89,6 +92,17 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
 
     @Override
     public void onRunningAppsChanged(int[] runningUids) {
+        mRunningUids.clear();
+        for (int i = 0; i < runningUids.length; i++) {
+            mRunningUids.add(runningUids[i]);
+        }
+    }
 
+    /**
+     * Returns true if an app with the given UID has an activity running on the virtual display for
+     * this controller.
+     */
+    boolean containsUid(int uid) {
+        return mRunningUids.contains(uid);
     }
 }
