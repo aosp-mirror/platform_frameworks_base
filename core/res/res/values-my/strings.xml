@@ -1157,8 +1157,8 @@
     <string name="delete" msgid="1514113991712129054">"ဖျက်ရန်"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URLအား ကူးခြင်း"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"စာသား ရွေးရန်"</string>
-    <string name="undo" msgid="3175318090002654673">"တစ်ဆင့်နောက်ပြန်ရန်"</string>
-    <string name="redo" msgid="7231448494008532233">"ထပ်လုပ်ပါ"</string>
+    <string name="undo" msgid="3175318090002654673">"နောက်ပြန်ရန်"</string>
+    <string name="redo" msgid="7231448494008532233">"ပြန်လုပ်ရန်"</string>
     <string name="autofill" msgid="511224882647795296">"အော်တိုဖြည့်"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"စာတိုရွေးချယ်မှု"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"အဘိဓာန်ထဲ ထည့်ပါ"</string>
@@ -1533,7 +1533,7 @@
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"ပယ်ဖျက်မည့်ကန့်သတ်နှုန်းကျော်လွန်သည်"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>၊  account <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> အတွက် စုစုပေါင်း <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> အရာဖျက်ထားပါသည်။ သင်ဘာလုပ်ချင်ပါလဲ?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"ဤအရာများကိုဖျက်ပါ"</string>
-    <string name="sync_undo_deletes" msgid="5786033331266418896">"ဖျက်ပီးသည်များကို ပယ်ဖျက်ရန်"</string>
+    <string name="sync_undo_deletes" msgid="5786033331266418896">"အားလုံးကို မဖျက်တော့ရန်"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"လက်ရှိ ဘာမှမလုပ်ရန်"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"အကောင့် တစ်ခု ရွေးပါ"</string>
     <string name="add_account_label" msgid="4067610644298737417">"အကောင့်တစ်ခုထည့်ရန်"</string>
