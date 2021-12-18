@@ -146,6 +146,7 @@ public class NotificationSnooze extends LinearLayout
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         logOptionSelection(MetricsEvent.NOTIFICATION_SNOOZE_CLICKED, mDefaultOption);
+        dispatchConfigurationChanged(getResources().getConfiguration());
     }
 
     @Override
