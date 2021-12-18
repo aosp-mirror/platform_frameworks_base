@@ -17,6 +17,8 @@
 package com.android.wm.shell.compatui;
 
 import android.annotation.Nullable;
+import android.app.TaskInfo;
+import android.app.TaskInfo.CameraCompatControlState;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
@@ -53,12 +55,14 @@ import java.util.function.Predicate;
 public class CompatUIController implements OnDisplaysChangedListener,
         DisplayImeController.ImePositionProcessor {
 
-    /** Callback for size compat UI interaction. */
+    /** Callback for compat UI interaction. */
     public interface CompatUICallback {
         /** Called when the size compat restart button appears. */
         void onSizeCompatRestartButtonAppeared(int taskId);
         /** Called when the size compat restart button is clicked. */
         void onSizeCompatRestartButtonClicked(int taskId);
+        /** Called when the camera compat control state is updated. */
+        void onCameraControlStateUpdated(int taskId, @CameraCompatControlState int state);
     }
 
     private static final String TAG = "CompatUIController";
@@ -86,10 +90,12 @@ public class CompatUIController implements OnDisplaysChangedListener,
 
     private CompatUICallback mCallback;
 
-    /** Only show once automatically in the process life. */
-    private boolean mHasShownHint;
-    /** Indicates if the keyguard is currently occluded, in which case compat UIs shouldn't
-     * be shown. */
+    // Only show once automatically in the process life.
+    private boolean mHasShownSizeCompatHint;
+    private boolean mHasShownCameraCompatHint;
+
+    // Indicates if the keyguard is currently occluded, in which case compat UIs shouldn't
+    // be shown.
     private boolean mKeyguardOccluded;
 
     public CompatUIController(Context context,
@@ -122,23 +128,20 @@ public class CompatUIController implements OnDisplaysChangedListener,
      * Called when the Task info changed. Creates and updates the compat UI if there is an
      * activity in size compat, or removes the UI if there is no size compat activity.
      *
-     * @param displayId display the task and activity are in.
-     * @param taskId task the activity is in.
-     * @param taskConfig task config to place the compat UI with.
+     * @param taskInfo {@link TaskInfo} task the activity is in.
      * @param taskListener listener to handle the Task Surface placement.
      */
-    public void onCompatInfoChanged(int displayId, int taskId,
-            @Nullable Configuration taskConfig,
+    public void onCompatInfoChanged(TaskInfo taskInfo,
             @Nullable ShellTaskOrganizer.TaskListener taskListener) {
-        if (taskConfig == null || taskListener == null) {
+        if (taskInfo.configuration == null || taskListener == null) {
             // Null token means the current foreground activity is not in compatibility mode.
-            removeLayout(taskId);
-        } else if (mActiveLayouts.contains(taskId)) {
+            removeLayout(taskInfo.taskId);
+        } else if (mActiveLayouts.contains(taskInfo.taskId)) {
             // UI already exists, update the UI layout.
-            updateLayout(taskId, taskConfig, taskListener);
+            updateLayout(taskInfo, taskListener);
         } else {
             // Create a new compat UI.
-            createLayout(displayId, taskId, taskConfig, taskListener);
+            createLayout(taskInfo, taskListener);
         }
     }
 
@@ -215,38 +218,45 @@ public class CompatUIController implements OnDisplaysChangedListener,
         return mDisplaysWithIme.contains(displayId);
     }
 
-    private void createLayout(int displayId, int taskId, Configuration taskConfig,
-            ShellTaskOrganizer.TaskListener taskListener) {
-        final Context context = getOrCreateDisplayContext(displayId);
+    private void createLayout(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener) {
+        final Context context = getOrCreateDisplayContext(taskInfo.displayId);
         if (context == null) {
-            Log.e(TAG, "Cannot get context for display " + displayId);
+            Log.e(TAG, "Cannot get context for display " + taskInfo.displayId);
             return;
         }
 
         final CompatUIWindowManager compatUIWindowManager =
-                createLayout(context, displayId, taskId, taskConfig, taskListener);
-        mActiveLayouts.put(taskId, compatUIWindowManager);
-        compatUIWindowManager.createLayout(showOnDisplay(displayId));
+                createLayout(context, taskInfo, taskListener);
+        mActiveLayouts.put(taskInfo.taskId, compatUIWindowManager);
+        compatUIWindowManager.createLayout(showOnDisplay(taskInfo.displayId),
+                taskInfo.topActivityInSizeCompat, taskInfo.cameraCompatControlState);
     }
 
     @VisibleForTesting
-    CompatUIWindowManager createLayout(Context context, int displayId, int taskId,
-            Configuration taskConfig, ShellTaskOrganizer.TaskListener taskListener) {
+    CompatUIWindowManager createLayout(Context context, TaskInfo taskInfo,
+            ShellTaskOrganizer.TaskListener taskListener) {
         final CompatUIWindowManager compatUIWindowManager = new CompatUIWindowManager(context,
-                taskConfig, mSyncQueue, mCallback, taskId, taskListener,
-                mDisplayController.getDisplayLayout(displayId), mHasShownHint);
-        // Only show hint for the first time.
-        mHasShownHint = true;
+                taskInfo.configuration, mSyncQueue, mCallback, taskInfo.taskId, taskListener,
+                mDisplayController.getDisplayLayout(taskInfo.displayId), mHasShownSizeCompatHint,
+                mHasShownCameraCompatHint);
+        // Only show hints for the first time.
+        if (taskInfo.topActivityInSizeCompat) {
+            mHasShownSizeCompatHint = true;
+        }
+        if (taskInfo.hasCameraCompatControl()) {
+            mHasShownCameraCompatHint = true;
+        }
         return compatUIWindowManager;
     }
 
-    private void updateLayout(int taskId, Configuration taskConfig,
-            ShellTaskOrganizer.TaskListener taskListener) {
-        final CompatUIWindowManager layout = mActiveLayouts.get(taskId);
+    private void updateLayout(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener) {
+        final CompatUIWindowManager layout = mActiveLayouts.get(taskInfo.taskId);
         if (layout == null) {
             return;
         }
-        layout.updateCompatInfo(taskConfig, taskListener, showOnDisplay(layout.getDisplayId()));
+        layout.updateCompatInfo(taskInfo.configuration, taskListener,
+                showOnDisplay(layout.getDisplayId()), taskInfo.topActivityInSizeCompat,
+                taskInfo.cameraCompatControlState);
     }
 
     private void removeLayout(int taskId) {
