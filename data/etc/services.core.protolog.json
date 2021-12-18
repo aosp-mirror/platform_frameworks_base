@@ -1201,6 +1201,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-846931068": {
+      "message": "Update camera compat control state to %s for taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
+    },
     "-846078709": {
       "message": "Configuration doesn't matter in finishing %s",
       "level": "VERBOSE",
