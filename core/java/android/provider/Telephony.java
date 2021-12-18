@@ -5453,5 +5453,12 @@ public final class Telephony {
          */
         public static final String COLUMN_PHONE_NUMBER_SOURCE_IMS =
                 "phone_number_source_ims";
+
+        /**
+         * TelephonyProvider column name for the device's preferred usage setting.
+         *
+         * @hide
+         */
+        public static final String COLUMN_USAGE_SETTING = "usage_setting";
     }
 }

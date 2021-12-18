@@ -26,6 +26,10 @@
     <xs:element name="displayConfiguration">
         <xs:complexType>
             <xs:sequence>
+                <xs:element type="densityMap" name="densityMap" minOccurs="0" maxOccurs="1">
+                    <xs:annotation name="nullable"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
                 <xs:element type="nitsMap" name="screenBrightnessMap">
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
@@ -181,5 +185,27 @@
         </xs:sequence>
     </xs:complexType>
 
+    <xs:complexType name="densityMap">
+        <xs:sequence>
+            <xs:element name="density" type="density" maxOccurs="unbounded" minOccurs="1">
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
 
+    <xs:complexType name="density">
+        <xs:sequence>
+            <xs:element type="xs:nonNegativeInteger" name="width">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="xs:nonNegativeInteger" name="height">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="xs:nonNegativeInteger" name="density">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
 </xs:schema>

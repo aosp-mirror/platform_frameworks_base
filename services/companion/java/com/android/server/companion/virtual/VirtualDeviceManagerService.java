@@ -252,7 +252,14 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public boolean isAppRunningOnAnyVirtualDevice(int uid) {
-            // TODO(yukl): Implement this using DWPC.onRunningAppsChanged
+            synchronized (mVirtualDeviceManagerLock) {
+                int size = mVirtualDevices.size();
+                for (int i = 0; i < size; i++) {
+                    if (mVirtualDevices.valueAt(i).isAppRunningOnVirtualDevice(uid)) {
+                        return true;
+                    }
+                }
+            }
             return false;
         }
     }

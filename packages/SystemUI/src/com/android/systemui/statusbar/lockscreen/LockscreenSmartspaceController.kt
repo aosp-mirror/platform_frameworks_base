@@ -241,6 +241,10 @@ class LockscreenSmartspaceController @Inject constructor(
         configurationController.addCallback(configChangeListener)
         statusBarStateController.addCallback(statusBarStateListener)
 
+        plugin.registerSmartspaceEventNotifier {
+                e -> session?.notifySmartspaceEvent(e)
+        }
+
         reloadSmartspace()
     }
 
@@ -266,6 +270,7 @@ class LockscreenSmartspaceController @Inject constructor(
         statusBarStateController.removeCallback(statusBarStateListener)
         session = null
 
+        plugin?.registerSmartspaceEventNotifier(null)
         plugin?.onTargetsAvailable(emptyList())
         Log.d(TAG, "Ending smartspace session for lockscreen")
     }

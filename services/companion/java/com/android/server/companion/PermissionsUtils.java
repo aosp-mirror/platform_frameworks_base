@@ -84,18 +84,6 @@ final class PermissionsUtils {
             throw new IllegalArgumentException("Unsupported device profile: " + deviceProfile);
         }
 
-        if (DEVICE_PROFILE_APP_STREAMING.equals(deviceProfile)) {
-            // TODO: remove, when properly supporting this profile.
-            throw new UnsupportedOperationException(
-                    "DEVICE_PROFILE_APP_STREAMING is not fully supported yet.");
-        }
-
-        if (DEVICE_PROFILE_AUTOMOTIVE_PROJECTION.equals(deviceProfile)) {
-            // TODO: remove, when properly supporting this profile.
-            throw new UnsupportedOperationException(
-                    "DEVICE_PROFILE_AUTOMOTIVE_PROJECTION is not fully supported yet.");
-        }
-
         final String permission = DEVICE_PROFILE_TO_PERMISSION.get(deviceProfile);
         if (context.checkPermission(permission, getCallingPid(), packageUid)
                 != PERMISSION_GRANTED) {

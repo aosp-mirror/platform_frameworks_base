@@ -17,6 +17,8 @@
 
 package android.bluetooth;
 
+import static android.bluetooth.BluetoothUtils.getSyncTimeout;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,14 +29,16 @@ import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.content.AttributionSource;
 import android.content.Context;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.CloseGuard;
 import android.util.Log;
 
+import com.android.modules.utils.SynchronousResultReceiver;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This class provides the public APIs to control the LeAudio profile.
@@ -331,7 +335,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
                     IBluetoothLeAudio.class.getName()) {
                 @Override
                 public IBluetoothLeAudio getServiceInterface(IBinder service) {
-                    return IBluetoothLeAudio.Stub.asInterface(Binder.allowBlocking(service));
+                    return IBluetoothLeAudio.Stub.asInterface(service);
                 }
     };
 
@@ -385,17 +389,21 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean connect(@Nullable BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
-        try {
-            final IBluetoothLeAudio service = getService();
-            if (service != null && mAdapter.isEnabled() && isValidDevice(device)) {
-                return service.connect(device, mAttributionSource);
+        final IBluetoothLeAudio service = getService();
+        final boolean defaultValue = false;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled() && isValidDevice(device)) {
+            try {
+                final SynchronousResultReceiver<Boolean> recv = new SynchronousResultReceiver();
+                service.connect(device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return false;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return false;
         }
+        return defaultValue;
     }
 
     /**
@@ -425,17 +433,21 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disconnect(@Nullable BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
-        try {
-            final IBluetoothLeAudio service = getService();
-            if (service != null && mAdapter.isEnabled() && isValidDevice(device)) {
-                return service.disconnect(device, mAttributionSource);
+        final IBluetoothLeAudio service = getService();
+        final boolean defaultValue = false;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled() && isValidDevice(device)) {
+            try {
+                final SynchronousResultReceiver<Boolean> recv = new SynchronousResultReceiver();
+                service.disconnect(device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return false;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return false;
         }
+        return defaultValue;
     }
 
     /**
@@ -446,18 +458,24 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
-        try {
-            final IBluetoothLeAudio service = getService();
-            if (service != null && mAdapter.isEnabled()) {
+        final IBluetoothLeAudio service = getService();
+        final List<BluetoothDevice> defaultValue = new ArrayList<BluetoothDevice>();
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled()) {
+            try {
+                final SynchronousResultReceiver<List<BluetoothDevice>> recv =
+                        new SynchronousResultReceiver();
+                service.getConnectedDevices(mAttributionSource, recv);
                 return Attributable.setAttributionSource(
-                        service.getConnectedDevices(mAttributionSource), mAttributionSource);
+                        recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue),
+                        mAttributionSource);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return new ArrayList<BluetoothDevice>();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return new ArrayList<BluetoothDevice>();
         }
+        return defaultValue;
     }
 
     /**
@@ -469,19 +487,24 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     public @NonNull List<BluetoothDevice> getDevicesMatchingConnectionStates(
             @NonNull int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
-        try {
-            final IBluetoothLeAudio service = getService();
-            if (service != null && mAdapter.isEnabled()) {
+        final IBluetoothLeAudio service = getService();
+        final List<BluetoothDevice> defaultValue = new ArrayList<BluetoothDevice>();
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled()) {
+            try {
+                final SynchronousResultReceiver<List<BluetoothDevice>> recv =
+                        new SynchronousResultReceiver();
+                service.getDevicesMatchingConnectionStates(states, mAttributionSource, recv);
                 return Attributable.setAttributionSource(
-                        service.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                        recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue),
                         mAttributionSource);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return new ArrayList<BluetoothDevice>();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return new ArrayList<BluetoothDevice>();
         }
+        return defaultValue;
     }
 
     /**
@@ -493,18 +516,21 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @BtProfileState int getConnectionState(@NonNull BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
-        try {
-            final IBluetoothLeAudio service = getService();
-            if (service != null && mAdapter.isEnabled()
-                    && isValidDevice(device)) {
-                return service.getConnectionState(device, mAttributionSource);
+        final IBluetoothLeAudio service = getService();
+        final int defaultValue = BluetoothProfile.STATE_DISCONNECTED;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled() && isValidDevice(device)) {
+            try {
+                final SynchronousResultReceiver<Integer> recv = new SynchronousResultReceiver();
+                service.getConnectionState(device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return BluetoothProfile.STATE_DISCONNECTED;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return BluetoothProfile.STATE_DISCONNECTED;
         }
+        return defaultValue;
     }
 
     /**
@@ -531,19 +557,21 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean setActiveDevice(@Nullable BluetoothDevice device) {
         if (DBG) log("setActiveDevice(" + device + ")");
-        try {
-            final IBluetoothLeAudio service = getService();
-            if (service != null && mAdapter.isEnabled()
-                    && ((device == null) || isValidDevice(device))) {
-                service.setActiveDevice(device, mAttributionSource);
-                return true;
+        final IBluetoothLeAudio service = getService();
+        final boolean defaultValue = false;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled() && ((device == null) || isValidDevice(device))) {
+            try {
+                final SynchronousResultReceiver<Boolean> recv = new SynchronousResultReceiver();
+                service.setActiveDevice(device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return false;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return false;
         }
+        return defaultValue;
     }
 
     /**
@@ -557,19 +585,25 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getActiveDevices() {
-        if (VDBG) log("getActiveDevices()");
-        try {
-            final IBluetoothLeAudio service = getService();
-            if (service != null && mAdapter.isEnabled()) {
+        if (VDBG) log("getActiveDevice()");
+        final IBluetoothLeAudio service = getService();
+        final List<BluetoothDevice> defaultValue = new ArrayList<BluetoothDevice>();
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled()) {
+            try {
+                final SynchronousResultReceiver<List<BluetoothDevice>> recv =
+                        new SynchronousResultReceiver();
+                service.getActiveDevices(mAttributionSource, recv);
                 return Attributable.setAttributionSource(
-                        service.getActiveDevices(mAttributionSource), mAttributionSource);
+                        recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue),
+                        mAttributionSource);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return new ArrayList<>();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return new ArrayList<>();
         }
+        return defaultValue;
     }
 
     /**
@@ -583,17 +617,21 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getGroupId(@NonNull BluetoothDevice device) {
         if (VDBG) log("getGroupId()");
-        try {
-            final IBluetoothLeAudio service = getService();
-            if (service != null && mAdapter.isEnabled()) {
-                return service.getGroupId(device, mAttributionSource);
+        final IBluetoothLeAudio service = getService();
+        final int defaultValue = GROUP_ID_INVALID;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled()) {
+            try {
+                final SynchronousResultReceiver<Integer> recv = new SynchronousResultReceiver();
+                service.getGroupId(device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return GROUP_ID_INVALID;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return GROUP_ID_INVALID;
         }
+        return defaultValue;
     }
 
     /**
@@ -606,17 +644,18 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED})
     public void setVolume(int volume) {
         if (VDBG) log("setVolume(vol: " + volume + " )");
-        try {
-            final IBluetoothLeAudio service = getService();
-            if (service != null && mAdapter.isEnabled()) {
-                service.setVolume(volume, mAttributionSource);
-                return;
+        final IBluetoothLeAudio service = getService();
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled()) {
+            try {
+                final SynchronousResultReceiver recv = new SynchronousResultReceiver();
+                service.setVolume(volume, mAttributionSource, recv);
+                recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(null);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return;
         }
     }
 
@@ -635,16 +674,20 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     public boolean groupAddNode(int group_id, @NonNull BluetoothDevice device) {
         if (VDBG) log("groupAddNode()");
         final IBluetoothLeAudio service = getService();
-        try {
-            if (service != null && mAdapter.isEnabled()) {
-                return service.groupAddNode(group_id, device, mAttributionSource);
+        final boolean defaultValue = false;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled()) {
+            try {
+                final SynchronousResultReceiver<Boolean> recv = new SynchronousResultReceiver();
+                service.groupAddNode(group_id, device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return false;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return false;
         }
+        return defaultValue;
     }
 
     /**
@@ -663,16 +706,20 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     public boolean groupRemoveNode(int group_id, @NonNull BluetoothDevice device) {
         if (VDBG) log("groupRemoveNode()");
         final IBluetoothLeAudio service = getService();
-        try {
-            if (service != null && mAdapter.isEnabled()) {
-                return service.groupRemoveNode(group_id, device, mAttributionSource);
+        final boolean defaultValue = false;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled()) {
+            try {
+                final SynchronousResultReceiver<Boolean> recv = new SynchronousResultReceiver();
+                service.groupRemoveNode(group_id, device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return false;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return false;
         }
+        return defaultValue;
     }
 
     /**
@@ -695,22 +742,23 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
-        try {
-            final IBluetoothLeAudio service = getService();
-            if (service != null && mAdapter.isEnabled()
-                    && isValidDevice(device)) {
-                if (connectionPolicy != BluetoothProfile.CONNECTION_POLICY_FORBIDDEN
-                        && connectionPolicy != BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
-                    return false;
-                }
-                return service.setConnectionPolicy(device, connectionPolicy, mAttributionSource);
+        final IBluetoothLeAudio service = getService();
+        final boolean defaultValue = false;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled() && isValidDevice(device)
+                    && (connectionPolicy == BluetoothProfile.CONNECTION_POLICY_FORBIDDEN
+                        || connectionPolicy == BluetoothProfile.CONNECTION_POLICY_ALLOWED)) {
+            try {
+                final SynchronousResultReceiver<Boolean> recv = new SynchronousResultReceiver();
+                service.setConnectionPolicy(device, connectionPolicy, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return false;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return false;
         }
+        return defaultValue;
     }
 
     /**
@@ -728,18 +776,21 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @ConnectionPolicy int getConnectionPolicy(@Nullable BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
-        try {
-            final IBluetoothLeAudio service = getService();
-            if (service != null && mAdapter.isEnabled()
-                    && isValidDevice(device)) {
-                return service.getConnectionPolicy(device, mAttributionSource);
+        final IBluetoothLeAudio service = getService();
+        final int defaultValue = BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) log(Log.getStackTraceString(new Throwable()));
+        } else if (mAdapter.isEnabled() && isValidDevice(device)) {
+            try {
+                final SynchronousResultReceiver<Integer> recv = new SynchronousResultReceiver();
+                service.getConnectionPolicy(device, mAttributionSource, recv);
+                return recv.awaitResultNoInterrupt(getSyncTimeout()).getValue(defaultValue);
+            } catch (RemoteException | TimeoutException e) {
+                Log.e(TAG, e.toString() + "\n" + Log.getStackTraceString(new Throwable()));
             }
-            if (service == null) Log.w(TAG, "Proxy not attached to service");
-            return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
         }
+        return defaultValue;
     }
 
 

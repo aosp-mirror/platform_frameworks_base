@@ -3638,6 +3638,9 @@
              to re-retrieve all resources (including view layouts, drawables, etc)
              to correctly handle any configuration change.-->
         <attr name="configChanges" />
+        <!-- Specifies whether the IME supports Handwriting using stylus. Defaults to false. -->
+        <attr name="supportsStylusHandwriting" format="boolean" />
+
     </declare-styleable>
 
     <!-- This is the subtype of InputMethod. Subtype can describe locales (for example, en_US and

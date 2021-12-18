@@ -22,6 +22,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -191,10 +192,42 @@ public final class AttributionSource implements Parcelable {
         return new ScopedParcelState(this);
     }
 
-    /** @hide */
-    public static AttributionSource myAttributionSource() {
-        return new AttributionSource(Process.myUid(), ActivityThread.currentOpPackageName(),
-                /*attributionTag*/ null, (String[]) /*renouncedPermissions*/ null, /*next*/ null);
+    /**
+     * Returns a generic {@link AttributionSource} that represents the entire
+     * calling process.
+     *
+     * <p>Callers are <em>strongly</em> encouraged to use a more specific
+     * attribution source whenever possible, such as from
+     * {@link Context#getAttributionSource()}, since that enables developers to
+     * have more detailed and scoped control over attribution within
+     * sub-components of their app.
+     *
+     * @see Context#createAttributionContext(String)
+     * @see Context#getAttributionTag()
+     * @return a generic {@link AttributionSource} representing the entire
+     *         calling process
+     * @throws IllegalStateException when no accurate {@link AttributionSource}
+     *         can be determined
+     */
+    public static @NonNull AttributionSource myAttributionSource() {
+
+        final AttributionSource globalSource = ActivityThread.currentAttributionSource();
+        if (globalSource != null) {
+            return globalSource;
+        }
+
+        int uid = Process.myUid();
+        if (uid == Process.ROOT_UID) {
+            uid = Process.SYSTEM_UID;
+        }
+        try {
+            return new AttributionSource.Builder(uid)
+                .setPackageName(AppGlobals.getPackageManager().getPackagesForUid(uid)[0])
+                .build();
+        } catch (Exception ignored) {
+        }
+
+        throw new IllegalStateException("Failed to resolve AttributionSource");
     }
 
     /**
@@ -247,7 +280,7 @@ public final class AttributionSource implements Parcelable {
      * whether the attribution source is one for the calling app to prevent the caller
      * to pass you a source from another app without including themselves in the
      * attribution chain.
-     *f
+     *
      * @return if the attribution source cannot be trusted to be from the caller.
      */
     public boolean checkCallingUid() {

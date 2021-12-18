@@ -214,6 +214,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         // THEN the session is created
         verify(smartspaceManager).createSmartspaceSession(any())
+        // THEN an event notifier is registered
+        verify(plugin).registerSmartspaceEventNotifier(any())
     }
 
     @Test
@@ -241,7 +243,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testEmptyListIsEmittedAfterDisconnect() {
+    fun testEmptyListIsEmittedAndNotifierRemovedAfterDisconnect() {
         // GIVEN a registered listener on an active session
         connectSession()
         clearInvocations(plugin)
@@ -250,8 +252,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         controller.stateChangeListener.onViewDetachedFromWindow(smartspaceView as View)
         controller.disconnect()
 
-        // THEN the listener receives an empty list of targets
+        // THEN the listener receives an empty list of targets and unregisters the notifier
         verify(plugin).onTargetsAvailable(emptyList())
+        verify(plugin).registerSmartspaceEventNotifier(null)
     }
 
     @Test

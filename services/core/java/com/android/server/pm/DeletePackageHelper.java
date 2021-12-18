@@ -236,7 +236,9 @@ final class DeletePackageHelper {
         if (res) {
             final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
             info.sendPackageRemovedBroadcasts(killApp, removedBySystem);
-            info.sendSystemPackageUpdatedBroadcasts();
+            if (disabledSystemPs != null) {
+                info.sendSystemPackageUpdatedBroadcasts(disabledSystemPs.getAppId());
+            }
         }
         // Force a gc here.
         Runtime.getRuntime().gc();
@@ -591,6 +593,7 @@ final class DeletePackageHelper {
         if (outInfo != null) {
             // Delete the updated package
             outInfo.mIsRemovedPackageSystemUpdate = true;
+            outInfo.mAppIdChanging = disabledPs.getAppId() != deletedPs.getAppId();
         }
 
         if (disabledPs.getVersionCode() < deletedPs.getVersionCode()

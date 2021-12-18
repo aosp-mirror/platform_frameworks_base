@@ -5112,6 +5112,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 assertTrue(expected.containsKey(uid));
                 assertThat(expected.get(uid)).isEqualTo(
                             builder.getInt(PackageNotificationPreferences.IMPORTANCE_FIELD_NUMBER));
+
+                // pre-migration, the userSet field will always default to false
+                boolean userSet = builder.getBoolean(
+                        PackageNotificationPreferences.USER_SET_IMPORTANCE_FIELD_NUMBER);
+                assertFalse(userSet);
             }
         }
     }
@@ -5123,8 +5128,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // build a collection of app permissions that should be passed in but ignored
         ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
         appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
+        appPermissions.put(new Pair(3, "third"), new Pair(false, true));   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, true)); // in local prefs
 
         // package preferences: PKG_O not banned based on local importance, and PKG_P is
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
@@ -5132,11 +5137,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         // expected output. format: uid -> importance, as only uid (and not package name)
         // is in PackageNotificationPreferences
-        ArrayMap<Integer, Integer> expected = new ArrayMap<>();
-        expected.put(1, IMPORTANCE_DEFAULT);
-        expected.put(3, IMPORTANCE_NONE);
-        expected.put(UID_O, IMPORTANCE_NONE);    // banned by permissions
-        expected.put(UID_P, IMPORTANCE_NONE);    // defaults to none
+        ArrayMap<Integer, Pair<Integer, Boolean>> expected = new ArrayMap<>();
+        expected.put(1, new Pair(IMPORTANCE_DEFAULT, false));
+        expected.put(3, new Pair(IMPORTANCE_NONE, true));
+        expected.put(UID_O, new Pair(IMPORTANCE_NONE, true));     // banned by permissions
+        expected.put(UID_P, new Pair(IMPORTANCE_NONE, false));    // defaults to none, false
 
         ArrayList<StatsEvent> events = new ArrayList<>();
         mHelper.pullPackagePreferencesStats(events, appPermissions);
@@ -5144,11 +5149,14 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
             if (builder.getAtomId() == PACKAGE_NOTIFICATION_PREFERENCES) {
                 int uid = builder.getInt(PackageNotificationPreferences.UID_FIELD_NUMBER);
+                boolean userSet = builder.getBoolean(
+                        PackageNotificationPreferences.USER_SET_IMPORTANCE_FIELD_NUMBER);
 
                 // if it's one of the expected ids, then make sure the importance matches
                 assertTrue(expected.containsKey(uid));
-                assertThat(expected.get(uid)).isEqualTo(
+                assertThat(expected.get(uid).first).isEqualTo(
                         builder.getInt(PackageNotificationPreferences.IMPORTANCE_FIELD_NUMBER));
+                assertThat(expected.get(uid).second).isEqualTo(userSet);
             }
         }
     }
