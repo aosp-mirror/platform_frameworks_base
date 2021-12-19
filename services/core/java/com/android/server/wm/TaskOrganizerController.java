@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.TaskInfo.cameraCompatControlStateToString;
+
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
@@ -924,6 +926,35 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 final ActivityRecord activity = task.getTopNonFinishingActivity();
                 if (activity != null) {
                     activity.restartProcessIfVisible();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void updateCameraCompatControlState(WindowContainerToken token, int state) {
+        enforceTaskPermission("updateCameraCompatControlState()");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final WindowContainer wc = WindowContainer.fromBinder(token.asBinder());
+                if (wc == null) {
+                    Slog.w(TAG, "Could not resolve window from token");
+                    return;
+                }
+                final Task task = wc.asTask();
+                if (task == null) {
+                    Slog.w(TAG, "Could not resolve task from token");
+                    return;
+                }
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
+                        "Update camera compat control state to %s for taskId=%d",
+                        cameraCompatControlStateToString(state), task.mTaskId);
+                final ActivityRecord activity = task.getTopNonFinishingActivity();
+                if (activity != null) {
+                    activity.updateCameraCompatStateFromUser(state);
                 }
             }
         } finally {
