@@ -16,6 +16,11 @@
 
 package com.android.wm.shell.compatui;
 
+import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
+import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.mockito.Mockito.doNothing;
@@ -69,7 +74,7 @@ public class CompatUILayoutTest extends ShellTestCase {
 
         mWindowManager = new CompatUIWindowManager(mContext, new Configuration(),
                 mSyncTransactionQueue, mCallback, TASK_ID, mTaskListener, new DisplayLayout(),
-                false /* hasShownHint */);
+                false /* hasShownSizeCompatHint */, false /* hasShownCameraCompatHint */);
 
         mCompatUILayout = (CompatUILayout)
                 LayoutInflater.from(mContext).inflate(R.layout.compat_ui_layout, null);
@@ -78,6 +83,7 @@ public class CompatUILayoutTest extends ShellTestCase {
         spyOn(mWindowManager);
         spyOn(mCompatUILayout);
         doReturn(mViewHost).when(mWindowManager).createSurfaceViewHost();
+        doReturn(mCompatUILayout).when(mWindowManager).inflateCompatUILayout();
     }
 
     @Test
@@ -86,7 +92,6 @@ public class CompatUILayoutTest extends ShellTestCase {
         button.performClick();
 
         verify(mWindowManager).onRestartButtonClicked();
-        doReturn(mCompatUILayout).when(mWindowManager).inflateCompatUILayout();
         verify(mCallback).onSizeCompatRestartButtonClicked(TASK_ID);
     }
 
@@ -102,10 +107,92 @@ public class CompatUILayoutTest extends ShellTestCase {
 
     @Test
     public void testOnClickForSizeCompatHint() {
-        mWindowManager.createLayout(true /* show */);
+        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_HIDDEN);
         final LinearLayout sizeCompatHint = mCompatUILayout.findViewById(R.id.size_compat_hint);
         sizeCompatHint.performClick();
 
         verify(mCompatUILayout).setSizeCompatHintVisibility(/* show= */ false);
+    }
+
+    @Test
+    public void testUpdateCameraTreatmentButton_treatmentAppliedByDefault() {
+        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
+        final ImageButton button =
+                mCompatUILayout.findViewById(R.id.camera_compat_treatment_button);
+        button.performClick();
+
+        verify(mWindowManager).onCameraTreatmentButtonClicked();
+        verify(mCallback).onCameraControlStateUpdated(
+                TASK_ID, CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+
+        button.performClick();
+
+        verify(mCallback).onCameraControlStateUpdated(
+                TASK_ID, CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
+    }
+
+    @Test
+    public void testUpdateCameraTreatmentButton_treatmentSuggestedByDefault() {
+        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        final ImageButton button =
+                mCompatUILayout.findViewById(R.id.camera_compat_treatment_button);
+        button.performClick();
+
+        verify(mWindowManager).onCameraTreatmentButtonClicked();
+        verify(mCallback).onCameraControlStateUpdated(
+                TASK_ID, CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
+
+        button.performClick();
+
+        verify(mCallback).onCameraControlStateUpdated(
+                TASK_ID, CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+    }
+
+    @Test
+    public void testOnCameraDismissButtonClicked() {
+        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        final ImageButton button =
+                mCompatUILayout.findViewById(R.id.camera_compat_dismiss_button);
+        button.performClick();
+
+        verify(mWindowManager).onCameraDismissButtonClicked();
+        verify(mCallback).onCameraControlStateUpdated(
+                TASK_ID, CAMERA_COMPAT_CONTROL_DISMISSED);
+        verify(mCompatUILayout).setCameraControlVisibility(/* show */ false);
+    }
+
+    @Test
+    public void testOnLongClickForCameraTreatementButton() {
+        doNothing().when(mWindowManager).onCameraButtonLongClicked();
+
+        final ImageButton button =
+                mCompatUILayout.findViewById(R.id.camera_compat_treatment_button);
+        button.performLongClick();
+
+        verify(mWindowManager).onCameraButtonLongClicked();
+    }
+
+    @Test
+    public void testOnLongClickForCameraDismissButton() {
+        doNothing().when(mWindowManager).onCameraButtonLongClicked();
+
+        final ImageButton button = mCompatUILayout.findViewById(R.id.camera_compat_dismiss_button);
+        button.performLongClick();
+
+        verify(mWindowManager).onCameraButtonLongClicked();
+    }
+
+    @Test
+    public void testOnClickForCameraCompatHint() {
+        mWindowManager.createLayout(true /* show */, false /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        final LinearLayout hint = mCompatUILayout.findViewById(R.id.camera_compat_hint);
+        hint.performClick();
+
+        verify(mCompatUILayout).setCameraCompatHintVisibility(/* show= */ false);
     }
 }
