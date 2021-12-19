@@ -458,7 +458,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 newListener.onTaskInfoChanged(taskInfo);
             }
             notifyLocusVisibilityIfNeeded(taskInfo);
-            if (updated || !taskInfo.equalsForSizeCompat(data.getTaskInfo())) {
+            if (updated || !taskInfo.equalsForCompatUi(data.getTaskInfo())) {
                 // Notify the compat UI if the listener or task info changed.
                 notifyCompatUI(taskInfo, newListener);
             }
@@ -607,6 +607,19 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         restartTaskTopActivityProcessIfVisible(info.getTaskInfo().token);
     }
 
+    @Override
+    public void onCameraControlStateUpdated(
+            int taskId, @TaskInfo.CameraCompatControlState int state) {
+        final TaskAppearedInfo info;
+        synchronized (mLock) {
+            info = mTasks.get(taskId);
+        }
+        if (info == null) {
+            return;
+        }
+        updateCameraCompatControlState(info.getTaskInfo().token, state);
+    }
+
     private void logSizeCompatRestartButtonEventReported(@NonNull TaskAppearedInfo info,
             int event) {
         ActivityInfo topActivityInfo = info.getTaskInfo().topActivityInfo;
@@ -633,14 +646,11 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         // The task is vanished or doesn't support compat UI, notify to remove compat UI
         // on this Task if there is any.
         if (taskListener == null || !taskListener.supportCompatUI()
-                || !taskInfo.topActivityInSizeCompat || !taskInfo.isVisible) {
-            mCompatUI.onCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
-                    null /* taskConfig */, null /* taskListener */);
+                || !taskInfo.hasCompatUI() || !taskInfo.isVisible) {
+            mCompatUI.onCompatInfoChanged(taskInfo, null /* taskListener */);
             return;
         }
-
-        mCompatUI.onCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
-                taskInfo.configuration, taskListener);
+        mCompatUI.onCompatInfoChanged(taskInfo, taskListener);
     }
 
     private TaskListener getTaskListener(RunningTaskInfo runningTaskInfo) {
