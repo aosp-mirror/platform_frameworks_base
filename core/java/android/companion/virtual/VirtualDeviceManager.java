@@ -25,6 +25,8 @@ import android.annotation.SystemService;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
+import android.companion.virtual.audio.VirtualAudioDevice;
+import android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Point;
@@ -336,6 +338,30 @@ public final class VirtualDeviceManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+
+        /**
+         * Creates a VirtualAudioDevice, capable of recording audio emanating from this device,
+         * or injecting audio from another device.
+         *
+         * <p>Note: This object does not support capturing privileged playback, such as voice call
+         * audio.
+         *
+         * @param display The target virtual display to capture from and inject into.
+         * @param executor The {@link Executor} object for the thread on which to execute
+         *                the callback. If <code>null</code>, the {@link Executor} associated with
+         *                the main {@link Looper} will be used.
+         * @param callback Interface to be notified when playback or recording configuration of
+         *                applications running on virtual display is changed.
+         * @return A {@link VirtualAudioDevice} instance.
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        public VirtualAudioDevice createVirtualAudioDevice(
+                @NonNull VirtualDisplay display,
+                @Nullable Executor executor,
+                @Nullable AudioConfigurationChangeCallback callback) {
+            return new VirtualAudioDevice(mContext, mVirtualDevice, display, executor, callback);
         }
 
         /**

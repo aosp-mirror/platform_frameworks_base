@@ -2750,6 +2750,7 @@ package android.companion.virtual {
     method public void addActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
     method public void addActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener, @NonNull java.util.concurrent.Executor);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
+    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.audio.VirtualAudioDevice createVirtualAudioDevice(@NonNull android.hardware.display.VirtualDisplay, @Nullable java.util.concurrent.Executor, @Nullable android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback);
     method @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(int, int, int, @Nullable android.view.Surface, int, @Nullable android.os.Handler, @Nullable android.hardware.display.VirtualDisplay.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualKeyboard createVirtualKeyboard(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
@@ -2778,6 +2779,39 @@ package android.companion.virtual {
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@Nullable java.util.Set<android.content.ComponentName>);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setUsersWithMatchingAccounts(@NonNull java.util.Set<android.os.UserHandle>);
+  }
+
+}
+
+package android.companion.virtual.audio {
+
+  public final class AudioCapture {
+    ctor public AudioCapture();
+    method public int getRecordingState();
+    method public int read(@NonNull java.nio.ByteBuffer, int);
+    method public void startRecording();
+    method public void stop();
+  }
+
+  public final class AudioInjection {
+    ctor public AudioInjection();
+    method public int getPlayState();
+    method public void play();
+    method public void stop();
+    method public int write(@NonNull java.nio.ByteBuffer, int, int);
+  }
+
+  public final class VirtualAudioDevice implements java.io.Closeable {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void close();
+    method @Nullable public android.companion.virtual.audio.AudioCapture getAudioCapture();
+    method @Nullable public android.companion.virtual.audio.AudioInjection getAudioInjection();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.companion.virtual.audio.AudioCapture startAudioCapture(@NonNull android.media.AudioFormat);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.companion.virtual.audio.AudioInjection startAudioInjection(@NonNull android.media.AudioFormat);
+  }
+
+  public static interface VirtualAudioDevice.AudioConfigurationChangeCallback {
+    method public void onPlaybackConfigChanged(@NonNull java.util.List<android.media.AudioPlaybackConfiguration>);
+    method public void onRecordingConfigChanged(@NonNull java.util.List<android.media.AudioRecordingConfiguration>);
   }
 
 }
