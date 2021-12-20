@@ -333,7 +333,7 @@ public class DreamService extends Service implements Window.Callback {
     public boolean dispatchTouchEvent(MotionEvent event) {
         // TODO: create more flexible version of mInteractive that allows clicks
         // but finish()es on any other kind of activity
-        if (!mInteractive) {
+        if (!mInteractive && event.getActionMasked() == MotionEvent.ACTION_UP) {
             if (mDebug) Slog.v(TAG, "Waking up on touchEvent");
             wakeUp();
             return true;
