@@ -61,6 +61,11 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_T
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_WARM_LAUNCH;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
+import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_APPLY_TREATMENT;
+import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_REVERT_TREATMENT;
+import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_APPLY_TREATMENT;
+import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_DISMISS;
+import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_REVERT_TREATMENT;
 import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_METRICS;
@@ -73,6 +78,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.ActivityOptions.SourceInfo;
+import android.app.TaskInfo;
+import android.app.TaskInfo.CameraCompatControlState;
 import android.app.WaitResult;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.ComponentName;
@@ -1374,6 +1381,71 @@ class ActivityMetricsLogger {
 
         if (DEBUG_METRICS) {
             Slog.i(TAG, String.format("APP_COMPAT_STATE_CHANGED(%s, %s)", packageUid, state));
+        }
+    }
+
+    /**
+     * Logs the Camera Compat Control appeared event that corresponds to the given {@code state}
+     * with the given {@code packageUid}.
+     */
+    void logCameraCompatControlAppearedEventReported(@CameraCompatControlState int state,
+            int packageUid) {
+        switch (state) {
+            case TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED:
+                logCameraCompatControlEventReported(
+                        CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_APPLY_TREATMENT,
+                        packageUid);
+                break;
+            case TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED:
+                logCameraCompatControlEventReported(
+                        CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_REVERT_TREATMENT,
+                        packageUid);
+                break;
+            case TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN:
+                // Nothing to log.
+                break;
+            default:
+                Slog.w(TAG, "Unexpected state in logCameraCompatControlAppearedEventReported: "
+                        + state);
+                break;
+        }
+    }
+
+    /**
+     * Logs the Camera Compat Control clicked event that corresponds to the given {@code state}
+     * with the given {@code packageUid}.
+     */
+    void logCameraCompatControlClickedEventReported(@CameraCompatControlState int state,
+            int packageUid) {
+        switch (state) {
+            case TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED:
+                logCameraCompatControlEventReported(
+                        CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_APPLY_TREATMENT,
+                        packageUid);
+                break;
+            case TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED:
+                logCameraCompatControlEventReported(
+                        CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_REVERT_TREATMENT,
+                        packageUid);
+                break;
+            case TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED:
+                logCameraCompatControlEventReported(
+                        CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_DISMISS,
+                        packageUid);
+                break;
+            default:
+                Slog.w(TAG, "Unexpected state in logCameraCompatControlAppearedEventReported: "
+                        + state);
+                break;
+        }
+    }
+
+    private void logCameraCompatControlEventReported(int event, int packageUid) {
+        FrameworkStatsLog.write(FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED, packageUid,
+                event);
+        if (DEBUG_METRICS) {
+            Slog.i(TAG, String.format("CAMERA_COMPAT_CONTROL_EVENT_REPORTED(%s, %s)", packageUid,
+                    event));
         }
     }
 
