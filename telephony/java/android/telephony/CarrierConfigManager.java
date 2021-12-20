@@ -37,6 +37,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.service.carrier.CarrierService;
 import android.telecom.TelecomManager;
+import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.data.DataCallResponse;
 import android.telephony.gba.TlsParams;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
@@ -4831,6 +4832,2103 @@ public class CarrierConfigManager {
     }
 
     /**
+     * IMS Voice configs. This groups the configs required for IMS Voice - VoNR/VoLTE
+     *
+     * <p>Reference: IR.92
+     */
+    public static final class ImsVoice {
+        private ImsVoice() {}
+
+        /** Prefix of all imsvoice.KEY_* constants. */
+        public static final String KEY_PREFIX = "imsvoice.";
+
+        /**
+         * Flag specifying whether VoLTE should be available when on
+         * roaming network.
+         *
+         * <p>If {@code false}: hard disabled.
+         * If {@code true}: then depends on availability, etc.
+         */
+        public static final String KEY_CARRIER_VOLTE_ROAMING_AVAILABLE_BOOL  =
+                KEY_PREFIX + "carrier_volte_roaming_available_bool";
+
+        /**
+         * Flag specifying whether to send vertical caller id service codes
+         * (*67 and *82) in the dialed string in the SIP:INVITE.
+         *
+         * <p>If {@code true}, vertical caller id service codes *67 and *82
+         * will be sent in the dialed string in the SIP:INVITE.
+         * If {@code false}, *67 and *82 will be removed.
+         */
+        public static final String KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL  =
+                KEY_PREFIX + "include_caller_id_service_codes_in_sip_invite_bool";
+
+        /**
+         * Flag indicating whether Multi-end point setting is enabled or not.
+         */
+        public static final String KEY_MULTIENDPOINT_SUPPORTED_BOOL =
+                KEY_PREFIX + "multiendpoint_supported_bool";
+
+        /**
+         * Flag indicating whether Supported header field with the option tag
+         *  'timer' is enabled or not.
+         *
+         * <p>If {@code true}, session timer support is available.{@code false} otherwise.
+         *
+         * Reference: RFC 4028 Section 3
+         */
+        public static final String KEY_SESSION_TIMER_SUPPORTED_BOOL =
+                KEY_PREFIX + "session_timer_supported_bool";
+
+        /**
+         * Session-expires header field expressed in seconds as per
+         * RFC 4028 Section 3.
+         *
+         * <p>This establishes the upper bound for the session refresh interval.
+         */
+        public static final String KEY_SESSION_EXPIRES_TIMER_SEC_INT =
+                KEY_PREFIX + "session_expires_timer_sec_int";
+
+        /**
+         * Indicates the minimum value for the session interval in seconds.
+         * Represented as min-SE header field as per RFC 4028 Section 3.
+         *
+         * <p>This establishes the lower bound for the session refresh interval.
+         */
+        public static final String KEY_MINIMUM_SESSION_EXPIRES_TIMER_SEC_INT =
+                KEY_PREFIX + "minimum_session_expires_timer_sec_int";
+
+        /** @hide */
+        @IntDef({
+            SESSION_REFRESHER_TYPE_UNKNOWN,
+            SESSION_REFRESHER_TYPE_UAC,
+            SESSION_REFRESHER_TYPE_UAS
+        })
+
+        public @interface SessionRefresherType {}
+
+        /**
+         * Session Refresher entity is unknown. This means UE does not include the
+         * "refresher" parameter in the Session-Expires header field of
+         * the SIP INVITE request.
+         */
+        public static final int SESSION_REFRESHER_TYPE_UNKNOWN = 0;
+
+        /**
+         * Session Refresher entity is User Agent Client (UAC).
+         *
+         * <p>Type of "refresher" parameter in the Session-Expires header field
+         * of the SIP INVITE request is UAC.
+         */
+        public static final int SESSION_REFRESHER_TYPE_UAC = 1;
+
+        /**
+         * Session Refresher entity is User Agent Server (UAS).
+         *
+         * <p>Type of "refresher" parameter in the Session-Expires header field
+         * of the SIP INVITE request is UAS.
+         */
+        public static final int SESSION_REFRESHER_TYPE_UAS = 2;
+
+        /**
+         * Session Refresher entity as per RFC 4028 and IR.92 Section 2.2.8.
+         *
+         * <p>This determines,
+         * a) whether to include the "refresher" parameter
+         * b) Type of refresher" parameter
+         * in the Session-Expires header field of the SIP INVITE request.
+         *
+         * <p>Possible values are,
+         * {@link #SESSION_REFRESHER_TYPE_UNKNOWN},
+         * {@link #SESSION_REFRESHER_TYPE_UAC},
+         * {@link #SESSION_REFRESHER_TYPE_UAS}
+         */
+        public static final String KEY_SESSION_REFRESHER_TYPE_INT =
+                KEY_PREFIX + "session_refresher_type_int";
+
+        /**
+         * Flag indicating whether PRACK must be enabled for all 18x messages.
+         *
+         * <p>If {@code false}, only 18x responses with SDP are sent reliably.
+         * If {@code true},  SIP 18x responses (other than SIP 183 response)
+         * are sent reliably.
+         */
+        public static final String KEY_PRACK_SUPPORTED_FOR_18X_BOOL  =
+                KEY_PREFIX + "prack_supported_for_18x_bool";
+
+        /** @hide */
+        @IntDef({
+            CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG,
+            CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG
+        })
+
+        public @interface ConferenceSubscribeType {}
+
+        /**
+         * The SIP SUBSCRIBE to conference state events is sent in the
+         * SIP INVITE dialog between the UE and the conference server.
+         *
+         * <p>Reference: IR.92 Section 2.3.3.
+         */
+        public static final int CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG = 0;
+
+        /**
+         * The SIP SUBSCRIBE to conference state events is sent out of
+         * the SIP INVITE dialog between the UE and the conference server.
+         *
+         * <p>Reference: IR.92 Section 2.3.3.
+         */
+        public static final int CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG = 1;
+
+        /**
+         * This is used to specify whether the SIP SUBSCRIBE to conference state events,
+         * is sent in or out of the  SIP INVITE dialog between the UE and the
+         * conference server.
+         *
+         * <p>Reference: IR.92 Section 2.3.3.
+         *
+         * <p>Possible values are,
+         * {@link #CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG},
+         * {@link #CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG}
+         *
+         * An empty array indicates SUBSCRIBE to conference event package
+         * is not required.
+         */
+        public static final String KEY_CONFERENCE_SUBSCRIBE_TYPE_INT =
+                KEY_PREFIX + "conference_subscribe_type_int";
+
+        /**
+         * Flag specifying whether QoS preconditions are supported during call setup.
+         *
+         * <p>If {@code true}: QoS Preconditions are supported during call setup and
+         * 'precondition' tag is included in the SIP INVITE header and precondition
+         * parameters are sent in SDP as required.
+         * <p>If {@code false}: QoS Preconditions are not supported during call setup.
+         *
+         * <p>Reference: 3GPP TS 24.229
+         */
+        public static final String KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL  =
+                KEY_PREFIX + "voice_qos_precondition_supported_bool";
+
+        /**
+         * Flag specifying whether voice is allowed on default bearer.
+         *
+         * <p>If {@code true}: voice packets can be sent on default bearer. {@code false} otherwise.
+         */
+        public static final String KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL  =
+                KEY_PREFIX + "voice_on_default_bearer_supported_bool";
+
+        /**
+         * Specifies the dedicated bearer wait time during call establishment.
+         *
+         * <p>If dedicated bearer is not established within this time and if
+         * {@link #KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL} is false, then call setup would fail.
+         * <p>If dedicated bearer is not established within this time and if
+         * {@link #KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL} is true, then the media is allowed
+         * on default bearer.
+         */
+        public static final String KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT =
+                KEY_PREFIX + "dedicated_bearer_wait_timer_millis_int";
+
+        /** @hide */
+        @IntDef({
+            BASIC_SRVCC_SUPPORT,
+            ALERTING_SRVCC_SUPPORT,
+            PREALERTING_SRVCC_SUPPORT,
+            MIDCALL_SRVCC_SUPPORT
+        })
+
+        public @interface SrvccType {}
+
+        /**
+         * Indicates support for basic SRVCC, typically 1 active call
+         * as detailed in IR.92 Section A.3.
+         */
+        public static final int BASIC_SRVCC_SUPPORT = 0;
+
+        /**
+         * SRVCC access transfer for calls in alerting phase as per 3GPP 24.237
+         * and IR.64 Section 4.4.
+         * Media feature tag used: g.3gpp.srvcc-alerting.
+         */
+        public static final int ALERTING_SRVCC_SUPPORT = 1;
+
+        /**
+         * SRVCC access transfer for calls in pre-alerting phase as per 3GPP 24.237.
+         * Media feature tag used: g.3gpp.ps2cs-srvcc-orig-pre-alerting.
+         */
+        public static final int PREALERTING_SRVCC_SUPPORT = 2;
+
+        /**
+         * SRVCC access transfer for calls in mid-call phase as per 3GPP 24.237.
+         * and IR.64 Section 4.4.
+         * <p>This means UE supports the MSC server assisted mid-call feature.
+         * Media feature tag used: g.3gpp.mid-call.
+         */
+        public static final int MIDCALL_SRVCC_SUPPORT = 3;
+
+        /**
+         * List of different SRVCC types supported as defined in 3GPP 24.237.
+         *
+         * <p> Possible values are,
+         * {@link #BASIC_SRVCC_SUPPORT},
+         * {@link #ALERTING_SRVCC_SUPPORT},
+         * {@link #PREALERTING_SRVCC_SUPPORT},
+         * {@link #MIDCALL_SRVCC_SUPPORT}
+         *
+         * <p> Reference: IR.64, 3GPP 24.237, 3GPP 23.216
+         */
+        public static final String KEY_SRVCC_TYPE_INT_ARRAY =
+                KEY_PREFIX + "srvcc_type_int_array";
+
+        /**
+         * Specifies the ringing timer for Mobile terminated calls.
+         *
+         * <p>Ringing timer starts when the device sends SIP 180 Ringing in
+         * response to a received SIP INVITE. If Ringing timer expires,
+         * the device sends SIP 486 response.
+         */
+        public static final String KEY_RINGING_TIMER_MILLIS_INT =
+                KEY_PREFIX + "ringing_timer_millis_int";
+
+        /**
+         * Specifies the ringback timer for Mobile originated calls.
+         *
+         * <p>Ringback timer starts when the device receives SIP 180 Ringing
+         * in response to its SIP INVITE. If Ringback timer expires,
+         * the device sends SIP CANCEL.
+         */
+        public static final String KEY_RINGBACK_TIMER_MILLIS_INT =
+                KEY_PREFIX + "ringback_timer_millis_int";
+
+        /**
+         * Specifies the timeout value for RTP inactivity for audio media.
+         * <p>On timer expiry, call will end.
+         * See {@link #KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY} for more
+         * details.
+         * <p> Value of 0 means this timer is not enabled.
+         */
+        public static final String KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT =
+                KEY_PREFIX + "audio_rtp_inactivity_timer_millis_int";
+
+        /**
+         * Specifies the timeout value for RTCP inactivity for audio media.
+         * <p>On timer expiry, call will end.
+         * See {@link #KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY} for more
+         * details.
+         * <p> Value of 0 means this timer is not enabled.
+         */
+        public static final String KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT =
+                KEY_PREFIX + "audio_rtcp_inactivity_timer_millis_int";
+
+        /**
+         * Used to specify the conference factory URI.
+         *
+         * <p>If this is empty, then conference URI is generated from MCC/MNC as
+         * specified in clause 13.10 of 3GPP 23.003.
+         */
+        public static final String KEY_CONFERENCE_FACTORY_URI_STRING =
+                KEY_PREFIX + "conference_factory_uri_string";
+
+        /** @hide */
+        @IntDef({
+            SESSION_REFRESH_METHOD_INVITE,
+            SESSION_REFRESH_METHOD_UPDATE_PREFERRED
+        })
+
+        public @interface SessionRefreshMethod {}
+
+        /**
+         * SIP INVITE is used for Session Refresh
+         */
+        public static final int SESSION_REFRESH_METHOD_INVITE = 0;
+
+        /**
+         * Both SIP INVITE and UPDATE are used for session refresh.
+         *
+         * <p>SIP UPDATE will be used if UPDATE is in 'Allow' header.
+         * If UPDATE is not in 'Allow' header, then INVITE will be used.
+         */
+        public static final int SESSION_REFRESH_METHOD_UPDATE_PREFERRED = 1;
+
+        /**
+         * This is used to specify the method used for session refresh.
+         *
+         * <p>Possible values are,
+         * {@link #SESSION_REFRESH_METHOD_INVITE},
+         * {@link #SESSION_REFRESH_METHOD_UPDATE_PREFERRED}
+         */
+        public static final String KEY_SESSION_REFRESH_METHOD_INT =
+                KEY_PREFIX + "session_refresh_method_int";
+
+        /**
+         * Flag specifying whether the 'From' header field is used for determination of
+         * the originating party identity in Originating Identification Presentation(OIP)
+         * service.
+         *
+         * <p>If {@code true}: Indicates that the 'From' header field is used for
+         * determination of the originating party identity in OIP.
+         * {@code false} otherwise.
+         */
+        public static final String KEY_OIP_SOURCE_FROM_HEADER_BOOL  =
+                KEY_PREFIX + "oip_source_from_header_bool";
+
+        /**
+         * Specifies the timer value for INVITE to the first 1xx response
+         * (including 100 trying). If no response is received at timer expiry,
+         * call is redialed over CS.
+         *
+         * <p> Reference: 24.173 Table L.1
+         */
+        public static final String KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT =
+                KEY_PREFIX + "mo_call_request_timeout_millis_int";
+
+        /**
+         * List of various reasons of media inactivity for which
+         * voice/emergency call will end.
+         *
+         * <p>Possible values are,
+         * {@link Ims#RTCP_INACTIVITY_ON_HOLD},
+         * {@link Ims#RTCP_INACTIVITY_ON_CONNECTED},
+         * {@link Ims#RTP_INACTIVITY_ON_CONNECTED}
+         * {@link Ims#E911_RTCP_INACTIVITY_ON_CONNECTED},
+         * {@link Ims#E911_RTP_INACTIVITY_ON_CONNECTED}
+         */
+        public static final String KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY =
+                KEY_PREFIX + "audio_inactivity_call_end_reasons_int_array";
+
+        /**
+         * Specifies the AS (Application Specific) SDP modifier for audio media.
+         *
+         * <p>This value is expressed in kilobits per second.
+         * Reference: RFC 3556 Section 2.
+         */
+        public static final String KEY_AUDIO_AS_BANDWIDTH_KBPS_INT =
+                KEY_PREFIX + "audio_as_bandwidth_kbps_int";
+
+        /**
+         * Specifies the RS SDP modifier for audio media. This indicates the RTCP
+         * bandwidth allocated to active data senders for audio media.
+         *
+         * <p>This value is expressed in bits per second.
+         * Reference: RFC 3556 Section 2.
+         */
+        public static final String KEY_AUDIO_RS_BANDWIDTH_BPS_INT =
+                KEY_PREFIX + "audio_rs_bandwidth_bps_int";
+
+        /**
+         * Specifies the RR SDP modifier for audio media. This indicates the RTCP
+         * bandwidth allocated to receivers for audio media.
+         *
+         * <p>This value is expressed in bits per second.
+         * Reference: RFC 3556 Section 2.
+         */
+        public static final String KEY_AUDIO_RR_BANDWIDTH_BPS_INT =
+                KEY_PREFIX + "audio_rr_bandwidth_bps_int";
+
+        /**
+         * Specifies the Audio Codec capability. This contains a list of payload types
+         * representing different audio codec instances.
+         *
+         * <p> The priority of the codecs is EVS, AMRWB, AMRNB,  DTMF WB, DTMF NB
+         * from highest to lowest. In each individual codec, the priority is determined
+         * by the order of the payload types from highest to lowest.
+         *
+         * <p>Possible keys in this bundle are,
+         * <UL>
+         *     <LI>{@link #KEY_EVS_PAYLOAD_TYPE_INT_ARRAY}</LI>
+         *     <LI>{@link #KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY}</LI>
+         *     <LI>{@link #KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY}</LI>
+         *     <LI>{@link #KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY}</LI>
+         *     <LI>{@link #KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY}</LI>
+         * </UL>
+         * <p>To specify payload descriptions for each of the audio payload types, see
+         * <UL>
+         *     <LI>{@link #KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE}</LI>
+         *     <LI>{@link #KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE}</LI>
+         *     <LI>{@link #KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE}</LI>
+         * </UL>
+         */
+        public static final String KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE =
+                KEY_PREFIX + "audio_codec_capability_payload_types_bundle";
+
+        /**
+         * A list of integers representing the different payload types
+         * in EVS codec in priority order from highest to lowest.
+         * <p>Payload type is an integer in dynamic payload type range 96-127
+         * as per RFC RFC 3551 Section 6.
+         */
+        public static final String KEY_EVS_PAYLOAD_TYPE_INT_ARRAY  =
+                KEY_PREFIX + "evs_payload_type_int_array";
+
+        /**
+         * A list of integers representing the different payload types
+         * in AMR-WB codec in priority order from highest to lowest.
+         * <p>Payload type is an integer in dynamic payload type range 96-127
+         * as per RFC RFC 3551 Section 6.
+         */
+        public static final String KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY  =
+                KEY_PREFIX + "amrwb_payload_type_int_array";
+
+        /**
+         * A list of integers representing the different payload types
+         * in AMR-NB codec in priority order from highest to lowest.
+         * <p>Payload type is an integer in dynamic payload type range 96-127
+         * as per RFC RFC 3551 Section 6.
+         */
+        public static final String KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY  =
+                KEY_PREFIX + "amrnb_payload_type_int_array";
+
+        /**
+         * A list of integers representing the different payload types
+         * in DTMF WB codec in priority order from highest to lowest.
+         * <p>Payload type is an integer in dynamic payload type range 96-127
+         * as per RFC RFC 3551 Section 6.
+         */
+        public static final String KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY  =
+                KEY_PREFIX + "dtmfwb_payload_type_int_array";
+
+        /**
+         * A list of integers representing the different payload types
+         * in DTMF NB codec in priority order from highest to lowest.
+         * <p>Payload type is an integer in dynamic payload type range 96-127
+         * as per RFC RFC 3551 Section 6.
+         */
+        public static final String KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY  =
+                KEY_PREFIX + "dtmfnb_payload_type_int_array";
+
+        /** @hide */
+        @IntDef({
+            BANDWIDTH_EFFICIENT,
+            OCTET_ALIGNED
+        })
+
+        public @interface AmrPayloadFormat {}
+
+        /** AMR NB/WB Payload format is bandwidth-efficient. */
+        public static final int BANDWIDTH_EFFICIENT = 0;
+
+        /** AMR NB/WB Payload format is octet-aligned. */
+        public static final int OCTET_ALIGNED = 1;
+
+        /**
+         * Specifies the payload format of the AMR-NB/AMR-WB codec.
+         *
+         * <p>Possible values are,
+         * {@link #BANDWIDTH_EFFICIENT},
+         * {@link #OCTET_ALIGNED}
+
+         * <p>If value is not specified, payload format is
+         * {@link #BANDWIDTH_EFFICIENT}.
+         *
+         * <p>Reference: RFC 4867 Section 8.1.
+         */
+        public static final String KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT  =
+                KEY_PREFIX + "amr_codec_attribute_payload_format_int";
+
+        /**
+         * Restricts the active mode set to a subset of all modes in the codec.
+         *
+         * <p>This attribute is optional. If value is set, then session mode
+         * set is restricted to the modes specified in this list. If this value
+         * is not specified, then all available modes in the codec are allowed.
+         * This attribute is applicable for AMR-WB, AMR-NB,
+         * and EVS codec (operating in AMR-WB IO Mode).
+         *
+         * <p>Possible values are subset of,
+         * [0,1,2,3,4,5,6,7,8] - AMRWB with the modes representing nine speech codec modes
+         * with bit rates of 6.6, 8.85, 12.65, 14.25,  15.85, 18.25, 19.85, 23.05, 23.85 kbps.
+         * [0,1,2,3,4,5,6,7] - AMRNB  with the modes representing eight speech codec modes
+         * with bit rates of 4.75, 5.15, 5.90, 6.70, 7.40, 7.95, 10.2, 12.2 kbps.
+         *
+         * <p>If value is not specified, then it means device supports all
+         * modes in the codec but not included in SDP.
+         *
+         * <p>Reference: RFC 4867 Section 8.1, 3GPP 26.445 A.3.1
+         */
+        public static final String KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY  =
+                KEY_PREFIX + "amr_codec_attribute_modeset_int_array";
+
+        /**
+         * Specifies the codec attributes of different payload types in
+         * the AMR NarrowBand (AMR-NB) codec.
+         *
+         * <p> The keys in this bundle are payload types specified
+         * in {@link #KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY}.
+         *
+         * <p>Codec attributes allowed as part of AMR-NB codec bundle are,
+         * <UL>
+         *     <LI>{@link #KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT}</LI>
+         *     <LI>{@link #KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY}</LI>
+         * </UL>
+         *
+         * <p> If this bundle is not configured and AMRNB payload type is added
+         * in {@link #KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY}, then default
+         * values as in the individual codec attribute to be used
+         * for that payload type.
+         */
+        public static final String KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE =
+                KEY_PREFIX + "amrnb_payload_description_bundle";
+
+        /**
+         * Specifies the codec attributes of different payload types in
+         * the AMR WideBand (AMR-WB) codec.
+         *
+         * <p> The keys in this bundle are payload types specified
+         * in {@link #KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY}.
+         *
+         * <p>Codec attributes allowed as part of AMR-NB codec bundle are,
+         * <UL>
+         *     <LI>{@link #KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT}</LI>
+         *     <LI>{@link #KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY}</LI>
+         * </UL>
+         *
+         * <p> If this bundle is not configured and AMRWB payload type is added
+         * in {@link #KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY}, then default
+         * values as in the individual codec attribute to be used
+         * for that payload type.
+         */
+        public static final String KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE =
+                KEY_PREFIX + "amrwb_payload_description_bundle";
+
+        /** @hide */
+        @IntDef({
+            EVS_OPERATIONAL_MODE_PRIMARY,
+            EVS_OPERATIONAL_MODE_AMRWB_IO
+        })
+
+        public @interface EvsOperationalMode {}
+
+        /**  Indicates the EVS primary mode. 3GPP 26.445 Section 3.1 */
+        public static final int EVS_OPERATIONAL_MODE_PRIMARY = 0;
+
+        /** Indicates the EVS AMR-WB IO mode. 3GPP 26.445 Section 3.1 */
+        public static final int EVS_OPERATIONAL_MODE_AMRWB_IO = 1;
+
+        /**
+         * Specifies if the EVS mode used is EVS primary mode
+         * or EVS AMR-WB IO mode.
+         *
+         * <p>Possible values are,
+         * {@link #EVS_OPERATIONAL_MODE_PRIMARY},
+         * {@link #EVS_OPERATIONAL_MODE_AMRWB_IO}
+         *
+         * <p>If this is not present, then {@link EVS_OPERATIONAL_MODE_PRIMARY} is used.
+         * <p>Reference: 3GPP 26.445 Section 3.1.
+         */
+        public static final String KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT =
+                KEY_PREFIX + "evs_codec_attribute_mode_switch_int";
+
+        /** @hide */
+        @IntDef({
+            EVS_ENCODED_BW_TYPE_NB,
+            EVS_ENCODED_BW_TYPE_WB,
+            EVS_ENCODED_BW_TYPE_SWB,
+            EVS_ENCODED_BW_TYPE_FB,
+            EVS_ENCODED_BW_TYPE_NB_WB,
+            EVS_ENCODED_BW_TYPE_NB_WB_SWB,
+            EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB,
+            EVS_ENCODED_BW_TYPE_WB_SWB,
+            EVS_ENCODED_BW_TYPE_WB_SWB_FB
+        })
+
+        public @interface EvsEncodedBwType {}
+
+        /**
+         * EVS encoded Bandwidth is Narrow Band (NB).
+         * Reference: 3GPP 26.441 Table 1.
+         */
+        public static final int EVS_ENCODED_BW_TYPE_NB = 0;
+
+        /**
+         * EVS encoded Bandwidth is Wide Band (WB).
+         * Reference: 3GPP 26.441 Table 1.
+         */
+        public static final int EVS_ENCODED_BW_TYPE_WB = 1;
+
+        /**
+         * EVS encoded Bandwidth is Super WideBand (SWB).
+         * Reference: 3GPP 26.441 Table 1.
+         */
+        public static final int EVS_ENCODED_BW_TYPE_SWB = 2;
+
+        /**
+         * EVS encoded Bandwidth is Full Band (FB).
+         * Reference: 3GPP 26.441 Table 1.
+         */
+        public static final int EVS_ENCODED_BW_TYPE_FB = 3;
+
+        /**
+         * EVS encoded Bandwidth is in the range NB,WB.
+         * Reference: 3GPP 26.441 Table 1.
+         */
+        public static final int EVS_ENCODED_BW_TYPE_NB_WB = 4;
+
+        /**
+         * EVS encoded Bandwidth is in the range NB,WB,SWB.
+         * Reference: 3GPP 26.441 Table 1.
+         */
+        public static final int EVS_ENCODED_BW_TYPE_NB_WB_SWB = 5;
+
+        /**
+         * EVS encoded Bandwidth is in the range NB,WB,SWB,FB.
+         * Reference: 3GPP 26.441 Table 1.
+         */
+        public static final int EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB = 6;
+
+        /**
+         * EVS encoded Bandwidth is in the range WB,SWB.
+         * Reference: 3GPP 26.441 Table 1.
+         */
+        public static final int EVS_ENCODED_BW_TYPE_WB_SWB = 7;
+
+        /**
+         * EVS encoded Bandwidth is in the range WB,SWB,FB.
+         * Reference: 3GPP 26.441 Table 1.
+         */
+        public static final int EVS_ENCODED_BW_TYPE_WB_SWB_FB = 8;
+
+        /**
+         * Specifies the EVS codec encoding bandwidth options.
+         *
+         * Possible values are,
+         * {@link #EVS_ENCODED_BW_TYPE_NB},
+         * {@link #EVS_ENCODED_BW_TYPE_WB},
+         * {@link #EVS_ENCODED_BW_TYPE_SWB},
+         * {@link #EVS_ENCODED_BW_TYPE_FB},
+         * {@link #EVS_ENCODED_BW_TYPE_NB_WB},
+         * {@link #EVS_ENCODED_BW_TYPE_NB_WB_SWB},
+         * {@link #EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB},
+         * {@link #EVS_ENCODED_BW_TYPE_WB_SWB},
+         * {@link #EVS_ENCODED_BW_TYPE_WB_SWB_FB}
+         *
+         * If this key is not specified, then the behavior is same as
+         * value {@link #EVS_ENCODED_BW_TYPE_NB_WB_SWB}
+         *
+         * <p>Reference: 3GPP 26.441 Table 1.
+         */
+        public static final String KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT  =
+                KEY_PREFIX + "evs_codec_attribute_bandwidth_int";
+
+        /** @hide */
+        @IntDef({
+            EVS_PRIMARY_MODE_BITRATE_5_9_KBPS,
+            EVS_PRIMARY_MODE_BITRATE_7_2_KBPS,
+            EVS_PRIMARY_MODE_BITRATE_8_0_KBPS,
+            EVS_PRIMARY_MODE_BITRATE_9_6_KBPS,
+            EVS_PRIMARY_MODE_BITRATE_13_2_KBPS,
+            EVS_PRIMARY_MODE_BITRATE_16_4_KBPS,
+            EVS_PRIMARY_MODE_BITRATE_24_4_KBPS,
+            EVS_PRIMARY_MODE_BITRATE_32_0_KBPS,
+            EVS_PRIMARY_MODE_BITRATE_48_0_KBPS,
+            EVS_PRIMARY_MODE_BITRATE_64_0_KBPS,
+            EVS_PRIMARY_MODE_BITRATE_96_0_KBPS,
+            EVS_PRIMARY_MODE_BITRATE_128_0_KBPS
+        })
+
+        public @interface EvsPrimaryModeBitRate {}
+
+        /** EVS primary mode with bitrate 5.9 kbps */
+        public static final int EVS_PRIMARY_MODE_BITRATE_5_9_KBPS = 0;
+
+        /** EVS primary mode with bitrate 7.2 kbps */
+        public static final int EVS_PRIMARY_MODE_BITRATE_7_2_KBPS = 1;
+
+        /** EVS primary mode with bitrate 8.0 kbps */
+        public static final int EVS_PRIMARY_MODE_BITRATE_8_0_KBPS = 2;
+
+        /** EVS primary mode with bitrate 9.6 kbps */
+        public static final int EVS_PRIMARY_MODE_BITRATE_9_6_KBPS = 3;
+
+        /** EVS primary mode with bitrate 13.2 kbps */
+        public static final int EVS_PRIMARY_MODE_BITRATE_13_2_KBPS = 4;
+
+        /** EVS primary mode with bitrate 16.4 kbps */
+        public static final int EVS_PRIMARY_MODE_BITRATE_16_4_KBPS = 5;
+
+        /** EVS primary mode with bitrate 24.4 kbps */
+        public static final int EVS_PRIMARY_MODE_BITRATE_24_4_KBPS = 6;
+
+        /** EVS primary mode with bitrate 32.0 kbps */
+        public static final int EVS_PRIMARY_MODE_BITRATE_32_0_KBPS = 7;
+
+        /** EVS primary mode with bitrate 48.0 kbps */
+        public static final int EVS_PRIMARY_MODE_BITRATE_48_0_KBPS = 8;
+
+        /** EVS primary mode with bitrate 64.0 kbps */
+        public static final int EVS_PRIMARY_MODE_BITRATE_64_0_KBPS = 9;
+
+        /** EVS primary mode with bitrate 96.0 kbps */
+        public static final int EVS_PRIMARY_MODE_BITRATE_96_0_KBPS = 10;
+
+        /** EVS primary mode with bitrate 128.0 kbps */
+        public static final int EVS_PRIMARY_MODE_BITRATE_128_0_KBPS = 11;
+
+        /**
+         * Specifies the range of source codec bit-rate for EVS Primary mode
+         * in the session. This is expressed in kilobits per second and
+         * applicable for both the send and the receive directions.
+         *
+         * <p>The range is specified as integer aray of size 2,
+         * represented as [low, high], where low <= high
+         *
+         * <p>Possible values for low and high are,
+         * {@link #EVS_PRIMARY_MODE_BITRATE_5_9_KBPS},
+         * {@link #EVS_PRIMARY_MODE_BITRATE_7_2_KBPS},
+         * {@link #EVS_PRIMARY_MODE_BITRATE_8_0_KBPS},
+         * {@link #EVS_PRIMARY_MODE_BITRATE_9_6_KBPS},
+         * {@link #EVS_PRIMARY_MODE_BITRATE_13_2_KBPS},
+         * {@link #EVS_PRIMARY_MODE_BITRATE_16_4_KBPS},
+         * {@link #EVS_PRIMARY_MODE_BITRATE_24_4_KBPS},
+         * {@link #EVS_PRIMARY_MODE_BITRATE_32_0_KBPS},
+         * {@link #EVS_PRIMARY_MODE_BITRATE_48_0_KBPS},
+         * {@link #EVS_PRIMARY_MODE_BITRATE_64_0_KBPS},
+         * {@link #EVS_PRIMARY_MODE_BITRATE_96_0_KBPS},
+         * {@link #EVS_PRIMARY_MODE_BITRATE_128_0_KBPS}
+         *
+         * If this key is not specified, then the behavior is same as
+         * value {@link #EVS_PRIMARY_MODE_BITRATE_24_4_KBPS}
+         *
+         * <p>Reference: 3GPP 26.445 Section A.3.1
+         */
+        public static final String KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY  =
+                KEY_PREFIX + "evs_codec_attribute_bitrate_int_array";
+
+        /**
+         * Specifies the Channel aware mode (ch-aw-recv) for the receive direction.
+         * This is applicable for EVS codec.
+         *
+         * <p>Permissible values  are -1, 0, 2, 3, 5, and 7.
+         * If this key is not specified, then the behavior is same as value 0
+         * (channel aware mode disabled).
+         * <p> If this key is configured, then device is expected to send
+         * this parameter in the SDP offer.
+         *
+         * <p>Reference: 3GPP TS 26.445 section 4.4.5, 3GPP 26.445 Section A.3.1
+         */
+        public static final String KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT  =
+                KEY_PREFIX + "evs_codec_attribute_ch_aw_recv_int";
+
+        /**
+         * Specifies whether to limit the session to header-full format.
+         * This applies to both directions in the session. This attribute
+         * is applicable for EVS codec.
+         *
+         * <p>Permissible values are 0, 1
+         * If hf-only is 1, only Header-Full format is used and hf-only is
+         * included in the SDP.
+         * <p>If hf-only is 0, both Compact and Header-Full formats are used
+         * and hf-only is included in the SDP.
+         * <p>If this key is not present, then both Compact
+         * and Header-Full formats are used and hf-only is not included in
+         * the SDP.
+         * <p> If this key is configured, then device is expected to send
+         * this parameter in the SDP offer if operator required it.
+         *
+         * <p>Reference: 3GPP 26.445 Section A.3.1.
+         */
+        public static final String KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT  =
+                KEY_PREFIX + "evs_codec_attribute_hf_only_int";
+
+        /**
+         * Specifies whether DTX (Discontinuous transmission) is enabled
+         * or not. This applies to both directions in the session.
+         * This attribute is applicable for EVS codec and can be used
+         * in both EVS Primary mode and EVS AMR-WB IO mode.
+         *
+         * <p>If {@code true}: Indicates DTX is enabled.
+         * If {@code false}: Indicates DTX is disabled.
+         *
+         * <p>If this is not present, then default value of {@code true}
+         * will apply.
+         * <p>Reference: 3GPP TS 26.445 Section A.3.1.
+         */
+        public static final String KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL  =
+                KEY_PREFIX + "evs_codec_attribute_dtx_bool";
+
+        /**
+         * This is used if further restriction is required on DTX in the
+         * receive direction. This attribute is applicable for EVS codec
+         * and can be used in both EVS Primary mode and EVS AMR-WB IO mode.
+         *
+         * <p> If this value is true or not present, then DTX setting is
+         * dependent on {@link #KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL}.
+         *
+         * <p> If this is not present, then default value of {@code true}
+         * will apply.
+         *
+         * <p>Reference: 3GPP TS 26.445 Section A.3.1.
+         */
+        public static final String KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL =
+                KEY_PREFIX + "evs_codec_attribute_dtx_recv_bool";
+
+        /**
+         * Specifies the number of audio channels.
+         * If this is not present, then default value of 1 will apply.
+         *
+         * <p>Reference: RFC 3551
+         */
+        public static final String KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT  =
+                KEY_PREFIX + "evs_codec_attribute_channels_int";
+
+        /**
+         * Indicates whether the Codec Mode Request (CMR) is supported
+         * for the session.
+         * This attribute is applicable for EVS codec in Primary Mode only.
+         *
+         * <p>Possible values are -1, 0, 1. If this key is not present,
+         * then behavior as per value 0 is applicable.
+         *
+         * <p>Reference: 3GPP 26.445 Section A.3.1, 3GPP 26.114 Table 6.2a
+         */
+        public static final String KEY_EVS_CODEC_ATTRIBUTE_CMR_INT  =
+                KEY_PREFIX + "codec_attribute_cmr_int";
+
+        /**
+         * Specifies the number of frame-blocks. This indicates the frame-block period
+         * at which codec mode changes are allowed for the sender. This attribute is
+         * applicable for EVS codec in AMR-WB IO mode and AMR-WB.
+         *
+         * <p>Possible values are 1, 2.
+         * If the key is not present, behavior as per value 1 is applicable and this
+         * parameter is not included in SDP.
+         *
+         * <p>Reference: RFC 4867 Section 8.1.
+         */
+        public static final String KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT  =
+                KEY_PREFIX + "codec_attribute_mode_change_period_int";
+
+        /**
+         * Specifies if the client is capable to transmit with a restricted mode
+         * change period. This attribute is applicable for EVS codec in
+         * AMR-WB IO mode and AMR-WB.
+         *
+         * <p>Possible values are 1, 2. If this key is not present,
+         * then behavior as per value 1 is applicable and this
+         * parameter is not included in SDP.
+         *
+         * <p>Reference: RFC 4867 Section 8.1.
+         */
+        public static final String KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT  =
+                KEY_PREFIX + "codec_attribute_mode_change_capability_int";
+
+        /**
+         * Specifies the allowed mode changes for the sender in the active mode set.
+         * This attribute is applicable for EVS codec in AMR-WB IO mode
+         * and AMR-WB.
+         *
+         * <p>Possible values are 0, 1.  If value is 1, then the sender should only
+         * perform mode changes to the neighboring modes in the active codec mode set.
+         * If value is 0, then mode changes between any two modes
+         * in the active codec mode set is allowed.
+         * If the key is not present, behavior as per value 0 is applicable and this
+         * parameter is not included in SDP.
+         *
+         * <p>Reference: RFC 4867 Section 8.1.
+         */
+        public static final String KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT  =
+                KEY_PREFIX + "codec_attribute_mode_change_neighbor_int";
+
+        /**
+         * Specifies the codec attributes of different payload types in
+         * the EVS codec.
+         *
+         * <p> The keys in this bundle are payload types specified
+         * in {@link #KEY_EVS_PAYLOAD_TYPE_INT_ARRAY}.
+         *
+         * <p>Codec attributes allowed as part of EVS codec are,
+         * <UL>
+         *     <LI>{@link #KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT}</LI>
+         *     <LI>{@link #KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY}</LI>
+         *     <LI>{@link #KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT}</LI>
+         *     <LI>{@link #KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT}</LI>
+         *     <LI>{@link #KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL}</LI>
+         *     <LI>{@link #KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL}</LI>
+         *     <LI>{@link #KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT}</LI>
+         *     <LI>{@link #KEY_EVS_CODEC_ATTRIBUTE_CMR_INT}</LI>
+         *     <LI>{@link #KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT}</LI>
+         *     <LI>{@link #KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT}</LI>
+         *     <LI>{@link #KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT}</LI>
+         *     <LI>{@link #KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT}</LI>
+         * </UL>
+         */
+        public static final String KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE =
+                KEY_PREFIX + "evs_payload_description_bundle";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putBoolean(KEY_CARRIER_VOLTE_ROAMING_AVAILABLE_BOOL, true);
+            defaults.putBoolean(KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL, false);
+            defaults.putBoolean(KEY_MULTIENDPOINT_SUPPORTED_BOOL, false);
+            defaults.putBoolean(KEY_SESSION_TIMER_SUPPORTED_BOOL, true);
+            defaults.putBoolean(KEY_OIP_SOURCE_FROM_HEADER_BOOL, false);
+            defaults.putBoolean(KEY_PRACK_SUPPORTED_FOR_18X_BOOL, true);
+            defaults.putBoolean(KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL, true);
+            defaults.putBoolean(KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL, false);
+
+            defaults.putInt(KEY_SESSION_REFRESHER_TYPE_INT, SESSION_REFRESHER_TYPE_UNKNOWN);
+            defaults.putInt(KEY_SESSION_REFRESH_METHOD_INT,
+                            SESSION_REFRESH_METHOD_UPDATE_PREFERRED);
+            defaults.putInt(KEY_CONFERENCE_SUBSCRIBE_TYPE_INT,
+                            CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG);
+            defaults.putInt(KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT, 20000);
+            defaults.putInt(KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT, 20000);
+            defaults.putInt(KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT, 8000);
+            defaults.putInt(KEY_RINGING_TIMER_MILLIS_INT, 90000);
+            defaults.putInt(KEY_RINGBACK_TIMER_MILLIS_INT, 90000);
+            defaults.putInt(KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT, 5000);
+            defaults.putInt(KEY_SESSION_EXPIRES_TIMER_SEC_INT, 1800);
+            defaults.putInt(KEY_MINIMUM_SESSION_EXPIRES_TIMER_SEC_INT, 90);
+            defaults.putInt(KEY_AUDIO_AS_BANDWIDTH_KBPS_INT, 41);
+            defaults.putInt(KEY_AUDIO_RS_BANDWIDTH_BPS_INT, 600);
+            defaults.putInt(KEY_AUDIO_RR_BANDWIDTH_BPS_INT, 2000);
+
+            defaults.putIntArray(
+                    KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY,
+                    new int[] {
+                        Ims.RTCP_INACTIVITY_ON_CONNECTED,
+                        Ims.RTP_INACTIVITY_ON_CONNECTED
+                    });
+
+            defaults.putIntArray(
+                    KEY_SRVCC_TYPE_INT_ARRAY,
+                    new int[] {
+                        BASIC_SRVCC_SUPPORT,
+                        ALERTING_SRVCC_SUPPORT,
+                        PREALERTING_SRVCC_SUPPORT,
+                        MIDCALL_SRVCC_SUPPORT
+                    });
+
+            defaults.putString(KEY_CONFERENCE_FACTORY_URI_STRING, "");
+
+            PersistableBundle audio_codec_capability_payload_types = new PersistableBundle();
+
+            audio_codec_capability_payload_types.putIntArray(
+                    KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY,
+                    new int[] { 97, 98 });
+
+            audio_codec_capability_payload_types.putIntArray(
+                    KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY,
+                    new int[] { 99, 100 });
+
+            audio_codec_capability_payload_types.putIntArray(
+                    KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY,
+                    new int[] { 101 });
+
+            audio_codec_capability_payload_types.putIntArray(
+                    KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY,
+                    new int[] { 102 });
+
+            defaults.putPersistableBundle(
+                    KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+                    audio_codec_capability_payload_types);
+
+            /* Setting defaults for AMRWB */
+            PersistableBundle all_amrwb_payload_bundles = new PersistableBundle();
+            PersistableBundle amrwb_bundle_instance1 = new PersistableBundle();
+
+            all_amrwb_payload_bundles.putPersistableBundle(
+                    "97", /* Same value of payload type as in KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY */
+                    amrwb_bundle_instance1);
+
+            PersistableBundle amrwb_bundle_instance2 = new PersistableBundle();
+
+            amrwb_bundle_instance2.putInt(KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
+                                          OCTET_ALIGNED);
+
+            all_amrwb_payload_bundles.putPersistableBundle(
+                    "98", /* Same value of payload type as in KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY */
+                    amrwb_bundle_instance2);
+
+            defaults.putPersistableBundle(
+                    KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE,
+                    all_amrwb_payload_bundles);
+
+            /* Setting defaults for AMRNB */
+            PersistableBundle all_amrnb_payload_bundles = new PersistableBundle();
+            PersistableBundle amrnb_bundle_instance1 = new PersistableBundle();
+
+            all_amrnb_payload_bundles.putPersistableBundle(
+                    "99", /* Same value of payload type as in KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY */
+                    amrnb_bundle_instance1);
+
+            PersistableBundle amrnb_bundle_instance2 = new PersistableBundle();
+
+            amrnb_bundle_instance2.putInt(KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
+                                          OCTET_ALIGNED);
+
+            all_amrnb_payload_bundles.putPersistableBundle(
+                    "100", /* Same value of payload type as in KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY */
+                    amrnb_bundle_instance2);
+
+            defaults.putPersistableBundle(
+                    KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE,
+                    all_amrnb_payload_bundles);
+
+            return defaults;
+        }
+    }
+
+    /**
+     * IMS SMS configs. This groups the configs specific for SMS over IMS
+     */
+    public static final class ImsSms {
+        private ImsSms() {}
+
+        /** Prefix of all imssms.KEY_* constants. */
+        public static final String KEY_PREFIX = "imssms.";
+
+        /**
+         * Flag specifying if SMS over IMS support is available or not.
+         *
+         * <p>If {@code true}: SMS over IMS support available.
+         * {@code false}: otherwise.
+         */
+        public static final String KEY_SMS_OVER_IMS_SUPPORTED_BOOL  =
+                KEY_PREFIX + "sms_over_ims_supported_bool";
+
+        /**
+         * Flag specifying whether to allow SMS CSFB in case of
+         * SMS over PS failure.
+         *
+         * <p>If {@code true}: allow SMS CSFB in case of SMS over PS failure.
+         * {@code false} otherwise.
+         */
+        public static final String KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL  =
+                KEY_PREFIX + "sms_csfb_retry_on_failure_bool";
+
+        /** @hide */
+        @IntDef({
+            SMS_FORMAT_3GPP,
+            SMS_FORMAT_3GPP2
+        })
+
+        public @interface SmsFormat {}
+
+        /** SMS format is 3GPP. */
+        public static final int SMS_FORMAT_3GPP = 0;
+
+        /** SMS format is 3GPP2. */
+        public static final int SMS_FORMAT_3GPP2 = 1;
+
+        /**
+         * Specifies the SMS over IMS format.
+         *
+         * <p>Possible values are,
+         * {@link #SMS_FORMAT_3GPP},
+         * {@link #SMS_FORMAT_3GPP2}
+         */
+        public static final String KEY_SMS_OVER_IMS_FORMAT_INT =
+                KEY_PREFIX + "sms_over_ims_format_int";
+
+        /**
+         * List of different RAT technologies on which SMS over IMS
+         * is supported.
+         *
+         * <p>Possible values are,
+         * {@link AccessNetworkConstants.AccessNetworkType#NGRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#EUTRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#IWLAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#UTRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#GERAN}
+         */
+        public static final String KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY =
+                KEY_PREFIX + "sms_over_ims_supported_rats_int_array";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putBoolean(KEY_SMS_OVER_IMS_SUPPORTED_BOOL, true);
+            defaults.putBoolean(KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL, true);
+
+            defaults.putInt(KEY_SMS_OVER_IMS_FORMAT_INT, SMS_FORMAT_3GPP);
+
+            defaults.putIntArray(
+                    KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY,
+                    new int[] {
+                        AccessNetworkType.EUTRAN,
+                        AccessNetworkType.IWLAN
+                    });
+
+            return defaults;
+        }
+    }
+
+    /**
+     * IMS RTT configs. This groups the configs specific for text media,
+     * RTT (Real Time Text).
+     */
+    public static final class ImsRtt {
+        private ImsRtt() {}
+
+        /** Prefix of all imsrtt.KEY_* constants. */
+        public static final String KEY_PREFIX = "imsrtt.";
+
+        /**
+         * Flag specifying whether text media is allowed on default bearer.
+         *
+         * <p>If {@code true}: text media can be sent on default bearer.
+         * {@code false} otherwise.
+         */
+        public static final String KEY_TEXT_ON_DEFAULT_BEARER_SUPPORTED_BOOL  =
+                KEY_PREFIX + "text_on_default_bearer_supported_bool";
+
+        /**
+         * Flag specifying whether QoS preconditions are supported for text.
+         *
+         * <p>If {@code true}: QoS Preconditions are supported.
+         * {@code false} otherwise.
+         * <p>Reference: 3GPP TS 24.229
+         */
+        public static final String KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL  =
+                KEY_PREFIX + "text_qos_precondition_supported_bool";
+
+        /**
+         * Specifies the AS (Application Specific) SDP modifier for text media.
+         *
+         * <p>Expressed in kilobits per second as per RFC 3556 Section 2.
+         */
+        public static final String KEY_TEXT_AS_BANDWIDTH_KBPS_INT =
+                KEY_PREFIX + "text_as_bandwidth_kbps_int";
+
+        /**
+         * Specifies the RS (RTCP bandwidth-Sender) SDP modifier for text media.
+         *
+         * <p>This indicates the RTCP bandwidth allocated to active data senders
+         * for text media.
+         *
+         * <p>Expressed in bits per second as per RFC 3556 Section 2.
+         */
+        public static final String KEY_TEXT_RS_BANDWIDTH_BPS_INT =
+                KEY_PREFIX + "text_rs_bandwidth_bps_int";
+
+        /**
+         * Specifies the RR (RTCP bandwidth-Receiver) SDP modifier for
+         * text media.
+         *
+         * <p>This indicates the RTCP bandwidth allocated to receivers
+         * for text media.
+         *
+         * <p>Expressed in bits per second as per RFC 3556 Section 2.
+         */
+        public static final String KEY_TEXT_RR_BANDWIDTH_BPS_INT =
+                KEY_PREFIX + "text_rr_bandwidth_bps_int";
+
+        /**
+         * List of various reasons for RTT call to end due to
+         * media inactivity.
+         *
+         * <p>Possible values are,
+         * <UL>
+         *     <LI>{@link Ims#RTCP_INACTIVITY_ON_HOLD}</LI>
+         *     <LI>{@link Ims#RTCP_INACTIVITY_ON_CONNECTED}</LI>
+         *     <LI>{@link Ims#RTP_INACTIVITY_ON_CONNECTED}</LI>
+         *     <LI>{@link Ims#E911_RTCP_INACTIVITY_ON_CONNECTED}</LI>
+         *     <LI>{@link Ims#E911_RTP_INACTIVITY_ON_CONNECTED}</LI>
+         * </UL>
+         */
+        public static final String KEY_TEXT_INACTIVITY_CALL_END_REASONS_INT_ARRAY =
+                KEY_PREFIX + "text_inactivity_call_end_reasons_int_array";
+
+        /**
+         * Specifies the Text Codec capability.
+         *
+         * <p>Possible keys in this bundle are,
+         * <UL>
+         *     <LI>{@link #KEY_T140_PAYLOAD_TYPE_INT}</LI>
+         *     <LI>{@link #KEY_RED_PAYLOAD_TYPE_INT}</LI>
+         * </UL>
+         */
+        public static final String KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE =
+                KEY_PREFIX + "text_codec_capability_payload_types_bundle";
+
+        /** Integer representing payload type for T140 codec.
+         * <p>Payload type is an integer in dynamic payload type range 96-127
+         * as per RFC RFC 3551 Section 6.
+         */
+        public static final String KEY_T140_PAYLOAD_TYPE_INT  =
+                KEY_PREFIX + "t140_payload_type_int";
+
+        /** Integer representing payload type for RED/redundancy codec.
+         * <p>Payload type is an integer in dynamic payload type range 96-127
+         * as per RFC RFC 3551 Section 6.
+         */
+        public static final String KEY_RED_PAYLOAD_TYPE_INT  =
+                KEY_PREFIX + "red_payload_type_int";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putBoolean(KEY_TEXT_ON_DEFAULT_BEARER_SUPPORTED_BOOL, false);
+            defaults.putBoolean(KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL, true);
+
+            defaults.putInt(KEY_TEXT_AS_BANDWIDTH_KBPS_INT, 4);
+            defaults.putInt(KEY_TEXT_RS_BANDWIDTH_BPS_INT, 100);
+            defaults.putInt(KEY_TEXT_RR_BANDWIDTH_BPS_INT, 300);
+
+            defaults.putIntArray(
+                    KEY_TEXT_INACTIVITY_CALL_END_REASONS_INT_ARRAY,
+                    new int[] {
+                        Ims.RTCP_INACTIVITY_ON_CONNECTED,
+                        Ims.RTP_INACTIVITY_ON_CONNECTED
+                    });
+
+            PersistableBundle text_codec_capability_payload_types = new PersistableBundle();
+
+            text_codec_capability_payload_types.putInt(
+                    KEY_RED_PAYLOAD_TYPE_INT,
+                    112);
+
+            text_codec_capability_payload_types.putInt(
+                    KEY_T140_PAYLOAD_TYPE_INT,
+                    111);
+
+            defaults.putPersistableBundle(
+                    KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+                    text_codec_capability_payload_types);
+
+            return defaults;
+        }
+    }
+
+    /**
+     * Emergency Call/E911. This groups the configs specific for emergency call
+     * over IMS.
+     *
+     * <p> Reference: 3GPP 24.229, 3GPP 23.167 Annex H, 3GPP 24.301.
+     */
+    public static final class ImsEmergency {
+        private ImsEmergency() {}
+
+        /** Prefix of all imsemergency.KEY_* constants. */
+        public static final String KEY_PREFIX = "imsemergency.";
+
+        /**
+         * Flag specifying whether UE would retry E911 call on
+         * IMS PDN if emergency PDN setup failed.
+         *
+         * <p>If {@code true}: Allow UE to retry emergency call on
+         * IMS PDN if emergency PDN setup failed.{@code false} otherwise.
+         */
+        public static final String KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL  =
+                KEY_PREFIX + "retry_emergency_on_ims_pdn_bool";
+
+        /**
+         * Flag specifying whether UE should enter Emergency CallBack Mode(ECBM)
+         * after E911 call is ended.
+         *
+         * <p>If {@code true}: Enter ECBM mode after E911 call is ended.
+         * {@code false} otherwise.
+         */
+        public static final String KEY_EMERGENCY_CALLBACK_MODE_SUPPORTED_BOOL  =
+                KEY_PREFIX + "emergency_callback_mode_supported_bool";
+
+        /**
+         * Flag specifying whether QoS preconditions are supported for emergency
+         * call setup.
+         *
+         * <p>If {@code true}: QoS Preconditions are supported.
+         * {@code false} otherwise.
+         *
+         * <p>Reference: 3GPP TS 24.229
+         */
+        public static final String KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL  =
+                KEY_PREFIX + "emergency_qos_precondition_supported_bool";
+
+        /**
+         * List of different RAT technologies on which emergency call using IMS
+         * is supported.
+         *
+         * <p>Possible values are,
+         * {@link AccessNetworkConstants.AccessNetworkType#NGRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#EUTRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#IWLAN}
+         */
+        public static final String KEY_EMERGENCY_OVER_IMS_SUPPORTED_RATS_INT_ARRAY =
+                KEY_PREFIX + "emergency_over_ims_supported_rats_int_array";
+
+        /**
+         * Specifies the maximum time from deciding that an emergency service is to
+         * be established until completion of the emergency registration procedure.
+         * Upon timer expiry, the UE considers the emergency REGISTER request or
+         * the emergency call attempt as failed.
+         */
+        public static final String KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT =
+                KEY_PREFIX + "emergency_registration_timer_millis_int";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putBoolean(KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL, false);
+            defaults.putBoolean(KEY_EMERGENCY_CALLBACK_MODE_SUPPORTED_BOOL, false);
+            defaults.putBoolean(KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL, true);
+
+            defaults.putIntArray(
+                    KEY_EMERGENCY_OVER_IMS_SUPPORTED_RATS_INT_ARRAY,
+                    new int[] {
+                        AccessNetworkType.EUTRAN,
+                        AccessNetworkType.IWLAN
+                    });
+
+            defaults.putInt(KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT, 20000);
+
+            return defaults;
+        }
+    }
+
+    /**
+     * IMS Video Telephony configs. This groups the configs that are specific for video call.
+     */
+    public static final class ImsVt {
+        private ImsVt() {}
+
+        /** Prefix of all imsvt.KEY_* constants. */
+        public static final String KEY_PREFIX = "imsvt.";
+
+        /**
+         * Flag specifying whether video media is allowed on default bearer.
+         *
+         * <p>If {@code true}: video media can be sent on default bearer.
+         * {@code false} otherwise.
+         */
+        public static final String KEY_VIDEO_ON_DEFAULT_BEARER_SUPPORTED_BOOL  =
+                KEY_PREFIX + "video_on_default_bearer_supported_bool";
+
+        /**
+         * Specifies the timeout value for no video RTP packets received.
+         * <p>On timer expiry, VT call can downgrade to voice call or end
+         * or continue depending on the operator requirement.
+         */
+        public static final String KEY_VIDEO_RTP_INACTIVITY_TIMER_MILLIS_INT =
+                KEY_PREFIX + "video_rtp_inactivity_timer_millis_int";
+
+        /**
+         * Specifies the timeout value for no video RTCP packets received.
+         * <p>On timer expiry, VT call can downgrade to voice call or end
+         * or continue depending on the operator requirement.
+         */
+        public static final String KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT =
+                KEY_PREFIX + "video_rtcp_inactivity_timer_millis_int";
+
+        /**
+         * Specifies the AS (Application Specific) SDP modifier for video media.
+         *
+         * <p>Expressed in kilobits per second as per RFC 3556 Section 2.
+         */
+        public static final String KEY_VIDEO_AS_BANDWIDTH_KBPS_INT =
+                KEY_PREFIX + "video_as_bandwidth_kbps_int";
+
+        /**
+         * Specifies the RS (RTCP bandwidth-Sender) SDP modifier for video media.
+         *
+         * <p>This indicates the RTCP bandwidth allocated to active data senders
+         * for video media.
+         *
+         * <p>Expressed in bits per second as per RFC 3556 Section 2.
+         */
+        public static final String KEY_VIDEO_RS_BANDWIDTH_BPS_INT =
+                KEY_PREFIX + "video_rs_bandwidth_bps_int";
+
+        /**
+         * Specifies the RR (RTCP bandwidth-Receiver) SDP modifier
+         * for video media.
+         *
+         * <p>This indicates the RTCP bandwidth allocated to receivers
+         * for video media.
+         *
+         * <p>Expressed in bits per second as per RFC 3556 Section 2.
+         */
+        public static final String KEY_VIDEO_RR_BANDWIDTH_BPS_INT =
+                KEY_PREFIX + "video_rr_bandwidth_bps_int";
+
+        /**
+         * Specifies the differentiated services code point (DSCP) value
+         * for Video RTP.
+         *
+         * <p>Reference: RFC 4594 Section 1.4.4
+         */
+        public static final String KEY_VIDEO_RTP_DSCP_INT =
+                KEY_PREFIX + "video_rtp_dscp_int";
+
+        /**
+         * Flag specifying whether QoS preconditions are supported for Video.
+         *
+         * <p>If {@code true}: QoS Preconditions are supported.
+         * {@code false} otherwise.
+         * <p>Reference: 3GPP TS 24.229
+         */
+        public static final String KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL  =
+                KEY_PREFIX + "video_qos_precondition_supported_bool";
+
+        /**
+         * Specifies the Video Codec capability. This contains a list of
+         * payload types representing different Video codec instances.
+
+         * <p>Possible key(s) in this bundle are,
+         * <UL>
+         *     <LI>{@link #KEY_H264_PAYLOAD_TYPE_INT_ARRAY}</LI>
+         * </UL>
+         * <p>To specify payload descriptions for each of the payload types, see
+         * <UL>
+         *     <LI>{@link #KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE}</LI>
+         * </UL>
+         */
+        public static final String KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE =
+                KEY_PREFIX + "video_codec_capability_payload_types_bundle";
+
+        /**
+         * A list of integers representing the different payload types
+         * in H264 video codec in priority order from highest to lowest.
+         * <p>Payload type is an integer in dynamic payload type range 96-127
+         * as per RFC RFC 3551 Section 6.
+         */
+        public static final String KEY_H264_PAYLOAD_TYPE_INT_ARRAY  =
+                KEY_PREFIX + "h264_payload_type_int_array";
+
+        /**
+         * Specifies the codec attributes of different payload types
+         * representing H264 video codec instances.
+         *
+         * <p> The allowed payload types of the video codecs are specified in,
+         * {@link #KEY_H264_PAYLOAD_TYPE_INT_ARRAY}.
+         *
+         * <p>Codec attributes allowed as part of H264 codec bundle are,
+         * <UL>
+         *     <LI>{@link #KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING}</LI>
+         *     <LI>{@link #KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT}</LI>
+         *     <LI>{@link #KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT}</LI>
+         *     <LI>{@link #KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY}</LI>
+         * </UL>
+         *
+         * <p>If this bundle is not configured and
+         * {@link #KEY_H264_PAYLOAD_TYPE_INT_ARRAY} is not empty,
+         * then default values as in the individual codec attributes to
+         * be used for that payload type.
+         * <p>If the codec attributes in a particular codec instance bundle
+         * is not valid together, then that codec instance should not be used.
+         */
+        public static final String KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE =
+                KEY_PREFIX + "h264_payload_description_bundle";
+
+        /**
+         * Specifies the packetization mode of the video codec.
+         *
+         * <p>Permissible values are 0 (Single NAL unit mode),
+         * 1(Non-interleaved mode).
+         *
+         * <p>If this key is not specified or invalid, then the following
+         * default value to be used.
+         * <UL>
+         *   <LI>For H264: 1(Non-interleaved mode)</LI>
+         * <UL>
+         *
+         * <p>Reference: RFC 6184 Section 5.4
+         */
+        public static final String KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT  =
+                KEY_PREFIX + "video_codec_attribute_packetization_mode_int";
+
+        /**
+         * Specifies the maximum frame rate the offerer wishes to receive.
+         * This gives the maximum video frame rate in frames/sec.
+         *
+         * <p>If this key is not specified or invalid, then the following
+         * default value to be used.
+         * <UL>
+         *   <LI>For H264: 15 </LI>
+         * <UL>
+         * <p>Reference: RFC 4566 Section 6, 3GPP 26.114 Section 6.2.3.2
+         */
+        public static final String KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT  =
+                KEY_PREFIX + "video_codec_attribute_frame_rate_int";
+
+        /**
+         * Specifies the maximum resolution allowed for the video codec
+         * instance.
+         *
+         * <p>This is specified as an array of two integers, with
+         * index 0 : Width,
+         * index 1 : Height
+         *
+         * <p>If this key is not specified or invalid as per the video codec,
+         * then the following default value to be used.
+         * <UL>
+         *   <LI>For H264: 240 (WIDTH) x 320 (HEIGHT) </LI>
+         * <UL>
+         * <p>Reference: RFC 4566 Section 6, 3GPP 26.114 Section 6.2.3.2
+         *
+         */
+        public static final String KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY  =
+                KEY_PREFIX + "video_codec_attribute_resolution_int_array";
+
+        /**
+         * Specifies the profile level id of the H264 video codec.
+         * This value is represented as "profile-level-id" in the SDP offer
+         * as per RFC 6184 Section 8.1.
+         *
+         * <p>If this key is not specified or invalid as per the video codec,
+         * then default value of 42C00C to be used.
+         *
+         * <p>Reference: RFC 6184 Section 8.1, ITU-T Recommendation H.264
+         */
+        public static final String KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING  =
+                KEY_PREFIX + "h264_video_codec_attribute_profile_level_id_string";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putBoolean(KEY_VIDEO_ON_DEFAULT_BEARER_SUPPORTED_BOOL, false);
+            defaults.putBoolean(KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL, true);
+
+            defaults.putInt(KEY_VIDEO_RTP_INACTIVITY_TIMER_MILLIS_INT, 0);
+            defaults.putInt(KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT, 0);
+
+            defaults.putInt(KEY_VIDEO_AS_BANDWIDTH_KBPS_INT, 960);
+            defaults.putInt(KEY_VIDEO_RS_BANDWIDTH_BPS_INT, 8000);
+            defaults.putInt(KEY_VIDEO_RR_BANDWIDTH_BPS_INT, 6000);
+            defaults.putInt(KEY_VIDEO_RTP_DSCP_INT, 40);
+
+            PersistableBundle video_codec_capability_payload_types = new PersistableBundle();
+
+            video_codec_capability_payload_types.putIntArray(
+                    KEY_H264_PAYLOAD_TYPE_INT_ARRAY,
+                    new int[] { 99, 100 });
+
+            defaults.putPersistableBundle(
+                    KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+                    video_codec_capability_payload_types);
+
+            PersistableBundle all_h264_payload_bundles = new PersistableBundle();
+
+            /* Setting default codec attributes for individual H264 profiles*/
+
+            /* For H264 profile-level-id: 42C00C, frame rate:15, Resolution: 240x320 */
+            PersistableBundle h264_bundle_instance1 = new PersistableBundle();
+            all_h264_payload_bundles.putPersistableBundle(
+                    "99", /* Same value of payload type as in KEY_H264_PAYLOAD_TYPE_INT_ARRAY */
+                    h264_bundle_instance1);
+
+            /* For H264 profile-level-id: 42C00C, packetisation mode:0, frame rate:15,
+             * Resolution: 240x320 */
+            PersistableBundle h264_bundle_instance2 = new PersistableBundle();
+            h264_bundle_instance2.putInt(
+                    KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
+                    0);
+
+            all_h264_payload_bundles.putPersistableBundle(
+                    "100", /* Same value of payload type as in KEY_H264_PAYLOAD_TYPE_INT_ARRAY */
+                    h264_bundle_instance2);
+
+            defaults.putPersistableBundle(
+                    KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE,
+                    all_h264_payload_bundles);
+
+            return defaults;
+        }
+    }
+
+    /**
+     * WiFi Calling. This groups the configs specific for Voice over WiFi/WFC call.
+     */
+    public static final class ImsWfc {
+        private ImsWfc() {}
+
+        /** Prefix of all imswfc.KEY_* constants. */
+        public static final String KEY_PREFIX = "imswfc.";
+
+        /**
+         *  List of MDNs for which Geo-location PIDF XML with country info
+         *  needs to included for normal calls involving short code.
+         */
+        public static final String KEY_PIDF_SHORT_CODE_STRING_ARRAY  =
+                KEY_PREFIX + "pidf_short_code_string_array";
+
+        /**
+         * Flag specifying whether emergency call over VoWiFi is requested over
+         * emergency PDN or IMS PDN.
+         *
+         * <p>If {@code false}: E911 call uses IMS PDN for E911 call over VoWiFi.
+         * If {@code true}: E911 call uses Emergency PDN for E911 call over VoWiFi.
+         */
+        public static final String KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL  =
+                KEY_PREFIX + "emergency_call_over_emergency_pdn_bool";
+
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+
+            defaults.putBoolean(KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL, false);
+            defaults.putStringArray(KEY_PIDF_SHORT_CODE_STRING_ARRAY, new String[] {});
+
+            return defaults;
+        }
+    }
+
+    /**
+     *   IMS supplementary services configs. This groups the configs required for
+     *   supplementary services (SS) like XCAP over UT,
+     *   Unstructured Supplementary Service Data(USSD).
+     */
+    public static final class ImsSs {
+        private ImsSs() {}
+
+        /** Prefix of all imsss.KEY_* constants. */
+        public static final String KEY_PREFIX = "imsss.";
+
+        /**
+         * Flag that controls whether XCAP over UT status need to be
+         * dependent on IMS registration.
+         *
+         * <p>If {@code true}: XCAP over UT status need to be
+         * dependent on IMS registration.
+         * {@code false} otherwise.
+         */
+        public static final String KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL =
+                KEY_PREFIX + "ut_requires_ims_registration_bool";
+
+        /**
+         * Flag that controls whether Circuit Switched Fallback (CSFB)
+         * option is available when XCAP over UT fails.
+         *
+         * <p>If {@code false}:  XCAP over UT only with no CSFB option.
+         * If XCAP over UT fails, return error.
+         * if {@code true}, Use CSFB if XCAP over UT fails.
+         */
+        public static final String KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL  =
+                KEY_PREFIX + "use_csfb_on_xcap_over_ut_failure_bool";
+
+        /**
+         * Flag that controls whether XCAP over UT is enabled or not
+         * when PS data is turned off.
+         *
+         * <p>If {@code true}: XCAP over UT is enabled when PS data is off.
+         * {@code false}: Otherwise.
+         *
+         * Reference: IR.92 Section 5.5.1
+         */
+        public static final String KEY_UT_SUPPORTED_WHEN_PS_DATA_OFF_BOOL  =
+                KEY_PREFIX + "ut_supported_when_ps_data_off_bool";
+
+        /**
+         * Flag that controls whether network initiated USSD over IMS is
+         * supported by the UE.
+         *
+         * <p>If {@code true}:  Support Available.{@code false}: Otherwise.
+         * Reference: 3GPP 24.390.
+         */
+        public static final String KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL  =
+                KEY_PREFIX + "network_initiated_ussd_over_ims_supported_bool";
+
+        /**
+         * Specifies the 'XCAP over UT' IP Type when device is
+         * on Home Network.
+         *
+         * <p>Possible values are,
+         * {@link Ims#IP_TYPE_IPV4V6},
+         * {@link Ims#IP_TYPE_IPV4},
+         * {@link Ims#IP_TYPE_IPV6}
+         *
+         * If key is invalid or not configured, the default value
+         * {@link Ims#IP_TYPE_IPV4V6} will apply.
+         */
+        public static final String KEY_UT_IPTYPE_HOME_INT =
+                KEY_PREFIX + "ut_iptype_home_int";
+
+        /**
+         * Specifies the 'XCAP over UT' IP Type when device is roaming.
+         *
+         * <p>Possible values are,
+         * {@link Ims#IP_TYPE_IPV4V6},
+         * {@link Ims#IP_TYPE_IPV4},
+         * {@link Ims#IP_TYPE_IPV6}
+
+         * If key is invalid or not configured, the default value
+         * {@link #IP_TYPE_IPV4V6} will apply.
+         */
+        public static final String KEY_UT_IPTYPE_ROAMING_INT =
+                KEY_PREFIX + "ut_iptype_roaming_int";
+
+        /**
+         * Specifies the XCAP Application Server fully qualified domain name (FQDN).
+         * <p> Reference: 24.623 Section 5.2.3.
+         */
+        public static final String KEY_UT_AS_SERVER_FQDN_STRING =
+                KEY_PREFIX + "ut_as_server_fqdn_string";
+
+        /**
+         * Specifies the XCAP Application Server Remote port.
+         * As XCAP is a usage of HTTP, the default value is same as HTTP, i.e. 80.
+         */
+        public static final String KEY_UT_AS_SERVER_PORT_INT =
+                KEY_PREFIX + "ut_as_server_port_int";
+
+        /**
+         * Specifies the preferred transport to be used for XCAP over UT.
+         *
+         * <p>Possible values are,
+         * {@link Ims#PREFERRED_TRANSPORT_TCP},
+         * {@link Ims#PREFERRED_TRANSPORT_TLS}
+         *
+         * <p>If key is invalid or not configured, the default value
+         * {@link Ims#PREFERRED_TRANSPORT_TCP} will apply.
+         */
+        public static final String KEY_UT_TRANSPORT_TYPE_INT =
+                KEY_PREFIX + "ut_transport_type_int";
+
+        /** @hide */
+        @IntDef({
+            SUPPLEMENTARY_SERVICE_CW,
+            SUPPLEMENTARY_SERVICE_CF_ALL,
+            SUPPLEMENTARY_SERVICE_CF_CFU,
+            SUPPLEMENTARY_SERVICE_CF_ALL_CONDITONAL_FORWARDING,
+            SUPPLEMENTARY_SERVICE_CF_CFB,
+            SUPPLEMENTARY_SERVICE_CF_CFNRY,
+            SUPPLEMENTARY_SERVICE_CF_CFNRC,
+            SUPPLEMENTARY_SERVICE_CF_CFNL,
+            SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIP,
+            SUPPLEMENTARY_SERVICE_IDENTIFICATION_TIP,
+            SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR,
+            SUPPLEMENTARY_SERVICE_IDENTIFICATION_TIR,
+            SUPPLEMENTARY_SERVICE_CB_ALL,
+            SUPPLEMENTARY_SERVICE_CB_OBS,
+            SUPPLEMENTARY_SERVICE_CB_BAOC,
+            SUPPLEMENTARY_SERVICE_CB_BOIC,
+            SUPPLEMENTARY_SERVICE_CB_BOIC_EXHC,
+            SUPPLEMENTARY_SERVICE_CB_IBS,
+            SUPPLEMENTARY_SERVICE_CB_BAIC,
+            SUPPLEMENTARY_SERVICE_CB_BIC_ROAM,
+            SUPPLEMENTARY_SERVICE_CB_ACR,
+            SUPPLEMENTARY_SERVICE_CB_BIL
+        })
+
+        public @interface SsType {}
+
+        /** Communication Waiting (CW) support as per 3GPP 24.615. */
+        public static final int SUPPLEMENTARY_SERVICE_CW = 0;
+
+        /**
+         * Call Diversion - All call forwarding support as per 3GPP 24.604.
+         *
+         * <p>This value is associated with MMI support service code 002
+         * as indicated in TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CF_ALL = 1;
+
+        /**
+         * Call Diversion - All Unconditional call forwarding support (CFU) as
+         * per 3GPP 24.604.
+         *
+         * <p>This value is associated with MMI support service code 21
+         * as indicated in TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CF_CFU = 2;
+
+        /**
+         * Call Diversion - All conditional call forwarding support as
+         * per 3GPP 24.604.
+         *
+         * <p>This value is associated with MMI support service code 004
+         * as indicated in TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CF_ALL_CONDITONAL_FORWARDING = 3;
+
+        /**
+         * Call Diversion - Call forwarding on mobile subscriber busy (CFB)
+         * support as per 3GPP 24.604.
+         *
+         * <p>This value is associated with MMI support service code 67
+         * as indicated in TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CF_CFB = 4;
+
+        /**
+         * Call Diversion - Call forwarding on no reply (CFNRY)
+         * support as per 3GPP 24.604.
+         *
+         * <p>This value is associated with MMI support service code 61
+         * as indicated in TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CF_CFNRY = 5;
+
+        /**
+         * Call Diversion - Call forwarding on mobile subscriber not reachable
+         * (CFNRC) support as per 3GPP 24.604.
+         *
+         * <p>This value is associated with MMI support service code 62
+         * as indicated in TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CF_CFNRC = 6;
+
+        /**
+         * Communication Forwarding on Not Logged-in (CFNL).
+         * support as per 3GPP 24.604 Section 4.2.1.7
+         *
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CF_CFNL = 7;
+
+        /**
+         * Originating Identification Presentation (OIP) support
+         * as per 3GPP 24.607.
+         *
+         */
+        public static final int SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIP = 8;
+
+        /**
+         * Terminating Identification Presentation (TIP) support
+         * as per 3GPP 24.608.
+         */
+        public static final int SUPPLEMENTARY_SERVICE_IDENTIFICATION_TIP = 9;
+
+        /**
+         * Originating Identification Restriction (OIR) support
+         * as per 3GPP 24.607.
+         */
+        public static final int SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR = 10;
+
+        /**
+         * Terminating Identification Restriction (TIR) support
+         * as per 3GPP 24.608.
+         */
+        public static final int SUPPLEMENTARY_SERVICE_IDENTIFICATION_TIR = 11;
+
+        /**
+         * Call Barring - All barring services,
+         * This value is associated with MMI support service code 330
+         * as indicated TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CB_ALL = 12;
+
+        /**
+         * Call Barring - Outgoing barring services,
+         * This value is associated with MMI support service code 333
+         * as indicated TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CB_OBS = 13;
+
+        /**
+         * Call Barring - Barring of all outgoing calls (BAOC)
+         * support as per 3GPP TS 24.611.
+         *
+         * <p>This value is associated with MMI support service code 33
+         * as indicated TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CB_BAOC = 14;
+
+        /**
+         * Call Barring - Barring of outgoing international calls
+         * (BOIC) support as per 3GPP TS 24.611.
+         *
+         * <p>This value is associated with MMI support service code 331
+         * as indicated TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CB_BOIC = 15;
+
+        /**
+         * Call Barring - Barring of outgoing international calls
+         * except those directed to the home PLMN country (BOIC-EXHC) support
+         * as per 3GPP TS 24.611.
+         *
+         * <p>This value is associated with MMI support service code 332
+         * as indicated TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CB_BOIC_EXHC = 16;
+
+        /**
+         * Call Barring - Incoming barring services,
+         * This value is associated with MMI support service code 353
+         * as indicated TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CB_IBS = 17;
+
+        /**
+         * Call Barring - Barring of all incoming calls (BAIC)
+         * support as per 3GPP TS 24.611.
+         *
+         * <p>This value is associated with MMI support service code 35
+         * as indicated TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CB_BAIC = 18;
+
+        /**
+         * Call Barring - Barring of incoming calls when roaming outside
+         * the home PLMN country (BIC-ROAM) support as per 3GPP TS 24.611.
+         *
+         * <p>This value is associated with MMI support service code 351
+         * as indicated TS 22.030 Table B.1
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CB_BIC_ROAM = 19;
+
+        /**
+         * Call Barring - Anonymous Call Rejection/Barring of all anonymous
+         * incoming number support as per 3GPP TS 24.611.
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CB_ACR = 20;
+
+        /**
+         * Call Barring - Barring list of incoming numbers support.
+         */
+        public static final int SUPPLEMENTARY_SERVICE_CB_BIL = 21;
+
+        /**
+         * List of UT services that are Server based.
+         *
+         * <p>Possible values are,
+         * <UL>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CW}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CF_ALL}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CF_CFU}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CF_ALL_COND_FORWARDING}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CF_CFB}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CF_CFNRY}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CF_CFNRC}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CF_CFNL}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIP}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_IDENTIFICATION_TIP}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_IDENTIFICATION_TIR}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CB_ALL}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CB_OBS}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CB_IBS}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CB_BAOC}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CB_BOIC}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CB_BOIC_EXHC}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CB_BAIC}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CB_BIC_ROAM}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CB_ACR}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CB_BIL}</LI>
+         * </UL>
+         */
+        public static final String KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY =
+                KEY_PREFIX + "ut_server_based_services_int_array";
+
+        /**
+         * List of UT services that are terminal based.
+         *
+         * By default, all services are server based and defined in
+         * {@link #KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY}.
+         * Adding here will override that service setting to terminal based.
+         *
+         * <p>Possible values are,
+         * <UL>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_CW}</LI>
+         *     <LI>{@link #SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR}</LI>
+         * </UL>
+         */
+        public static final String KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY =
+                KEY_PREFIX + "ut_terminal_based_services_int_array";
+
+        /**
+         * List of different RAT technologies on which XCAP over UT
+         * is supported.
+         *
+         * <p>Possible values are,
+         * {@link AccessNetworkConstants.AccessNetworkType#NGRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#EUTRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#IWLAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#UTRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#GERAN}
+         */
+        public static final String KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY =
+                KEY_PREFIX + "xcap_over_ut_supported_rats_int_array";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putBoolean(KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL, true);
+            defaults.putBoolean(KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL, true);
+            defaults.putBoolean(KEY_UT_SUPPORTED_WHEN_PS_DATA_OFF_BOOL, true);
+            defaults.putBoolean(KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL, true);
+
+            defaults.putInt(KEY_UT_IPTYPE_HOME_INT, Ims.IP_TYPE_IPV4V6);
+            defaults.putInt(KEY_UT_IPTYPE_ROAMING_INT, Ims.IP_TYPE_IPV4V6);
+            defaults.putInt(KEY_UT_AS_SERVER_PORT_INT, 80);
+            defaults.putInt(KEY_UT_TRANSPORT_TYPE_INT, Ims.PREFERRED_TRANSPORT_TCP);
+
+            defaults.putIntArray(
+                    KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY,
+                    new int[] {
+                        SUPPLEMENTARY_SERVICE_CW,
+                        SUPPLEMENTARY_SERVICE_CF_ALL,
+                        SUPPLEMENTARY_SERVICE_CF_CFU,
+                        SUPPLEMENTARY_SERVICE_CF_CFNRC,
+                        SUPPLEMENTARY_SERVICE_CF_ALL_CONDITONAL_FORWARDING,
+                        SUPPLEMENTARY_SERVICE_CF_CFB,
+                        SUPPLEMENTARY_SERVICE_CF_CFNRY,
+                        SUPPLEMENTARY_SERVICE_CF_CFNL,
+                        SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIP,
+                        SUPPLEMENTARY_SERVICE_IDENTIFICATION_TIP,
+                        SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR,
+                        SUPPLEMENTARY_SERVICE_IDENTIFICATION_TIR,
+                        SUPPLEMENTARY_SERVICE_CB_ALL,
+                        SUPPLEMENTARY_SERVICE_CB_OBS,
+                        SUPPLEMENTARY_SERVICE_CB_IBS,
+                        SUPPLEMENTARY_SERVICE_CB_BAOC,
+                        SUPPLEMENTARY_SERVICE_CB_BOIC,
+                        SUPPLEMENTARY_SERVICE_CB_BOIC_EXHC,
+                        SUPPLEMENTARY_SERVICE_CB_BAIC,
+                        SUPPLEMENTARY_SERVICE_CB_BIC_ROAM,
+                        SUPPLEMENTARY_SERVICE_CB_ACR,
+                        SUPPLEMENTARY_SERVICE_CB_BIL
+                    });
+            defaults.putIntArray(
+                    KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY,
+                    new int[] {});
+
+            defaults.putIntArray(
+                    KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY,
+                    new int[] {
+                        AccessNetworkType.EUTRAN,
+                        AccessNetworkType.IWLAN
+                    });
+            defaults.putString(KEY_UT_AS_SERVER_FQDN_STRING, "");
+
+            return defaults;
+        }
+    }
+
+    /**
+     * This groups the BSF (BootStrapping Function) related configs.
+     * Reference: 3GPP TS 24.109.
+     */
+    public static final class Bsf {
+        private Bsf() {}
+
+        /** Prefix of all bsf.KEY_* constants. */
+        public static final String KEY_PREFIX = "bsf.";
+
+        /** Specifies the fully qualified domain name (FQDN) of BSF Server
+         * as per 3GPP 24.109.
+         */
+        public static final String KEY_BSF_SERVER_FQDN_STRING =
+                KEY_PREFIX + "bsf_server_fqdn_string";
+
+        /**
+         * Specifies the port number of the BSF server as per 3GPP 24.109.
+         * This is usually default port number of HTTP, i.e. 80.
+         */
+        public static final String KEY_BSF_SERVER_PORT_INT =
+                KEY_PREFIX + "bsf_server_port_int";
+
+        /**
+         * Specifies the transport type used in communication with
+         * BSF server.
+         *
+         * <p>Possible values are,
+         * {@link Ims#PREFERRED_TRANSPORT_TCP},
+         * {@link Ims#PREFERRED_TRANSPORT_TLS}
+         *
+         * <p>If key is invalid or not configured, the default value
+         * {@link Ims#PREFERRED_TRANSPORT_TCP} will apply.
+         */
+        public static final String KEY_BSF_TRANSPORT_TYPE_INT =
+                KEY_PREFIX + "bsf_transport type_int";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+
+            defaults.putInt(KEY_BSF_SERVER_PORT_INT, 80);
+            defaults.putInt(KEY_BSF_TRANSPORT_TYPE_INT, Ims.PREFERRED_TRANSPORT_TCP);
+            defaults.putString(KEY_BSF_SERVER_FQDN_STRING, "");
+
+            return defaults;
+        }
+    }
+
+    /**
      * Configs used for epdg tunnel bring up.
      *
      * @see <a href="https://tools.ietf.org/html/rfc7296">RFC 7296, Internet Key Exchange Protocol
@@ -6157,6 +8255,14 @@ public class CarrierConfigManager {
                 });
         sDefaults.putBoolean(KEY_SUPPORT_WPS_OVER_IMS_BOOL, true);
         sDefaults.putAll(Ims.getDefaults());
+        sDefaults.putAll(ImsVoice.getDefaults());
+        sDefaults.putAll(ImsSms.getDefaults());
+        sDefaults.putAll(ImsRtt.getDefaults());
+        sDefaults.putAll(ImsEmergency.getDefaults());
+        sDefaults.putAll(ImsVt.getDefaults());
+        sDefaults.putAll(ImsWfc.getDefaults());
+        sDefaults.putAll(ImsSs.getDefaults());
+        sDefaults.putAll(Bsf.getDefaults());
         sDefaults.putAll(Iwlan.getDefaults());
         sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, new String[0]);
          sDefaults.putBoolean(KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL, false);
