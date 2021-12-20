@@ -7605,6 +7605,7 @@ package android.media.tv.tuner.frontend {
     method public int getBer();
     method @NonNull public int[] getBers();
     method @NonNull public int[] getCodeRates();
+    method @NonNull public int[] getDvbtCellIds();
     method @NonNull public int[] getExtendedModulations();
     method @Deprecated public int getFreqOffset();
     method public long getFreqOffsetLong();
@@ -7647,6 +7648,7 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_BERS = 23; // 0x17
     field public static final int FRONTEND_STATUS_TYPE_CODERATES = 24; // 0x18
     field public static final int FRONTEND_STATUS_TYPE_DEMOD_LOCK = 0; // 0x0
+    field public static final int FRONTEND_STATUS_TYPE_DVBT_CELL_IDS = 40; // 0x28
     field public static final int FRONTEND_STATUS_TYPE_EWBS = 13; // 0xd
     field public static final int FRONTEND_STATUS_TYPE_FEC = 8; // 0x8
     field public static final int FRONTEND_STATUS_TYPE_FREQ_OFFSET = 18; // 0x12
@@ -7881,6 +7883,7 @@ package android.media.tv.tuner.frontend {
     method public void onAtsc3PlpInfosReported(@NonNull android.media.tv.tuner.frontend.Atsc3PlpInfo[]);
     method public default void onDvbcAnnexReported(int);
     method public void onDvbsStandardReported(int);
+    method public default void onDvbtCellIdsReported(@NonNull int[]);
     method public void onDvbtStandardReported(int);
     method public default void onFrequenciesLongReported(@NonNull long[]);
     method @Deprecated public void onFrequenciesReported(@NonNull int[]);

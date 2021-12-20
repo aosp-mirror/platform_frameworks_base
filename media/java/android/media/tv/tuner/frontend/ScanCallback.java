@@ -94,4 +94,7 @@ public interface ScanCallback {
 
     /** DVBC Frontend Annex reported. */
     default void onDvbcAnnexReported(@DvbcFrontendSettings.Annex int dvbcAnnex) {}
+
+    /** DVBT Frontend Cell Ids reported. */
+    default void onDvbtCellIdsReported(@NonNull int[] dvbtCellIds) {}
 }
