@@ -161,6 +161,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     int mMinHeight;
 
+    Dimmer mDimmer = new Dimmer(this);
+
     /** This task fragment will be removed when the cleanup of its children are done. */
     private boolean mIsRemovalRequested;
 
@@ -2335,6 +2337,34 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         resetAdjacentTaskFragment();
         super.removeImmediately();
         sendTaskFragmentVanished();
+    }
+
+    @Override
+    Dimmer getDimmer() {
+        // If the window is in an embedded TaskFragment, we want to dim at the TaskFragment.
+        if (asTask() == null) {
+            return mDimmer;
+        }
+
+        return super.getDimmer();
+    }
+
+    @Override
+    void prepareSurfaces() {
+        if (asTask() != null) {
+            super.prepareSurfaces();
+            return;
+        }
+
+        mDimmer.resetDimStates();
+        super.prepareSurfaces();
+
+        // Bounds need to be relative, as the dim layer is a child.
+        final Rect dimBounds = getBounds();
+        dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+        if (mDimmer.updateDims(getPendingTransaction(), dimBounds)) {
+            scheduleAnimation();
+        }
     }
 
     @Override

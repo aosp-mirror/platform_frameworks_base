@@ -473,7 +473,6 @@ class Task extends TaskFragment {
     // to layout without loading all the task snapshots
     final PersistedTaskSnapshotData mLastTaskSnapshotData;
 
-    private Dimmer mDimmer = new Dimmer(this);
     private final Rect mTmpDimBoundsRect = new Rect();
 
     /** @see #setCanAffectSystemUiFlags */
