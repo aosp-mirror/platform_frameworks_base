@@ -1832,6 +1832,32 @@ public final class AccessibilityManager {
         }
     }
 
+
+    /**
+     * Sets the {@link AccessibilityWindowAttributes} to the window associated with the given
+     * window id.
+     *
+     * @param displayId The display id of the window.
+     * @param windowId  The id of the window.
+     * @param attributes The accessibility window attributes.
+     * @hide
+     */
+    public void setAccessibilityWindowAttributes(int displayId, int windowId,
+            AccessibilityWindowAttributes attributes) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.setAccessibilityWindowAttributes(displayId, windowId, mUserId, attributes);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
     private IAccessibilityManager getServiceLocked() {
         if (mService == null) {
             tryConnectToServiceLocked(null);
