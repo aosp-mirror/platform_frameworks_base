@@ -308,9 +308,11 @@ public class WMShellModule {
             Transitions transitions, ShellTaskOrganizer shellTaskOrganizer,
             PipAnimationController pipAnimationController, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState, PipTransitionState pipTransitionState,
-            PhonePipMenuController pipMenuController) {
+            PhonePipMenuController pipMenuController,
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper) {
         return new PipTransition(context, pipBoundsState, pipTransitionState, pipMenuController,
-                pipBoundsAlgorithm, pipAnimationController, transitions, shellTaskOrganizer);
+                pipBoundsAlgorithm, pipAnimationController, transitions, shellTaskOrganizer,
+                pipSurfaceTransactionHelper);
     }
 
     @WMSingleton
