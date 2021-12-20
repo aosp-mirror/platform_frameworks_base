@@ -75,7 +75,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         final String name = UUID.randomUUID().toString();
         mFd = nativeCreate(name, size);
         mMemoryAddr = nativeOpen(mFd, mIsOwner);
-        mCloseGuard.open("close");
+        mCloseGuard.open("MemoryIntArray.close");
     }
 
     private MemoryIntArray(Parcel parcel) throws IOException {
@@ -86,7 +86,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         }
         mFd = pfd.detachFd();
         mMemoryAddr = nativeOpen(mFd, mIsOwner);
-        mCloseGuard.open("close");
+        mCloseGuard.open("MemoryIntArray.close");
     }
 
     /**

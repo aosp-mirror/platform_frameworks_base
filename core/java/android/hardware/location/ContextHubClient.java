@@ -69,7 +69,7 @@ public class ContextHubClient implements Closeable {
             mCloseGuard = null;
         } else {
             mCloseGuard = CloseGuard.get();
-            mCloseGuard.open("close");
+            mCloseGuard.open("ContextHubClient.close");
         }
     }
 
