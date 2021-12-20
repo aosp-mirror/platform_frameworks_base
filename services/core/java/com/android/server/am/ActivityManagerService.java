@@ -5915,6 +5915,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (targetPkg == null) {
                 throw new IllegalArgumentException("null target");
             }
+            final int callingUserId = UserHandle.getUserId(r.uid);
+            if (mPackageManagerInt.filterAppAccess(targetPkg, r.uid, callingUserId)) {
+                return;
+            }
 
             Preconditions.checkFlagsArgument(modeFlags, Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -5926,7 +5930,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             intent.setFlags(modeFlags);
 
             final NeededUriGrants needed = mUgmInternal.checkGrantUriPermissionFromIntent(intent,
-                    r.uid, targetPkg, UserHandle.getUserId(r.uid));
+                    r.uid, targetPkg, callingUserId);
             mUgmInternal.grantUriPermissionUncheckedFromIntent(needed, null);
         }
     }
