@@ -31867,6 +31867,7 @@ package android.os {
     method @IntRange(from=0xffffffff) public int indexOf(java.util.Locale);
     method public boolean isEmpty();
     method public static boolean isPseudoLocale(@Nullable android.icu.util.ULocale);
+    method public static boolean matchesLanguageAndScript(@NonNull java.util.Locale, @NonNull java.util.Locale);
     method public static void setDefault(@NonNull @Size(min=1) android.os.LocaleList);
     method @IntRange(from=0) public int size();
     method @NonNull public String toLanguageTags();
