@@ -144,8 +144,9 @@ class SplitScreenTransitions {
 
             if (transition == mPendingEnter && (mainRoot.equals(change.getContainer())
                     || sideRoot.equals(change.getContainer()))) {
-                t.setWindowCrop(leash, change.getStartAbsBounds().width(),
-                        change.getStartAbsBounds().height());
+                t.setPosition(leash, change.getEndAbsBounds().left, change.getEndAbsBounds().top);
+                t.setWindowCrop(leash, change.getEndAbsBounds().width(),
+                        change.getEndAbsBounds().height());
             }
             boolean isOpening = isOpeningType(info.getType());
             if (isOpening && (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT)) {
