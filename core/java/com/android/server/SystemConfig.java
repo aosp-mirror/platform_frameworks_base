@@ -46,6 +46,7 @@ import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.build.UnboundedSdkLevel;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
@@ -126,7 +127,7 @@ public class SystemConfig {
          *
          * <p>0 means not specified.
          */
-        public final int onBootclasspathSince;
+        public final String onBootclasspathSince;
 
         /**
          * SDK version this library was removed from the BOOTCLASSPATH.
@@ -138,7 +139,7 @@ public class SystemConfig {
          *
          * <p>0 means not specified.
          */
-        public final int onBootclasspathBefore;
+        public final String onBootclasspathBefore;
 
         /**
          * Declares whether this library can be safely ignored from <uses-library> tags.
@@ -155,19 +156,19 @@ public class SystemConfig {
         @VisibleForTesting
         public SharedLibraryEntry(String name, String filename, String[] dependencies,
                 boolean isNative) {
-            this(name, filename, dependencies, 0 /* onBootclasspathSince */,
-                    0 /* onBootclasspathBefore */, isNative);
+            this(name, filename, dependencies, null /* onBootclasspathSince */,
+                    null /* onBootclasspathBefore */, isNative);
         }
 
         @VisibleForTesting
         public SharedLibraryEntry(String name, String filename, String[] dependencies,
-                int onBootclasspathSince, int onBootclassPathBefore) {
-            this(name, filename, dependencies, onBootclasspathSince, onBootclassPathBefore,
+                String onBootclasspathSince, String onBootclasspathBefore) {
+            this(name, filename, dependencies, onBootclasspathSince, onBootclasspathBefore,
                     false /* isNative */);
         }
 
         SharedLibraryEntry(String name, String filename, String[] dependencies,
-                int onBootclasspathSince, int onBootclasspathBefore, boolean isNative) {
+                String onBootclasspathSince, String onBootclasspathBefore, boolean isNative) {
             this.name = name;
             this.filename = filename;
             this.dependencies = dependencies;
@@ -175,16 +176,14 @@ public class SystemConfig {
             this.onBootclasspathBefore = onBootclasspathBefore;
             this.isNative = isNative;
 
-            canBeSafelyIgnored = this.onBootclasspathSince != 0
-                    && isSdkAtLeast(this.onBootclasspathSince);
-        }
-
-        private static boolean isSdkAtLeast(int level) {
-            if ("REL".equals(Build.VERSION.CODENAME)) {
-                return Build.VERSION.SDK_INT >= level;
-            }
-            return level == Build.VERSION_CODES.CUR_DEVELOPMENT
-                    || Build.VERSION.SDK_INT >= level;
+            // this entry can be ignored if either:
+            // - onBootclasspathSince is set and we are at or past that SDK
+            // - onBootclasspathBefore is set and we are before that SDK
+            canBeSafelyIgnored =
+                    (this.onBootclasspathSince != null
+                            && UnboundedSdkLevel.isAtLeast(this.onBootclasspathSince))
+                            || (this.onBootclasspathBefore != null
+                            && !UnboundedSdkLevel.isAtLeast(this.onBootclasspathBefore));
         }
     }
 
@@ -878,10 +877,8 @@ public class SystemConfig {
                             String lname = parser.getAttributeValue(null, "name");
                             String lfile = parser.getAttributeValue(null, "file");
                             String ldependency = parser.getAttributeValue(null, "dependency");
-                            int minDeviceSdk = XmlUtils.readIntAttribute(parser, "min-device-sdk",
-                                    0);
-                            int maxDeviceSdk = XmlUtils.readIntAttribute(parser, "max-device-sdk",
-                                    0);
+                            String minDeviceSdk = parser.getAttributeValue(null, "min-device-sdk");
+                            String maxDeviceSdk = parser.getAttributeValue(null, "max-device-sdk");
                             if (lname == null) {
                                 Slog.w(TAG, "<" + name + "> without name in " + permFile + " at "
                                         + parser.getPositionDescription());
@@ -889,15 +886,18 @@ public class SystemConfig {
                                 Slog.w(TAG, "<" + name + "> without file in " + permFile + " at "
                                         + parser.getPositionDescription());
                             } else {
-                                boolean allowedMinSdk = minDeviceSdk <= Build.VERSION.SDK_INT;
+                                boolean allowedMinSdk =
+                                        minDeviceSdk == null || UnboundedSdkLevel.isAtLeast(
+                                                minDeviceSdk);
                                 boolean allowedMaxSdk =
-                                        maxDeviceSdk == 0 || maxDeviceSdk >= Build.VERSION.SDK_INT;
+                                        maxDeviceSdk == null || UnboundedSdkLevel.isAtMost(
+                                                maxDeviceSdk);
                                 final boolean exists = new File(lfile).exists();
                                 if (allowedMinSdk && allowedMaxSdk && exists) {
-                                    int bcpSince = XmlUtils.readIntAttribute(parser,
-                                            "on-bootclasspath-since", 0);
-                                    int bcpBefore = XmlUtils.readIntAttribute(parser,
-                                            "on-bootclasspath-before", 0);
+                                    String bcpSince = parser.getAttributeValue(null,
+                                            "on-bootclasspath-since");
+                                    String bcpBefore = parser.getAttributeValue(null,
+                                            "on-bootclasspath-before");
                                     SharedLibraryEntry entry = new SharedLibraryEntry(lname, lfile,
                                             ldependency == null
                                                     ? new String[0] : ldependency.split(":"),
