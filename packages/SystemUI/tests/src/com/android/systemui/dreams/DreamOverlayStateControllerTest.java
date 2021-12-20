@@ -27,6 +27,10 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,19 +49,24 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     @Mock
     ComplicationProvider mProvider;
 
+    final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void testCallback() {
-        final DreamOverlayStateController stateController = new DreamOverlayStateController();
+    public void testCallback() throws Exception {
+        final DreamOverlayStateController stateController = new DreamOverlayStateController(
+                mExecutor);
         stateController.addCallback(mCallback);
 
         // Add complication and verify callback is notified.
-        final DreamOverlayStateController.ComplicationToken token =
+        final ListenableFuture<DreamOverlayStateController.ComplicationToken> tokenFuture =
                 stateController.addComplication(mProvider);
+
+        mExecutor.runAllReady();
 
         verify(mCallback, times(1)).onComplicationsChanged();
 
@@ -68,19 +77,23 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
         clearInvocations(mCallback);
 
         // Remove complication and verify callback is notified.
-        stateController.removeComplication(token);
+        stateController.removeComplication(tokenFuture.get());
+        mExecutor.runAllReady();
         verify(mCallback, times(1)).onComplicationsChanged();
         assertTrue(providers.isEmpty());
     }
 
     @Test
     public void testNotifyOnCallbackAdd() {
-        final DreamOverlayStateController stateController = new DreamOverlayStateController();
-        final DreamOverlayStateController.ComplicationToken token =
-                stateController.addComplication(mProvider);
+        final DreamOverlayStateController stateController =
+                new DreamOverlayStateController(mExecutor);
+
+        stateController.addComplication(mProvider);
+        mExecutor.runAllReady();
 
         // Verify callback occurs on add when an overlay is already present.
         stateController.addCallback(mCallback);
+        mExecutor.runAllReady();
         verify(mCallback, times(1)).onComplicationsChanged();
     }
 }

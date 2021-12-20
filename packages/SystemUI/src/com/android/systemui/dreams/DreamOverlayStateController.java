@@ -17,15 +17,20 @@
 package com.android.systemui.dreams;
 
 import androidx.annotation.NonNull;
+import androidx.concurrent.futures.CallbackToFutureAdapter;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.policy.CallbackController;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -77,12 +82,14 @@ public class DreamOverlayStateController implements
         }
     }
 
+    private final Executor mExecutor;
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final HashMap<ComplicationToken, ComplicationProvider> mComplications = new HashMap<>();
 
     @VisibleForTesting
     @Inject
-    public DreamOverlayStateController() {
+    public DreamOverlayStateController(@Main Executor executor) {
+        mExecutor = executor;
     }
 
     /**
@@ -90,11 +97,16 @@ public class DreamOverlayStateController implements
      * @param provider The {@link ComplicationProvider} providing the dream.
      * @return The {@link ComplicationToken} tied to the supplied {@link ComplicationProvider}.
      */
-    public ComplicationToken addComplication(ComplicationProvider provider) {
-        final ComplicationToken token = new ComplicationToken(mNextComplicationTokenId++);
-        mComplications.put(token, provider);
-        notifyCallbacks();
-        return token;
+    public ListenableFuture<ComplicationToken> addComplication(ComplicationProvider provider) {
+        return CallbackToFutureAdapter.getFuture(completer -> {
+            mExecutor.execute(() -> {
+                final ComplicationToken token = new ComplicationToken(mNextComplicationTokenId++);
+                mComplications.put(token, provider);
+                notifyCallbacks();
+                completer.set(token);
+            });
+            return "DreamOverlayStateController::addComplication";
+        });
     }
 
     /**
@@ -103,14 +115,19 @@ public class DreamOverlayStateController implements
      *              to be removed.
      * @return The removed {@link ComplicationProvider}, {@code null} if not found.
      */
-    public ComplicationProvider removeComplication(ComplicationToken token) {
-        final ComplicationProvider removedComplication = mComplications.remove(token);
+    public ListenableFuture<ComplicationProvider> removeComplication(ComplicationToken token) {
+        return CallbackToFutureAdapter.getFuture(completer -> {
+            mExecutor.execute(() -> {
+                final ComplicationProvider removedComplication = mComplications.remove(token);
 
-        if (removedComplication != null) {
-            notifyCallbacks();
-        }
+                if (removedComplication != null) {
+                    notifyCallbacks();
+                }
+                completer.set(removedComplication);
+            });
 
-        return removedComplication;
+            return "DreamOverlayStateController::removeComplication";
+        });
     }
 
     private void notifyCallbacks() {
@@ -121,24 +138,28 @@ public class DreamOverlayStateController implements
 
     @Override
     public void addCallback(@NonNull Callback callback) {
-        Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
-        if (mCallbacks.contains(callback)) {
-            return;
-        }
+        mExecutor.execute(() -> {
+            Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
+            if (mCallbacks.contains(callback)) {
+                return;
+            }
 
-        mCallbacks.add(callback);
+            mCallbacks.add(callback);
 
-        if (mComplications.isEmpty()) {
-            return;
-        }
+            if (mComplications.isEmpty()) {
+                return;
+            }
 
-        callback.onComplicationsChanged();
+            callback.onComplicationsChanged();
+        });
     }
 
     @Override
     public void removeCallback(@NonNull Callback callback) {
-        Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
-        mCallbacks.remove(callback);
+        mExecutor.execute(() -> {
+            Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
+            mCallbacks.remove(callback);
+        });
     }
 
     /**
