@@ -85,6 +85,8 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED, ANY_STRING_VALIDATOR);
         VALIDATORS.put(
                 Global.EMERGENCY_TONE, new DiscreteValueValidator(new String[] {"0", "1", "2"}));
+        VALIDATORS.put(Global.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
+                NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.CALL_AUTO_RETRY, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.DOCK_AUDIO_MEDIA_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(

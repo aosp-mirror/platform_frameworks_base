@@ -9327,16 +9327,6 @@ public final class Settings {
                 "emergency_gesture_sound_enabled";
 
         /**
-         * The power button "cooldown" period in milliseconds after the Emergency gesture is
-         * triggered, during which single-key actions on the power button are suppressed. Cooldown
-         * period is disabled if set to zero.
-         *
-         * @hide
-         */
-        public static final String EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS =
-                "emergency_gesture_power_button_cooldown_period_ms";
-
-        /**
          * Whether the camera launch gesture to double tap the power button when the screen is off
          * should be disabled.
          *
@@ -13923,6 +13913,16 @@ public final class Settings {
          */
         @Readable
         public static final String EMERGENCY_AFFORDANCE_NEEDED = "emergency_affordance_needed";
+
+        /**
+         * The power button "cooldown" period in milliseconds after the Emergency gesture is
+         * triggered, during which single-key actions on the power button are suppressed. Cooldown
+         * period is disabled if set to zero.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS =
+                "emergency_gesture_power_button_cooldown_period_ms";
 
         /**
          * Whether to enable automatic system server heap dumps. This only works on userdebug or
