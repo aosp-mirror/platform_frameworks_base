@@ -32,6 +32,7 @@ import android.media.MediaParceledListSlice;
 import android.media.Session2CommandGroup;
 import android.media.Session2Token;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -44,6 +45,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.modules.annotation.MinSdk;
 import com.android.server.SystemService;
 
 import java.lang.ref.WeakReference;
@@ -59,6 +61,7 @@ import java.util.stream.Collectors;
  * and their ongoing media playback state.
  * @hide
  */
+@MinSdk(Build.VERSION_CODES.S)
 public class MediaCommunicationService extends SystemService {
     private static final String TAG = "MediaCommunicationService";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
