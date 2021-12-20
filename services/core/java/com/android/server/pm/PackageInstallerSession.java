@@ -2261,10 +2261,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (params.isStaged) {
-            // TODO(b/136257624): CTS test fails if we don't send session finished broadcast, even
-            //  though ideally, we just need to send session committed broadcast.
-            sendUpdateToRemoteStatusReceiver(INSTALL_SUCCEEDED, "Session staged", null);
-
             mStagedSession.verifySession();
         } else {
             verify();
@@ -2511,6 +2507,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mStagedSession.notifyEndPreRebootVerification();
                 if (error == SessionInfo.SESSION_NO_ERROR) {
                     mStagingManager.commitSession(mStagedSession);
+                    sendUpdateToRemoteStatusReceiver(INSTALL_SUCCEEDED, "Session staged", null);
                 } else {
                     dispatchSessionFinished(INSTALL_FAILED_VERIFICATION_FAILURE, msg, null);
                     maybeFinishChildSessions(INSTALL_FAILED_VERIFICATION_FAILURE, msg);
