@@ -36,6 +36,7 @@ import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -63,6 +64,7 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.accessibility.floatingmenu.AnnotationLinkSpan;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -110,6 +112,8 @@ public class InternetDialog extends SystemUIDialog implements
     private LinearLayout mTurnWifiOnLayout;
     private LinearLayout mEthernetLayout;
     private TextView mWifiToggleTitleText;
+    private LinearLayout mWifiScanNotifyLayout;
+    private TextView mWifiScanNotifyText;
     private LinearLayout mSeeAllLayout;
     private RecyclerView mWifiRecyclerView;
     private ImageView mConnectedWifiIcon;
@@ -220,6 +224,8 @@ public class InternetDialog extends SystemUIDialog implements
         mMobileNetworkLayout = mDialogView.requireViewById(R.id.mobile_network_layout);
         mTurnWifiOnLayout = mDialogView.requireViewById(R.id.turn_on_wifi_layout);
         mWifiToggleTitleText = mDialogView.requireViewById(R.id.wifi_toggle_title);
+        mWifiScanNotifyLayout = mDialogView.requireViewById(R.id.wifi_scan_notify_layout);
+        mWifiScanNotifyText = mDialogView.requireViewById(R.id.wifi_scan_notify_text);
         mConnectedWifListLayout = mDialogView.requireViewById(R.id.wifi_connected_layout);
         mConnectedWifiIcon = mDialogView.requireViewById(R.id.wifi_connected_icon);
         mConnectedWifiTitleText = mDialogView.requireViewById(R.id.wifi_connected_title);
@@ -313,8 +319,10 @@ public class InternetDialog extends SystemUIDialog implements
         showProgressBar();
         final boolean isDeviceLocked = mInternetDialogController.isDeviceLocked();
         final boolean isWifiEnabled = mWifiManager.isWifiEnabled();
+        final boolean isWifiScanEnabled = mWifiManager.isScanAlwaysAvailable();
         updateWifiToggle(isWifiEnabled, isDeviceLocked);
         updateConnectedWifi(isWifiEnabled, isDeviceLocked);
+        updateWifiScanNotify(isWifiEnabled, isWifiScanEnabled, isDeviceLocked);
 
         final int visibility = (isDeviceLocked || !isWifiEnabled || mWifiEntriesCount <= 0)
                 ? View.GONE : View.VISIBLE;
@@ -409,6 +417,24 @@ public class InternetDialog extends SystemUIDialog implements
                 mInternetDialogController.getInternetWifiDrawable(mConnectedWifiEntry));
         mWifiSettingsIcon.setColorFilter(
                 mContext.getColor(R.color.connected_network_primary_color));
+    }
+
+    @MainThread
+    private void updateWifiScanNotify(boolean isWifiEnabled, boolean isWifiScanEnabled,
+            boolean isDeviceLocked) {
+        if (isWifiEnabled || !isWifiScanEnabled || isDeviceLocked) {
+            mWifiScanNotifyLayout.setVisibility(View.GONE);
+            return;
+        }
+        if (TextUtils.isEmpty(mWifiScanNotifyText.getText())) {
+            final AnnotationLinkSpan.LinkInfo linkInfo = new AnnotationLinkSpan.LinkInfo(
+                    AnnotationLinkSpan.LinkInfo.DEFAULT_ANNOTATION,
+                    v -> mInternetDialogController.launchWifiScanningSetting());
+            mWifiScanNotifyText.setText(AnnotationLinkSpan.linkify(
+                    getContext().getText(R.string.wifi_scan_notify_message), linkInfo));
+            mWifiScanNotifyText.setMovementMethod(LinkMovementMethod.getInstance());
+        }
+        mWifiScanNotifyLayout.setVisibility(View.VISIBLE);
     }
 
     void onClickConnectedWifi() {
