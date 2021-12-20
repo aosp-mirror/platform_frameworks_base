@@ -40,7 +40,7 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 
 /**
- * The {@link DreamOverlayService} is responsible for placing overlays on top of a dream. The
+ * The {@link DreamOverlayService} is responsible for placing an overlay on top of a dream. The
  * dream reaches directly out to the service with a Window reference (via LayoutParams), which the
  * service uses to insert its own child Window into the dream's parent Window.
  */
@@ -52,7 +52,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final Context mContext;
     // The Executor ensures actions and ui updates happen on the same thread.
     private final Executor mExecutor;
-    // The state controller informs the service of updates to the overlays present.
+    // The state controller informs the service of updates to the complications present.
     private final DreamOverlayStateController mStateController;
     // The component used to resolve dream overlay dependencies.
     private final DreamOverlayComponent mDreamOverlayComponent;
@@ -64,8 +64,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final DreamOverlayStateController.Callback mOverlayStateCallback =
             new DreamOverlayStateController.Callback() {
                 @Override
-                public void onOverlayChanged() {
-                    mExecutor.execute(() -> reloadOverlaysLocked());
+                public void onComplicationsChanged() {
+                    mExecutor.execute(() -> reloadComplicationsLocked());
                 }
             };
 
@@ -87,7 +87,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 }
             };
 
-    // A hook into the internal inset calculation where we declare the overlays as the only
+    // A hook into the internal inset calculation where we declare the complications as the only
     // touchable regions.
     private final ViewTreeObserver.OnComputeInternalInsetsListener
             mOnComputeInternalInsetsListener =
@@ -129,20 +129,20 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mExecutor.execute(() -> addOverlayWindowLocked(layoutParams));
     }
 
-    private void reloadOverlaysLocked() {
+    private void reloadComplicationsLocked() {
         if (mDreamOverlayContentView == null) {
             return;
         }
         mDreamOverlayContentView.removeAllViews();
-        for (OverlayProvider overlayProvider : mStateController.getOverlays()) {
-            addOverlay(overlayProvider);
+        for (ComplicationProvider complicationProvider : mStateController.getComplications()) {
+            addComplication(complicationProvider);
         }
     }
 
     /**
-     * Inserts {@link Window} to host dream overlays into the dream's parent window. Must be called
-     * from the main executing thread. The window attributes closely mirror those that are set by
-     * the {@link android.service.dreams.DreamService} on the dream Window.
+     * Inserts {@link Window} to host the dream overlay into the dream's parent window. Must be
+     * called from the main executing thread. The window attributes closely mirror those that are
+     * set by the {@link android.service.dreams.DreamService} on the dream Window.
      * @param layoutParams The {@link android.view.WindowManager.LayoutParams} which allow inserting
      *                     into the dream window.
      */
@@ -173,12 +173,12 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         windowManager.addView(window.getDecorView(), window.getAttributes());
-        mExecutor.execute(this::reloadOverlaysLocked);
+        mExecutor.execute(this::reloadComplicationsLocked);
     }
 
     @VisibleForTesting
-    protected void addOverlay(OverlayProvider provider) {
-        provider.onCreateOverlay(mContext,
+    protected void addComplication(ComplicationProvider provider) {
+        provider.onCreateComplication(mContext,
                 (view, layoutParams) -> {
                     // Always move UI related work to the main thread.
                     mExecutor.execute(() -> {

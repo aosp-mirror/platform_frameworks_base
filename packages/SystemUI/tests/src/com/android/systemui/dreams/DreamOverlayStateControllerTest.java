@@ -43,7 +43,7 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     DreamOverlayStateController.Callback mCallback;
 
     @Mock
-    OverlayProvider mProvider;
+    ComplicationProvider mProvider;
 
     @Before
     public void setup() {
@@ -55,32 +55,32 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
         final DreamOverlayStateController stateController = new DreamOverlayStateController();
         stateController.addCallback(mCallback);
 
-        // Add overlay and verify callback is notified.
-        final DreamOverlayStateController.OverlayToken token =
-                stateController.addOverlay(mProvider);
+        // Add complication and verify callback is notified.
+        final DreamOverlayStateController.ComplicationToken token =
+                stateController.addComplication(mProvider);
 
-        verify(mCallback, times(1)).onOverlayChanged();
+        verify(mCallback, times(1)).onComplicationsChanged();
 
-        final Collection<OverlayProvider> providers = stateController.getOverlays();
+        final Collection<ComplicationProvider> providers = stateController.getComplications();
         assertEquals(providers.size(), 1);
         assertTrue(providers.contains(mProvider));
 
         clearInvocations(mCallback);
 
-        // Remove overlay and verify callback is notified.
-        stateController.removeOverlay(token);
-        verify(mCallback, times(1)).onOverlayChanged();
+        // Remove complication and verify callback is notified.
+        stateController.removeComplication(token);
+        verify(mCallback, times(1)).onComplicationsChanged();
         assertTrue(providers.isEmpty());
     }
 
     @Test
     public void testNotifyOnCallbackAdd() {
         final DreamOverlayStateController stateController = new DreamOverlayStateController();
-        final DreamOverlayStateController.OverlayToken token =
-                stateController.addOverlay(mProvider);
+        final DreamOverlayStateController.ComplicationToken token =
+                stateController.addComplication(mProvider);
 
         // Verify callback occurs on add when an overlay is already present.
         stateController.addCallback(mCallback);
-        verify(mCallback, times(1)).onOverlayChanged();
+        verify(mCallback, times(1)).onComplicationsChanged();
     }
 }
