@@ -376,14 +376,16 @@ public class Instrumentation {
             Debug.stopMethodTracing();
         }
     }
-    
+
     /**
-     * Force the global system in or out of touch mode.  This can be used if
-     * your instrumentation relies on the UI being in one more or the other
-     * when it starts.
-     * 
-     * @param inTouch Set to true to be in touch mode, false to be in
-     * focus mode.
+     * Force the global system in or out of touch mode. This can be used if your
+     * instrumentation relies on the UI being in one more or the other when it starts.
+     *
+     * <p><b>Note:</b> Starting from Android {@link Build.VERSION_CODES#TIRAMISU}, this method
+     * will only have an effect if the calling process is also the focused window owner or has
+     * {@link android.permission#MODIFY_TOUCH_MODE_STATE} permission granted.
+     *
+     * @param inTouch Set to true to be in touch mode, false to be in focus mode.
      */
     public void setInTouchMode(boolean inTouch) {
         try {
@@ -393,11 +395,11 @@ public class Instrumentation {
             // Shouldn't happen!
         }
     }
-    
+
     /**
      * Schedule a callback for when the application's main thread goes idle
      * (has no more events to process).
-     * 
+     *
      * @param recipient Called the next time the thread's message queue is
      *                  idle.
      */

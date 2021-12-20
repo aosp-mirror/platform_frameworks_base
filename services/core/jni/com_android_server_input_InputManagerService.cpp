@@ -1707,7 +1707,6 @@ static void nativePilferPointers(JNIEnv* env, jclass /* clazz */, jlong ptr, job
     im->pilferPointers(token);
 }
 
-
 static void nativeSetInputFilterEnabled(JNIEnv* /* env */, jclass /* clazz */,
         jlong ptr, jboolean enabled) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -1715,11 +1714,13 @@ static void nativeSetInputFilterEnabled(JNIEnv* /* env */, jclass /* clazz */,
     im->getInputManager()->getDispatcher().setInputFilterEnabled(enabled);
 }
 
-static void nativeSetInTouchMode(JNIEnv* /* env */, jclass /* clazz */,
-        jlong ptr, jboolean inTouchMode) {
+static jboolean nativeSetInTouchMode(JNIEnv* /* env */, jclass /* clazz */, jlong ptr,
+                                     jboolean inTouchMode, jint pid, jint uid,
+                                     jboolean hasPermission) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getDispatcher().setInTouchMode(inTouchMode);
+    return im->getInputManager()->getDispatcher().setInTouchMode(inTouchMode, pid, uid,
+                                                                 hasPermission);
 }
 
 static void nativeSetMaximumObscuringOpacityForTouch(JNIEnv* /* env */, jclass /* clazz */,
@@ -2386,7 +2387,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeRemoveInputChannel", "(JLandroid/os/IBinder;)V", (void*)nativeRemoveInputChannel},
         {"nativePilferPointers", "(JLandroid/os/IBinder;)V", (void*)nativePilferPointers},
         {"nativeSetInputFilterEnabled", "(JZ)V", (void*)nativeSetInputFilterEnabled},
-        {"nativeSetInTouchMode", "(JZ)V", (void*)nativeSetInTouchMode},
+        {"nativeSetInTouchMode", "(JZIIZ)Z", (void*)nativeSetInTouchMode},
         {"nativeSetMaximumObscuringOpacityForTouch", "(JF)V",
          (void*)nativeSetMaximumObscuringOpacityForTouch},
         {"nativeSetBlockUntrustedTouchesMode", "(JI)V", (void*)nativeSetBlockUntrustedTouchesMode},
