@@ -31,6 +31,7 @@ import static android.os.PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF
 import static android.os.PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
 import static android.os.PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
+import static android.os.UserHandle.USER_CURRENT;
 
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
@@ -893,6 +894,10 @@ public class LocationProviderManager extends
                                         MAX_FASTEST_INTERVAL_JITTER_MS);
                                 if (deltaMs
                                         < getRequest().getMinUpdateIntervalMillis() - maxJitterMs) {
+                                    if (D) {
+                                        Log.v(TAG, mName + " provider registration " + getIdentity()
+                                                + " dropped delivery - too fast");
+                                    }
                                     return false;
                                 }
 
@@ -902,6 +907,10 @@ public class LocationProviderManager extends
                                 if (smallestDisplacementM > 0.0 && location.distanceTo(
                                         mPreviousLocation)
                                         <= smallestDisplacementM) {
+                                    if (D) {
+                                        Log.v(TAG, mName + " provider registration " + getIdentity()
+                                                + " dropped delivery - too close");
+                                    }
                                     return false;
                                 }
                             }
@@ -919,7 +928,8 @@ public class LocationProviderManager extends
             if (!mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(getPermissionLevel()),
                     getIdentity())) {
                 if (D) {
-                    Log.w(TAG, "noteOp denied for " + getIdentity());
+                    Log.w(TAG,
+                            mName + " provider registration " + getIdentity() + " noteOp denied");
                 }
                 return null;
             }
@@ -1503,7 +1513,7 @@ public class LocationProviderManager extends
     public boolean isEnabled(int userId) {
         if (userId == UserHandle.USER_NULL) {
             return false;
-        } else if (userId == UserHandle.USER_CURRENT) {
+        } else if (userId == USER_CURRENT) {
             return isEnabled(mUserHelper.getCurrentUserId());
         }
 
@@ -1676,7 +1686,7 @@ public class LocationProviderManager extends
                 }
             }
             return lastLocation;
-        } else if (userId == UserHandle.USER_CURRENT) {
+        } else if (userId == USER_CURRENT) {
             return getLastLocationUnsafe(mUserHelper.getCurrentUserId(), permissionLevel,
                     isBypass, maximumAgeMs);
         }
@@ -1721,7 +1731,7 @@ public class LocationProviderManager extends
                 setLastLocation(location, runningUserIds[i]);
             }
             return;
-        } else if (userId == UserHandle.USER_CURRENT) {
+        } else if (userId == USER_CURRENT) {
             setLastLocation(location, mUserHelper.getCurrentUserId());
             return;
         }
@@ -2404,13 +2414,13 @@ public class LocationProviderManager extends
             filtered = locationResult.filter(location -> {
                 if (!location.isMock()) {
                     if (location.getLatitude() == 0 && location.getLongitude() == 0) {
-                        Log.w(TAG, "blocking 0,0 location from " + mName + " provider");
+                        Log.e(TAG, "blocking 0,0 location from " + mName + " provider");
                         return false;
                     }
                 }
 
                 if (!location.isComplete()) {
-                    Log.w(TAG, "blocking incomplete location from " + mName + " provider");
+                    Log.e(TAG, "blocking incomplete location from " + mName + " provider");
                     return false;
                 }
 
@@ -2426,6 +2436,12 @@ public class LocationProviderManager extends
         } else {
             // passive provider should get already filtered results as input
             filtered = locationResult;
+        }
+
+        Location last = getLastLocationUnsafe(USER_CURRENT, PERMISSION_FINE, true, Long.MAX_VALUE);
+        if (last != null && locationResult.get(0).getElapsedRealtimeNanos()
+                < last.getElapsedRealtimeNanos()) {
+            Log.e(TAG, "non-monotonic location received from " + mName + " provider");
         }
 
         // update last location
