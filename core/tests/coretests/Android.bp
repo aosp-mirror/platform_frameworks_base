@@ -138,3 +138,39 @@ java_genrule {
         "done && " +
         "$(location soong_zip) -o $(out) -C $(genDir)/res -D $(genDir)/res",
 }
+
+// In addition to running as part of FrameworksCoreTests, we run (a subclass of)
+// ChooserActivityTest against the unbundled ChooserActivity implementation in
+// //packages/modules/IntentResolver/. The following library provides the
+// minimum dependencies required to build that test in the unbundled package.
+android_library {
+    name: "ChooserActivityTestsLib",
+    visibility: ["//packages/modules/IntentResolver/java/tests:__pkg__"],
+
+    srcs: [
+        "src/com/android/internal/app/ChooserActivityLoggerFake.java",
+        "src/com/android/internal/app/ChooserActivityOverrideData.java",
+        "src/com/android/internal/app/ChooserActivityTest.java",
+        "src/com/android/internal/app/ChooserWrapperActivity.java",
+        "src/com/android/internal/app/IChooserWrapper.java",
+        "src/com/android/internal/app/MatcherUtils.java",
+        "src/com/android/internal/app/ResolverDataProvider.java",
+    ],
+
+    static_libs: [
+        "androidx.test.espresso.core",
+        "androidx.test.ext.junit",
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "mockito-target-minus-junit4",
+        "truth-prebuilt",
+    ],
+
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+        "framework",
+        "framework-res",
+    ],
+}
