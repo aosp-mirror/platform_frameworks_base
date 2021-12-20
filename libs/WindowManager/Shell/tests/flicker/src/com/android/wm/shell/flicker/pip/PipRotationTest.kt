@@ -27,12 +27,10 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
-import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -121,8 +119,6 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     @Presubmit
     @Test
     fun appLayerRotates_EndingBounds() {
-        // This CUJ don't work in shell transitions because of b/204570898 b/204562589 b/206753786
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayersEnd {
             visibleRegion(fixedApp.component).coversExactly(screenBoundsEnd)
         }
