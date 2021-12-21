@@ -17,6 +17,7 @@
 package com.android.server.wallpaper;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.WallpaperManager.COMMAND_REAPPLY;
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
@@ -791,6 +792,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private final Context mContext;
     private final WindowManagerInternal mWindowManagerInternal;
     private final IPackageManager mIPackageManager;
+    private final ActivityManager mActivityManager;
     private final MyPackageMonitor mMonitor;
     private final AppOpsManager mAppOpsManager;
 
@@ -938,6 +940,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
          * Primary colors histogram
          */
         WallpaperColors primaryColors;
+
+        /**
+         * If the wallpaper was set from a foreground app (instead of from a background service).
+         */
+        public boolean fromForegroundApp;
 
         WallpaperConnection connection;
         long lastDiedTime;
@@ -1688,6 +1695,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mDisplayManager.registerDisplayListener(mDisplayListener, null /* handler */);
+        mActivityManager = mContext.getSystemService(ActivityManager.class);
         mMonitor = new MyPackageMonitor();
         mColorsChangedListeners = new SparseArray<>();
 
@@ -2648,6 +2656,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
         }
 
+        final boolean fromForegroundApp = Binder.withCleanCallingIdentity(() ->
+                mActivityManager.getPackageImportance(callingPackage) == IMPORTANCE_FOREGROUND);
+
         synchronized (mLock) {
             if (DEBUG) Slog.v(TAG, "setWallpaper which=0x" + Integer.toHexString(which));
             WallpaperData wallpaper;
@@ -2670,6 +2681,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     wallpaper.imageWallpaperPending = true;
                     wallpaper.whichPending = which;
                     wallpaper.setComplete = completion;
+                    wallpaper.fromForegroundApp = fromForegroundApp;
                     wallpaper.cropHint.set(cropHint);
                     wallpaper.allowBackup = allowBackup;
                 }
@@ -3052,6 +3064,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         wallpaper.callbacks.finishBroadcast();
 
         final Intent intent = new Intent(Intent.ACTION_WALLPAPER_CHANGED);
+        intent.putExtra(WallpaperManager.EXTRA_FROM_FOREGROUND_APP, wallpaper.fromForegroundApp);
         mContext.sendBroadcastAsUser(intent, new UserHandle(mCurrentUserId));
     }
 
