@@ -25,9 +25,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
-import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
 import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
-import static android.net.NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_EXACT;
 import static android.provider.Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
@@ -77,6 +75,8 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -224,12 +224,13 @@ public class MultipathPolicyTracker {
                         "Can't get TelephonyManager for subId %d", subId));
             }
 
-            subscriberId = tele.getSubscriberId();
-            mNetworkTemplate = new NetworkTemplate(
-                    NetworkTemplate.MATCH_MOBILE, subscriberId, new String[] { subscriberId },
-                    null, NetworkStats.METERED_YES, NetworkStats.ROAMING_ALL,
-                    NetworkStats.DEFAULT_NETWORK_NO, NETWORK_TYPE_ALL, OEM_MANAGED_ALL,
-                    SUBSCRIBER_ID_MATCH_RULE_EXACT);
+            subscriberId = Objects.requireNonNull(tele.getSubscriberId(),
+                    "Null subscriber Id for subId " + subId);
+            mNetworkTemplate = new NetworkTemplate.Builder(NetworkTemplate.MATCH_MOBILE)
+                    .setSubscriberIds(Set.of(subscriberId))
+                    .setMeteredness(NetworkStats.METERED_YES)
+                    .setDefaultNetworkStatus(NetworkStats.DEFAULT_NETWORK_NO)
+                    .build();
             mUsageCallback = new UsageCallback() {
                 @Override
                 public void onThresholdReached(int networkType, String subscriberId) {
