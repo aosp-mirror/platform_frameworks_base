@@ -28,6 +28,7 @@ import com.android.systemui.media.MediaHost;
 import com.android.systemui.media.MediaHostStatesManager;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
+import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -96,16 +97,35 @@ public interface MediaModule {
     /** */
     @Provides
     @SysUISingleton
+    static Optional<MediaTttChipControllerReceiver> providesMediaTttChipControllerReceiver(
+            MediaTttFlags mediaTttFlags,
+            Context context,
+            WindowManager windowManager) {
+        if (!mediaTttFlags.isMediaTttEnabled()) {
+            return Optional.empty();
+        }
+        return Optional.of(new MediaTttChipControllerReceiver(context, windowManager));
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
     static Optional<MediaTttCommandLineHelper> providesMediaTttCommandLineHelper(
             MediaTttFlags mediaTttFlags,
             CommandRegistry commandRegistry,
             Context context,
             MediaTttChipControllerSender mediaTttChipControllerSender,
+            MediaTttChipControllerReceiver mediaTttChipControllerReceiver,
             @Main DelayableExecutor mainExecutor) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(new MediaTttCommandLineHelper(
-                commandRegistry, context, mediaTttChipControllerSender, mainExecutor));
+        return Optional.of(
+                new MediaTttCommandLineHelper(
+                        commandRegistry,
+                        context,
+                        mediaTttChipControllerSender,
+                        mediaTttChipControllerReceiver,
+                        mainExecutor));
     }
 }
