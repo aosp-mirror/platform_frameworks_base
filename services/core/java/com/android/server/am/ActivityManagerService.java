@@ -8046,7 +8046,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Obtain Incremental information if available
         if (r != null && r.info != null && r.info.packageName != null) {
             IncrementalStatesInfo incrementalStatesInfo =
-                    mPackageManagerInt.getIncrementalStatesInfo(r.info.packageName, r.uid,
+                    mPackageManagerInt.getIncrementalStatesInfo(r.info.packageName, SYSTEM_UID,
                             r.userId);
             if (incrementalStatesInfo != null) {
                 loadingProgress = incrementalStatesInfo.getProgress();
