@@ -5550,4 +5550,7 @@
          That button will fire an intent targeted for this package with the mentioned action.
          When this resource is empty, that button will not be shown. -->
     <string name="config_supervisedUserCreationPackage" translatable="false"></string>
+
+    <!-- Determines whether SafetyCenter feature is enabled. -->
+    <bool name="config_enableSafetyCenter">true</bool>
 </resources>
