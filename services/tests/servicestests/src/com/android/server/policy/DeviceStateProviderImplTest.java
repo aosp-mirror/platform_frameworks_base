@@ -160,12 +160,12 @@ public final class DeviceStateProviderImplTest {
     }
 
     @Test
-    public void create_stateWithCancelStickyRequestFlag() {
+    public void create_stateWithCancelOverrideRequestFlag() {
         String configString = "<device-state-config>\n"
                 + "    <device-state>\n"
                 + "        <identifier>1</identifier>\n"
                 + "        <flags>\n"
-                + "            <flag>FLAG_CANCEL_STICKY_REQUESTS</flag>\n"
+                + "            <flag>FLAG_CANCEL_OVERRIDE_REQUESTS</flag>\n"
                 + "        </flags>\n"
                 + "        <conditions/>\n"
                 + "    </device-state>\n"
@@ -183,7 +183,7 @@ public final class DeviceStateProviderImplTest {
 
         verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
         final DeviceState[] expectedStates = new DeviceState[]{
-                new DeviceState(1, "", DeviceState.FLAG_CANCEL_STICKY_REQUESTS),
+                new DeviceState(1, "", DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS),
                 new DeviceState(2, "", 0 /* flags */) };
         assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
     }
