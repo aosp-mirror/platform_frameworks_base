@@ -1650,6 +1650,18 @@ public final class InputManager {
     }
 
     /**
+     * Cancel all ongoing pointer gestures on all displays.
+     * @hide
+     */
+    public void cancelCurrentTouch() {
+        try {
+            mIm.cancelCurrentTouch();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Listens for changes in input devices.
      */
     public interface InputDeviceListener {
