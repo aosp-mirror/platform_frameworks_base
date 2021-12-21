@@ -547,7 +547,6 @@ final class DeletePackageHelper {
                     true /*notLaunched*/,
                     false /*hidden*/,
                     0 /*distractionFlags*/,
-                    false /*suspended*/,
                     null /*suspendParams*/,
                     false /*instantApp*/,
                     false /*virtualPreload*/,

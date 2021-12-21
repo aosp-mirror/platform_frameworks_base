@@ -22,6 +22,7 @@ import android.content.pm.ApplicationInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.permission.LegacyPermissionState;
+import com.android.server.pm.pkg.mutate.PackageStateMutator;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableImpl;
@@ -88,6 +89,7 @@ public abstract class SettingBase implements Watchable, Snappable {
      * Notify listeners that this object has changed.
      */
     protected void onChanged() {
+        PackageStateMutator.onPackageStateChanged();
         dispatchChange(this);
     }
 
@@ -122,7 +124,7 @@ public abstract class SettingBase implements Watchable, Snappable {
         return mLegacyPermissionsState;
     }
 
-    SettingBase setFlags(int pkgFlags) {
+    public SettingBase setFlags(int pkgFlags) {
         this.mPkgFlags = pkgFlags
                 & (ApplicationInfo.FLAG_SYSTEM
                         | ApplicationInfo.FLAG_EXTERNAL_STORAGE
@@ -131,7 +133,7 @@ public abstract class SettingBase implements Watchable, Snappable {
         return this;
     }
 
-    SettingBase setPrivateFlags(int pkgPrivateFlags) {
+    public SettingBase setPrivateFlags(int pkgPrivateFlags) {
         this.mPkgPrivateFlags = pkgPrivateFlags
                 & (ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
                 | ApplicationInfo.PRIVATE_FLAG_OEM

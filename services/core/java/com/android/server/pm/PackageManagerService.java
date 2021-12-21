@@ -239,6 +239,9 @@ import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.SuspendParams;
+import com.android.server.pm.pkg.mutate.PackageStateMutator;
+import com.android.server.pm.pkg.mutate.PackageStateWrite;
+import com.android.server.pm.pkg.mutate.PackageUserStateWrite;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
@@ -596,6 +599,16 @@ public class PackageManagerService extends IPackageManager.Stub
     // Methods that must be called with this lock held have
     // the suffix "Locked". Some methods may use the legacy suffix "LP"
     final PackageManagerTracedLock mLock;
+
+    // Lock alias for doing package state mutation
+    private final PackageManagerTracedLock mPackageStateWriteLock;
+
+    // Lock alias to track syncing a consistent Computer
+    private final PackageManagerTracedLock mLiveComputerSyncLock;
+
+    private final PackageStateMutator mPackageStateMutator = new PackageStateMutator(
+            this::getPackageSettingForMutation,
+            this::getDisabledPackageSettingForMutation);
 
     // Keys are String (package name), values are Package.
     @Watched
@@ -1626,6 +1639,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mInstaller = injector.getInstaller();
         mInstallLock = injector.getInstallLock();
         mLock = injector.getLock();
+        mPackageStateWriteLock = mLock;
+        mLiveComputerSyncLock = mLock;
         mPermissionManager = injector.getPermissionManagerServiceInternal();
         mSettings = injector.getSettings();
         mUserManager = injector.getUserManagerService();
@@ -1729,6 +1744,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mInjector.bootstrap(this);
         mLock = injector.getLock();
+        mPackageStateWriteLock = mLock;
+        mLiveComputerSyncLock = mLock;
         mInstallLock = injector.getInstallLock();
         LockGuard.installLock(mLock, LockGuard.INDEX_PACKAGES);
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
@@ -4909,8 +4926,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (pus.isSuspended()) {
             for (int i = 0; i < pus.getSuspendParams().size(); i++) {
                 final SuspendParams params = pus.getSuspendParams().valueAt(i);
-                if (params != null && params.appExtras != null) {
-                    allExtras.putAll(params.appExtras);
+                if (params != null && params.getAppExtras() != null) {
+                    allExtras.putAll(params.getAppExtras());
                 }
             }
         }
@@ -4983,9 +5000,9 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             for (String packageName : packagesToChange) {
                 final PackageSetting ps = mSettings.getPackageLPr(packageName);
-                if (ps != null && ps.getSuspended(userId)) {
+                if (ps != null && ps.getUserStateOrDefault(userId).isSuspended()) {
                     ps.removeSuspension(suspendingPackagePredicate, userId);
-                    if (!ps.getSuspended(userId)) {
+                    if (!ps.getUserStateOrDefault(userId).isSuspended()) {
                         unsuspendedPackages.add(ps.getPackageName());
                         unsuspendedUids.add(UserHandle.getUid(userId, ps.getAppId()));
                     }
@@ -7769,8 +7786,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (userState.isSuspended()) {
                 for (int i = 0; i < userState.getSuspendParams().size(); i++) {
                     final SuspendParams params = userState.getSuspendParams().valueAt(i);
-                    if (params != null && params.launcherExtras != null) {
-                        allExtras.putAll(params.launcherExtras);
+                    if (params != null && params.getLauncherExtras() != null) {
+                        allExtras.putAll(params.getLauncherExtras());
                     }
                 }
             }
@@ -7859,7 +7876,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             final SuspendParams suspendParams = suspendParamsMap.get(suspendingPackage);
-            return (suspendParams != null) ? suspendParams.dialogInfo : null;
+            return (suspendParams != null) ? suspendParams.getDialogInfo() : null;
         }
 
         @Override
@@ -8305,7 +8322,13 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void forEachInstalledPackage(@NonNull Consumer<AndroidPackage> actionLocked,
                 @UserIdInt int userId) {
-            PackageManagerService.this.forEachInstalledPackage(actionLocked, userId);
+            forEachInstalledPackage(true, actionLocked, userId);
+        }
+
+        @Override
+        public void forEachInstalledPackage(boolean locked,
+                @NonNull Consumer<AndroidPackage> action, int userId) {
+            PackageManagerService.this.forEachInstalledPackage(locked, action, userId);
         }
 
         @Override
@@ -8578,51 +8601,24 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void withPackageSettingsSnapshot(
                 @NonNull Consumer<Function<String, PackageStateInternal>> block) {
-            final Computer snapshot = snapshotComputer();
-
-            // This method needs to either lock or not lock consistently throughout the method,
-            // so if the live computer is returned, force a wrapping sync block.
-            if (snapshot == mLiveComputer) {
-                synchronized (mLock) {
-                    block.accept(snapshot::getPackageStateInternal);
-                }
-            } else {
-                block.accept(snapshot::getPackageStateInternal);
-            }
+            executeWithConsistentComputer(computer ->
+                    block.accept(computer::getPackageStateInternal));
         }
 
         @Override
         public <Output> Output withPackageSettingsSnapshotReturning(
                 @NonNull FunctionalUtils.ThrowingFunction<Function<String, PackageStateInternal>,
                         Output> block) {
-            final Computer snapshot = snapshotComputer();
-
-            // This method needs to either lock or not lock consistently throughout the method,
-            // so if the live computer is returned, force a wrapping sync block.
-            if (snapshot == mLiveComputer) {
-                synchronized (mLock) {
-                    return block.apply(snapshot::getPackageStateInternal);
-                }
-            } else {
-                return block.apply(snapshot::getPackageStateInternal);
-            }
+            return executeWithConsistentComputerReturning(computer ->
+                    block.apply(computer::getPackageStateInternal));
         }
 
         @Override
         public <ExceptionType extends Exception> void withPackageSettingsSnapshotThrowing(
                 @NonNull FunctionalUtils.ThrowingCheckedConsumer<Function<String,
                         PackageStateInternal>, ExceptionType> block) throws ExceptionType {
-            final Computer snapshot = snapshotComputer();
-
-            // This method needs to either lock or not lock consistently throughout the method,
-            // so if the live computer is returned, force a wrapping sync block.
-            if (snapshot == mLiveComputer) {
-                synchronized (mLock) {
-                    block.accept(snapshot::getPackageStateInternal);
-                }
-            } else {
-                block.accept(snapshot::getPackageStateInternal);
-            }
+            executeWithConsistentComputerThrowing(computer ->
+                    block.accept(computer::getPackageStateInternal));
         }
 
         @Override
@@ -8632,17 +8628,9 @@ public class PackageManagerService extends IPackageManager.Stub
                                 Function<String, PackageStateInternal>, ExceptionOne,
                                 ExceptionTwo> block)
                 throws ExceptionOne, ExceptionTwo {
-            final Computer snapshot = snapshotComputer();
-
-            // This method needs to either lock or not lock consistently throughout the method,
-            // so if the live computer is returned, force a wrapping sync block.
-            if (snapshot == mLiveComputer) {
-                synchronized (mLock) {
-                    block.accept(snapshot::getPackageStateInternal);
-                }
-            } else {
-                block.accept(snapshot::getPackageStateInternal);
-            }
+            executeWithConsistentComputerThrowing2(
+                    (FunctionalUtils.ThrowingChecked2Consumer<Computer, ExceptionOne,
+                            ExceptionTwo>) computer -> block.accept(computer::getPackageStateInternal));
         }
 
         @Override
@@ -8652,17 +8640,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                 Function<String, PackageStateInternal>, Output,
                                 ExceptionType> block)
                 throws ExceptionType {
-            final Computer snapshot = snapshotComputer();
-
-            // This method needs to either lock or not lock consistently throughout the method,
-            // so if the live computer is returned, force a wrapping sync block.
-            if (snapshot == mLiveComputer) {
-                synchronized (mLock) {
-                    return block.apply(snapshot::getPackageStateInternal);
-                }
-            } else {
-                return block.apply(snapshot::getPackageStateInternal);
-            }
+            return executeWithConsistentComputerReturningThrowing(computer ->
+                    block.apply(computer::getPackageStateInternal));
         }
 
         @Override
@@ -8670,6 +8649,20 @@ public class PackageManagerService extends IPackageManager.Stub
                 boolean migrateAppsData) {
             PackageManagerService.this.mAppDataHelper.reconcileAppsData(userId, flags,
                     migrateAppsData);
+        }
+
+        @NonNull
+        @Override
+        public PackageStateMutator.InitialState recordInitialState() {
+            return PackageManagerService.this.recordInitialState();
+        }
+
+        @Nullable
+        @Override
+        public PackageStateMutator.Result commitPackageStateMutation(
+                @Nullable PackageStateMutator.InitialState state,
+                @NonNull Consumer<PackageStateMutator> consumer) {
+            return PackageManagerService.this.commitPackageStateMutation(state, consumer);
         }
     }
 
@@ -8713,7 +8706,15 @@ public class PackageManagerService extends IPackageManager.Stub
     @Nullable
     @GuardedBy("mLock")
     PackageSetting getPackageSettingForMutation(String packageName) {
-        return (PackageSetting) mComputer.getPackageStateInternal(packageName);
+        return mSettings.getPackageLPr(packageName);
+    }
+
+    // TODO: Remove
+    @Deprecated
+    @Nullable
+    @GuardedBy("mLock")
+    PackageSetting getDisabledPackageSettingForMutation(String packageName) {
+        return mSettings.getDisabledSystemPkgLPr(packageName);
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -8721,7 +8722,7 @@ public class PackageManagerService extends IPackageManager.Stub
     PackageStateInternal getPackageStateInternal(String packageName) {
         Computer computer = snapshotComputer();
         if (computer == mLiveComputer) {
-            synchronized (mLock) {
+            synchronized (mLiveComputerSyncLock) {
                 PackageSetting pkgSetting =
                         (PackageSetting) computer.getPackageStateInternal(packageName);
                 if (pkgSetting == null) {
@@ -8730,15 +8731,16 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 return new PackageSetting(pkgSetting);
             }
+        } else {
+            return computer.getPackageStateInternal(packageName);
         }
-        return computer.getPackageStateInternal(packageName);
     }
 
     @Nullable
     PackageStateInternal getPackageStateInternal(String packageName, int callingUid) {
         Computer computer = snapshotComputer();
         if (computer == mLiveComputer) {
-            synchronized (mLock) {
+            synchronized (mLiveComputerSyncLock) {
                 PackageSetting pkgSetting =
                         (PackageSetting) computer.getPackageStateInternal(packageName, callingUid);
                 if (pkgSetting == null) {
@@ -8747,8 +8749,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 return new PackageSetting(pkgSetting);
             }
+        } else {
+            return computer.getPackageStateInternal(packageName, callingUid);
         }
-        return computer.getPackageStateInternal(packageName, callingUid);
     }
 
     @Nullable
@@ -8756,7 +8759,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int callingUid, @UserIdInt int userId) {
         Computer computer = snapshotComputer();
         if (computer == mLiveComputer) {
-            synchronized (mLock) {
+            synchronized (mLiveComputerSyncLock) {
                 PackageSetting pkgSetting =
                         (PackageSetting) filterPackageStateForInstalledAndFiltered(computer,
                                 packageName, callingUid, userId);
@@ -8765,9 +8768,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 return new PackageSetting(pkgSetting);
             }
+        } else {
+            return filterPackageStateForInstalledAndFiltered(computer, packageName, callingUid,
+                    userId);
         }
-
-        return filterPackageStateForInstalledAndFiltered(computer, packageName, callingUid, userId);
     }
 
     @Nullable
@@ -8795,16 +8799,8 @@ public class PackageManagerService extends IPackageManager.Stub
         Computer computer = snapshotComputer();
         if (computer == mLiveComputer) {
             return new ArrayMap<>(computer.getPackageStates());
-        }
-        return computer.getPackageStates();
-    }
-
-    void forEachPackage(Consumer<AndroidPackage> actionLocked) {
-        synchronized (mLock) {
-            int numPackages = mPackages.size();
-            for (int i = 0; i < numPackages; i++) {
-                actionLocked.accept(mPackages.valueAt(i));
-            }
+        } else {
+            return computer.getPackageStates();
         }
     }
 
@@ -8817,17 +8813,31 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void forEachPackageState(boolean locked, Consumer<PackageStateInternal> action) {
+    void forEachPackageState(boolean locked, Consumer<PackageStateInternal> action) {
         if (locked) {
-            forEachPackageSetting(action::accept);
+            synchronized (mLiveComputerSyncLock) {
+                forEachPackageState(mComputer.getPackageStates(), action);
+            }
         } else {
             Computer computer = snapshotComputer();
             if (computer == mLiveComputer) {
-                synchronized (mLock) {
+                synchronized (mLiveComputerSyncLock) {
                     forEachPackageState(computer.getPackageStates(), action);
-                };
+                }
+            } else {
+                forEachPackageState(computer.getPackageStates(), action);
             }
-            forEachPackageState(computer.getPackageStates(), action);
+        }
+    }
+
+    void forEachPackage(Consumer<AndroidPackage> action) {
+        Computer computer = snapshotComputer();
+        if (computer == mLiveComputer) {
+            synchronized (mLiveComputerSyncLock) {
+                forEachPackage(computer.getPackageStates(), action);
+            }
+        } else {
+            forEachPackage(computer.getPackageStates(), action);
         }
     }
 
@@ -8841,18 +8851,103 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void forEachInstalledPackage(@NonNull Consumer<AndroidPackage> actionLocked,
-            @UserIdInt int userId) {
-        synchronized (mLock) {
-            int numPackages = mPackages.size();
-            for (int i = 0; i < numPackages; i++) {
-                AndroidPackage pkg = mPackages.valueAt(i);
-                PackageSetting setting = mSettings.getPackageLPr(pkg.getPackageName());
-                if (setting == null || !setting.getInstalled(userId)) {
-                    continue;
-                }
-                actionLocked.accept(pkg);
+    private void forEachPackage(
+            @NonNull ArrayMap<String, ? extends PackageStateInternal> packageStates,
+            @NonNull Consumer<AndroidPackage> consumer) {
+        int size = packageStates.size();
+        for (int index = 0; index < size; index++) {
+            PackageStateInternal packageState = packageStates.valueAt(index);
+            if (packageState.getPkg() != null) {
+                consumer.accept(packageState.getPkg());
             }
+        }
+    }
+
+    void forEachInstalledPackage(boolean locked, @NonNull Consumer<AndroidPackage> action,
+            @UserIdInt int userId) {
+        Consumer<PackageStateInternal> actionWrapped = packageState -> {
+            if (packageState.getPkg() != null
+                    && packageState.getUserStateOrDefault(userId).isInstalled()) {
+                action.accept(packageState.getPkg());
+            }
+        };
+        if (locked) {
+            synchronized (mLiveComputerSyncLock) {
+                forEachPackageState(mComputer.getPackageStates(), actionWrapped);
+            }
+        } else {
+            Computer computer = snapshotComputer();
+            if (computer == mLiveComputer) {
+                synchronized (mLiveComputerSyncLock) {
+                    forEachPackageState(computer.getPackageStates(), actionWrapped);
+                }
+            } else {
+                forEachPackageState(computer.getPackageStates(), actionWrapped);
+            }
+        }
+    }
+
+    private void executeWithConsistentComputer(
+            @NonNull FunctionalUtils.ThrowingConsumer<Computer> consumer) {
+        Computer computer = snapshotComputer();
+        if (computer == mLiveComputer) {
+            synchronized (mLiveComputerSyncLock) {
+                consumer.accept(computer);
+            }
+        } else {
+            consumer.accept(computer);
+        }
+    }
+
+    private <T> T executeWithConsistentComputerReturning(
+            @NonNull FunctionalUtils.ThrowingFunction<Computer, T> function) {
+        Computer computer = snapshotComputer();
+        if (computer == mLiveComputer) {
+            synchronized (mLiveComputerSyncLock) {
+                return function.apply(computer);
+            }
+        } else {
+            return function.apply(computer);
+        }
+    }
+
+    private <ExceptionType extends Exception> void executeWithConsistentComputerThrowing(
+            @NonNull FunctionalUtils.ThrowingCheckedConsumer<Computer, ExceptionType> consumer)
+            throws ExceptionType {
+        Computer computer = snapshotComputer();
+        if (computer == mLiveComputer) {
+            synchronized (mLiveComputerSyncLock) {
+                consumer.accept(computer);
+            }
+        } else {
+            consumer.accept(computer);
+        }
+    }
+
+    private <ExceptionOne extends Exception, ExceptionTwo extends Exception> void
+    executeWithConsistentComputerThrowing2(
+            @NonNull FunctionalUtils.ThrowingChecked2Consumer<Computer, ExceptionOne,
+                    ExceptionTwo> consumer) throws ExceptionOne, ExceptionTwo {
+        Computer computer = snapshotComputer();
+        if (computer == mLiveComputer) {
+            synchronized (mLiveComputerSyncLock) {
+                consumer.accept(computer);
+            }
+        } else {
+            consumer.accept(computer);
+        }
+    }
+
+    private <T, ExceptionType extends Exception> T executeWithConsistentComputerReturningThrowing(
+            @NonNull FunctionalUtils.ThrowingCheckedFunction<Computer, T, ExceptionType> function)
+            throws ExceptionType {
+        Computer computer = snapshotComputer();
+        if (computer == mLiveComputer) {
+            synchronized (mLiveComputerSyncLock) {
+                return function.apply(computer);
+            }
+        } else {
+            return function.apply(computer);
         }
     }
 
@@ -9051,7 +9146,8 @@ public class PackageManagerService extends IPackageManager.Stub
         enforceOwnerRights(packageName, Binder.getCallingUid());
         final boolean changed;
         synchronized (mLock) {
-            changed = mSettings.getPackageLPr(packageName).setMimeGroup(mimeGroup, mimeTypes);
+            changed = mSettings.getPackageLPr(packageName).setMimeGroup(mimeGroup,
+                    new ArraySet<>(mimeTypes));
         }
         if (changed) {
             applyMimeGroupChanges(packageName, mimeGroup);
@@ -9553,4 +9649,62 @@ public class PackageManagerService extends IPackageManager.Stub
         return new Pair<>(rescanFlags, reparseFlags);
     }
 
+
+    /**
+     * @see PackageManagerInternal#recordInitialState()
+     */
+    @NonNull
+    public PackageStateMutator.InitialState recordInitialState() {
+        return mPackageStateMutator.initialState(mChangedPackagesSequenceNumber);
+    }
+
+    /**
+     * @see PackageManagerInternal#commitPackageStateMutation(PackageStateMutator.InitialState,
+     * Consumer)
+     */
+    @NonNull
+    public PackageStateMutator.Result commitPackageStateMutation(
+            @Nullable PackageStateMutator.InitialState initialState,
+            @NonNull Consumer<PackageStateMutator> consumer) {
+        synchronized (mPackageStateWriteLock) {
+            final PackageStateMutator.Result result = mPackageStateMutator.generateResult(
+                    initialState, mChangedPackagesSequenceNumber);
+            if (result != PackageStateMutator.Result.SUCCESS) {
+                return result;
+            }
+
+            consumer.accept(mPackageStateMutator);
+            onChanged();
+        }
+
+        return PackageStateMutator.Result.SUCCESS;
+    }
+
+    /**
+     * @see PackageManagerInternal#commitPackageStateMutation(PackageStateMutator.InitialState,
+     * Consumer)
+     */
+    @NonNull
+    public PackageStateMutator.Result commitPackageStateMutation(
+            @Nullable PackageStateMutator.InitialState initialState, @NonNull String packageName,
+            @NonNull Consumer<PackageStateWrite> consumer) {
+        synchronized (mPackageStateWriteLock) {
+            final PackageStateMutator.Result result = mPackageStateMutator.generateResult(
+                    initialState, mChangedPackagesSequenceNumber);
+            if (result != PackageStateMutator.Result.SUCCESS) {
+                return result;
+            }
+
+            PackageStateWrite state = mPackageStateMutator.forPackage(packageName);
+            if (state == null) {
+                return PackageStateMutator.Result.SPECIFIC_PACKAGE_NULL;
+            } else {
+                consumer.accept(state);
+            }
+
+            onChanged();
+        }
+
+        return PackageStateMutator.Result.SUCCESS;
+    }
 }

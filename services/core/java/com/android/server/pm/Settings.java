@@ -114,6 +114,7 @@ import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.permission.LegacyPermissionState.PermissionState;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.SuspendParams;
@@ -162,6 +163,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * Holds information about dynamic settings.
@@ -257,7 +259,7 @@ public final class Settings implements Watchable, Snappable {
         public static final int SIGNATURE_MALFORMED_RECOVER = 3;
     }
 
-    private static final boolean DEBUG_STOPPED = false;
+    static final boolean DEBUG_STOPPED = false;
     private static final boolean DEBUG_MU = false;
     private static final boolean DEBUG_KERNEL = false;
     private static final boolean DEBUG_PARSER = false;
@@ -625,7 +627,15 @@ public final class Settings implements Watchable, Snappable {
         mOtherAppIds = new WatchedSparseArray<>();
         mPermissions = new LegacyPermissionSettings(lock);
         mRuntimePermissionsPersistence = new RuntimePermissionPersistence(
-                runtimePermissionsPersistence);
+                runtimePermissionsPersistence, new Consumer<Integer>() {
+            @Override
+            public void accept(Integer userId) {
+                synchronized (mLock) {
+                    mRuntimePermissionsPersistence.writeStateForUserSync(userId,
+                            mPermissionDataProvider, mPackages, mSharedUsers);
+                }
+            }
+        });
         mPermissionDataProvider = permissionDataProvider;
 
         mSystemDir = new File(dataDir, "system");
@@ -989,7 +999,6 @@ public final class Settings implements Watchable, Snappable {
                                 true /*notLaunched*/,
                                 false /*hidden*/,
                                 0 /*distractionFlags*/,
-                                false /*suspended*/,
                                 null /*suspendParams*/,
                                 instantApp,
                                 virtualPreload,
@@ -1423,7 +1432,7 @@ public final class Settings implements Watchable, Snappable {
 
     void writeAllRuntimePermissionsLPr() {
         for (int userId : UserManagerService.getInstance().getUserIds()) {
-            mRuntimePermissionsPersistence.writeStateForUserAsyncLPr(userId);
+            mRuntimePermissionsPersistence.writeStateForUserAsync(userId);
         }
     }
 
@@ -1432,15 +1441,15 @@ public final class Settings implements Watchable, Snappable {
     }
 
     void updateRuntimePermissionsFingerprintLPr(@UserIdInt int userId) {
-        mRuntimePermissionsPersistence.updateRuntimePermissionsFingerprintLPr(userId);
+        mRuntimePermissionsPersistence.updateRuntimePermissionsFingerprint(userId);
     }
 
     int getDefaultRuntimePermissionsVersionLPr(int userId) {
-        return mRuntimePermissionsPersistence.getVersionLPr(userId);
+        return mRuntimePermissionsPersistence.getVersion(userId);
     }
 
     void setDefaultRuntimePermissionsVersionLPr(int version, int userId) {
-        mRuntimePermissionsPersistence.setVersionLPr(version, userId);
+        mRuntimePermissionsPersistence.setVersion(version, userId);
     }
 
     void setPermissionControllerVersion(long version) {
@@ -1646,7 +1655,6 @@ public final class Settings implements Watchable, Snappable {
                                 false /*notLaunched*/,
                                 false /*hidden*/,
                                 0 /*distractionFlags*/,
-                                false /*suspended*/,
                                 null /*suspendParams*/,
                                 false /*instantApp*/,
                                 false /*virtualPreload*/,
@@ -1816,10 +1824,9 @@ public final class Settings implements Watchable, Snappable {
                         setBlockUninstallLPw(userId, name, true);
                     }
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
-                            hidden, distractionFlags, suspended, suspendParamsMap,
-                            instantApp, virtualPreload, enabledCaller, enabledComponents,
-                            disabledComponents, installReason, uninstallReason, harmfulAppWarning,
-                            splashScreenTheme);
+                            hidden, distractionFlags, suspendParamsMap, instantApp, virtualPreload,
+                            enabledCaller, enabledComponents, disabledComponents, installReason,
+                            uninstallReason, harmfulAppWarning, splashScreenTheme);
 
                     mDomainVerificationManager.setLegacyUserState(name, userId, verifState);
                 } else if (tagName.equals("preferred-activities")) {
@@ -3100,7 +3107,8 @@ public final class Settings implements Watchable, Snappable {
         }
 
         for (UserInfo user : users) {
-            mRuntimePermissionsPersistence.readStateForUserSyncLPr(user.id);
+            mRuntimePermissionsPersistence.readStateForUserSync(user.id, getInternalVersion(),
+                    mPackages, mSharedUsers, getUserRuntimePermissionsFile(user.id));
         }
 
         /*
@@ -3124,7 +3132,8 @@ public final class Settings implements Watchable, Snappable {
     }
 
     void readPermissionStateForUserSyncLPr(@UserIdInt int userId) {
-        mRuntimePermissionsPersistence.readStateForUserSyncLPr(userId);
+        mRuntimePermissionsPersistence.readStateForUserSync(userId, getInternalVersion(),
+                mPackages, mSharedUsers, getUserRuntimePermissionsFile(userId));
     }
 
     void applyDefaultPreferredAppsLPw(int userId) {
@@ -4120,7 +4129,7 @@ public final class Settings implements Watchable, Snappable {
         file.delete();
         removeCrossProfileIntentFiltersLPw(userId);
 
-        mRuntimePermissionsPersistence.onUserRemovedLPw(userId);
+        mRuntimePermissionsPersistence.onUserRemoved(userId);
         mDomainVerificationManager.clearUser(userId);
 
         writePackageListLPr();
@@ -4485,24 +4494,25 @@ public final class Settings implements Watchable, Snappable {
                 }
             }
             for (UserInfo user : users) {
+                final PackageUserStateInternal userState = ps.getUserStateOrDefault(user.id);
                 pw.print(checkinTag);
                 pw.print("-");
                 pw.print("usr");
                 pw.print(",");
                 pw.print(user.id);
                 pw.print(",");
-                pw.print(ps.getInstalled(user.id) ? "I" : "i");
-                pw.print(ps.getHidden(user.id) ? "B" : "b");
-                pw.print(ps.getSuspended(user.id) ? "SU" : "su");
-                pw.print(ps.getStopped(user.id) ? "S" : "s");
-                pw.print(ps.getNotLaunched(user.id) ? "l" : "L");
-                pw.print(ps.getInstantApp(user.id) ? "IA" : "ia");
-                pw.print(ps.getVirtualPreload(user.id) ? "VPI" : "vpi");
-                String harmfulAppWarning = ps.getHarmfulAppWarning(user.id);
+                pw.print(userState.isInstalled() ? "I" : "i");
+                pw.print(userState.isHidden() ? "B" : "b");
+                pw.print(userState.isSuspended() ? "SU" : "su");
+                pw.print(userState.isStopped() ? "S" : "s");
+                pw.print(userState.isNotLaunched() ? "l" : "L");
+                pw.print(userState.isInstantApp() ? "IA" : "ia");
+                pw.print(userState.isVirtualPreload() ? "VPI" : "vpi");
+                String harmfulAppWarning = userState.getHarmfulAppWarning();
                 pw.print(harmfulAppWarning != null ? "HA" : "ha");
                 pw.print(",");
-                pw.print(ps.getEnabled(user.id));
-                String lastDisabledAppCaller = ps.getLastDisabledAppCaller(user.id);
+                pw.print(userState.getEnabledState());
+                String lastDisabledAppCaller = userState.getLastDisableAppCaller();
                 pw.print(",");
                 pw.print(lastDisabledAppCaller != null ? lastDisabledAppCaller : "?");
                 pw.print(",");
@@ -4819,48 +4829,48 @@ public final class Settings implements Watchable, Snappable {
         }
 
         for (UserInfo user : users) {
+            final PackageUserStateInternal userState = ps.getUserStateOrDefault(user.id);
             pw.print(prefix); pw.print("  User "); pw.print(user.id); pw.print(": ");
             pw.print("ceDataInode=");
-            pw.print(ps.getCeDataInode(user.id));
+            pw.print(userState.getCeDataInode());
             pw.print(" installed=");
-            pw.print(ps.getInstalled(user.id));
+            pw.print(userState.isInstalled());
             pw.print(" hidden=");
-            pw.print(ps.getHidden(user.id));
+            pw.print(userState.isHidden());
             pw.print(" suspended=");
-            pw.print(ps.getSuspended(user.id));
+            pw.print(userState.isSuspended());
             pw.print(" distractionFlags=");
-            pw.print(ps.getDistractionFlags(user.id));
+            pw.print(userState.getDistractionFlags());
             pw.print(" stopped=");
-            pw.print(ps.getStopped(user.id));
+            pw.print(userState.isStopped());
             pw.print(" notLaunched=");
-            pw.print(ps.getNotLaunched(user.id));
+            pw.print(userState.isNotLaunched());
             pw.print(" enabled=");
-            pw.print(ps.getEnabled(user.id));
+            pw.print(userState.getEnabledState());
             pw.print(" instant=");
-            pw.print(ps.getInstantApp(user.id));
+            pw.print(userState.isInstantApp());
             pw.print(" virtual=");
-            pw.print(ps.getVirtualPreload(user.id));
+            pw.println(userState.isVirtualPreload());
             pw.print(" installReason=");
-            pw.println(ps.getInstallReason(user.id));
+            pw.println(userState.getInstallReason());
 
-            if (ps.getSuspended(user.id)) {
+            if (userState.isSuspended()) {
                 pw.print(prefix);
                 pw.println("  Suspend params:");
-                final PackageUserStateInternal pus = ps.readUserState(user.id);
-                for (int i = 0; i < pus.getSuspendParams().size(); i++) {
+                for (int i = 0; i < userState.getSuspendParams().size(); i++) {
                     pw.print(prefix);
                     pw.print("    suspendingPackage=");
-                    pw.print(pus.getSuspendParams().keyAt(i));
-                    final SuspendParams params = pus.getSuspendParams().valueAt(i);
+                    pw.print(userState.getSuspendParams().keyAt(i));
+                    final SuspendParams params = userState.getSuspendParams().valueAt(i);
                     if (params != null) {
                         pw.print(" dialogInfo=");
-                        pw.print(params.dialogInfo);
+                        pw.print(params.getDialogInfo());
                     }
                     pw.println();
                 }
             }
 
-            final OverlayPaths overlayPaths = ps.getOverlayPaths(user.id);
+            final OverlayPaths overlayPaths = userState.getOverlayPaths();
             if (overlayPaths != null) {
                 if (!overlayPaths.getOverlayPaths().isEmpty()) {
                     pw.print(prefix);
@@ -4883,7 +4893,7 @@ public final class Settings implements Watchable, Snappable {
             }
 
             final Map<String, OverlayPaths> sharedLibraryOverlayPaths =
-                    ps.getOverlayPathsForLibrary(user.id);
+                    userState.getSharedLibraryOverlayPaths();
             if (sharedLibraryOverlayPaths != null) {
                 for (Map.Entry<String, OverlayPaths> libOverlayPaths :
                         sharedLibraryOverlayPaths.entrySet()) {
@@ -4916,7 +4926,7 @@ public final class Settings implements Watchable, Snappable {
                 }
             }
 
-            String lastDisabledAppCaller = ps.getLastDisabledAppCaller(user.id);
+            String lastDisabledAppCaller = userState.getLastDisableAppCaller();
             if (lastDisabledAppCaller != null) {
                 pw.print(prefix); pw.print("    lastDisabledCaller: ");
                         pw.println(lastDisabledAppCaller);
@@ -4929,21 +4939,21 @@ public final class Settings implements Watchable, Snappable {
                         .getPermissionStates(user.id), dumpAll);
             }
 
-            String harmfulAppWarning = ps.getHarmfulAppWarning(user.id);
+            String harmfulAppWarning = userState.getHarmfulAppWarning();
             if (harmfulAppWarning != null) {
                 pw.print(prefix); pw.print("      harmfulAppWarning: ");
                 pw.println(harmfulAppWarning);
             }
 
             if (permissionNames == null) {
-                ArraySet<String> cmp = ps.getDisabledComponents(user.id);
+                Set<String> cmp = userState.getDisabledComponents();
                 if (cmp != null && cmp.size() > 0) {
                     pw.print(prefix); pw.println("    disabledComponents:");
                     for (String s : cmp) {
                         pw.print(prefix); pw.print("      "); pw.println(s);
                     }
                 }
-                cmp = ps.getEnabledComponents(user.id);
+                cmp = userState.getEnabledComponents();
                 if (cmp != null && cmp.size() > 0) {
                     pw.print(prefix); pw.println("    enabledComponents:");
                     for (String s : cmp) {
@@ -5291,9 +5301,10 @@ public final class Settings implements Watchable, Snappable {
 
     public void writePermissionStateForUserLPr(int userId, boolean sync) {
         if (sync) {
-            mRuntimePermissionsPersistence.writeStateForUserSyncLPr(userId);
+            mRuntimePermissionsPersistence.writeStateForUserSync(userId, mPermissionDataProvider,
+                    mPackages, mSharedUsers);
         } else {
-            mRuntimePermissionsPersistence.writeStateForUserAsyncLPr(userId);
+            mRuntimePermissionsPersistence.writeStateForUserAsync(userId);
         }
     }
 
@@ -5368,7 +5379,7 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    private final class RuntimePermissionPersistence {
+    private static final class RuntimePermissionPersistence {
         private static final long WRITE_PERMISSIONS_DELAY_MILLIS = 200;
         private static final long MAX_WRITE_PERMISSIONS_DELAY_MILLIS = 2000;
 
@@ -5380,6 +5391,8 @@ public final class Settings implements Watchable, Snappable {
         private final RuntimePermissionsPersistence mPersistence;
 
         private final Handler mHandler = new MyHandler();
+
+        private final Object mLock = new Object();
 
         @GuardedBy("mLock")
         private final SparseBooleanArray mWriteScheduled = new SparseBooleanArray();
@@ -5400,45 +5413,58 @@ public final class Settings implements Watchable, Snappable {
         // The mapping keys are user ids.
         private final SparseBooleanArray mPermissionUpgradeNeeded = new SparseBooleanArray();
 
-        public RuntimePermissionPersistence(RuntimePermissionsPersistence persistence) {
+        // This is a hack to allow this class to invoke a write using Settings's data structures,
+        // to facilitate moving to a finer scoped lock without a significant refactor.
+        private final Consumer<Integer> mInvokeWriteUserStateAsyncCallback;
+
+        public RuntimePermissionPersistence(RuntimePermissionsPersistence persistence,
+                Consumer<Integer> invokeWriteUserStateAsyncCallback) {
             mPersistence = persistence;
+            mInvokeWriteUserStateAsyncCallback = invokeWriteUserStateAsyncCallback;
         }
 
-        @GuardedBy("Settings.this.mLock")
-        int getVersionLPr(int userId) {
-            return mVersions.get(userId, INITIAL_VERSION);
-        }
-
-        @GuardedBy("Settings.this.mLock")
-        void setVersionLPr(int version, int userId) {
-            mVersions.put(userId, version);
-            writeStateForUserAsyncLPr(userId);
-        }
-
-        @GuardedBy("Settings.this.mLock")
-        public boolean isPermissionUpgradeNeeded(int userId) {
-            return mPermissionUpgradeNeeded.get(userId, true);
-        }
-
-        @GuardedBy("Settings.this.mLock")
-        public void updateRuntimePermissionsFingerprintLPr(@UserIdInt int userId) {
-            if (mExtendedFingerprint == null) {
-                throw new RuntimeException("The version of the permission controller hasn't been "
-                        + "set before trying to update the fingerprint.");
+        int getVersion(int userId) {
+            synchronized (mLock) {
+                return mVersions.get(userId, INITIAL_VERSION);
             }
-            mFingerprints.put(userId, mExtendedFingerprint);
-            writeStateForUserAsyncLPr(userId);
+        }
+
+        void setVersion(int version, int userId) {
+            synchronized (mLock) {
+                mVersions.put(userId, version);
+                writeStateForUserAsync(userId);
+            }
+        }
+
+        public boolean isPermissionUpgradeNeeded(int userId) {
+            synchronized (mLock) {
+                return mPermissionUpgradeNeeded.get(userId, true);
+            }
+        }
+
+        public void updateRuntimePermissionsFingerprint(@UserIdInt int userId) {
+            synchronized (mLock) {
+                if (mExtendedFingerprint == null) {
+                    throw new RuntimeException(
+                            "The version of the permission controller hasn't been "
+                                    + "set before trying to update the fingerprint.");
+                }
+                mFingerprints.put(userId, mExtendedFingerprint);
+                writeStateForUserAsync(userId);
+            }
         }
 
         public void setPermissionControllerVersion(long version) {
-            int numUser = mFingerprints.size();
-            mExtendedFingerprint = getExtendedFingerprint(version);
+            synchronized (mLock) {
+                int numUser = mFingerprints.size();
+                mExtendedFingerprint = getExtendedFingerprint(version);
 
-            for (int i = 0;  i < numUser; i++) {
-                int userId = mFingerprints.keyAt(i);
-                String fingerprint = mFingerprints.valueAt(i);
-                mPermissionUpgradeNeeded.put(userId,
-                        !TextUtils.equals(mExtendedFingerprint, fingerprint));
+                for (int i = 0; i < numUser; i++) {
+                    int userId = mFingerprints.keyAt(i);
+                    String fingerprint = mFingerprints.valueAt(i);
+                    mPermissionUpgradeNeeded.put(userId,
+                            !TextUtils.equals(mExtendedFingerprint, fingerprint));
+                }
             }
         }
 
@@ -5446,84 +5472,92 @@ public final class Settings implements Watchable, Snappable {
             return PackagePartitions.FINGERPRINT + "?pc_version=" + version;
         }
 
-        public void writeStateForUserAsyncLPr(int userId) {
-            final long currentTimeMillis = SystemClock.uptimeMillis();
+        public void writeStateForUserAsync(int userId) {
+            synchronized (mLock) {
+                final long currentTimeMillis = SystemClock.uptimeMillis();
 
-            if (mWriteScheduled.get(userId)) {
-                mHandler.removeMessages(userId);
+                if (mWriteScheduled.get(userId)) {
+                    mHandler.removeMessages(userId);
 
-                // If enough time passed, write without holding off anymore.
-                final long lastNotWrittenMutationTimeMillis = mLastNotWrittenMutationTimesMillis
-                        .get(userId);
-                final long timeSinceLastNotWrittenMutationMillis = currentTimeMillis
-                        - lastNotWrittenMutationTimeMillis;
-                if (timeSinceLastNotWrittenMutationMillis >= MAX_WRITE_PERMISSIONS_DELAY_MILLIS) {
-                    mHandler.obtainMessage(userId).sendToTarget();
-                    return;
+                    // If enough time passed, write without holding off anymore.
+                    final long lastNotWrittenMutationTimeMillis = mLastNotWrittenMutationTimesMillis
+                            .get(userId);
+                    final long timeSinceLastNotWrittenMutationMillis = currentTimeMillis
+                            - lastNotWrittenMutationTimeMillis;
+                    if (timeSinceLastNotWrittenMutationMillis
+                            >= MAX_WRITE_PERMISSIONS_DELAY_MILLIS) {
+                        mHandler.obtainMessage(userId).sendToTarget();
+                        return;
+                    }
+
+                    // Hold off a bit more as settings are frequently changing.
+                    final long maxDelayMillis = Math.max(lastNotWrittenMutationTimeMillis
+                            + MAX_WRITE_PERMISSIONS_DELAY_MILLIS - currentTimeMillis, 0);
+                    final long writeDelayMillis = Math.min(WRITE_PERMISSIONS_DELAY_MILLIS,
+                            maxDelayMillis);
+
+                    Message message = mHandler.obtainMessage(userId);
+                    mHandler.sendMessageDelayed(message, writeDelayMillis);
+                } else {
+                    mLastNotWrittenMutationTimesMillis.put(userId, currentTimeMillis);
+                    Message message = mHandler.obtainMessage(userId);
+                    mHandler.sendMessageDelayed(message, WRITE_PERMISSIONS_DELAY_MILLIS);
+                    mWriteScheduled.put(userId, true);
                 }
-
-                // Hold off a bit more as settings are frequently changing.
-                final long maxDelayMillis = Math.max(lastNotWrittenMutationTimeMillis
-                        + MAX_WRITE_PERMISSIONS_DELAY_MILLIS - currentTimeMillis, 0);
-                final long writeDelayMillis = Math.min(WRITE_PERMISSIONS_DELAY_MILLIS,
-                        maxDelayMillis);
-
-                Message message = mHandler.obtainMessage(userId);
-                mHandler.sendMessageDelayed(message, writeDelayMillis);
-            } else {
-                mLastNotWrittenMutationTimesMillis.put(userId, currentTimeMillis);
-                Message message = mHandler.obtainMessage(userId);
-                mHandler.sendMessageDelayed(message, WRITE_PERMISSIONS_DELAY_MILLIS);
-                mWriteScheduled.put(userId, true);
             }
         }
 
-        public void writeStateForUserSyncLPr(int userId) {
-            mHandler.removeMessages(userId);
-            mWriteScheduled.delete(userId);
+        public void writeStateForUserSync(int userId, @NonNull LegacyPermissionDataProvider
+                legacyPermissionDataProvider,
+                @NonNull WatchedArrayMap<String, ? extends PackageStateInternal> packageStates,
+                @NonNull WatchedArrayMap<String, SharedUserSetting> sharedUsers) {
+            synchronized (mLock) {
+                mHandler.removeMessages(userId);
+                mWriteScheduled.delete(userId);
 
-            mPermissionDataProvider.writeLegacyPermissionStateTEMP();
+                legacyPermissionDataProvider.writeLegacyPermissionStateTEMP();
 
-            int version = mVersions.get(userId, INITIAL_VERSION);
+                int version = mVersions.get(userId, INITIAL_VERSION);
 
-            String fingerprint = mFingerprints.get(userId);
+                String fingerprint = mFingerprints.get(userId);
 
-            Map<String, List<RuntimePermissionsState.PermissionState>> packagePermissions =
-                    new ArrayMap<>();
-            int packagesSize = mPackages.size();
-            for (int i = 0; i < packagesSize; i++) {
-                String packageName = mPackages.keyAt(i);
-                PackageSetting packageSetting = mPackages.valueAt(i);
-                if (packageSetting.getSharedUser() == null) {
+                Map<String, List<RuntimePermissionsState.PermissionState>> packagePermissions =
+                        new ArrayMap<>();
+                int packagesSize = packageStates.size();
+                for (int i = 0; i < packagesSize; i++) {
+                    String packageName = packageStates.keyAt(i);
+                    PackageStateInternal packageState = packageStates.valueAt(i);
+                    if (packageState.getSharedUser() == null) {
+                        List<RuntimePermissionsState.PermissionState> permissions =
+                                getPermissionsFromPermissionsState(
+                                        packageState.getLegacyPermissionState(), userId);
+                        if (permissions.isEmpty() && !packageState.isInstallPermissionsFixed()) {
+                            // Storing an empty state means the package is known to the system and
+                            // its install permissions have been granted and fixed. If this is not
+                            // the case, we should not store anything.
+                            continue;
+                        }
+                        packagePermissions.put(packageName, permissions);
+                    }
+                }
+
+                Map<String, List<RuntimePermissionsState.PermissionState>> sharedUserPermissions =
+                        new ArrayMap<>();
+                final int sharedUsersSize = sharedUsers.size();
+                for (int i = 0; i < sharedUsersSize; i++) {
+                    String sharedUserName = sharedUsers.keyAt(i);
+                    SharedUserSetting sharedUserSetting = sharedUsers.valueAt(i);
                     List<RuntimePermissionsState.PermissionState> permissions =
                             getPermissionsFromPermissionsState(
-                                    packageSetting.getLegacyPermissionState(), userId);
-                    if (permissions.isEmpty() && !packageSetting.isInstallPermissionsFixed()) {
-                        // Storing an empty state means the package is known to the system and its
-                        // install permissions have been granted and fixed. If this is not the case,
-                        // we should not store anything.
-                        continue;
-                    }
-                    packagePermissions.put(packageName, permissions);
+                                    sharedUserSetting.getLegacyPermissionState(), userId);
+                    sharedUserPermissions.put(sharedUserName, permissions);
                 }
+
+                RuntimePermissionsState runtimePermissions = new RuntimePermissionsState(version,
+                        fingerprint, packagePermissions, sharedUserPermissions);
+
+                mPersistence.writeForUser(runtimePermissions, UserHandle.of(userId));
             }
-
-            Map<String, List<RuntimePermissionsState.PermissionState>> sharedUserPermissions =
-                    new ArrayMap<>();
-            final int sharedUsersSize = mSharedUsers.size();
-            for (int i = 0; i < sharedUsersSize; i++) {
-                String sharedUserName = mSharedUsers.keyAt(i);
-                SharedUserSetting sharedUserSetting = mSharedUsers.valueAt(i);
-                List<RuntimePermissionsState.PermissionState> permissions =
-                        getPermissionsFromPermissionsState(
-                                sharedUserSetting.getLegacyPermissionState(), userId);
-                sharedUserPermissions.put(sharedUserName, permissions);
-            }
-
-            RuntimePermissionsState runtimePermissions = new RuntimePermissionsState(version,
-                    fingerprint, packagePermissions, sharedUserPermissions);
-
-            mPersistence.writeForUser(runtimePermissions, UserHandle.of(userId));
         }
 
         @NonNull
@@ -5541,82 +5575,91 @@ public final class Settings implements Watchable, Snappable {
             return permissions;
         }
 
-        @GuardedBy("Settings.this.mLock")
-        private void onUserRemovedLPw(int userId) {
-            // Make sure we do not
-            mHandler.removeMessages(userId);
+        private void onUserRemoved(int userId) {
+            synchronized (mLock) {
+                // Make sure we do not
+                mHandler.removeMessages(userId);
 
-            mPermissionUpgradeNeeded.delete(userId);
-            mVersions.delete(userId);
-            mFingerprints.remove(userId);
+                mPermissionUpgradeNeeded.delete(userId);
+                mVersions.delete(userId);
+                mFingerprints.remove(userId);
+            }
         }
 
         public void deleteUserRuntimePermissionsFile(int userId) {
-            mPersistence.deleteForUser(UserHandle.of(userId));
-        }
-
-        @GuardedBy("Settings.this.mLock")
-        public void readStateForUserSyncLPr(int userId) {
-            RuntimePermissionsState runtimePermissions = mPersistence.readForUser(UserHandle.of(
-                    userId));
-            if (runtimePermissions == null) {
-                readLegacyStateForUserSyncLPr(userId);
-                writeStateForUserAsyncLPr(userId);
-                return;
-            }
-
-            // If the runtime permissions file exists but the version is not set this is
-            // an upgrade from P->Q. Hence mark it with the special UPGRADE_VERSION.
-            int version = runtimePermissions.getVersion();
-            if (version == RuntimePermissionsState.NO_VERSION) {
-                version = UPGRADE_VERSION;
-            }
-            mVersions.put(userId, version);
-
-            String fingerprint = runtimePermissions.getFingerprint();
-            mFingerprints.put(userId, fingerprint);
-
-            boolean isUpgradeToR = getInternalVersion().sdkVersion < Build.VERSION_CODES.R;
-
-            Map<String, List<RuntimePermissionsState.PermissionState>> packagePermissions =
-                    runtimePermissions.getPackagePermissions();
-            int packagesSize = mPackages.size();
-            for (int i = 0; i < packagesSize; i++) {
-                String packageName = mPackages.keyAt(i);
-                PackageSetting packageSetting = mPackages.valueAt(i);
-
-                List<RuntimePermissionsState.PermissionState> permissions =
-                        packagePermissions.get(packageName);
-                if (permissions != null) {
-                    readPermissionsStateLpr(permissions, packageSetting.getLegacyPermissionState(),
-                            userId);
-                    packageSetting.setInstallPermissionsFixed(true);
-                } else if (packageSetting.getSharedUser() == null && !isUpgradeToR) {
-                    Slog.w(TAG, "Missing permission state for package: " + packageName);
-                    packageSetting.getLegacyPermissionState().setMissing(true, userId);
-                }
-            }
-
-            Map<String, List<RuntimePermissionsState.PermissionState>> sharedUserPermissions =
-                    runtimePermissions.getSharedUserPermissions();
-            int sharedUsersSize = mSharedUsers.size();
-            for (int i = 0; i < sharedUsersSize; i++) {
-                String sharedUserName = mSharedUsers.keyAt(i);
-                SharedUserSetting sharedUserSetting = mSharedUsers.valueAt(i);
-
-                List<RuntimePermissionsState.PermissionState> permissions =
-                        sharedUserPermissions.get(sharedUserName);
-                if (permissions != null) {
-                    readPermissionsStateLpr(permissions,
-                            sharedUserSetting.getLegacyPermissionState(), userId);
-                } else if (!isUpgradeToR) {
-                    Slog.w(TAG, "Missing permission state for shared user: " + sharedUserName);
-                    sharedUserSetting.getLegacyPermissionState().setMissing(true, userId);
-                }
+            synchronized (mLock) {
+                mPersistence.deleteForUser(UserHandle.of(userId));
             }
         }
 
-        private void readPermissionsStateLpr(
+        public void readStateForUserSync(int userId, @NonNull VersionInfo internalVersion,
+                @NonNull WatchedArrayMap<String, PackageSetting> packageSettings,
+                @NonNull WatchedArrayMap<String, SharedUserSetting> sharedUsers,
+                @NonNull File userRuntimePermissionsFile) {
+            synchronized (mLock) {
+                RuntimePermissionsState runtimePermissions = mPersistence.readForUser(UserHandle.of(
+                        userId));
+                if (runtimePermissions == null) {
+                    readLegacyStateForUserSync(userId, userRuntimePermissionsFile, packageSettings,
+                            sharedUsers);
+                    writeStateForUserAsync(userId);
+                    return;
+                }
+
+                // If the runtime permissions file exists but the version is not set this is
+                // an upgrade from P->Q. Hence mark it with the special UPGRADE_VERSION.
+                int version = runtimePermissions.getVersion();
+                if (version == RuntimePermissionsState.NO_VERSION) {
+                    version = UPGRADE_VERSION;
+                }
+                mVersions.put(userId, version);
+
+                String fingerprint = runtimePermissions.getFingerprint();
+                mFingerprints.put(userId, fingerprint);
+
+                boolean isUpgradeToR = internalVersion.sdkVersion < Build.VERSION_CODES.R;
+
+                Map<String, List<RuntimePermissionsState.PermissionState>> packagePermissions =
+                        runtimePermissions.getPackagePermissions();
+                int packagesSize = packageSettings.size();
+                for (int i = 0; i < packagesSize; i++) {
+                    String packageName = packageSettings.keyAt(i);
+                    PackageSetting packageSetting = packageSettings.valueAt(i);
+
+                    List<RuntimePermissionsState.PermissionState> permissions =
+                            packagePermissions.get(packageName);
+                    if (permissions != null) {
+                        readPermissionsState(permissions,
+                                packageSetting.getLegacyPermissionState(),
+                                userId);
+                        packageSetting.setInstallPermissionsFixed(true);
+                    } else if (packageSetting.getSharedUser() == null && !isUpgradeToR) {
+                        Slog.w(TAG, "Missing permission state for package: " + packageName);
+                        packageSetting.getLegacyPermissionState().setMissing(true, userId);
+                    }
+                }
+
+                Map<String, List<RuntimePermissionsState.PermissionState>> sharedUserPermissions =
+                        runtimePermissions.getSharedUserPermissions();
+                int sharedUsersSize = sharedUsers.size();
+                for (int i = 0; i < sharedUsersSize; i++) {
+                    String sharedUserName = sharedUsers.keyAt(i);
+                    SharedUserSetting sharedUserSetting = sharedUsers.valueAt(i);
+
+                    List<RuntimePermissionsState.PermissionState> permissions =
+                            sharedUserPermissions.get(sharedUserName);
+                    if (permissions != null) {
+                        readPermissionsState(permissions,
+                                sharedUserSetting.getLegacyPermissionState(), userId);
+                    } else if (!isUpgradeToR) {
+                        Slog.w(TAG, "Missing permission state for shared user: " + sharedUserName);
+                        sharedUserSetting.getLegacyPermissionState().setMissing(true, userId);
+                    }
+                }
+            }
+        }
+
+        private void readPermissionsState(
                 @NonNull List<RuntimePermissionsState.PermissionState> permissions,
                 @NonNull LegacyPermissionState permissionsState, @UserIdInt int userId) {
             int permissionsSize = permissions.size();
@@ -5630,77 +5673,86 @@ public final class Settings implements Watchable, Snappable {
             }
         }
 
-        @GuardedBy("Settings.this.mLock")
-        private void readLegacyStateForUserSyncLPr(int userId) {
-            File permissionsFile = getUserRuntimePermissionsFile(userId);
-            if (!permissionsFile.exists()) {
-                return;
-            }
+        private void readLegacyStateForUserSync(int userId, @NonNull File permissionsFile,
+                @NonNull WatchedArrayMap<String, ? extends PackageStateInternal> packageStates,
+                @NonNull WatchedArrayMap<String, SharedUserSetting> sharedUsers) {
+            synchronized (mLock) {
+                if (!permissionsFile.exists()) {
+                    return;
+                }
 
-            FileInputStream in;
-            try {
-                in = new AtomicFile(permissionsFile).openRead();
-            } catch (FileNotFoundException fnfe) {
-                Slog.i(PackageManagerService.TAG, "No permissions state");
-                return;
-            }
+                FileInputStream in;
+                try {
+                    in = new AtomicFile(permissionsFile).openRead();
+                } catch (FileNotFoundException fnfe) {
+                    Slog.i(PackageManagerService.TAG, "No permissions state");
+                    return;
+                }
 
-            try {
-                final TypedXmlPullParser parser = Xml.resolvePullParser(in);
-                parseLegacyRuntimePermissionsLPr(parser, userId);
+                try {
+                    final TypedXmlPullParser parser = Xml.resolvePullParser(in);
+                    parseLegacyRuntimePermissions(parser, userId, packageStates, sharedUsers);
 
-            } catch (XmlPullParserException | IOException e) {
-                throw new IllegalStateException("Failed parsing permissions file: "
-                        + permissionsFile, e);
-            } finally {
-                IoUtils.closeQuietly(in);
+                } catch (XmlPullParserException | IOException e) {
+                    throw new IllegalStateException("Failed parsing permissions file: "
+                            + permissionsFile, e);
+                } finally {
+                    IoUtils.closeQuietly(in);
+                }
             }
         }
 
-        // Private internals
-
-        @GuardedBy("Settings.this.mLock")
-        private void parseLegacyRuntimePermissionsLPr(TypedXmlPullParser parser, int userId)
+        private void parseLegacyRuntimePermissions(TypedXmlPullParser parser, int userId,
+                @NonNull WatchedArrayMap<String, ? extends PackageStateInternal> packageStates,
+                @NonNull WatchedArrayMap<String, SharedUserSetting> sharedUsers)
                 throws IOException, XmlPullParserException {
-            final int outerDepth = parser.getDepth();
-            int type;
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                    continue;
-                }
+            synchronized (mLock) {
+                final int outerDepth = parser.getDepth();
+                int type;
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                        && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                    if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                        continue;
+                    }
 
-                switch (parser.getName()) {
-                    case TAG_RUNTIME_PERMISSIONS: {
-                        // If the permisions settings file exists but the version is not set this is
-                        // an upgrade from P->Q. Hence mark it with the special UPGRADE_VERSION
-                        int version = parser.getAttributeInt(null, ATTR_VERSION, UPGRADE_VERSION);
-                        mVersions.put(userId, version);
-                        String fingerprint = parser.getAttributeValue(null, ATTR_FINGERPRINT);
-                        mFingerprints.put(userId, fingerprint);
-                    } break;
-
-                    case TAG_PACKAGE: {
-                        String name = parser.getAttributeValue(null, ATTR_NAME);
-                        PackageSetting ps = mPackages.get(name);
-                        if (ps == null) {
-                            Slog.w(PackageManagerService.TAG, "Unknown package:" + name);
-                            XmlUtils.skipCurrentTag(parser);
-                            continue;
+                    switch (parser.getName()) {
+                        case TAG_RUNTIME_PERMISSIONS: {
+                            // If the permisions settings file exists but the version is not set this is
+                            // an upgrade from P->Q. Hence mark it with the special UPGRADE_VERSION
+                            int version = parser.getAttributeInt(null, ATTR_VERSION,
+                                    UPGRADE_VERSION);
+                            mVersions.put(userId, version);
+                            String fingerprint = parser.getAttributeValue(null, ATTR_FINGERPRINT);
+                            mFingerprints.put(userId, fingerprint);
                         }
-                        parseLegacyPermissionsLPr(parser, ps.getLegacyPermissionState(), userId);
-                    } break;
+                        break;
 
-                    case TAG_SHARED_USER: {
-                        String name = parser.getAttributeValue(null, ATTR_NAME);
-                        SharedUserSetting sus = mSharedUsers.get(name);
-                        if (sus == null) {
-                            Slog.w(PackageManagerService.TAG, "Unknown shared user:" + name);
-                            XmlUtils.skipCurrentTag(parser);
-                            continue;
+                        case TAG_PACKAGE: {
+                            String name = parser.getAttributeValue(null, ATTR_NAME);
+                            PackageStateInternal ps = packageStates.get(name);
+                            if (ps == null) {
+                                Slog.w(PackageManagerService.TAG, "Unknown package:" + name);
+                                XmlUtils.skipCurrentTag(parser);
+                                continue;
+                            }
+                            parseLegacyPermissionsLPr(parser, ps.getLegacyPermissionState(),
+                                    userId);
                         }
-                        parseLegacyPermissionsLPr(parser, sus.getLegacyPermissionState(), userId);
-                    } break;
+                        break;
+
+                        case TAG_SHARED_USER: {
+                            String name = parser.getAttributeValue(null, ATTR_NAME);
+                            SharedUserSetting sus = sharedUsers.get(name);
+                            if (sus == null) {
+                                Slog.w(PackageManagerService.TAG, "Unknown shared user:" + name);
+                                XmlUtils.skipCurrentTag(parser);
+                                continue;
+                            }
+                            parseLegacyPermissionsLPr(parser, sus.getLegacyPermissionState(),
+                                    userId);
+                        }
+                        break;
+                    }
                 }
             }
         }
@@ -5708,25 +5760,27 @@ public final class Settings implements Watchable, Snappable {
         private void parseLegacyPermissionsLPr(TypedXmlPullParser parser,
                 LegacyPermissionState permissionsState, int userId)
                 throws IOException, XmlPullParserException {
-            final int outerDepth = parser.getDepth();
-            int type;
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                    continue;
-                }
-
-                switch (parser.getName()) {
-                    case TAG_ITEM: {
-                        String name = parser.getAttributeValue(null, ATTR_NAME);
-                        final boolean granted =
-                                parser.getAttributeBoolean(null, ATTR_GRANTED, true);
-                        final int flags =
-                                parser.getAttributeIntHex(null, ATTR_FLAGS, 0);
-                        permissionsState.putPermissionState(new PermissionState(name, true,
-                                granted, flags), userId);
+            synchronized (mLock) {
+                final int outerDepth = parser.getDepth();
+                int type;
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                        && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                    if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                        continue;
                     }
-                    break;
+
+                    switch (parser.getName()) {
+                        case TAG_ITEM: {
+                            String name = parser.getAttributeValue(null, ATTR_NAME);
+                            final boolean granted =
+                                    parser.getAttributeBoolean(null, ATTR_GRANTED, true);
+                            final int flags =
+                                    parser.getAttributeIntHex(null, ATTR_FLAGS, 0);
+                            permissionsState.putPermissionState(new PermissionState(name, true,
+                                    granted, flags), userId);
+                        }
+                        break;
+                    }
                 }
             }
         }
@@ -5740,9 +5794,7 @@ public final class Settings implements Watchable, Snappable {
             public void handleMessage(Message message) {
                 final int userId = message.what;
                 Runnable callback = (Runnable) message.obj;
-                synchronized (mLock) {
-                    writeStateForUserSyncLPr(userId);
-                }
+                mInvokeWriteUserStateAsyncCallback.accept(userId);
                 if (callback != null) {
                     callback.run();
                 }

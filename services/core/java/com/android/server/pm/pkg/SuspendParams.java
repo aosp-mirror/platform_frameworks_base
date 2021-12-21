@@ -42,11 +42,15 @@ public final class SuspendParams {
     private static final String TAG_APP_EXTRAS = "app-extras";
     private static final String TAG_LAUNCHER_EXTRAS = "launcher-extras";
 
-    public SuspendDialogInfo dialogInfo;
-    public PersistableBundle appExtras;
-    public PersistableBundle launcherExtras;
+    private final SuspendDialogInfo dialogInfo;
+    private final PersistableBundle appExtras;
+    private final PersistableBundle launcherExtras;
 
-    private SuspendParams() {
+    private SuspendParams(SuspendDialogInfo dialogInfo, PersistableBundle appExtras,
+            PersistableBundle launcherExtras) {
+        this.dialogInfo = dialogInfo;
+        this.appExtras = appExtras;
+        this.launcherExtras = launcherExtras;
     }
 
     /**
@@ -60,11 +64,7 @@ public final class SuspendParams {
         if (dialogInfo == null && appExtras == null && launcherExtras == null) {
             return null;
         }
-        final SuspendParams instance = new SuspendParams();
-        instance.dialogInfo = dialogInfo;
-        instance.appExtras = appExtras;
-        instance.launcherExtras = launcherExtras;
-        return instance;
+        return new SuspendParams(dialogInfo, appExtras, launcherExtras);
     }
 
     @Override
@@ -171,5 +171,17 @@ public final class SuspendParams {
                     + " some fields may default", e);
         }
         return getInstanceOrNull(readDialogInfo, readAppExtras, readLauncherExtras);
+    }
+
+    public SuspendDialogInfo getDialogInfo() {
+        return dialogInfo;
+    }
+
+    public PersistableBundle getAppExtras() {
+        return appExtras;
+    }
+
+    public PersistableBundle getLauncherExtras() {
+        return launcherExtras;
     }
 }
