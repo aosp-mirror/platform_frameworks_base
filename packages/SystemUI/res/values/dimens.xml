@@ -1254,6 +1254,8 @@
 
     <!-- Internet dialog related dimensions -->
     <dimen name="internet_dialog_corner_radius">24dp</dimen>
+    <!-- Width of progress bar -->
+    <dimen name="internet_dialog_progress_bar_width">152dp</dimen>
     <!-- End margin of network layout -->
     <dimen name="internet_dialog_network_layout_margin">16dp</dimen>
     <!-- Size of switch bar in internet dialog -->
