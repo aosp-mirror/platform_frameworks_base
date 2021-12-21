@@ -161,13 +161,14 @@ public class WMShellModule {
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             @ShellMainThread ShellExecutor mainExecutor,
+            DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool, IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks,
             Provider<Optional<StageTaskUnfoldController>> stageTaskUnfoldControllerProvider) {
         return new SplitScreenController(shellTaskOrganizer, syncQueue, context,
-                rootTaskDisplayAreaOrganizer, mainExecutor, displayImeController,
+                rootTaskDisplayAreaOrganizer, mainExecutor, displayController, displayImeController,
                 displayInsetsController, transitions, transactionPool, iconProvider,
                 recentTasks, stageTaskUnfoldControllerProvider);
     }
@@ -307,9 +308,11 @@ public class WMShellModule {
             Transitions transitions, ShellTaskOrganizer shellTaskOrganizer,
             PipAnimationController pipAnimationController, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState, PipTransitionState pipTransitionState,
-            PhonePipMenuController pipMenuController) {
+            PhonePipMenuController pipMenuController,
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper) {
         return new PipTransition(context, pipBoundsState, pipTransitionState, pipMenuController,
-                pipBoundsAlgorithm, pipAnimationController, transitions, shellTaskOrganizer);
+                pipBoundsAlgorithm, pipAnimationController, transitions, shellTaskOrganizer,
+                pipSurfaceTransactionHelper);
     }
 
     @WMSingleton

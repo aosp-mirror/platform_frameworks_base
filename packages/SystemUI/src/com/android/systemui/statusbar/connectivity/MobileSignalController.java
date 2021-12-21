@@ -81,7 +81,6 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     private final String mNetworkNameSeparator;
     private final ContentObserver mObserver;
     private final boolean mProviderModelBehavior;
-    private final boolean mProviderModelSetting;
     private final Handler mReceiverHandler;
     private int mImsType = IMS_TYPE_WWAN;
     // Save entire info for logging, we only use the id.
@@ -193,8 +192,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             SubscriptionDefaults defaults,
             Looper receiverLooper,
             CarrierConfigTracker carrierConfigTracker,
-            FeatureFlags featureFlags,
-            StatusBarFlags statusBarFlags
+            FeatureFlags featureFlags
     ) {
         super("MobileSignalController(" + info.getSubscriptionId() + ")", context,
                 NetworkCapabilities.TRANSPORT_CELLULAR, callbackHandler,
@@ -229,7 +227,6 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mMobileStatusTracker = new MobileStatusTracker(mPhone, receiverLooper,
                 info, mDefaults, mMobileCallback);
         mProviderModelBehavior = featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS);
-        mProviderModelSetting = statusBarFlags.isProviderModelSettingEnabled();
     }
 
     void setConfiguration(Config config) {
@@ -396,10 +393,9 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         IconState qsIcon = null;
         CharSequence qsDescription = null;
 
-        boolean pm = mProviderModelSetting || mProviderModelBehavior;
         if (mCurrentState.dataSim) {
             // If using provider model behavior, only show QS icons if the state is also default
-            if (pm && !mCurrentState.isDefault) {
+            if (!mCurrentState.isDefault) {
                 return new QsInfo(qsTypeIcon, qsIcon, qsDescription);
             }
 
@@ -814,7 +810,6 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     public void dump(PrintWriter pw) {
         super.dump(pw);
         pw.println("  mSubscription=" + mSubscriptionInfo + ",");
-        pw.println("  mProviderModelSetting=" + mProviderModelSetting + ",");
         pw.println("  mProviderModelBehavior=" + mProviderModelBehavior + ",");
         pw.println("  mInflateSignalStrengths=" + mInflateSignalStrengths + ",");
         pw.println("  isDataDisabled=" + isDataDisabled() + ",");

@@ -358,8 +358,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
                 // No default animation for this, so just update bounds/position.
                 startTransaction.setPosition(change.getLeash(),
-                        change.getEndAbsBounds().left - change.getEndRelOffset().x,
-                        change.getEndAbsBounds().top - change.getEndRelOffset().y);
+                        change.getEndAbsBounds().left - info.getRootOffset().x,
+                        change.getEndAbsBounds().top - info.getRootOffset().y);
                 if (isTask) {
                     // Skip non-tasks since those usually have null bounds.
                     startTransaction.setWindowCrop(change.getLeash(),
