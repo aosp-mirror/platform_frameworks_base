@@ -329,19 +329,19 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"poziva i upravlja pozivima"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tjelesni senzori"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"pristupa podacima senzora o vašim vitalnim funkcijama"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Preuzima sadržaj prozora"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"preuzima sadržaj prozora"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Pregleda sadržaj prozora koji trenutno koristite."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Uključi opciju Istraživanje dodirom"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"uključi opciju Istraživanje dodirom"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Stavke koje dodirnete bit će izgovorene naglas, a ekran možete istraživati koristeći pokrete."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Prati tekst koji unosite"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"prati tekst koji unosite"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Obuhvata lične podatke kao što su brojevi kreditnih kartica i lozinke."</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Kontrolira uvećavanje prikaza na ekranu"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"kontrolira uvećavanje prikaza na ekranu"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Kontrolira stepen uvećanja prikaza na ekranu i podešavanje položaja."</string>
-    <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Praviti pokrete"</string>
+    <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"izvodi pokrete"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Može dodirivati, prevlačiti, hvatati prstima i praviti druge pokrete."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Pokreti otiska prsta"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"prepoznaje pokrete za otisak prsta"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Moguće je zabilježiti pokrete na senzoru za otisak prsta uređaja."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Snimanje ekrana"</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"pravi snimke ekrana"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Moguće je snimiti ekran."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"onemogućavanje ili mijenjanje statusne trake"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Dozvoljava aplikaciji onemogućavanje statusne trake ili dodavanje i uklanjanje sistemskih ikona."</string>
@@ -1899,7 +1899,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisao je vaš administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Uredu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Ušteda baterije uključuje tamnu temu i ograničava ili isključuje aktivnost u pozadini, određene vizuelne efekte i funkcije te neke mrežne veze."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Ušteda baterije uključuje Tamnu temu i ograničava ili isključuje aktivnost u pozadini, određene vizuelne efekte i funkcije te neke mrežne veze."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Ušteda baterije uključuje tamnu temu i ograničava ili isključuje aktivnost u pozadini, određene vizuelne efekte i funkcije te neke mrežne veze."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Radi smanjenja prijenosa podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali će to činiti rjeđe. Naprimjer, to može značiti da se slike ne prikazuju dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
