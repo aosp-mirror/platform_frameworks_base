@@ -26,9 +26,9 @@ import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.media.MediaHostStatesManager;
-import com.android.systemui.media.taptotransfer.MediaTttChipController;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
+import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -80,7 +80,7 @@ public interface MediaModule {
     /** */
     @Provides
     @SysUISingleton
-    static Optional<MediaTttChipController> providesMediaTttChipController(
+    static Optional<MediaTttChipControllerSender> providesMediaTttChipControllerSender(
             MediaTttFlags mediaTttFlags,
             Context context,
             WindowManager windowManager,
@@ -89,7 +89,7 @@ public interface MediaModule {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(new MediaTttChipController(
+        return Optional.of(new MediaTttChipControllerSender(
                 context, windowManager, mainExecutor, backgroundExecutor));
     }
 
@@ -100,12 +100,12 @@ public interface MediaModule {
             MediaTttFlags mediaTttFlags,
             CommandRegistry commandRegistry,
             Context context,
-            MediaTttChipController mediaTttChipController,
+            MediaTttChipControllerSender mediaTttChipControllerSender,
             @Main DelayableExecutor mainExecutor) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
         return Optional.of(new MediaTttCommandLineHelper(
-                commandRegistry, context, mediaTttChipController, mainExecutor));
+                commandRegistry, context, mediaTttChipControllerSender, mainExecutor));
     }
 }

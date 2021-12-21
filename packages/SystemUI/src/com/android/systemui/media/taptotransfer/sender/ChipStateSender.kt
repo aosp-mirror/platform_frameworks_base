@@ -14,52 +14,52 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.taptotransfer
+package com.android.systemui.media.taptotransfer.sender
 
 import android.graphics.drawable.Drawable
 import androidx.annotation.StringRes
 import com.android.systemui.R
+import com.android.systemui.media.taptotransfer.common.MediaTttChipState
 import java.util.concurrent.Future
 
 /**
- * A class that stores all the information necessary to display the media tap-to-transfer chip in
- * certain states.
+ * A class that stores all the information necessary to display the media tap-to-transfer chip on
+ * the sender device.
  *
  * This is a sealed class where each subclass represents a specific chip state. Each subclass can
  * contain additional information that is necessary for only that state.
  *
  * @property chipText a string resource for the text that the chip should display.
  * @property otherDeviceName the name of the other device involved in the transfer.
- * @property appIconDrawable a drawable representing the icon of the app playing the media.
  */
-sealed class MediaTttChipState(
+sealed class ChipStateSender(
+    appIconDrawable: Drawable,
     @StringRes internal val chipText: Int,
     internal val otherDeviceName: String,
-    internal val appIconDrawable: Drawable,
-)
+) : MediaTttChipState(appIconDrawable)
 
 /**
  * A state representing that the two devices are close but not close enough to initiate a transfer.
  * The chip will instruct the user to move closer in order to initiate the transfer.
  */
 class MoveCloserToTransfer(
+    appIconDrawable: Drawable,
     otherDeviceName: String,
-    appIconDrawable: Drawable
-) : MediaTttChipState(R.string.media_move_closer_to_transfer, otherDeviceName, appIconDrawable)
+) : ChipStateSender(appIconDrawable, R.string.media_move_closer_to_transfer, otherDeviceName)
 
 /**
  * A state representing that a transfer has been initiated (but not completed).
  *
  * @property future a future that will be resolved when the transfer has either succeeded or failed.
  *   If the transfer succeeded, the future can optionally return an undo runnable (see
- *   [TransferSucceeded.undoRunnable]). [MediaTttChipController] is responsible for transitioning
+ *   [TransferSucceeded.undoRunnable]). [MediaTttChipControllerSender] is responsible for transitioning
  *   the chip to the [TransferSucceeded] state if the future resolves successfully.
  */
 class TransferInitiated(
-    otherDeviceName: String,
     appIconDrawable: Drawable,
+    otherDeviceName: String,
     val future: Future<Runnable?>
-) : MediaTttChipState(R.string.media_transfer_playing, otherDeviceName, appIconDrawable)
+) : ChipStateSender(appIconDrawable, R.string.media_transfer_playing, otherDeviceName)
 
 /**
  * A state representing that a transfer has been successfully completed.
@@ -68,7 +68,7 @@ class TransferInitiated(
  *   show an Undo button on the chip if this runnable is present.
  */
 class TransferSucceeded(
-    otherDeviceName: String,
     appIconDrawable: Drawable,
+    otherDeviceName: String,
     val undoRunnable: Runnable? = null
-) : MediaTttChipState(R.string.media_transfer_playing, otherDeviceName, appIconDrawable)
+) : ChipStateSender(appIconDrawable, R.string.media_transfer_playing, otherDeviceName)

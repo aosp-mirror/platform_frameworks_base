@@ -23,6 +23,10 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender
+import com.android.systemui.media.taptotransfer.sender.MoveCloserToTransfer
+import com.android.systemui.media.taptotransfer.sender.TransferInitiated
+import com.android.systemui.media.taptotransfer.sender.TransferSucceeded
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -38,7 +42,7 @@ import javax.inject.Inject
 class MediaTttCommandLineHelper @Inject constructor(
     commandRegistry: CommandRegistry,
     context: Context,
-    private val mediaTttChipController: MediaTttChipController,
+    private val mediaTttChipControllerSender: MediaTttChipControllerSender,
     @Main private val mainExecutor: DelayableExecutor,
 ) {
     private val appIconDrawable =
@@ -54,21 +58,21 @@ class MediaTttCommandLineHelper @Inject constructor(
             val otherDeviceName = args[0]
             when (args[1]) {
                 MOVE_CLOSER_TO_TRANSFER_COMMAND_NAME -> {
-                    mediaTttChipController.displayChip(
-                        MoveCloserToTransfer(otherDeviceName, appIconDrawable)
+                    mediaTttChipControllerSender.displayChip(
+                        MoveCloserToTransfer(appIconDrawable, otherDeviceName)
                     )
                 }
                 TRANSFER_INITIATED_COMMAND_NAME -> {
                     val futureTask = FutureTask { fakeUndoRunnable }
-                    mediaTttChipController.displayChip(
-                        TransferInitiated(otherDeviceName, appIconDrawable, futureTask)
+                    mediaTttChipControllerSender.displayChip(
+                        TransferInitiated(appIconDrawable, otherDeviceName, futureTask)
                     )
                     mainExecutor.executeDelayed({ futureTask.run() }, FUTURE_WAIT_TIME)
 
                 }
                 TRANSFER_SUCCEEDED_COMMAND_NAME -> {
-                    mediaTttChipController.displayChip(
-                        TransferSucceeded(otherDeviceName, appIconDrawable, fakeUndoRunnable)
+                    mediaTttChipControllerSender.displayChip(
+                        TransferSucceeded(appIconDrawable, otherDeviceName, fakeUndoRunnable)
                     )
                 }
                 else -> {
@@ -90,7 +94,7 @@ class MediaTttCommandLineHelper @Inject constructor(
 
     inner class RemoveChipCommand : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
-            mediaTttChipController.removeChip()
+            mediaTttChipControllerSender.removeChip()
         }
         override fun help(pw: PrintWriter) {
             pw.println("Usage: adb shell cmd statusbar $REMOVE_CHIP_COMMAND_TAG")
@@ -114,3 +118,4 @@ val TRANSFER_INITIATED_COMMAND_NAME = TransferInitiated::class.simpleName!!
 val TRANSFER_SUCCEEDED_COMMAND_NAME = TransferSucceeded::class.simpleName!!
 
 private const val FUTURE_WAIT_TIME = 2000L
+private const val TAG = "MediaTapToTransferCli"
