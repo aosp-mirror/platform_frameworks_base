@@ -5,3 +5,5 @@ per-file art-profile* = calin@google.com, ngeoffray@google.com, vmarko@google.co
 
 per-file java/com/android/server/* = toddke@google.com,patb@google.com
 per-file tests/servicestests/src/com/android/server/systemconfig/* = patb@google.com
+
+per-file proguard.flags = jdduke@google.com

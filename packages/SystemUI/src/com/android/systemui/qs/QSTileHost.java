@@ -39,7 +39,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
@@ -53,7 +52,6 @@ import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.connectivity.StatusBarFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -98,7 +96,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final UiEventLogger mUiEventLogger;
     private final InstanceIdSequence mInstanceIdSequence;
     private final CustomTileStatePersister mCustomTileStatePersister;
-    private final FeatureFlags mFeatureFlags;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
     private AutoTileManager mAutoTiles;
@@ -111,7 +108,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private SecureSettings mSecureSettings;
 
     private final TileServiceRequestController mTileServiceRequestController;
-    private final StatusBarFlags mStatusBarFlags;
 
     @Inject
     public QSTileHost(Context context,
@@ -130,9 +126,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             UserTracker userTracker,
             SecureSettings secureSettings,
             CustomTileStatePersister customTileStatePersister,
-            TileServiceRequestController.Builder tileServiceRequestControllerBuilder,
-            FeatureFlags featureFlags,
-            StatusBarFlags statusBarFlags
+            TileServiceRequestController.Builder tileServiceRequestControllerBuilder
     ) {
         mIconController = iconController;
         mContext = context;
@@ -144,7 +138,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mUiEventLogger = uiEventLogger;
         mBroadcastDispatcher = broadcastDispatcher;
         mTileServiceRequestController = tileServiceRequestControllerBuilder.create(this);
-        mStatusBarFlags = statusBarFlags;
 
         mInstanceIdSequence = new InstanceIdSequence(MAX_QS_INSTANCE_ID);
         mServices = new TileServices(this, bgLooper, mBroadcastDispatcher, userTracker);
@@ -156,7 +149,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mUserTracker = userTracker;
         mSecureSettings = secureSettings;
         mCustomTileStatePersister = customTileStatePersister;
-        mFeatureFlags = featureFlags;
 
         mainHandler.post(() -> {
             // This is technically a hack to avoid circular dependency of
@@ -280,7 +272,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (newValue == null && UserManager.isDeviceInDemoMode(mContext)) {
             newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
         }
-        final List<String> tileSpecs = loadTileSpecs(mContext, newValue, mStatusBarFlags);
+        final List<String> tileSpecs = loadTileSpecs(mContext, newValue);
         int currentUser = mUserTracker.getUserId();
         if (currentUser != mCurrentUser) {
             mUserContext = mUserTracker.getUserContext();
@@ -349,7 +341,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (newTiles.isEmpty() && !tileSpecs.isEmpty()) {
             // If we didn't manage to create any tiles, set it to empty (default)
             Log.d(TAG, "No valid tiles on tuning changed. Setting to default.");
-            changeTiles(currentSpecs, loadTileSpecs(mContext, "", mStatusBarFlags));
+            changeTiles(currentSpecs, loadTileSpecs(mContext, ""));
         } else {
             for (int i = 0; i < mCallbacks.size(); i++) {
                 mCallbacks.get(i).onTilesChanged();
@@ -417,7 +409,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
 
     private void changeTileSpecs(Predicate<List<String>> changeFunction) {
         final String setting = mSecureSettings.getStringForUser(TILES_SETTING, mCurrentUser);
-        final List<String> tileSpecs = loadTileSpecs(mContext, setting, mStatusBarFlags);
+        final List<String> tileSpecs = loadTileSpecs(mContext, setting);
         if (changeFunction.test(tileSpecs)) {
             saveTilesToSettings(tileSpecs);
         }
@@ -506,8 +498,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         throw new RuntimeException("Default factory didn't create view for " + tile.getTileSpec());
     }
 
-    protected static List<String> loadTileSpecs(
-            Context context, String tileList, StatusBarFlags statusBarFlags) {
+    protected static List<String> loadTileSpecs(Context context, String tileList) {
         final Resources res = context.getResources();
 
         if (TextUtils.isEmpty(tileList)) {
@@ -540,20 +531,19 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 }
             }
         }
-        if (statusBarFlags.isProviderModelSettingEnabled()) {
-            if (!tiles.contains("internet")) {
-                if (tiles.contains("wifi")) {
-                    // Replace the WiFi with Internet, and remove the Cell
-                    tiles.set(tiles.indexOf("wifi"), "internet");
-                    tiles.remove("cell");
-                } else if (tiles.contains("cell")) {
-                    // Replace the Cell with Internet
-                    tiles.set(tiles.indexOf("cell"), "internet");
-                }
-            } else {
-                tiles.remove("wifi");
+
+        if (!tiles.contains("internet")) {
+            if (tiles.contains("wifi")) {
+                // Replace the WiFi with Internet, and remove the Cell
+                tiles.set(tiles.indexOf("wifi"), "internet");
                 tiles.remove("cell");
+            } else if (tiles.contains("cell")) {
+                // Replace the Cell with Internet
+                tiles.set(tiles.indexOf("cell"), "internet");
             }
+        } else {
+            tiles.remove("wifi");
+            tiles.remove("cell");
         }
         return tiles;
     }

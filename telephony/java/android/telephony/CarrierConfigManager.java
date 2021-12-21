@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
@@ -28,6 +29,7 @@ import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.SaProposal;
 import android.os.Build;
@@ -48,12 +50,14 @@ import android.telephony.ims.feature.RcsFeature;
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Provides access to telephony configuration values that are carrier-specific.
  */
 @SystemService(Context.CARRIER_CONFIG_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
 public class CarrierConfigManager {
     private final static String TAG = "CarrierConfigManager";
 
@@ -556,9 +560,9 @@ public class CarrierConfigManager {
             KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL = "disable_cdma_activation_code_bool";
 
     /**
-     * List of RIL radio technologies (See {@link ServiceState} {@code RIL_RADIO_TECHNOLOGY_*}
-     * constants) which support only a single data connection at a time. Some carriers do not
-     * support multiple pdp on UMTS.
+     * List of network type constants which support only a single data connection at a time.
+     * Some carriers do not support multiple PDP on UMTS.
+     * @see TelephonyManager NETWORK_TYPE_*
      */
     public static final String
             KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY = "only_single_dc_allowed_int_array";
@@ -3652,16 +3656,45 @@ public class CarrierConfigManager {
     public static final String KEY_5G_WATCHDOG_TIME_MS_LONG = "5g_watchdog_time_ms_long";
 
     /**
-     * Which NR types are unmetered. A string array containing the following keys:
+     * Which network types are unmetered. A string array that can contain network type names from
+     * {@link TelephonyManager#getNetworkTypeName(int)} in addition to the following NR keys:
      * NR_NSA - NR NSA is unmetered for sub-6 frequencies
      * NR_NSA_MMWAVE - NR NSA is unmetered for mmwave frequencies
      * NR_SA - NR SA is unmetered for sub-6 frequencies
      * NR_SA_MMWAVE - NR SA is unmetered for mmwave frequencies
+     *
+     * Note that this config only applies if an unmetered SubscriptionPlan is set via
+     * {@link SubscriptionManager#setSubscriptionPlans(int, List)} or an unmetered override is set
+     * via {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, int[], long)}
+     * or {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, long)}.
+     * If neither SubscriptionPlans nor an override are set, then no network types can be unmetered
+     * regardless of the value of this config.
      * TODO: remove other unmetered keys and replace with this
      * @hide
      */
     public static final String KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY =
             "unmetered_network_types_string_array";
+
+    /**
+     * Which network types are unmetered when roaming. A string array that can contain network type
+     * names from {@link TelephonyManager#getNetworkTypeName(int)} in addition to the following
+     * NR keys:
+     * NR_NSA - NR NSA is unmetered when roaming for sub-6 frequencies
+     * NR_NSA_MMWAVE - NR NSA is unmetered when roaming for mmwave frequencies
+     * NR_SA - NR SA is unmetered when roaming for sub-6 frequencies
+     * NR_SA_MMWAVE - NR SA is unmetered when roaming for mmwave frequencies
+     *
+     * Note that this config only applies if an unmetered SubscriptionPlan is set via
+     * {@link SubscriptionManager#setSubscriptionPlans(int, List)} or an unmetered override is set
+     * via {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, int[], long)}
+     * or {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, long)}.
+     * If neither SubscriptionPlans nor an override are set, then no network types can be unmetered
+     * when roaming regardless of the value of this config.
+     * TODO: remove KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL and replace with this
+     * @hide
+     */
+    public static final String KEY_ROAMING_UNMETERED_NETWORK_TYPES_STRING_ARRAY =
+            "roaming_unmetered_network_types_string_array";
 
     /**
      * Whether NR (non-standalone) should be unmetered for all frequencies.
@@ -5604,14 +5637,9 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CARRIER_WLAN_DISALLOWED_APN_TYPES_STRING_ARRAY,
                 new String[]{""});
         sDefaults.putIntArray(KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY,
-                new int[]{
-                    4, /* IS95A */
-                    5, /* IS95B */
-                    6, /* 1xRTT */
-                    7, /* EVDO_0 */
-                    8, /* EVDO_A */
-                    12 /* EVDO_B */
-                });
+                new int[] {TelephonyManager.NETWORK_TYPE_CDMA, TelephonyManager.NETWORK_TYPE_1xRTT,
+                        TelephonyManager.NETWORK_TYPE_EVDO_0, TelephonyManager.NETWORK_TYPE_EVDO_A,
+                        TelephonyManager.NETWORK_TYPE_EVDO_B});
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putString(KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING, null);
@@ -5954,7 +5982,9 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT, 0);
         sDefaults.putBoolean(KEY_ENABLE_NR_ADVANCED_WHILE_ROAMING_BOOL, true);
         sDefaults.putBoolean(KEY_LTE_ENDC_USING_USER_DATA_FOR_RRC_DETECTION_BOOL, false);
-        sDefaults.putStringArray(KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY, new String[0]);
+        sDefaults.putStringArray(KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY, new String[] {
+                "NR_NSA", "NR_NSA_MMWAVE", "NR_SA", "NR_SA_MMWAVE"});
+        sDefaults.putStringArray(KEY_ROAMING_UNMETERED_NETWORK_TYPES_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);

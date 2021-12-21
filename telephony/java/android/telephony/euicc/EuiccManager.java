@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
@@ -58,6 +59,7 @@ import java.util.stream.Collectors;
  *
  * <p>See {@link #isEnabled} before attempting to use these APIs.
  */
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_EUICC)
 public class EuiccManager {
 
     /**

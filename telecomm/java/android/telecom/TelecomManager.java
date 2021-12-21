@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
@@ -31,6 +32,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -70,6 +72,7 @@ import java.util.concurrent.Executor;
  */
 @SuppressAutoDoc
 @SystemService(Context.TELECOM_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_TELECOM)
 public class TelecomManager {
 
     /**

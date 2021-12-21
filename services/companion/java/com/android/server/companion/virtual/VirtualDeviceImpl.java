@@ -55,6 +55,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @VisibleForTesting
     final List<Integer> mVirtualDisplayIds = new ArrayList<>();
     private final OnDeviceCloseListener mListener;
+    private final IBinder mAppToken;
 
     /**
      * A mapping from the virtual display ID to its corresponding
@@ -74,6 +75,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mContext = context;
         mAssociationInfo = associationInfo;
         mOwnerUid = ownerUid;
+        mAppToken = token;
         if (inputController == null) {
             mInputController = new InputController(mVirtualDeviceLock);
         } else {
@@ -95,6 +97,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @Override // Binder call
     public void close() {
         mListener.onClose(mAssociationInfo.getId());
+        mAppToken.unlinkToDeath(this, 0);
         mInputController.close();
     }
 

@@ -40,7 +40,10 @@ java_sdk_library {
     ],
     libs: [
         "updatable-media",
+        "modules-annotation-minsdk",
+        "modules-utils-build",
     ],
+    jarjar_rules: "jarjar_rules.txt",
     sdk_version: "system_server_current",
     min_sdk_version: "29", // TODO: We may need to bump this at some point.
     apex_available: [

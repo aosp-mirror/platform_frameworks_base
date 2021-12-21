@@ -180,8 +180,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     /** Applies new configuration, returns {@code false} if there's no effect to the layout. */
     public boolean updateConfiguration(Configuration configuration) {
-        boolean affectsLayout = false;
-
         // Update the split bounds when necessary. Besides root bounds changed, split bounds need to
         // be updated when the rotation changed to cover the case that users rotated the screen 180
         // degrees.
@@ -212,6 +210,24 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         }
 
         return true;
+    }
+
+    /** Rotate the layout to specific rotation and assume its new bounds. */
+    public void rotateTo(int newRotation) {
+        final int rotationDelta = (newRotation - mRotation + 4) % 4;
+        final boolean changeOrient = (rotationDelta % 2) != 0;
+
+        mRotation = newRotation;
+        Rect tmpRect = new Rect(mRootBounds);
+        if (changeOrient) {
+            tmpRect.set(mRootBounds.top, mRootBounds.left, mRootBounds.bottom, mRootBounds.right);
+        }
+
+        final Configuration config = new Configuration();
+        config.setTo(mContext.getResources().getConfiguration());
+        config.orientation = mOrientation;
+        config.windowConfiguration.setBounds(tmpRect);
+        updateConfiguration(config);
     }
 
     private void initDividerPosition(Rect oldBounds) {

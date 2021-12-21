@@ -42,7 +42,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -54,7 +53,6 @@ import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.connectivity.StatusBarFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -100,10 +98,6 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
     @Mock
     private TileServiceRequestController mTileServiceRequestController;
-    @Mock
-    private FeatureFlags mFeatureFlags;
-    @Mock
-    private StatusBarFlags mStatusBarFlags;
 
     public QSFragmentTest() {
         super(QSFragment.class);
@@ -149,7 +143,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mock(BroadcastDispatcher.class), Optional.of(mock(StatusBar.class)),
                 mock(QSLogger.class), mock(UiEventLogger.class), mock(UserTracker.class),
                 mock(SecureSettings.class), mock(CustomTileStatePersister.class),
-                mTileServiceRequestControllerBuilder, mFeatureFlags, mStatusBarFlags);
+                mTileServiceRequestControllerBuilder);
         qs.setHost(host);
 
         qs.setListening(true);

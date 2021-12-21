@@ -41,7 +41,6 @@ import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.connectivity.StatusBarFlags;
 import com.android.systemui.util.leak.GarbageMonitor;
 
 import java.util.ArrayList;
@@ -63,7 +62,6 @@ public class TileQueryHelper {
     private final Executor mBgExecutor;
     private final Context mContext;
     private final UserTracker mUserTracker;
-    private final StatusBarFlags mStatusBarFlags;
     private TileStateListener mListener;
 
     private boolean mFinished;
@@ -73,14 +71,12 @@ public class TileQueryHelper {
             Context context,
             UserTracker userTracker,
             @Main Executor mainExecutor,
-            @Background Executor bgExecutor,
-            StatusBarFlags statusBarFlags
+            @Background Executor bgExecutor
     ) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mUserTracker = userTracker;
-        mStatusBarFlags = statusBarFlags;
     }
 
     public void setListener(TileStateListener listener) {
@@ -121,10 +117,8 @@ public class TileQueryHelper {
         }
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
-        if (mStatusBarFlags.isProviderModelSettingEnabled()) {
-            possibleTiles.remove("cell");
-            possibleTiles.remove("wifi");
-        }
+        possibleTiles.remove("cell");
+        possibleTiles.remove("wifi");
 
         for (String spec : possibleTiles) {
             // Only add current and stock tiles that can be created from QSFactoryImpl.
