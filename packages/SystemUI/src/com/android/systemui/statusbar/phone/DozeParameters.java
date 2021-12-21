@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.PowerManager;
@@ -26,7 +27,10 @@ import android.util.Log;
 import android.util.MathUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
@@ -35,7 +39,9 @@ import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.tuner.TunerService;
 
@@ -53,7 +59,8 @@ import javax.inject.Inject;
 public class DozeParameters implements
         TunerService.Tunable,
         com.android.systemui.plugins.statusbar.DozeParameters,
-        Dumpable {
+        Dumpable, ConfigurationController.ConfigurationListener,
+        StatusBarStateController.StateListener {
     private static final int MAX_DURATION = 60 * 1000;
     public static final boolean FORCE_NO_BLANKING =
             SystemProperties.getBoolean("debug.force_no_blanking", false);
@@ -74,6 +81,22 @@ public class DozeParameters implements
     private boolean mDozeAlwaysOn;
     private boolean mControlScreenOffAnimation;
 
+    private boolean mKeyguardShowing;
+    @VisibleForTesting
+    final KeyguardUpdateMonitorCallback mKeyguardVisibilityCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onKeyguardVisibilityChanged(boolean showing) {
+                    mKeyguardShowing = showing;
+                    updateControlScreenOff();
+                }
+
+                @Override
+                public void onShadeExpandedChanged(boolean expanded) {
+                    updateControlScreenOff();
+                }
+            };
+
     @Inject
     protected DozeParameters(
             @Main Resources resources,
@@ -84,7 +107,10 @@ public class DozeParameters implements
             TunerService tunerService,
             DumpManager dumpManager,
             FeatureFlags featureFlags,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            ConfigurationController configurationController,
+            StatusBarStateController statusBarStateController) {
         mResources = resources;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
         mAlwaysOnPolicy = alwaysOnDisplayPolicy;
@@ -97,10 +123,13 @@ public class DozeParameters implements
         mFeatureFlags = featureFlags;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
 
+        keyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
         tunerService.addTunable(
                 this,
                 Settings.Secure.DOZE_ALWAYS_ON,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
+        configurationController.addCallback(this);
+        statusBarStateController.addCallback(this);
     }
 
     public boolean getDisplayStateSupported() {
@@ -222,12 +251,28 @@ public class DozeParameters implements
     }
 
     /**
+     *
+     */
+    public void updateControlScreenOff() {
+        if (!getDisplayNeedsBlanking()) {
+            final boolean controlScreenOff =
+                    getAlwaysOn() && (mKeyguardShowing || shouldControlUnlockedScreenOff());
+            setControlScreenOffAnimation(controlScreenOff);
+        }
+    }
+
+    /**
      * Whether we want to control the screen off animation when the device is unlocked. If we do,
      * we'll animate in AOD before turning off the screen, rather than simply fading to black and
      * then abruptly showing AOD.
+     *
+     * There are currently several reasons we might not want to control the screen off even if we
+     * are able to, such as the shade being expanded, being in landscape, or having animations
+     * disabled for a11y.
      */
     public boolean shouldControlUnlockedScreenOff() {
-        return mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation();
+        return canControlUnlockedScreenOff()
+                && mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation();
     }
 
     /**
@@ -308,9 +353,24 @@ public class DozeParameters implements
     @Override
     public void onTuningChanged(String key, String newValue) {
         mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+
+        if (key.equals(Settings.Secure.DOZE_ALWAYS_ON)) {
+            updateControlScreenOff();
+        }
+
         for (Callback callback : mCallbacks) {
             callback.onAlwaysOnChange();
         }
+    }
+
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        updateControlScreenOff();
+    }
+
+    @Override
+    public void onStatePostChange() {
+        updateControlScreenOff();
     }
 
     @Override
