@@ -2053,6 +2053,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Vlastní oznámení aplikace"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Povolit aplikaci <xliff:g id="APP">%1$s</xliff:g> vytvořit nového uživatele s účtem <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Uživatel s tímto účtem již existuje.)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Povolit aplikaci <xliff:g id="APP">%1$s</xliff:g> vytvořit nového uživatele s účtem <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"Přidat jazyk"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferovaná oblast"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Zadejte název jazyka"</string>

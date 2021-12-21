@@ -1989,6 +1989,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Maxsus ilova bildirishnomasi"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi (bunday hisobdagi foydalanuvchi allaqachon mavjud) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi ?"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Kuzatuvdagi foydalanuvchi qoʻshish"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Til qoʻshish"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Hudud sozlamalari"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Til nomini kiriting"</string>

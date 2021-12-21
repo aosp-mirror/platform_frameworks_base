@@ -1989,6 +1989,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Rakenduse kohandatud märguanne"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Kas lubada rakendusel <xliff:g id="APP">%1$s</xliff:g> luua uus kasutaja kontoga <xliff:g id="ACCOUNT">%2$s</xliff:g> (selle kontoga kasutaja on juba olemas)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Kas lubada rakendusel <xliff:g id="APP">%1$s</xliff:g> luua uus kasutaja kontoga <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"Keele lisamine"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Piirkonnaeelistus"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Sisestage keele nimi"</string>

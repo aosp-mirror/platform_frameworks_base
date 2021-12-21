@@ -1989,6 +1989,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ऐप्लिकेशन की सूचना पसंद के मुताबिक बनाएं"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> को <xliff:g id="ACCOUNT">%2$s</xliff:g> के नाम से एक नया उपयोगकर्ता बनाने की अनुमति दें (इस नाम से एक खाता पहले से मौजूद है)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Allow <xliff:g id="APP">%1$s</xliff:g> to create a new User with <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"निगरानी में रखा गया उपयोगकर्ता जोड़ें"</string>
     <string name="language_selection_title" msgid="52674936078683285">"भाषा जोड़ें"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"क्षेत्र प्राथमिकता"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"भाषा का नाम लिखें"</string>

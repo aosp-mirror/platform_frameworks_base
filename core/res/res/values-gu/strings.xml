@@ -1989,6 +1989,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ઍપનું કસ્ટમ નોટિફિકેશન"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g>ને <xliff:g id="ACCOUNT">%2$s</xliff:g> માટે એક નવા વપરાશકર્તા બનાવવાની મંજૂરી આપીએ (આ એકાઉન્ટ માટે એક વપરાશકર્તા પહેલાંથી અસ્તિત્વમાં છે) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g>ને <xliff:g id="ACCOUNT">%2$s</xliff:g> માટે એક નવા વપરાશકર્તા બનાવવાની મંજૂરી આપીએ ?"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"ભાષા ઉમેરો"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"પ્રદેશ પસંદગી"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ભાષાનું નામ ટાઇપ કરો"</string>

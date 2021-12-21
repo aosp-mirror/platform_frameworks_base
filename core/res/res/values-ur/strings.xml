@@ -1989,6 +1989,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"حسب ضرورت ایپ کی اطلاع"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> کو <xliff:g id="ACCOUNT">%2$s</xliff:g> کے ساتھ ایک نیا صارف بنانے کی اجازت دیں (اس اکاؤنٹ کے ساتھ ایک صارف پہلے سے موجود ہے) ؟"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> کے ساتھ نئے صارف کو تخلیق کرنے کے لیے <xliff:g id="APP">%1$s</xliff:g> کو اجازت دیں ؟"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"ایک زبان شامل کریں"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"علاقہ کی ترجیح"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"زبان کا نام ٹائپ کریں"</string>

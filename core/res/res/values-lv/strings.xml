@@ -2021,6 +2021,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Pielāgots lietotnes paziņojums"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Vai atļaut lietotnei <xliff:g id="APP">%1$s</xliff:g> izveidot jaunu lietotāju, izmantojot e-pasta adresi <xliff:g id="ACCOUNT">%2$s</xliff:g> (lietotājs ar šādu kontu jau pastāv)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Vai atļaut lietotnei <xliff:g id="APP">%1$s</xliff:g> izveidot jaunu lietotāju, izmantojot e-pasta adresi <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"Pievienot valodu"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Reģiona preference"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Ierakstiet valodas nosaukumu"</string>

@@ -624,8 +624,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Touchez pour supprimer votre modèle facial, puis ajoutez votre visage de nouveau"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurer le déverrouillage par reconnaissance faciale"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Déverrouillez votre téléphone en le regardant"</string>
-    <!-- no translation found for face_sensor_privacy_enabled (7407126963510598508) -->
-    <skip />
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Pour utiliser le déverrouillage par reconnaissance faciale, activez l\'"<b>"accès à l\'appareil photo"</b>" dans Paramètres &gt; Confidentialité"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configurer d\'autres méthodes de déverrouillage"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Touchez pour ajouter une empreinte digitale"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Déverrouillage par empreinte digitale"</string>
@@ -1990,6 +1989,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notification d\'application personnalisée"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un utilisateur <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Un utilisateur est déjà associé à ce compte)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil d\'utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"Ajouter une langue"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Préférences régionales"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Entrez la langue"</string>

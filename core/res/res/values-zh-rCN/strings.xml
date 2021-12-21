@@ -1989,6 +1989,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"自定义应用通知"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g>（目前已有用户使用此帐号）创建新用户吗？"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 创建新用户吗？"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"添加语言"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"区域偏好设置"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"输入语言名称"</string>

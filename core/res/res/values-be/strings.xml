@@ -2053,6 +2053,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Апавяшчэнне пра карыстальніцкую праграму"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Дазволіць праграме \"<xliff:g id="APP">%1$s</xliff:g>\" стварыць новага Карыстальніка з уліковым запісам <xliff:g id="ACCOUNT">%2$s</xliff:g> (Карыстальнік з гэтым уліковым запісам ужо існуе)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Дазволіць праграме \"<xliff:g id="APP">%1$s</xliff:g>\" стварыць новага Карыстальніка з уліковым запісам <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"Дадаць мову"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Параметры рэгіёна"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Увядзіце назву мовы"</string>

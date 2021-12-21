@@ -2053,6 +2053,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"התראות אפליקציה בהתאמה אישית"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"האם לאפשר לאפליקציה <xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש באמצעות <xliff:g id="ACCOUNT">%2$s</xliff:g> (כבר קיים משתמש לחשבון הזה)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"לאפשר לאפליקציה <xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש באמצעות <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"הוספת שפה"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"העדפת אזור"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"יש להקליד את שם השפה"</string>

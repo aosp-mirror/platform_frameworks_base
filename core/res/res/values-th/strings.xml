@@ -1989,6 +1989,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"การแจ้งเตือนที่กำหนดเองของแอป"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"อนุญาตให้ <xliff:g id="APP">%1$s</xliff:g> สร้างผู้ใช้ใหม่ด้วย <xliff:g id="ACCOUNT">%2$s</xliff:g> ไหม (มีผู้ใช้ที่มีบัญชีนี้อยู่แล้ว)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"อนุญาตให้ <xliff:g id="APP">%1$s</xliff:g> สร้างผู้ใช้ใหม่ด้วย <xliff:g id="ACCOUNT">%2$s</xliff:g> ไหม"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"เพิ่มผู้ใช้ภายใต้การควบคุมดูแล"</string>
     <string name="language_selection_title" msgid="52674936078683285">"เพิ่มภาษา"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ค่ากำหนดภูมิภาค"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"พิมพ์ชื่อภาษา"</string>

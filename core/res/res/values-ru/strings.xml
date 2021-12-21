@@ -2053,6 +2053,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Уведомление пользовательского приложения"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Разрешить приложению \"<xliff:g id="APP">%1$s</xliff:g>\" создать нового пользователя с аккаунтом <xliff:g id="ACCOUNT">%2$s</xliff:g> (пользователь с этим аккаунтом уже существует)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Разрешить приложению \"<xliff:g id="APP">%1$s</xliff:g>\" создать нового пользователя с аккаунтом <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"Добавить язык"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Региональные настройки"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Введите название языка"</string>

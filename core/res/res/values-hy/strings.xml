@@ -1989,6 +1989,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Հավելվածի հատուկ ծանուցում"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Թույլատրե՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օգտատեր ստեղծել (նման հաշվով Օգտատեր արդեն գոյություն ունի):"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Թույլատրե՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օգտատեր ստեղծել:"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Ավելացնել վերահսկվող օգտատեր"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Ավելացնել լեզու"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Նախընտրելի տարածաշրջան"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Մուտքագրեք լեզուն"</string>
