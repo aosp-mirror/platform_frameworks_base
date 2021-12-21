@@ -158,10 +158,10 @@ public class StagingManagerTest {
 
         mStagingManager.restoreSessions(Arrays.asList(session1, session2), true);
 
-        assertThat(session1.getErrorCode()).isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
+        assertThat(session1.getErrorCode()).isEqualTo(SessionInfo.SESSION_ACTIVATION_FAILED);
         assertThat(session1.getErrorMessage()).isEqualTo("Build fingerprint has changed");
 
-        assertThat(session2.getErrorCode()).isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
+        assertThat(session2.getErrorCode()).isEqualTo(SessionInfo.SESSION_ACTIVATION_FAILED);
         assertThat(session2.getErrorMessage()).isEqualTo("Build fingerprint has changed");
     }
 
@@ -247,12 +247,12 @@ public class StagingManagerTest {
         verify(mStorageManager, never()).abortChanges(eq("abort-staged-install"), eq(false));
 
         assertThat(apexSession.getErrorCode())
-                .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
+                .isEqualTo(SessionInfo.SESSION_ACTIVATION_FAILED);
         assertThat(apexSession.getErrorMessage()).isEqualTo("apexd did not know anything about a "
                 + "staged session supposed to be activated");
 
         assertThat(apkSession.getErrorCode())
-                .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
+                .isEqualTo(SessionInfo.SESSION_ACTIVATION_FAILED);
         assertThat(apkSession.getErrorMessage()).isEqualTo("Another apex session failed");
     }
 
@@ -303,22 +303,22 @@ public class StagingManagerTest {
         verify(mStorageManager, never()).abortChanges(eq("abort-staged-install"), eq(false));
 
         assertThat(apexSession1.getErrorCode())
-                .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
+                .isEqualTo(SessionInfo.SESSION_ACTIVATION_FAILED);
         assertThat(apexSession1.getErrorMessage()).isEqualTo("APEX activation failed. "
                 + "Error: Failed for test");
 
         assertThat(apexSession2.getErrorCode())
-                .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
+                .isEqualTo(SessionInfo.SESSION_ACTIVATION_FAILED);
         assertThat(apexSession2.getErrorMessage()).isEqualTo("Staged session 101 at boot didn't "
                 + "activate nor fail. Marking it as failed anyway.");
 
         assertThat(apexSession3.getErrorCode())
-                .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
+                .isEqualTo(SessionInfo.SESSION_ACTIVATION_FAILED);
         assertThat(apexSession3.getErrorMessage()).isEqualTo("apexd did not know anything about a "
                 + "staged session supposed to be activated");
 
         assertThat(apkSession.getErrorCode())
-                .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
+                .isEqualTo(SessionInfo.SESSION_ACTIVATION_FAILED);
         assertThat(apkSession.getErrorMessage()).isEqualTo("Another apex session failed");
     }
 
@@ -351,12 +351,12 @@ public class StagingManagerTest {
         verify(mStorageManager, never()).abortChanges(eq("abort-staged-install"), eq(false));
 
         assertThat(apexSession.getErrorCode())
-                .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
+                .isEqualTo(SessionInfo.SESSION_ACTIVATION_FAILED);
         assertThat(apexSession.getErrorMessage()).isEqualTo("Staged session 1543 at boot didn't "
                 + "activate nor fail. Marking it as failed anyway.");
 
         assertThat(apkSession.getErrorCode())
-                .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
+                .isEqualTo(SessionInfo.SESSION_ACTIVATION_FAILED);
         assertThat(apkSession.getErrorMessage()).isEqualTo("Another apex session failed");
     }
 
@@ -445,11 +445,11 @@ public class StagingManagerTest {
         verify(mStorageManager, never()).abortChanges(eq("abort-staged-install"), eq(false));
 
         assertThat(apexSession.getErrorCode())
-                .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
+                .isEqualTo(SessionInfo.SESSION_ACTIVATION_FAILED);
         assertThat(apexSession.getErrorMessage()).isEqualTo("Impossible state");
 
         assertThat(apkSession.getErrorCode())
-                .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
+                .isEqualTo(SessionInfo.SESSION_ACTIVATION_FAILED);
         assertThat(apkSession.getErrorMessage()).isEqualTo("Another apex session failed");
     }
 
@@ -754,7 +754,7 @@ public class StagingManagerTest {
                 /* isReady */ false,
                 /* isFailed */ false,
                 /* isApplied */false,
-                /* stagedSessionErrorCode */ PackageInstaller.SessionInfo.STAGED_SESSION_NO_ERROR,
+                /* stagedSessionErrorCode */ PackageInstaller.SessionInfo.SESSION_NO_ERROR,
                 /* stagedSessionErrorMessage */ "no error");
 
         StagingManager.StagedSession stagedSession = spy(session.mStagedSession);

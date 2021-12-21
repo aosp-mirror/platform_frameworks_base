@@ -460,7 +460,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mSessionFailed;
     @GuardedBy("mLock")
-    private int mSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
+    private int mSessionErrorCode = SessionInfo.SESSION_NO_ERROR;
     @GuardedBy("mLock")
     private String mSessionErrorMessage;
 
@@ -2092,7 +2092,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (isStaged()) {
             // This will clean up the session when it reaches the terminal state
             mStagedSession.setSessionFailed(
-                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED, msgWithErrorCode);
+                    SessionInfo.SESSION_VERIFICATION_FAILED, msgWithErrorCode);
             mStagedSession.notifyEndPreRebootVerification();
         } else {
             // Session is sealed and committed but could not be verified, we need to destroy it.
@@ -2547,7 +2547,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (isStaged()) {
             mSessionProvider.getSessionVerifier().verifyStaged(mStagedSession, (error, msg) -> {
                 mStagedSession.notifyEndPreRebootVerification();
-                if (error == SessionInfo.STAGED_SESSION_NO_ERROR) {
+                if (error == SessionInfo.SESSION_NO_ERROR) {
                     mStagingManager.commitSession(mStagedSession);
                 }
             });
@@ -4168,7 +4168,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mSessionReady = true;
             mSessionApplied = false;
             mSessionFailed = false;
-            mSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
+            mSessionErrorCode = SessionInfo.SESSION_NO_ERROR;
             mSessionErrorMessage = "";
         }
         mCallback.onSessionChanged(this);
@@ -4196,7 +4196,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mSessionReady = false;
             mSessionApplied = true;
             mSessionFailed = false;
-            mSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
+            mSessionErrorCode = SessionInfo.SESSION_NO_ERROR;
             mSessionErrorMessage = "";
             Slog.d(TAG, "Marking session " + sessionId + " as applied");
         }
@@ -4705,7 +4705,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isFailed = in.getAttributeBoolean(null, ATTR_IS_FAILED, false);
         final boolean isApplied = in.getAttributeBoolean(null, ATTR_IS_APPLIED, false);
         final int sessionErrorCode = in.getAttributeInt(null, ATTR_SESSION_ERROR_CODE,
-                SessionInfo.STAGED_SESSION_NO_ERROR);
+                SessionInfo.SESSION_NO_ERROR);
         final String sessionErrorMessage = readStringAttribute(in, ATTR_SESSION_ERROR_MESSAGE);
 
         if (!isStagedSessionStateValid(isReady, isApplied, isFailed)) {
