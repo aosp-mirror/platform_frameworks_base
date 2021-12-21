@@ -74,23 +74,25 @@ public class Transitions implements RemoteCallable<Transitions> {
     public static final boolean ENABLE_SHELL_TRANSITIONS =
             SystemProperties.getBoolean("persist.debug.shell_transit", false);
 
-    /** Transition type for dismissing split-screen via dragging the divider off the screen. */
-    public static final int TRANSIT_SPLIT_DISMISS_SNAP = TRANSIT_FIRST_CUSTOM + 1;
-
-    /** Transition type for launching 2 tasks simultaneously. */
-    public static final int TRANSIT_SPLIT_SCREEN_PAIR_OPEN = TRANSIT_FIRST_CUSTOM + 2;
-
     /** Transition type for exiting PIP via the Shell, via pressing the expand button. */
-    public static final int TRANSIT_EXIT_PIP = TRANSIT_FIRST_CUSTOM + 3;
+    public static final int TRANSIT_EXIT_PIP = TRANSIT_FIRST_CUSTOM + 1;
+
+    public static final int TRANSIT_EXIT_PIP_TO_SPLIT =  TRANSIT_FIRST_CUSTOM + 2;
 
     /** Transition type for removing PIP via the Shell, either via Dismiss bubble or Close. */
-    public static final int TRANSIT_REMOVE_PIP = TRANSIT_FIRST_CUSTOM + 4;
+    public static final int TRANSIT_REMOVE_PIP = TRANSIT_FIRST_CUSTOM + 3;
+
+    /** Transition type for launching 2 tasks simultaneously. */
+    public static final int TRANSIT_SPLIT_SCREEN_PAIR_OPEN = TRANSIT_FIRST_CUSTOM + 4;
 
     /** Transition type for entering split by opening an app into side-stage. */
     public static final int TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE = TRANSIT_FIRST_CUSTOM + 5;
 
+    /** Transition type for dismissing split-screen via dragging the divider off the screen. */
+    public static final int TRANSIT_SPLIT_DISMISS_SNAP = TRANSIT_FIRST_CUSTOM + 6;
+
     /** Transition type for dismissing split-screen. */
-    public static final int TRANSIT_SPLIT_DISMISS = TRANSIT_FIRST_CUSTOM + 6;
+    public static final int TRANSIT_SPLIT_DISMISS = TRANSIT_FIRST_CUSTOM + 7;
 
     private final WindowOrganizer mOrganizer;
     private final Context mContext;

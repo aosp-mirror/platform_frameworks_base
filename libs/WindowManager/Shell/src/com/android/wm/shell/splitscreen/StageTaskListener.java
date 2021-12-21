@@ -301,6 +301,11 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     void addTask(ActivityManager.RunningTaskInfo task, WindowContainerTransaction wct) {
+        // Clear overridden bounds and windowing mode to make sure the child task can inherit
+        // windowing mode and bounds from split root.
+        wct.setWindowingMode(task.token, WINDOWING_MODE_UNDEFINED)
+                .setBounds(task.token, null);
+
         wct.reparent(task.token, mRootTaskInfo.token, true /* onTop*/);
     }
 
