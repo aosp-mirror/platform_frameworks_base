@@ -30,7 +30,7 @@ import java.util.Optional;
 /**
  * A span that turns the text wrapped by annotation tag into the clickable link text.
  */
-class AnnotationLinkSpan extends ClickableSpan {
+public class AnnotationLinkSpan extends ClickableSpan {
     private final Optional<View.OnClickListener> mClickListener;
 
     private AnnotationLinkSpan(View.OnClickListener listener) {
@@ -50,7 +50,7 @@ class AnnotationLinkSpan extends ClickableSpan {
      * @param linkInfos used to attach the click action into the corresponding span
      * @return the text attached with the span
      */
-    static CharSequence linkify(CharSequence text, LinkInfo... linkInfos) {
+    public static CharSequence linkify(CharSequence text, LinkInfo... linkInfos) {
         final SpannableString msg = new SpannableString(text);
         final Annotation[] spans =
                 msg.getSpans(/* queryStart= */ 0, msg.length(), Annotation.class);
@@ -78,12 +78,12 @@ class AnnotationLinkSpan extends ClickableSpan {
     /**
      * Data class to store the annotation and the click action.
      */
-    static class LinkInfo {
-        static final String DEFAULT_ANNOTATION = "link";
+    public static class LinkInfo {
+        public static final String DEFAULT_ANNOTATION = "link";
         private final Optional<String> mAnnotation;
         private final Optional<View.OnClickListener> mListener;
 
-        LinkInfo(@NonNull String annotation, View.OnClickListener listener) {
+        public LinkInfo(@NonNull String annotation, View.OnClickListener listener) {
             mAnnotation = Optional.of(annotation);
             mListener = Optional.ofNullable(listener);
         }
