@@ -1076,13 +1076,6 @@ public final class DataFailCause {
      */
     public static final int SERVICE_TEMPORARILY_UNAVAILABLE = 0x10009;
 
-    /**
-     * The request is not supported by the vendor.
-     *
-     * @hide
-     */
-    public static final int REQUEST_NOT_SUPPORTED = 0x1000A;
-
     private static final Map<Integer, String> sFailCauseMap;
     static {
         sFailCauseMap = new HashMap<>();
