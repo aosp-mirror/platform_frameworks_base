@@ -2014,22 +2014,12 @@ class ActivityStarter {
     private boolean canEmbedActivity(@NonNull TaskFragment taskFragment,
             @NonNull ActivityRecord starting, boolean newTask, Task targetTask) {
         final Task hostTask = taskFragment.getTask();
-        if (hostTask == null) {
+        // Not allowed embedding a separate task or without host task.
+        if (hostTask == null || newTask || targetTask != hostTask) {
             return false;
         }
 
-        // Allowing the embedding if the task is owned by system.
-        final int hostUid = hostTask.effectiveUid;
-        if (UserHandle.getAppId(hostUid) == Process.SYSTEM_UID) {
-            return true;
-        }
-
-        if (!taskFragment.isAllowedToEmbedActivity(starting)) {
-            return false;
-        }
-
-        // Not allowed embedding task.
-        return !newTask && (targetTask == null || targetTask == hostTask);
+        return taskFragment.isAllowedToEmbedActivity(starting);
     }
 
     /**
