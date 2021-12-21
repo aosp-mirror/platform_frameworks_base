@@ -23,6 +23,8 @@ import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
 import static com.android.server.location.eventlog.LocationEventLog.EVENT_LOG;
 
+import static java.lang.Math.max;
+
 import android.annotation.Nullable;
 import android.location.Location;
 import android.location.LocationResult;
@@ -53,6 +55,7 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
         implements DeviceIdleHelper.DeviceIdleListener, DeviceIdleInternal.StationaryListener {
 
     private static final long MAX_STATIONARY_LOCATION_AGE_MS = 30000;
+    private static final long MIN_INTERVAL_MS = 1000;
 
     final Object mLock = new Object();
 
@@ -179,7 +182,7 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
                 && mLastLocation != null
                 && mLastLocation.getElapsedRealtimeAgeMillis(mDeviceStationaryRealtimeMs)
                 <= MAX_STATIONARY_LOCATION_AGE_MS) {
-            throttlingIntervalMs = mIncomingRequest.getIntervalMillis();
+            throttlingIntervalMs = max(mIncomingRequest.getIntervalMillis(), MIN_INTERVAL_MS);
         }
 
         ProviderRequest newRequest;
