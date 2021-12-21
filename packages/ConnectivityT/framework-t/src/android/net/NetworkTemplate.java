@@ -560,30 +560,6 @@ public final class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Check if the template can be persisted into disk.
-     *
-     * @hide
-     */
-    // TODO: Move to the NetworkPolicy.
-    public boolean isPersistable() {
-        switch (mMatchRule) {
-            case MATCH_MOBILE_WILDCARD:
-            case MATCH_WIFI_WILDCARD:
-                return false;
-            case MATCH_CARRIER:
-                return mSubscriberId != null;
-            case MATCH_WIFI:
-                if (Objects.equals(mNetworkId, WIFI_NETWORK_KEY_ALL)
-                        && mSubscriberIdMatchRule == SUBSCRIBER_ID_MATCH_RULE_ALL) {
-                    return false;
-                }
-                return true;
-            default:
-                return true;
-        }
-    }
-
-    /**
      * Get match rule of the template. See {@code MATCH_*}.
      */
     @UnsupportedAppUsage
