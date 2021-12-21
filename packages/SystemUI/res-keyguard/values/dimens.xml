@@ -108,11 +108,15 @@
     <dimen name="one_handed_bouncer_move_animation_translation">120dp</dimen>
 
 
-    <dimen name="keyguard_user_switcher_header_text_size">32sp</dimen>
-    <dimen name="keyguard_user_switcher_item_text_size">32sp</dimen>
-    <dimen name="keyguard_user_switcher_width">320dp</dimen>
-    <dimen name="keyguard_user_switcher_icon_size">310dp</dimen>
-    <dimen name="keyguard_user_switcher_corner">32dp</dimen>
-    <dimen name="keyguard_user_switcher_popup_corner">24dp</dimen>
-    <dimen name="keyguard_user_switcher_item_padding_vertical">15dp</dimen>
+    <dimen name="bouncer_user_switcher_header_text_size">20sp</dimen>
+    <dimen name="bouncer_user_switcher_item_text_size">20sp</dimen>
+    <dimen name="bouncer_user_switcher_item_line_height">24sp</dimen>
+    <dimen name="bouncer_user_switcher_item_icon_size">28dp</dimen>
+    <dimen name="bouncer_user_switcher_item_icon_padding">12dp</dimen>
+    <dimen name="bouncer_user_switcher_width">248dp</dimen>
+    <dimen name="bouncer_user_switcher_icon_size">190dp</dimen>
+    <dimen name="bouncer_user_switcher_popup_header_height">12dp</dimen>
+    <dimen name="bouncer_user_switcher_popup_divider_height">4dp</dimen>
+    <dimen name="bouncer_user_switcher_item_padding_vertical">10dp</dimen>
+    <dimen name="bouncer_user_switcher_item_padding_horizontal">12dp</dimen>
 </resources>
