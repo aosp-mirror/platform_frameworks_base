@@ -707,6 +707,7 @@ public class Annotation {
             NetworkCapabilities.NET_CAPABILITY_VSIM,
             NetworkCapabilities.NET_CAPABILITY_BIP,
             NetworkCapabilities.NET_CAPABILITY_HEAD_UNIT,
+            NetworkCapabilities.NET_CAPABILITY_MMTEL,
     })
     public @interface NetCapability { }
 
