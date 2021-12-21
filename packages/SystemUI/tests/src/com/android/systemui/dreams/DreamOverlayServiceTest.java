@@ -74,7 +74,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     WindowManagerImpl mWindowManager;
 
     @Mock
-    OverlayProvider mProvider;
+    ComplicationProvider mProvider;
 
     @Mock
     DreamOverlayStateController mDreamOverlayStateController;
@@ -124,16 +124,16 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         verify(mWindowManager).addView(any(), any());
 
         // Add overlay.
-        service.addOverlay(mProvider);
+        service.addComplication(mProvider);
         mMainExecutor.runAllReady();
 
-        final ArgumentCaptor<OverlayHost.CreationCallback> creationCallbackCapture =
-                ArgumentCaptor.forClass(OverlayHost.CreationCallback.class);
-        final ArgumentCaptor<OverlayHost.InteractionCallback> interactionCallbackCapture =
-                ArgumentCaptor.forClass(OverlayHost.InteractionCallback.class);
+        final ArgumentCaptor<ComplicationHost.CreationCallback> creationCallbackCapture =
+                ArgumentCaptor.forClass(ComplicationHost.CreationCallback.class);
+        final ArgumentCaptor<ComplicationHost.InteractionCallback> interactionCallbackCapture =
+                ArgumentCaptor.forClass(ComplicationHost.InteractionCallback.class);
 
         // Ensure overlay provider is asked to create view.
-        verify(mProvider).onCreateOverlay(any(), creationCallbackCapture.capture(),
+        verify(mProvider).onCreateComplication(any(), creationCallbackCapture.capture(),
                 interactionCallbackCapture.capture());
         mMainExecutor.runAllReady();
 
@@ -169,12 +169,12 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
 
         verify(mDreamOverlayStateController).addCallback(callbackCapture.capture());
-        when(mDreamOverlayStateController.getOverlays()).thenReturn(Arrays.asList(mProvider));
-        callbackCapture.getValue().onOverlayChanged();
+        when(mDreamOverlayStateController.getComplications()).thenReturn(Arrays.asList(mProvider));
+        callbackCapture.getValue().onComplicationsChanged();
         mMainExecutor.runAllReady();
 
         // Verify provider is asked to create overlay.
-        verify(mProvider).onCreateOverlay(any(), any(), any());
+        verify(mProvider).onCreateComplication(any(), any(), any());
     }
 
     @Test

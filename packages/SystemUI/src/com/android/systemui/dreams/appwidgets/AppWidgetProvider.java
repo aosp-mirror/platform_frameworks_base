@@ -34,8 +34,8 @@ import javax.inject.Inject;
 
 /**
  * {@link AppWidgetProvider} is a singleton for accessing app widgets within SystemUI. This
- * consolidates resources such as the App Widget Host across potentially multiple
- * {@link AppWidgetOverlayProvider} instances and other usages.
+ * consolidates resources such as the {@link AppWidgetHost} across potentially multiple
+ * {@link ComplicationProvider} instances and other usages.
  */
 @SysUISingleton
 public class AppWidgetProvider {
@@ -87,8 +87,8 @@ public class AppWidgetProvider {
                                 final float density = mResources.getDisplayMetrics().density;
                                 final int height = Math.round((bottom - top) / density);
                                 final int width = Math.round((right - left) / density);
-                                appWidgetView.updateAppWidgetSize(null, width, height, width,
-                                        height);
+                                appWidgetView.updateAppWidgetSize(null, width, height,
+                                        width, height);
                             });
                 }
 

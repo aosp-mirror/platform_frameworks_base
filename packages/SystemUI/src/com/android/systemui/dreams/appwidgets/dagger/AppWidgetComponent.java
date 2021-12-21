@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.dagger;
+package com.android.systemui.dreams.appwidgets.dagger;
 
 import android.content.ComponentName;
 
-import com.android.systemui.dreams.OverlayHostView;
-import com.android.systemui.dreams.appwidgets.AppWidgetOverlayProvider;
+import com.android.systemui.dreams.ComplicationHostView;
+import com.android.systemui.dreams.appwidgets.ComplicationProvider;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /** */
 @Subcomponent
-public interface AppWidgetOverlayComponent {
+public interface AppWidgetComponent {
     /** */
     @Subcomponent.Factory
     interface Factory {
-        AppWidgetOverlayComponent build(@BindsInstance ComponentName component,
-                @BindsInstance OverlayHostView.LayoutParams layoutParams);
+        AppWidgetComponent build(@BindsInstance ComponentName component,
+                @BindsInstance ComplicationHostView.LayoutParams layoutParams);
     }
 
-    /** Builds a {@link AppWidgetOverlayProvider}. */
-    AppWidgetOverlayProvider getAppWidgetOverlayProvider();
+    /** Builds a {@link ComplicationProvider}. */
+    ComplicationProvider getAppWidgetComplicationProvider();
 }

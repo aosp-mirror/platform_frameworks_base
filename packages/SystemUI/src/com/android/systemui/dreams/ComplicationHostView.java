@@ -22,22 +22,23 @@ import android.util.AttributeSet;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 /**
- * {@link OverlayHostView} is the container view for housing overlays ontop of a dream.
+ * {@link ComplicationHostView} is the container view for housing complications above of a dream.
  */
-public class OverlayHostView extends ConstraintLayout {
-    public OverlayHostView(Context context) {
+public class ComplicationHostView extends ConstraintLayout {
+    public ComplicationHostView(Context context) {
         super(context, null);
     }
 
-    public OverlayHostView(Context context, AttributeSet attrs) {
+    public ComplicationHostView(Context context, AttributeSet attrs) {
         super(context, attrs, 0);
     }
 
-    public OverlayHostView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ComplicationHostView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr, 0);
     }
 
-    public OverlayHostView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public ComplicationHostView(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 }

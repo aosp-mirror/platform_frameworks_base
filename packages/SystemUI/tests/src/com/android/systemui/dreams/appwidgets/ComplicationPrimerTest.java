@@ -37,7 +37,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.dreams.dagger.AppWidgetOverlayComponent;
+import com.android.systemui.dreams.appwidgets.dagger.AppWidgetComponent;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
@@ -50,7 +50,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-public class AppWidgetOverlayPrimerTest extends SysuiTestCase {
+public class ComplicationPrimerTest extends SysuiTestCase {
     @Rule
     public final LeakCheckedTest.SysuiLeakCheck mLeakCheck = new LeakCheckedTest.SysuiLeakCheck();
 
@@ -62,56 +62,57 @@ public class AppWidgetOverlayPrimerTest extends SysuiTestCase {
     Resources mResources;
 
     @Mock
-    AppWidgetOverlayComponent mAppWidgetOverlayComponent1;
+    AppWidgetComponent mAppWidgetComplicationComponent1;
     @Mock
-    AppWidgetOverlayComponent mAppWidgetOverlayComponent2;
+    AppWidgetComponent mAppWidgetComplicationComponent2;
 
     @Mock
-    AppWidgetOverlayProvider mAppWidgetOverlayProvider1;
+    ComplicationProvider mComplicationProvider1;
 
     @Mock
-    AppWidgetOverlayProvider mAppWidgetOverlayProvider2;
+    ComplicationProvider mComplicationProvider2;
 
-    final ComponentName mAppOverlayComponent1 =
+    final ComponentName mAppComplicationComponent1 =
             ComponentName.unflattenFromString("com.foo.bar/.Baz");
-    final ComponentName mAppOverlayComponent2 =
+    final ComponentName mAppComplicationComponent2 =
             ComponentName.unflattenFromString("com.foo.bar/.Baz2");
 
-    final int mAppOverlayGravity1 = Gravity.BOTTOM | Gravity.START;
-    final int mAppOverlayGravity2 = Gravity.BOTTOM | Gravity.END;
+    final int mAppComplicationGravity1 = Gravity.BOTTOM | Gravity.START;
+    final int mAppComplicationGravity2 = Gravity.BOTTOM | Gravity.END;
 
-    final String[] mComponents = new String[]{mAppOverlayComponent1.flattenToString(),
-            mAppOverlayComponent2.flattenToString() };
-    final int[] mPositions = new int[]{ mAppOverlayGravity1, mAppOverlayGravity2 };
+    final String[] mComponents = new String[]{mAppComplicationComponent1.flattenToString(),
+            mAppComplicationComponent2.flattenToString() };
+    final int[] mPositions = new int[]{mAppComplicationGravity1, mAppComplicationGravity2};
 
     @Mock
     DreamOverlayStateController mDreamOverlayStateController;
 
     @Mock
-    AppWidgetOverlayComponent.Factory mAppWidgetOverlayProviderFactory;
+    AppWidgetComponent.Factory mAppWidgetComplicationProviderFactory;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(mAppWidgetOverlayProviderFactory.build(eq(mAppOverlayComponent1), any()))
-                .thenReturn(mAppWidgetOverlayComponent1);
-        when(mAppWidgetOverlayComponent1.getAppWidgetOverlayProvider())
-                .thenReturn(mAppWidgetOverlayProvider1);
-        when(mAppWidgetOverlayProviderFactory.build(eq(mAppOverlayComponent2), any()))
-                .thenReturn(mAppWidgetOverlayComponent2);
-        when(mAppWidgetOverlayComponent2.getAppWidgetOverlayProvider())
-                .thenReturn(mAppWidgetOverlayProvider2);
-        when(mResources.getIntArray(R.array.config_dreamOverlayPositions)).thenReturn(mPositions);
-        when(mResources.getStringArray(R.array.config_dreamOverlayComponents))
+        when(mAppWidgetComplicationProviderFactory.build(eq(mAppComplicationComponent1), any()))
+                .thenReturn(mAppWidgetComplicationComponent1);
+        when(mAppWidgetComplicationComponent1.getAppWidgetComplicationProvider())
+                .thenReturn(mComplicationProvider1);
+        when(mAppWidgetComplicationProviderFactory.build(eq(mAppComplicationComponent2), any()))
+                .thenReturn(mAppWidgetComplicationComponent2);
+        when(mAppWidgetComplicationComponent2.getAppWidgetComplicationProvider())
+                .thenReturn(mComplicationProvider2);
+        when(mResources.getIntArray(R.array.config_dreamComplicationPositions))
+                .thenReturn(mPositions);
+        when(mResources.getStringArray(R.array.config_dreamAppWidgetComplications))
                 .thenReturn(mComponents);
     }
 
     @Test
     public void testLoading() {
-        final AppWidgetOverlayPrimer primer = new AppWidgetOverlayPrimer(mContext,
+        final ComplicationPrimer primer = new ComplicationPrimer(mContext,
                 mResources,
                 mDreamOverlayStateController,
-                mAppWidgetOverlayProviderFactory);
+                mAppWidgetComplicationProviderFactory);
 
         // Inform primer to begin.
         primer.onBootCompleted();
@@ -120,7 +121,8 @@ public class AppWidgetOverlayPrimerTest extends SysuiTestCase {
         {
             final ArgumentCaptor<ConstraintLayout.LayoutParams> layoutParamsArgumentCaptor =
                     ArgumentCaptor.forClass(ConstraintLayout.LayoutParams.class);
-            verify(mAppWidgetOverlayProviderFactory, times(1)).build(eq(mAppOverlayComponent1),
+            verify(mAppWidgetComplicationProviderFactory, times(1))
+                    .build(eq(mAppComplicationComponent1),
                     layoutParamsArgumentCaptor.capture());
 
             assertEquals(layoutParamsArgumentCaptor.getValue().startToStart,
@@ -129,14 +131,15 @@ public class AppWidgetOverlayPrimerTest extends SysuiTestCase {
                     ConstraintLayout.LayoutParams.PARENT_ID);
 
             verify(mDreamOverlayStateController, times(1))
-                    .addOverlay(eq(mAppWidgetOverlayProvider1));
+                    .addComplication(eq(mComplicationProvider1));
         }
 
         // Verify the second component is added to the state controller with the proper position.
         {
             final ArgumentCaptor<ConstraintLayout.LayoutParams> layoutParamsArgumentCaptor =
                     ArgumentCaptor.forClass(ConstraintLayout.LayoutParams.class);
-            verify(mAppWidgetOverlayProviderFactory, times(1)).build(eq(mAppOverlayComponent2),
+            verify(mAppWidgetComplicationProviderFactory, times(1))
+                    .build(eq(mAppComplicationComponent2),
                     layoutParamsArgumentCaptor.capture());
 
             assertEquals(layoutParamsArgumentCaptor.getValue().endToEnd,
@@ -144,19 +147,19 @@ public class AppWidgetOverlayPrimerTest extends SysuiTestCase {
             assertEquals(layoutParamsArgumentCaptor.getValue().bottomToBottom,
                     ConstraintLayout.LayoutParams.PARENT_ID);
             verify(mDreamOverlayStateController, times(1))
-                    .addOverlay(eq(mAppWidgetOverlayProvider1));
+                    .addComplication(eq(mComplicationProvider1));
         }
     }
 
     @Test
     public void testNoComponents() {
-        when(mResources.getStringArray(R.array.config_dreamOverlayComponents))
+        when(mResources.getStringArray(R.array.config_dreamAppWidgetComplications))
                 .thenReturn(new String[]{});
 
-        final AppWidgetOverlayPrimer primer = new AppWidgetOverlayPrimer(mContext,
+        final ComplicationPrimer primer = new ComplicationPrimer(mContext,
                 mResources,
                 mDreamOverlayStateController,
-                mAppWidgetOverlayProviderFactory);
+                mAppWidgetComplicationProviderFactory);
 
         // Inform primer to begin.
         primer.onBootCompleted();
@@ -164,25 +167,25 @@ public class AppWidgetOverlayPrimerTest extends SysuiTestCase {
 
         // Make sure there is no request to add a widget if no components are specified by the
         // product.
-        verify(mAppWidgetOverlayProviderFactory, never()).build(any(), any());
-        verify(mDreamOverlayStateController, never()).addOverlay(any());
+        verify(mAppWidgetComplicationProviderFactory, never()).build(any(), any());
+        verify(mDreamOverlayStateController, never()).addComplication(any());
     }
 
     @Test
     public void testNoPositions() {
-        when(mResources.getIntArray(R.array.config_dreamOverlayPositions))
+        when(mResources.getIntArray(R.array.config_dreamComplicationPositions))
                 .thenReturn(new int[]{});
 
-        final AppWidgetOverlayPrimer primer = new AppWidgetOverlayPrimer(mContext,
+        final ComplicationPrimer primer = new ComplicationPrimer(mContext,
                 mResources,
                 mDreamOverlayStateController,
-                mAppWidgetOverlayProviderFactory);
+                mAppWidgetComplicationProviderFactory);
 
         primer.onBootCompleted();
 
         // Make sure there is no request to add a widget if no positions are specified by the
         // product.
-        verify(mAppWidgetOverlayProviderFactory, never()).build(any(), any());
-        verify(mDreamOverlayStateController, never()).addOverlay(any());
+        verify(mAppWidgetComplicationProviderFactory, never()).build(any(), any());
+        verify(mDreamOverlayStateController, never()).addComplication(any());
     }
 }

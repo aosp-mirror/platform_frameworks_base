@@ -22,30 +22,30 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.android.systemui.dreams.OverlayHost;
-import com.android.systemui.dreams.OverlayHostView;
-import com.android.systemui.dreams.OverlayProvider;
+import com.android.systemui.dreams.ComplicationHost;
+import com.android.systemui.dreams.ComplicationHostView;
 import com.android.systemui.plugins.ActivityStarter;
 
 import javax.inject.Inject;
 
 /**
- * {@link AppWidgetOverlayProvider} is an implementation of {@link OverlayProvider} for providing
- * app widget-based overlays.
+ * {@link ComplicationProvider} is an implementation of
+ * {@link com.android.systemui.dreams.ComplicationProvider} for providing app widget-based
+ * complications.
  */
-public class AppWidgetOverlayProvider implements OverlayProvider {
-    private static final String TAG = "AppWdgtOverlayProvider";
+public class ComplicationProvider implements com.android.systemui.dreams.ComplicationProvider {
+    private static final String TAG = "AppWidgetCompProvider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final ActivityStarter mActivityStarter;
     private final AppWidgetProvider mAppWidgetProvider;
     private final ComponentName mComponentName;
-    private final OverlayHostView.LayoutParams mLayoutParams;
+    private final ComplicationHostView.LayoutParams mLayoutParams;
 
     @Inject
-    public AppWidgetOverlayProvider(ActivityStarter activityStarter,
+    public ComplicationProvider(ActivityStarter activityStarter,
             ComponentName componentName, AppWidgetProvider widgetProvider,
-            OverlayHostView.LayoutParams layoutParams) {
+            ComplicationHostView.LayoutParams layoutParams) {
         mActivityStarter = activityStarter;
         mComponentName = componentName;
         mAppWidgetProvider = widgetProvider;
@@ -53,8 +53,9 @@ public class AppWidgetOverlayProvider implements OverlayProvider {
     }
 
     @Override
-    public void onCreateOverlay(Context context, OverlayHost.CreationCallback creationCallback,
-            OverlayHost.InteractionCallback interactionCallback) {
+    public void onCreateComplication(Context context,
+            ComplicationHost.CreationCallback creationCallback,
+            ComplicationHost.InteractionCallback interactionCallback) {
         final AppWidgetHostView widget = mAppWidgetProvider.getWidget(mComponentName);
 
         if (widget == null) {
