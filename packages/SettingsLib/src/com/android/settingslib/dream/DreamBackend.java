@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -57,6 +58,7 @@ public class DreamBackend {
         public boolean isActive;
         public ComponentName componentName;
         public ComponentName settingsComponentName;
+        public CharSequence description;
 
         @Override
         public String toString() {
@@ -123,6 +125,7 @@ public class DreamBackend {
             DreamInfo dreamInfo = new DreamInfo();
             dreamInfo.caption = resolveInfo.loadLabel(pm);
             dreamInfo.icon = resolveInfo.loadIcon(pm);
+            dreamInfo.description = getDescription(resolveInfo, pm);
             dreamInfo.componentName = getDreamComponentName(resolveInfo);
             dreamInfo.isActive = dreamInfo.componentName.equals(activeDream);
             dreamInfo.settingsComponentName = getSettingsComponentName(pm, resolveInfo);
@@ -132,9 +135,25 @@ public class DreamBackend {
         return dreamInfos;
     }
 
+    private static CharSequence getDescription(ResolveInfo resolveInfo, PackageManager pm) {
+        String packageName = resolveInfo.resolvePackageName;
+        ApplicationInfo applicationInfo = null;
+        if (packageName == null) {
+            packageName = resolveInfo.serviceInfo.packageName;
+            applicationInfo = resolveInfo.serviceInfo.applicationInfo;
+        }
+        if (resolveInfo.serviceInfo.descriptionRes != 0) {
+            return pm.getText(packageName,
+                    resolveInfo.serviceInfo.descriptionRes,
+                    applicationInfo);
+        }
+        return null;
+    }
+
     public ComponentName getDefaultDream() {
-        if (mDreamManager == null)
+        if (mDreamManager == null) {
             return null;
+        }
         try {
             return mDreamManager.getDefaultDreamComponentForUser(mContext.getUserId());
         } catch (RemoteException e) {
