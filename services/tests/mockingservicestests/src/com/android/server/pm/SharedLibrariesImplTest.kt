@@ -24,6 +24,7 @@ import android.os.Build
 import android.os.storage.StorageManager
 import android.util.ArrayMap
 import android.util.PackageUtils
+import com.android.internal.util.FunctionalUtils
 import com.android.server.SystemConfig.SharedLibraryEntry
 import com.android.server.compat.PlatformCompat
 import com.android.server.extendedtestutils.wheneverStatic
@@ -34,6 +35,7 @@ import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
 import com.android.server.testutils.mock
+import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.nullable
 import com.android.server.testutils.spy
 import com.android.server.testutils.whenever
@@ -46,6 +48,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
+import org.mockito.Mockito.anyLong
+import org.mockito.Mockito.anyString
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -109,7 +113,19 @@ class SharedLibrariesImplTest {
         whenever(mRule.mocks().injector.getSystemService(StorageManager::class.java))
             .thenReturn(mStorageManager)
         whenever(mStorageManager.findPathForUuid(nullable())).thenReturn(mFile)
-        doAnswer { it.arguments[0] }.`when`(mPms).resolveInternalPackageNameLPr(any(), any())
+        doAnswer { it.arguments[0] }.`when`(mPms).resolveInternalPackageName(any(), any())
+        doAnswer {
+            it.getArgument<FunctionalUtils.ThrowingConsumer<Computer>>(0).acceptOrThrow(
+                mockThrowOnUnmocked {
+                    whenever(sharedLibraries) { mSharedLibrariesImpl.sharedLibraries }
+                    whenever(resolveInternalPackageName(anyString(), anyLong())) {
+                        mPms.resolveInternalPackageName(getArgument(0), getArgument(1))
+                    }
+                    whenever(getPackageStateInternal(anyString())) {
+                        mPms.getPackageStateInternal(getArgument(0))
+                    }
+                })
+        }.`when`(mPms).executeWithConsistentComputer(any())
         whenever(mDeletePackageHelper.deletePackageX(any(), any(), any(), any(), any()))
             .thenReturn(PackageManager.DELETE_SUCCEEDED)
         whenever(mRule.mocks().injector.compatibility).thenReturn(mPlatformCompat)

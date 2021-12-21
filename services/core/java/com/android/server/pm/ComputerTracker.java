@@ -47,6 +47,8 @@ import android.util.SparseArray;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -387,10 +389,10 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public String resolveInternalPackageNameLPr(String packageName, long versionCode) {
-        ThreadComputer current = live();
+    public String resolveInternalPackageName(String packageName, long versionCode) {
+        ThreadComputer current = snapshot();
         try {
-            return current.mComputer.resolveInternalPackageNameLPr(packageName, versionCode);
+            return current.mComputer.resolveInternalPackageName(packageName, versionCode);
         } finally {
             current.release();
         }
@@ -497,7 +499,7 @@ public final class ComputerTracker implements Computer {
     }
     public boolean isInstantAppInternal(String packageName, @UserIdInt int userId,
             int callingUid) {
-        ThreadComputer current = live();
+        ThreadComputer current = snapshot();
         try {
             return current.mComputer.isInstantAppInternal(packageName, userId, callingUid);
         } finally {
@@ -525,7 +527,7 @@ public final class ComputerTracker implements Computer {
     public boolean shouldFilterApplication(@Nullable PackageStateInternal ps,
             int callingUid, @Nullable ComponentName component,
             @PackageManager.ComponentType int componentType, int userId) {
-        ThreadComputer current = live();
+        ThreadComputer current = snapshot();
         try {
             return current.mComputer.shouldFilterApplication(ps, callingUid, component,
                     componentType, userId);
@@ -535,7 +537,7 @@ public final class ComputerTracker implements Computer {
     }
     public boolean shouldFilterApplication(@Nullable PackageStateInternal ps,
             int callingUid, int userId) {
-        ThreadComputer current = live();
+        ThreadComputer current = snapshot();
         try {
             return current.mComputer.shouldFilterApplication(ps, callingUid, userId);
         } finally {
@@ -830,15 +832,6 @@ public final class ComputerTracker implements Computer {
     public String[] getSystemSharedLibraryNames() {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getSystemSharedLibraryNames();
-        }
-    }
-
-    @Override
-    public boolean isPackageStateAvailableAndVisible(@NonNull String packageName, int callingUid,
-            @UserIdInt int userId) {
-        try (ThreadComputer current = snapshot()) {
-            return current.mComputer.isPackageStateAvailableAndVisible(packageName, callingUid,
-                    userId);
         }
     }
 
@@ -1270,6 +1263,29 @@ public final class ComputerTracker implements Computer {
     public ArrayMap<String, ProcessInfo> getProcessesForUid(int uid) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getProcessesForUid(uid);
+        }
+    }
+
+    @Override
+    public PackageStateInternal getPackageStateFiltered(@NonNull String packageName, int callingUid,
+            @UserIdInt int userId) {
+        try (ThreadComputer current = snapshot()) {
+            return current.mComputer.getPackageStateFiltered(packageName, callingUid, userId);
+        }
+    }
+
+    @Override
+    public boolean getBlockUninstall(@UserIdInt int userId, @NonNull String packageName) {
+        try (ThreadComputer current = snapshot()) {
+            return current.mComputer.getBlockUninstall(userId, packageName);
+        }
+    }
+
+    @NonNull
+    @Override
+    public WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries() {
+        try (ThreadComputer current = snapshot()) {
+            return current.mComputer.getSharedLibraries();
         }
     }
 }

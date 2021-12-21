@@ -46,6 +46,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -386,14 +388,6 @@ public final class ComputerLocked extends ComputerEngine {
     public String[] getSystemSharedLibraryNames() {
         synchronized (mLock) {
             return super.getSystemSharedLibraryNames();
-        }
-    }
-
-    @Override
-    public boolean isPackageStateAvailableAndVisible(@NonNull String packageName, int callingUid,
-            @UserIdInt int userId) {
-        synchronized (mLock) {
-            return super.isPackageStateAvailableAndVisible(packageName, callingUid, userId);
         }
     }
 
@@ -823,6 +817,29 @@ public final class ComputerLocked extends ComputerEngine {
     public ArrayMap<String, ProcessInfo> getProcessesForUid(int uid) {
         synchronized (mLock) {
             return super.getProcessesForUid(uid);
+        }
+    }
+
+    @Override
+    public PackageStateInternal getPackageStateFiltered(@NonNull String packageName, int callingUid,
+            @UserIdInt int userId) {
+        synchronized (mLock) {
+            return super.getPackageStateFiltered(packageName, callingUid, userId);
+        }
+    }
+
+    @Override
+    public boolean getBlockUninstall(@UserIdInt int userId, @NonNull String packageName) {
+        synchronized (mLock) {
+            return super.getBlockUninstall(userId, packageName);
+        }
+    }
+
+    @NonNull
+    @Override
+    public WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries() {
+        synchronized (mLock) {
+            return super.getSharedLibraries();
         }
     }
 }

@@ -117,7 +117,7 @@ final class DumpHelper {
                 }
 
                 // Normalize package name to handle renamed packages and static libs
-                pkg = mPm.resolveInternalPackageNameLPr(pkg, PackageManager.VERSION_CODE_HIGHEST);
+                pkg = mPm.resolveInternalPackageName(pkg, PackageManager.VERSION_CODE_HIGHEST);
 
                 pw.println(mPm.checkPermission(perm, pkg, user));
                 return;

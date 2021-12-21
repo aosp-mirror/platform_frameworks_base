@@ -4288,49 +4288,6 @@ public final class Settings implements Watchable, Snappable {
         return pkg.getCurrentEnabledStateLPr(classNameStr, userId);
     }
 
-    boolean setPackageStoppedStateLPw(PackageManagerService pm, String packageName,
-            boolean stopped, int userId) {
-        final PackageSetting pkgSetting = mPackages.get(packageName);
-        if (pkgSetting == null) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-        if (DEBUG_STOPPED) {
-            if (stopped) {
-                RuntimeException e = new RuntimeException("here");
-                e.fillInStackTrace();
-                Slog.i(TAG, "Stopping package " + packageName, e);
-            }
-        }
-        if (pkgSetting.getStopped(userId) != stopped) {
-            pkgSetting.setStopped(stopped, userId);
-            if (pkgSetting.getNotLaunched(userId)) {
-                if (pkgSetting.getInstallSource().installerPackageName != null) {
-                    pm.notifyFirstLaunch(pkgSetting.getPackageName(),
-                            pkgSetting.getInstallSource().installerPackageName, userId);
-                }
-                pkgSetting.setNotLaunched(false, userId);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    void setHarmfulAppWarningLPw(String packageName, CharSequence warning, int userId) {
-        final PackageSetting pkgSetting = mPackages.get(packageName);
-        if (pkgSetting == null) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-        pkgSetting.setHarmfulAppWarning(userId, warning == null ? null : warning.toString());
-    }
-
-    String getHarmfulAppWarningLPr(String packageName, int userId) {
-        final PackageSetting pkgSetting = mPackages.get(packageName);
-        if (pkgSetting == null) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-        return pkgSetting.getHarmfulAppWarning(userId);
-    }
-
     /**
      * Returns all users on the device, including pre-created and dying users.
      *

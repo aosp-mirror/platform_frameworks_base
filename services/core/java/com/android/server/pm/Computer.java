@@ -49,6 +49,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -214,7 +216,7 @@ public interface Computer {
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     String resolveExternalPackageName(AndroidPackage pkg);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    String resolveInternalPackageNameLPr(String packageName, long versionCode);
+    String resolveInternalPackageName(String packageName, long versionCode);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     String[] getPackagesForUid(int uid);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
@@ -381,11 +383,12 @@ public interface Computer {
     String[] getSystemSharedLibraryNames();
 
     /**
-     * @return if the given package has a state and isn't filtered by visibility. Provides no
-     * guarantee that the package is in any usable state.
+     * @return the state if the given package has a state and isn't filtered by visibility.
+     * Provides no guarantee that the package is in any usable state.
      */
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
-    boolean isPackageStateAvailableAndVisible(@NonNull String packageName, int callingUid,
+    @Nullable
+    PackageStateInternal getPackageStateFiltered(@NonNull String packageName, int callingUid,
             @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
@@ -623,4 +626,11 @@ public interface Computer {
     @Nullable
     ArrayMap<String, ProcessInfo> getProcessesForUid(int uid);
     // End block
+
+    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
+    boolean getBlockUninstall(@UserIdInt int userId, @NonNull String packageName);
+
+    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
+    @NonNull
+    WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries();
 }
