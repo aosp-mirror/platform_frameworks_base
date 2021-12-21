@@ -22,8 +22,9 @@ import android.os.Parcelable;
 import android.net.Uri;
 
 /** @hide */
-public class TableResponse extends BroadcastInfoResponse implements Parcelable {
-    public static final int responseType = BroadcastInfoType.TABLE;
+public final class TableResponse extends BroadcastInfoResponse implements Parcelable {
+    public static final @TvInputManager.BroadcastInfoType int responseType =
+            TvInputManager.BROADCAST_INFO_TYPE_TABLE;
 
     public static final @NonNull Parcelable.Creator<TableResponse> CREATOR =
             new Parcelable.Creator<TableResponse>() {
@@ -47,8 +48,8 @@ public class TableResponse extends BroadcastInfoResponse implements Parcelable {
         return new TableResponse(in);
     }
 
-    public TableResponse(int requestId, int sequence, int responseResult, Uri tableUri,
-            int version, int size) {
+    public TableResponse(int requestId, int sequence, @ResponseResult int responseResult,
+            Uri tableUri, int version, int size) {
         super(responseType, requestId, sequence, responseResult);
         mTableUri = tableUri;
         mVersion = version;

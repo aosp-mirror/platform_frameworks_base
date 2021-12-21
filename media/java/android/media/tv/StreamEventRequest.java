@@ -22,8 +22,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class StreamEventRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.STREAM_EVENT;
+public final class StreamEventRequest extends BroadcastInfoRequest implements Parcelable {
+    public static final @TvInputManager.BroadcastInfoType int requestType =
+            TvInputManager.BROADCAST_INFO_STREAM_EVENT;
 
     public static final @NonNull Parcelable.Creator<StreamEventRequest> CREATOR =
             new Parcelable.Creator<StreamEventRequest>() {
@@ -46,7 +47,8 @@ public class StreamEventRequest extends BroadcastInfoRequest implements Parcelab
         return new StreamEventRequest(in);
     }
 
-    public StreamEventRequest(int requestId, int option, Uri targetUri, String eventName) {
+    public StreamEventRequest(int requestId, @RequestOption int option, Uri targetUri,
+            String eventName) {
         super(requestType, requestId, option);
         this.mTargetUri = targetUri;
         this.mEventName = eventName;

@@ -357,6 +357,28 @@ public final class TvInputManager {
      */
     public static final int INPUT_STATE_DISCONNECTED = 2;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({BROADCAST_INFO_TYPE_TS, BROADCAST_INFO_TYPE_TABLE, BROADCAST_INFO_TYPE_SECTION,
+            BROADCAST_INFO_TYPE_PES, BROADCAST_INFO_STREAM_EVENT, BROADCAST_INFO_TYPE_DSMCC,
+            BROADCAST_INFO_TYPE_TV_PROPRIETARY_FUNCTION})
+    public @interface BroadcastInfoType {}
+
+    /** @hide */
+    public static final int BROADCAST_INFO_TYPE_TS = 1;
+    /** @hide */
+    public static final int BROADCAST_INFO_TYPE_TABLE = 2;
+    /** @hide */
+    public static final int BROADCAST_INFO_TYPE_SECTION = 3;
+    /** @hide */
+    public static final int BROADCAST_INFO_TYPE_PES = 4;
+    /** @hide */
+    public static final int BROADCAST_INFO_STREAM_EVENT = 5;
+    /** @hide */
+    public static final int BROADCAST_INFO_TYPE_DSMCC = 6;
+    /** @hide */
+    public static final int BROADCAST_INFO_TYPE_TV_PROPRIETARY_FUNCTION = 7;
+
     /**
      * An unknown state of the client pid gets from the TvInputManager. Client gets this value when
      * query through {@link getClientPid(String sessionId)} fails.

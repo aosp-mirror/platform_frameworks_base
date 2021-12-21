@@ -16,38 +16,41 @@
 
 package android.media.tv;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import android.annotation.NonNull;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /** @hide */
 public abstract class BroadcastInfoRequest implements Parcelable {
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({REQUEST_OPTION_REPEAT, REQUEST_OPTION_AUTO_UPDATE})
+    public @interface RequestOption {}
 
-    // todo: change const declaration to intdef
-    public static final int REQUEST_OPTION_REPEAT = 11;
-    public static final int REQUEST_OPTION_AUTO_UPDATE = 12;
+    public static final int REQUEST_OPTION_REPEAT = 0;
+    public static final int REQUEST_OPTION_AUTO_UPDATE = 1;
 
     public static final @NonNull Parcelable.Creator<BroadcastInfoRequest> CREATOR =
             new Parcelable.Creator<BroadcastInfoRequest>() {
                 @Override
                 public BroadcastInfoRequest createFromParcel(Parcel source) {
-                    int type = source.readInt();
+                    @TvInputManager.BroadcastInfoType int type = source.readInt();
                     switch (type) {
-                        case BroadcastInfoType.TS:
+                        case TvInputManager.BROADCAST_INFO_TYPE_TS:
                             return TsRequest.createFromParcelBody(source);
-                        case BroadcastInfoType.TABLE:
-                            return TableRequest.createFromParcelBody(source);
-                        case BroadcastInfoType.SECTION:
+                        case TvInputManager.BROADCAST_INFO_TYPE_SECTION:
                             return SectionRequest.createFromParcelBody(source);
-                        case BroadcastInfoType.PES:
+                        case TvInputManager.BROADCAST_INFO_TYPE_PES:
                             return PesRequest.createFromParcelBody(source);
-                        case BroadcastInfoType.STREAM_EVENT:
+                        case TvInputManager.BROADCAST_INFO_STREAM_EVENT:
                             return StreamEventRequest.createFromParcelBody(source);
-                        case BroadcastInfoType.DSMCC:
+                        case TvInputManager.BROADCAST_INFO_TYPE_DSMCC:
                             return DsmccRequest.createFromParcelBody(source);
-                        case BroadcastInfoType.TV_PROPRIETARY_FUNCTION:
-                            return TvProprietaryFunctionRequest.createFromParcelBody(source);
+                        case TvInputManager.BROADCAST_INFO_TYPE_TV_PROPRIETARY_FUNCTION:
+                            return CommandRequest.createFromParcelBody(source);
                         default:
                             throw new IllegalStateException(
                                     "Unexpected broadcast info request type (value "
@@ -61,23 +64,24 @@ public abstract class BroadcastInfoRequest implements Parcelable {
                 }
             };
 
-    protected final int mType;
+    protected final @TvInputManager.BroadcastInfoType int mType;
     protected final int mRequestId;
-    protected final int mOption;
+    protected final @RequestOption int mOption;
 
-    protected BroadcastInfoRequest(int type, int requestId, int option) {
+    protected BroadcastInfoRequest(@TvInputManager.BroadcastInfoType int type,
+            int requestId, @RequestOption int option) {
         mType = type;
         mRequestId = requestId;
         mOption = option;
     }
 
-    protected BroadcastInfoRequest(int type, Parcel source) {
+    protected BroadcastInfoRequest(@TvInputManager.BroadcastInfoType int type, Parcel source) {
         mType = type;
         mRequestId = source.readInt();
         mOption = source.readInt();
     }
 
-    public int getType() {
+    public @TvInputManager.BroadcastInfoType int getType() {
         return mType;
     }
 
@@ -85,7 +89,7 @@ public abstract class BroadcastInfoRequest implements Parcelable {
         return mRequestId;
     }
 
-    public int getOption() {
+    public @RequestOption int getOption() {
         return mOption;
     }
 
