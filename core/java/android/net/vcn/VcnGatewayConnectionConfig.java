@@ -74,6 +74,7 @@ import java.util.concurrent.TimeUnit;
  *   <li>{@link NetworkCapabilities#NET_CAPABILITY_CBS}
  *   <li>{@link NetworkCapabilities#NET_CAPABILITY_IA}
  *   <li>{@link NetworkCapabilities#NET_CAPABILITY_RCS}
+ *   <li>{@link NetworkCapabilities#NET_CAPABILITY_MMTEL}
  *   <li>{@link NetworkCapabilities#NET_CAPABILITY_XCAP}
  *   <li>{@link NetworkCapabilities#NET_CAPABILITY_EIMS}
  *   <li>{@link NetworkCapabilities#NET_CAPABILITY_INTERNET}
@@ -102,6 +103,7 @@ public final class VcnGatewayConnectionConfig {
         allowedCaps.add(NetworkCapabilities.NET_CAPABILITY_CBS);
         allowedCaps.add(NetworkCapabilities.NET_CAPABILITY_IA);
         allowedCaps.add(NetworkCapabilities.NET_CAPABILITY_RCS);
+        allowedCaps.add(NetworkCapabilities.NET_CAPABILITY_MMTEL);
         allowedCaps.add(NetworkCapabilities.NET_CAPABILITY_XCAP);
         allowedCaps.add(NetworkCapabilities.NET_CAPABILITY_EIMS);
         allowedCaps.add(NetworkCapabilities.NET_CAPABILITY_INTERNET);
