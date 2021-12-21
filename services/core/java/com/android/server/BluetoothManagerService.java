@@ -17,12 +17,11 @@
 package com.android.server;
 
 import static android.Manifest.permission.BLUETOOTH_CONNECT;
-import static android.content.PermissionChecker.PERMISSION_HARD_DENIED;
-import static android.content.PermissionChecker.PID_UNKNOWN;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.UserHandle.USER_SYSTEM;
+import static android.permission.PermissionCheckerManager.PERMISSION_HARD_DENIED;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -54,7 +53,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.PermissionChecker;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -76,6 +74,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
@@ -2912,9 +2911,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     @SuppressLint("AndroidFrameworkRequiresPermission")
     private static boolean checkPermissionForDataDelivery(Context context, String permission,
             AttributionSource attributionSource, String message) {
-        final int result = PermissionChecker.checkPermissionForDataDeliveryFromDataSource(
-                context, permission, PID_UNKNOWN,
-                new AttributionSource(context.getAttributionSource(), attributionSource), message);
+        PermissionManager pm = context.getSystemService(PermissionManager.class);
+        if (pm == null) {
+            return false;
+        }
+        AttributionSource currentAttribution = new AttributionSource
+                .Builder(context.getAttributionSource())
+                .setNext(attributionSource)
+                .build();
+        final int result = pm.checkPermissionForDataDeliveryFromDataSource(permission,
+                currentAttribution, message);
         if (result == PERMISSION_GRANTED) {
             return true;
         }
