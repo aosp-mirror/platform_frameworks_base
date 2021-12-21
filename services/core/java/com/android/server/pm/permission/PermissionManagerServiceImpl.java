@@ -23,6 +23,7 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_ONE_TIME;
@@ -108,6 +109,7 @@ import android.util.DebugUtils;
 import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -195,6 +197,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     private static final List<String> STORAGE_PERMISSIONS = new ArrayList<>();
     /** All nearby devices permissions */
     private static final List<String> NEARBY_DEVICES_PERMISSIONS = new ArrayList<>();
+
+    // TODO: This is a placeholder. Replace with actual implementation
+    private static final List<String> NOTIFICATION_PERMISSIONS = new ArrayList<>();
 
     /**
      * All permissions that should be granted with the REVOKE_WHEN_REQUESTED flag, if they are
@@ -4636,23 +4641,231 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         return true;
     }
 
-    private void onPackageInstalledInternal(@NonNull AndroidPackage pkg, int previousAppId,
-            @NonNull PermissionManagerServiceInternal.PackageInstalledParams params,
-            @UserIdInt int[] userIds) {
-        // If previousAppId is not Process.INVALID_UID, the package is performing a migration out
-        // of a shared user group. Operations we need to do before calling updatePermissions():
-        // - Retrieve the original uid permission state and create a copy of it as the new app's
-        //   uid state. The new permission state will be properly updated in updatePermissions().
-        // - Remove the app from the original shared user group. Other apps in the shared
-        //   user group will perceive as if the original app is uninstalled.
-        if (previousAppId != Process.INVALID_UID) {
-            final PackageStateInternal ps =
-                    mPackageManagerInt.getPackageStateInternal(pkg.getPackageName());
+    private boolean isEffectivelyGranted(PermissionState state) {
+        final int flags = state.getFlags();
+        final int denyMask = FLAG_PERMISSION_REVIEW_REQUIRED
+                | FLAG_PERMISSION_REVOKED_COMPAT
+                | FLAG_PERMISSION_ONE_TIME;
+
+        if ((flags & FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
+            return true;
+        } else if ((flags & FLAG_PERMISSION_POLICY_FIXED) != 0) {
+            return (flags & FLAG_PERMISSION_REVOKED_COMPAT) == 0 && state.isGranted();
+        } else if ((flags & denyMask) != 0) {
+            return false;
+        } else {
+            return state.isGranted();
+        }
+    }
+
+    /**
+     * Merge srcState into destState. Return [granted, flags].
+     */
+    private Pair<Boolean, Integer> mergePermissionState(int appId,
+            PermissionState srcState, PermissionState destState) {
+        // This merging logic prioritizes the shared permission state (destState) over
+        // the current package's state (srcState), because an uninstallation of a previously
+        // unrelated app (the updated system app) should not affect the functionality of
+        // existing apps (other apps in the shared UID group).
+
+        final int userSettableMask = FLAG_PERMISSION_USER_SET
+                | FLAG_PERMISSION_USER_FIXED
+                | FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY;
+
+        final int defaultGrantMask = FLAG_PERMISSION_GRANTED_BY_DEFAULT
+                | FLAG_PERMISSION_GRANTED_BY_ROLE;
+
+        final int priorityFixedMask = FLAG_PERMISSION_SYSTEM_FIXED
+                | FLAG_PERMISSION_POLICY_FIXED;
+
+        final int priorityMask = defaultGrantMask | priorityFixedMask;
+
+        final int destFlags = destState.getFlags();
+        final boolean destIsGranted = isEffectivelyGranted(destState);
+
+        final int srcFlags = srcState.getFlags();
+        final boolean srcIsGranted = isEffectivelyGranted(srcState);
+
+        final int combinedFlags = destFlags | srcFlags;
+
+        /* Merge flags */
+
+        int newFlags = 0;
+
+        // Inherit user set flags only from dest as we want to preserve the
+        // user preference of destState, not the one of the current package.
+        newFlags |= (destFlags & userSettableMask);
+
+        // Inherit all exempt flags
+        newFlags |= (combinedFlags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT);
+        // If no exempt flags are set, set APPLY_RESTRICTION
+        if ((newFlags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) == 0) {
+            newFlags |= FLAG_PERMISSION_APPLY_RESTRICTION;
+        }
+
+        // Inherit all priority flags
+        newFlags |= (combinedFlags & priorityMask);
+
+        // If no priority flags are set, inherit REVOKE_WHEN_REQUESTED
+        if ((combinedFlags & priorityMask) == 0) {
+            newFlags |= (combinedFlags & FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);
+        }
+
+        // Handle REVIEW_REQUIRED
+        if ((newFlags & priorityFixedMask) == 0) {
+            if (NOTIFICATION_PERMISSIONS.contains(srcState.getName())) {
+                // For notification permissions, inherit from both states
+                // if no priority FIXED flags are set
+                newFlags |= (combinedFlags & FLAG_PERMISSION_REVIEW_REQUIRED);
+            } else if ((newFlags & priorityMask) == 0) {
+                // Else inherit from destState if no priority flags are set
+                newFlags |= (destFlags & FLAG_PERMISSION_REVIEW_REQUIRED);
+            }
+        }
+
+        /* Determine effective grant state */
+
+        final boolean effectivelyGranted;
+        if ((newFlags & FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
+            effectivelyGranted = true;
+        } else if ((destFlags & FLAG_PERMISSION_POLICY_FIXED) != 0) {
+            // If this flag comes from destState, preserve its state
+            effectivelyGranted = destIsGranted;
+        } else if ((srcFlags & FLAG_PERMISSION_POLICY_FIXED) != 0) {
+            effectivelyGranted = destIsGranted || srcIsGranted;
+            // If this flag comes from srcState, preserve flag only if
+            // there is no conflict
+            if (destIsGranted != srcIsGranted) {
+                newFlags &= ~FLAG_PERMISSION_POLICY_FIXED;
+            }
+        } else if ((destFlags & defaultGrantMask) != 0) {
+            // If a permission state has default grant flags and is not
+            // granted, this meant user has overridden the grant state.
+            // Respect the user's preference on destState.
+            // Due to this reason, if this flag comes from destState,
+            // preserve its state
+            effectivelyGranted = destIsGranted;
+        } else if ((srcFlags & defaultGrantMask) != 0) {
+            effectivelyGranted = destIsGranted || srcIsGranted;
+        } else if ((destFlags & FLAG_PERMISSION_REVOKE_WHEN_REQUESTED) != 0) {
+            // Similar reason to defaultGrantMask, if this flag comes
+            // from destState, preserve its state
+            effectivelyGranted = destIsGranted;
+        } else if ((srcFlags & FLAG_PERMISSION_REVOKE_WHEN_REQUESTED) != 0) {
+            effectivelyGranted = destIsGranted || srcIsGranted;
+            // If this flag comes from srcState, remove this flag if
+            // destState is already granted to prevent revocation.
+            if (destIsGranted) {
+                newFlags &= ~FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
+            }
+        } else {
+            // If still not determined, fallback to destState.
+            effectivelyGranted = destIsGranted;
+        }
+
+        /* Post-processing / fix ups */
+
+        if (!effectivelyGranted) {
+            // If not effectively granted, inherit AUTO_REVOKED
+            newFlags |= (combinedFlags & FLAG_PERMISSION_AUTO_REVOKED);
+
+            // REVOKE_WHEN_REQUESTED make no sense when denied
+            newFlags &= ~FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
+        } else {
+            // REVIEW_REQUIRED make no sense when granted
+            newFlags &= ~FLAG_PERMISSION_REVIEW_REQUIRED;
+        }
+
+        if (effectivelyGranted != destIsGranted) {
+            // Remove user set flags if state changes
+            newFlags &= ~userSettableMask;
+        }
+
+        // Fix permission state based on targetSdk of the shared UID
+        final boolean newGrantState;
+        if (!effectivelyGranted && isPermissionSplitFromNonRuntime(
+                srcState.getName(),
+                mPackageManagerInt.getUidTargetSdkVersion(appId))) {
+            // Even though effectively denied, it has to be set to granted
+            // for backwards compatibility
+            newFlags |= FLAG_PERMISSION_REVOKED_COMPAT;
+            newGrantState = true;
+        } else {
+            // Either it's effectively granted, or it targets a high enough API level
+            // to handle this permission properly
+            newGrantState = effectivelyGranted;
+        }
+
+        return new Pair<>(newGrantState, newFlags);
+    }
+
+    /**
+     * This method handles permission migration of packages leaving/joining shared UID
+     */
+    private void handleAppIdMigration(@NonNull AndroidPackage pkg, int previousAppId) {
+        final PackageStateInternal ps =
+                mPackageManagerInt.getPackageStateInternal(pkg.getPackageName());
+
+        if (ps.getSharedUser() != null) {
+            // The package is joining a shared user group. This can only happen when a system
+            // app left shared UID with an update, and then the update is uninstalled.
+            // If no apps remain in its original shared UID group, clone the current
+            // permission state to the shared appId; or else, merge the current permission
+            // state into the shared UID state.
+
+            synchronized (mLock) {
+                for (final int userId : getAllUserIds()) {
+                    final UserPermissionState userState = mState.getOrCreateUserState(userId);
+
+                    // This is the permission state the package was using
+                    final UidPermissionState uidState = userState.getUidState(previousAppId);
+                    if (uidState == null) {
+                        continue;
+                    }
+
+                    // This is the shared UID permission state the package wants to join
+                    final UidPermissionState sharedUidState = userState.getUidState(ps.getAppId());
+                    if (sharedUidState == null) {
+                        // No apps remain in the shared UID group, clone permissions
+                        userState.createUidStateWithExisting(ps.getAppId(), uidState);
+                    } else {
+                        final List<PermissionState> states = uidState.getPermissionStates();
+                        final int count = states.size();
+                        for (int i = 0; i < count; ++i) {
+                            final PermissionState srcState = states.get(i);
+                            final PermissionState destState =
+                                    sharedUidState.getPermissionState(srcState.getName());
+                            if (destState != null) {
+                                // Merge the 2 permission states
+                                Pair<Boolean, Integer> newState =
+                                        mergePermissionState(ps.getAppId(), srcState, destState);
+                                sharedUidState.putPermissionState(srcState.getPermission(),
+                                        newState.first, newState.second);
+                            } else {
+                                // Simply copy the permission state over
+                                sharedUidState.putPermissionState(srcState.getPermission(),
+                                        srcState.isGranted(), srcState.getFlags());
+                            }
+                        }
+                    }
+
+                    // Remove permissions for the previous appId
+                    userState.removeUidState(previousAppId);
+                }
+            }
+        } else {
+            // The package is migrating out of a shared user group.
+            // Operations we need to do before calling updatePermissions():
+            // - Retrieve the original uid permission state and create a copy of it as the
+            //   new app's uid state. The new permission state will be properly updated in
+            //   updatePermissions().
+            // - Remove the app from the original shared user group. Other apps in the shared
+            //   user group will perceive as if the original app is uninstalled.
+
             final List<AndroidPackage> origSharedUserPackages =
                     mPackageManagerInt.getPackagesForAppId(previousAppId);
 
             synchronized (mLock) {
-                // All users are affected
                 for (final int userId : getAllUserIds()) {
                     // Retrieve the original uid state
                     final UserPermissionState userState = mState.getUserState(userId);
@@ -4678,6 +4891,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     }
                 }
             }
+        }
+    }
+
+    private void onPackageInstalledInternal(@NonNull AndroidPackage pkg, int previousAppId,
+            @NonNull PermissionManagerServiceInternal.PackageInstalledParams params,
+            @UserIdInt int[] userIds) {
+        if (previousAppId != Process.INVALID_UID) {
+            handleAppIdMigration(pkg, previousAppId);
         }
         updatePermissions(pkg.getPackageName(), pkg);
         for (final int userId : userIds) {
