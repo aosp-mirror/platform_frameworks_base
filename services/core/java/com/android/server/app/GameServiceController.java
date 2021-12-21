@@ -18,40 +18,56 @@ package com.android.server.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
-import android.service.games.GameService;
-import android.text.TextUtils;
+import android.annotation.WorkerThread;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
 
-import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
 
+/**
+ * Responsible for managing the Game Service API.
+ *
+ * Key responsibilities selecting the active Game Service provider, binding to the Game Service
+ * provider services, and driving the GameService/GameSession lifecycles.
+ */
 final class GameServiceController {
     private static final String TAG = "GameServiceController";
-    private static final boolean DEBUG = false;
 
-    private final Context mContext;
+
+    private final Object mLock = new Object();
+    private final Executor mBackgroundExecutor;
+    private final GameServiceProviderSelector mGameServiceProviderSelector;
+    private final GameServiceProviderInstanceFactory mGameServiceProviderInstanceFactory;
+
+    private volatile boolean mHasBootCompleted;
     @Nullable
-    private SystemService.TargetUser mCurrentForegroundUser;
-    private boolean mHasBootCompleted;
-
+    private volatile SystemService.TargetUser mCurrentForegroundUser;
+    @GuardedBy("mLock")
     @Nullable
-    private GameServiceConnection mGameServiceConnection;
+    private volatile GameServiceProviderConfiguration mActiveGameServiceProviderConfiguration;
+    @GuardedBy("mLock")
+    @Nullable
+    private volatile GameServiceProviderInstance mGameServiceProviderInstance;
 
-    GameServiceController(Context context) {
-        mContext = context;
+    GameServiceController(
+            @NonNull Executor backgroundExecutor,
+            @NonNull GameServiceProviderSelector gameServiceProviderSelector,
+            @NonNull GameServiceProviderInstanceFactory gameServiceProviderInstanceFactory) {
+        mGameServiceProviderInstanceFactory = gameServiceProviderInstanceFactory;
+        mBackgroundExecutor = backgroundExecutor;
+        mGameServiceProviderSelector = gameServiceProviderSelector;
     }
 
     void onBootComplete() {
+        if (mHasBootCompleted) {
+            return;
+        }
         mHasBootCompleted = true;
 
-        evaluateGameServiceConnection();
+        mBackgroundExecutor.execute(this::evaluateActiveGameServiceProvider);
     }
 
     void notifyUserStarted(@NonNull SystemService.TargetUser user) {
@@ -59,96 +75,86 @@ final class GameServiceController {
             return;
         }
 
-        mCurrentForegroundUser = user;
-        evaluateGameServiceConnection();
+        setCurrentForegroundUserAndEvaluateProvider(user);
     }
 
     void notifyNewForegroundUser(@NonNull SystemService.TargetUser user) {
-        mCurrentForegroundUser = user;
-        evaluateGameServiceConnection();
+        setCurrentForegroundUserAndEvaluateProvider(user);
     }
 
-    void notifyUserStopped(@NonNull SystemService.TargetUser user) {
-        if (mCurrentForegroundUser == null
-                || mCurrentForegroundUser.getUserIdentifier() != user.getUserIdentifier()) {
+    void notifyUserUnlocking(@NonNull SystemService.TargetUser user) {
+        boolean isSameAsForegroundUser =
+                mCurrentForegroundUser != null
+                        && mCurrentForegroundUser.getUserIdentifier() == user.getUserIdentifier();
+        if (!isSameAsForegroundUser) {
             return;
         }
 
-        mCurrentForegroundUser = null;
-        evaluateGameServiceConnection();
+        // It is likely that the Game Service provider's components are not Direct Boot mode aware
+        // and will not be capable of running until the user has unlocked the device. To allow for
+        // this we re-evaluate the active game service provider once these components are available.
+
+        mBackgroundExecutor.execute(this::evaluateActiveGameServiceProvider);
     }
 
-    private void evaluateGameServiceConnection() {
+    void notifyUserStopped(@NonNull SystemService.TargetUser user) {
+        boolean isSameAsForegroundUser =
+                mCurrentForegroundUser != null
+                        && mCurrentForegroundUser.getUserIdentifier() == user.getUserIdentifier();
+        if (!isSameAsForegroundUser) {
+            return;
+        }
+
+        setCurrentForegroundUserAndEvaluateProvider(null);
+    }
+
+    private void setCurrentForegroundUserAndEvaluateProvider(
+            @Nullable SystemService.TargetUser user) {
+        boolean hasUserChanged =
+                !Objects.equals(mCurrentForegroundUser, user);
+        if (!hasUserChanged) {
+            return;
+        }
+        mCurrentForegroundUser = user;
+
+        mBackgroundExecutor.execute(this::evaluateActiveGameServiceProvider);
+    }
+
+    @WorkerThread
+    private void evaluateActiveGameServiceProvider() {
         if (!mHasBootCompleted) {
             return;
         }
 
-        // TODO(b/204565942): Only shutdown the existing service connection if the game service
-        // provider or user has changed.
-        if (mGameServiceConnection != null) {
-            mGameServiceConnection.disconnect();
-            mGameServiceConnection = null;
-        }
+        synchronized (mLock) {
+            GameServiceProviderConfiguration selectedGameServiceProviderConfiguration =
+                    mGameServiceProviderSelector.get(mCurrentForegroundUser);
 
-        boolean isUserSupported =
-                mCurrentForegroundUser != null
-                        && mCurrentForegroundUser.isFull()
-                        && !mCurrentForegroundUser.isManagedProfile();
-        if (!isUserSupported) {
-            if (DEBUG && mCurrentForegroundUser != null) {
-                Slog.d(TAG, "User not supported: " + mCurrentForegroundUser);
+            boolean didActiveGameServiceProviderChanged =
+                    !Objects.equals(selectedGameServiceProviderConfiguration,
+                            mActiveGameServiceProviderConfiguration);
+            if (!didActiveGameServiceProviderChanged) {
+                return;
             }
-            return;
-        }
 
-        ComponentName gameServiceComponentName =
-                determineGameServiceComponentName(mCurrentForegroundUser.getUserIdentifier());
-        if (gameServiceComponentName == null) {
-            return;
-        }
-
-        mGameServiceConnection = new GameServiceConnection(
-                mContext,
-                gameServiceComponentName,
-                mCurrentForegroundUser.getUserIdentifier());
-        mGameServiceConnection.connect();
-    }
-
-    @Nullable
-    private ComponentName determineGameServiceComponentName(int userId) {
-        String gameServicePackage =
-                mContext.getResources().getString(
-                        com.android.internal.R.string.config_systemGameService);
-        if (TextUtils.isEmpty(gameServicePackage)) {
-            if (DEBUG) {
-                Slog.d(TAG, "No game service package defined");
+            if (mGameServiceProviderInstance != null) {
+                Slog.i(TAG, "Stopping Game Service provider: "
+                        + mActiveGameServiceProviderConfiguration);
+                mGameServiceProviderInstance.stop();
             }
-            return null;
-        }
 
-        List<ResolveInfo> gameServiceResolveInfos =
-                mContext.getPackageManager().queryIntentServicesAsUser(
-                        new Intent(GameService.SERVICE_INTERFACE).setPackage(gameServicePackage),
-                        PackageManager.MATCH_SYSTEM_ONLY,
-                        userId);
+            mActiveGameServiceProviderConfiguration = selectedGameServiceProviderConfiguration;
 
-        if (gameServiceResolveInfos.isEmpty()) {
-            Slog.v(TAG, "No available game service found for user id: " + userId);
-            return null;
-        }
-
-        for (ResolveInfo resolveInfo : gameServiceResolveInfos) {
-            if (resolveInfo.serviceInfo == null) {
-                continue;
+            if (mActiveGameServiceProviderConfiguration == null) {
+                return;
             }
-            final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
-            if (!serviceInfo.isEnabled()) {
-                continue;
-            }
-            return serviceInfo.getComponentName();
-        }
 
-        Slog.v(TAG, "No game service found for user id: " + userId);
-        return null;
+            Slog.i(TAG,
+                    "Starting Game Service provider: " + mActiveGameServiceProviderConfiguration);
+            mGameServiceProviderInstance =
+                    mGameServiceProviderInstanceFactory.create(
+                            mActiveGameServiceProviderConfiguration);
+            mGameServiceProviderInstance.start();
+        }
     }
 }
