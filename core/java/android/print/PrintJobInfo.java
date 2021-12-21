@@ -240,7 +240,7 @@ public final class PrintJobInfo implements Parcelable {
         mTag = parcel.readString();
         mCreationTime = parcel.readLong();
         mCopies = parcel.readInt();
-        Parcelable[] parcelables = parcel.readParcelableArray(null);
+        Parcelable[] parcelables = parcel.readParcelableArray(null, PageRange.class);
         if (parcelables != null) {
             mPageRanges = new PageRange[parcelables.length];
             for (int i = 0; i < parcelables.length; i++) {

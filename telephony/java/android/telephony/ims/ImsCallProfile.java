@@ -847,7 +847,8 @@ public final class ImsCallProfile implements Parcelable {
         mHasKnownUserIntentEmergency = in.readBoolean();
         mRestrictCause = in.readInt();
         mCallerNumberVerificationStatus = in.readInt();
-        Object[] accepted = in.readArray(RtpHeaderExtensionType.class.getClassLoader());
+        Object[] accepted = in.readArray(RtpHeaderExtensionType.class.getClassLoader(),
+                RtpHeaderExtensionType.class);
         mAcceptedRtpHeaderExtensionTypes = Arrays.stream(accepted)
                 .map(o -> (RtpHeaderExtensionType) o).collect(Collectors.toSet());
     }
