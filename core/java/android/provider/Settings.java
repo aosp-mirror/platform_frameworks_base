@@ -10467,13 +10467,6 @@ public final class Settings {
         public static final String COMMUNAL_MODE_ENABLED = "communal_mode_enabled";
 
         /**
-         * An array of all the packages which have been enabled for hub mode by the user.
-         *
-         * @hide
-         */
-        public static final String COMMUNAL_MODE_PACKAGES = "communal_mode_packages";
-
-        /**
          * An array of SSIDs of Wi-Fi networks that, when connected, are considered safe to enable
          * the communal mode.
          *
