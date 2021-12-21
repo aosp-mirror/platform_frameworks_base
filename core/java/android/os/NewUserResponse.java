@@ -17,6 +17,7 @@ package android.os;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 
 /**
  * Contains the response of the call {@link UserManager#createUser(NewUserRequest)}.
@@ -29,7 +30,11 @@ public final class NewUserResponse {
     private final @Nullable UserHandle mUser;
     private final @UserManager.UserOperationResult int mOperationResult;
 
-    NewUserResponse(@Nullable UserHandle user,
+    /**
+     * @hide
+     */
+    @TestApi
+    public NewUserResponse(@Nullable UserHandle user,
             @UserManager.UserOperationResult int operationResult) {
         mUser = user;
         mOperationResult = operationResult;
