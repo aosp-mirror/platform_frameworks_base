@@ -106,7 +106,7 @@ public final class SearchSession implements AutoCloseable{
             e.rethrowFromSystemServer();
         }
 
-        mCloseGuard.open("close");
+        mCloseGuard.open("SearchSession.close");
     }
 
     /**

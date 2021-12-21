@@ -687,7 +687,7 @@ public class SystemSensorManager extends SensorManager {
                     new WeakReference<>(this), looper.getQueue(),
                     packageName, mode, manager.mContext.getOpPackageName(),
                     manager.mContext.getAttributionTag());
-            mCloseGuard.open("dispose");
+            mCloseGuard.open("BaseEventQueue.dispose");
             mManager = manager;
         }
 

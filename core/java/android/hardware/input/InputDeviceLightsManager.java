@@ -100,7 +100,7 @@ class InputDeviceLightsManager extends LightsManager {
          * Instantiated by {@link LightsManager#openSession()}.
          */
         private InputDeviceLightsSession() {
-            mCloseGuard.open("close");
+            mCloseGuard.open("InputDeviceLightsSession.close");
         }
 
         /**
