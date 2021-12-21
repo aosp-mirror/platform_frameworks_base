@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.RemoteException;
+import android.provider.DeviceConfig;
 
 import java.util.Objects;
 
@@ -40,6 +41,11 @@ public final class SelectionToolbarManager {
      */
     public static final String LOG_TAG = "SelectionToolbar";
 
+    /**
+     * Whether system selection toolbar is enabled.
+     */
+    private static final String REMOTE_SELECTION_TOOLBAR_ENABLED =
+            "remote_selection_toolbar_enabled";
 
     @NonNull
     private final Context mContext;
@@ -85,5 +91,22 @@ public final class SelectionToolbarManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    private boolean isRemoteSelectionToolbarEnabled() {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SELECTION_TOOLBAR,
+                REMOTE_SELECTION_TOOLBAR_ENABLED, false);
+    }
+
+    /**
+     * Returns {@code true} if remote render selection toolbar enabled, otherwise
+     * returns {@code false}.
+     */
+    public static boolean isRemoteSelectionToolbarEnabled(Context context) {
+        SelectionToolbarManager manager = context.getSystemService(SelectionToolbarManager.class);
+        if (manager != null) {
+            return manager.isRemoteSelectionToolbarEnabled();
+        }
+        return false;
     }
 }

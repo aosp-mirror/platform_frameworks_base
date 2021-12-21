@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.widget;
+package com.android.internal.widget.floatingtoolbar;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -70,13 +70,13 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * A popup window used by the floating toolbar.
+ * A popup window used by the floating toolbar to render menu items in the local app process.
  *
  * This class is responsible for the rendering/animation of the floating toolbar.
  * It holds 2 panels (i.e. main panel and overflow panel) and an overflow button
  * to transition between panels.
  */
-public final class FloatingToolbarPopup {
+public final class LocalFloatingToolbarPopup implements FloatingToolbarPopup {
 
     /* Minimum and maximum number of items allowed in the overflow. */
     private static final int MIN_OVERFLOW_SIZE = 2;
@@ -94,7 +94,7 @@ public final class FloatingToolbarPopup {
     private final ViewGroup mContentContainer;  // holds all contents.
     private final ViewGroup mMainPanel;  // holds menu items that are initially displayed.
     // holds menu items hidden in the overflow.
-    private final FloatingToolbarPopup.OverflowPanel mOverflowPanel;
+    private final OverflowPanel mOverflowPanel;
     private final ImageButton mOverflowButton;  // opens/closes the overflow.
     /* overflow button drawables. */
     private final Drawable mArrow;
@@ -102,8 +102,7 @@ public final class FloatingToolbarPopup {
     private final AnimatedVectorDrawable mToArrow;
     private final AnimatedVectorDrawable mToOverflow;
 
-    private final FloatingToolbarPopup.OverflowPanelViewHelper
-            mOverflowPanelViewHelper;
+    private final OverflowPanelViewHelper mOverflowPanelViewHelper;
 
     /* Animation interpolators. */
     private final Interpolator mLogAccelerateInterpolator;
@@ -138,7 +137,7 @@ public final class FloatingToolbarPopup {
     private final int mIconTextSpacing;
 
     /**
-     * @see FloatingToolbarPopup.OverflowPanelViewHelper#preparePopupContent().
+     * @see OverflowPanelViewHelper#preparePopupContent().
      */
     private final Runnable mPreparePopupContentRTLHelper = new Runnable() {
         @Override
@@ -184,16 +183,20 @@ public final class FloatingToolbarPopup {
 
     private int mTransitionDurationScale;  // Used to scale the toolbar transition duration.
 
+    private final Rect mPreviousContentRect = new Rect();
+    private int mSuggestedWidth;
+    private boolean mWidthChanged = true;
+
     /**
      * Initializes a new floating toolbar popup.
      *
      * @param parent  A parent view to get the {@link android.view.View#getWindowToken()} token
      *      from.
      */
-    public FloatingToolbarPopup(Context context, View parent) {
+    public LocalFloatingToolbarPopup(Context context, View parent) {
         mParent = Objects.requireNonNull(parent);
         mContext = applyDefaultTheme(context);
-        mContentContainer = createContentContainer(context);
+        mContentContainer = createContentContainer(mContext);
         mPopupWindow = createPopupWindow(mContentContainer);
         mMarginHorizontal = parent.getResources()
                 .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
@@ -205,7 +208,7 @@ public final class FloatingToolbarPopup {
                 .getDimensionPixelSize(R.dimen.floating_toolbar_icon_text_spacing);
 
         // Interpolators
-        mLogAccelerateInterpolator = new FloatingToolbarPopup.LogAccelerateInterpolator();
+        mLogAccelerateInterpolator = new LogAccelerateInterpolator();
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(
                 mContext, android.R.interpolator.fast_out_slow_in);
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(
@@ -231,8 +234,7 @@ public final class FloatingToolbarPopup {
         mOverflowButton = createOverflowButton();
         mOverflowButtonSize = measure(mOverflowButton);
         mMainPanel = createMainPanel();
-        mOverflowPanelViewHelper =
-                new FloatingToolbarPopup.OverflowPanelViewHelper(mContext, mIconTextSpacing);
+        mOverflowPanelViewHelper = new OverflowPanelViewHelper(mContext, mIconTextSpacing);
         mOverflowPanel = createOverflowPanel();
 
         // Animation. Need views.
@@ -263,19 +265,7 @@ public final class FloatingToolbarPopup {
                 });
     }
 
-    /**
-     * Makes this toolbar "outside touchable" and sets the onDismissListener.
-     *
-     * @param outsideTouchable if true, the popup will be made "outside touchable" and
-     *      "non focusable". The reverse will happen if false.
-     * @param onDismiss
-     *
-     * @return true if the "outsideTouchable" setting was modified. Otherwise returns false
-     *
-     * @see PopupWindow#setOutsideTouchable(boolean)
-     * @see PopupWindow#setFocusable(boolean)
-     * @see PopupWindow.OnDismissListener
-     */
+    @Override
     public boolean setOutsideTouchable(
             boolean outsideTouchable, @Nullable PopupWindow.OnDismissListener onDismiss) {
         boolean ret = false;
@@ -293,7 +283,7 @@ public final class FloatingToolbarPopup {
      * Lays out buttons for the specified menu items.
      * Requires a subsequent call to {@link FloatingToolbar#show()} to show the items.
      */
-    public void layoutMenuItems(
+    private void layoutMenuItems(
             List<MenuItem> menuItems,
             MenuItem.OnMenuItemClickListener menuItemClickListener,
             int suggestedWidth) {
@@ -314,7 +304,7 @@ public final class FloatingToolbarPopup {
      *
      * @see #isLayoutRequired(List<MenuItem>)
      */
-    public void updateMenuItems(
+    private void updateMenuItems(
             List<MenuItem> menuItems, MenuItem.OnMenuItemClickListener menuItemClickListener) {
         mMenuItems.clear();
         for (MenuItem menuItem : menuItems) {
@@ -326,15 +316,42 @@ public final class FloatingToolbarPopup {
     /**
      * Returns true if this popup needs a relayout to properly render the specified menu items.
      */
-    public boolean isLayoutRequired(List<MenuItem> menuItems) {
+    private boolean isLayoutRequired(List<MenuItem> menuItems) {
         return !MenuItemRepr.reprEquals(menuItems, mMenuItems.values());
     }
 
-    /**
-     * Shows this popup at the specified coordinates.
-     * The specified coordinates may be adjusted to make sure the popup is entirely on-screen.
-     */
-    public void show(Rect contentRectOnScreen) {
+    @Override
+    public void setWidthChanged(boolean widthChanged) {
+        mWidthChanged = widthChanged;
+    }
+
+    @Override
+    public void setSuggestedWidth(int suggestedWidth) {
+        // Check if there's been a substantial width spec change.
+        int difference = Math.abs(suggestedWidth - mSuggestedWidth);
+        mWidthChanged = difference > (mSuggestedWidth * 0.2);
+        mSuggestedWidth = suggestedWidth;
+    }
+
+    @Override
+    public void show(List<MenuItem> menuItems,
+            MenuItem.OnMenuItemClickListener menuItemClickListener, Rect contentRect) {
+        if (isLayoutRequired(menuItems) || mWidthChanged) {
+            dismiss();
+            layoutMenuItems(menuItems, menuItemClickListener, mSuggestedWidth);
+        } else {
+            updateMenuItems(menuItems, menuItemClickListener);
+        }
+        if (!isShowing()) {
+            show(contentRect);
+        } else if (!mPreviousContentRect.equals(contentRect)) {
+            updateCoordinates(contentRect);
+        }
+        mWidthChanged = false;
+        mPreviousContentRect.set(contentRect);
+    }
+
+    private void show(Rect contentRectOnScreen) {
         Objects.requireNonNull(contentRectOnScreen);
 
         if (isShowing()) {
@@ -357,9 +374,7 @@ public final class FloatingToolbarPopup {
         runShowAnimation();
     }
 
-    /**
-     * Gets rid of this popup. If the popup isn't currently showing, this will be a no-op.
-     */
+    @Override
     public void dismiss() {
         if (mDismissed) {
             return;
@@ -373,10 +388,7 @@ public final class FloatingToolbarPopup {
         setZeroTouchableSurface();
     }
 
-    /**
-     * Hides this popup. This is a no-op if this popup is not showing.
-     * Use {@link #isHidden()} to distinguish between a hidden and a dismissed popup.
-     */
+    @Override
     public void hide() {
         if (!isShowing()) {
             return;
@@ -387,16 +399,12 @@ public final class FloatingToolbarPopup {
         setZeroTouchableSurface();
     }
 
-    /**
-     * Returns {@code true} if this popup is currently showing. {@code false} otherwise.
-     */
+    @Override
     public boolean isShowing() {
         return !mDismissed && !mHidden;
     }
 
-    /**
-     * Returns {@code true} if this popup is currently hidden. {@code false} otherwise.
-     */
+    @Override
     public boolean isHidden() {
         return mHidden;
     }
@@ -406,7 +414,7 @@ public final class FloatingToolbarPopup {
      * The specified coordinates may be adjusted to make sure the popup is entirely on-screen.
      * This is a no-op if this popup is not showing.
      */
-    public void updateCoordinates(Rect contentRectOnScreen) {
+    private void updateCoordinates(Rect contentRectOnScreen) {
         Objects.requireNonNull(contentRectOnScreen);
 
         if (!isShowing() || !mPopupWindow.isShowing()) {
@@ -1206,9 +1214,8 @@ public final class FloatingToolbarPopup {
         return overflowButton;
     }
 
-    private FloatingToolbarPopup.OverflowPanel createOverflowPanel() {
-        final FloatingToolbarPopup.OverflowPanel
-                overflowPanel = new FloatingToolbarPopup.OverflowPanel(this);
+    private OverflowPanel createOverflowPanel() {
+        final OverflowPanel overflowPanel = new OverflowPanel(this);
         overflowPanel.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         overflowPanel.setDivider(null);
@@ -1307,9 +1314,9 @@ public final class FloatingToolbarPopup {
      */
     private static final class OverflowPanel extends ListView {
 
-        private final FloatingToolbarPopup mPopup;
+        private final LocalFloatingToolbarPopup mPopup;
 
-        OverflowPanel(FloatingToolbarPopup popup) {
+        OverflowPanel(LocalFloatingToolbarPopup popup) {
             super(Objects.requireNonNull(popup).mContext);
             this.mPopup = popup;
             setScrollBarDefaultDelayBeforeFade(ViewConfiguration.getScrollDefaultDelay() * 3);
