@@ -21542,6 +21542,7 @@ package android.media {
   public class MediaActionSound {
     ctor public MediaActionSound();
     method public void load(int);
+    method public static boolean mustPlayShutterSound();
     method public void play(int);
     method public void release();
     field public static final int FOCUS_COMPLETE = 1; // 0x1
