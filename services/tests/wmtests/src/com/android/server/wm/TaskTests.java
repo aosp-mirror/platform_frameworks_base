@@ -899,22 +899,21 @@ public class TaskTests extends WindowTestsBase {
 
     /**
      * Test that root activity index is reported correctly when looking for the 'effective root' in
-     * case when bottom activity is finishing. Ignore the relinquishing task identity if it's not a
-     * system activity even with the FLAG_RELINQUISH_TASK_IDENTITY.
+     * case when bottom activities are relinquishing task identity or finishing.
      */
     @Test
     public void testFindRootIndex_effectiveRoot_finishingAndRelinquishing() {
-        final Task task = getTestTask();
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity0.getTask();
         // Add extra two activities. Mark the one on the bottom with "relinquishTaskIdentity" and
         // one above as finishing.
-        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
         activity1.finishing = true;
         new ActivityBuilder(mAtm).setTask(task).build();
 
         assertEquals("The first non-finishing activity and non-relinquishing task identity "
-                + "must be reported.", task.getChildAt(0), task.getRootActivity(
+                + "must be reported.", task.getChildAt(2), task.getRootActivity(
                 false /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/));
     }
 
@@ -934,21 +933,21 @@ public class TaskTests extends WindowTestsBase {
     }
 
     /**
-     * Test that the root activity index is reported correctly when looking for the
-     * 'effective root' for the case when all non-system activities have relinquishTaskIdentity set.
+     * Test that the topmost activity index is reported correctly when looking for the
+     * 'effective root' for the case when all activities have relinquishTaskIdentity set.
      */
     @Test
     public void testFindRootIndex_effectiveRoot_relinquishingMultipleActivities() {
-        final Task task = getTestTask();
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity0.getTask();
         // Set relinquishTaskIdentity for all activities in the task
-        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
         activity1.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
 
-        assertEquals("The topmost activity in the task must be reported.", task.getChildAt(0),
-                task.getRootActivity(false /*ignoreRelinquishIdentity*/,
-                        true /*setToBottomIfNone*/));
+        assertEquals("The topmost activity in the task must be reported.",
+                task.getChildAt(task.getChildCount() - 1), task.getRootActivity(
+                        false /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/));
     }
 
     /** Test that bottom-most activity is reported in {@link Task#getRootActivity()}. */
@@ -1086,14 +1085,14 @@ public class TaskTests extends WindowTestsBase {
     }
 
     /**
-     * Test {@link ActivityRecord#getTaskForActivityLocked(IBinder, boolean)} with non-system
-     * activity that relinquishes task identity.
+     * Test {@link ActivityRecord#getTaskForActivityLocked(IBinder, boolean)} with activity that
+     * relinquishes task identity.
      */
     @Test
     public void testGetTaskForActivity_onlyRoot_relinquishTaskIdentity() {
-        final Task task = getTestTask();
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity0.getTask();
         // Make the current root activity relinquish task identity
-        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         // Add an extra activity on top - this will be the new root
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
@@ -1102,7 +1101,7 @@ public class TaskTests extends WindowTestsBase {
 
         assertEquals(task.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity0.token, true /* onlyRoot */));
-        assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
+        assertEquals(task.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity1.token, true /* onlyRoot */));
         assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
                 ActivityRecord.getTaskForActivityLocked(activity2.token, true /* onlyRoot */));
@@ -1187,6 +1186,46 @@ public class TaskTests extends WindowTestsBase {
         spyOn(task);
         task.updateEffectiveIntent();
         verify(task).setIntent(eq(activity0));
+    }
+
+    /**
+     * Test {@link Task#updateEffectiveIntent()} when activity with relinquishTaskIdentity but
+     * another with different uid. This should make the task use the root activity when updating the
+     * intent.
+     */
+    @Test
+    public void testUpdateEffectiveIntent_relinquishingWithDifferentUid() {
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm)
+                .setActivityFlags(FLAG_RELINQUISH_TASK_IDENTITY).setCreateTask(true).build();
+        final Task task = activity0.getTask();
+
+        // Add an extra activity on top
+        new ActivityBuilder(mAtm).setUid(11).setTask(task).build();
+
+        spyOn(task);
+        task.updateEffectiveIntent();
+        verify(task).setIntent(eq(activity0));
+    }
+
+    /**
+     * Test {@link Task#updateEffectiveIntent()} with activities set as relinquishTaskIdentity.
+     * This should make the task use the topmost activity when updating the intent.
+     */
+    @Test
+    public void testUpdateEffectiveIntent_relinquishingMultipleActivities() {
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm)
+                .setActivityFlags(FLAG_RELINQUISH_TASK_IDENTITY).setCreateTask(true).build();
+        final Task task = activity0.getTask();
+        // Add an extra activity on top
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
+        activity1.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+
+        // Add an extra activity on top
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(task).build();
+
+        spyOn(task);
+        task.updateEffectiveIntent();
+        verify(task).setIntent(eq(activity2));
     }
 
     @Test
