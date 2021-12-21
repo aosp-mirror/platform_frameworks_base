@@ -38,8 +38,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
 
     private static final String TAG = "Biometrics/AcquisitionClient";
 
-    private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
-            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
+    private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
 
     private static final VibrationEffect SUCCESS_VIBRATION_EFFECT =
             VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
@@ -196,7 +196,7 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
                     getContext().getOpPackageName(),
                     SUCCESS_VIBRATION_EFFECT,
                     getClass().getSimpleName() + "::success",
-                    TOUCH_VIBRATION_ATTRIBUTES);
+                    HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
         }
     }
 
@@ -207,7 +207,7 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
                     getContext().getOpPackageName(),
                     ERROR_VIBRATION_EFFECT,
                     getClass().getSimpleName() + "::error",
-                    TOUCH_VIBRATION_ATTRIBUTES);
+                    HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
         }
     }
 }
