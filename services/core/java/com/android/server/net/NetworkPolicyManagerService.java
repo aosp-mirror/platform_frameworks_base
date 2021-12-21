@@ -2456,7 +2456,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                 networkId, templateMeteredness, NetworkStats.ROAMING_ALL,
                                 NetworkStats.DEFAULT_NETWORK_ALL, NetworkTemplate.NETWORK_TYPE_ALL,
                                 NetworkTemplate.OEM_MANAGED_ALL, subscriberIdMatchRule);
-                        if (template.isPersistable()) {
+                        if (NetworkPolicy.isTemplatePersistable(template)) {
                             mNetworkPolicy.put(template, new NetworkPolicy(template, cycleRule,
                                     warningBytes, limitBytes, lastWarningSnooze,
                                     lastLimitSnooze, metered, inferred));
@@ -2663,7 +2663,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int i = 0; i < mNetworkPolicy.size(); i++) {
                 final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
                 final NetworkTemplate template = policy.template;
-                if (!template.isPersistable()) continue;
+                if (!NetworkPolicy.isTemplatePersistable(template)) continue;
 
                 out.startTag(null, TAG_NETWORK_POLICY);
                 writeIntAttribute(out, ATTR_NETWORK_TEMPLATE, template.getMatchRule());
