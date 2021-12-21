@@ -38,8 +38,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * Description of a mobile data profile used for establishing
- * data connections.
+ * Description of a mobile data profile used for establishing data networks. The data profile
+ * consist an {@link ApnSetting} which is needed for 2G/3G/4G networks bring up, and a
+ * {@link TrafficDescriptor} contains additional information that can be used for 5G standalone
+ * network bring up.
  *
  * @hide
  */
@@ -113,7 +115,9 @@ public final class DataProfile implements Parcelable {
 
     /**
      * @return Id of the data profile.
+     * @deprecated Use {@link #getApnSetting()} and {@link ApnSetting#getProfileId()} instead.
      */
+    @Deprecated
     public int getProfileId() {
         if (mApnSetting != null) {
             return mApnSetting.getProfileId();
@@ -124,9 +128,10 @@ public final class DataProfile implements Parcelable {
     /**
      * @return The APN (Access Point Name) to establish data connection. This is a string
      * specifically defined by the carrier.
+     * @deprecated Use {@link #getApnSetting()} and {@link ApnSetting#getApnName()} instead.
      */
-    @NonNull
-    public String getApn() {
+    @Deprecated
+    public @NonNull String getApn() {
         if (mApnSetting != null) {
             return TextUtils.emptyIfNull(mApnSetting.getApnName());
         }
@@ -135,7 +140,9 @@ public final class DataProfile implements Parcelable {
 
     /**
      * @return The connection protocol defined in 3GPP TS 27.007 section 10.1.1.
+     * @deprecated Use {@link #getApnSetting()} and {@link ApnSetting#getProtocol()} instead.
      */
+    @Deprecated
     public @ProtocolType int getProtocolType() {
         if (mApnSetting != null) {
             return mApnSetting.getProtocol();
@@ -145,7 +152,9 @@ public final class DataProfile implements Parcelable {
 
     /**
      * @return The authentication protocol used for this PDP context.
+     * @deprecated Use {@link #getApnSetting()} and {@link ApnSetting#getAuthType()} instead.
      */
+    @Deprecated
     public @AuthType int getAuthType() {
         if (mApnSetting != null) {
             return mApnSetting.getAuthType();
@@ -154,10 +163,11 @@ public final class DataProfile implements Parcelable {
     }
 
     /**
-     * @return The username for APN. Can be null.
+     * @return The username for APN.
+     * @deprecated Use {@link #getApnSetting()} and {@link ApnSetting#getUser()} instead.
      */
-    @Nullable
-    public String getUserName() {
+    @Deprecated
+    public @Nullable String getUserName() {
         if (mApnSetting != null) {
             return mApnSetting.getUser();
         }
@@ -165,10 +175,11 @@ public final class DataProfile implements Parcelable {
     }
 
     /**
-     * @return The password for APN. Can be null.
+     * @return The password for APN.
+     * @deprecated Use {@link #getApnSetting()} and {@link ApnSetting#getPassword()} instead.
      */
-    @Nullable
-    public String getPassword() {
+    @Deprecated
+    public @Nullable String getPassword() {
         if (mApnSetting != null) {
             return mApnSetting.getPassword();
         }
@@ -232,7 +243,9 @@ public final class DataProfile implements Parcelable {
 
     /**
      * @return The supported APN types bitmask.
+     * @deprecated Use {@link #getApnSetting()} and {@link ApnSetting#getApnTypeBitmask()} instead.
      */
+    @Deprecated
     public @ApnType int getSupportedApnTypesBitmask() {
         if (mApnSetting != null) {
             return mApnSetting.getApnTypeBitmask();
@@ -242,7 +255,9 @@ public final class DataProfile implements Parcelable {
 
     /**
      * @return The connection protocol on roaming network defined in 3GPP TS 27.007 section 10.1.1.
+     * @deprecated Use {@link #getApnSetting()} and {@link ApnSetting#getRoamingProtocol()} instead.
      */
+    @Deprecated
     public @ProtocolType int getRoamingProtocolType() {
         if (mApnSetting != null) {
             return mApnSetting.getRoamingProtocol();
@@ -252,7 +267,10 @@ public final class DataProfile implements Parcelable {
 
     /**
      * @return The bearer bitmask indicating the applicable networks for this data profile.
+     * @deprecated use {@link #getApnSetting()} and {@link ApnSetting#getNetworkTypeBitmask()}
+     * instead.
      */
+    @Deprecated
     public @NetworkTypeBitMask int getBearerBitmask() {
         if (mApnSetting != null) {
             return mApnSetting.getNetworkTypeBitmask();
@@ -262,7 +280,8 @@ public final class DataProfile implements Parcelable {
 
     /**
      * @return The maximum transmission unit (MTU) size in bytes.
-     * @deprecated use {@link #getMtuV4} or {@link #getMtuV6} instead.
+     * @deprecated use {@link #getApnSetting()} and {@link ApnSetting#getMtuV4()}/
+     * {@link ApnSetting#getMtuV6()} instead.
      */
     @Deprecated
     public int getMtu() {
@@ -272,7 +291,9 @@ public final class DataProfile implements Parcelable {
     /**
      * This replaces the deprecated method getMtu.
      * @return The maximum transmission unit (MTU) size in bytes, for IPv4.
+     * @deprecated use {@link #getApnSetting()} and {@link ApnSetting#getMtuV4()} instead.
      */
+    @Deprecated
     public int getMtuV4() {
         if (mApnSetting != null) {
             return mApnSetting.getMtuV4();
@@ -282,7 +303,9 @@ public final class DataProfile implements Parcelable {
 
     /**
      * @return The maximum transmission unit (MTU) size in bytes, for IPv6.
+     * @deprecated use {@link #getApnSetting()} and {@link ApnSetting#getMtuV6()} instead.
      */
+    @Deprecated
     public int getMtuV6() {
         if (mApnSetting != null) {
             return mApnSetting.getMtuV6();
@@ -292,7 +315,9 @@ public final class DataProfile implements Parcelable {
 
     /**
      * @return {@code true} if modem must persist this data profile.
+     * @deprecated Use {@link #getApnSetting()} and {@link ApnSetting#isPersistent()} instead.
      */
+    @Deprecated
     public boolean isPersistent() {
         if (mApnSetting != null) {
             return mApnSetting.isPersistent();
@@ -320,16 +345,16 @@ public final class DataProfile implements Parcelable {
     }
 
     /**
-     * @return The APN setting
-     * @hide TODO: Remove before T is released.
+     * @return The APN setting {@link ApnSetting}, which is used to establish data network on
+     * 2G/3G/4G.
      */
     public @Nullable ApnSetting getApnSetting() {
         return mApnSetting;
     }
 
     /**
-     * @return The traffic descriptor
-     * @hide TODO: Remove before T is released.
+     * @return The traffic descriptor {@link TrafficDescriptor}, which can be used to establish
+     * data network on 5G.
      */
     public @Nullable TrafficDescriptor getTrafficDescriptor() {
         return mTrafficDescriptor;
@@ -539,7 +564,10 @@ public final class DataProfile implements Parcelable {
          *
          * @param profileId Network domain.
          * @return The same instance of the builder.
+         * @deprecated use {@link #setApnSetting(ApnSetting)} and
+         * {@link ApnSetting.Builder#setProfileId(int)} instead.
          */
+        @Deprecated
         public @NonNull Builder setProfileId(int profileId) {
             mProfileId = profileId;
             return this;
@@ -551,7 +579,10 @@ public final class DataProfile implements Parcelable {
          *
          * @param apn Access point name
          * @return The same instance of the builder.
+         * @deprecated use {@link #setApnSetting(ApnSetting)} and
+         * {@link ApnSetting.Builder#setApnName(String)} instead.
          */
+        @Deprecated
         public @NonNull Builder setApn(@NonNull String apn) {
             mApn = apn;
             return this;
@@ -562,7 +593,10 @@ public final class DataProfile implements Parcelable {
          *
          * @param protocolType The connection protocol defined in 3GPP TS 27.007 section 10.1.1.
          * @return The same instance of the builder.
+         * @deprecated use {@link #setApnSetting(ApnSetting)} and
+         * {@link ApnSetting.Builder#setProtocol(int)} instead.
          */
+        @Deprecated
         public @NonNull Builder setProtocolType(@ProtocolType int protocolType) {
             mProtocolType = protocolType;
             return this;
@@ -573,7 +607,10 @@ public final class DataProfile implements Parcelable {
          *
          * @param authType The authentication type
          * @return The same instance of the builder.
+         * @deprecated use {@link #setApnSetting(ApnSetting)} and
+         * {@link ApnSetting.Builder#setAuthType(int)} instead.
          */
+        @Deprecated
         public @NonNull Builder setAuthType(@AuthType int authType) {
             mAuthType = authType;
             return this;
@@ -584,7 +621,10 @@ public final class DataProfile implements Parcelable {
          *
          * @param userName The user name
          * @return The same instance of the builder.
+         * @deprecated use {@link #setApnSetting(ApnSetting)} and
+         * {@link ApnSetting.Builder#setUser(String)} instead.
          */
+        @Deprecated
         public @NonNull Builder setUserName(@NonNull String userName) {
             mUserName = userName;
             return this;
@@ -595,7 +635,10 @@ public final class DataProfile implements Parcelable {
          *
          * @param password The password
          * @return The same instance of the builder.
+         * @deprecated use {@link #setApnSetting(ApnSetting)} and
+         * {@link ApnSetting.Builder#setPassword(String)} (int)} instead.
          */
+        @Deprecated
         public @NonNull Builder setPassword(@NonNull String password) {
             mPassword = password;
             return this;
@@ -628,7 +671,10 @@ public final class DataProfile implements Parcelable {
          *
          * @param supportedApnTypesBitmask The supported APN types bitmask.
          * @return The same instance of the builder.
+         * @deprecated use {@link #setApnSetting(ApnSetting)} and
+         * {@link ApnSetting.Builder#setApnTypeBitmask(int)} instead.
          */
+        @Deprecated
         public @NonNull Builder setSupportedApnTypesBitmask(@ApnType int supportedApnTypesBitmask) {
             mSupportedApnTypesBitmask = supportedApnTypesBitmask;
             return this;
@@ -639,7 +685,10 @@ public final class DataProfile implements Parcelable {
          *
          * @param protocolType The connection protocol defined in 3GPP TS 27.007 section 10.1.1.
          * @return The same instance of the builder.
+         * @deprecated use {@link #setApnSetting(ApnSetting)} and
+         * {@link ApnSetting.Builder#setRoamingProtocol(int)} instead.
          */
+        @Deprecated
         public @NonNull Builder setRoamingProtocolType(@ProtocolType int protocolType) {
             mRoamingProtocolType = protocolType;
             return this;
@@ -651,7 +700,10 @@ public final class DataProfile implements Parcelable {
          * @param bearerBitmask The bearer bitmask indicating the applicable networks for this data
          * profile.
          * @return The same instance of the builder.
+         * @deprecated use {@link #setApnSetting(ApnSetting)} and
+         * {@link ApnSetting.Builder#setNetworkTypeBitmask(int)} instead.
          */
+        @Deprecated
         public @NonNull Builder setBearerBitmask(@NetworkTypeBitMask int bearerBitmask) {
             mBearerBitmask = bearerBitmask;
             return this;
@@ -662,7 +714,9 @@ public final class DataProfile implements Parcelable {
          *
          * @param mtu The maximum transmission unit (MTU) size in bytes.
          * @return The same instance of the builder.
-         * @deprecated use {@link #setApnSetting(ApnSetting)} instead.
+         * @deprecated use {@link #setApnSetting(ApnSetting)} and
+         * {@link ApnSetting.Builder#setMtuV4(int)}/{@link ApnSetting.Builder#setMtuV6(int)}
+         * instead.
          */
         @Deprecated
         public @NonNull Builder setMtu(int mtu) {
@@ -672,11 +726,13 @@ public final class DataProfile implements Parcelable {
 
         /**
          * Set the maximum transmission unit (MTU) size in bytes, for IPv4.
-         * This replaces the deprecated method setMtu.
          *
          * @param mtu The maximum transmission unit (MTU) size in bytes.
          * @return The same instance of the builder.
+         * @deprecated Use {{@link #setApnSetting(ApnSetting)}} and
+         * {@link ApnSetting.Builder#setMtuV4(int)} instead.
          */
+        @Deprecated
         public @NonNull Builder setMtuV4(int mtu) {
             mMtuV4 = mtu;
             return this;
@@ -687,7 +743,10 @@ public final class DataProfile implements Parcelable {
          *
          * @param mtu The maximum transmission unit (MTU) size in bytes.
          * @return The same instance of the builder.
+         * @deprecated Use {{@link #setApnSetting(ApnSetting)}} and
+         * {@link ApnSetting.Builder#setMtuV6(int)} instead.
          */
+        @Deprecated
         public @NonNull Builder setMtuV6(int mtu) {
             mMtuV6 = mtu;
             return this;
@@ -712,19 +771,23 @@ public final class DataProfile implements Parcelable {
          * @param isPersistent {@code true} if this data profile was used to bring up the last
          * default (i.e internet) data connection successfully.
          * @return The same instance of the builder.
+         * @deprecated Use {{@link #setApnSetting(ApnSetting)}} and
+         * {@link ApnSetting.Builder#setPersistent(boolean)} instead.
          */
+        @Deprecated
         public @NonNull Builder setPersistent(boolean isPersistent) {
             mPersistent = isPersistent;
             return this;
         }
 
         /**
-         * Set APN setting.
+         * Set the APN setting. Note that if an APN setting is not set here, then either
+         * {@link #setApn(String)} or {@link #setTrafficDescriptor(TrafficDescriptor)} must be
+         * called. Otherwise {@link IllegalArgumentException} will be thrown when {@link #build()}
+         * the data profile.
          *
-         * @param apnSetting APN setting
-         * @return The same instance of the builder
-         *
-         * @hide // TODO: Remove before T is released.
+         * @param apnSetting The APN setting.
+         * @return The same instance of the builder.
          */
         public @NonNull Builder setApnSetting(@NonNull ApnSetting apnSetting) {
             mApnSetting = apnSetting;
@@ -732,12 +795,13 @@ public final class DataProfile implements Parcelable {
         }
 
         /**
-         * Set traffic descriptor.
+         * Set the traffic descriptor. Note that if a traffic descriptor is not set here, then
+         * either {@link #setApnSetting(ApnSetting)} or {@link #setApn(String)} must be called.
+         * Otherwise {@link IllegalArgumentException} will be thrown when {@link #build()} the data
+         * profile.
          *
-         * @param trafficDescriptor Traffic descriptor
-         * @return The same instance of the builder
-         *
-         * @hide // TODO: Remove before T is released.
+         * @param trafficDescriptor The traffic descriptor.
+         * @return The same instance of the builder.
          */
         public @NonNull Builder setTrafficDescriptor(@NonNull TrafficDescriptor trafficDescriptor) {
             mTrafficDescriptor = trafficDescriptor;
@@ -745,9 +809,9 @@ public final class DataProfile implements Parcelable {
         }
 
         /**
-         * Build the DataProfile object
+         * Build the DataProfile object.
          *
-         * @return The data profile object
+         * @return The data profile object.
          */
         public @NonNull DataProfile build() {
             if (mApnSetting == null && mApn != null) {

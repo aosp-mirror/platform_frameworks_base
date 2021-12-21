@@ -13087,21 +13087,23 @@ package android.telephony.data {
 
   public final class DataProfile implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public String getApn();
-    method public int getAuthType();
-    method public int getBearerBitmask();
+    method @Deprecated @NonNull public String getApn();
+    method @Nullable public android.telephony.data.ApnSetting getApnSetting();
+    method @Deprecated public int getAuthType();
+    method @Deprecated public int getBearerBitmask();
     method @Deprecated public int getMtu();
-    method public int getMtuV4();
-    method public int getMtuV6();
-    method @Nullable public String getPassword();
-    method public int getProfileId();
-    method public int getProtocolType();
-    method public int getRoamingProtocolType();
-    method public int getSupportedApnTypesBitmask();
+    method @Deprecated public int getMtuV4();
+    method @Deprecated public int getMtuV6();
+    method @Deprecated @Nullable public String getPassword();
+    method @Deprecated public int getProfileId();
+    method @Deprecated public int getProtocolType();
+    method @Deprecated public int getRoamingProtocolType();
+    method @Deprecated public int getSupportedApnTypesBitmask();
+    method @Nullable public android.telephony.data.TrafficDescriptor getTrafficDescriptor();
     method public int getType();
-    method @Nullable public String getUserName();
+    method @Deprecated @Nullable public String getUserName();
     method public boolean isEnabled();
-    method public boolean isPersistent();
+    method @Deprecated public boolean isPersistent();
     method public boolean isPreferred();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.DataProfile> CREATOR;
@@ -13114,21 +13116,23 @@ package android.telephony.data {
     ctor public DataProfile.Builder();
     method @NonNull public android.telephony.data.DataProfile build();
     method @NonNull public android.telephony.data.DataProfile.Builder enable(boolean);
-    method @NonNull public android.telephony.data.DataProfile.Builder setApn(@NonNull String);
-    method @NonNull public android.telephony.data.DataProfile.Builder setAuthType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setBearerBitmask(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setApn(@NonNull String);
+    method @NonNull public android.telephony.data.DataProfile.Builder setApnSetting(@NonNull android.telephony.data.ApnSetting);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setAuthType(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setBearerBitmask(int);
     method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtu(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setMtuV4(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setMtuV6(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setPassword(@NonNull String);
-    method @NonNull public android.telephony.data.DataProfile.Builder setPersistent(boolean);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtuV4(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtuV6(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setPassword(@NonNull String);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setPersistent(boolean);
     method @NonNull public android.telephony.data.DataProfile.Builder setPreferred(boolean);
-    method @NonNull public android.telephony.data.DataProfile.Builder setProfileId(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setProtocolType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setRoamingProtocolType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setSupportedApnTypesBitmask(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setProfileId(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setProtocolType(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setRoamingProtocolType(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setSupportedApnTypesBitmask(int);
+    method @NonNull public android.telephony.data.DataProfile.Builder setTrafficDescriptor(@NonNull android.telephony.data.TrafficDescriptor);
     method @NonNull public android.telephony.data.DataProfile.Builder setType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setUserName(@NonNull String);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setUserName(@NonNull String);
   }
 
   public abstract class DataService extends android.app.Service {
