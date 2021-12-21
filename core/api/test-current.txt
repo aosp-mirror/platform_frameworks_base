@@ -248,12 +248,15 @@ package android.app {
 
   public class BroadcastOptions {
     ctor public BroadcastOptions(@NonNull android.os.Bundle);
-    method public int getMaxManifestReceiverApiLevel();
+    method @Deprecated public int getMaxManifestReceiverApiLevel();
     method public long getTemporaryAppAllowlistDuration();
     method @Nullable public String getTemporaryAppAllowlistReason();
     method public int getTemporaryAppAllowlistReasonCode();
     method public int getTemporaryAppAllowlistType();
-    method public void setMaxManifestReceiverApiLevel(int);
+    method @Deprecated public void setMaxManifestReceiverApiLevel(int);
+    method public boolean testRequireCompatChange(int);
+    field public static final long CHANGE_ALWAYS_DISABLED = 210856463L; // 0xc916a0fL
+    field public static final long CHANGE_ALWAYS_ENABLED = 209888056L; // 0xc82a338L
   }
 
   public class DownloadManager {

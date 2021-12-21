@@ -722,12 +722,14 @@ package android.app {
   }
 
   public class BroadcastOptions {
+    method public void clearRequireCompatChange();
     method public boolean isPendingIntentBackgroundActivityLaunchAllowed();
     method public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND) public void setBackgroundActivityStartsAllowed(boolean);
     method public void setDontSendToRestrictedApps(boolean);
     method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
     method public void setRequireAllOfPermissions(@Nullable String[]);
+    method public void setRequireCompatChange(long, boolean);
     method public void setRequireNoneOfPermissions(@Nullable String[]);
     method @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppAllowlist(long, int, int, @Nullable String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(long);

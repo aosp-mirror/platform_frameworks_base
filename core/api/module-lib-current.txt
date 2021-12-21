@@ -24,8 +24,8 @@ package android.app {
   }
 
   public class BroadcastOptions {
-    method public int getMaxManifestReceiverApiLevel();
-    method public void setMaxManifestReceiverApiLevel(int);
+    method @Deprecated public int getMaxManifestReceiverApiLevel();
+    method @Deprecated public void setMaxManifestReceiverApiLevel(int);
   }
 
   public abstract class HomeVisibilityListener {
