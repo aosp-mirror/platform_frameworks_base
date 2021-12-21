@@ -99,12 +99,13 @@ public interface MediaModule {
     static Optional<MediaTttCommandLineHelper> providesMediaTttCommandLineHelper(
             MediaTttFlags mediaTttFlags,
             CommandRegistry commandRegistry,
+            Context context,
             MediaTttChipController mediaTttChipController,
             @Main DelayableExecutor mainExecutor) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
         return Optional.of(new MediaTttCommandLineHelper(
-                commandRegistry, mediaTttChipController, mainExecutor));
+                commandRegistry, context, mediaTttChipController, mainExecutor));
     }
 }

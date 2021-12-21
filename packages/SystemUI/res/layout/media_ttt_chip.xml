@@ -26,6 +26,13 @@
     android:gravity="center_vertical"
     >
 
+    <com.android.internal.widget.CachingIconView
+        android:id="@+id/app_icon"
+        android:layout_width="@dimen/media_ttt_icon_size"
+        android:layout_height="@dimen/media_ttt_icon_size"
+        android:layout_marginEnd="12dp"
+        />
+
     <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
@@ -37,8 +44,8 @@
     <ProgressBar
         android:id="@+id/loading"
         android:indeterminate="true"
-        android:layout_width="@dimen/media_ttt_icon_size"
-        android:layout_height="@dimen/media_ttt_icon_size"
+        android:layout_width="@dimen/media_ttt_loading_size"
+        android:layout_height="@dimen/media_ttt_loading_size"
         android:layout_marginStart="12dp"
         android:indeterminateTint="?androidprv:attr/colorAccentPrimaryVariant"
         style="?android:attr/progressBarStyleSmall"
