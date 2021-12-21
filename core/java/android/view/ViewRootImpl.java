@@ -851,6 +851,28 @@ public final class ViewRootImpl implements ViewParent,
      */
     private Bundle mRelayoutBundle = new Bundle();
 
+    private static volatile boolean sAnrReported = false;
+    static BLASTBufferQueue.TransactionHangCallback sTransactionHangCallback =
+        new BLASTBufferQueue.TransactionHangCallback() {
+            @Override
+            public void onTransactionHang(boolean isGPUHang) {
+                if (isGPUHang && !sAnrReported) {
+                    sAnrReported = true;
+                    try {
+                        ActivityManager.getService().appNotResponding(
+                            "Buffer processing hung up due to stuck fence. Indicates GPU hang");
+                    } catch (RemoteException e) {
+                        // We asked the system to crash us, but the system
+                        // already crashed. Unfortunately things may be
+                        // out of control.
+                    }
+                } else {
+                    // TODO: Do something with this later. For now we just ANR
+                    // in dequeue buffer later like we always have.
+                }
+            }
+        };
+
     private String mTag = TAG;
 
     public ViewRootImpl(Context context, Display display) {
@@ -2086,6 +2108,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl,
                 mSurfaceSize.x, mSurfaceSize.y, mWindowAttributes.format);
+        mBlastBufferQueue.setTransactionHangCallback(sTransactionHangCallback);
         Surface blastSurface = mBlastBufferQueue.createSurface();
         // Only call transferFrom if the surface has changed to prevent inc the generation ID and
         // causing EGL resources to be recreated.

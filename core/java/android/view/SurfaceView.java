@@ -1200,8 +1200,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
         mTransformHint = viewRoot.getBufferTransformHint();
         mBlastSurfaceControl.setTransformHint(mTransformHint);
+
         mBlastBufferQueue = new BLASTBufferQueue(name, false /* updateDestinationFrame */);
         mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight, mFormat);
+        mBlastBufferQueue.setTransactionHangCallback(ViewRootImpl.sTransactionHangCallback);
     }
 
     private void onDrawFinished() {
