@@ -1710,7 +1710,8 @@ public class DisplayPolicy {
 
         if (mShowingDream != mLastShowingDream) {
             mLastShowingDream = mShowingDream;
-            mService.notifyShowingDreamChanged();
+            // Notify that isShowingDreamLw (which is checked in KeyguardController) has changed.
+            mDisplayContent.notifyKeyguardFlagsChanged();
         }
 
         mService.mPolicy.setAllowLockscreenWhenOn(getDisplayId(), mAllowLockscreenWhenOn);

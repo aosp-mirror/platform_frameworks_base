@@ -63,7 +63,6 @@ import static android.provider.Settings.System.FONT_SCALE;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_WAKE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
@@ -5413,42 +5412,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                     resultTo, null, 0, startFlags, null, options, userId,
                     false /*validateIncomingUser*/);
-        }
-
-        @Override
-        public void notifyKeyguardFlagsChanged(@Nullable Runnable callback, int displayId) {
-            synchronized (mGlobalLock) {
-
-                // We might change the visibilities here, so prepare an empty app transition which
-                // might be overridden later if we actually change visibilities.
-                final DisplayContent dc = mRootWindowContainer.getDisplayContent(displayId);
-                if (dc == null) {
-                    return;
-                }
-                final boolean wasTransitionSet = dc.mAppTransition.isTransitionSet();
-                if (!wasTransitionSet) {
-                    dc.prepareAppTransition(TRANSIT_NONE);
-                }
-                mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-
-                // If there was a transition set already we don't want to interfere with it as we
-                // might be starting it too early.
-                if (!wasTransitionSet) {
-                    dc.executeAppTransition();
-                }
-            }
-            if (callback != null) {
-                callback.run();
-            }
-        }
-
-        @Override
-        public void notifyKeyguardTrustedChanged() {
-            synchronized (mGlobalLock) {
-                if (mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
-                    mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-                }
-            }
         }
 
         /**
