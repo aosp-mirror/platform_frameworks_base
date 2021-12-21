@@ -271,6 +271,7 @@ public abstract class WallpaperService extends Service {
         private Display mDisplay;
         private Context mDisplayContext;
         private int mDisplayState;
+        private @Surface.Rotation int mDisplayInstallOrientation;
         private float mWallpaperDimAmount = 0.05f;
 
         SurfaceControl mSurfaceControl = new SurfaceControl();
@@ -1082,6 +1083,11 @@ public abstract class WallpaperService extends Service {
                             mWindow, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, -1, mWinFrames, mMergedConfiguration, mSurfaceControl,
                             mInsetsState, mTempControls, mSurfaceSize);
+
+                    final int transformHint = SurfaceControl.rotationToBufferTransform(
+                            (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
+                    mSurfaceControl.setTransformHint(transformHint);
+
                     if (mSurfaceControl.isValid()) {
                         if (mBbqSurfaceControl == null) {
                             mBbqSurfaceControl = new SurfaceControl.Builder()
@@ -1095,9 +1101,9 @@ public abstract class WallpaperService extends Service {
                                     .build();
                             updateSurfaceDimming();
                         }
-                        // Propagate transform hint from WM so we can use the right hint for the
+                        // Propagate transform hint from WM, so we can use the right hint for the
                         // first frame.
-                        mBbqSurfaceControl.setTransformHint(mSurfaceControl.getTransformHint());
+                        mBbqSurfaceControl.setTransformHint(transformHint);
                         Surface blastSurface = getOrCreateBLASTSurface(mSurfaceSize.x,
                                 mSurfaceSize.y, mFormat);
                         // If blastSurface == null that means it hasn't changed since the last
@@ -1335,6 +1341,7 @@ public abstract class WallpaperService extends Service {
             mWallpaperDimAmount = mDisplayContext.getResources().getFloat(
                     com.android.internal.R.dimen.config_wallpaperDimAmount);
             mDisplayState = mDisplay.getState();
+            mDisplayInstallOrientation = mDisplay.getInstallOrientation();
 
             if (DEBUG) Log.v(TAG, "onCreate(): " + this);
             onCreate(mSurfaceHolder);

@@ -805,12 +805,6 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
-    "-1248290210": {
-      "message": "Passing transform hint %d for window %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-1228653755": {
       "message": "Launch on display check: displayId=%d callingPid=%d callingUid=%d",
       "level": "DEBUG",

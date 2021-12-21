@@ -2430,14 +2430,6 @@ public class WindowManagerService extends IWindowManager.Stub
             configChanged = displayContent.updateOrientation();
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
-            final DisplayInfo displayInfo = win.getDisplayInfo();
-            final int transformHint = (displayInfo.rotation + displayInfo.installOrientation) % 4;
-            outSurfaceControl.setTransformHint(
-                    SurfaceControl.rotationToBufferTransform(transformHint));
-            ProtoLog.v(WM_DEBUG_ORIENTATION,
-                    "Passing transform hint %d for window %s",
-                    transformHint, win);
-
             if (toBeDisplayed && win.mIsWallpaper) {
                 displayContent.mWallpaperController.updateWallpaperOffset(win, false /* sync */);
             }
