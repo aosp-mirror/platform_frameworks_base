@@ -2199,8 +2199,11 @@ public class NotificationManager {
                     + conversationSendersToString(priorityConversationSenders)
                     + ",suppressedVisualEffects="
                     + suppressedEffectsToString(suppressedVisualEffects)
-                    + ",areChannelsBypassingDnd=" + (((state & STATE_CHANNELS_BYPASSING_DND) != 0)
-                        ? "true" : "false")
+                    + ",areChannelsBypassingDnd=" + (state == STATE_UNSET
+                        ? "unset"
+                        : ((state & STATE_CHANNELS_BYPASSING_DND) != 0)
+                                ? "true"
+                                : "false")
                     + "]";
         }
 
