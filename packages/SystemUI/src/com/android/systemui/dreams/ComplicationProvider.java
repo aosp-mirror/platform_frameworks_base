@@ -19,18 +19,18 @@ package com.android.systemui.dreams;
 import android.content.Context;
 
 /**
- * {@link OverlayProvider} is an interface for defining entities that can supply overlays to show
- * over a dream. Presentation components such as the {@link DreamOverlayService} supply
+ * {@link ComplicationProvider} is an interface for defining entities that can supply complications
+ * to show over a dream. Presentation components such as the {@link DreamOverlayService} supply
  * implementations with the necessary context for constructing such overlays.
  */
-public interface OverlayProvider {
+public interface ComplicationProvider {
     /**
-     * Called when the {@link OverlayHost} requests the associated overlay be produced.
+     * Called when the {@link ComplicationHost} requests the associated complication be produced.
      *
      * @param context The {@link Context} used to construct the view.
-     * @param creationCallback The callback to inform when the overlay has been created.
-     * @param interactionCallback The callback to inform when the overlay has been interacted with.
+     * @param creationCallback The callback to inform the complication has been created.
+     * @param interactionCallback The callback to inform the complication has been interacted with.
      */
-    void onCreateOverlay(Context context, OverlayHost.CreationCallback creationCallback,
-            OverlayHost.InteractionCallback interactionCallback);
+    void onCreateComplication(Context context, ComplicationHost.CreationCallback creationCallback,
+            ComplicationHost.InteractionCallback interactionCallback);
 }

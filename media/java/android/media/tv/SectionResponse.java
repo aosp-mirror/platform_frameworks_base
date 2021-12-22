@@ -22,8 +22,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class SectionResponse extends BroadcastInfoResponse implements Parcelable {
-    public static final int responseType = BroadcastInfoType.SECTION;
+public final class SectionResponse extends BroadcastInfoResponse implements Parcelable {
+    public static final @TvInputManager.BroadcastInfoType int responseType =
+            TvInputManager.BROADCAST_INFO_TYPE_SECTION;
 
     public static final @NonNull Parcelable.Creator<SectionResponse> CREATOR =
             new Parcelable.Creator<SectionResponse>() {
@@ -47,8 +48,8 @@ public class SectionResponse extends BroadcastInfoResponse implements Parcelable
         return new SectionResponse(in);
     }
 
-    public SectionResponse(int requestId, int sequence, int responseResult, int sessionId,
-            int version, Bundle sessionData) {
+    public SectionResponse(int requestId, int sequence, @ResponseResult int responseResult,
+            int sessionId, int version, Bundle sessionData) {
         super(responseType, requestId, sequence, responseResult);
         mSessionId = sessionId;
         mVersion = version;

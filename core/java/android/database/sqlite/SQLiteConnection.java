@@ -179,7 +179,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         mIsReadOnlyConnection = mConfiguration.isReadOnlyDatabase();
         mPreparedStatementCache = new PreparedStatementCache(
                 mConfiguration.maxSqlCacheSize);
-        mCloseGuard.open("close");
+        mCloseGuard.open("SQLiteConnection.close");
     }
 
     @Override

@@ -21,36 +21,37 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class TvProprietaryFunctionResponse extends BroadcastInfoResponse implements Parcelable {
-    public static final int responseType = BroadcastInfoType.TV_PROPRIETARY_FUNCTION;
+public final class CommandResponse extends BroadcastInfoResponse implements Parcelable {
+    public static final @TvInputManager.BroadcastInfoType int responseType =
+            TvInputManager.BROADCAST_INFO_TYPE_TV_PROPRIETARY_FUNCTION;
 
-    public static final @NonNull Parcelable.Creator<TvProprietaryFunctionResponse> CREATOR =
-            new Parcelable.Creator<TvProprietaryFunctionResponse>() {
+    public static final @NonNull Parcelable.Creator<CommandResponse> CREATOR =
+            new Parcelable.Creator<CommandResponse>() {
                 @Override
-                public TvProprietaryFunctionResponse createFromParcel(Parcel source) {
+                public CommandResponse createFromParcel(Parcel source) {
                     source.readInt();
                     return createFromParcelBody(source);
                 }
 
                 @Override
-                public TvProprietaryFunctionResponse[] newArray(int size) {
-                    return new TvProprietaryFunctionResponse[size];
+                public CommandResponse[] newArray(int size) {
+                    return new CommandResponse[size];
                 }
             };
 
     private final String mResponse;
 
-    public static TvProprietaryFunctionResponse createFromParcelBody(Parcel in) {
-        return new TvProprietaryFunctionResponse(in);
+    public static CommandResponse createFromParcelBody(Parcel in) {
+        return new CommandResponse(in);
     }
 
-    public TvProprietaryFunctionResponse(int requestId, int sequence, int responseResult,
-            String response) {
+    public CommandResponse(int requestId, int sequence,
+            @ResponseResult int responseResult, String response) {
         super(responseType, requestId, sequence, responseResult);
         mResponse = response;
     }
 
-    protected TvProprietaryFunctionResponse(Parcel source) {
+    protected CommandResponse(Parcel source) {
         super(responseType, source);
         mResponse = source.readString();
     }

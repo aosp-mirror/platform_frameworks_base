@@ -258,21 +258,29 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
             drawable = mContext.getDrawable(com.android.internal.R.drawable.ic_bt_headphones_a2dp);
         }
         if (!(drawable instanceof BitmapDrawable)) {
-            setColorFilter(drawable,
-                    mLocalMediaManager.getCurrentConnectedDevice().getId().equals(device.getId()));
+            setColorFilter(drawable, isActiveItem(device));
         }
         return BluetoothUtils.createIconWithDrawable(drawable);
     }
 
-    void setColorFilter(Drawable drawable, boolean isConnected) {
+    void setColorFilter(Drawable drawable, boolean isActive) {
         final ColorStateList list =
                 mContext.getResources().getColorStateList(
-                        !hasAdjustVolumeUserRestriction() && isConnected && !isTransferring()
+                        isActive
                                 ? R.color.media_dialog_active_item_main_content
                                 : R.color.media_dialog_inactive_item_main_content,
                         mContext.getTheme());
         drawable.setColorFilter(new PorterDuffColorFilter(list.getDefaultColor(),
                 PorterDuff.Mode.SRC_IN));
+    }
+
+    boolean isActiveItem(MediaDevice device) {
+        boolean isConnected = mLocalMediaManager.getCurrentConnectedDevice().getId().equals(
+                device.getId());
+        boolean isSelectedDeviceInGroup = getSelectedMediaDevice().size() > 1
+                && getSelectedMediaDevice().contains(device);
+        return (!hasAdjustVolumeUserRestriction() && isConnected && !isTransferring())
+                || isSelectedDeviceInGroup;
     }
 
     IconCompat getNotificationIcon() {
