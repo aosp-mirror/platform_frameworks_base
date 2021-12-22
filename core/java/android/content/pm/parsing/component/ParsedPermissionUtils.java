@@ -27,6 +27,7 @@ import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -34,6 +35,7 @@ import com.android.internal.R;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.List;
 
 /** @hide */
 public class ParsedPermissionUtils {
@@ -270,5 +272,30 @@ public class ParsedPermissionUtils {
             size += nonLocalizedLabel.length();
         }
         return size;
+    }
+
+    /**
+     * @return {@code true} if the package declares duplicate permissions with different
+     * protection levels.
+     */
+    public static boolean declareDuplicatePermission(@NonNull ParsingPackage pkg) {
+        final List<ParsedPermission> permissions = pkg.getPermissions();
+        final int size = permissions.size();
+        if (size > 0) {
+            final ArrayMap<String, ParsedPermission> checkDuplicatePerm = new ArrayMap<>(size);
+            for (int i = 0; i < size; i++) {
+                final ParsedPermission parsedPermission = permissions.get(i);
+                final String name = parsedPermission.getName();
+                final ParsedPermission perm = checkDuplicatePerm.get(name);
+                // Since a permission tree is also added as a permission with normal protection
+                // level, we need to skip if the parsedPermission is a permission tree.
+                if (perm != null && !(perm.isTree() || parsedPermission.isTree())
+                        && perm.getProtectionLevel() != parsedPermission.getProtectionLevel()) {
+                    return true;
+                }
+                checkDuplicatePerm.put(name, parsedPermission);
+            }
+        }
+        return false;
     }
 }
