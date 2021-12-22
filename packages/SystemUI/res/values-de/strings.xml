@@ -181,7 +181,7 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Der Flugmodus ist aktiviert."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"lautlos"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"nur Weckrufe"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Nicht stören."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Bitte nicht stören."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"„Bitte nicht stören“ deaktiviert."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"„Bitte nicht stören“ aktiviert"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
@@ -250,7 +250,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Keine Geräte verfügbar"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"WLAN nicht verbunden"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Helligkeit"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Farben umkehren"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Farbumkehr"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Weitere Einstellungen"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Nutzereinstellungen"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Fertig"</string>
@@ -747,7 +747,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ganzen Bildschirm vergrößern"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Teil des Bildschirms vergrößern"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Schalter"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Die Schaltfläche „Bedienungshilfen“ ersetzt die Touch-Geste für Bedienungshilfen\n\n"<annotation id="link">"Einstellungen aufrufen"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Tippe, um die Bedienungshilfen aufzurufen. Du kannst diese Schaltfläche in den Einstellungen anpassen oder ersetzen.\n\n"<annotation id="link">"Zu den Einstellungen"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Durch Ziehen an den Rand wird die Schaltfläche zeitweise ausgeblendet"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Nach oben links verschieben"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Nach rechts oben verschieben"</string>
@@ -798,10 +798,17 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Einstellungen"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> von <xliff:g id="ARTIST_NAME">%2$s</xliff:g> wird gerade über <xliff:g id="APP_LABEL">%3$s</xliff:g> wiedergegeben"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> von <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_button_play" msgid="2705068099607410633">"Wiedergeben"</string>
+    <string name="controls_media_button_pause" msgid="8614887780950376258">"Pausieren"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"Vorheriger Titel"</string>
+    <string name="controls_media_button_next" msgid="6662636627525947610">"Nächster Titel"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Wiedergeben"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> öffnen"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g> von <xliff:g id="ARTIST_NAME">%2$s</xliff:g> über <xliff:g id="APP_LABEL">%3$s</xliff:g> wiedergeben"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> über <xliff:g id="APP_LABEL">%2$s</xliff:g> wiedergeben"</string>
+    <string name="media_transfer_undo" msgid="1895606387620728736">"Rückgängig machen"</string>
+    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"Gehe für die Wiedergabe näher an <xliff:g id="DEVICENAME">%1$s</xliff:g> heran"</string>
+    <string name="media_transfer_playing" msgid="3760048096352107789">"Wird auf <xliff:g id="DEVICENAME">%1$s</xliff:g> abgespielt"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv – sieh in der App nach"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nicht gefunden"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Steuerelement nicht verfügbar"</string>
@@ -816,7 +823,7 @@
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Ein Gerät ausgewählt"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> Geräte ausgewählt"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(nicht verbunden)"</string>
-    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Verbindung nicht möglich. Versuch es noch einmal."</string>
+    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Wechseln nicht möglich. Tippe, um es noch einmal zu versuchen."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Neues Gerät koppeln"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build-Nummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Build-Nummer in Zwischenablage kopiert."</string>
@@ -881,8 +888,11 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Alle ansehen"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Trenne das Ethernetkabel, um das Netzwerk zu wechseln"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Zur Verbesserung der Gerätenutzung können Apps und Dienste weiter nach WLANs suchen, auch wenn die WLAN-Funktion deaktiviert ist. Dies lässt sich in den Einstellungen für die WLAN-Suche ändern. "<annotation id="link">"Ändern"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Flugmodus deaktivieren"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> möchte die folgende Kachel den Schnelleinstellungen hinzufügen"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Kachel hinzufügen"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Kachel nicht hinzu"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Nutzer auswählen"</string>
+    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"Apps, die im Hintergrund ausgeführt werden"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Beenden"</string>
 </resources>

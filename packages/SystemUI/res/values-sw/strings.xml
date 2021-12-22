@@ -250,7 +250,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Hakuna vifaa vilivyopatikana"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi haijaunganishwa"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Ung\'avu"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Pindua rangi"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Ugeuzaji rangi"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Mipangilio zaidi"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Mipangilio ya mtumiaji"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Nimemaliza"</string>
@@ -747,7 +747,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Kuza skrini nzima"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Kuza sehemu ya skrini"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Swichi"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Kitufe cha zana za ufikivu kimechukua nafasi ya ishara ya ufikivu\n\n"<annotation id="link">"Angalia mipangilio"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Gusa ili ufungue vipengele vya ufikivu. Weka mapendeleo au ubadilishe kitufe katika Mipangilio.\n\n"<annotation id="link">"Angalia mipangilio"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Sogeza kitufe kwenye ukingo ili ukifiche kwa muda"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Sogeza juu kushoto"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Sogeza juu kulia"</string>
@@ -798,10 +798,17 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Mipangilio"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ulioimbwa na <xliff:g id="ARTIST_NAME">%2$s</xliff:g> unacheza katika <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> kati ya <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_button_play" msgid="2705068099607410633">"Cheza"</string>
+    <string name="controls_media_button_pause" msgid="8614887780950376258">"Simamisha"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"Wimbo uliotangulia"</string>
+    <string name="controls_media_button_next" msgid="6662636627525947610">"Wimbo unaofuata"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Cheza"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Fungua <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Cheza <xliff:g id="SONG_NAME">%1$s</xliff:g> ulioimbwa na <xliff:g id="ARTIST_NAME">%2$s</xliff:g> katika <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Cheza <xliff:g id="SONG_NAME">%1$s</xliff:g> katika <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="media_transfer_undo" msgid="1895606387620728736">"Tendua"</string>
+    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"Sogea karibu ili ucheze kwenye <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_transfer_playing" msgid="3760048096352107789">"Inacheza kwenye <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Haitumiki, angalia programu"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hakipatikani"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kidhibiti hakipatikani"</string>
@@ -816,7 +823,7 @@
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Umechagua kifaa 1"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Umechagua vifaa <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(imetenganishwa)"</string>
-    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Imeshindwa kuunganisha. Jaribu tena."</string>
+    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Imeshindwa kubadilisha. Gusa ili ujaribu tena."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Oanisha kifaa kipya"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nambari ya muundo"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nambari ya muundo imewekwa kwenye ubao wa kunakili."</string>
@@ -881,8 +888,11 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Angalia yote"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ili kubadili mitandao, tenganisha ethaneti"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Ili kuboresha hali ya matumizi ya kifaa, programu na huduma bado zinaweza kutafuta mitandao ya Wi‑Fi wakati wowote, hata wakati umezima Wi‑Fi. Unaweza kubadilisha mipangilio hii katika mipangilio ya kutafuta Wi-Fi. "<annotation id="link">"Badilisha"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Zima hali ya ndegeni"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ingependa kuongeza kigae kifuatacho kwenye Mipangilio ya Haraka"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Ongeza kigae"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Usiongeze kigae"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Chagua mtumiaji"</string>
+    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"Programu zinazotumika chinichini"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Simamisha"</string>
 </resources>

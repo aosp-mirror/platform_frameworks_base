@@ -234,7 +234,7 @@
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ទី​តាំង​"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"ការចូលប្រើ​កាមេរ៉ា"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"ការចូលប្រើ​មីក្រូហ្វូន"</string>
-    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"អាចប្រើបាន"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"អាចចូលប្រើបាន"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"បាន​ទប់ស្កាត់"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ឧបករណ៍​មេឌៀ"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"អ្នកប្រើ"</string>
@@ -250,7 +250,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"មិន​មាន​ឧបករណ៍​ដែល​អាច​ប្រើ​បាន"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"មិនមាន​ការតភ្ជាប់ Wi-Fi ទេ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ពន្លឺ"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ដាក់​​​បញ្ច្រាស​ពណ៌"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ការបញ្ច្រាស​ពណ៌"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ការ​កំណត់​ច្រើន​ទៀត"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ការកំណត់អ្នកប្រើប្រាស់"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"រួចរាល់"</string>
@@ -747,7 +747,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ពង្រីក​ពេញអេក្រង់"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ពង្រីក​ផ្នែកនៃ​អេក្រង់"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ប៊ូតុងបិទបើក"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ប៊ូតុង​ភាពងាយស្រួល​បានជំនួស​ចលនាភាពងាយស្រួល\n\n"<annotation id="link">"មើល​ការកំណត់"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ចុចដើម្បីបើក​មុខងារ​ភាពងាយស្រួល។ ប្ដូរ ឬប្ដូរ​ប៊ូតុងនេះ​តាមបំណង​នៅក្នុង​ការកំណត់។\n\n"<annotation id="link">"មើល​ការកំណត់"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ផ្លាស់ទី​ប៊ូតុង​ទៅគែម ដើម្បីលាក់វា​ជាបណ្ដោះអាសន្ន"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ផ្លាស់ទីទៅខាងលើផ្នែកខាងឆ្វេង"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ផ្លាស់ទីទៅខាងលើផ្នែកខាងស្ដាំ"</string>
@@ -798,10 +798,17 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ការកំណត់"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ច្រៀងដោយ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> កំពុងចាក់ពី <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> នៃ <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_button_play" msgid="2705068099607410633">"ចាក់"</string>
+    <string name="controls_media_button_pause" msgid="8614887780950376258">"ផ្អាក"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"ចម្រៀងមុន"</string>
+    <string name="controls_media_button_next" msgid="6662636627525947610">"ចម្រៀង​បន្ទាប់"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ចាក់"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"បើក <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"ចាក់ <xliff:g id="SONG_NAME">%1$s</xliff:g> ច្រៀងដោយ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> ពី <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"ចាក់ <xliff:g id="SONG_NAME">%1$s</xliff:g> ពី <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="media_transfer_undo" msgid="1895606387620728736">"ត្រឡប់វិញ"</string>
+    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"រំកិលឱ្យកាន់តែជិត ដើម្បីចាក់នៅលើ <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_transfer_playing" msgid="3760048096352107789">"កំពុង​ចាក់​​នៅ​លើ <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"អសកម្ម ពិនិត្យមើល​កម្មវិធី"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"រកមិន​ឃើញទេ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"មិនអាច​គ្រប់គ្រង​បានទេ"</string>
@@ -816,7 +823,7 @@
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"បានជ្រើសរើស​ឧបករណ៍ 1"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"បានជ្រើសរើស​ឧបករណ៍ <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(បាន​ដាច់)"</string>
-    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"មិន​អាច​ភ្ជាប់​បាន​ទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"មិនអាចប្ដូរបានទេ។ សូមចុចដើម្បី​ព្យាយាម​ម្ដងទៀត។"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ផ្គូផ្គង​ឧបករណ៍ថ្មី"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"លេខ​កំណែបង្កើត"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"បានចម្លងលេខ​កំណែបង្កើតទៅឃ្លីបបត។"</string>
@@ -881,8 +888,11 @@
     <string name="see_all_networks" msgid="3773666844913168122">"មើលទាំងអស់"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ដើម្បី​ប្ដូរ​បណ្ដាញ សូមផ្ដាច់​អ៊ីសឺរណិត"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ដើម្បីធ្វើឱ្យ​បទពិសោធន៍ប្រើប្រាស់​ឧបករណ៍ប្រសើរឡើង កម្មវិធី និងសេវាកម្ម​នៅតែអាចស្កេនរក​បណ្ដាញ Wi‑Fi បានគ្រប់ពេល ទោះបីជា​នៅពេលដែលបិទ Wi‑Fi ក៏ដោយ។ អ្នកអាចប្ដូរវាបាន​នៅក្នុង​ការកំណត់​ការស្កេន Wi‑Fi។ "<annotation id="link">"ប្ដូរ"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"បិទមុខងារពេល​ជិះ​យន្តហោះ"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ចង់បញ្ចូល​ប្រអប់​ខាងក្រោម​ទៅក្នុង​ការកំណត់រហ័ស"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"បញ្ចូល​ប្រអប់"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"កុំ​បញ្ចូល​ប្រអប់"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ជ្រើសរើសអ្នកប្រើប្រាស់"</string>
+    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"កម្មវិធីដែលកំពុងដំណើរការ​នៅផ្ទៃខាងក្រោយ"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ឈប់"</string>
 </resources>

@@ -250,7 +250,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"କୌଣସି ଡିଭାଇସ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ୱାଇ-ଫାଇ ସଂଯୋଜିତ ହୋଇନାହିଁ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ଉଜ୍ଜ୍ୱଳତା"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ରଙ୍ଗ ଇନଭାର୍ଟ୍ କରନ୍ତୁ"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ରଙ୍ଗ ଇନଭାର୍ସନ"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ଅଧିକ ସେଟିଂସ୍"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ଉପଯୋଗକର୍ତ୍ତା ସେଟିଂସ୍"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ହୋଇଗଲା"</string>
@@ -747,7 +747,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନକୁ ମ୍ୟାଗ୍ନିଫାଏ କରନ୍ତୁ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ସ୍କ୍ରିନର ଅଂଶ ମାଗ୍ନିଫାଏ କରନ୍ତୁ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ସ୍ୱିଚ୍ କରନ୍ତୁ"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ଆକ୍ସେସିବିଲିଟୀ ଜେଶ୍ଚରକୁ ଆକ୍ସେସିବିଲିଟୀ ବଟନରେ ପରିବର୍ତ୍ତନ କରାଯାଇଛି\n\n"<annotation id="link">"ସେଟିଂସ୍ ଦେଖନ୍ତୁ"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ଆକ୍ସେସିବିଲିଟୀ ଫିଚର ଖୋଲିବାକୁ ଟାପ କରନ୍ତୁ। ସେଟିଂସରେ ଏହି ବଟନକୁ କଷ୍ଟମାଇଜ କର କିମ୍ବା ବଦଳାଅ।\n\n"<annotation id="link">"ସେଟିଂସ ଦେଖନ୍ତୁ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ବଟନକୁ ଅସ୍ଥାୟୀ ଭାବେ ଲୁଚାଇବା ପାଇଁ ଏହାକୁ ଗୋଟିଏ ଧାରକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ଶୀର୍ଷ ବାମକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ଶୀର୍ଷ ଡାହାଣକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
@@ -798,10 +798,17 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ସେଟିଂସ୍"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g>ରୁ <xliff:g id="ARTIST_NAME">%2$s</xliff:g>ଙ୍କ <xliff:g id="SONG_NAME">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g>ରୁ <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
+    <string name="controls_media_button_play" msgid="2705068099607410633">"ଚଲାନ୍ତୁ"</string>
+    <string name="controls_media_button_pause" msgid="8614887780950376258">"ବିରତ କରନ୍ତୁ"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"ପୂର୍ବବର୍ତ୍ତୀ ଟ୍ରାକ"</string>
+    <string name="controls_media_button_next" msgid="6662636627525947610">"ପରବର୍ତ୍ତୀ ଟ୍ରାକ"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ଚଲାନ୍ତୁ"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ଖୋଲନ୍ତୁ"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g>ରୁ <xliff:g id="ARTIST_NAME">%2$s</xliff:g>ଙ୍କ <xliff:g id="SONG_NAME">%1$s</xliff:g> ଚଲାନ୍ତୁ"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g>ରୁ <xliff:g id="SONG_NAME">%1$s</xliff:g> ଚଲାନ୍ତୁ"</string>
+    <string name="media_transfer_undo" msgid="1895606387620728736">"ପୂର୍ବବତ୍ କରନ୍ତୁ"</string>
+    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ରେ ଚଲାଇବା ପାଇଁ ନିକଟକୁ ଯାଆନ୍ତୁ"</string>
+    <string name="media_transfer_playing" msgid="3760048096352107789">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ରେ ଚାଲୁଛି"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ନିଷ୍କ୍ରିୟ ଅଛି, ଆପ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ମିଳିଲା ନାହିଁ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ନିୟନ୍ତ୍ରଣ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -816,7 +823,7 @@
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1ଟି ଡିଭାଇସ୍ ଚୟନ କରାଯାଇଛି"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g>ଟି ଡିଭାଇସ୍ ଚୟନ କରାଯାଇଛି"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ବିଚ୍ଛିନ୍ନ କରାଯାଇଛି)"</string>
-    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"ସଂଯୋଗ କରାଯାଇପାରିଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"ସ୍ୱିଚ କରାଯାଇପାରିବ ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ନୂଆ ଡିଭାଇସକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ବିଲ୍ଡ ନମ୍ୱର"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"କ୍ଲିପବୋର୍ଡକୁ କପି କରାଯାଇଥିବା ବିଲ୍ଡ ନମ୍ୱର।"</string>
@@ -881,8 +888,11 @@
     <string name="see_all_networks" msgid="3773666844913168122">"ସବୁ ଦେଖନ୍ତୁ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ନେଟୱାର୍କ ସ୍ୱିଚ୍ କରିବାକୁ, ଇଥରନେଟ୍ ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ଡିଭାଇସ ଅନୁଭୂତିକୁ ଉନ୍ନତ କରିବା ପାଇଁ, ୱାଇ-ଫାଇ ବନ୍ଦ ଥିଲେ ମଧ୍ୟ ଆପ ଓ ସେବାଗୁଡ଼ିକ ଏବେ ବି ଯେ କୌଣସି ସମୟରେ ୱାଇ-ଫାଇ ନେଟୱାର୍କ ପାଇଁ ସ୍କାନ କରିପାରିବ। ଆପଣ ଏହାକୁ ୱାଇ-ଫାଇ ସ୍କାନିଂ ସେଟିଂସରେ ପରିବର୍ତ୍ତନ କରିପାରିବେ। "<annotation id="link">"ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ଏୟାରପ୍ଲେନ ମୋଡ ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> କ୍ୱିକ୍ ସେଟିଂସରେ ନିମ୍ନୋକ୍ତ ଟାଇଲ୍ ଯୋଗ କରିବାକୁ ଚାହେଁ"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ଟାଇଲ୍ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ଟାଇଲ୍ ଯୋଗ କର ନାହିଁ"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ଉପଯୋଗକର୍ତ୍ତା ଚୟନ କର"</string>
+    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"ପୃଷ୍ଠପଟରେ ଚାଲୁଥିବା ଆପଗୁଡ଼ିକ"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ବନ୍ଦ କରନ୍ତୁ"</string>
 </resources>

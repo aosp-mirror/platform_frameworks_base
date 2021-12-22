@@ -251,7 +251,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Niciun dispozitiv disponibil"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Rețeaua Wi-Fi nu este conectată"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Luminozitate"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Inversați culorile"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversarea culorilor"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Mai multe setări"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Setări de utilizator"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Terminat"</string>
@@ -752,7 +752,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Măriți tot ecranul"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Măriți o parte a ecranului"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Comutator"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Butonul de accesibilitate a înlocuit gestul de accesibilitate\n\n"<annotation id="link">"Vedeți setările"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Atingeți pentru a deschide funcțiile de accesibilitate. Personalizați sau înlocuiți butonul în Setări.\n\n"<annotation id="link">"Afișați setările"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mutați butonul spre margine pentru a-l ascunde temporar"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mutați în stânga sus"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mutați în dreapta sus"</string>
@@ -804,10 +804,17 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Setări"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> de la <xliff:g id="ARTIST_NAME">%2$s</xliff:g> se redă în <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> din <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_button_play" msgid="2705068099607410633">"Redați"</string>
+    <string name="controls_media_button_pause" msgid="8614887780950376258">"Întrerupeți"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"Melodia anterioară"</string>
+    <string name="controls_media_button_next" msgid="6662636627525947610">"Melodia următoare"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Redați"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Deschideți <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Redați <xliff:g id="SONG_NAME">%1$s</xliff:g> de la <xliff:g id="ARTIST_NAME">%2$s</xliff:g> în <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Redați <xliff:g id="SONG_NAME">%1$s</xliff:g> în <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="media_transfer_undo" msgid="1895606387620728736">"Anulați"</string>
+    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"Apropiați-vă pentru a reda pe <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_transfer_playing" msgid="3760048096352107789">"Se redă pe <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactiv, verificați aplicația"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nu s-a găsit"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Comanda este indisponibilă"</string>
@@ -822,7 +829,7 @@
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"S-a selectat un dispozitiv"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"S-au selectat <xliff:g id="COUNT">%1$d</xliff:g> dispozitive"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(deconectat)"</string>
-    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Nu s-a putut conecta. Reîncercați."</string>
+    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nu se poate comuta. Atingeți pentru a încerca din nou."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Asociați un nou dispozitiv"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numărul versiunii"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numărul versiunii s-a copiat în clipboard."</string>
@@ -887,8 +894,11 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Afișează-le pe toate"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Pentru a schimba rețeaua, deconectați ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Pentru a îmbunătăți experiența cu dispozitivul, aplicațiile și serviciile pot să caute în continuare rețele Wi‑Fi chiar și atunci când conexiunea Wi-Fi este dezactivată. Puteți să schimbați acest aspect din setările pentru căutarea de rețele Wi-Fi. "<annotation id="link">"Schimbați"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Dezactivați modul Avion"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vrea să adauge următorul card la Setări rapide"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Adăugați un card"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nu adăugați un card"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Alegeți utilizatorul"</string>
+    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"Aplicațiile rulează în fundal"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Opriți"</string>
 </resources>
