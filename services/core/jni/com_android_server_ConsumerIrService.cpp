@@ -34,7 +34,7 @@ namespace android {
 
 static sp<IConsumerIr> mHal;
 
-static jboolean halOpen(JNIEnv* /* env */, jobject /* obj */) {
+static jboolean getHidlHalService(JNIEnv * /* env */, jobject /* obj */) {
     // TODO(b/31632518)
     mHal = IConsumerIr::getService();
     return mHal != nullptr;
@@ -84,9 +84,9 @@ static jintArray halGetCarrierFrequencies(JNIEnv *env, jobject /* obj */) {
 }
 
 static const JNINativeMethod method_table[] = {
-    { "halOpen", "()Z", (void *)halOpen },
-    { "halTransmit", "(I[I)I", (void *)halTransmit },
-    { "halGetCarrierFrequencies", "()[I", (void *)halGetCarrierFrequencies},
+        {"getHidlHalService", "()Z", (void *)getHidlHalService},
+        {"halTransmit", "(I[I)I", (void *)halTransmit},
+        {"halGetCarrierFrequencies", "()[I", (void *)halGetCarrierFrequencies},
 };
 
 int register_android_server_ConsumerIrService(JNIEnv *env) {
