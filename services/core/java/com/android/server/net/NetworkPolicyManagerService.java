@@ -947,10 +947,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final IntentFilter packageFilter = new IntentFilter();
             packageFilter.addAction(ACTION_PACKAGE_ADDED);
             packageFilter.addDataScheme("package");
-            mContext.registerReceiver(mPackageReceiver, packageFilter, null, mHandler);
+            mContext.registerReceiverForAllUsers(mPackageReceiver, packageFilter, null, mHandler);
 
             // listen for UID changes to update policy
-            mContext.registerReceiver(
+            mContext.registerReceiverForAllUsers(
                     mUidRemovedReceiver, new IntentFilter(ACTION_UID_REMOVED), null, mHandler);
 
             // listen for user changes to update policy
