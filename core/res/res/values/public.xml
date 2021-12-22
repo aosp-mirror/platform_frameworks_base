@@ -3281,6 +3281,8 @@
   </staging-public-group>
 
   <staging-public-group type="array" first-id="0x01d90000">
+    <!-- @hide @SystemApi -->
+    <public name="config_optionalIpSecAlgorithms" />
   </staging-public-group>
 
   <staging-public-group type="drawable" first-id="0x01d80000">
