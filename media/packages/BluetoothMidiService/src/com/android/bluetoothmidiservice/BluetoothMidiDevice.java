@@ -260,7 +260,8 @@ public final class BluetoothMidiDevice {
         inputPortReceivers[0] = mEventScheduler.getReceiver();
 
         mDeviceServer = mMidiManager.createDeviceServer(inputPortReceivers, 1,
-                null, null, properties, MidiDeviceInfo.TYPE_BLUETOOTH, mDeviceServerCallback);
+                null, null, properties, MidiDeviceInfo.TYPE_BLUETOOTH,
+                MidiDeviceInfo.PROTOCOL_UNKNOWN, mDeviceServerCallback);
 
         mOutputReceiver = mDeviceServer.getOutputPortReceivers()[0];
 
