@@ -20,18 +20,12 @@
     <string name="confirmation_title" msgid="8455544820286920304">"உங்கள் &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ஐ நிர்வகிக்க &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை அனுமதியுங்கள்"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"வாட்ச்"</string>
     <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ஆப்ஸ் நிர்வகிக்கக்கூடிய <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ஐத் தேர்ந்தெடுங்கள்"</string>
-    <!-- no translation found for summary_watch (7113724443198337683) -->
-    <skip />
-    <!-- no translation found for summary_watch (7113724443198337683) -->
-    <skip />
-    <!-- no translation found for title_app_streaming (4459136600249308574) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (6105916810614498138) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (2996373715966272792) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (7614171699434639963) -->
-    <skip />
+    <string name="summary_watch" product="default" msgid="7113724443198337683">"உங்கள் அறிவிப்புகளைப் பார்க்கவும் மொபைல், மெசேஜ், தொடர்புகள், கேலெண்டர் ஆகியவற்றை அணுகவும் <xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு அனுமதி வழங்கப்படும்."</string>
+    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"உங்கள் அறிவிப்புகளைப் பார்க்கவும் மொபைல், மெசேஜ், தொடர்புகள், கேலெண்டர் ஆகியவற்றை அணுகவும் <xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு அனுமதி வழங்கப்படும்."</string>
+    <string name="title_app_streaming" msgid="4459136600249308574">"ஆப்ஸை ஸ்ட்ரீம் செய்ய &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
+    <string name="summary_app_streaming" product="default" msgid="6105916810614498138">"இணைக்கப்பட்டிருக்கும்போது இந்த மொபைலில் நிறுவப்பட்டிருக்கும் ஆப்ஸை அணுகுவதற்கான தொலைநிலை அணுகலை &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; சாதனத்திற்கு வழங்க &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை அனுமதிக்கும்."</string>
+    <string name="summary_app_streaming" product="tablet" msgid="2996373715966272792">"இணைக்கப்பட்டிருக்கும்போது இந்த டேப்லெட்டில் நிறுவப்பட்டிருக்கும் ஆப்ஸை அணுகுவதற்கான தொலைநிலை அணுகலை &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; சாதனத்திற்கு வழங்க &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை அனுமதிக்கும்."</string>
+    <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"இணைக்கப்பட்டிருக்கும்போது இந்தச் சாதனத்தில் நிறுவப்பட்டிருக்கும் ஆப்ஸை அணுகுவதற்கான தொலைநிலை அணுகலை &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; சாதனத்திற்கு வழங்க &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"சாதனம்"</string>

@@ -20,18 +20,12 @@
     <string name="confirmation_title" msgid="8455544820286920304">"ଆପଣଙ୍କ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;କୁ ପରିଚାଳନା କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ୱାଚ୍"</string>
     <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ଦ୍ୱାରା ପରିଚାଳିତ ହେବା ପାଇଁ ଏକ <xliff:g id="PROFILE_NAME">%1$s</xliff:g>କୁ ବାଛନ୍ତୁ"</string>
-    <!-- no translation found for summary_watch (7113724443198337683) -->
-    <skip />
-    <!-- no translation found for summary_watch (7113724443198337683) -->
-    <skip />
-    <!-- no translation found for title_app_streaming (4459136600249308574) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (6105916810614498138) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (2996373715966272792) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (7614171699434639963) -->
-    <skip />
+    <string name="summary_watch" product="default" msgid="7113724443198337683">"ଆପଣଙ୍କ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ସହ ଇଣ୍ଟରାକ୍ଟ କରିବା ଏବଂ ଆପଣଙ୍କ ଫୋନ, SMS, ଯୋଗାଯୋଗ ଓ କ୍ୟାଲେଣ୍ଡର ଅନୁମତିଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g>କୁ ଅନୁମତି ଦିଆଯିବ।"</string>
+    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"ଆପଣଙ୍କ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ସହ ଇଣ୍ଟରାକ୍ଟ କରିବା ଏବଂ ଆପଣଙ୍କ ଫୋନ, SMS, ଯୋଗାଯୋଗ ଓ କ୍ୟାଲେଣ୍ଡର ଅନୁମତିଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g>କୁ ଅନୁମତି ଦିଆଯିବ।"</string>
+    <string name="title_app_streaming" msgid="4459136600249308574">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଆପ୍ଲିକେସନଗୁଡ଼ିକ ଷ୍ଟ୍ରିମ କରିବା ପାଇଁ ଅନୁମତି ଦେବେ କି?"</string>
+    <string name="summary_app_streaming" product="default" msgid="6105916810614498138">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ, ଏହି ଫୋନଟି ସଂଯୁକ୍ତ ହୋଇଥିବା ବେଳେ ଏଥିରେ ଇନଷ୍ଟଲ କରାଯାଇଥିବା ଆପ୍ଲିକେସନଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;କୁ ରିମୋଟ ଆକ୍ସେସ ପ୍ରଦାନ କରିବାକୁ ଦିଅନ୍ତୁ।"</string>
+    <string name="summary_app_streaming" product="tablet" msgid="2996373715966272792">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ, ଏହି ଟାବଲେଟଟି ସଂଯୁକ୍ତ ହୋଇଥିବା ବେଳେ ଏଥିରେ ଇନଷ୍ଟଲ କରାଯାଇଥିବା ଆପ୍ଲିକେସନଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;କୁ ରିମୋଟ ଆକ୍ସେସ ପ୍ରଦାନ କରିବାକୁ ଦିଅନ୍ତୁ।"</string>
+    <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ, ଏହି ଡିଭାଇସଟି ସଂଯୁକ୍ତ ହୋଇଥିବା ବେଳେ ଏଥିରେ ଇନଷ୍ଟଲ କରାଯାଇଥିବା ଆପ୍ଲିକେସନଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;କୁ ରିମୋଟ ଆକ୍ସେସ ପ୍ରଦାନ କରିବାକୁ ଦିଅନ୍ତୁ।"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ଡିଭାଇସ୍"</string>

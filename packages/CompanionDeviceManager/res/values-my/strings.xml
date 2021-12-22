@@ -20,18 +20,12 @@
     <string name="confirmation_title" msgid="8455544820286920304">"သင်၏ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ကို စီမံခန့်ခွဲရန် &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ကို ခွင့်ပြုပါ"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"နာရီ"</string>
     <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; က စီမံခန့်ခွဲရန် <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ကို ရွေးချယ်ပါ"</string>
-    <!-- no translation found for summary_watch (7113724443198337683) -->
-    <skip />
-    <!-- no translation found for summary_watch (7113724443198337683) -->
-    <skip />
-    <!-- no translation found for title_app_streaming (4459136600249308574) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (6105916810614498138) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (2996373715966272792) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (7614171699434639963) -->
-    <skip />
+    <string name="summary_watch" product="default" msgid="7113724443198337683">"သင်၏ ‘ဖုန်း’၊ ‘SMS စာတိုစနစ်’၊ ‘အဆက်အသွယ်များ’ နှင့် ‘ပြက္ခဒိန်’ ခွင့်ပြုချက်များကို သုံးရန်နှင့် အကြောင်းကြားချက်များကို ပြန်လှန်တုံ့ပြန်ရန် <xliff:g id="APP_NAME">%1$s</xliff:g> အား ခွင့်ပြုပါမည်။"</string>
+    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"သင်၏ ‘ဖုန်း’၊ ‘SMS စာတိုစနစ်’၊ ‘အဆက်အသွယ်များ’ နှင့် ‘ပြက္ခဒိန်’ ခွင့်ပြုချက်များကို သုံးရန်နှင့် အကြောင်းကြားချက်များကို ပြန်လှန်တုံ့ပြန်ရန် <xliff:g id="APP_NAME">%1$s</xliff:g> အား ခွင့်ပြုပါမည်။"</string>
+    <string name="title_app_streaming" msgid="4459136600249308574">"အပလီကေးရှင်းများကို တိုက်ရိုက်လွှင့်ရန် &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ကိုခွင့်ပြုမလား။"</string>
+    <string name="summary_app_streaming" product="default" msgid="6105916810614498138">"ချိတ်ဆက်ထားသည့်အခါ ဤဖုန်းတွင် ထည့်သွင်းထားသော အပလီကေးရှင်းများကို သုံးခွင့်ရရန်အတွက် &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ကိုအဝေးမှ သုံးခွင့်ပေးနိုင်ရန် &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; အားခွင့်ပြုပါ။"</string>
+    <string name="summary_app_streaming" product="tablet" msgid="2996373715966272792">"ချိတ်ဆက်ထားသည့်အခါ ဤတက်ဘလက်တွင် ထည့်သွင်းထားသော အပလီကေးရှင်းများကို သုံးခွင့်ရရန်အတွက် &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ကိုအဝေးမှ သုံးခွင့်ပေးနိုင်ရန် &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; အားခွင့်ပြုပါ။"</string>
+    <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"ချိတ်ဆက်ထားသည့်အခါ ဤစက်တွင် ထည့်သွင်းထားသော အပလီကေးရှင်းများကို သုံးခွင့်ရရန်အတွက် &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ကိုအဝေးမှ သုံးခွင့်ပေးနိုင်ရန် &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; အားခွင့်ပြုပါ။"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"စက်"</string>

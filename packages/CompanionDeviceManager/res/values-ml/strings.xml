@@ -20,18 +20,12 @@
     <string name="confirmation_title" msgid="8455544820286920304">"നിങ്ങളുടെ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; മാനേജ് ചെയ്യാൻ, &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; എന്നതിനെ അനുവദിക്കുക"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"വാച്ച്"</string>
     <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ഉപയോഗിച്ച് മാനേജ് ചെയ്യുന്നതിന് ഒരു <xliff:g id="PROFILE_NAME">%1$s</xliff:g> തിരഞ്ഞെടുക്കുക"</string>
-    <!-- no translation found for summary_watch (7113724443198337683) -->
-    <skip />
-    <!-- no translation found for summary_watch (7113724443198337683) -->
-    <skip />
-    <!-- no translation found for title_app_streaming (4459136600249308574) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (6105916810614498138) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (2996373715966272792) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (7614171699434639963) -->
-    <skip />
+    <string name="summary_watch" product="default" msgid="7113724443198337683">"നിങ്ങളുടെ അറിയിപ്പുകളുമായി സംവദിക്കാനും നിങ്ങളുടെ ഫോൺ, SMS, കോൺടാക്റ്റുകൾ, കലണ്ടർ അനുമതികൾ എന്നിവ ആക്‌സസ് ചെയ്യാനും <xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനെ അനുവദിക്കും."</string>
+    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"നിങ്ങളുടെ അറിയിപ്പുകളുമായി സംവദിക്കാനും നിങ്ങളുടെ ഫോൺ, SMS, കോൺടാക്റ്റുകൾ, കലണ്ടർ അനുമതികൾ എന്നിവ ആക്‌സസ് ചെയ്യാനും <xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനെ അനുവദിക്കും."</string>
+    <string name="title_app_streaming" msgid="4459136600249308574">"ആപ്പുകൾ സ്‌ട്രീം ചെയ്യാൻ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; എന്നതിനെ അനുവദിക്കണോ?"</string>
+    <string name="summary_app_streaming" product="default" msgid="6105916810614498138">"കണക്‌റ്റ് ചെയ്യുമ്പോൾ, ഈ ഫോണിൽ ഇൻസ്‌റ്റാൾ ചെയ്‌തിട്ടുള്ള ആപ്പുകൾ ആക്‌സസ് ചെയ്യാനുള്ള റിമോട്ട് ആക്‌സസ് &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; എന്നതിന് നൽകാൻ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; എന്നതിനെ അനുവദിക്കുക."</string>
+    <string name="summary_app_streaming" product="tablet" msgid="2996373715966272792">"കണക്‌റ്റ് ചെയ്യുമ്പോൾ, ഈ ടാബ്‌ലെറ്റിൽ ഇൻസ്‌റ്റാൾ ചെയ്‌തിട്ടുള്ള ആപ്പുകൾ ആക്‌സസ് ചെയ്യാനുള്ള റിമോട്ട് ആക്‌സസ് &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; എന്നതിന് നൽകാൻ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; എന്നതിനെ അനുവദിക്കുക."</string>
+    <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"കണക്‌റ്റ് ചെയ്യുമ്പോൾ, ഈ ഉപകരണത്തിൽ ഇൻസ്‌റ്റാൾ ചെയ്‌തിട്ടുള്ള ആപ്പുകൾ ആക്‌സസ് ചെയ്യാനുള്ള റിമോട്ട് ആക്‌സസ് &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; എന്നതിന് നൽകാൻ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; എന്നതിനെ അനുവദിക്കുക."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ഉപകരണം"</string>
