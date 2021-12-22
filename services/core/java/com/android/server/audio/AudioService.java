@@ -2611,6 +2611,16 @@ public class AudioService extends IAudioService.Stub
         return getDevicesForAttributesInt(attributes);
     }
 
+    /** @see AudioManager#getAudioDevicesForAttributes(AudioAttributes)
+     * This method is similar with AudioService#getDevicesForAttributes,
+     * only it doesn't enforce permissions because it is used by an unprivileged public API
+     * instead of the system API.
+     */
+    public @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributesUnprotected(
+            @NonNull AudioAttributes attributes) {
+        return getDevicesForAttributesInt(attributes);
+    }
+
     /**
      * @see AudioManager#isMusicActive()
      * @param remotely true if query is for remote playback (cast), false for local playback.
