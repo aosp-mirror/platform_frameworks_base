@@ -4,11 +4,11 @@
     <string name="app_label" msgid="8016145283189546017">"Dispositivi di immissione"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Tastiera Android"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Inglese (UK)"</string>
-    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Inglese (USA)"</string>
-    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Inglese (USA), stile internazionale"</string>
-    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Inglese (USA), stile Colemak"</string>
-    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Inglese (USA), stile Dvorak"</string>
-    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"Inglese (USA), stile Workman"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Inglese (US)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Inglese (US), stile internazionale"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Inglese (US), stile Colemak"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Inglese (US), stile Dvorak"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"Inglese (US), stile Workman"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"Tedesco"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"Francese"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"Francese (Canada)"</string>
