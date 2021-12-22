@@ -849,8 +849,8 @@ public class SystemConfig {
                             XmlUtils.skipCurrentTag(parser);
                         }
                     } break;
-                    case "updatable-library":
-                        // "updatable-library" is meant to behave exactly like "library"
+                    case "apex-library":
+                        // "apex-library" is meant to behave exactly like "library"
                     case "library": {
                         if (allowLibs) {
                             String lname = parser.getAttributeValue(null, "name");
