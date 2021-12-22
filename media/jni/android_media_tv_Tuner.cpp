@@ -1573,6 +1573,24 @@ Result JTuner::getFrontendHardwareInfo(string &info) {
     return mFeClient->getHardwareInfo(info);
 }
 
+jint JTuner::setMaxNumberOfFrontends(int32_t type, int32_t maxNumber) {
+    if (mTunerClient == nullptr) {
+        ALOGE("tuner is not initialized");
+        return (jint)Result::INVALID_STATE;
+    }
+
+    return (jint)mTunerClient->setMaxNumberOfFrontends(static_cast<FrontendType>(type), maxNumber);
+}
+
+int32_t JTuner::getMaxNumberOfFrontends(int32_t type) {
+    if (mTunerClient == nullptr) {
+        ALOGE("tuner is not initialized");
+        return -1;
+    }
+
+    return mTunerClient->getMaxNumberOfFrontends(static_cast<FrontendType>(type));
+}
+
 jobject JTuner::openLnbByHandle(int handle) {
     if (mTunerClient == nullptr) {
         return nullptr;
@@ -4247,6 +4265,17 @@ static jstring android_media_tv_Tuner_get_frontend_hardware_info(JNIEnv *env, jo
     return env->NewStringUTF(info.data());
 }
 
+static jint android_media_tv_Tuner_set_maximum_frontends(JNIEnv *env, jobject thiz, jint type,
+                                                         jint maxNumber) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->setMaxNumberOfFrontends(type, maxNumber);
+}
+
+static jint android_media_tv_Tuner_get_maximum_frontends(JNIEnv *env, jobject thiz, jint type) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->getMaxNumberOfFrontends(type);
+}
+
 static jint android_media_tv_Tuner_close_frontend(JNIEnv* env, jobject thiz, jint /* handle */) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->closeFrontend();
@@ -4558,6 +4587,10 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_shared_filter},
     { "nativeGetFrontendHardwareInfo","()Ljava/lang/String;",
             (void *)android_media_tv_Tuner_get_frontend_hardware_info },
+    { "nativeSetMaxNumberOfFrontends", "(II)I",
+             (void *)android_media_tv_Tuner_set_maximum_frontends },
+    { "nativeGetMaxNumberOfFrontends", "(I)I",
+            (void *)android_media_tv_Tuner_get_maximum_frontends },
 };
 
 static const JNINativeMethod gFilterMethods[] = {
