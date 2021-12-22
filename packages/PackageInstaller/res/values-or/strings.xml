@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"ଆପଣ ଏହି ଆପ୍‍ ଅନଇନଷ୍ଟଲ୍‌ କରିବାକୁ ଚାହାଁନ୍ତି କି?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ଆପଣ "<b>"ସମସ୍ତ"</b>" ୟୁଜର୍‌ଙ୍କ ପାଇଁ ଏହି ଆପ୍‌କୁ ଅନଷ୍ଟଲ୍‍ କରିବାକୁ ଚାହୁଁଛନ୍ତି କି? ଡିଭାଇସ୍‌ରେ ଥିବା "<b>"ସମସ୍ତ"</b>" ୟୁଜର୍‌ ଆପ୍ଲିକେଶନ୍‍ ଏବଂ ତାହାର ଡାଟା ବାହାର କରିଦିଆଯିବ।"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"ୟୁଜର୍‌ <xliff:g id="USERNAME">%1$s</xliff:g>ଙ୍କ ପାଇଁ ଆପଣ ଏହି ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ କରିବେ କି?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"ଆପଣ ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲରୁ ଏହି ଆପକୁ ଅନଇନଷ୍ଟଲ କରିବାକୁ ଚାହାଁନ୍ତି କି?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"ଏହି ଆପ୍‍ ଫ୍ୟାକ୍ଟୋରୀ ଭର୍ସନ୍‍‍ ସହ ବଦଳାଇବେ? ସମସ୍ତ ଡାଟା କାଢ଼ିଦିଆଯିବ।"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ଏହି ଆପ୍‍ ଫ୍ୟାକ୍ଟୋରୀ ଭର୍ସନ୍‍‍ ସହ ବଦଳାଇବେ? ସମସ୍ତ ଡାଟା ବାହାର କରିଦିଆଯିବ। ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ ଥିବା ସମେତ, ଏହାଦ୍ୱାରା ଡିଭାଇସରେ ଥିବା ସମସ୍ତ ୟୁଜର୍‌ ପ୍ରଭାବିତ ହେବେ।"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ଆକାରର ଆପ୍‍ ଡାଟା ରଖନ୍ତୁୁ।"</string>

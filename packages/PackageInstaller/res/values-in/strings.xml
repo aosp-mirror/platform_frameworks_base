@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Apakah Anda ingin meng-uninstal aplikasi ini?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Apakah Anda ingin meng-uninstal aplikasi ini untuk "<b>"semua"</b>" pengguna? Aplikasi dan datanya akan dihapus dari "<b>"semua"</b>" pengguna pada perangkat."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Apakah Anda ingin meng-uninstal aplikasi ini untuk pengguna <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Ingin meng-uninstal aplikasi ini dari profil kerja Anda?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Ganti aplikasi ini dengan versi setelan pabrik? Semua data akan dihapus."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Ganti aplikasi ini dengan versi setelan pabrik? Semua data akan dihapus. Tindakan ini memengaruhi semua pengguna perangkat ini, termasuk yang memiliki profil kerja."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Pertahankan data aplikasi sebesar <xliff:g id="SIZE">%1$s</xliff:g>."</string>

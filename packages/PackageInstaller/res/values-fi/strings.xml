@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Haluatko poistaa tämän sovelluksen?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Haluatko poistaa tämän sovelluksen "<b>"kaikilta"</b>" käyttäjiltä? Sovellus ja sen data poistetaan "<b>"kaikilta"</b>" laitteen käyttäjiltä."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Haluatko poistaa tämän sovelluksen käyttäjältä <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Haluatko poistaa sovelluksen työprofiilistasi?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Haluatko korvata tämän sovelluksen tehdasversiolla? Kaikki data poistetaan."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Haluatko korvata tämän sovelluksen tehdasversiolla? Kaikki data poistetaan. Tämä vaikuttaa kaikkiin laitteen käyttäjiin, myös työprofiileihin."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Säilytä <xliff:g id="SIZE">%1$s</xliff:g> sovellusdataa"</string>

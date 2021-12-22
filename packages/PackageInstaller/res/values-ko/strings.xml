@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"이 앱을 제거하시겠습니까?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119"><b>"모든"</b>" 사용자에 대해 이 앱을 제거하시겠습니까? 기기를 사용하는 "<b>"모든"</b>" 사용자에 대해 애플리케이션 및 데이터가 삭제됩니다."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g>님의 기기에 설치된 앱을 제거하시겠습니까?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"직장 프로필에서 이 앱을 제거하시겠습니까?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"이 앱을 초기 버전으로 바꾸시겠습니까? 모든 데이터가 삭제됩니다."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"이 앱을 초기 버전으로 바꾸시겠습니까? 모든 데이터가 삭제되며 직장 프로필 사용자를 포함해 이 기기의 모든 사용자에게 영향을 미칩니다."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"앱 데이터 크기를 <xliff:g id="SIZE">%1$s</xliff:g>로 유지합니다."</string>

@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"ဤအက်ပ်ကို ဖယ်ရှားလိုပါသလား။"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ဤအပလီကေးရှင်းကို အသုံးပြုသူ "<b>"အားလုံး"</b>" အတွက် ဖယ်ရှားလိုပါသလား။ ဤအပလီကေးရှင်းနှင့် သက်ဆိုင်ရာ အချက်အလက်များ အားလုံးကို "<b>" က "</b>" စက်အသုံးပြုသူများအတွက် ဖယ်ရှားလိုက်ပါမည်။"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"သင်သည် အသုံးပြုသူ <xliff:g id="USERNAME">%1$s</xliff:g> အတွက် ဤအကောင့်ကို ဖယ်ရှားလိုပါသလား။"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"သင့်အလုပ်ပရိုဖိုင်ကနေ ဤအက်ပ်ကို ဖယ်ရှားလိုတာ သေချာပါသလား။"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"ဤအက်ပ်ကို စက်ရုံထုတ်ဗားရှင်းဖြင့် အစားထိုးလိုပါသလား။ ဒေတာများအားလုံးကို ဖယ်ရှားလိုက်ပါမည်။"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ဤအက်ပ်ကို စက်ရုံထုတ်ဗားရှင်းဖြင့် အစားထိုးလိုသလား။ ဒေတာများအားလုံးကို ဖယ်ရှားလိုက်ပါမည်။ ၎င်းသည် အလုပ်ပရိုဖိုင်ဖြင့်သုံးသူများအပါအဝင် အသုံးပြုသူများအားလုံးကို အကျိုးသက်ရောက်စေပါမည်။"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"အက်ပ်ဒေတာများ၏ <xliff:g id="SIZE">%1$s</xliff:g> ကို ထားရှိရန်။"</string>

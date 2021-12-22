@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Quer desinstalar este app?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Quer desinstalar este app para "<b>"todos"</b>" os usuários? O aplicativo e os dados dele serão removidos para "<b>"todos"</b>" os usuários do dispositivo."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Quer desinstalar este app para o usuário <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Você quer desinstalar esse app do seu perfil de trabalho?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Substituir este app pela versão de fábrica? Todos os dados serão removidos."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Substituir este app pela versão de fábrica? Todos os dados serão removidos. Isso afeta todos os usuários deste dispositivo, incluindo aqueles com perfis de trabalho."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Manter <xliff:g id="SIZE">%1$s</xliff:g> de dados do app."</string>
