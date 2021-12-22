@@ -73,4 +73,10 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ਬਬਲ ਨੂੰ ਖਾਰਜ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ ਅਤੇ ਪੂਰੀ ਸਕ੍ਰੀਨ ਮੋਡ \'ਤੇ ਜਾਓ।"</string>
+    <!-- no translation found for camera_compat_treatment_suggested_button_description (8103916969024076767) -->
+    <skip />
+    <!-- no translation found for camera_compat_treatment_applied_button_description (2944157113330703897) -->
+    <skip />
+    <!-- no translation found for camera_compat_dismiss_button_description (2795364433503817511) -->
+    <skip />
 </resources>
