@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Manual na na-lock ang device"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Hindi nakilala"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Hindi nakilala"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Para magamit ang Pag-unlock Gamit ang Mukha, i-on ang "<b>"Access sa camera"</b>" sa Mga Setting &gt; Privacy"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">Ilagay ang PIN ng SIM. Mayroon kang <xliff:g id="NUMBER_1">%d</xliff:g> natitirang pagsubok.</item>
       <item quantity="other">Ilagay ang PIN ng SIM. Mayroon kang <xliff:g id="NUMBER_1">%d</xliff:g> na natitirang pagsubok.</item>

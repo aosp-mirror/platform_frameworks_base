@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"यन्त्रलाई म्यानुअल तरिकाले लक गरिएको थियो"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"पहिचान भएन"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"पहिचान भएन"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"फेस अनलक प्रयोग गर्न \"सेटिङ तथा गोपनीयता\" मा गई "<b>"क्यामेरा प्रयोग गर्ने अनुमति"</b>" दिनुहोस्"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">SIM को PIN प्रविष्टि गर्नुहोस्। तपाईंसँग <xliff:g id="NUMBER_1">%d</xliff:g>  प्रयासहरू बाँकी छन्।</item>
       <item quantity="one">SIM को PIN प्रविष्टि गर्नुहोस्। तपाईंसँग <xliff:g id="NUMBER_0">%d</xliff:g> प्रयास बाँकी छ, त्यसपछि भने आफ्नो डिभाइस अनलक गर्नका लागि तपाईंले अनिवार्य रूपमा आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नु पर्ने हुन्छ।</item>

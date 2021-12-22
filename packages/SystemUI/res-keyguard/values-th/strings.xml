@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"มีการล็อกอุปกรณ์ด้วยตัวเอง"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"ไม่รู้จัก"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ไม่รู้จัก"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"หากต้องการใช้ปลดล็อกด้วยใบหน้า ให้เปิด"<b>"การเข้าถึงกล้อง"</b>"ในการตั้งค่าและความเป็นส่วนตัว"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">โปรดป้อน PIN ของซิม คุณพยายามได้อีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง</item>
       <item quantity="one">โปรดป้อน PIN ของซิม คุณพยายามได้อีก <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งก่อนที่จะต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์</item>

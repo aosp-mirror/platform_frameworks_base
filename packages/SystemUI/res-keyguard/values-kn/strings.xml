@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ಸಾಧನವನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ಲಾಕ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಬಳಸಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಗೌಪ್ಯತೆ ಎಂಬಲ್ಲಿ "<b>"ಕ್ಯಾಮರಾ ಪ್ರವೇಶವನ್ನು"</b>" ಆನ್ ಮಾಡಿ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">ಸಿಮ್ ಪಿನ್ ನಮೂದಿಸಿ. ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ.</item>
       <item quantity="other">ಸಿಮ್ ಪಿನ್ ನಮೂದಿಸಿ. ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ.</item>

@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"O dispositivo foi bloqueado manualmente"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Não reconhecido."</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Não reconhecido."</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Para utilizar o Desbloqueio facial, ative o "<b>"Acesso à câmara"</b>" em Definições &gt; Privacidade"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">Introduza o PIN do cartão SIM. Tem mais <xliff:g id="NUMBER_0">%d</xliff:g> tentativa antes de ser necessário contactar o operador para desbloquear o dispositivo.</item>
       <item quantity="other">Introduza o PIN do cartão SIM. Tem mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas.</item>

@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ଡିଭାଇସ୍‍ ମାନୁଆଲ ଭାବେ ଲକ୍‍ କରାଗଲା"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"ଚିହ୍ନଟ ହେଲାନାହିଁ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ଚିହ୍ନଟ ହେଲାନାହିଁ"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ଫେସ ଅନଲକ ବ୍ୟବହାର କରିବା ପାଇଁ, ସେଟିଂସ ଏବଂ ଗୋପନୀୟତାରେ "<b>"କ୍ୟାମେରା ଆକ୍ସେସ"</b>"କୁ ଚାଲୁ କରନ୍ତୁ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">SIM PIN ପ୍ରବେଶ କରନ୍ତୁ। ଆପଣଙ୍କ ପାଇଁ <xliff:g id="NUMBER_1">%d</xliff:g>ଟି ପ୍ରୟାସ ବଳକା ଅଛି।</item>
       <item quantity="one">SIM PIN ପ୍ରବେଶ କରନ୍ତୁ। ଆପଣଙ୍କ ଡିଭାଇସ୍‍କୁ ଅନଲକ୍ କରିବା ପାଇଁ ପାଖରେ ବଳକା ଥିବା <xliff:g id="NUMBER_0">%d</xliff:g>ଟି ପ୍ରୟାସର ବ୍ୟବହାର କରିବା ପୂର୍ବରୁ ନିଜର କେରିଅର୍‍ଙ୍କୁ ସମ୍ପର୍କ କରନ୍ତୁ।</item>

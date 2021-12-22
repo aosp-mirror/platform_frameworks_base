@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"デバイスは手動でロックされました"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"認識されませんでした"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"認識されませんでした"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"顔認証を使用するには、[設定] &gt; [プライバシー] で"<b>"カメラへのアクセス"</b>"を有効にしてください"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">SIM PIN を入力してください。入力できるのはあと <xliff:g id="NUMBER_1">%d</xliff:g> 回です。</item>
       <item quantity="one">SIM PIN を入力してください。入力できるのはあと <xliff:g id="NUMBER_0">%d</xliff:g> 回です。この回数を超えた場合は、携帯通信会社にお問い合わせください。</item>

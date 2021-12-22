@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Tækinu var læst handvirkt"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Þekktist ekki"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Þekktist ekki"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Þú verður að kveikja á "<b>"aðgangi að myndavél"</b>" í „Stillingar &gt; persónuvernd“ til að nota andlitskenni"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">Sláðu inn PIN-númer SIM-korts. Þú átt <xliff:g id="NUMBER_1">%d</xliff:g> tilraun eftir.</item>
       <item quantity="other">Sláðu inn PIN-númer SIM-korts. Þú átt <xliff:g id="NUMBER_1">%d</xliff:g> tilraunir eftir.</item>

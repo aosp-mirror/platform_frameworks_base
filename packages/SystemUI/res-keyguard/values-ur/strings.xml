@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"آلہ کو دستی طور پر مقفل کیا گیا تھا"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"تسلیم شدہ نہیں ہے"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"تسلیم شدہ نہیں ہے"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"فیس اَنلاک کا استعمال کرنے کے لیے، ترتیبات اور رازداری میں "<b>"کیمرے تک رسائی"</b>" کو آن کریں"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">‏SIM کا PIN درج کریں، آپ کے پاس <xliff:g id="NUMBER_1">%d</xliff:g> کوششیں بچی ہیں۔</item>
       <item quantity="one">‏SIM کا PIN درج کریں، آپ کے پاس <xliff:g id="NUMBER_0">%d</xliff:g> کوشش بچی ہے، اس کے بعد آپ کو اپنا آلہ غیر مقفل کرنے کے لیے اپنے کیریئر سے رابطہ کرنا ہوگا۔</item>

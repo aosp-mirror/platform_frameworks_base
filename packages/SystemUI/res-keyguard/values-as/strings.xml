@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ডিভাইচটো মেনুৱেলভাৱে লক কৰা হৈছিল"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"চিনাক্ত কৰিব পৰা নাই"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"চিনাক্ত কৰিব পৰা নাই"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ফেচ আনলক সুবিধাটো ব্যৱহাৰ কৰিবলৈ ছেটিং &gt; গোপনীয়তাত "<b>"কেমেৰাৰ এক্সেছ"</b>" অন কৰক"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">ছিমৰ পিন দিয়ক। আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g>বাৰ প্ৰয়াস কৰিব পাৰে।</item>
       <item quantity="other">ছিমৰ পিন দিয়ক। আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g>বাৰ প্ৰয়াস কৰিব পাৰে।</item>

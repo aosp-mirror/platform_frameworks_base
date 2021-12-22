@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Az eszközt manuálisan lezárták"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Nem ismerhető fel"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nem ismerhető fel"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Az Arcalapú feloldás funkció használatához kapcsolja be a "<b>"Hozzáférés a kamerához"</b>" beállítást a Beállítások &gt; Adatvédelem szakaszban."</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Adja meg a SIM-kártya PIN-kódját. <xliff:g id="NUMBER_1">%d</xliff:g> próbálkozása maradt.</item>
       <item quantity="one">Adja meg a SIM-kártya PIN-kódját. <xliff:g id="NUMBER_0">%d</xliff:g> próbálkozása maradt. Ha elfogynak a próbálkozási lehetőségek, az eszköz feloldásához fel kell vennie a kapcsolatot szolgáltatójával.</item>

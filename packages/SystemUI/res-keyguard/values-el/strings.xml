@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Η συσκευή κλειδώθηκε με μη αυτόματο τρόπο"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Δεν αναγνωρίστηκε"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Δεν αναγνωρίστηκε"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Για να χρησιμοποιήσετε τη λειτουργία Ξεκλείδωμα με το πρόσωπο, ενεργοποιήστε την επιλογή "<b>"Πρόσβαση στην κάμερα"</b>" από το μενού Ρυθμίσεις &gt; Απόρρητο"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Εισαγάγετε τον αριθμό PIN της κάρτας SIM. Απομένουν άλλες <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες.</item>
       <item quantity="one">Εισαγάγετε τον αριθμό PIN της κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER_0">%d</xliff:g> προσπάθεια. Στη συνέχεια, θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας, για να ξεκλειδώσετε τη συσκευή.</item>
