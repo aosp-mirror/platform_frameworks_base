@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Geen toestelle beskikbaar nie"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi is nie gekoppel nie"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Helderheid"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Keer kleure om"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Kleuromkering"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Meer instellings"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Gebruikerinstellings"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Klaar"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Vergroot die hele skerm"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Vergroot \'n deel van die skerm"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Wissel"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Toeganklikheidknoppie het die toeganklikheidgebaar vervang\n\n"<annotation id="link">"Bekyk instellings"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Tik om toeganklikheidkenmerke oop te maak Pasmaak of vervang knoppie in Instellings.\n\n"<annotation id="link">"Bekyk instellings"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Skuif knoppie na kant om dit tydelik te versteek"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Beweeg na links bo"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Beweeg na regs bo"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Sien alles"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ontkoppel Ethernet om netwerke te wissel"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Om toestelervaring te verbeter, kan programme en dienste steeds enige tyd na wi‑fi-netwerke soek, selfs wanneer wi‑fi af is. Jy kan dit in Wi-fi-opsporing-instellings verander. "<annotation id="link">"Verander"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Skakel vliegtuigmodus af"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Kies gebruiker"</string>
 </resources>

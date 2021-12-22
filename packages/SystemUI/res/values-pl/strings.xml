@@ -251,7 +251,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Brak dostępnych urządzeń"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Brak połączenia z Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Jasność"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Odwróć kolory"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Odwrócenie kolorów"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Więcej ustawień"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Ustawienia użytkownika"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Gotowe"</string>
@@ -753,7 +753,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Powiększanie pełnego ekranu"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Powiększ część ekranu"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Przełącz"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Przycisk ułatwień dostępu zastąpił gest ułatwień dostępu\n\n"<annotation id="link">"Wyświetl ustawienia"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Kliknij, aby otworzyć ułatwienia dostępu. Dostosuj lub zmień ten przycisk w Ustawieniach.\n\n"<annotation id="link">"Wyświetl ustawienia"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Przesuń przycisk do krawędzi, aby ukryć go tymczasowo"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Przenieś w lewy górny róg"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Przenieś w prawy górny róg"</string>
@@ -889,5 +889,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Pokaż wszystko"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Aby przełączać sieci, odłącz Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Aby zapewnić Ci większy komfort korzystania z urządzenia, aplikacje i usługi mogą nadal wyszukiwać sieci Wi-Fi w pobliżu nawet wtedy, gdy Wi-Fi jest wyłączone. Możesz to zmienić w ustawieniach skanowania Wi-Fi. "<annotation id="link">"Zmień"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Wyłącz tryb samolotowy"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Wybierz użytkownika"</string>
 </resources>

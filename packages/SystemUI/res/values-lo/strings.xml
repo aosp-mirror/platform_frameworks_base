@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"​ບໍ່​ມີ​ອຸ​ປະ​ກອນ​ທີ່​ສາ​ມາດ​ໃຊ້​ໄດ້"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ບໍ່ໄດ້ເຊື່ອມຕໍ່ Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ຄວາມແຈ້ງ"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ສະຫຼັບສີ"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ການປີ້ນສີ"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"​ການ​ຕັ້ງ​ຄ່າ​ເພີ່ມ​ເຕີມ"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ຕັ້ງຄ່າຜູ້ໃຊ້"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ແລ້ວໆ"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ຂະຫຍາຍເຕັມຈໍ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ຂະຫຍາຍບາງສ່ວນຂອງໜ້າຈໍ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ສະຫຼັບ"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ປຸ່ມການຊ່ວຍເຂົ້າເຖິງຖືກແທນທີ່ທ່າທາງຊ່ວຍເຂົ້າເຖິງແລ້ວ\n\n"<annotation id="link">"ເບິ່ງການຕັ້ງຄ່າ"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ແຕະເພື່ອເປີດຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ. ປັບແຕ່ງ ຫຼື ປ່ຽນປຸ່ມນີ້ໃນການຕັ້ງຄ່າ.\n\n"<annotation id="link">"ເບິ່ງການຕັ້ງຄ່າ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ຍ້າຍປຸ່ມໄປໃສ່ຂອບເພື່ອເຊື່ອງມັນຊົ່ວຄາວ"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ຍ້າຍຊ້າຍເທິງ"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ຍ້າຍຂວາເທິງ"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"ເບິ່ງທັງໝົດ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ເພື່ອສະຫຼັບເຄືອຂ່າຍ, ໃຫ້ຕັດການເຊື່ອມຕໍ່ອີເທີເນັດກ່ອນ"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ເພື່ອປັບປຸງປະສົບການອຸປະກອນ, ແອັບ ແລະ ບໍລິການຍັງຄົງສາມາດສະແກນຫາເຄືອຂ່າຍ Wi‑Fi ຕອນໃດກໍໄດ້, ເຖິງແມ່ນວ່າຈະປິດ Wi‑Fi ໄວ້ກໍຕາມ. ທ່ານສາມາດປ່ຽນສິ່ງນີ້ໄດ້ໃນການຕັ້ງຄ່າການສະແກນ Wi‑Fi. "<annotation id="link">"ປ່ຽນ"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ປິດໂໝດຢູ່ໃນຍົນ"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ເລືອກຜູ້ໃຊ້"</string>
 </resources>

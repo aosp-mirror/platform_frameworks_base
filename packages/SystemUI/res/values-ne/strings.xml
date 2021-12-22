@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"कुनै उपकरणहरू उपलब्ध छैन"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi जडान गरिएको छैन"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"उज्यालपन"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"रंग उल्टाउनुहोस्"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"कलर इन्भर्सन"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"थप सेटिङहरू"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"प्रयोगकर्तासम्बन्धी सेटिङ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"भयो"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"पूरै स्क्रिन जुम इन गर्नुहोस्"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रिनको केही भाग म्याग्निफाइ गर्नुहोस्"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"बदल्नुहोस्"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"एक्सेसिबिलिटी इसाराका स्थानमा एक्सेसिबिलिटी बटन प्रयोग हुन थालेको छ\n\n"<annotation id="link">"सेटिङ हेर्नुहोस्"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"सर्वसुलभता कायम गर्ने सुविधा खोल्न ट्याप गर्नुहोस्। सेटिङमा गई यो बटन कस्टमाइज गर्नुहोस् वा बदल्नुहोस्।\n\n"<annotation id="link">"सेटिङ हेर्नुहोस्"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"यो बटन केही बेर नदेखिने पार्न किनारातिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"सिरानको बायाँतिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"सिरानको दायाँतिर सार्नुहोस्"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"सबै नेटवर्क हेर्नुहोस्"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"नेटवर्क बदल्न इथरनेट डिस्कनेक्ट गर्नुहोस्"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"डिभाइस प्रयोगको अनुभवमा गुणस्तर सुधार गर्न, एप तथा सेवाहरूले अझै पनि जुनसुकै बेला (Wi‑Fi अफ भएका बेलामा पनि) Wi‑Fi नेटवर्क खोज्न सक्छन्। तपाईं यसलाई Wi‑Fi स्क्यानिङका सेटिङमा गई परिवर्तन गर्न सक्नुहुन्छ। "<annotation id="link">"बदल्नुहोस्"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"हवाइजहाज मोड अफ गर्नुहोस्"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"प्रयोगकर्ता चयन गर्नु…"</string>
 </resources>

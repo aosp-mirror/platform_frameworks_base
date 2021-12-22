@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"사용 가능한 기기가 없습니다."</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi가 연결되지 않음"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"밝기"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"색상 반전"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"색상 반전"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"설정 더보기"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"사용자 설정"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"완료"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"전체 화면 확대"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"화면 일부 확대"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"전환"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"접근성 동작이 접근성 버튼으로 대체되었습니다.\n\n"<annotation id="link">"설정 보기"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"접근성 기능을 열려면 탭하세요. 설정에서 이 버튼을 맞춤설정하거나 교체할 수 있습니다.\n\n"<annotation id="link">"설정 보기"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"버튼을 가장자리로 옮겨서 일시적으로 숨기세요."</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"왼쪽 상단으로 이동"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"오른쪽 상단으로 이동"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"모두 보기"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"네트워크를 전환하려면 이더넷을 연결 해제하세요."</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"기기 환경을 개선하기 위해 Wi‑Fi가 꺼져 있을 때도 앱과 서비스에서 Wi‑Fi 네트워크를 검색할 수 있습니다. 이 설정은 Wi‑Fi 검색 설정에서 변경할 수 있습니다. "<annotation id="link">"변경"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"비행기 모드 사용 중지"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"사용자 선택"</string>
 </resources>

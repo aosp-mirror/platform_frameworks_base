@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"ಯಾವುದೇ ಸಾಧನಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ವೈ-ಫೈ ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ಪ್ರಕಾಶಮಾನ"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ಬಣ್ಣ ಇನ್ವರ್ಟ್ ಮಾಡಿ"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ಕಲರ್ ಇನ್‍ವರ್ಶನ್"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ಹೆಚ್ಚಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ಬಳಕೆದಾರರ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ಮುಗಿದಿದೆ"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ಹಿಗ್ಗಿಸಿ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ಸ್ಕ್ರೀನ್‌ನ ಅರ್ಧಭಾಗವನ್ನು ಝೂಮ್ ಮಾಡಿ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ಸ್ವಿಚ್"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ಪ್ರವೇಶಿಸುವಿಕೆ ಬಟನ್, ಪ್ರವೇಶಿಸುವಿಕೆ ಗೆಸ್ಚರ್ ಅನ್ನು ಬದಲಾಯಿಸಿದೆ\n\n"<annotation id="link">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ಪ್ರವೇಶಿಸುವಿಕೆ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ತೆರೆಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಈ ಬಟನ್ ಅನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ ಅಥವಾ ಬದಲಾಯಿಸಿ.\n\n"<annotation id="link">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ಅದನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ಮರೆಮಾಡಲು ಅಂಚಿಗೆ ಬಟನ್ ಸರಿಸಿ"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ಎಡ ಮೇಲ್ಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ಬಲ ಮೇಲ್ಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"ಎಲ್ಲವನ್ನೂ ನೋಡಿ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಬದಲಿಸಲು, ಇಥರ್ನೆಟ್ ಅನ್ನು ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ವೈ-ಫೈ ಆಫ್ ಇದ್ದಾಗಲೂ ಸಹ, ಸಾಧನದ ಅನುಭವವನ್ನು ಸುಧಾರಿಸಲು, ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಸೇವೆಗಳು ಯಾವಾಗ ಬೇಕಾದರೂ ಸಹ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳಿಗಾಗಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಬಹುದು. ನೀವು ಇದನ್ನು ವೈ-ಫೈ ಸ್ಕ್ಯಾನಿಂಗ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಬದಲಾಯಿಸಬಹುದು. "<annotation id="link">"ಬದಲಿಸಿ"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್ ಆಫ್ ಮಾಡಿ"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ಬಳಕೆದಾರ ಆಯ್ಕೆಮಾಡಿ"</string>
 </resources>

@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Hakuna vifaa vilivyopatikana"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi haijaunganishwa"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Ung\'avu"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Pindua rangi"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Ugeuzaji rangi"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Mipangilio zaidi"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Mipangilio ya mtumiaji"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Nimemaliza"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Kuza skrini nzima"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Kuza sehemu ya skrini"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Swichi"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Kitufe cha zana za ufikivu kimechukua nafasi ya ishara ya ufikivu\n\n"<annotation id="link">"Angalia mipangilio"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Gusa ili ufungue vipengele vya ufikivu. Weka mapendeleo au ubadilishe kitufe katika Mipangilio.\n\n"<annotation id="link">"Angalia mipangilio"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Sogeza kitufe kwenye ukingo ili ukifiche kwa muda"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Sogeza juu kushoto"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Sogeza juu kulia"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Angalia yote"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ili kubadili mitandao, tenganisha ethaneti"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Ili kuboresha hali ya matumizi ya kifaa, programu na huduma bado zinaweza kutafuta mitandao ya Wi‑Fi wakati wowote, hata wakati umezima Wi‑Fi. Unaweza kubadilisha mipangilio hii katika mipangilio ya kutafuta Wi-Fi. "<annotation id="link">"Badilisha"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Zima hali ya ndegeni"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Chagua mtumiaji"</string>
 </resources>

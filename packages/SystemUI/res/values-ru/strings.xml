@@ -251,7 +251,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Нет доступных устройств"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Нет подключения к сети Wi-Fi."</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркость"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Обратные цвета"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инверсия цветов"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Настройки"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Пользовательские настройки"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
@@ -753,7 +753,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Увеличение всего экрана"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Увеличить часть экрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Переключить"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Жест заменен на кнопку специальных возможностей\n\n"<annotation id="link">"Открыть настройки"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Нажмите, чтобы открыть спец. возможности. Настройте или замените эту кнопку в настройках.\n\n"<annotation id="link">"Настройки"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Чтобы временно скрыть кнопку, переместите ее к краю экрана"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Перенести в левый верхний угол"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Перенести в правый верхний угол"</string>
@@ -889,5 +889,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Показать все"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Чтобы переключиться между сетями, отключите кабель Ethernet."</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Чтобы улучшать работу устройства, приложения и сервисы могут искать беспроводные сети в любое время, даже если вы отключили Wi‑Fi. Чтобы запретить это, отключите поиск сетей Wi‑Fi. "<annotation id="link">"Открыть настройки"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Отключить режим полета"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Выберите профиль"</string>
 </resources>

@@ -221,7 +221,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"تم قفل الشاشة في الاتجاه الأفقي."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"تم قفل الشاشة في الاتجاه العمودي."</string>
     <string name="dessert_case" msgid="9104973640704357717">"حالة الحلويات"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"شاشة التوقف"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"شاشة الاستراحة"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"عدم الإزعاج"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"بلوتوث"</string>
@@ -253,7 +253,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"لا يتوفر أي جهاز"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"‏لم يتم الاتصال بشبكة Wi-Fi."</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"السطوع"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"قلب الألوان"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"قلب الألوان"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"المزيد من الإعدادات"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"إعدادات المستخدم"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"تم"</string>
@@ -763,7 +763,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"تكبير الشاشة كلها"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"تكبير جزء من الشاشة"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"تبديل"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"تم استبدال \"زر أدوات تسهيل الاستخدام\" بإيماءة تسهيل الاستخدام.\n\n"<annotation id="link">"الاطّلاع على الإعدادات"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"انقر لفتح ميزات تسهيل الاستخدام. يمكنك تخصيص هذا الزر أو استبداله من الإعدادات.\n\n"<annotation id="link">"عرض الإعدادات"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"يمكنك نقل الزر إلى الحافة لإخفائه مؤقتًا."</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"نقل إلى أعلى يمين الشاشة"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"نقل إلى أعلى يسار الشاشة"</string>
@@ -901,5 +901,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"عرض الكل"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"للتبديل بين الشبكات، يجب فصل إيثرنت."</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"‏لتحسين تجربتك على الجهاز، يظل بإمكان التطبيقات والخدمات البحث عن شبكات Wi‑Fi في أي وقت، حتى عند إيقاف شبكة Wi‑Fi. وبإمكانك تغيير هذا الخيار في إعدادات البحث عن شبكات Wi-Fi. "<annotation id="link">"تغيير"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"إيقاف وضع الطيران"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"اختيار المستخدم"</string>
 </resources>

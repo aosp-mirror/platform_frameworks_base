@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"कोणतेही डिव्हाइसेस उपलब्ध नाहीत"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"वाय-फाय नाही"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"चमक"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"रंग उलटे करा"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"कलर इन्व्हर्जन"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"अधिक सेटिंग्ज"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"वापरकर्ता सेटिंग्ज"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"पूर्ण झाले"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"फुल स्क्रीन मॅग्निफाय करा"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीनचा काही भाग मॅग्निफाय करा"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"स्विच करा"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"अ‍ॅक्सेसिबिलिटी जेश्चर हे आता अ‍ॅक्सेसिबिलिटी बटण आहे \n\n"<annotation id="link">"सेटिंग्ज पहा"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"अ‍ॅक्सेसिबिलिटी वैशिष्ट्ये उघडण्यासाठी, टॅप करा. सेटिंग्जमध्ये हे बटण कस्टमाइझ करा किंवा बदला.\n\n"<annotation id="link">"सेटिंग्ज पहा"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"बटण तात्पुरते लपवण्यासाठी ते कोपर्‍यामध्ये हलवा"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"वर डावीकडे हलवा"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"वर उजवीकडे हलवा"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"सर्व पहा"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"नेटवर्क स्विच करण्यासाठी, इथरनेट केबल डिस्कनेक्ट करा"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"डिव्हाइसच्या अनुभवामध्ये सुधारणा करण्यासाठी, वाय-फाय बंद असले तरीही ॲप्स आणि सेवा या कधीही वाय-फाय नेटवर्क स्कॅन करू शकतात. तुम्ही हे वाय-फाय स्कॅनिंग सेटिंग्जमध्ये बदलू शकता. "<annotation id="link">"बदला"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"विमान मोड बंद करा"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"वापरकर्ता निवडा"</string>
 </resources>

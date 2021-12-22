@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"ഉപകരണങ്ങളൊന്നും ലഭ്യമല്ല"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"വൈഫൈ കണക്റ്റ് ചെയ്‌തിട്ടില്ല"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"തെളിച്ചം"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"നെഗറ്റീവ് ലുക്ക്"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"നിറം വിപരീതമാക്കൽ"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"കൂടുതൽ ക്രമീകരണങ്ങൾ"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ഉപയോക്തൃ ക്രമീകരണം"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"പൂർത്തിയാക്കി"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"സ്ക്രീൻ പൂർണ്ണമായും മാഗ്നിഫൈ ചെയ്യുക"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"സ്‌ക്രീനിന്റെ ഭാഗം മാഗ്നിഫൈ ചെയ്യുക"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"മാറുക"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ഉപയോഗസഹായി ജെസ്ച്ചറിനെ മാറ്റി പകരം ഉപയോഗസഹായി ബട്ടൺ വന്നു\n\n"<annotation id="link">"ക്രമീകരണം കാണുക"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ഉപയോഗസഹായി ഫീച്ചർ തുറക്കാൻ ടാപ്പ് ചെയ്യൂ. ക്രമീകരണത്തിൽ ഈ ബട്ടൺ ഇഷ്ടാനുസൃതമാക്കാം, മാറ്റാം.\n\n"<annotation id="link">"ക്രമീകരണം കാണൂ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"തൽക്കാലം മറയ്‌ക്കുന്നതിന് ബട്ടൺ അരുകിലേക്ക് നീക്കുക"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"മുകളിൽ ഇടതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"മുകളിൽ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"എല്ലാം കാണുക"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"മറ്റ് നെറ്റ്‌വർക്കുകളിലേക്ക് മാറാൻ, ഇതർനെറ്റ് വിച്ഛേദിക്കുക"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ഉപകരണ അനുഭവം മെച്ചപ്പെടുത്താൻ, വൈഫൈ ഓഫാക്കിയിരിക്കുമ്പോൾ പോലും ആപ്പുകൾക്കും സേവനങ്ങൾക്കും വൈഫൈ നെറ്റ്‌വർക്കുകൾ കണ്ടെത്താൻ ഏത് സമയത്തും സ്‌കാൻ ചെയ്യാനാകും. നിങ്ങൾക്ക് ഇത് വൈഫൈ സ്‌കാനിംഗ് ക്രമീകരണത്തിൽ മാറ്റാം. "<annotation id="link">"മാറ്റുക"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ഫ്ലൈറ്റ് മോഡ് ഓഫാക്കുക"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ഉപയോക്താവിനെ തിരഞ്ഞെടുക്കൂ"</string>
 </resources>

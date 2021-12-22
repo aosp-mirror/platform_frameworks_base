@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"ကိရိယာများ မရှိ"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi ချိတ်ဆက်ထားခြင်းမရှိပါ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"အလင်းတောက်ပမှု"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"အရောင်ပြောင်းပြန်"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"အရောင်ပြောင်းပြန်ပြုလုပ်ရန်"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"နောက်ထပ် ဆက်တင်များ"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"အသုံးပြုသူ ဆက်တင်များ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ပြီးပါပြီ"</string>
@@ -525,7 +525,7 @@
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"အကြောင်းကြားချက် ထိန်းချုပ်မှုများ"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"အကြောင်းကြားချက်များကို ဆိုင်းငံ့ရန် ရွေးချယ်စရာများ"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"ကျွန်ုပ်ကို သတိပေးပါ"</string>
-    <string name="snooze_undo" msgid="2738844148845992103">"တစ်ဆင့်နောက်ပြန်ရန်"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"နောက်ပြန်ရန်"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ဆိုင်းငံ့ရန်"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d နာရီ</item>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ဖန်သားပြင်အပြည့် ချဲ့သည်"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ဖန်သားပြင် တစ်စိတ်တစ်ပိုင်းကို ချဲ့ပါ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ခလုတ်"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"အများသုံးစွဲနိုင်မှုခလုတ်က အများသုံးစွဲနိုင်မှုလက်ဟန်ကို အစားထိုးသည်\n\n"<annotation id="link">"ဆက်တင်များကို ကြည့်ပါ"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများ ဖွင့်ရန် တို့ပါ။ ဆက်တင်များတွင် ဤခလုတ်ကို စိတ်ကြိုက်ပြင်ပါ (သို့) လဲပါ။\n\n"<annotation id="link">"ဆက်တင်များ ကြည့်ရန်"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ခလုတ်ကို ယာယီဝှက်ရန် အစွန်းသို့ရွှေ့ပါ"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ဘယ်ဘက်ထိပ်သို့ ရွှေ့ရန်"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ညာဘက်ထိပ်သို့ ရွှေ့ရန်"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"အားလုံးကြည့်ရန်"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ကွန်ရက်ပြောင်းရန် အီသာနက်ကို ချိတ်ဆက်မှုဖြုတ်ပါ"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"စက်ပစ္စည်းကို ပိုမိုကောင်းမွန်စွာ အသုံးပြုနိုင်ရန် Wi-Fi ပိတ်ထားသည့်တိုင် အက်ပ်နှင့် ဝန်ဆောင်မှုများက Wi-Fi ကွန်ရက်များကို အချိန်မရွေး စကင်ဖတ်နိုင်သည်။ ၎င်းကို Wi-Fi ရှာဖွေခြင်း ဆက်တင်များတွင် ပြောင်းနိုင်သည်။ "<annotation id="link">"ပြောင်းရန်"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"လေယာဉ်ပျံမုဒ်ကို ပိတ်ရန်"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"အသုံးပြုသူ ရွေးခြင်း"</string>
 </resources>

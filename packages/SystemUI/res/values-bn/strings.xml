@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"কোনো ডিভাইস উপলব্ধ নয়"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ওয়াই-ফাই কানেক্ট করা নেই"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"উজ্জ্বলতা"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"বিপরীত রঙ"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"কালার ইনভার্সন"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"আরও সেটিংস"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ব্যবহারকারী সেটিংস"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"সম্পন্ন হয়েছে"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"সম্পূর্ণ স্ক্রিন বড় করে দেখা"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"স্ক্রিনের কিছুটা অংশ বড় করুন"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"বদল করুন"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"অ্যাক্সেসিবিলিটি জেসচার পরিবর্তন করে অ্যাক্সেসেবিলিটি বোতাম করা হয়েছে\n\n"<annotation id="link">"সেটিংস দেখুন"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"অ্যাক্সেসিবিলিটি ফিচার খুলতে ট্যাপ করুন। কাস্টমাইজ করুন বা সেটিংসে এই বোতামটি সরিয়ে দিন।\n\n"<annotation id="link">"সেটিংস দেখুন"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"এটি অস্থায়ীভাবে লুকাতে বোতামটি কোণে সরান"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"উপরে বাঁদিকে সরান"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"উপরে ডানদিকে সরান"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"সবকটি দেখুন"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"নেটওয়ার্ক বদলাতে ইথারনেট ডিসকানেক্ট করুন"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ডিভাইস সংক্রান্ত অভিজ্ঞতা আরও ভাল করতে, অ্যাপ ও পরিষেবা যেকোনও সময় আপনার ওয়াই-ফাই নেটওয়ার্ক স্ক্যান করতে পারবে, এমনকি ডিভাইসের ওয়াই-ফাই বন্ধ করা থাকলেও। ওয়াই-ফাই স্ক্যানিং সেটিংস থেকে আপনি এটি পরিবর্তন করতে পারবেন। "<annotation id="link">"পরিবর্তন করুন"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"\'বিমান\' মোড বন্ধ করুন"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ব্যবহারকারী বেছে নিন"</string>
 </resources>

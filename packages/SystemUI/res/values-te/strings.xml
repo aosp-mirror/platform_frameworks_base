@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"పరికరాలు ఏవీ అందుబాటులో లేవు"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi‑Fi కనెక్ట్ కాలేదు"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ప్రకాశం"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"కలర్ మార్పిడి"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"కలర్ మార్పిడి"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"మరిన్ని సెట్టింగ్‌లు"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"యూజర్ సెట్టింగ్‌లు"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"పూర్తయింది"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ఫుల్ స్క్రీన్‌ను మ్యాగ్నిఫై చేయండి"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"స్క్రీన్‌లో భాగాన్ని మాగ్నిఫై చేయండి"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"స్విచ్ చేయి"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"యాక్సెసిబిలిటీ బటన్, యాక్సెసిబిలిటీ సంజ్ఞను భర్తీ చేసింది\n\n"<annotation id="link">"సెట్టింగ్‌లను చూడండి"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"యాక్సెసిబిలిటీ ఫీచర్‌లను తెరవడానికి ట్యాప్ చేయండి. సెట్టింగ్‌లలో ఈ బటన్‌ను అనుకూలీకరించండి లేదా రీప్లేస్ చేయండి.\n\n"<annotation id="link">"వీక్షణ సెట్టింగ్‌లు"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"తాత్కాలికంగా దానిని దాచడానికి బటన్‌ను చివరకు తరలించండి"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ఎగువ ఎడమ వైపునకు తరలించు"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ఎగువ కుడి వైపునకు తరలించు"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"అన్నీ చూడండి"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"నెట్‌వర్క్‌లను మార్చడానికి, ఈథర్‌నెట్‌ను డిస్‌కనెక్ట్ చేయండి"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"పరికర అనుభవాన్ని మెరుగుపరచడానికి, Wi‑Fi ఆఫ్‌లో ఉన్నప్పుడు కూడా, ఏ సమయంలో అయినా ఇప్పటికీ Wi‑Fi నెట్‌వర్క్‌ల కోసం యాప్‌లు, సర్వీస్‌లు స్కాన్ చేయగలవు. మీరు దీనిని Wi‑Fi స్కానింగ్ సెట్టింగ్‌లలో మార్చవచ్చు. "<annotation id="link">"మార్చండి"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"విమానం మోడ్‌ను ఆఫ్ చేయండి"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"యూజర్‌ను ఎంచుకోండి"</string>
 </resources>

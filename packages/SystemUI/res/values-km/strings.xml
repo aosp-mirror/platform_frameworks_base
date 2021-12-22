@@ -233,7 +233,7 @@
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ទី​តាំង​"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"ការចូលប្រើ​កាមេរ៉ា"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"ការចូលប្រើ​មីក្រូហ្វូន"</string>
-    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"អាចប្រើបាន"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"អាចចូលប្រើបាន"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"បាន​ទប់ស្កាត់"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ឧបករណ៍​មេឌៀ"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"អ្នកប្រើ"</string>
@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"មិន​មាន​ឧបករណ៍​ដែល​អាច​ប្រើ​បាន"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"មិនមាន​ការតភ្ជាប់ Wi-Fi ទេ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ពន្លឺ"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ដាក់​​​បញ្ច្រាស​ពណ៌"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ការបញ្ច្រាស​ពណ៌"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ការ​កំណត់​ច្រើន​ទៀត"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ការកំណត់អ្នកប្រើប្រាស់"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"រួចរាល់"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ពង្រីក​ពេញអេក្រង់"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ពង្រីក​ផ្នែកនៃ​អេក្រង់"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ប៊ូតុងបិទបើក"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ប៊ូតុង​ភាពងាយស្រួល​បានជំនួស​ចលនាភាពងាយស្រួល\n\n"<annotation id="link">"មើល​ការកំណត់"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ចុចដើម្បីបើក​មុខងារ​ភាពងាយស្រួល។ ប្ដូរ ឬប្ដូរ​ប៊ូតុងនេះ​តាមបំណង​នៅក្នុង​ការកំណត់។\n\n"<annotation id="link">"មើល​ការកំណត់"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ផ្លាស់ទី​ប៊ូតុង​ទៅគែម ដើម្បីលាក់វា​ជាបណ្ដោះអាសន្ន"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ផ្លាស់ទីទៅខាងលើផ្នែកខាងឆ្វេង"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ផ្លាស់ទីទៅខាងលើផ្នែកខាងស្ដាំ"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"មើលទាំងអស់"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ដើម្បី​ប្ដូរ​បណ្ដាញ សូមផ្ដាច់​អ៊ីសឺរណិត"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ដើម្បីធ្វើឱ្យ​បទពិសោធន៍ប្រើប្រាស់​ឧបករណ៍ប្រសើរឡើង កម្មវិធី និងសេវាកម្ម​នៅតែអាចស្កេនរក​បណ្ដាញ Wi‑Fi បានគ្រប់ពេល ទោះបីជា​នៅពេលដែលបិទ Wi‑Fi ក៏ដោយ។ អ្នកអាចប្ដូរវាបាន​នៅក្នុង​ការកំណត់​ការស្កេន Wi‑Fi។ "<annotation id="link">"ប្ដូរ"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"បិទមុខងារពេល​ជិះ​យន្តហោះ"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ជ្រើសរើសអ្នកប្រើប្រាស់"</string>
 </resources>

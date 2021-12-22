@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"कोई डिवाइस उपलब्ध नहीं"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"वाई-फ़ाई कनेक्ट नहीं है"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"स्क्रीन की रोशनी"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"रंग उलटें"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"रंग बदलने की सुविधा"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"और सेटिंग"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"उपयोगकर्ता सेटिंग"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"हो गया"</string>
@@ -685,7 +685,7 @@
     <string name="notification_channel_battery" msgid="9219995638046695106">"बैटरी"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"स्‍क्रीनशॉट"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"सामान्य संदेश"</string>
-    <string name="notification_channel_storage" msgid="2720725707628094977">"जगह"</string>
+    <string name="notification_channel_storage" msgid="2720725707628094977">"स्टोरेज"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"संकेत"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> चल रहा है"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"फ़ुल स्क्रीन को ज़ूम करें"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीन के किसी हिस्से को ज़ूम करें"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"स्विच"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"सुलभता वाले हाथ के जेस्चर (हाव-भाव) को सुलभता बटन से बदल दिया गया है\n\n"<annotation id="link">"सेटिंग देखें"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"सुलभता सुविधाएं खोलने के लिए टैप करें. सेटिंग में, इस बटन को बदलें या अपने हिसाब से सेट करें.\n\n"<annotation id="link">"सेटिंग देखें"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"बटन को कुछ समय छिपाने के लिए, उसे किनारे पर ले जाएं"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"सबसे ऊपर बाईं ओर ले जाएं"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"सबसे ऊपर दाईं ओर ले जाएं"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"सभी देखें"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"नेटवर्क बदलने के लिए, पहले ईथरनेट को डिसकनेक्ट करें"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"डिवाइस इस्तेमाल करने के अनुभव काे बेहतर बनाने के लिए, ऐप्लिकेशन और सेवाओं की मदद से, किसी भी समय वाई-फ़ाई नेटवर्क स्कैन किए जा सकते हैं. ऐसा वाई-फ़ाई बंद होने पर भी किया जा सकता है. वाई-फ़ाई स्कैनिंग की सेटिंग में जाकर, इसे बदला जा सकता है. "<annotation id="link">"बदलें"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"हवाई जहाज़ मोड बंद करें"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"उपयोगकर्ता चुनें"</string>
 </resources>

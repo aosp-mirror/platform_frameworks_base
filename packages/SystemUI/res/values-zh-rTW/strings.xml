@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"沒有可用裝置"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"未連線至 Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"亮度"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"反轉顏色"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"色彩反轉"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"更多設定"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"使用者設定"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"完成"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"放大整個螢幕畫面"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"放大局部螢幕畫面"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"切換"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"無障礙工具按鈕已取代無障礙手勢\n\n"<annotation id="link">"查看設定"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"輕觸即可開啟無障礙功能。你可以前往「設定」自訂或更換這個按鈕。\n\n"<annotation id="link">"查看設定"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"將按鈕移到邊緣處即可暫時隱藏"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"移到左上方"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"移到右上方"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"查看全部"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"如要切換網路，請中斷乙太網路連線"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"為提升裝置的使用體驗，應用程式和服務仍可隨時掃描 Wi‑Fi 網路，即使 Wi-Fi 連線功能處於關閉狀態時亦然。你可以前往「掃描 Wi-Fi」設定進行變更。"<annotation id="link">"變更"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"關閉飛航模式"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"選取使用者"</string>
 </resources>

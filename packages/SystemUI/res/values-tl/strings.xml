@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Walang available na mga device"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Hindi nakakonekta sa Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brightness"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"I-invert ang mga kulay"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Pag-invert ng kulay"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Higit pang setting"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Mga setting ng user"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Tapos na"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"I-magnify ang buong screen"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"I-magnify ang isang bahagi ng screen"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Switch"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Pinalitan ng button ng accessibility ang galaw ng accessibility\n\n"<annotation id="link">"Tingnan ang mga setting"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"I-tap, buksan mga feature ng accessibility. I-customize o palitan button sa Mga Setting.\n\n"<annotation id="link">"Tingnan ang mga setting"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Ilipat ang button sa gilid para pansamantala itong itago"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Ilipat sa kaliwa sa itaas"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Ilipat sa kanan sa itaas"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Tingnan lahat"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para lumipat ng network, idiskonekta ang ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Para pahusayin ang karanasan sa device, puwede pa ring mag-scan ng mga Wi-Fi network ang mga app at serbisyo anumang oras, kahit habang naka-off ang Wi‑Fi. Mababago mo ito sa mga setting ng pag-scan ng Wi-Fi. "<annotation id="link">"Baguhin"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"I-off ang airplane mode"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Pumili ng user"</string>
 </resources>
