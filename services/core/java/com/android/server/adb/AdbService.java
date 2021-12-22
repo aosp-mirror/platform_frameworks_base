@@ -431,7 +431,7 @@ public class AdbService extends IAdbManager.Stub {
                 ? AdbManager.WIRELESS_STATUS_CONNECTED
                 : AdbManager.WIRELESS_STATUS_DISCONNECTED);
         intent.putExtra(AdbManager.WIRELESS_DEBUG_PORT_EXTRA, port);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        AdbDebuggingManager.sendBroadcastWithDebugPermission(mContext, intent, UserHandle.ALL);
         Slog.i(TAG, "sent port broadcast port=" + port);
     }
 
