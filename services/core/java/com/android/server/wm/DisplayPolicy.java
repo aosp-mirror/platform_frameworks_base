@@ -1515,11 +1515,15 @@ public class DisplayPolicy {
                     statusBarBottom);
         }
 
-        sTmpRect.set(windowFrames.mFrame);
-        sTmpRect.intersect(displayFrames.mDisplayCutoutSafe);
-        sTmpRect.top = windowFrames.mFrame.top; // Ignore top display cutout inset
-        sTmpRect.bottom = statusBarBottom; // Use collapsed status bar size
-        contentFrame.set(sTmpRect);
+        final InsetsState state = displayFrames.mInsetsState;
+        sTmpRect.set(displayFrames.mDisplayCutoutSafe);
+        // The status bar content can extend into regular display cutout insets but not
+        // waterfall insets.
+        sTmpRect.top = Math.max(state.getDisplayCutout().getWaterfallInsets().top, 0);
+
+        contentFrame.set(windowFrames.mFrame);
+        contentFrame.intersect(sTmpRect);
+        contentFrame.bottom = statusBarBottom; // Use collapsed status bar size
     }
 
     private int layoutNavigationBar(DisplayFrames displayFrames, Rect contentFrame) {
