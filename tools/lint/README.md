@@ -41,6 +41,37 @@ m out/soong/.intermediates/frameworks/base/services/autofill/services.autofill/a
   `defaults` field, e.g. `platform_service_defaults`, you can add the `lint` property to that common
   module instead of adding it in every module.
 
+## Create or update a baseline
+
+Baseline files can be used to silence known errors (and warnings) that are deemed to be safe. When
+there is a lint-baseline.xml file in the root folder of the java library, soong will
+automatically use it. You can override the file using lint properties too.
+
+```
+java_library {
+    lint: {
+        baseline_filename: "my-baseline.xml", // default: lint-baseline.xml;
+    }
+}
+```
+
+When using soong to create a lint report (as described above), it also creates a reference
+baseline file. This contains all lint errors and warnings that were found. So the next time
+you run lint, if you use this baseline file, there should be 0 findings.
+
+After the previous invocation, you can find the baseline here:
+
+```
+out/soong/.intermediates/frameworks/base/services/autofill/services.autofill/android_common/lint/lint-baseline.xml
+```
+
+As noted above, this baseline file contains warnings too, which might be undesirable. For example,
+CI tools might surface these warnings in code reviews. In order to create this file without
+warnings, we need to pass another flag to lint: `--nowarn`. The easiest way to do this is to
+locally change the soong code in
+[lint.go](http://cs/aosp-master/build/soong/java/lint.go;l=451;rcl=2e778d5bc4a8d1d77b4f4a3029a4a254ad57db75)
+adding `cmd.Flag("--nowarn")` and running lint again.
+
 ## Documentation
 
 - [Android Lint Docs](https://googlesamples.github.io/android-custom-lint-rules/)
