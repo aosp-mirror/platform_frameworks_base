@@ -134,6 +134,11 @@ class PackageUserStateDefault implements PackageUserStateInternal {
     }
 
     @Override
+    public long getFirstInstallTime() {
+        return 0;
+    }
+
+    @Override
     public boolean isComponentEnabled(String componentName) {
         return false;
     }

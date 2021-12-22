@@ -1560,7 +1560,7 @@ public class ComputerEngine implements Computer {
                     : mPermissionManager.getGrantedPermissions(ps.getPackageName(), userId);
 
             PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
-                    ps.getFirstInstallTime(), ps.getLastUpdateTime(), permissions, state, userId,
+                    state.getFirstInstallTime(), ps.getLastUpdateTime(), permissions, state, userId,
                     ps);
 
             if (packageInfo == null) {
@@ -1577,7 +1577,7 @@ public class ComputerEngine implements Computer {
             pi.packageName = ps.getPackageName();
             pi.setLongVersionCode(ps.getVersionCode());
             pi.sharedUserId = (ps.getSharedUser() != null) ? ps.getSharedUser().name : null;
-            pi.firstInstallTime = ps.getFirstInstallTime();
+            pi.firstInstallTime = state.getFirstInstallTime();
             pi.lastUpdateTime = ps.getLastUpdateTime();
 
             ApplicationInfo ai = new ApplicationInfo();
@@ -5436,12 +5436,11 @@ public class ComputerEngine implements Computer {
             }
             PackageDexUsage.PackageUseInfo packageUseInfo =
                     mDexManager.getPackageUseInfoOrDefault(packageState.getPackageName());
-            if (PackageManagerServiceUtils
-                    .isUnusedSinceTimeInMillis(packageState.getFirstInstallTime(),
-                            currentTimeInMillis, downgradeTimeThresholdMillis, packageUseInfo,
-                            packageState.getTransientState().getLatestPackageUseTimeInMills(),
-                            packageState.getTransientState()
-                                    .getLatestForegroundPackageUseTimeInMills())) {
+            if (PackageManagerServiceUtils.isUnusedSinceTimeInMillis(
+                    PackageStateUtils.getEarliestFirstInstallTime(packageState.getUserStates()),
+                    currentTimeInMillis, downgradeTimeThresholdMillis, packageUseInfo,
+                    packageState.getTransientState().getLatestPackageUseTimeInMills(),
+                    packageState.getTransientState().getLatestForegroundPackageUseTimeInMills())) {
                 unusedPackages.add(packageState.getPackageName());
             }
         }

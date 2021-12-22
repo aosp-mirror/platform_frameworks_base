@@ -84,6 +84,7 @@ import com.android.server.pm.parsing.library.PackageBackwardCompatibility;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.PackageStateUtils;
 
 import dalvik.system.VMRuntime;
 
@@ -410,16 +411,19 @@ final class ScanPackageUtils {
 
         // Take care of first install / last update times.
         final long scanFileTime = getLastModifiedTime(parsedPackage);
+        final long existingFirstInstallTime = userId == UserHandle.USER_ALL
+                ? PackageStateUtils.getEarliestFirstInstallTime(pkgSetting.getUserStates())
+                : pkgSetting.readUserState(userId).getFirstInstallTime();
         if (currentTime != 0) {
-            if (pkgSetting.getFirstInstallTime() == 0) {
-                pkgSetting.setFirstInstallTime(currentTime)
+            if (existingFirstInstallTime == 0) {
+                pkgSetting.setFirstInstallTime(currentTime, userId)
                         .setLastUpdateTime(currentTime);
             } else if ((scanFlags & SCAN_UPDATE_TIME) != 0) {
                 pkgSetting.setLastUpdateTime(currentTime);
             }
-        } else if (pkgSetting.getFirstInstallTime() == 0) {
-            // We need *something*.  Take time time stamp of the file.
-            pkgSetting.setFirstInstallTime(scanFileTime)
+        } else if (existingFirstInstallTime == 0) {
+            // We need *something*.  Take time stamp of the file.
+            pkgSetting.setFirstInstallTime(scanFileTime, userId)
                     .setLastUpdateTime(scanFileTime);
         } else if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0) {
             if (scanFileTime != pkgSetting.getLastModifiedTime()) {
