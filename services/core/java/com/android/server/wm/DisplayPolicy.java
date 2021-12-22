@@ -2840,8 +2840,7 @@ public class DisplayPolicy {
 
     @VisibleForTesting
     int updateLightNavigationBarLw(int appearance, WindowState navColorWin) {
-        if (navColorWin == null || navColorWin.isDimming()
-                || !isLightBarAllowed(navColorWin, Type.navigationBars())) {
+        if (navColorWin == null || !isLightBarAllowed(navColorWin, Type.navigationBars())) {
             // Clear the light flag while not allowed.
             appearance &= ~APPEARANCE_LIGHT_NAVIGATION_BARS;
             return appearance;
