@@ -23,7 +23,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.debug.AdbManager;
+import android.debug.IAdbManager;
+import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -105,6 +112,7 @@ public final class AdbDebuggingManagerTest {
     public void tearDown() throws Exception {
         mKeyStore.deleteKeyStore();
         setAllowedConnectionTime(mOriginalAllowedConnectionTime);
+        dropShellPermissionIdentity();
     }
 
     /**
@@ -811,6 +819,108 @@ public final class AdbDebuggingManagerTest {
         }
 
         return hasAtLeastOneLetter;
+    }
+
+    CountDownLatch mAdbActionLatch = new CountDownLatch(1);
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Log.i(TAG, "Received intent action=" + action);
+            if (AdbManager.WIRELESS_DEBUG_PAIRED_DEVICES_ACTION.equals(action)) {
+                assertEquals("Received broadcast without MANAGE_DEBUGGING permission.",
+                        context.checkSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING),
+                        PackageManager.PERMISSION_GRANTED);
+                Log.i(TAG, "action=" + action + " paired_device=" + intent.getSerializableExtra(
+                        AdbManager.WIRELESS_DEVICES_EXTRA).toString());
+                mAdbActionLatch.countDown();
+            } else if (AdbManager.WIRELESS_DEBUG_STATE_CHANGED_ACTION.equals(action)) {
+                assertEquals("Received broadcast without MANAGE_DEBUGGING permission.",
+                        context.checkSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING),
+                        PackageManager.PERMISSION_GRANTED);
+                int status = intent.getIntExtra(AdbManager.WIRELESS_STATUS_EXTRA,
+                        AdbManager.WIRELESS_STATUS_DISCONNECTED);
+                Log.i(TAG, "action=" + action + " status=" + status);
+                mAdbActionLatch.countDown();
+            } else if (AdbManager.WIRELESS_DEBUG_PAIRING_RESULT_ACTION.equals(action)) {
+                assertEquals("Received broadcast without MANAGE_DEBUGGING permission.",
+                        context.checkSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING),
+                        PackageManager.PERMISSION_GRANTED);
+                Integer res = intent.getIntExtra(
+                        AdbManager.WIRELESS_STATUS_EXTRA,
+                        AdbManager.WIRELESS_STATUS_FAIL);
+                Log.i(TAG, "action=" + action + " result=" + res);
+
+                if (res.equals(AdbManager.WIRELESS_STATUS_PAIRING_CODE)) {
+                    String pairingCode = intent.getStringExtra(
+                                AdbManager.WIRELESS_PAIRING_CODE_EXTRA);
+                    Log.i(TAG, "pairingCode=" + pairingCode);
+                } else if (res.equals(AdbManager.WIRELESS_STATUS_CONNECTED)) {
+                    int port = intent.getIntExtra(AdbManager.WIRELESS_DEBUG_PORT_EXTRA, 0);
+                    Log.i(TAG, "port=" + port);
+                }
+                mAdbActionLatch.countDown();
+            }
+        }
+    };
+
+    private void adoptShellPermissionIdentity() {
+        InstrumentationRegistry.getInstrumentation().getUiAutomation()
+            .adoptShellPermissionIdentity(android.Manifest.permission.MANAGE_DEBUGGING);
+    }
+
+    private void dropShellPermissionIdentity() {
+        InstrumentationRegistry.getInstrumentation().getUiAutomation()
+            .dropShellPermissionIdentity();
+    }
+
+    @Test
+    public void testBroadcastReceiverWithPermissions() throws Exception {
+        adoptShellPermissionIdentity();
+        final IAdbManager mAdbManager = IAdbManager.Stub.asInterface(
+                ServiceManager.getService(Context.ADB_SERVICE));
+        IntentFilter intentFilter =
+                new IntentFilter(AdbManager.WIRELESS_DEBUG_PAIRED_DEVICES_ACTION);
+        intentFilter.addAction(AdbManager.WIRELESS_DEBUG_STATE_CHANGED_ACTION);
+        intentFilter.addAction(AdbManager.WIRELESS_DEBUG_PAIRING_RESULT_ACTION);
+        assertEquals("Context does not have MANAGE_DEBUGGING permission.",
+                mContext.checkSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING),
+                PackageManager.PERMISSION_GRANTED);
+        try {
+            mContext.registerReceiver(mReceiver, intentFilter);
+            mAdbManager.enablePairingByPairingCode();
+            if (!mAdbActionLatch.await(TIMEOUT, TIMEOUT_TIME_UNIT)) {
+                fail("Receiver did not receive adb intent action within the timeout duration");
+            }
+        } finally {
+            mContext.unregisterReceiver(mReceiver);
+        }
+    }
+
+    @Test
+    public void testBroadcastReceiverWithoutPermissions() throws Exception {
+        adoptShellPermissionIdentity();
+        final IAdbManager mAdbManager = IAdbManager.Stub.asInterface(
+                ServiceManager.getService(Context.ADB_SERVICE));
+        IntentFilter intentFilter =
+                new IntentFilter(AdbManager.WIRELESS_DEBUG_PAIRED_DEVICES_ACTION);
+        intentFilter.addAction(AdbManager.WIRELESS_DEBUG_STATE_CHANGED_ACTION);
+        intentFilter.addAction(AdbManager.WIRELESS_DEBUG_PAIRING_RESULT_ACTION);
+        mAdbManager.enablePairingByPairingCode();
+
+        dropShellPermissionIdentity();
+        assertEquals("Context has MANAGE_DEBUGGING permission.",
+                mContext.checkSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING),
+                PackageManager.PERMISSION_DENIED);
+        try {
+            mContext.registerReceiver(mReceiver, intentFilter);
+
+            if (mAdbActionLatch.await(TIMEOUT, TIMEOUT_TIME_UNIT)) {
+                fail("Broadcast receiver received adb action intent without debug permissions");
+            }
+        } finally {
+            mContext.unregisterReceiver(mReceiver);
+        }
     }
 
     /**
