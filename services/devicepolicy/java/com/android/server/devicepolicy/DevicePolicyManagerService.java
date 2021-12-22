@@ -17979,6 +17979,41 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         );
     }
 
+    private void validateCurrentWifiMeetsAdminRequirements() {
+        mInjector.binderWithCleanCallingIdentity(
+                () -> mInjector.getWifiManager().validateCurrentWifiMeetsAdminRequirements());
+    }
+
+    @Override
+    public void setMinimumRequiredWifiSecurityLevel(int level) {
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                isDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller),
+                "Wi-Fi minimum security level can only be controlled by a device owner or "
+                        + "a profile owner on an organization-owned device.");
+
+        boolean valueChanged = false;
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
+            if (admin.mWifiMinimumSecurityLevel != level) {
+                admin.mWifiMinimumSecurityLevel = level;
+                saveSettingsLocked(caller.getUserId());
+                valueChanged = true;
+            }
+        }
+        if (valueChanged) validateCurrentWifiMeetsAdminRequirements();
+    }
+
+    @Override
+    public int getMinimumRequiredWifiSecurityLevel() {
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                    UserHandle.USER_SYSTEM);
+            return (admin == null) ? DevicePolicyManager.WIFI_SECURITY_OPEN
+                    : admin.mWifiMinimumSecurityLevel;
+        }
+    }
+
     @Override
     public void setDrawables(@NonNull List<DevicePolicyDrawableResource> drawables) {
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(

@@ -145,6 +145,7 @@ class ActiveAdmin {
     private static final String TAG_PREFERENTIAL_NETWORK_SERVICE_ENABLED =
             "preferential-network-service-enabled";
     private static final String TAG_USB_DATA_SIGNALING = "usb-data-signaling";
+    private static final String TAG_WIFI_MIN_SECURITY = "wifi-min-security";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
     private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
@@ -297,6 +298,8 @@ class ActiveAdmin {
 
     private static final boolean USB_DATA_SIGNALING_ENABLED_DEFAULT = true;
     boolean mUsbDataSignalingEnabled = USB_DATA_SIGNALING_ENABLED_DEFAULT;
+
+    int mWifiMinimumSecurityLevel = DevicePolicyManager.WIFI_SECURITY_OPEN;
 
     ActiveAdmin(DeviceAdminInfo info, boolean isParent) {
         this.info = info;
@@ -574,6 +577,9 @@ class ActiveAdmin {
         if (mUsbDataSignalingEnabled != USB_DATA_SIGNALING_ENABLED_DEFAULT) {
             writeAttributeValueToXml(out, TAG_USB_DATA_SIGNALING, mUsbDataSignalingEnabled);
         }
+        if (mWifiMinimumSecurityLevel != DevicePolicyManager.WIFI_SECURITY_OPEN) {
+            writeAttributeValueToXml(out, TAG_WIFI_MIN_SECURITY, mWifiMinimumSecurityLevel);
+        }
     }
 
     void writeTextToXml(TypedXmlSerializer out, String tag, String text) throws IOException {
@@ -826,6 +832,8 @@ class ActiveAdmin {
             } else if (TAG_USB_DATA_SIGNALING.equals(tag)) {
                 mUsbDataSignalingEnabled = parser.getAttributeBoolean(null, ATTR_VALUE,
                         USB_DATA_SIGNALING_ENABLED_DEFAULT);
+            } else if (TAG_WIFI_MIN_SECURITY.equals(tag)) {
+                mWifiMinimumSecurityLevel = parser.getAttributeInt(null, ATTR_VALUE);
             } else {
                 Slogf.w(LOG_TAG, "Unknown admin tag: %s", tag);
                 XmlUtils.skipCurrentTag(parser);
@@ -1184,5 +1192,8 @@ class ActiveAdmin {
 
         pw.print("mUsbDataSignaling=");
         pw.println(mUsbDataSignalingEnabled);
+
+        pw.print("mWifiMinimumSecurityLevel=");
+        pw.println(mWifiMinimumSecurityLevel);
     }
 }
