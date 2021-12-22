@@ -158,6 +158,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private boolean mExitSplitScreenOnHide;
     private boolean mKeyguardOccluded;
     private boolean mDeviceSleep;
+    private boolean mIsDividerRemoteAnimating;
 
     @StageType
     private int mDismissTop = NO_DISMISS;
@@ -364,6 +365,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     void startTasksWithLegacyTransition(int mainTaskId, @Nullable Bundle mainOptions,
             int sideTaskId, @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
             float splitRatio, RemoteAnimationAdapter adapter) {
+        // Init divider first to make divider leash for remote animation target.
+        setDividerVisibility(true /* visible */);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         // Need to add another wrapper here in shell so that we can inject the divider bar
         // and also manage the process elevation via setRunningRemote
@@ -374,12 +377,23 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     RemoteAnimationTarget[] wallpapers,
                     RemoteAnimationTarget[] nonApps,
                     final IRemoteAnimationFinishedCallback finishedCallback) {
+                mIsDividerRemoteAnimating = true;
                 RemoteAnimationTarget[] augmentedNonApps =
                         new RemoteAnimationTarget[nonApps.length + 1];
                 for (int i = 0; i < nonApps.length; ++i) {
                     augmentedNonApps[i] = nonApps[i];
                 }
                 augmentedNonApps[augmentedNonApps.length - 1] = getDividerBarLegacyTarget();
+
+                IRemoteAnimationFinishedCallback wrapCallback =
+                        new IRemoteAnimationFinishedCallback.Stub() {
+                            @Override
+                            public void onAnimationFinished() throws RemoteException {
+                                mIsDividerRemoteAnimating = false;
+                                mSyncQueue.runInSync(t -> applyDividerVisibility(t));
+                                finishedCallback.onAnimationFinished();
+                            }
+                        };
                 try {
                     try {
                         ActivityTaskManager.getService().setRunningRemoteTransitionDelegate(
@@ -388,8 +402,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         Slog.e(TAG, "Unable to boost animation thread. This should only happen"
                                 + " during unit tests");
                     }
-                    adapter.getRunner().onAnimationStart(transit, apps, wallpapers, nonApps,
-                            finishedCallback);
+                    adapter.getRunner().onAnimationStart(transit, apps, wallpapers,
+                            augmentedNonApps, wrapCallback);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error starting remote animation", e);
                 }
@@ -397,6 +411,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
             @Override
             public void onAnimationCancelled() {
+                mIsDividerRemoteAnimating = false;
                 try {
                     adapter.getRunner().onAnimationCancelled();
                 } catch (RemoteException e) {
@@ -832,7 +847,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     private void setDividerVisibility(boolean visible) {
-        if (mDividerVisible == visible) return;
+        if (mIsDividerRemoteAnimating || mDividerVisible == visible) return;
         mDividerVisible = visible;
         if (visible) {
             mSplitLayout.init();
@@ -880,10 +895,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     private void applyDividerVisibility(SurfaceControl.Transaction t) {
+        if  (mIsDividerRemoteAnimating) return;
+
         final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
-        if (dividerLeash == null) {
-            return;
-        }
+        if (dividerLeash == null) return;
 
         if (mDividerVisible) {
             t.show(dividerLeash)
