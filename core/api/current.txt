@@ -61,6 +61,7 @@ package android {
     field public static final String BLUETOOTH_PRIVILEGED = "android.permission.BLUETOOTH_PRIVILEGED";
     field public static final String BLUETOOTH_SCAN = "android.permission.BLUETOOTH_SCAN";
     field public static final String BODY_SENSORS = "android.permission.BODY_SENSORS";
+    field public static final String BODY_SENSORS_BACKGROUND = "android.permission.BODY_SENSORS_BACKGROUND";
     field public static final String BROADCAST_PACKAGE_REMOVED = "android.permission.BROADCAST_PACKAGE_REMOVED";
     field public static final String BROADCAST_SMS = "android.permission.BROADCAST_SMS";
     field public static final String BROADCAST_STICKY = "android.permission.BROADCAST_STICKY";
