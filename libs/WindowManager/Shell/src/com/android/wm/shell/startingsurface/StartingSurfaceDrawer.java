@@ -269,16 +269,12 @@ public class StartingSurfaceDrawer {
         // touchable or focusable by the user.  We also add in the ALT_FOCUSABLE_IM
         // flag because we do know that the next window will take input
         // focus, so we want to get the IME window up on top of us right away.
-        windowFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        windowFlags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         params.flags = windowFlags;
         params.token = appToken;
         params.packageName = activityInfo.packageName;
         params.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
-        // Setting as trusted overlay to let touches pass through. This is safe because this
-        // window is controlled by the system.
-        params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
         if (!context.getResources().getCompatibilityInfo().supportsScreen()) {
             params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
