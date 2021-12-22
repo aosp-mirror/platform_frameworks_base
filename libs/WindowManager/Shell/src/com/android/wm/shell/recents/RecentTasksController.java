@@ -25,6 +25,7 @@ import android.app.ActivityTaskManager;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.os.RemoteException;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -316,6 +317,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                     (controller) -> out[0] = controller.getRecentTasks(maxNum, flags, userId)
                             .toArray(new GroupedRecentTaskInfo[0]),
                     true /* blocking */);
+            Slog.d("b/206648922", "getRecentTasks(" + maxNum + "): " + out[0]);
             return out[0];
         }
     }
