@@ -36,6 +36,8 @@ import com.android.internal.compat.AndroidBuildClassifier;
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.compat.CompatibilityChangeInfo;
 import com.android.internal.compat.CompatibilityOverrideConfig;
+import com.android.internal.compat.CompatibilityOverridesByPackageConfig;
+import com.android.internal.compat.CompatibilityOverridesToRemoveByPackageConfig;
 import com.android.internal.compat.CompatibilityOverridesToRemoveConfig;
 import com.android.internal.compat.IOverrideValidator;
 import com.android.internal.compat.OverrideAllowedState;
@@ -220,14 +222,46 @@ final class CompatConfig {
     }
 
     /**
-     * Overrides the enabled state for a given change and app.
+     * Adds compat config overrides for multiple packages.
      *
+     * <p>Equivalent to calling
+     * {@link #addPackageOverrides(CompatibilityOverrideConfig, String, boolean)} on each entry
+     * in {@code overridesByPackage}, but the state of the compat config will be updated only
+     * once instead of for each package.
      *
-     * @param overrides            list of overrides to default changes config.
-     * @param packageName          app for which the overrides will be applied.
+     * @param overridesByPackage map from package name to compat config overrides to add for that
+     *                           package.
+     * @param skipUnknownChangeIds whether to skip unknown change IDs in {@code overridesByPackage}.
+     */
+    synchronized void addAllPackageOverrides(
+            CompatibilityOverridesByPackageConfig overridesByPackage,
+            boolean skipUnknownChangeIds) {
+        for (String packageName : overridesByPackage.packageNameToOverrides.keySet()) {
+            addPackageOverridesWithoutSaving(
+                    overridesByPackage.packageNameToOverrides.get(packageName), packageName,
+                    skipUnknownChangeIds);
+        }
+        saveOverrides();
+        invalidateCache();
+    }
+
+    /**
+     * Adds compat config overrides for a given package.
+     *
+     * <p>Note, package overrides are not persistent and will be lost on system or runtime restart.
+     *
+     * @param overrides   list of compat config overrides to add for the given package.
+     * @param packageName app for which the overrides will be applied.
      * @param skipUnknownChangeIds whether to skip unknown change IDs in {@code overrides}.
      */
     synchronized void addPackageOverrides(CompatibilityOverrideConfig overrides,
+            String packageName, boolean skipUnknownChangeIds) {
+        addPackageOverridesWithoutSaving(overrides, packageName, skipUnknownChangeIds);
+        saveOverrides();
+        invalidateCache();
+    }
+
+    private void addPackageOverridesWithoutSaving(CompatibilityOverrideConfig overrides,
             String packageName, boolean skipUnknownChangeIds) {
         for (Long changeId : overrides.overrides.keySet()) {
             if (skipUnknownChangeIds && !isKnownChangeId(changeId)) {
@@ -237,8 +271,6 @@ final class CompatConfig {
             }
             addOverrideUnsafe(changeId, packageName, overrides.overrides.get(changeId));
         }
-        saveOverrides();
-        invalidateCache();
     }
 
     private boolean addOverrideUnsafe(long changeId, String packageName,
@@ -344,6 +376,36 @@ final class CompatConfig {
     }
 
     /**
+     * Removes overrides with a specified change ID that were previously added via
+     * {@link #addOverride(long, String, boolean)} or
+     * {@link #addPackageOverrides(CompatibilityOverrideConfig, String, boolean)} for multiple
+     * packages.
+     *
+     * <p>Equivalent to calling
+     * {@link #removePackageOverrides(CompatibilityOverridesToRemoveConfig, String)} on each entry
+     * in {@code overridesToRemoveByPackage}, but the state of the compat config will be updated
+     * only once instead of for each package.
+     *
+     * @param overridesToRemoveByPackage map from package name to a list of change IDs for
+     *                                   which to restore the default behaviour for that
+     *                                   package.
+     */
+    synchronized void removeAllPackageOverrides(
+            CompatibilityOverridesToRemoveByPackageConfig overridesToRemoveByPackage) {
+        boolean shouldInvalidateCache = false;
+        for (String packageName :
+                overridesToRemoveByPackage.packageNameToOverridesToRemove.keySet()) {
+            shouldInvalidateCache |= removePackageOverridesWithoutSaving(
+                    overridesToRemoveByPackage.packageNameToOverridesToRemove.get(packageName),
+                    packageName);
+        }
+        if (shouldInvalidateCache) {
+            saveOverrides();
+            invalidateCache();
+        }
+    }
+
+    /**
      * Removes all overrides previously added via {@link #addOverride(long, String, boolean)} or
      * {@link #addPackageOverrides(CompatibilityOverrideConfig, String, boolean)} for a certain
      * package.
@@ -377,6 +439,16 @@ final class CompatConfig {
      */
     synchronized void removePackageOverrides(CompatibilityOverridesToRemoveConfig overridesToRemove,
             String packageName) {
+        boolean shouldInvalidateCache = removePackageOverridesWithoutSaving(overridesToRemove,
+                packageName);
+        if (shouldInvalidateCache) {
+            saveOverrides();
+            invalidateCache();
+        }
+    }
+
+    private boolean removePackageOverridesWithoutSaving(
+            CompatibilityOverridesToRemoveConfig overridesToRemove, String packageName) {
         boolean shouldInvalidateCache = false;
         for (Long changeId : overridesToRemove.changeIds) {
             if (!isKnownChangeId(changeId)) {
@@ -386,10 +458,7 @@ final class CompatConfig {
             }
             shouldInvalidateCache |= removeOverrideUnsafe(changeId, packageName);
         }
-        if (shouldInvalidateCache) {
-            saveOverrides();
-            invalidateCache();
-        }
+        return shouldInvalidateCache;
     }
 
     private long[] getAllowedChangesSinceTargetSdkForPackage(String packageName,
