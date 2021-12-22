@@ -46,6 +46,7 @@ import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
@@ -98,7 +99,7 @@ public class InputMethodMenuController {
         int lastInputMethodSubtypeId = mSettings.getSelectedInputMethodSubtypeId(lastInputMethodId);
         if (DEBUG) Slog.v(TAG, "Current IME: " + lastInputMethodId);
 
-        synchronized (mMethodMap) {
+        synchronized (ImfLock.class) {
             final List<ImeSubtypeListItem> imList = mSwitchingController
                     .getSortedInputMethodAndSubtypeListForImeMenuLocked(
                             showAuxSubtypes, isScreenLocked);
@@ -112,7 +113,7 @@ public class InputMethodMenuController {
                 final InputMethodSubtype currentSubtype =
                         mService.getCurrentInputMethodSubtypeLocked();
                 if (currentSubtype != null) {
-                    final String curMethodId = mService.getCurrentMethodId();
+                    final String curMethodId = mService.getSelectedMethodIdLocked();
                     final InputMethodInfo currentImi = mMethodMap.get(curMethodId);
                     lastInputMethodSubtypeId = InputMethodUtils.getSubtypeIdFromHashCode(
                             currentImi, currentSubtype.hashCode());
@@ -175,7 +176,7 @@ public class InputMethodMenuController {
             final ImeSubtypeListAdapter adapter = new ImeSubtypeListAdapter(dialogContext,
                     com.android.internal.R.layout.input_method_switch_item, imList, checkedItem);
             final DialogInterface.OnClickListener choiceListener = (dialog, which) -> {
-                synchronized (mMethodMap) {
+                synchronized (ImfLock.class) {
                     if (mIms == null || mIms.length <= which || mSubtypeIds == null
                             || mSubtypeIds.length <= which) {
                         return;
@@ -250,11 +251,12 @@ public class InputMethodMenuController {
     }
 
     void hideInputMethodMenu() {
-        synchronized (mMethodMap) {
+        synchronized (ImfLock.class) {
             hideInputMethodMenuLocked();
         }
     }
 
+    @GuardedBy("ImfLock.class")
     void hideInputMethodMenuLocked() {
         if (DEBUG) Slog.v(TAG, "Hide switching menu");
 
@@ -299,7 +301,7 @@ public class InputMethodMenuController {
             if (DEBUG) {
                 Slog.w(TAG, "HardKeyboardStatusChanged: available=" + available);
             }
-            synchronized (mMethodMap) {
+            synchronized (ImfLock.class) {
                 if (mSwitchingDialog != null && mSwitchingDialogTitleView != null
                         && mSwitchingDialog.isShowing()) {
                     mSwitchingDialogTitleView.findViewById(
