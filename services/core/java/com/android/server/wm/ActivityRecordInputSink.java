@@ -55,12 +55,12 @@ class ActivityRecordInputSink {
 
     private final ActivityRecord mActivityRecord;
     private final boolean mIsCompatEnabled;
+    private final String mName;
 
     // Hold on to InputEventReceiver to prevent it from getting GCd.
     private InputEventReceiver mInputEventReceiver;
     private InputWindowHandleWrapper mInputWindowHandleWrapper;
-    private final String mName = Integer.toHexString(System.identityHashCode(this))
-            + " ActivityRecordInputSink";
+
     private int mRapidTouchCount = 0;
     private IBinder mToken;
     private boolean mDisabled = false;
@@ -69,6 +69,8 @@ class ActivityRecordInputSink {
         mActivityRecord = activityRecord;
         mIsCompatEnabled = CompatChanges.isChangeEnabled(ENABLE_TOUCH_OPAQUE_ACTIVITIES,
                 mActivityRecord.getUid());
+        mName = Integer.toHexString(System.identityHashCode(this)) + " ActivityRecordInputSink "
+                + mActivityRecord.mActivityComponent.getShortClassName();
     }
 
     public void applyChangesToSurfaceIfChanged(
@@ -90,11 +92,6 @@ class ActivityRecordInputSink {
         if (mDisabled || !mIsCompatEnabled || mActivityRecord.isAnimating(TRANSITION | PARENTS,
                 ANIMATION_TYPE_APP_TRANSITION)) {
             // TODO(b/208662670): Investigate if we can have feature active during animations.
-            mInputWindowHandleWrapper.setToken(null);
-        } else if (mActivityRecord.mStartingData != null) {
-            // TODO(b/208659130): Remove this special case
-            // Don't block touches during splash screen. This is done to not show toasts for
-            // touches passing through splash screens. b/171772640
             mInputWindowHandleWrapper.setToken(null);
         } else {
             mInputWindowHandleWrapper.setToken(mToken);
