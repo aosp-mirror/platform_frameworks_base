@@ -1685,14 +1685,12 @@ public class LauncherAppsService extends SystemService {
                             continue;
                         }
                         final String[] filteredPackagesWithoutExtras =
-                                getFilteredPackageNames(packages, cookie);
-                        // If all packages are filtered, skip notifying listener.
-                        if (ArrayUtils.isEmpty(filteredPackagesWithoutExtras)) {
-                            continue;
-                        }
+                                getFilteredPackageNames(packagesNullExtras, cookie);
                         try {
-                            listener.onPackagesSuspended(user, filteredPackagesWithoutExtras,
-                                    /* launcherExtras= */ null);
+                            if (!ArrayUtils.isEmpty(filteredPackagesWithoutExtras)) {
+                                listener.onPackagesSuspended(user, filteredPackagesWithoutExtras,
+                                        /* launcherExtras= */ null);
+                            }
                             for (int idx = 0; idx < packagesWithExtras.size(); idx++) {
                                 Pair<String, Bundle> packageExtraPair = packagesWithExtras.get(idx);
                                 if (!isPackageVisibleToListener(packageExtraPair.first, cookie)) {
