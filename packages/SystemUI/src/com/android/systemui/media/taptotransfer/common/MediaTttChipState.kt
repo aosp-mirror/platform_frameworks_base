@@ -22,7 +22,9 @@ import android.graphics.drawable.Drawable
  * A superclass chip state that will be subclassed by the sender chip and receiver chip.
  *
  * @property appIconDrawable a drawable representing the icon of the app playing the media.
+ * @property appIconContentDescription a string to use as the content description for the icon.
  */
 open class MediaTttChipState(
-    internal val appIconDrawable: Drawable
+    internal val appIconDrawable: Drawable,
+    internal val appIconContentDescription: String
 )
