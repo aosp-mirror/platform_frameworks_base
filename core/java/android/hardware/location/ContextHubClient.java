@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A class describing a client of the Context Hub Service.
- *
+ * <p>
  * Clients can send messages to nanoapps at a Context Hub through this object. The APIs supported
  * by this object are thread-safe and can be used without external synchronization.
  *
@@ -110,7 +110,7 @@ public class ContextHubClient implements Closeable {
      * This value can be used as an identifier for the messaging channel between a
      * ContextHubClient and the Context Hub. This may be used as a routing mechanism
      * between various ContextHubClient objects within an application.
-     *
+     * <p>
      * The value returned by this method will remain the same if it is associated with
      * the same client reference at the ContextHubService (for instance, the ID of a
      * PendingIntent ContextHubClient will remain the same even if the local object
@@ -119,8 +119,6 @@ public class ContextHubClient implements Closeable {
      * of a non-equal PendingIntent client), the ID will not be the same.
      *
      * @return The ID of this ContextHubClient.
-     *
-     * @throws IllegalStateException if the ID was not set internally.
      */
     public int getId() {
         if (mId == null) {
@@ -135,7 +133,7 @@ public class ContextHubClient implements Closeable {
      * When this function is invoked, the messaging associated with this client is invalidated.
      * All futures messages targeted for this client are dropped at the service, and the
      * ContextHubClient is unregistered from the service.
-     *
+     * <p>
      * If this object has a PendingIntent, i.e. the object was generated via
      * {@link ContextHubManager.createClient(PendingIntent, ContextHubInfo, long)}, then the
      * Intent events corresponding to the PendingIntent will no longer be triggered.
@@ -158,7 +156,7 @@ public class ContextHubClient implements Closeable {
      *
      * This function returns RESULT_SUCCESS if the message has reached the HAL, but
      * does not guarantee delivery of the message to the target nanoapp.
-     *
+     * <p>
      * Before sending the first message to your nanoapp, it's recommended that the following
      * operations should be performed:
      * 1) Invoke {@link ContextHubManager#queryNanoApps(ContextHubInfo)} to verify the nanoapp is
