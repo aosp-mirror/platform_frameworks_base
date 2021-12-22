@@ -166,4 +166,9 @@
     <item msgid="146088982397753810">"बंद है"</item>
     <item msgid="460891964396502657">"चालू है"</item>
   </string-array>
+  <string-array name="tile_states_fgsmanager">
+    <item msgid="3054341646818213094">"उपलब्ध नहीं है"</item>
+    <item msgid="5581384648880018330">"बंद है"</item>
+    <item msgid="8000850843692192257">"चालू है"</item>
+  </string-array>
 </resources>
