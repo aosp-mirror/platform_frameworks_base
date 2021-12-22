@@ -363,7 +363,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel, RemoteAnimationTarget[] apps) {
-        if (!isSplitScreenVisible()) return null;
+        if (apps.length < 2) return null;
         final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
                 .setContainerLayer()
                 .setName("RecentsAnimationSplitTasks")
