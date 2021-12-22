@@ -1348,7 +1348,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
                             Settings.Global.CONNECTIVITY_CHANGE_DELAY,
                             Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED,
                             Settings.Global.CAPTIVE_PORTAL_SERVER,
-                            Settings.Global.NSD_ON,
                             Settings.Global.SET_INSTALL_LOCATION,
                             Settings.Global.DEFAULT_INSTALL_LOCATION,
                             Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY,
