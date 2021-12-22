@@ -33,7 +33,6 @@ import android.os.ServiceSpecificException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
 
@@ -41,6 +40,7 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
+import java.util.Objects;
 
 /**
  * This class represents a transform, which roughly corresponds to an IPsec Security Association.
@@ -255,7 +255,7 @@ public final class IpSecTransform implements AutoCloseable {
         @NonNull
         public IpSecTransform.Builder setEncryption(@NonNull IpSecAlgorithm algo) {
             // TODO: throw IllegalArgumentException if algo is not an encryption algorithm.
-            Preconditions.checkNotNull(algo);
+            Objects.requireNonNull(algo);
             mConfig.setEncryption(algo);
             return this;
         }
@@ -270,7 +270,7 @@ public final class IpSecTransform implements AutoCloseable {
         @NonNull
         public IpSecTransform.Builder setAuthentication(@NonNull IpSecAlgorithm algo) {
             // TODO: throw IllegalArgumentException if algo is not an authentication algorithm.
-            Preconditions.checkNotNull(algo);
+            Objects.requireNonNull(algo);
             mConfig.setAuthentication(algo);
             return this;
         }
@@ -290,7 +290,7 @@ public final class IpSecTransform implements AutoCloseable {
          */
         @NonNull
         public IpSecTransform.Builder setAuthenticatedEncryption(@NonNull IpSecAlgorithm algo) {
-            Preconditions.checkNotNull(algo);
+            Objects.requireNonNull(algo);
             mConfig.setAuthenticatedEncryption(algo);
             return this;
         }
@@ -311,7 +311,7 @@ public final class IpSecTransform implements AutoCloseable {
         @NonNull
         public IpSecTransform.Builder setIpv4Encapsulation(
                 @NonNull IpSecManager.UdpEncapsulationSocket localSocket, int remotePort) {
-            Preconditions.checkNotNull(localSocket);
+            Objects.requireNonNull(localSocket);
             mConfig.setEncapType(ENCAP_ESPINUDP);
             if (localSocket.getResourceId() == INVALID_RESOURCE_ID) {
                 throw new IllegalArgumentException("Invalid UdpEncapsulationSocket");
@@ -348,8 +348,8 @@ public final class IpSecTransform implements AutoCloseable {
                 @NonNull IpSecManager.SecurityParameterIndex spi)
                 throws IpSecManager.ResourceUnavailableException,
                         IpSecManager.SpiUnavailableException, IOException {
-            Preconditions.checkNotNull(sourceAddress);
-            Preconditions.checkNotNull(spi);
+            Objects.requireNonNull(sourceAddress);
+            Objects.requireNonNull(spi);
             if (spi.getResourceId() == INVALID_RESOURCE_ID) {
                 throw new IllegalArgumentException("Invalid SecurityParameterIndex");
             }
@@ -387,8 +387,8 @@ public final class IpSecTransform implements AutoCloseable {
                 @NonNull IpSecManager.SecurityParameterIndex spi)
                 throws IpSecManager.ResourceUnavailableException,
                         IpSecManager.SpiUnavailableException, IOException {
-            Preconditions.checkNotNull(sourceAddress);
-            Preconditions.checkNotNull(spi);
+            Objects.requireNonNull(sourceAddress);
+            Objects.requireNonNull(spi);
             if (spi.getResourceId() == INVALID_RESOURCE_ID) {
                 throw new IllegalArgumentException("Invalid SecurityParameterIndex");
             }
@@ -404,7 +404,7 @@ public final class IpSecTransform implements AutoCloseable {
          * @param context current context
          */
         public Builder(@NonNull Context context) {
-            Preconditions.checkNotNull(context);
+            Objects.requireNonNull(context);
             mContext = context;
             mConfig = new IpSecConfig();
         }
