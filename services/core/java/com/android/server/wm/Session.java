@@ -45,7 +45,6 @@ import android.content.ClipDescription;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ShortcutServiceInternal;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
@@ -225,14 +224,14 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
             ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Point outSurfaceSize) {
+            InsetsSourceControl[] outActiveControls) {
         if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
         int res = mService.relayoutWindow(this, window, attrs,
                 requestedWidth, requestedHeight, viewFlags, flags, frameNumber,
                 outFrames, mergedConfiguration, outSurfaceControl, outInsetsState,
-                outActiveControls, outSurfaceSize);
+                outActiveControls);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());
