@@ -258,6 +258,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_JOB_SCHEDULER = "jobscheduler";
 
     /**
+     * Namespace for all lmkd related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_LMKD_NATIVE = "lmkd_native";
+
+    /**
      * Namespace for all location related features.
      *
      * @hide
