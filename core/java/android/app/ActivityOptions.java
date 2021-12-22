@@ -380,6 +380,8 @@ public class ActivityOptions extends ComponentOptions {
     public static final int ANIM_OPEN_CROSS_PROFILE_APPS = 12;
     /** @hide */
     public static final int ANIM_REMOTE_ANIMATION = 13;
+    /** @hide */
+    public static final int ANIM_FROM_STYLE = 14;
 
     private String mPackageName;
     private Rect mLaunchBounds;
