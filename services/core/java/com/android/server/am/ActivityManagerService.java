@@ -4856,6 +4856,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        if (!badApp) {
+            updateUidReadyForBootCompletedBroadcastLocked(app.uid);
+        }
+
         // Check if a next-broadcast receiver is in this process...
         if (!badApp && isPendingBroadcastProcessLocked(pid)) {
             try {
@@ -6482,7 +6486,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         return isBackgroundRestrictedNoCheck(callingUid, packageName);
     }
 
-    boolean isBackgroundRestrictedNoCheck(final int uid, final String packageName) {
+    @VisibleForTesting
+    public boolean isBackgroundRestrictedNoCheck(final int uid, final String packageName) {
         final int mode = getAppOpsManager().checkOpNoThrow(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND,
                 uid, packageName);
         return mode != AppOpsManager.MODE_ALLOWED;
@@ -12762,6 +12767,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             didSomething |= queue.sendPendingBroadcastsLocked(app);
         }
         return didSomething;
+    }
+
+    void updateUidReadyForBootCompletedBroadcastLocked(int uid) {
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.updateUidReadyForBootCompletedBroadcastLocked(uid);
+            queue.scheduleBroadcastsLocked();
+        }
     }
 
     /**
