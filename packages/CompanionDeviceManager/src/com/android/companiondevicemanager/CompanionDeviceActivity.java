@@ -95,6 +95,9 @@ public class CompanionDeviceActivity extends Activity {
     // an association to CDM.
     private boolean mApproved;
     private boolean mCancelled;
+    // A reference to the device selected by the user, to be sent back to the application via
+    // onActivityResult() after the association is created.
+    private @Nullable DeviceFilterPair<?> mSelectedDevice;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -203,6 +206,17 @@ public class CompanionDeviceActivity extends Activity {
         }
     }
 
+    private void onUserSelectedDevice(@NonNull DeviceFilterPair<?> selectedDevice) {
+        if (mSelectedDevice != null) {
+            if (DEBUG) Log.w(TAG, "Already selected.");
+            return;
+        }
+        mSelectedDevice = requireNonNull(selectedDevice);
+
+        final MacAddress macAddress = selectedDevice.getMacAddress();
+        onAssociationApproved(macAddress);
+    }
+
     private void onAssociationApproved(@Nullable MacAddress macAddress) {
         if (isDone()) {
             if (DEBUG) Log.w(TAG, "Already done: " + (mApproved ? "Approved" : "Cancelled"));
@@ -271,8 +285,7 @@ public class CompanionDeviceActivity extends Activity {
         if (association != null) {
             data.putExtra(CompanionDeviceManager.EXTRA_ASSOCIATION, association);
             if (!association.isSelfManaged()) {
-                data.putExtra(CompanionDeviceManager.EXTRA_DEVICE,
-                        association.getDeviceMacAddressAsString());
+                data.putExtra(CompanionDeviceManager.EXTRA_DEVICE, mSelectedDevice.getDevice());
             }
         }
         setResult(association != null ? RESULT_OK : RESULT_CANCELED, data);
@@ -369,8 +382,7 @@ public class CompanionDeviceActivity extends Activity {
         if (DEBUG) Log.d(TAG, "onListItemClick() " + position);
 
         final DeviceFilterPair<?> selectedDevice = mAdapter.getItem(position);
-        final MacAddress macAddress = selectedDevice.getMacAddress();
-        onAssociationApproved(macAddress);
+        onUserSelectedDevice(selectedDevice);
     }
 
     private void onPositiveButtonClick(View v) {
@@ -379,15 +391,13 @@ public class CompanionDeviceActivity extends Activity {
         // Disable the button, to prevent more clicks.
         v.setEnabled(false);
 
-        final MacAddress macAddress;
         if (mRequest.isSelfManaged()) {
-            macAddress = null;
+            onAssociationApproved(null);
         } else {
-            // TODO: implement.
+            // TODO(b/211722613): call onUserSelectedDevice().
             throw new UnsupportedOperationException(
                     "isSingleDevice() requests are not supported yet.");
         }
-        onAssociationApproved(macAddress);
     }
 
     private void onNegativeButtonClick(View v) {
