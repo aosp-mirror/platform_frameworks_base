@@ -24,15 +24,13 @@ import static android.net.TrafficStats.UID_TETHERING;
 import android.Manifest;
 import android.annotation.IntDef;
 import android.app.AppOpsManager;
-import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
-
-import com.android.server.LocalServices;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -109,8 +107,7 @@ public final class NetworkStatsAccess {
     /** Returns the {@link NetworkStatsAccess.Level} for the given caller. */
     public static @NetworkStatsAccess.Level int checkAccessLevel(
             Context context, int callingUid, String callingPackage) {
-        final DevicePolicyManagerInternal dpmi = LocalServices.getService(
-                DevicePolicyManagerInternal.class);
+        final DevicePolicyManager mDpm = context.getSystemService(DevicePolicyManager.class);
         final TelephonyManager tm = (TelephonyManager)
                 context.getSystemService(Context.TELEPHONY_SERVICE);
         boolean hasCarrierPrivileges;
@@ -123,8 +120,9 @@ public final class NetworkStatsAccess {
             Binder.restoreCallingIdentity(token);
         }
 
-        final boolean isDeviceOwner = dpmi != null && dpmi.isActiveDeviceOwner(callingUid);
+        final boolean isDeviceOwner = mDpm != null && mDpm.isDeviceOwnerApp(callingPackage);
         final int appId = UserHandle.getAppId(callingUid);
+
         if (hasCarrierPrivileges || isDeviceOwner
                 || appId == Process.SYSTEM_UID || appId == Process.NETWORK_STACK_UID) {
             // Carrier-privileged apps and device owners, and the system (including the
@@ -139,8 +137,8 @@ public final class NetworkStatsAccess {
         }
 
         //TODO(b/169395065) Figure out if this flow makes sense in Device Owner mode.
-        boolean isProfileOwner = dpmi != null && (dpmi.isActiveProfileOwner(callingUid)
-                || dpmi.isActiveDeviceOwner(callingUid));
+        boolean isProfileOwner = mDpm != null && (mDpm.isProfileOwnerApp(callingPackage)
+                || mDpm.isDeviceOwnerApp(callingPackage));
         if (isProfileOwner) {
             // Apps with the AppOps permission, profile owners, and apps with the privileged
             // permission can access data usage for all apps in this user/profile.
