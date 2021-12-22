@@ -699,6 +699,7 @@ package android.content {
     field public static final String FONT_SERVICE = "font";
     field public static final String POWER_EXEMPTION_SERVICE = "power_exemption";
     field @Deprecated public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
+    field @Deprecated public static final int RECEIVER_EXPORTED_UNAUDITED = 2; // 0x2
     field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 
