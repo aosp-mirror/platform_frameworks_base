@@ -35,6 +35,7 @@ import java.util.List;
 /**
  * Adapter for media output dynamic group dialog.
  */
+//TODO: clear this class after new UI updated
 public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
 
     private static final String TAG = "MediaOutputGroupAdapter";
@@ -96,7 +97,6 @@ public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
         @Override
         void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {
             super.onBind(device, topMargin, bottomMargin, position);
-            mAddIcon.setVisibility(View.GONE);
             mCheckBox.setVisibility(View.VISIBLE);
             mCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 onCheckBoxClicked(isChecked, device);
@@ -131,7 +131,6 @@ public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
                         false /* showSubtitle*/);
                 mTitleIcon.setImageDrawable(getSpeakerDrawable());
                 mCheckBox.setVisibility(View.GONE);
-                mAddIcon.setVisibility(View.GONE);
                 initSessionSeekbar();
             }
         }

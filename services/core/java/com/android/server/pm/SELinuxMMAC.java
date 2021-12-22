@@ -125,16 +125,10 @@ public final class SELinuxMMAC {
         }
 
         // Vendor mac permissions.
-        // The filename has been renamed from nonplat_mac_permissions to
-        // vendor_mac_permissions. Either of them should exist.
         final File vendorMacPermission = new File(
             Environment.getVendorDirectory(), "/etc/selinux/vendor_mac_permissions.xml");
         if (vendorMacPermission.exists()) {
             sMacPermissions.add(vendorMacPermission);
-        } else {
-            // For backward compatibility.
-            sMacPermissions.add(new File(Environment.getVendorDirectory(),
-                                         "/etc/selinux/nonplat_mac_permissions.xml"));
         }
 
         // ODM mac permissions (optional).

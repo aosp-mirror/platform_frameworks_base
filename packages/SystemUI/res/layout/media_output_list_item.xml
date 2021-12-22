@@ -96,26 +96,6 @@
                 android:textSize="14sp"
                 android:fontFamily="@*android:string/config_bodyFontFamily"
                 android:visibility="gone"/>
-            <ImageView
-                android:id="@+id/add_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="right"
-                android:layout_marginEnd="16dp"
-                android:layout_alignParentRight="true"
-                android:src="@drawable/ic_add"
-                android:tint="?android:attr/colorAccent"
-            />
-            <CheckBox
-                android:id="@+id/check_box"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="right"
-                android:layout_marginEnd="16dp"
-                android:layout_alignParentRight="true"
-                android:button="@drawable/ic_check_box"
-                android:visibility="gone"
-            />
         </RelativeLayout>
 
         <ProgressBar
@@ -139,5 +119,15 @@
             android:indeterminateOnly="true"
             android:importantForAccessibility="no"
             android:visibility="gone"/>
+
+        <CheckBox
+            android:id="@+id/check_box"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            android:layout_gravity="right|center"
+            android:button="@drawable/ic_circle_check_box"
+            android:visibility="gone"
+        />
     </FrameLayout>
 </LinearLayout>

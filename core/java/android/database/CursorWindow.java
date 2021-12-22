@@ -142,7 +142,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         if (mWindowPtr == 0) {
             throw new AssertionError(); // Not possible, the native code won't return it.
         }
-        mCloseGuard.open("close");
+        mCloseGuard.open("CursorWindow.close");
     }
 
     /**
@@ -170,7 +170,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
             throw new AssertionError(); // Not possible, the native code won't return it.
         }
         mName = nativeGetName(mWindowPtr);
-        mCloseGuard.open("close");
+        mCloseGuard.open("CursorWindow.close");
     }
 
     @Override

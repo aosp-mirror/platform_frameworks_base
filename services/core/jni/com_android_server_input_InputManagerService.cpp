@@ -2292,6 +2292,11 @@ static jboolean nativeFlushSensor(JNIEnv* env, jclass /* clazz */, jlong ptr, ji
                                                                       sensorType));
 }
 
+static void nativeCancelCurrentTouch(JNIEnv* env, jclass /* clazz */, jlong ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->getInputManager()->getDispatcher().cancelCurrentTouch();
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2371,6 +2376,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeEnableSensor", "(JIIII)Z", (void*)nativeEnableSensor},
         {"nativeDisableSensor", "(JII)V", (void*)nativeDisableSensor},
         {"nativeFlushSensor", "(JII)Z", (void*)nativeFlushSensor},
+        {"nativeCancelCurrentTouch", "(J)V", (void*)nativeCancelCurrentTouch},
 };
 
 #define FIND_CLASS(var, className) \

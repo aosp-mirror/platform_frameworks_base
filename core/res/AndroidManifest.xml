@@ -6071,6 +6071,13 @@
     <permission android:name="android.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES"
                 android:protectionLevel="signature|role" />
     
+    <!-- @SystemApi Allows an app to read whether SafetyCenter is enabled/disabled.
+             <p>Protection level: signature|privileged
+             @hide
+        -->
+    <permission android:name="android.permission.READ_SAFETY_CENTER_STATUS"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

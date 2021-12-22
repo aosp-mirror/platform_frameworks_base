@@ -131,7 +131,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
             false /* isStrongBiometric */)
 
         // THEN update sensor location and show ripple
-        verify(rippleView).setSensorLocation(fpsLocation)
+        verify(rippleView).setFingerprintSensorLocation(fpsLocation, -1f)
         verify(rippleView).startUnlockedRipple(any())
     }
 
@@ -292,10 +292,10 @@ class AuthRippleControllerTest : SysuiTestCase() {
 
         reset(rippleView)
         captor.value.onThemeChanged()
-        verify(rippleView).setColor(ArgumentMatchers.anyInt())
+        verify(rippleView).setLockScreenColor(ArgumentMatchers.anyInt())
 
         reset(rippleView)
         captor.value.onUiModeChanged()
-        verify(rippleView).setColor(ArgumentMatchers.anyInt())
+        verify(rippleView).setLockScreenColor(ArgumentMatchers.anyInt())
     }
 }

@@ -17,45 +17,51 @@
 package com.android.systemui.dreams;
 
 import androidx.annotation.NonNull;
+import androidx.concurrent.futures.CallbackToFutureAdapter;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.policy.CallbackController;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
 /**
- * {@link DreamOverlayStateController} is the source of truth for Dream overlay configurations.
- * Clients can register as listeners for changes to the overlay composition and can query for the
- * overlays on-demand.
+ * {@link DreamOverlayStateController} is the source of truth for Dream overlay configurations and
+ * state. Clients can register as listeners for changes to the overlay composition and can query for
+ * the complications on-demand.
  */
 @SysUISingleton
 public class DreamOverlayStateController implements
         CallbackController<DreamOverlayStateController.Callback> {
-    // A counter for guaranteeing unique overlay tokens within the scope of this state controller.
-    private int mNextOverlayTokenId = 0;
+    // A counter for guaranteeing unique complications tokens within the scope of this state
+    // controller.
+    private int mNextComplicationTokenId = 0;
 
     /**
-     * {@link OverlayToken} provides a unique key for identifying {@link OverlayProvider}
+     * {@link ComplicationToken} provides a unique key for identifying {@link ComplicationProvider}
      * instances registered with {@link DreamOverlayStateController}.
      */
-    public static class OverlayToken {
+    public static class ComplicationToken {
         private final int mId;
 
-        private OverlayToken(int id) {
+        private ComplicationToken(int id) {
             mId = id;
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof OverlayToken)) return false;
-            OverlayToken that = (OverlayToken) o;
+            if (!(o instanceof ComplicationToken)) return false;
+            ComplicationToken that = (ComplicationToken) o;
             return mId == that.mId;
         }
 
@@ -70,81 +76,97 @@ public class DreamOverlayStateController implements
      */
     public interface Callback {
         /**
-         * Called when the visibility of the communal view changes.
+         * Called when the composition of complications changes.
          */
-        default void onOverlayChanged() {
+        default void onComplicationsChanged() {
         }
     }
 
+    private final Executor mExecutor;
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
-    private final HashMap<OverlayToken, OverlayProvider> mOverlays = new HashMap<>();
+    private final HashMap<ComplicationToken, ComplicationProvider> mComplications = new HashMap<>();
 
     @VisibleForTesting
     @Inject
-    public DreamOverlayStateController() {
+    public DreamOverlayStateController(@Main Executor executor) {
+        mExecutor = executor;
     }
 
     /**
-     * Adds an overlay to be presented on top of dreams.
-     * @param provider The {@link OverlayProvider} providing the dream.
-     * @return The {@link OverlayToken} tied to the supplied {@link OverlayProvider}.
+     * Adds a complication to be presented on top of dreams.
+     * @param provider The {@link ComplicationProvider} providing the dream.
+     * @return The {@link ComplicationToken} tied to the supplied {@link ComplicationProvider}.
      */
-    public OverlayToken addOverlay(OverlayProvider provider) {
-        final OverlayToken token = new OverlayToken(mNextOverlayTokenId++);
-        mOverlays.put(token, provider);
-        notifyCallbacks();
-        return token;
+    public ListenableFuture<ComplicationToken> addComplication(ComplicationProvider provider) {
+        return CallbackToFutureAdapter.getFuture(completer -> {
+            mExecutor.execute(() -> {
+                final ComplicationToken token = new ComplicationToken(mNextComplicationTokenId++);
+                mComplications.put(token, provider);
+                notifyCallbacks();
+                completer.set(token);
+            });
+            return "DreamOverlayStateController::addComplication";
+        });
     }
 
     /**
-     * Removes an overlay from being shown on dreams.
-     * @param token The {@link OverlayToken} associated with the {@link OverlayProvider} to be
-     *              removed.
-     * @return The removed {@link OverlayProvider}, {@code null} if not found.
+     * Removes a complication from being shown on dreams.
+     * @param token The {@link ComplicationToken} associated with the {@link ComplicationProvider}
+     *              to be removed.
+     * @return The removed {@link ComplicationProvider}, {@code null} if not found.
      */
-    public OverlayProvider removeOverlay(OverlayToken token) {
-        final OverlayProvider removedOverlay = mOverlays.remove(token);
+    public ListenableFuture<ComplicationProvider> removeComplication(ComplicationToken token) {
+        return CallbackToFutureAdapter.getFuture(completer -> {
+            mExecutor.execute(() -> {
+                final ComplicationProvider removedComplication = mComplications.remove(token);
 
-        if (removedOverlay != null) {
-            notifyCallbacks();
-        }
+                if (removedComplication != null) {
+                    notifyCallbacks();
+                }
+                completer.set(removedComplication);
+            });
 
-        return removedOverlay;
+            return "DreamOverlayStateController::removeComplication";
+        });
     }
 
     private void notifyCallbacks() {
         for (Callback callback : mCallbacks) {
-            callback.onOverlayChanged();
+            callback.onComplicationsChanged();
         }
     }
 
     @Override
     public void addCallback(@NonNull Callback callback) {
-        Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
-        if (mCallbacks.contains(callback)) {
-            return;
-        }
+        mExecutor.execute(() -> {
+            Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
+            if (mCallbacks.contains(callback)) {
+                return;
+            }
 
-        mCallbacks.add(callback);
+            mCallbacks.add(callback);
 
-        if (mOverlays.isEmpty()) {
-            return;
-        }
+            if (mComplications.isEmpty()) {
+                return;
+            }
 
-        callback.onOverlayChanged();
+            callback.onComplicationsChanged();
+        });
     }
 
     @Override
     public void removeCallback(@NonNull Callback callback) {
-        Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
-        mCallbacks.remove(callback);
+        mExecutor.execute(() -> {
+            Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
+            mCallbacks.remove(callback);
+        });
     }
 
     /**
-     * Returns all registered {@link OverlayProvider} instances.
-     * @return A collection of {@link OverlayProvider}.
+     * Returns all registered {@link ComplicationProvider} instances.
+     * @return A collection of {@link ComplicationProvider}.
      */
-    public Collection<OverlayProvider> getOverlays() {
-        return mOverlays.values();
+    public Collection<ComplicationProvider> getComplications() {
+        return mComplications.values();
     }
 }

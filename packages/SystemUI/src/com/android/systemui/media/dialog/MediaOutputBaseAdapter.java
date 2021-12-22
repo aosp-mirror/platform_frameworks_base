@@ -118,7 +118,6 @@ public abstract class MediaOutputBaseAdapter extends
         final TextView mTwoLineTitleText;
         final TextView mSubTitleText;
         final ImageView mTitleIcon;
-        final ImageView mAddIcon;
         final ProgressBar mProgressBar;
         final SeekBar mSeekBar;
         final RelativeLayout mTwoLineLayout;
@@ -137,7 +136,6 @@ public abstract class MediaOutputBaseAdapter extends
             mTitleIcon = view.requireViewById(R.id.title_icon);
             mProgressBar = view.requireViewById(R.id.volume_indeterminate_progress);
             mSeekBar = view.requireViewById(R.id.volume_seekbar);
-            mAddIcon = view.requireViewById(R.id.add_icon);
             mStatusIcon = view.requireViewById(R.id.media_output_item_status);
             mCheckBox = view.requireViewById(R.id.check_box);
         }

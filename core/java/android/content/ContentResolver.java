@@ -3858,7 +3858,7 @@ public abstract class ContentResolver implements ContentInterface {
         CursorWrapperInner(Cursor cursor, IContentProvider contentProvider) {
             super(cursor);
             mContentProvider = contentProvider;
-            mCloseGuard.open("close");
+            mCloseGuard.open("CursorWrapperInner.close");
         }
 
         @Override

@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.hardware.devicestate.DeviceStateManager
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener
+import android.hardware.input.InputManager
 import android.hardware.display.DisplayManager
 import android.os.Handler
 import android.os.Trace
@@ -195,8 +196,7 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
         params.layoutInDisplayCutoutMode =
             WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
         params.fitInsetsTypes = 0
-        params.flags = (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-            or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         params.setTrustedOverlay()
 
         val packageName: String = context.opPackageName
@@ -239,6 +239,8 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
             if (scrimView == null) {
                 addView()
             }
+            // Disable input dispatching during transition.
+            InputManager.getInstance().cancelCurrentTouch()
         }
     }
 

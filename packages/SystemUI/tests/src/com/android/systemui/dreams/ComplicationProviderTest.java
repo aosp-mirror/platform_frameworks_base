@@ -33,8 +33,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
-import com.android.systemui.dreams.appwidgets.AppWidgetOverlayProvider;
 import com.android.systemui.dreams.appwidgets.AppWidgetProvider;
+import com.android.systemui.dreams.appwidgets.ComplicationProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
@@ -48,7 +48,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-public class AppWidgetOverlayProviderTest extends SysuiTestCase {
+public class ComplicationProviderTest extends SysuiTestCase {
     @Mock
     ActivityStarter mActivityStarter;
 
@@ -62,10 +62,10 @@ public class AppWidgetOverlayProviderTest extends SysuiTestCase {
     AppWidgetHostView mAppWidgetHostView;
 
     @Mock
-    OverlayHost.CreationCallback mCreationCallback;
+    ComplicationHost.CreationCallback mCreationCallback;
 
     @Mock
-    OverlayHost.InteractionCallback mInteractionCallback;
+    ComplicationHost.InteractionCallback mInteractionCallback;
 
     @Mock
     PendingIntent mPendingIntent;
@@ -73,7 +73,7 @@ public class AppWidgetOverlayProviderTest extends SysuiTestCase {
     @Mock
     RemoteViews.RemoteResponse mRemoteResponse;
 
-    AppWidgetOverlayProvider mOverlayProvider;
+    ComplicationProvider mComplicationProvider;
 
     RemoteViews.InteractionHandler mInteractionHandler;
 
@@ -84,8 +84,9 @@ public class AppWidgetOverlayProviderTest extends SysuiTestCase {
     public SysuiTestableContext mContext = new SysuiTestableContext(
             InstrumentationRegistry.getContext(), mLeakCheck);
 
-    OverlayHostView.LayoutParams mLayoutParams = new OverlayHostView.LayoutParams(
-            OverlayHostView.LayoutParams.MATCH_PARENT, OverlayHostView.LayoutParams.MATCH_PARENT);
+    ComplicationHostView.LayoutParams mLayoutParams = new ComplicationHostView.LayoutParams(
+            ComplicationHostView.LayoutParams.MATCH_PARENT,
+            ComplicationHostView.LayoutParams.MATCH_PARENT);
 
     @Before
     public void setup() {
@@ -93,7 +94,7 @@ public class AppWidgetOverlayProviderTest extends SysuiTestCase {
         when(mPendingIntent.isActivity()).thenReturn(true);
         when(mAppWidgetProvider.getWidget(mComponentName)).thenReturn(mAppWidgetHostView);
 
-        mOverlayProvider = new AppWidgetOverlayProvider(
+        mComplicationProvider = new ComplicationProvider(
                 mActivityStarter,
                 mComponentName,
                 mAppWidgetProvider,
@@ -103,7 +104,8 @@ public class AppWidgetOverlayProviderTest extends SysuiTestCase {
         final ArgumentCaptor<RemoteViews.InteractionHandler> creationCallbackCapture =
                 ArgumentCaptor.forClass(RemoteViews.InteractionHandler.class);
 
-        mOverlayProvider.onCreateOverlay(mContext, mCreationCallback, mInteractionCallback);
+        mComplicationProvider.onCreateComplication(mContext, mCreationCallback,
+                mInteractionCallback);
         verify(mAppWidgetHostView, times(1))
                 .setInteractionHandler(creationCallbackCapture.capture());
         mInteractionHandler = creationCallbackCapture.getValue();

@@ -298,9 +298,9 @@ class WallpaperController {
     }
 
     boolean updateWallpaperOffset(WindowState wallpaperWin, boolean sync) {
-        final Rect parentFrame = wallpaperWin.getParentFrame();
-        final int dw = parentFrame.width();
-        final int dh = parentFrame.height();
+        final Rect bounds = wallpaperWin.getLastReportedBounds();
+        final int dw = bounds.width();
+        final int dh = bounds.height();
 
         int xOffset = 0;
         int yOffset = 0;
@@ -448,6 +448,13 @@ class WallpaperController {
 
     private void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
         WindowState target = mWallpaperTarget;
+        if (target == null && changingTarget.mToken.isVisible()
+                && changingTarget.mTransitionController.inTransition()) {
+            // If the wallpaper target was cleared during transition, still allows the visible
+            // window which may have been requested to be invisible to update the offset, e.g.
+            // zoom effect from home.
+            target = changingTarget;
+        }
         if (target != null) {
             if (target.mWallpaperX >= 0) {
                 mLastWallpaperX = target.mWallpaperX;
