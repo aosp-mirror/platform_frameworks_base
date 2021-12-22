@@ -165,6 +165,10 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
         }
     }
 
+    @FlakyTest(bugId = 206753786)
+    @Test
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+
     companion object {
         /**
          * Creates the test configurations.

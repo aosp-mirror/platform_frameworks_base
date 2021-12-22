@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -80,7 +79,7 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
     @Test
     override fun pipLayerBecomesInvisible() = super.pipLayerBecomesInvisible()
 
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun statusBarLayerRotatesScales() {
         // This test doesn't work in shell transitions because of b/206753786

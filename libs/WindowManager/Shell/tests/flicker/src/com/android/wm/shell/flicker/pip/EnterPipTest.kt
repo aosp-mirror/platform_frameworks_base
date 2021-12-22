@@ -91,7 +91,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     }
 
     /** {@inheritDoc}  */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun statusBarLayerRotatesScales() {
         // This test doesn't work in shell transitions because of b/206753786

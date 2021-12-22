@@ -188,7 +188,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     }
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     fun statusBarLayerPositionAtEnd() {
         // This test doesn't work in shell transitions because of b/206753786
