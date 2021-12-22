@@ -230,7 +230,6 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     public void putAllOverridesOnReleaseBuilds(
             CompatibilityOverridesByPackageConfig overridesByPackage) {
-        // TODO(b/183630314): Unify the permission enforcement with the other setOverrides* methods.
         checkCompatChangeOverrideOverridablePermission();
         for (CompatibilityOverrideConfig overrides :
                 overridesByPackage.packageNameToOverrides.values()) {
@@ -242,7 +241,6 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     public void putOverridesOnReleaseBuilds(CompatibilityOverrideConfig overrides,
             String packageName) {
-        // TODO(b/183630314): Unify the permission enforcement with the other setOverrides* methods.
         checkCompatChangeOverrideOverridablePermission();
         checkAllCompatOverridesAreOverridable(overrides.overrides.keySet());
         mCompatConfig.addPackageOverrides(overrides, packageName, /* skipUnknownChangeIds= */ true);
@@ -296,7 +294,6 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     public void removeAllOverridesOnReleaseBuilds(
             CompatibilityOverridesToRemoveByPackageConfig overridesToRemoveByPackage) {
-        // TODO(b/183630314): Unify the permission enforcement with the other setOverrides* methods.
         checkCompatChangeOverrideOverridablePermission();
         for (CompatibilityOverridesToRemoveConfig overridesToRemove :
                 overridesToRemoveByPackage.packageNameToOverridesToRemove.values()) {
@@ -309,7 +306,6 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     public void removeOverridesOnReleaseBuilds(
             CompatibilityOverridesToRemoveConfig overridesToRemove,
             String packageName) {
-        // TODO(b/183630314): Unify the permission enforcement with the other setOverrides* methods.
         checkCompatChangeOverrideOverridablePermission();
         checkAllCompatOverridesAreOverridable(overridesToRemove.changeIds);
         mCompatConfig.removePackageOverrides(overridesToRemove, packageName);
