@@ -5503,6 +5503,17 @@ public class Activity extends ContextThemeWrapper
      */
     public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
             IBinder permissionToken, boolean ignoreTargetSecurity, int userId) {
+        startActivityAsCaller(intent, options, permissionToken, ignoreTargetSecurity, userId, -1);
+    }
+
+    /**
+     * @see #startActivityAsCaller(Intent, Bundle, IBinder, boolean, int)
+     * @param requestCode The request code used for returning a result or -1 if no result should be
+     *                    returned.
+     * @hide
+     */
+    public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
+            IBinder permissionToken, boolean ignoreTargetSecurity, int userId, int requestCode) {
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
@@ -5510,11 +5521,11 @@ public class Activity extends ContextThemeWrapper
         Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivityAsCaller(
                         this, mMainThread.getApplicationThread(), mToken, this,
-                        intent, -1, options, permissionToken, ignoreTargetSecurity, userId);
+                        intent, requestCode, options, permissionToken, ignoreTargetSecurity,
+                        userId);
         if (ar != null) {
             mMainThread.sendActivityResult(
-                mToken, mEmbeddedID, -1, ar.getResultCode(),
-                ar.getResultData());
+                    mToken, mEmbeddedID, requestCode, ar.getResultCode(), ar.getResultData());
         }
         cancelInputsAndStartExitTransition(options);
     }
