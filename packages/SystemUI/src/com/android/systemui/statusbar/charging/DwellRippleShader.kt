@@ -59,8 +59,8 @@ class DwellRippleShader internal constructor() : RuntimeShader(SHADER, false) {
                 }
 
                 vec2 distort(vec2 p, float time, float distort_amount_xy, float frequency) {
-                    return p + vec2(sin(p.x * frequency + in_phase1),
-                                    cos(p.y * frequency * 1.23 + in_phase2)) * distort_amount_xy;
+                    return p + vec2(sin(p.y * frequency + in_phase1),
+                                    cos(p.x * frequency * -1.23 + in_phase2)) * distort_amount_xy;
                 }
 
                 vec4 ripple(vec2 p, float distort_xy, float frequency) {
@@ -73,11 +73,11 @@ class DwellRippleShader internal constructor() : RuntimeShader(SHADER, false) {
                 """
         private const val SHADER_MAIN = """vec4 main(vec2 p) {
                     vec4 color1 = ripple(p,
-                        12 * in_distortion_strength, // distort_xy
+                        34 * in_distortion_strength, // distort_xy
                         0.012 // frequency
                     );
                     vec4 color2 = ripple(p,
-                        17.5 * in_distortion_strength, // distort_xy
+                        49 * in_distortion_strength, // distort_xy
                         0.018 // frequency
                     );
                     // Alpha blend between two layers.
@@ -128,8 +128,8 @@ class DwellRippleShader internal constructor() : RuntimeShader(SHADER, false) {
         set(value) {
             field = value * 0.001f
             setUniform("in_time", field)
-            setUniform("in_phase1", field * 2f + 0.367f)
-            setUniform("in_phase2", field * 5.2f * 1.531f)
+            setUniform("in_phase1", field * 3f + 0.367f)
+            setUniform("in_phase2", field * 7.2f * 1.531f)
         }
 
     /**
