@@ -253,8 +253,13 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                 if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
                 reevaluateSystemTheme(true /* forceReload */);
             } else if (Intent.ACTION_WALLPAPER_CHANGED.equals(intent.getAction())) {
-                mAcceptColorEvents = true;
-                Log.i(TAG, "Allowing color events again");
+                if (intent.getBooleanExtra(WallpaperManager.EXTRA_FROM_FOREGROUND_APP, false)) {
+                    mAcceptColorEvents = true;
+                    Log.i(TAG, "Wallpaper changed, allowing color events again");
+                } else {
+                    Log.i(TAG, "Wallpaper changed from background app, "
+                            + "keep deferring color events. Accepting: " + mAcceptColorEvents);
+                }
             }
         }
     };
