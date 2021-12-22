@@ -17,8 +17,6 @@ package android.net;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.annotation.NonNull;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
@@ -46,6 +44,7 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Objects;
 
 /**
  * This class contains methods for managing IPsec sessions. Once configured, the kernel will apply
@@ -988,7 +987,7 @@ public final class IpSecManager {
      */
     public IpSecManager(Context ctx, IIpSecService service) {
         mContext = ctx;
-        mService = checkNotNull(service, "missing service");
+        mService = Objects.requireNonNull(service, "missing service");
     }
 
     private static void maybeHandleServiceSpecificException(ServiceSpecificException sse) {
