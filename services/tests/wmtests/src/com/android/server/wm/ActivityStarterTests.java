@@ -68,6 +68,7 @@ import static org.mockito.ArgumentMatchers.notNull;
 
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
+import android.app.PictureInPictureParams;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -1263,5 +1264,37 @@ public class ActivityStarterTests extends WindowTestsBase {
 
         // Verify the cookie is updated
         assertTrue(mRootWindowContainer.topRunningActivity().mLaunchCookie == newCookie);
+    }
+
+    @Test
+    public void testStartLaunchIntoPipActivity() {
+        final ActivityStarter starter = prepareStarter(0, false);
+
+        // Create an activity from ActivityOptions#makeLaunchIntoPip
+        final PictureInPictureParams params = new PictureInPictureParams.Builder()
+                .build();
+        final ActivityOptions opts = ActivityOptions.makeLaunchIntoPip(params);
+        ActivityRecord targetRecord = new ActivityBuilder(mAtm)
+                .setLaunchIntoPipActivityOptions(opts)
+                .build();
+
+        // Start the target launch-into-pip activity from a source
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        starter.startActivityInner(
+                /* r */ targetRecord,
+                /* sourceRecord */ sourceRecord,
+                /* voiceSession */ null,
+                /* voiceInteractor */ null,
+                /* startFlags */ 0,
+                /* doResume */ true,
+                /* options */ opts,
+                /* inTask */ null,
+                /* inTaskFragment */ null,
+                /* restrictedBgActivity */ false,
+                /* intentGrants */ null);
+
+        // Verify the ActivityRecord#getLaunchIntoPipHostActivity points to sourceRecord.
+        assertThat(targetRecord.getLaunchIntoPipHostActivity()).isNotNull();
+        assertEquals(targetRecord.getLaunchIntoPipHostActivity(), sourceRecord);
     }
 }

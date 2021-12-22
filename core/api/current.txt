@@ -4550,6 +4550,7 @@ package android.app {
     method public static android.app.ActivityOptions makeClipRevealAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
     method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, int);
+    method @NonNull public static android.app.ActivityOptions makeLaunchIntoPip(@NonNull android.app.PictureInPictureParams);
     method public static android.app.ActivityOptions makeScaleUpAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.view.View, String);
     method @java.lang.SafeVarargs public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.util.Pair<android.view.View,java.lang.String>...);
@@ -6635,6 +6636,7 @@ package android.app {
 
   public static class PictureInPictureParams.Builder {
     ctor public PictureInPictureParams.Builder();
+    ctor public PictureInPictureParams.Builder(@NonNull android.app.PictureInPictureParams);
     method public android.app.PictureInPictureParams build();
     method public android.app.PictureInPictureParams.Builder setActions(java.util.List<android.app.RemoteAction>);
     method public android.app.PictureInPictureParams.Builder setAspectRatio(android.util.Rational);
