@@ -199,6 +199,7 @@ import java.util.function.Function;
  *
  * </pre>
  */
+@RequiresApi(Build.VERSION_CODES.R)
 public final class MediaParser {
 
     /**
