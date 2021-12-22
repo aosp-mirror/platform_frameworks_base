@@ -716,8 +716,6 @@ message GlobalSettingsProto {
 
     optional SettingProto nr_nsa_tracking_screen_off_mode = 153 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-    optional SettingProto nsd_on = 83 [ (android.privacy).dest = DEST_AUTOMATIC ];
-
     message Ntp {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
