@@ -56,13 +56,17 @@ per-file android_media_* = file:/media/java/android/media/OWNERS
 per-file android_media_midi_* = file:/media/java/android/media/midi/OWNERS
 per-file android_opengl_* = file:/opengl/java/android/opengl/OWNERS
 per-file android_os_storage_* = file:/core/java/android/os/storage/OWNERS
-per-file android_se_* = file:/core/java/android/se/OWNERS
+per-file android_se_* = file:/omapi/java/android/se/OWNERS
 per-file android_security_* = file:/core/java/android/security/OWNERS
 per-file android_view_* = file:/core/java/android/view/OWNERS
 per-file com_android_internal_net_* = file:/services/core/java/com/android/server/net/OWNERS
 
 ### Graphics ###
 per-file android_graphics_* = file:/graphics/java/android/graphics/OWNERS
+
+### Text ###
+per-file android_text_* = file:/core/java/android/text/OWNERS
+
 # These are highly common-use files
 per-file Android.bp = file:/graphics/java/android/graphics/OWNERS
 per-file AndroidRuntime.cpp = file:/graphics/java/android/graphics/OWNERS
