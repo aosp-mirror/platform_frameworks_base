@@ -8440,6 +8440,8 @@
         <!-- Component name of an activity that allows the user to modify
              the settings for this dream. -->
         <attr name="settingsActivity" />
+        <!-- A preview, in a drawable resource id, of what the Dream will look like. -->
+        <attr name="previewImage" format="reference" />
     </declare-styleable>
 
     <!--  Use <code>trust-agent</code> as the root tag of the XML resource that
