@@ -134,9 +134,6 @@
          be sent during a change to the audio output device. -->
     <bool name="config_sendAudioBecomingNoisy">true</bool>
 
-    <!-- Whether Hearing Aid profile is supported -->
-    <bool name="config_hearing_aid_profile_supported">false</bool>
-
     <!-- Flag to disable all transition animations -->
     <bool name="config_disableTransitionAnimation">false</bool>
 
@@ -403,10 +400,6 @@
          com.android.networkstack.tethering.R.array.config_tether_bluetooth_regexs instead. -->
     <string-array translatable="false" name="config_tether_bluetooth_regexs">
     </string-array>
-
-    <!-- Max number of Bluetooth tethering connections allowed. If this is
-         updated config_tether_dhcp_range has to be updated appropriately. -->
-    <integer translatable="false" name="config_max_pan_devices">5</integer>
 
     <!-- This setting is deprecated, please use
          com.android.networkstack.tethering.R.array.config_dhcp_range instead. -->
@@ -1820,52 +1813,37 @@
     <!-- Integer to set a max latency the accelerometer will batch sensor requests with. -->
     <integer name="config_flipToScreenOffMaxLatencyMicros">2000000</integer>
 
-    <!-- Boolean indicating if current platform supports bluetooth SCO for off call
-    use cases -->
+    <!-- Note: This config is deprecated
+          Boolean indicating if current platform supports bluetooth SCO for off call
+          use cases
+    -->
     <bool name="config_bluetooth_sco_off_call">true</bool>
 
-    <!-- Boolean indicating if current platform supports bluetooth wide band
-         speech -->
-    <bool name="config_bluetooth_wide_band_speech">true</bool>
-
-    <!-- Boolean indicating if current platform need do one-time bluetooth address
-         re-validation -->
+    <!-- Note: This config is deprecated
+          Boolean indicating if current platform need do one-time bluetooth address
+          re-validation
+    -->
     <bool name="config_bluetooth_address_validation">false</bool>
 
-    <!-- Boolean indicating if current platform supports BLE peripheral mode -->
-    <bool name="config_bluetooth_le_peripheral_mode_supported">false</bool>
-
-    <!-- Boolean indicating if current platform supports HFP inband ringing -->
-    <bool name="config_bluetooth_hfp_inband_ringing_support">false</bool>
-
-    <!-- Max number of scan filters supported by blutooth controller. 0 if the
-         device does not support hardware scan filters-->
-    <integer translatable="false" name="config_bluetooth_max_scan_filters">0</integer>
-
-    <!-- Max number of advertisers supported by bluetooth controller. 0 if the
-         device does not support multiple advertisement-->
-    <integer translatable="false" name="config_bluetooth_max_advertisers">0</integer>
-
-    <!-- Idle current for bluetooth controller. 0 by default-->
+    <!-- Note: This config is deprecated, use BluetoothProperties instead.
+         Idle current for bluetooth controller. 0 by default
+    -->
     <integer translatable="false" name="config_bluetooth_idle_cur_ma">0</integer>
 
-    <!-- Rx current for bluetooth controller. 0 by default-->
+    <!-- Note: This config is deprecated, use BluetoothProperties instead.
+         Rx current for bluetooth controller. 0 by default
+    -->
     <integer translatable="false" name="config_bluetooth_rx_cur_ma">0</integer>
 
-    <!-- Tx current for bluetooth controller. 0 by default-->
+    <!-- Note: This config is deprecated, use BluetoothProperties instead.
+         Tx current for bluetooth controller. 0 by default
+    -->
     <integer translatable="false" name="config_bluetooth_tx_cur_ma">0</integer>
 
-    <!-- Operating volatage for bluetooth controller. 0 by default-->
+    <!-- Note: This config is deprecated, use BluetoothProperties instead.
+         Operating volatage for bluetooth controller. 0 by default
+    -->
     <integer translatable="false" name="config_bluetooth_operating_voltage_mv">0</integer>
-
-    <!-- Max number of connected audio devices supported by Bluetooth stack -->
-    <integer name="config_bluetooth_max_connected_audio_devices">5</integer>
-
-    <!-- Whether supported profiles should be reloaded upon enabling bluetooth -->
-    <bool name="config_bluetooth_reload_supported_profiles_when_enabled">false</bool>
-
-    <!-- Enabling autoconnect over pan -->
-    <bool name="config_bluetooth_pan_enable_autoconnect">false</bool>
 
     <!-- The default data-use polling period. -->
     <integer name="config_datause_polling_period_sec">600</integer>
@@ -2006,10 +1984,6 @@
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>
-
-    <!-- Enable/disable default bluetooth profiles:
-        HSP_AG, ObexObjectPush, Audio, NAP -->
-    <bool name="config_bluetooth_default_profiles">true</bool>
 
     <!-- IP address of the dns server to use if nobody else suggests one -->
     <string name="config_default_dns_server" translatable="false">8.8.8.8</string>
@@ -4140,8 +4114,6 @@
 
     <!-- Component name that should be granted Notification Assistant access -->
     <string name="config_defaultAssistantAccessComponent" translatable="false">android.ext.services/android.ext.services.notification.Assistant</string>
-
-    <bool name="config_supportBluetoothPersistedState">true</bool>
 
     <bool name="config_keepRestrictedProfilesInBackground">true</bool>
 
