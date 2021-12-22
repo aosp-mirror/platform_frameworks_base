@@ -37,9 +37,12 @@ class MediaViewController @Inject constructor(
     private val mediaHostStatesManager: MediaHostStatesManager
 ) {
 
-    /** Indicating the media view controller is for a player or recommendation. */
+    /**
+     * Indicating that the media view controller is for a notification-based player,
+     * session-based player, or recommendation
+     */
     enum class TYPE {
-        PLAYER, RECOMMENDATION
+        PLAYER, PLAYER_SESSION, RECOMMENDATION
     }
 
     companion object {
@@ -257,31 +260,29 @@ class MediaViewController @Inject constructor(
      * [TransitionViewState].
      */
     private fun setGutsViewState(viewState: TransitionViewState) {
-        if (type == TYPE.PLAYER) {
-            PlayerViewHolder.controlsIds.forEach { id ->
-                viewState.widgetStates.get(id)?.let { state ->
-                    // Make sure to use the unmodified state if guts are not visible.
-                    state.alpha = if (isGutsVisible) 0f else state.alpha
-                    state.gone = if (isGutsVisible) true else state.gone
-                }
-            }
-            PlayerViewHolder.gutsIds.forEach { id ->
-                viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
-                viewState.widgetStates.get(id)?.gone = !isGutsVisible
-            }
-        } else {
-            RecommendationViewHolder.controlsIds.forEach { id ->
-                viewState.widgetStates.get(id)?.let { state ->
-                    // Make sure to use the unmodified state if guts are not visible.
-                    state.alpha = if (isGutsVisible) 0f else state.alpha
-                    state.gone = if (isGutsVisible) true else state.gone
-                }
-            }
-            RecommendationViewHolder.gutsIds.forEach { id ->
-                viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
-                viewState.widgetStates.get(id)?.gone = !isGutsVisible
+        val controlsIds = when (type) {
+            TYPE.PLAYER -> PlayerViewHolder.controlsIds
+            TYPE.PLAYER_SESSION -> PlayerSessionViewHolder.controlsIds
+            TYPE.RECOMMENDATION -> RecommendationViewHolder.controlsIds
+        }
+        val gutsIds = when (type) {
+            TYPE.PLAYER -> PlayerViewHolder.gutsIds
+            TYPE.PLAYER_SESSION -> PlayerSessionViewHolder.gutsIds
+            TYPE.RECOMMENDATION -> RecommendationViewHolder.gutsIds
+        }
+
+        controlsIds.forEach { id ->
+            viewState.widgetStates.get(id)?.let { state ->
+                // Make sure to use the unmodified state if guts are not visible.
+                state.alpha = if (isGutsVisible) 0f else state.alpha
+                state.gone = if (isGutsVisible) true else state.gone
             }
         }
+        gutsIds.forEach { id ->
+            viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
+            viewState.widgetStates.get(id)?.gone = !isGutsVisible
+        }
+
         if (shouldHideGutsSettings) {
             viewState.widgetStates.get(R.id.settings)?.gone = true
         }
@@ -470,12 +471,19 @@ class MediaViewController @Inject constructor(
 
     private fun updateMediaViewControllerType(type: TYPE) {
         this.type = type
-        if (type == TYPE.PLAYER) {
-            collapsedLayout.load(context, R.xml.media_collapsed)
-            expandedLayout.load(context, R.xml.media_expanded)
-        } else {
-            collapsedLayout.load(context, R.xml.media_recommendation_collapsed)
-            expandedLayout.load(context, R.xml.media_recommendation_expanded)
+        when (type) {
+            TYPE.PLAYER -> {
+                collapsedLayout.load(context, R.xml.media_collapsed)
+                expandedLayout.load(context, R.xml.media_expanded)
+            }
+            TYPE.PLAYER_SESSION -> {
+                collapsedLayout.clone(context, R.layout.media_session_view)
+                expandedLayout.clone(context, R.layout.media_session_view)
+            }
+            TYPE.RECOMMENDATION -> {
+                collapsedLayout.load(context, R.xml.media_recommendation_collapsed)
+                expandedLayout.load(context, R.xml.media_recommendation_expanded)
+            }
         }
         refreshState()
     }
