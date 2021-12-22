@@ -2787,7 +2787,15 @@ class Task extends WindowContainer<WindowContainer> {
 
             if (inOutConfig.smallestScreenWidthDp
                     == Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
-                if (WindowConfiguration.isFloating(windowingMode)) {
+                // When entering to or exiting from Pip, the PipTaskOrganizer will set the
+                // windowing mode of the activity in the task to WINDOWING_MODE_FULLSCREEN and
+                // temporarily set the bounds of the task to fullscreen size for transitioning.
+                // It will get the wrong value if the calculation is based on this temporary
+                // fullscreen bounds.
+                // We should just inherit the value from parent for this temporary state.
+                final boolean inPipTransition = windowingMode == WINDOWING_MODE_PINNED
+                        && !mTmpFullBounds.isEmpty() && mTmpFullBounds.equals(parentBounds);
+                if (WindowConfiguration.isFloating(windowingMode) && !inPipTransition) {
                     // For floating tasks, calculate the smallest width from the bounds of the task
                     inOutConfig.smallestScreenWidthDp = (int) (
                             Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
