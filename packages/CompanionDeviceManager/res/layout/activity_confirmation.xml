@@ -14,6 +14,7 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/activity_confirmation"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:background="@drawable/dialog_background"
@@ -23,6 +24,8 @@
               android:padding="18dp"
               android:layout_gravity="center">
 
+    <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
+
     <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
@@ -30,7 +33,6 @@
             android:gravity="center"
             android:paddingHorizontal="12dp"
             style="@*android:style/TextAppearance.Widget.Toolbar.Title"/>
-    <!-- style="@*android:style/TextAppearance.Widget.Toolbar.Title" -->
 
     <TextView
             android:id="@+id/summary"
@@ -61,8 +63,10 @@
             android:orientation="horizontal"
             android:gravity="end">
 
+        <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
+
         <Button
-                android:id="@+id/button_cancel"
+                android:id="@+id/btn_negative"
                 style="@android:style/Widget.Material.Button.Borderless.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -70,7 +74,7 @@
                 android:textColor="?android:attr/textColorSecondary" />
 
         <Button
-                android:id="@+id/button_allow"
+                android:id="@+id/btn_positive"
                 style="@android:style/Widget.Material.Button.Borderless.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
