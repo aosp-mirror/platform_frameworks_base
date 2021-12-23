@@ -129,6 +129,7 @@ import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
+import android.net.wifi.WifiInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.INetworkManagementService;
@@ -226,13 +227,13 @@ public class NetworkPolicyManagerServiceTest {
 
     private static final long TEST_START = 1194220800000L;
     private static final String TEST_IFACE = "test0";
-    private static final String TEST_SSID = "AndroidAP";
+    private static final String TEST_WIFI_NETWORK_KEY = "TestWifiNetworkKey";
     private static final String TEST_IMSI = "310210";
     private static final int TEST_SUB_ID = 42;
     private static final Network TEST_NETWORK = mock(Network.class, CALLS_REAL_METHODS);
 
 
-    private static NetworkTemplate sTemplateWifi = buildTemplateWifi(TEST_SSID);
+    private static NetworkTemplate sTemplateWifi = buildTemplateWifi(TEST_WIFI_NETWORK_KEY);
     private static NetworkTemplate sTemplateCarrierMetered =
             buildTemplateCarrierMetered(TEST_IMSI);
 
@@ -2096,10 +2097,13 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private static NetworkStateSnapshot buildWifi() {
+        WifiInfo mockWifiInfo = mock(WifiInfo.class);
+        when(mockWifiInfo.makeCopy(anyLong())).thenReturn(mockWifiInfo);
+        when(mockWifiInfo.getCurrentNetworkKey()).thenReturn(TEST_WIFI_NETWORK_KEY);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
         final NetworkCapabilities networkCapabilities = new NetworkCapabilities.Builder()
-                .addTransportType(TRANSPORT_WIFI).setSsid(TEST_SSID).build();
+                .addTransportType(TRANSPORT_WIFI).setTransportInfo(mockWifiInfo).build();
         return new NetworkStateSnapshot(TEST_NETWORK, networkCapabilities, prop,
                 null /*subscriberId*/, TYPE_WIFI);
     }
