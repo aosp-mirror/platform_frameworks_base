@@ -57,6 +57,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Bundle;
@@ -87,6 +88,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
@@ -133,6 +135,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final SideStage mSideStage;
     private final StageListenerImpl mSideStageListener = new StageListenerImpl();
     private final StageTaskUnfoldController mSideUnfoldController;
+    private final DisplayLayout mDisplayLayout;
     @SplitPosition
     private int mSideStagePosition = SPLIT_POSITION_BOTTOM_OR_RIGHT;
 
@@ -234,6 +237,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSplitTransitions = new SplitScreenTransitions(transactionPool, transitions,
                 mOnTransitionAnimationComplete);
         mDisplayController.addDisplayWindowListener(this);
+        mDisplayLayout = new DisplayLayout(displayController.getDisplayLayout(displayId));
         transitions.addHandler(this);
     }
 
@@ -267,6 +271,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mLogger = logger;
         mRecentTasks = recentTasks;
         mDisplayController.addDisplayWindowListener(this);
+        mDisplayLayout = new DisplayLayout();
         transitions.addHandler(this);
     }
 
@@ -1084,6 +1089,14 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mDisplayController.addDisplayChangingController(this::onRotateDisplay);
     }
 
+    @Override
+    public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+        if (displayId != DEFAULT_DISPLAY) {
+            return;
+        }
+        mDisplayLayout.set(mDisplayController.getDisplayLayout(displayId));
+    }
+
     private void onRotateDisplay(int displayId, int fromRotation, int toRotation,
             WindowContainerTransaction wct) {
         if (!mMainStage.isActive()) return;
@@ -1092,7 +1105,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         final SurfaceControl.Transaction t = mTransactionPool.acquire();
         setDividerVisibility(false, t);
-        mSplitLayout.rotateTo(toRotation);
+        mDisplayLayout.rotateTo(mContext.getResources(), toRotation);
+        mSplitLayout.rotateTo(toRotation, mDisplayLayout.stableInsets());
         updateWindowBounds(mSplitLayout, wct);
         updateUnfoldBounds();
         t.apply();
