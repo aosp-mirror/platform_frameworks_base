@@ -18,6 +18,7 @@ package android.window;
 
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
 import static android.app.ActivityOptions.ANIM_CUSTOM;
+import static android.app.ActivityOptions.ANIM_FROM_STYLE;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
@@ -46,6 +47,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -581,6 +583,7 @@ public final class TransitionInfo implements Parcelable {
         private String mPackageName;
         private final Rect mTransitionBounds = new Rect();
         private HardwareBuffer mThumbnail;
+        private int mAnimations;
 
         private AnimationOptions(int type) {
             mType = type;
@@ -594,6 +597,15 @@ public final class TransitionInfo implements Parcelable {
             mPackageName = in.readString();
             mTransitionBounds.readFromParcel(in);
             mThumbnail = in.readTypedObject(HardwareBuffer.CREATOR);
+            mAnimations = in.readInt();
+        }
+
+        public static AnimationOptions makeAnimOptionsFromLayoutParameters(
+                WindowManager.LayoutParams lp) {
+            AnimationOptions options = new AnimationOptions(ANIM_FROM_STYLE);
+            options.mPackageName = lp.packageName;
+            options.mAnimations = lp.windowAnimations;
+            return options;
         }
 
         public static AnimationOptions makeCustomAnimOptions(String packageName, int enterResId,
@@ -662,6 +674,10 @@ public final class TransitionInfo implements Parcelable {
             return mThumbnail;
         }
 
+        public int getAnimations() {
+            return mAnimations;
+        }
+
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mType);
@@ -671,6 +687,7 @@ public final class TransitionInfo implements Parcelable {
             dest.writeString(mPackageName);
             mTransitionBounds.writeToParcel(dest, flags);
             dest.writeTypedObject(mThumbnail, flags);
+            dest.writeInt(mAnimations);
         }
 
         @NonNull

@@ -16,8 +16,11 @@
 
 package com.android.systemui.media.taptotransfer
 
+import android.content.Context
+import android.graphics.drawable.Icon
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.commandline.Command
@@ -34,9 +37,13 @@ import javax.inject.Inject
 @SysUISingleton
 class MediaTttCommandLineHelper @Inject constructor(
     commandRegistry: CommandRegistry,
+    context: Context,
     private val mediaTttChipController: MediaTttChipController,
     @Main private val mainExecutor: DelayableExecutor,
 ) {
+    private val appIconDrawable =
+        Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
+
     init {
         commandRegistry.registerCommand(ADD_CHIP_COMMAND_TAG) { AddChipCommand() }
         commandRegistry.registerCommand(REMOVE_CHIP_COMMAND_TAG) { RemoveChipCommand() }
@@ -47,19 +54,21 @@ class MediaTttCommandLineHelper @Inject constructor(
             val otherDeviceName = args[0]
             when (args[1]) {
                 MOVE_CLOSER_TO_TRANSFER_COMMAND_NAME -> {
-                    mediaTttChipController.displayChip(MoveCloserToTransfer(otherDeviceName))
+                    mediaTttChipController.displayChip(
+                        MoveCloserToTransfer(otherDeviceName, appIconDrawable)
+                    )
                 }
                 TRANSFER_INITIATED_COMMAND_NAME -> {
                     val futureTask = FutureTask { fakeUndoRunnable }
                     mediaTttChipController.displayChip(
-                        TransferInitiated(otherDeviceName, futureTask)
+                        TransferInitiated(otherDeviceName, appIconDrawable, futureTask)
                     )
                     mainExecutor.executeDelayed({ futureTask.run() }, FUTURE_WAIT_TIME)
 
                 }
                 TRANSFER_SUCCEEDED_COMMAND_NAME -> {
                     mediaTttChipController.displayChip(
-                        TransferSucceeded(otherDeviceName, fakeUndoRunnable)
+                        TransferSucceeded(otherDeviceName, appIconDrawable, fakeUndoRunnable)
                     )
                 }
                 else -> {

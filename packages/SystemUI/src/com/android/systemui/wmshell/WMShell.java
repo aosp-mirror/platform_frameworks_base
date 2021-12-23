@@ -258,11 +258,6 @@ public final class WMShell extends CoreStartable
             public void onKeyguardVisibilityChanged(boolean showing) {
                 splitScreen.onKeyguardVisibilityChanged(showing);
             }
-
-            @Override
-            public void onKeyguardOccludedChanged(boolean occluded) {
-                splitScreen.onKeyguardOccludedChanged(occluded);
-            }
         };
         mKeyguardUpdateMonitor.registerCallback(mSplitScreenKeyguardCallback);
 
@@ -270,11 +265,6 @@ public final class WMShell extends CoreStartable
             @Override
             public void onFinishedWakingUp() {
                 splitScreen.onFinishedWakingUp();
-            }
-
-            @Override
-            public void onFinishedGoingToSleep() {
-                splitScreen.onFinishedGoingToSleep();
             }
         });
     }

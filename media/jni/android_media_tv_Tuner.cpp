@@ -1191,6 +1191,14 @@ void FrontendClientCallbackImpl::executeOnScanMessage(
                                 dvbcAnnex);
             break;
         }
+        case FrontendScanMessageType::DVBT_CELL_IDS: {
+            std::vector<int32_t> jintV = message.get<FrontendScanMessage::dvbtCellIds>();
+            jintArray cellIds = env->NewIntArray(jintV.size());
+            env->SetIntArrayRegion(cellIds, 0, jintV.size(), reinterpret_cast<jint *>(&jintV[0]));
+            env->CallVoidMethod(frontend, env->GetMethodID(clazz, "onDvbtCellIdsReported", "([I)V"),
+                                cellIds);
+            break;
+        }
         default:
             break;
     }
@@ -2512,6 +2520,16 @@ jobject JTuner::getFrontendStatus(jintArray types) {
             case FrontendStatus::Tag::streamIdList: {
                 jfieldID field = env->GetFieldID(clazz, "mStreamIds", "[I");
                 std::vector<int32_t> ids = s.get<FrontendStatus::Tag::streamIdList>();
+
+                jintArray valObj = env->NewIntArray(v.size());
+                env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint *>(&ids[0]));
+
+                env->SetObjectField(statusObj, field, valObj);
+                break;
+            }
+            case FrontendStatus::Tag::dvbtCellIds: {
+                jfieldID field = env->GetFieldID(clazz, "mDvbtCellIds", "[I");
+                std::vector<int32_t> ids = s.get<FrontendStatus::Tag::dvbtCellIds>();
 
                 jintArray valObj = env->NewIntArray(v.size());
                 env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint *>(&ids[0]));

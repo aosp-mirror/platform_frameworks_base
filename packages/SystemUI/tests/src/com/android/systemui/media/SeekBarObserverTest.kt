@@ -62,7 +62,7 @@ public class SeekBarObserverTest : SysuiTestCase() {
         whenever(mockHolder.elapsedTimeView).thenReturn(elapsedTimeView)
         whenever(mockHolder.totalTimeView).thenReturn(totalTimeView)
 
-        observer = SeekBarObserver(mockHolder)
+        observer = SeekBarObserver(mockHolder, false /* useSessionLayout */)
     }
 
     @Test

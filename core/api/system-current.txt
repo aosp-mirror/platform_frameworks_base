@@ -345,6 +345,7 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
+    field public static final int gameSessionService;
     field public static final int hotwordDetectionService = 16844326; // 0x1010626
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
@@ -1399,7 +1400,9 @@ package android.app.compat {
     method public static boolean isChangeEnabled(long);
     method @RequiresPermission(allOf={"android.permission.READ_COMPAT_CHANGE_CONFIG", "android.permission.LOG_COMPAT_CHANGE"}) public static boolean isChangeEnabled(long, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(allOf={"android.permission.READ_COMPAT_CHANGE_CONFIG", "android.permission.LOG_COMPAT_CHANGE"}) public static boolean isChangeEnabled(long, int);
+    method @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD) public static void putAllPackageOverrides(@NonNull java.util.Map<java.lang.String,java.util.Map<java.lang.Long,android.app.compat.PackageOverride>>);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD) public static void putPackageOverrides(@NonNull String, @NonNull java.util.Map<java.lang.Long,android.app.compat.PackageOverride>);
+    method @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD) public static void removeAllPackageOverrides(@NonNull java.util.Map<java.lang.String,java.util.Set<java.lang.Long>>);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD) public static void removePackageOverrides(@NonNull String, @NonNull java.util.Set<java.lang.Long>);
   }
 
@@ -7606,6 +7609,7 @@ package android.media.tv.tuner.frontend {
     method public int getBer();
     method @NonNull public int[] getBers();
     method @NonNull public int[] getCodeRates();
+    method @NonNull public int[] getDvbtCellIds();
     method @NonNull public int[] getExtendedModulations();
     method @Deprecated public int getFreqOffset();
     method public long getFreqOffsetLong();
@@ -7648,6 +7652,7 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_BERS = 23; // 0x17
     field public static final int FRONTEND_STATUS_TYPE_CODERATES = 24; // 0x18
     field public static final int FRONTEND_STATUS_TYPE_DEMOD_LOCK = 0; // 0x0
+    field public static final int FRONTEND_STATUS_TYPE_DVBT_CELL_IDS = 40; // 0x28
     field public static final int FRONTEND_STATUS_TYPE_EWBS = 13; // 0xd
     field public static final int FRONTEND_STATUS_TYPE_FEC = 8; // 0x8
     field public static final int FRONTEND_STATUS_TYPE_FREQ_OFFSET = 18; // 0x12
@@ -7882,6 +7887,7 @@ package android.media.tv.tuner.frontend {
     method public void onAtsc3PlpInfosReported(@NonNull android.media.tv.tuner.frontend.Atsc3PlpInfo[]);
     method public default void onDvbcAnnexReported(int);
     method public void onDvbsStandardReported(int);
+    method public default void onDvbtCellIdsReported(@NonNull int[]);
     method public void onDvbtStandardReported(int);
     method public default void onFrequenciesLongReported(@NonNull long[]);
     method @Deprecated public void onFrequenciesReported(@NonNull int[]);
@@ -10737,12 +10743,35 @@ package android.service.euicc {
 
 package android.service.games {
 
+  public final class CreateGameSessionRequest implements android.os.Parcelable {
+    ctor public CreateGameSessionRequest(int, @NonNull String);
+    method public int describeContents();
+    method @NonNull public String getGamePackageName();
+    method public int getTaskId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.games.CreateGameSessionRequest> CREATOR;
+  }
+
   public class GameService extends android.app.Service {
     ctor public GameService();
     method @Nullable public android.os.IBinder onBind(@Nullable android.content.Intent);
     method public void onConnected();
     method public void onDisconnected();
-    field public static final String SERVICE_INTERFACE = "android.service.games.GameService";
+    field public static final String ACTION_GAME_SERVICE = "android.service.games.action.GAME_SERVICE";
+    field public static final String SERVICE_META_DATA = "android.game_service";
+  }
+
+  public abstract class GameSession {
+    ctor public GameSession();
+    method public void onCreate();
+    method public void onDestroy();
+  }
+
+  public abstract class GameSessionService extends android.app.Service {
+    ctor public GameSessionService();
+    method @Nullable public android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @NonNull public abstract android.service.games.GameSession onNewSession(@NonNull android.service.games.CreateGameSessionRequest);
+    field public static final String ACTION_GAME_SESSION_SERVICE = "android.service.games.action.GAME_SESSION_SERVICE";
   }
 
 }
@@ -13087,21 +13116,23 @@ package android.telephony.data {
 
   public final class DataProfile implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public String getApn();
-    method public int getAuthType();
-    method public int getBearerBitmask();
+    method @Deprecated @NonNull public String getApn();
+    method @Nullable public android.telephony.data.ApnSetting getApnSetting();
+    method @Deprecated public int getAuthType();
+    method @Deprecated public int getBearerBitmask();
     method @Deprecated public int getMtu();
-    method public int getMtuV4();
-    method public int getMtuV6();
-    method @Nullable public String getPassword();
-    method public int getProfileId();
-    method public int getProtocolType();
-    method public int getRoamingProtocolType();
-    method public int getSupportedApnTypesBitmask();
+    method @Deprecated public int getMtuV4();
+    method @Deprecated public int getMtuV6();
+    method @Deprecated @Nullable public String getPassword();
+    method @Deprecated public int getProfileId();
+    method @Deprecated public int getProtocolType();
+    method @Deprecated public int getRoamingProtocolType();
+    method @Deprecated public int getSupportedApnTypesBitmask();
+    method @Nullable public android.telephony.data.TrafficDescriptor getTrafficDescriptor();
     method public int getType();
-    method @Nullable public String getUserName();
+    method @Deprecated @Nullable public String getUserName();
     method public boolean isEnabled();
-    method public boolean isPersistent();
+    method @Deprecated public boolean isPersistent();
     method public boolean isPreferred();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.DataProfile> CREATOR;
@@ -13114,21 +13145,23 @@ package android.telephony.data {
     ctor public DataProfile.Builder();
     method @NonNull public android.telephony.data.DataProfile build();
     method @NonNull public android.telephony.data.DataProfile.Builder enable(boolean);
-    method @NonNull public android.telephony.data.DataProfile.Builder setApn(@NonNull String);
-    method @NonNull public android.telephony.data.DataProfile.Builder setAuthType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setBearerBitmask(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setApn(@NonNull String);
+    method @NonNull public android.telephony.data.DataProfile.Builder setApnSetting(@NonNull android.telephony.data.ApnSetting);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setAuthType(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setBearerBitmask(int);
     method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtu(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setMtuV4(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setMtuV6(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setPassword(@NonNull String);
-    method @NonNull public android.telephony.data.DataProfile.Builder setPersistent(boolean);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtuV4(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtuV6(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setPassword(@NonNull String);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setPersistent(boolean);
     method @NonNull public android.telephony.data.DataProfile.Builder setPreferred(boolean);
-    method @NonNull public android.telephony.data.DataProfile.Builder setProfileId(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setProtocolType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setRoamingProtocolType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setSupportedApnTypesBitmask(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setProfileId(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setProtocolType(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setRoamingProtocolType(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setSupportedApnTypesBitmask(int);
+    method @NonNull public android.telephony.data.DataProfile.Builder setTrafficDescriptor(@NonNull android.telephony.data.TrafficDescriptor);
     method @NonNull public android.telephony.data.DataProfile.Builder setType(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setUserName(@NonNull String);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setUserName(@NonNull String);
   }
 
   public abstract class DataService extends android.app.Service {

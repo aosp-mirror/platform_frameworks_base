@@ -42,6 +42,8 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_UNLOCK_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PIP_TRANSITION;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF_SHOW_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON;
@@ -177,6 +179,8 @@ public class InteractionJankMonitor {
     public static final int CUJ_USER_SWITCH = 37;
     public static final int CUJ_SPLASHSCREEN_AVD = 38;
     public static final int CUJ_SPLASHSCREEN_EXIT_ANIM = 39;
+    public static final int CUJ_SCREEN_OFF = 40;
+    public static final int CUJ_SCREEN_OFF_SHOW_AOD = 41;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -225,6 +229,8 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_AVD,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_EXIT_ANIM,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF_SHOW_AOD,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -285,6 +291,8 @@ public class InteractionJankMonitor {
             CUJ_USER_SWITCH,
             CUJ_SPLASHSCREEN_AVD,
             CUJ_SPLASHSCREEN_EXIT_ANIM,
+            CUJ_SCREEN_OFF,
+            CUJ_SCREEN_OFF_SHOW_AOD,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -419,6 +427,16 @@ public class InteractionJankMonitor {
                 mWorker.getThreadHandler().removeCallbacks(timeout);
                 mTimeoutActions.remove(cujType);
             }
+        }
+    }
+
+    /**
+     * @param cujType cuj type
+     * @return true if the cuj is under instrumenting, false otherwise.
+     */
+    public boolean isInstrumenting(@CujType int cujType) {
+        synchronized (mLock) {
+            return mRunningTrackers.contains(cujType);
         }
     }
 
@@ -690,6 +708,10 @@ public class InteractionJankMonitor {
                 return "SPLASHSCREEN_AVD";
             case CUJ_SPLASHSCREEN_EXIT_ANIM:
                 return "SPLASHSCREEN_EXIT_ANIM";
+            case CUJ_SCREEN_OFF:
+                return "SCREEN_OFF";
+            case CUJ_SCREEN_OFF_SHOW_AOD:
+                return "SCREEN_OFF_SHOW_AOD";
         }
         return "UNKNOWN";
     }

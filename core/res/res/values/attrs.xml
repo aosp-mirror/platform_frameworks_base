@@ -8778,6 +8778,14 @@
         <attr name="hotwordDetectionService" format="string" />
     </declare-styleable>
 
+    <!-- Use <code>game-service</code> as the root tag of the XML resource that
+         describes a GameService.
+         Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="GameService">
+        <!-- The service that hosts active game sessions.  This is required. -->
+        <attr name="gameSessionService" format="string" />
+    </declare-styleable>
+
     <!-- Use <code>voice-enrollment-application</code>
          as the root tag of the XML resource that escribes the supported keyphrases (hotwords)
          by the enrollment application.

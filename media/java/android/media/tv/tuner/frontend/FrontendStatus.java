@@ -53,7 +53,8 @@ public class FrontendStatus {
             FRONTEND_STATUS_TYPE_MODULATIONS_EXT, FRONTEND_STATUS_TYPE_ROLL_OFF,
             FRONTEND_STATUS_TYPE_IS_MISO_ENABLED, FRONTEND_STATUS_TYPE_IS_LINEAR,
             FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES_ENABLED, FRONTEND_STATUS_TYPE_ISDBT_MODE,
-            FRONTEND_STATUS_TYPE_ISDBT_PARTIAL_RECEPTION_FLAG, FRONTEND_STATUS_TYPE_STREAM_IDS})
+            FRONTEND_STATUS_TYPE_ISDBT_PARTIAL_RECEPTION_FLAG, FRONTEND_STATUS_TYPE_STREAM_IDS,
+            FRONTEND_STATUS_TYPE_DVBT_CELL_IDS})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendStatusType {}
 
@@ -259,6 +260,12 @@ public class FrontendStatus {
      */
     public static final int FRONTEND_STATUS_TYPE_STREAM_IDS =
             android.hardware.tv.tuner.FrontendStatusType.STREAM_ID_LIST;
+
+    /**
+     * DVB-T Cell IDs.
+     */
+    public static final int FRONTEND_STATUS_TYPE_DVBT_CELL_IDS =
+            android.hardware.tv.tuner.FrontendStatusType.DVBT_CELL_IDS;
 
     /** @hide */
     @IntDef(value = {
@@ -500,6 +507,7 @@ public class FrontendStatus {
     private Integer mIsdbtMode;
     private Integer mIsdbtPartialReceptionFlag;
     private int[] mStreamIds;
+    private int[] mDvbtCellIds;
 
     // Constructed and fields set by JNI code.
     private FrontendStatus() {
@@ -1049,6 +1057,24 @@ public class FrontendStatus {
             throw new IllegalStateException("stream ids are empty");
         }
         return mStreamIds;
+    }
+
+    /**
+     * Gets DVB-T cell ids.
+     *
+     * <p>This query is only supported by Tuner HAL 2.0 or higher. Unsupported version or if HAL
+     * doesn't return cell ids will throw IllegalStateException. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    @SuppressLint("ArrayReturn")
+    @NonNull
+    public int[] getDvbtCellIds() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_2_0, "dvbt cell ids status");
+        if (mDvbtCellIds == null) {
+            throw new IllegalStateException("dvbt cell ids are empty");
+        }
+        return mDvbtCellIds;
     }
 
     /**

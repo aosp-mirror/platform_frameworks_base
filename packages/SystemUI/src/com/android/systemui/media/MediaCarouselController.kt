@@ -18,6 +18,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.media.MediaControlPanel.SMARTSPACE_CARD_DISMISS_EVENT
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
@@ -56,7 +57,8 @@ class MediaCarouselController @Inject constructor(
     configurationController: ConfigurationController,
     falsingCollector: FalsingCollector,
     falsingManager: FalsingManager,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    private val mediaFlags: MediaFlags
 ) : Dumpable {
     /**
      * The current width of the carousel
@@ -382,7 +384,7 @@ class MediaCarouselController @Inject constructor(
     private fun reorderAllPlayers(previousVisiblePlayerKey: MediaPlayerData.MediaSortKey?) {
         mediaContent.removeAllViews()
         for (mediaPlayer in MediaPlayerData.players()) {
-            mediaPlayer.playerViewHolder?.let {
+            mediaPlayer.mediaViewHolder?.let {
                 mediaContent.addView(it.player)
             } ?: mediaPlayer.recommendationViewHolder?.let {
                 mediaContent.addView(it.recommendations)
@@ -416,12 +418,19 @@ class MediaCarouselController @Inject constructor(
                 .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
         if (existingPlayer == null) {
             var newPlayer = mediaControlPanelFactory.get()
-            newPlayer.attachPlayer(
-                    PlayerViewHolder.create(LayoutInflater.from(context), mediaContent))
+            if (mediaFlags.areMediaSessionActionsEnabled()) {
+                newPlayer.attachPlayer(
+                        PlayerSessionViewHolder.create(LayoutInflater.from(context), mediaContent),
+                        MediaViewController.TYPE.PLAYER_SESSION)
+            } else {
+                newPlayer.attachPlayer(
+                        PlayerViewHolder.create(LayoutInflater.from(context), mediaContent),
+                        MediaViewController.TYPE.PLAYER)
+            }
             newPlayer.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
-            newPlayer.playerViewHolder?.player?.setLayoutParams(lp)
+            newPlayer.mediaViewHolder?.player?.setLayoutParams(lp)
             newPlayer.bindPlayer(dataCopy, key)
             newPlayer.setListening(currentlyExpanded)
             MediaPlayerData.addMediaPlayer(key, dataCopy, newPlayer, systemClock)
@@ -493,7 +502,7 @@ class MediaCarouselController @Inject constructor(
         val removed = MediaPlayerData.removeMediaPlayer(key)
         removed?.apply {
             mediaCarouselScrollHandler.onPrePlayerRemoved(removed)
-            mediaContent.removeView(removed.playerViewHolder?.player)
+            mediaContent.removeView(removed.mediaViewHolder?.player)
             mediaContent.removeView(removed.recommendationViewHolder?.recommendations)
             removed.onDestroy()
             mediaCarouselScrollHandler.onPlayersChanged()
@@ -836,7 +845,7 @@ class MediaCarouselController @Inject constructor(
         MediaPlayerData.players().forEachIndexed {
             index, it ->
             if (it.mIsImpressed) {
-                logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
+                logSmartspaceCardReported(SMARTSPACE_CARD_DISMISS_EVENT,
                         it.mInstanceId,
                         it.mUid,
                         it.recommendationViewHolder != null,

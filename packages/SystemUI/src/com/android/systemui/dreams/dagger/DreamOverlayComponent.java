@@ -18,10 +18,7 @@ package com.android.systemui.dreams.dagger;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import android.view.ViewGroup;
-
-import com.android.systemui.dreams.DreamOverlayContainerView;
-import com.android.systemui.dreams.DreamOverlayStatusBarViewController;
+import com.android.systemui.dreams.DreamOverlayContainerViewController;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -48,15 +45,7 @@ public interface DreamOverlayComponent {
     @Scope
     @interface DreamOverlayScope {}
 
-    /** Builds a {@link DreamOverlayContainerView} */
+    /** Builds a {@link DreamOverlayContainerViewController}. */
     @DreamOverlayScope
-    DreamOverlayContainerView getDreamOverlayContainerView();
-
-    /** Builds a content view for dream overlays */
-    @DreamOverlayScope
-    ViewGroup getDreamOverlayContentView();
-
-    /** Builds a {@link DreamOverlayStatusBarViewController}. */
-    @DreamOverlayScope
-    DreamOverlayStatusBarViewController getDreamOverlayStatusBarViewController();
+    DreamOverlayContainerViewController getDreamOverlayContainerViewController();
 }

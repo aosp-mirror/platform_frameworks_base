@@ -146,7 +146,6 @@ import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationUtils;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.WatchedArrayMap;
-import com.android.server.utils.WatchedArraySet;
 import com.android.server.utils.WatchedLongSparseArray;
 import com.android.server.utils.WatchedSparseBooleanArray;
 import com.android.server.utils.WatchedSparseIntArray;
@@ -333,7 +332,7 @@ public class ComputerEngine implements Computer {
     private final InstantAppRegistry mInstantAppRegistry;
     private final ApplicationInfo mLocalAndroidApplication;
     private final AppsFilter mAppsFilter;
-    private final WatchedArraySet<String> mFrozenPackages;
+    private final WatchedArrayMap<String, Integer> mFrozenPackages;
 
     // Immutable service attribute
     private final String mAppPredictionServicePackage;
@@ -3580,7 +3579,7 @@ public class ComputerEngine implements Computer {
             return PackageManagerService.PACKAGE_STARTABILITY_NOT_SYSTEM;
         }
 
-        if (mFrozenPackages.contains(packageName)) {
+        if (mFrozenPackages.containsKey(packageName)) {
             return PackageManagerService.PACKAGE_STARTABILITY_FROZEN;
         }
 

@@ -32,8 +32,8 @@
         android:id="@+id/dream_overlay_status_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dream_overlay_status_bar_height"
-        android:layout_marginEnd="@dimen/dream_overlay_status_bar_margin"
-        android:layout_marginStart="@dimen/dream_overlay_status_bar_margin"
+        android:paddingEnd="@dimen/dream_overlay_status_bar_margin"
+        android:paddingStart="@dimen/dream_overlay_status_bar_margin"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout

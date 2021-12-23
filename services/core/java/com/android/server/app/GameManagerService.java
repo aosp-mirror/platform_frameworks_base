@@ -76,6 +76,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.CompatibilityOverrideConfig;
 import com.android.internal.compat.IPlatformCompat;
+import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
@@ -563,7 +564,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
             mService.registerPackageReceiver();
 
             if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_GAME_SERVICE)) {
-                mGameServiceController = new GameServiceController(context);
+                mGameServiceController = new GameServiceController(
+                        BackgroundThread.getExecutor(),
+                        new GameServiceProviderSelectorImpl(
+                                getContext().getResources(),
+                                getContext().getPackageManager()),
+                        new GameServiceProviderInstanceFactoryImpl(getContext()));
             }
         }
 
@@ -582,6 +588,14 @@ public final class GameManagerService extends IGameManagerService.Stub {
             mService.onUserStarting(user.getUserIdentifier());
             if (mGameServiceController != null) {
                 mGameServiceController.notifyUserStarted(user);
+            }
+        }
+
+        @Override
+        public void onUserUnlocking(@NonNull TargetUser user) {
+            super.onUserUnlocking(user);
+            if (mGameServiceController != null) {
+                mGameServiceController.notifyUserUnlocking(user);
             }
         }
 

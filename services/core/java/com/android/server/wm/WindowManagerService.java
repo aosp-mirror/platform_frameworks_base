@@ -3026,17 +3026,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 aspectRatio);
     }
 
-    /**
-     * Notifies window manager that {@link DisplayPolicy#isShowingDreamLw} has changed.
-     */
-    public void notifyShowingDreamChanged() {
-        // TODO(multi-display): support show dream in multi-display.
-        notifyKeyguardFlagsChanged(null /* callback */, DEFAULT_DISPLAY);
-    }
-
     @Override
     public void notifyKeyguardTrustedChanged() {
-        mAtmInternal.notifyKeyguardTrustedChanged();
+        synchronized (mGlobalLock) {
+            if (mAtmService.mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
+                mRoot.ensureActivitiesVisible(null, 0, false /* preserveWindows */);
+            }
+        }
     }
 
     @Override
@@ -3086,15 +3082,6 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean isAppTransitionStateIdle() {
         return getDefaultDisplayContentLocked().mAppTransition.isIdle();
-    }
-
-    /**
-     * Notifies activity manager that some Keyguard flags have changed and that it needs to
-     * reevaluate the visibilities of the activities.
-     * @param callback Runnable to be called when activity manager is done reevaluating visibilities
-     */
-    void notifyKeyguardFlagsChanged(@Nullable Runnable callback, int displayId) {
-        mAtmInternal.notifyKeyguardFlagsChanged(callback, displayId);
     }
 
 

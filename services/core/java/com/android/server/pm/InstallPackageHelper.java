@@ -2992,7 +2992,8 @@ final class InstallPackageHelper {
                     installPackageFromSystemLIF(stubPkg.getPath(),
                             mPm.mUserManager.getUserIds() /*allUserHandles*/,
                             null /*origUserHandles*/,
-                            true /*writeSettings*/);
+                            true /*writeSettings*/,
+                            Process.INVALID_UID /*previousAppId*/);
                 } catch (PackageManagerException pme) {
                     // Serious WTF; we have to be able to install the stub
                     Slog.wtf(TAG, "Failed to restore system package:" + stubPkg.getPackageName(),
@@ -3118,8 +3119,11 @@ final class InstallPackageHelper {
             if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
             try {
                 synchronized (mPm.mInstallLock) {
+                    final int[] origUsers = outInfo == null ? null : outInfo.mOrigUsers;
+                    final int previousAppId = disabledPs.getAppId() != deletedPs.getAppId()
+                            ? deletedPs.getAppId() : Process.INVALID_UID;
                     installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
-                            outInfo == null ? null : outInfo.mOrigUsers, writeSettings);
+                            origUsers, writeSettings, previousAppId);
                 }
             } catch (PackageManagerException e) {
                 Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
@@ -3160,7 +3164,8 @@ final class InstallPackageHelper {
      */
     @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
     private void installPackageFromSystemLIF(@NonNull String codePathString,
-            @NonNull int[] allUserHandles, @Nullable int[] origUserHandles, boolean writeSettings)
+            @NonNull int[] allUserHandles, @Nullable int[] origUserHandles,
+            boolean writeSettings, int previousAppId)
             throws PackageManagerException {
         final File codePath = new File(codePathString);
         @ParsingPackageUtils.ParseFlags int parseFlags =
@@ -3184,11 +3189,12 @@ final class InstallPackageHelper {
         mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
 
         setPackageInstalledForSystemPackage(pkg, allUserHandles,
-                origUserHandles, writeSettings);
+                origUserHandles, writeSettings, previousAppId);
     }
 
     private void setPackageInstalledForSystemPackage(@NonNull AndroidPackage pkg,
-            @NonNull int[] allUserHandles, @Nullable int[] origUserHandles, boolean writeSettings) {
+            @NonNull int[] allUserHandles, @Nullable int[] origUserHandles,
+            boolean writeSettings, int previousAppId) {
         // writer
         synchronized (mPm.mLock) {
             PackageSetting ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
@@ -3222,8 +3228,7 @@ final class InstallPackageHelper {
 
             // The method below will take care of removing obsolete permissions and granting
             // install permissions.
-            mPm.mPermissionManager.onPackageInstalled(pkg,
-                    Process.INVALID_UID /* previousAppId */,
+            mPm.mPermissionManager.onPackageInstalled(pkg, previousAppId,
                     PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
                     UserHandle.USER_ALL);
             for (final int userId : allUserHandles) {

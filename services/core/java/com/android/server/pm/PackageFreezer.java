@@ -31,8 +31,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 final class PackageFreezer implements AutoCloseable {
     private final String mPackageName;
 
-    private final boolean mWeFroze;
-
     private final AtomicBoolean mClosed = new AtomicBoolean();
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
@@ -48,7 +46,7 @@ final class PackageFreezer implements AutoCloseable {
     PackageFreezer(PackageManagerService pm) {
         mPm = pm;
         mPackageName = null;
-        mWeFroze = false;
+        mClosed.set(true);
         mCloseGuard.open("close");
     }
 
@@ -58,7 +56,9 @@ final class PackageFreezer implements AutoCloseable {
         mPackageName = packageName;
         final PackageSetting ps;
         synchronized (mPm.mLock) {
-            mWeFroze = mPm.mFrozenPackages.add(mPackageName);
+            final int refCounts = mPm.mFrozenPackages
+                    .getOrDefault(mPackageName, 0 /* defaultValue */) + 1;
+            mPm.mFrozenPackages.put(mPackageName, refCounts);
             ps = mPm.mSettings.getPackageLPr(mPackageName);
         }
         if (ps != null) {
@@ -82,7 +82,11 @@ final class PackageFreezer implements AutoCloseable {
         mCloseGuard.close();
         if (mClosed.compareAndSet(false, true)) {
             synchronized (mPm.mLock) {
-                if (mWeFroze) {
+                final int refCounts = mPm.mFrozenPackages
+                        .getOrDefault(mPackageName, 0 /* defaultValue */) - 1;
+                if (refCounts > 0) {
+                    mPm.mFrozenPackages.put(mPackageName, refCounts);
+                } else {
                     mPm.mFrozenPackages.remove(mPackageName);
                 }
             }

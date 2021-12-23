@@ -189,11 +189,6 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertEquals(0,
                 displayPolicy.updateLightNavigationBarLw(APPEARANCE_LIGHT_NAVIGATION_BARS, null));
 
-        // Dimming window clears APPEARANCE_LIGHT_NAVIGATION_BARS.
-        assertEquals(0, displayPolicy.updateLightNavigationBarLw(0, dimming));
-        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
-                APPEARANCE_LIGHT_NAVIGATION_BARS, dimming));
-
         // Control window overrides APPEARANCE_LIGHT_NAVIGATION_BARS flag.
         assertEquals(0, displayPolicy.updateLightNavigationBarLw(0, opaqueDarkNavBar));
         assertEquals(0, displayPolicy.updateLightNavigationBarLw(

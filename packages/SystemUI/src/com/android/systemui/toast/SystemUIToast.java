@@ -199,7 +199,9 @@ public class SystemUIToast implements ToastPlugin.Toast {
                 iconView.setVisibility(View.GONE);
             } else {
                 iconView.setImageDrawable(icon);
-                if (appInfo.labelRes != 0) {
+                if (appInfo == null) {
+                    Log.d(TAG, "No appInfo for pkg=" + mPackageName + " usr=" + mUserId);
+                } else if (appInfo.labelRes != 0) {
                     try {
                         Resources res = mContext.getPackageManager().getResourcesForApplication(
                                 appInfo,

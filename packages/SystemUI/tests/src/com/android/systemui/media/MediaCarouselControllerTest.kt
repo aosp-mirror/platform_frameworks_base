@@ -36,6 +36,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 import javax.inject.Provider
 
 private val DATA = MediaData(
@@ -74,6 +75,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var falsingCollector: FalsingCollector
     @Mock lateinit var falsingManager: FalsingManager
     @Mock lateinit var dumpManager: DumpManager
+    @Mock lateinit var mediaFlags: MediaFlags
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -81,7 +83,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-
+        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
         mediaCarouselController = MediaCarouselController(
             context,
             mediaControlPanelFactory,
@@ -94,7 +96,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             configurationController,
             falsingCollector,
             falsingManager,
-            dumpManager
+            dumpManager,
+            mediaFlags
         )
 
         MediaPlayerData.clear()

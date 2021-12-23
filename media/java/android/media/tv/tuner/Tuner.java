@@ -1577,6 +1577,20 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
+    private void onDvbtCellIdsReported(int[] dvbtCellIds) {
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(() -> {
+                    synchronized (mScanCallbackLock) {
+                        if (mScanCallback != null) {
+                            mScanCallback.onDvbtCellIdsReported(dvbtCellIds);
+                        }
+                    }
+                });
+            }
+        }
+    }
+
     /**
      * Opens a filter object based on the given types and buffer size.
      *

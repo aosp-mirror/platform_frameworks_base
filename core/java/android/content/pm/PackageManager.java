@@ -3735,14 +3735,6 @@ public abstract class PackageManager {
     public static final String FEATURE_MANAGED_PROFILES = "android.software.managed_users";
 
     /**
-     * @hide
-     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
-     * The device supports Nearby mainline feature.
-     */
-    @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_NEARBY = "android.software.nearby";
-
-    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device supports verified boot.
      */

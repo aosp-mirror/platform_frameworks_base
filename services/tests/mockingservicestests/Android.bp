@@ -59,6 +59,7 @@ android_test {
         "mockingservicestests-utils-mockito",
         "servicestests-core-utils",
         "testables",
+        "kotlin-test",
         // TODO: remove once Android migrates to JUnit 4.12, which provides assertThrows
         "testng",
     ],

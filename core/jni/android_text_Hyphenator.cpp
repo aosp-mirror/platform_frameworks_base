@@ -83,6 +83,7 @@ static void init() {
     constexpr int INDIC_MIN_PREFIX = 2;
     constexpr int INDIC_MIN_SUFFIX = 2;
 
+    addHyphenator("am", 1, 1);  // Amharic
     addHyphenator("as", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Assamese
     addHyphenator("be", 2, 2);  // Belarusian
     addHyphenator("bg", 2, 2);  // Bulgarian
@@ -100,6 +101,7 @@ static void init() {
     addHyphenator("eu", 2, 2);  // Basque
     addHyphenator("fr", 2, 3);  // French
     addHyphenator("ga", 2, 3);  // Irish
+    addHyphenator("gl", 2, 2);  // Galician
     addHyphenator("gu", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Gujarati
     addHyphenator("hi", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Hindi
     addHyphenator("hr", 2, 2);  // Croatian
@@ -107,8 +109,10 @@ static void init() {
     // texhyphen sources say Armenian may be (1, 2); but that it needs confirmation.
     // Going with a more conservative value of (2, 2) for now.
     addHyphenator("hy", 2, 2);  // Armenian
+    addHyphenator("it", 2, 2);  // Italian
     addHyphenator("kn", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Kannada
     addHyphenator("la", 2, 2);  // Latin
+    addHyphenator("lt", 2, 2);  // Lithuanian
     addHyphenator("ml", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Malayalam
     addHyphenator("mn-Cyrl", 2, 2);  // Mongolian in Cyrillic script
     addHyphenator("mr", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Marathi
@@ -121,6 +125,7 @@ static void init() {
     addHyphenator("ta", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Tamil
     addHyphenator("te", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Telugu
     addHyphenator("tk", 2, 2);  // Turkmen
+    addHyphenator("uk", 2, 2);  // Ukrainian
     addHyphenator("und-Ethi", 1, 1);  // Any language in Ethiopic script
 
     // Following two hyphenators do not have pattern files but there is some special logic based on

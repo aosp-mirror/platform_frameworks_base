@@ -49,7 +49,7 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         mediaTttCommandLineHelper =
             MediaTttCommandLineHelper(
-                commandRegistry, mediaTttChipController, FakeExecutor(FakeSystemClock())
+                commandRegistry, context, mediaTttChipController, FakeExecutor(FakeSystemClock())
             )
     }
 
