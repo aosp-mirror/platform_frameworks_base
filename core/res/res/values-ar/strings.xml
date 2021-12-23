@@ -287,7 +287,7 @@
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"إشعار جديد"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"لوحة المفاتيح الافتراضية"</string>
-    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"لوحة المفاتيح الفعلية"</string>
+    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"لوحة المفاتيح الخارجية"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"الأمان"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"وضع السيارة"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"حالة الحساب"</string>

@@ -325,7 +325,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"Teléfono"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"hacer y administrar llamadas telefónicas"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensores corporales"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"acceder a los datos del sensor acerca de tus signos vitales"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"acceder a los datos de sensores acerca de tus signos vitales"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperar el contenido de las ventanas"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspeccionará el contenido de la ventana con la que estés interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activar la Exploración táctil"</string>
@@ -722,8 +722,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite que la aplicación lea y modifique la configuración de la función No interrumpir."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso de permiso de vista"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite que el propietario inicie el uso de permisos para una app. No debería requerirse para apps normales."</string>
-    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Acceder a los datos del sensor a una tasa de muestreo alta"</string>
-    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite que la app tome una muestra de los datos del sensor a una tasa superior a 200 Hz"</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Acceder a los datos de sensores a una tasa de muestreo alta"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite que la app tome una muestra de los datos de sensores a una tasa superior a 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Establecer reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controlar la longitud y los caracteres permitidos en las contraseñas y los PIN para el bloqueo de pantalla."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Supervisa los intentos para desbloquear la pantalla"</string>

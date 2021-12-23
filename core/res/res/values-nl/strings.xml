@@ -37,7 +37,7 @@
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Kan instellingen voor doorschakelen van gesprekken niet wijzigen vanaf je telefoon tijdens roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Service staat aan."</string>
     <string name="serviceEnabledFor" msgid="1463104778656711613">"Service staat aan voor:"</string>
-    <string name="serviceDisabled" msgid="641878791205871379">"Service staat uit."</string>
+    <string name="serviceDisabled" msgid="641878791205871379">"Service is uitgezet."</string>
     <string name="serviceRegistered" msgid="3856192211729577482">"De registratie is voltooid."</string>
     <string name="serviceErased" msgid="997354043770513494">"Wissen uitgevoerd."</string>
     <string name="passwordIncorrect" msgid="917087532676155877">"Onjuist wachtwoord."</string>
@@ -1712,7 +1712,7 @@
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tik op een functie om deze te gebruiken:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Functies kiezen voor gebruik met de knop Toegankelijkheid"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Functies kiezen voor gebruik met de sneltoets via de volumeknop"</string>
-    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> staat uit"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> is uitgezet"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Snelkoppelingen bewerken"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Klaar"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Sneltoets uitzetten"</string>
