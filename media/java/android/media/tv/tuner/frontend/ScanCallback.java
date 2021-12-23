@@ -36,6 +36,9 @@ public interface ScanCallback {
      */
     void onLocked();
 
+    /** Scan unlocked the signal. */
+    default void onUnLocked() {}
+
     /** Scan stopped. */
     void onScanStopped();
 

@@ -107,7 +107,8 @@ public class AvSettings extends Settings {
                     AUDIO_STREAM_TYPE_AAC, AUDIO_STREAM_TYPE_AC3, AUDIO_STREAM_TYPE_EAC3,
                     AUDIO_STREAM_TYPE_AC4, AUDIO_STREAM_TYPE_DTS, AUDIO_STREAM_TYPE_DTS_HD,
                     AUDIO_STREAM_TYPE_WMA, AUDIO_STREAM_TYPE_OPUS, AUDIO_STREAM_TYPE_VORBIS,
-                    AUDIO_STREAM_TYPE_DRA})
+                    AUDIO_STREAM_TYPE_DRA, AUDIO_STREAM_TYPE_AAC_ADTS, AUDIO_STREAM_TYPE_AAC_LATM,
+                    AUDIO_STREAM_TYPE_AAC_HE_ADTS, AUDIO_STREAM_TYPE_AAC_HE_LATM})
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioStreamType {}
 
@@ -182,6 +183,41 @@ public class AvSettings extends Settings {
      */
     public static final int AUDIO_STREAM_TYPE_DRA = android.hardware.tv.tuner.AudioStreamType.DRA;
 
+    /*
+     * AAC with ADTS (Audio Data Transport Format).
+     *
+     * This API is only supported by Tuner HAL 2.0 or higher. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    public static final int AUDIO_STREAM_TYPE_AAC_ADTS =
+            android.hardware.tv.tuner.AudioStreamType.AAC_ADTS;
+
+    /*
+     * AAC with ADTS with LATM (Low-overhead MPEG-4 Audio Transport Multiplex).
+     *
+     * This API is only supported by Tuner HAL 2.0 or higher. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    public static final int AUDIO_STREAM_TYPE_AAC_LATM =
+            android.hardware.tv.tuner.AudioStreamType.AAC_LATM;
+
+    /*
+     * High-Efficiency AAC (HE-AAC) with ADTS (Audio Data Transport Format).
+     *
+     * This API is only supported by Tuner HAL 2.0 or higher. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    public static final int AUDIO_STREAM_TYPE_AAC_HE_ADTS =
+            android.hardware.tv.tuner.AudioStreamType.AAC_HE_ADTS;
+
+    /*
+     * High-Efficiency AAC (HE-AAC) with LATM (Low-overhead MPEG-4 Audio Transport Multiplex).
+     *
+     * This API is only supported by Tuner HAL 2.0 or higher. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    public static final int AUDIO_STREAM_TYPE_AAC_HE_LATM =
+            android.hardware.tv.tuner.AudioStreamType.AAC_HE_LATM;
 
     private final boolean mIsPassthrough;
     private int mAudioStreamType = AUDIO_STREAM_TYPE_UNDEFINED;
