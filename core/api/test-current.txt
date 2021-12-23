@@ -1822,9 +1822,9 @@ package android.os {
 
   public static final class VibrationEffect.WaveformBuilder {
     method @NonNull public android.os.VibrationEffect.WaveformBuilder addRamp(@FloatRange(from=0.0f, to=1.0f) float, @IntRange(from=0) int);
-    method @NonNull public android.os.VibrationEffect.WaveformBuilder addRamp(@FloatRange(from=0.0f, to=1.0f) float, @FloatRange(from=-1.0F, to=1.0f) float, @IntRange(from=0) int);
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addRamp(@FloatRange(from=0.0f, to=1.0f) float, @FloatRange(from=1.0f) float, @IntRange(from=0) int);
     method @NonNull public android.os.VibrationEffect.WaveformBuilder addStep(@FloatRange(from=0.0f, to=1.0f) float, @IntRange(from=0) int);
-    method @NonNull public android.os.VibrationEffect.WaveformBuilder addStep(@FloatRange(from=0.0f, to=1.0f) float, @FloatRange(from=-1.0F, to=1.0f) float, @IntRange(from=0) int);
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addStep(@FloatRange(from=0.0f, to=1.0f) float, @FloatRange(from=1.0f) float, @IntRange(from=0) int);
     method @NonNull public android.os.VibrationEffect build();
     method @NonNull public android.os.VibrationEffect build(int);
   }
@@ -1982,9 +1982,9 @@ package android.os.vibrator {
     method public int describeContents();
     method public long getDuration();
     method public float getEndAmplitude();
-    method public float getEndFrequency();
+    method public float getEndFrequencyHz();
     method public float getStartAmplitude();
-    method public float getStartFrequency();
+    method public float getStartFrequencyHz();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.RampSegment> CREATOR;
   }
@@ -1993,7 +1993,7 @@ package android.os.vibrator {
     method public int describeContents();
     method public float getAmplitude();
     method public long getDuration();
-    method public float getFrequency();
+    method public float getFrequencyHz();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.StepSegment> CREATOR;
   }

@@ -125,8 +125,8 @@ public class VibrationEffectTest {
         VibrationEffect.startWaveform()
                 .addStep(/* amplitude= */ 1, /* duration= */ 10)
                 .addRamp(/* amplitude= */ 0, /* duration= */ 20)
-                .addStep(/* amplitude= */ 1, /* frequency*/ 1, /* duration= */ 100)
-                .addRamp(/* amplitude= */ 0.5f, /* frequency*/ -1, /* duration= */ 50)
+                .addStep(/* amplitude= */ 1, /* frequencyHz= */ 1, /* duration= */ 100)
+                .addRamp(/* amplitude= */ 0.5f, /* frequencyHz= */ 100, /* duration= */ 50)
                 .build()
                 .validate();
 
@@ -150,10 +150,22 @@ public class VibrationEffectTest {
                         .addStep(/* amplitude= */ -2, 10).build().validate());
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.startWaveform()
+                        .addStep(1, /* frequencyHz= */ -1f, 10).build().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startWaveform()
                         .addStep(1, /* duration= */ -1).build().validate());
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.startWaveform()
-                        .addStep(1, 0, /* duration= */ -1).build().validate());
+                        .addStep(1, 100f, /* duration= */ -1).build().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startWaveform()
+                        .addRamp(/* amplitude= */ -3, 10).build().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startWaveform()
+                        .addRamp(1, /* frequencyHz= */ 0, 10).build().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startWaveform()
+                        .addRamp(1, 10f, /* duration= */ -3).build().validate());
     }
 
     @Test
