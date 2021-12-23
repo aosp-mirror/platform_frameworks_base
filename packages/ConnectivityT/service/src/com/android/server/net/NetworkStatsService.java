@@ -919,6 +919,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public NetworkStats getDetailedUidStats(String[] requiredIfaces) {
+        enforceAnyPermissionOf(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
         try {
             final String[] ifacesToQuery =
                     mStatsFactory.augmentWithStackedInterfaces(requiredIfaces);
