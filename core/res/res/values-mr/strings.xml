@@ -1989,6 +1989,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"कस्टम ॲप सूचना"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची (हे खाते असलेला वापरकर्ता आधीपासून अस्तित्वात आहे) <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची आहे का?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची आहे का?"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"व्यवस्थापित वापरकर्ता जोडा"</string>
     <string name="language_selection_title" msgid="52674936078683285">"एक भाषा जोडा"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"प्रदेश प्राधान्य"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"भाषा नाव टाइप करा"</string>

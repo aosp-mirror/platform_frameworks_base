@@ -1989,6 +1989,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notifikasi aplikasi kustom"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Izinkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baru dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> (Pengguna dengan akun ini sudah ada) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Izinkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baru dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"Tambahkan bahasa"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferensi wilayah"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Ketik nama bahasa"</string>

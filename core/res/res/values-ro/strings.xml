@@ -2021,6 +2021,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notificare de aplicație personalizată"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Permiteți ca <xliff:g id="APP">%1$s</xliff:g> să creeze un nou utilizator folosind <xliff:g id="ACCOUNT">%2$s</xliff:g>? (există deja un utilizator cu acest cont)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Permiteți ca <xliff:g id="APP">%1$s</xliff:g> să creeze un nou utilizator folosind <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Adăugați un utilizator monitorizat"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Adăugați o limbă"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Regiunea preferată"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Numele limbii"</string>
