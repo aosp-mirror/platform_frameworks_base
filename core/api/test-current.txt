@@ -2305,6 +2305,7 @@ package android.service.dreams {
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);
     method public final void requestExit();
+    method public final boolean shouldShowComplications();
   }
 
 }
