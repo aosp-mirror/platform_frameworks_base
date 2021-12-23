@@ -100,7 +100,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     /**
      * Checks the position of the status bar at the start and end of the transition
      */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
