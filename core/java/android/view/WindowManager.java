@@ -3327,16 +3327,6 @@ public interface WindowManager extends ViewManager {
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS = 3;
 
         /**
-         * When this window has focus, disable touch pad pointer gesture processing.
-         * The window will receive raw position updates from the touch pad instead
-         * of pointer movements and synthetic touch events.
-         *
-         * @hide
-         */
-        public static final int INPUT_FEATURE_DISABLE_POINTER_GESTURES =
-                IInputConstants.InputFeature.DISABLE_POINTER_GESTURES;
-
-        /**
          * Does not construct an input channel for this window.  The channel will therefore
          * be incapable of receiving input.
          *
@@ -3393,7 +3383,6 @@ public interface WindowManager extends ViewManager {
          */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(flag = true, prefix = { "INPUT_FEATURE_" }, value = {
-            INPUT_FEATURE_DISABLE_POINTER_GESTURES,
             INPUT_FEATURE_NO_INPUT_CHANNEL,
             INPUT_FEATURE_DISABLE_USER_ACTIVITY,
             INPUT_FEATURE_SPY,
@@ -3404,7 +3393,6 @@ public interface WindowManager extends ViewManager {
         /**
          * Control special features of the input subsystem.
          *
-         * @see #INPUT_FEATURE_DISABLE_POINTER_GESTURES
          * @see #INPUT_FEATURE_NO_INPUT_CHANNEL
          * @see #INPUT_FEATURE_DISABLE_USER_ACTIVITY
          * @see #INPUT_FEATURE_SPY
@@ -4816,10 +4804,6 @@ public interface WindowManager extends ViewManager {
 
         private static String inputFeaturesToString(int inputFeatures) {
             final List<String> features = new ArrayList<>();
-            if ((inputFeatures & INPUT_FEATURE_DISABLE_POINTER_GESTURES) != 0) {
-                inputFeatures &= ~INPUT_FEATURE_DISABLE_POINTER_GESTURES;
-                features.add("INPUT_FEATURE_DISABLE_POINTER_GESTURES");
-            }
             if ((inputFeatures & INPUT_FEATURE_NO_INPUT_CHANNEL) != 0) {
                 inputFeatures &= ~INPUT_FEATURE_NO_INPUT_CHANNEL;
                 features.add("INPUT_FEATURE_NO_INPUT_CHANNEL");
