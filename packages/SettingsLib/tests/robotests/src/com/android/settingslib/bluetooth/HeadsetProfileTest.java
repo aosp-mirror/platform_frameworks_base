@@ -55,15 +55,6 @@ public class HeadsetProfileTest {
     }
 
     @Test
-    public void bluetoothProfile_shouldReturnTheAudioStatusFromBlueToothHeadsetService() {
-        when(mService.isAudioOn()).thenReturn(true);
-        assertThat(mProfile.isAudioOn()).isTrue();
-
-        when(mService.isAudioOn()).thenReturn(false);
-        assertThat(mProfile.isAudioOn()).isFalse();
-    }
-
-    @Test
     public void testHeadsetProfile_shouldReturnAudioState() {
         when(mService.getAudioState(mBluetoothDevice)).
                 thenReturn(BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
