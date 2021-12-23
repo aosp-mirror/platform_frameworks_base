@@ -145,6 +145,20 @@ public abstract class PackageManager {
             "android.media.PROPERTY_MEDIA_CAPABILITIES";
 
     /**
+     * Application level property that an app can specify to opt-out from having private data
+     * directories both on the internal and external storages.
+     *
+     * <p>Changing the value of this property during app update is not supported, and such updates
+     * will be rejected.
+     *
+     * <p>This should only be set by platform apps that know what they are doing.
+     *
+     * @hide
+     */
+    public static final String PROPERTY_NO_APP_DATA_STORAGE =
+            "android.internal.PROPERTY_NO_APP_DATA_STORAGE";
+
+    /**
      * A property value set within the manifest.
      * <p>
      * The value of a property will only have a single type, as defined by
