@@ -600,7 +600,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
 
     /** @hide */
     public static int convertRssnrUnitFromTenDbToDB(int rssnr) {
-        return rssnr / 10;
+        return (int) Math.floor((float) rssnr / 10);
     }
 
     /** @hide */
