@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Non hai dispositivos dispoñibles"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"A wifi non está conectada"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Inverter cores"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversión da cor"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Máis opcións"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Configuración de usuario"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Feito"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ampliar pantalla completa"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Amplía parte da pantalla"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Cambiar"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"O botón de accesibilidade substituíu o xesto de accesibilidade\n\n"<annotation id="link">"Ver configuración"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Toca para abrir as funcións de accesibilidade. Cambia este botón en Configuración.\n\n"<annotation id="link">"Ver configuración"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Para ocultar temporalmente o botón, móveo ata o bordo"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover á parte super. esquerda"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mover á parte superior dereita"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Ver todo"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para cambiar de rede, desconecta a Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Para mellorar a experiencia que ofrece o dispositivo, as aplicacións e os servizos poden seguir buscando redes wifi en calquera momento, aínda que esta conexión estea desactivada. Podes cambiar esta opción na configuración da función Busca de redes wifi. "<annotation id="link">"Cambiar"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Desactivar modo avión"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleccionar usuario"</string>
 </resources>

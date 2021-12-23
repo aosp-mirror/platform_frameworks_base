@@ -251,7 +251,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Nėra pasiekiamų įrenginių"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"„Wi-Fi“ neprijungtas"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Šviesumas"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Pakeisti spalvas"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Spalvų inversija"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Daugiau nustatymų"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Naudotojo nustatymai"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Atlikta"</string>
@@ -753,7 +753,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Viso ekrano didinimas"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Didinti ekrano dalį"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Perjungti"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Pritaikomumo gestas pakeistas pritaikomumo mygtuku\n\n"<annotation id="link">"Žr. nustatymus"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Palietę atidarykite pritaikymo neįgaliesiems funkcijas. Tinkinkite arba pakeiskite šį mygtuką nustatymuose.\n\n"<annotation id="link">"Žr. nustatymus"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Perkelkite mygtuką prie krašto, kad laikinai jį paslėptumėte"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Perkelti į viršų kairėje"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Perkelti į viršų dešinėje"</string>
@@ -889,5 +889,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Žiūrėti viską"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Norėdami perjungti tinklus, atjunkite eternetą"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Kad pagerintų įrenginio funkcijas, programos ir paslaugos vis tiek gali bet kada nuskaityti ieškodamos „Wi‑Fi“ tinklų, net jei „Wi‑Fi“ išjungtas. Tai galite pakeisti „Wi-Fi“ nuskaitymo nustatymuose. "<annotation id="link">"Pakeisti"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Išjungti lėktuvo režimą"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Naudotojo pasirinkimas"</string>
 </resources>

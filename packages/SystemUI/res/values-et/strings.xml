@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Ühtegi seadet pole saadaval"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"WiFi-ühendus puudub"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Heledus"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Värvide vahetamine"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Värvide ümberpööramine"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Rohkem seadeid"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Kasutaja seaded"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Valmis"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Täisekraani suurendamine"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ekraanikuva osa suurendamine"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Vaheta"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Juurdepääsetavuse nupp asendas juurdepääsuliigutuse\n\n"<annotation id="link">"Vaadake seadeid"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Puudutage juurdepääsufunktsioonide avamiseks. Kohandage nuppu või asendage see seadetes.\n\n"<annotation id="link">"Kuva seaded"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Teisaldage nupp serva, et see ajutiselt peita"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Teisalda üles vasakule"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Teisalda üles paremale"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Kuva kõik"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Võrkude vahetamiseks katkestage Etherneti-ühendus"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Seadme kasutuskogemuse parandamiseks võivad rakendused ja teenused siiski alati otsida WiFi-võrke isegi siis, kui WiFi on väljas. Seda saab muuta WiFi-skannimise seadetes. "<annotation id="link">"Muuda"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Lennureżiimi väljalülitamine"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Kasutaja valimine"</string>
 </resources>

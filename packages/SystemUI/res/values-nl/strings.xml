@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Geen apparaten beschikbaar"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wifi niet verbonden"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Helderheid"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Kleuren omkeren"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Kleurinversie"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Meer instellingen"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Gebruikersinstellingen"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Klaar"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Volledig scherm vergroten"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Deel van het scherm vergroten"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Schakelen"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"De knop Toegankelijkheid vervangt het toegankelijkheidsgebaar\n\n"<annotation id="link">"Instellingen bekijken"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Tik voor toegankelijkheidsfuncties. Wijzig of vervang deze knop via Instellingen.\n\n"<annotation id="link">"Naar Instellingen"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Knop naar de rand verplaatsen om deze tijdelijk te verbergen"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Naar linksboven verplaatsen"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Naar rechtsboven verplaatsen"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Alles tonen"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Verbreek de ethernetverbinding om van netwerk te wisselen"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Apps en services kunnen nog steeds op elk moment scannen op wifi-netwerken, zelfs als wifi uitstaat, om de apparaatfunctionaliteit te verbeteren. Je kunt dit aanpassen in de instellingen voor wifi-scannen. "<annotation id="link">"Wijzigen"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Vliegtuigmodus uitzetten"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Gebruiker selecteren"</string>
 </resources>

@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Không có thiết bị nào"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Chưa kết nối với Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Độ sáng"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Đảo ngược màu"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Đảo màu"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Chế độ cài đặt khác"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Cài đặt người dùng"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Xong"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Phóng to toàn màn hình"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Phóng to một phần màn hình"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Chuyển"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Nút hỗ trợ tiếp cận đã thay thế cử chỉ hỗ trợ tiếp cận\n\n"<annotation id="link">"Xem chế độ cài đặt"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Nhấn để mở bộ tính năng hỗ trợ tiếp cận. Tuỳ chỉnh/thay thế nút này trong phần Cài đặt.\n\n"<annotation id="link">"Xem chế độ cài đặt"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Di chuyển nút sang cạnh để ẩn nút tạm thời"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Chuyển lên trên cùng bên trái"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Chuyển lên trên cùng bên phải"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Xem tất cả"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Để chuyển mạng, hãy rút cáp Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Để cải thiện trải nghiệm khi dùng thiết bị, các ứng dụng và dịch vụ vẫn có thể quét tìm mạng Wi‑Fi bất cứ lúc nào, ngay cả khi Wi‑Fi tắt. Bạn có thể thay đổi chế độ này trong phần cài đặt tính năng Quét tìm Wi‑Fi. "<annotation id="link">"Thay đổi"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Tắt chế độ trên máy bay"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Chọn người dùng"</string>
 </resources>

@@ -250,7 +250,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Није доступан ниједан уређај"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"WiFi није повезан"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Осветљеност"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Обрни боје"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инверзија боја"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Још подешавања"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Корисничка подешавања"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
@@ -748,7 +748,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Увећајте цео екран"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Увећајте део екрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Пређи"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Дугме Приступачност је заменило покрет за приступачност\n\n"<annotation id="link">"Прикажи подешавања"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Додирните за функције приступачности. Прилагодите или замените ово дугме у Подешавањима.\n\n"<annotation id="link">"Подешавања"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Померите дугме до ивице да бисте га привремено сакрили"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Премести горе лево"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Премести горе десно"</string>
@@ -883,5 +883,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Погледајте све"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Да бисте променили мрежу, прекините етернет везу"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Ради бољег доживљаја уређаја, апликације и услуге и даље могу да траже WiFi мреже у било ком тренутку, чак и када је WiFi искључен. То можете да промените у подешавањима WiFi скенирања. "<annotation id="link">"Промените"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Искључите режим рада у авиону"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Изаберите корисника"</string>
 </resources>

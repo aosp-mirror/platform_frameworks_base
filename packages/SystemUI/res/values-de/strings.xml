@@ -180,7 +180,7 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Der Flugmodus ist aktiviert."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"lautlos"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"nur Weckrufe"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Nicht stören."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Bitte nicht stören."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"„Bitte nicht stören“ deaktiviert."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"„Bitte nicht stören“ aktiviert"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Keine Geräte verfügbar"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"WLAN nicht verbunden"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Helligkeit"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Farben umkehren"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Farbumkehr"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Weitere Einstellungen"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Nutzereinstellungen"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Fertig"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ganzen Bildschirm vergrößern"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Teil des Bildschirms vergrößern"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Schalter"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Die Schaltfläche „Bedienungshilfen“ ersetzt die Touch-Geste für Bedienungshilfen\n\n"<annotation id="link">"Einstellungen aufrufen"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Tippe, um die Bedienungshilfen aufzurufen. Du kannst diese Schaltfläche in den Einstellungen anpassen oder ersetzen.\n\n"<annotation id="link">"Zu den Einstellungen"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Durch Ziehen an den Rand wird die Schaltfläche zeitweise ausgeblendet"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Nach oben links verschieben"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Nach rechts oben verschieben"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Alle ansehen"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Trenne das Ethernetkabel, um das Netzwerk zu wechseln"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Zur Verbesserung der Gerätenutzung können Apps und Dienste weiter nach WLANs suchen, auch wenn die WLAN-Funktion deaktiviert ist. Dies lässt sich in den Einstellungen für die WLAN-Suche ändern. "<annotation id="link">"Ändern"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Flugmodus deaktivieren"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Nutzer auswählen"</string>
 </resources>

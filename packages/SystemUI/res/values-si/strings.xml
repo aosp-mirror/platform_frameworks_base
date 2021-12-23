@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"උපාංග නොතිබේ"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi සම්බන්ධ නොවීය"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"දීප්තිමත් බව"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"වර්ණ යටිකුරු කරන්න"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"වර්ණ අපවර්තනය"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"තව සැකසීම්"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"පරිශීලක සැකසීම්"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"නිමයි"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"පූර්ණ තිරය විශාලනය කරන්න"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"තිරයේ කොටසක් විශාලනය කරන්න"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ස්විචය"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ප්‍රවේශ්‍යතා බොත්තම ප්‍රවේශ්‍යතා ඉංගිතය ප්‍රතිස්ථාපනය කළේය\n\n"<annotation id="link">"සැකසීම් බලන්න"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ප්‍රවේශ්‍යතා විශේෂාංග විවෘත කිරීමට තට්ටු කරන්න. සැකසීම් තුළ මෙම බොත්තම අභිරුචිකරණය හෝ ප්‍රතිස්ථාපනය කරන්න.\n\n"<annotation id="link">"සැකසීම් බලන්න"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"එය තාවකාලිකව සැඟවීමට බොත්තම දාරයට ගෙන යන්න"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ඉහළ වමට ගෙන යන්න"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ඉහළ දකුණට ගෙන යන්න"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"සියල්ල බලන්න"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ජාල මාරු කිරීමට, ඊතර්නෙට් විසන්ධි කරන්න"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"උපාංග අත්දැකීම වැඩි දියුණු කිරිමට, Wi‑Fi ක්‍රියාවිරහිත විට පවා, ඕනෑම අවස්ථාවක Wi‑Fi ජාල සඳහා ස්කෑන් කිරීමට යෙදුම් සහ සේවාවලට හැකිය. ඔබට මෙය Wi‑Fi ස්කෑන් කිරීමේ සැකසීම් තුළ වෙනස් කළ හැකිය. "<annotation id="link">"වෙනස් කරන්න"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ගුවන් යානා ප්‍රකාරය ක්‍රියාවිරහිත කරන්න"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"පරිශීලක තෝරන්න"</string>
 </resources>
