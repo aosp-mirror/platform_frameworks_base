@@ -515,15 +515,6 @@ public final class SurfaceControl implements Parcelable {
     public static final int ENABLE_BACKPRESSURE = 0x00000100;
 
     /**
-     * Buffers from this SurfaceControl should be considered display decorations.
-     *
-     * If the hardware has optimizations for display decorations (e.g. rounded corners, camera
-     * cutouts, etc), it should use them for this layer.
-     * @hide
-     */
-    public static final int DISPLAY_DECORATION = 0x00000200;
-
-    /**
      * Surface creation flag: Creates a surface where color components are interpreted
      * as "non pre-multiplied" by their alpha channel. Of course this flag is
      * meaningless for surfaces without an alpha channel. By default
@@ -3270,21 +3261,6 @@ public final class SurfaceControl implements Parcelable {
                 nativeSetFlags(mNativeObject, sc.mNativeObject, SECURE, SECURE);
             } else {
                 nativeSetFlags(mNativeObject, sc.mNativeObject, 0, SECURE);
-            }
-            return this;
-        }
-
-        /**
-         * Sets whether the surface should take advantage of display decoration optimizations.
-         * @hide
-         */
-        public Transaction setDisplayDecoration(SurfaceControl sc, boolean displayDecoration) {
-            checkPreconditions(sc);
-            if (displayDecoration) {
-                nativeSetFlags(mNativeObject, sc.mNativeObject, DISPLAY_DECORATION,
-                        DISPLAY_DECORATION);
-            } else {
-                nativeSetFlags(mNativeObject, sc.mNativeObject, 0, DISPLAY_DECORATION);
             }
             return this;
         }
