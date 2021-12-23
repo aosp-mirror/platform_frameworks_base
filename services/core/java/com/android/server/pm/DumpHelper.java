@@ -504,6 +504,9 @@ final class DumpHelper {
                     ipw.println("(none)");
                 } else {
                     for (int i = 0; i < mPm.mFrozenPackages.size(); i++) {
+                        ipw.print("package=");
+                        ipw.print(mPm.mFrozenPackages.keyAt(i));
+                        ipw.print(", refCounts=");
                         ipw.println(mPm.mFrozenPackages.valueAt(i));
                     }
                 }

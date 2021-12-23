@@ -844,6 +844,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     };
 
+    @Override
+    WindowState asWindowState() {
+        return this;
+    }
+
     /**
      * @see #setSurfaceTranslationY(int)
      */

@@ -16,43 +16,26 @@
 
 package com.android.systemui.media
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.SeekBar
 import android.widget.TextView
 import com.android.systemui.R
-import com.android.systemui.util.animation.TransitionLayout
-
-private const val TAG = "PlayerViewHolder"
 
 /**
  * ViewHolder for a media player.
  */
-class PlayerViewHolder private constructor(itemView: View) {
-
-    val player = itemView as TransitionLayout
+class PlayerViewHolder private constructor(itemView: View) : MediaViewHolder(itemView) {
 
     // Player information
-    val appIcon = itemView.requireViewById<ImageView>(R.id.icon)
     val albumView = itemView.requireViewById<ImageView>(R.id.album_art)
-    val titleText = itemView.requireViewById<TextView>(R.id.header_title)
-    val artistText = itemView.requireViewById<TextView>(R.id.header_artist)
-
-    // Output switcher
-    val seamless = itemView.requireViewById<ViewGroup>(R.id.media_seamless)
-    val seamlessIcon = itemView.requireViewById<ImageView>(R.id.media_seamless_image)
-    val seamlessText = itemView.requireViewById<TextView>(R.id.media_seamless_text)
-    val seamlessButton = itemView.requireViewById<View>(R.id.media_seamless_button)
 
     // Seek bar
-    val seekBar = itemView.requireViewById<SeekBar>(R.id.media_progress_bar)
     val progressTimes = itemView.requireViewById<ViewGroup>(R.id.notification_media_progress_time)
-    val elapsedTimeView = itemView.requireViewById<TextView>(R.id.media_elapsed_time)
-    val totalTimeView = itemView.requireViewById<TextView>(R.id.media_total_time)
+    override val elapsedTimeView = itemView.requireViewById<TextView>(R.id.media_elapsed_time)
+    override val totalTimeView = itemView.requireViewById<TextView>(R.id.media_total_time)
 
     // Action Buttons
     val action0 = itemView.requireViewById<ImageButton>(R.id.action0)
@@ -61,29 +44,17 @@ class PlayerViewHolder private constructor(itemView: View) {
     val action3 = itemView.requireViewById<ImageButton>(R.id.action3)
     val action4 = itemView.requireViewById<ImageButton>(R.id.action4)
 
-    // Settings screen
-    val longPressText = itemView.requireViewById<TextView>(R.id.remove_text)
-    val cancel = itemView.requireViewById<View>(R.id.cancel)
-    val dismiss = itemView.requireViewById<ViewGroup>(R.id.dismiss)
-    val dismissLabel = dismiss.getChildAt(0)
-    val settings = itemView.requireViewById<View>(R.id.settings)
-    val settingsText = itemView.requireViewById<TextView>(R.id.settings_text)
-
     init {
         (player.background as IlluminationDrawable).let {
-            it.registerLightSource(seamless)
             it.registerLightSource(action0)
             it.registerLightSource(action1)
             it.registerLightSource(action2)
             it.registerLightSource(action3)
             it.registerLightSource(action4)
-            it.registerLightSource(cancel)
-            it.registerLightSource(dismiss)
-            it.registerLightSource(settings)
         }
     }
 
-    fun getAction(id: Int): ImageButton {
+    override fun getAction(id: Int): ImageButton {
         return when (id) {
             R.id.action0 -> action0
             R.id.action1 -> action1
@@ -94,15 +65,6 @@ class PlayerViewHolder private constructor(itemView: View) {
                 throw IllegalArgumentException()
             }
         }
-    }
-
-    fun marquee(start: Boolean, delay: Long) {
-        val longPressTextHandler = longPressText.getHandler()
-        if (longPressTextHandler == null) {
-            Log.d(TAG, "marquee while longPressText.getHandler() is null", Exception())
-            return
-        }
-        longPressTextHandler.postDelayed({ longPressText.setSelected(start) }, delay)
     }
 
     companion object {

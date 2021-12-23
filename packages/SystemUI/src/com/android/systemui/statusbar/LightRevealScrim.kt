@@ -92,6 +92,8 @@ class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevealEffe
     override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
         val interpolatedAmount = INTERPOLATOR.getInterpolation(amount)
 
+        scrim.interpolatedRevealAmount = interpolatedAmount
+
         scrim.startColorAlpha =
             getPercentPastThreshold(1 - interpolatedAmount,
                 threshold = 1 - START_COLOR_REVEAL_PERCENTAGE)
@@ -152,6 +154,7 @@ class CircleReveal(
         // non-interpolated amount
         val fadeAmount = getPercentPastThreshold(amount, 0.5f)
         val radius = startRadius + ((endRadius - startRadius) * amount)
+        scrim.interpolatedRevealAmount = amount
         scrim.revealGradientEndColorAlpha = 1f - fadeAmount
         scrim.setRevealGradientBounds(
             centerX - radius /* left */,
@@ -182,6 +185,7 @@ class PowerButtonReveal(
 
         with(scrim) {
             revealGradientEndColorAlpha = 1f - fadeAmount
+            interpolatedRevealAmount = interpolatedAmount
             setRevealGradientBounds(
                     width * (1f + OFF_SCREEN_START_AMOUNT) -
                             width * WIDTH_INCREASE_MULTIPLIER * interpolatedAmount,
@@ -282,6 +286,14 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
                 field = value
                 isScrimOpaqueChangedListener.accept(field)
             }
+        }
+
+    var interpolatedRevealAmount: Float = 1f
+
+    val isScrimAlmostOccludes: Boolean
+        get() {
+            // if the interpolatedRevealAmount less than 0.1, over 90% of the screen is black.
+            return interpolatedRevealAmount < 0.1f
         }
 
     private fun updateScrimOpaque() {

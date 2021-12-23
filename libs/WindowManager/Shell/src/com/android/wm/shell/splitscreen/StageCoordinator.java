@@ -46,7 +46,6 @@ import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON
 import static com.android.wm.shell.splitscreen.SplitScreenController.exitReasonToString;
 import static com.android.wm.shell.splitscreen.SplitScreenTransitions.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
-import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS_SNAP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
 import static com.android.wm.shell.transition.Transitions.isClosingType;
 import static com.android.wm.shell.transition.Transitions.isOpeningType;
@@ -157,8 +156,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     // and exit, since exit itself can trigger a number of changes that update the stages.
     private boolean mShouldUpdateRecents;
     private boolean mExitSplitScreenOnHide;
-    private boolean mKeyguardOccluded;
-    private boolean mDeviceSleep;
 
     /** The target stage to dismiss to when unlock after folded. */
     @StageType
@@ -171,6 +168,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // properly for the animation itself.
             mSplitLayout.release();
             mSplitLayout.resetDividerPosition();
+            mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
         }
     };
 
@@ -369,8 +367,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     void startTasksWithLegacyTransition(int mainTaskId, @Nullable Bundle mainOptions,
             int sideTaskId, @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
             float splitRatio, RemoteAnimationAdapter adapter) {
-        // Init divider first to make divider leash for remote animation target.
-        mSplitLayout.init();
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         // Need to add another wrapper here in shell so that we can inject the divider bar
         // and also manage the process elevation via setRunningRemote
@@ -387,15 +383,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     augmentedNonApps[i] = nonApps[i];
                 }
                 augmentedNonApps[augmentedNonApps.length - 1] = getDividerBarLegacyTarget();
-
-                IRemoteAnimationFinishedCallback wrapCallback =
-                        new IRemoteAnimationFinishedCallback.Stub() {
-                            @Override
-                            public void onAnimationFinished() throws RemoteException {
-                                mSyncQueue.runInSync(t -> setDividerVisibility(true, t));
-                                finishedCallback.onAnimationFinished();
-                            }
-                        };
                 try {
                     try {
                         ActivityTaskManager.getService().setRunningRemoteTransitionDelegate(
@@ -404,8 +391,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         Slog.e(TAG, "Unable to boost animation thread. This should only happen"
                                 + " during unit tests");
                     }
-                    adapter.getRunner().onAnimationStart(transit, apps, wallpapers,
-                            augmentedNonApps, wrapCallback);
+                    adapter.getRunner().onAnimationStart(transit, apps, wallpapers, nonApps,
+                            finishedCallback);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error starting remote animation", e);
                 }
@@ -413,7 +400,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
             @Override
             public void onAnimationCancelled() {
-                mSyncQueue.runInSync(t -> setDividerVisibility(true, t));
                 try {
                     adapter.getRunner().onAnimationCancelled();
                 } catch (RemoteException e) {
@@ -566,29 +552,54 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mTaskOrganizer.applyTransaction(wct);
     }
 
-    void onKeyguardOccludedChanged(boolean occluded) {
-        // Do not exit split directly, because it needs to wait for task info update to determine
-        // which task should remain on top after split dismissed.
-        mKeyguardOccluded = occluded;
-    }
-
     void onKeyguardVisibilityChanged(boolean showing) {
-        if (!showing && mMainStage.isActive()
-                && mTopStageAfterFoldDismiss != STAGE_TYPE_UNDEFINED) {
-            exitSplitScreen(mTopStageAfterFoldDismiss == STAGE_TYPE_MAIN ? mMainStage : mSideStage,
-                    EXIT_REASON_DEVICE_FOLDED);
+        if (!mMainStage.isActive()) {
+            return;
+        }
+
+        if (ENABLE_SHELL_TRANSITIONS) {
+            // Update divider visibility so it won't float on top of keyguard.
+            setDividerVisibility(!showing, null /* transaction */);
+        }
+
+        if (!showing && mTopStageAfterFoldDismiss != STAGE_TYPE_UNDEFINED) {
+            if (ENABLE_SHELL_TRANSITIONS) {
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                prepareExitSplitScreen(mTopStageAfterFoldDismiss, wct);
+                mSplitTransitions.startDismissTransition(null /* transition */, wct, this,
+                        mTopStageAfterFoldDismiss, EXIT_REASON_DEVICE_FOLDED);
+            } else {
+                exitSplitScreen(
+                        mTopStageAfterFoldDismiss == STAGE_TYPE_MAIN ? mMainStage : mSideStage,
+                        EXIT_REASON_DEVICE_FOLDED);
+            }
         }
     }
 
     void onFinishedWakingUp() {
-        if (mMainStage.isActive()) {
-            exitSplitScreenIfKeyguardOccluded();
+        if (!mMainStage.isActive()) {
+            return;
         }
-        mDeviceSleep = false;
-    }
 
-    void onFinishedGoingToSleep() {
-        mDeviceSleep = true;
+        // Check if there's only one stage visible while keyguard occluded.
+        final boolean mainStageVisible = mMainStage.mRootTaskInfo.isVisible;
+        final boolean oneStageVisible =
+                mMainStage.mRootTaskInfo.isVisible != mSideStage.mRootTaskInfo.isVisible;
+        if (oneStageVisible) {
+            // Dismiss split because there's show-when-locked activity showing on top of keyguard.
+            // Also make sure the task contains show-when-locked activity remains on top after split
+            // dismissed.
+            if (!ENABLE_SHELL_TRANSITIONS) {
+                final StageTaskListener toTop = mainStageVisible ? mMainStage : mSideStage;
+                exitSplitScreen(toTop, EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
+            } else {
+                final int dismissTop = mainStageVisible ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                prepareExitSplitScreen(dismissTop, wct);
+                mSplitTransitions.startDismissTransition(null /* transition */, wct, this,
+                        dismissTop, EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
+            }
+        }
     }
 
     void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
@@ -617,19 +628,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         applyExitSplitScreen(childrenToTop, wct, exitReason);
-    }
-
-    private void exitSplitScreenIfKeyguardOccluded() {
-        final boolean mainStageVisible = mMainStageListener.mVisible;
-        final boolean oneStageVisible = mainStageVisible ^ mSideStageListener.mVisible;
-        if (mDeviceSleep && mKeyguardOccluded && oneStageVisible) {
-            // Only the stages include show-when-locked activity is visible while keyguard occluded.
-            // Dismiss split because there's show-when-locked activity showing on top of keyguard.
-            // Also make sure the task contains show-when-locked activity remains on top after split
-            // dismissed.
-            final StageTaskListener toTop = mainStageVisible ? mMainStage : mSideStage;
-            exitSplitScreen(toTop, EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
-        }
     }
 
     private void applyExitSplitScreen(StageTaskListener childrenToTop,
@@ -681,6 +679,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             case EXIT_REASON_APP_FINISHED:
             // One of the children enters PiP
             case EXIT_REASON_CHILD_TASK_ENTER_PIP:
+            // One of the apps occludes lock screen.
+            case EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP:
+            // User has unlocked the device after folded
+            case EXIT_REASON_DEVICE_FOLDED:
                 return true;
             default:
                 return false;
@@ -840,31 +842,27 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void onStageVisibilityChanged(StageListenerImpl stageListener) {
         final boolean sideStageVisible = mSideStageListener.mVisible;
         final boolean mainStageVisible = mMainStageListener.mVisible;
-        final boolean bothStageVisible = sideStageVisible && mainStageVisible;
-        final boolean bothStageInvisible = !sideStageVisible && !mainStageVisible;
-        final boolean sameVisibility = sideStageVisible == mainStageVisible;
 
-        if (bothStageInvisible) {
+        // Wait for both stages having the same visibility to prevent causing flicker.
+        if (mainStageVisible != sideStageVisible) {
+            return;
+        }
+
+        if (!mainStageVisible) {
+            // Both stages are not visible, check if it needs to dismiss split screen.
             if (mExitSplitScreenOnHide
-                    // Don't dismiss staged split when both stages are not visible due to sleeping
-                    // display, like the cases keyguard showing or screen off.
+                    // Don't dismiss split screen when both stages are not visible due to sleeping
+                    // display.
                     || (!mMainStage.mRootTaskInfo.isSleeping
                     && !mSideStage.mRootTaskInfo.isSleeping)) {
-            // Don't dismiss staged split when both stages are not visible due to sleeping display,
-            // like the cases keyguard showing or screen off.
                 exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RETURN_HOME);
             }
         }
-        exitSplitScreenIfKeyguardOccluded();
 
         mSyncQueue.runInSync(t -> {
-            // Same above, we only set root tasks and divider leash visibility when both stage
-            // change to visible or invisible to avoid flicker.
-            if (sameVisibility) {
-                t.setVisibility(mSideStage.mRootLeash, bothStageVisible)
-                        .setVisibility(mMainStage.mRootLeash, bothStageVisible);
-                setDividerVisibility(bothStageVisible, t);
-            }
+            t.setVisibility(mSideStage.mRootLeash, sideStageVisible)
+                    .setVisibility(mMainStage.mRootLeash, mainStageVisible);
+            setDividerVisibility(mainStageVisible, t);
         });
     }
 
@@ -880,7 +878,9 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void applyDividerVisibility(SurfaceControl.Transaction t) {
         final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
-        if (dividerLeash == null) return;
+        if (dividerLeash == null) {
+            return;
+        }
 
         if (mDividerVisible) {
             t.show(dividerLeash);
@@ -905,15 +905,11 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         } else if (isSideStage) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
-            mSplitLayout.init();
             // Make sure the main stage is active.
             mMainStage.activate(getMainStageBounds(), wct, true /* reparent */);
             mSideStage.moveToTop(getSideStageBounds(), wct);
             mSyncQueue.queue(wct);
-            mSyncQueue.runInSync(t -> {
-                updateSurfaceBounds(mSplitLayout, t);
-                setDividerVisibility(true, t);
-            });
+            mSyncQueue.runInSync(t -> updateSurfaceBounds(mSplitLayout, t));
         }
         if (mMainStageListener.mHasChildren && mSideStageListener.mHasChildren) {
             mShouldUpdateRecents = true;
@@ -1388,11 +1384,9 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setSplitsVisible(false);
         // Wait until after animation to update divider
 
-        if (info.getType() == TRANSIT_SPLIT_DISMISS_SNAP) {
-            // Reset crops so they don't interfere with subsequent launches
-            t.setWindowCrop(mMainStage.mRootLeash, null);
-            t.setWindowCrop(mSideStage.mRootLeash, null);
-        }
+        // Reset crops so they don't interfere with subsequent launches
+        t.setWindowCrop(mMainStage.mRootLeash, null);
+        t.setWindowCrop(mSideStage.mRootLeash, null);
 
         if (dismissTransition.mDismissTop == STAGE_TYPE_UNDEFINED) {
             logExit(dismissTransition.mReason);

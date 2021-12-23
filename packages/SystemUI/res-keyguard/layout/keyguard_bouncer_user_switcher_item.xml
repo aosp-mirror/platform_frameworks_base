@@ -13,13 +13,14 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<TextView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Keyguard.UserSwitcher.Spinner.Item"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="start"
-    android:paddingStart="@dimen/control_menu_horizontal_padding"
-    android:paddingEnd="@dimen/control_menu_horizontal_padding"
-    android:textDirection="locale"/>
-
+    android:layout_height="wrap_content">
+  <TextView
+      style="@style/Bouncer.UserSwitcher.Spinner.Item"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="12dp"
+      android:layout_marginEnd="12dp" />
+</FrameLayout>

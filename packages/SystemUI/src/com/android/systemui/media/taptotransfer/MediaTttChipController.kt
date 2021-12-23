@@ -25,6 +25,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -73,6 +74,11 @@ class MediaTttChipController @Inject constructor(
                 .inflate(R.layout.media_ttt_chip, null) as LinearLayout
         }
         val currentChipView = chipView!!
+
+        // App icon
+        currentChipView.findViewById<CachingIconView>(R.id.app_icon).apply {
+            this.setImageDrawable(chipState.appIconDrawable)
+        }
 
         // Text
         currentChipView.requireViewById<TextView>(R.id.text).apply {
@@ -128,7 +134,11 @@ class MediaTttChipController @Inject constructor(
                 val undoRunnable = chipState.future.get(TRANSFER_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 // Make UI changes on the main thread
                 mainExecutor.execute {
-                    displayChip(TransferSucceeded(chipState.otherDeviceName, undoRunnable))
+                    displayChip(
+                        TransferSucceeded(
+                            chipState.otherDeviceName, chipState.appIconDrawable, undoRunnable
+                        )
+                    )
                 }
             } catch (ex: Exception) {
                 // TODO(b/203800327): Maybe show a failure chip here if UX decides we need one.

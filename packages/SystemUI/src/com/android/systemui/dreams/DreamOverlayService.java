@@ -17,13 +17,8 @@
 package com.android.systemui.dreams;
 
 import android.content.Context;
-import android.graphics.Rect;
-import android.graphics.Region;
 import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -54,59 +49,18 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final Executor mExecutor;
     // The state controller informs the service of updates to the complications present.
     private final DreamOverlayStateController mStateController;
-    // The component used to resolve dream overlay dependencies.
-    private final DreamOverlayComponent mDreamOverlayComponent;
+    // A controller for the dream overlay container view (which contains both the status bar and the
+    // content area).
+    private final DreamOverlayContainerViewController mDreamOverlayContainerViewController;
 
-    // The dream overlay's content view, which is located below the status bar (in z-order) and is
-    // the space into which widgets are placed.
-    private ViewGroup mDreamOverlayContentView;
+    // A reference to the {@link Window} used to hold the dream overlay.
+    private Window mWindow;
 
     private final DreamOverlayStateController.Callback mOverlayStateCallback =
             new DreamOverlayStateController.Callback() {
                 @Override
                 public void onComplicationsChanged() {
                     mExecutor.execute(() -> reloadComplicationsLocked());
-                }
-            };
-
-    // The service listens to view changes in order to declare that input occurring in areas outside
-    // the overlay should be passed through to the dream underneath.
-    private final View.OnAttachStateChangeListener mRootViewAttachListener =
-            new View.OnAttachStateChangeListener() {
-                @Override
-                public void onViewAttachedToWindow(View v) {
-                    v.getViewTreeObserver()
-                            .addOnComputeInternalInsetsListener(mOnComputeInternalInsetsListener);
-                }
-
-                @Override
-                public void onViewDetachedFromWindow(View v) {
-                    v.getViewTreeObserver()
-                            .removeOnComputeInternalInsetsListener(
-                                    mOnComputeInternalInsetsListener);
-                }
-            };
-
-    // A hook into the internal inset calculation where we declare the complications as the only
-    // touchable regions.
-    private final ViewTreeObserver.OnComputeInternalInsetsListener
-            mOnComputeInternalInsetsListener =
-            new ViewTreeObserver.OnComputeInternalInsetsListener() {
-                @Override
-                public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
-                    if (mDreamOverlayContentView != null) {
-                        inoutInfo.setTouchableInsets(
-                                ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-                        final Region region = new Region();
-                        for (int i = 0; i < mDreamOverlayContentView.getChildCount(); i++) {
-                            View child = mDreamOverlayContentView.getChildAt(i);
-                            final Rect rect = new Rect();
-                            child.getGlobalVisibleRect(rect);
-                            region.op(rect, Region.Op.UNION);
-                        }
-
-                        inoutInfo.touchableRegion.set(region);
-                    }
                 }
             };
 
@@ -119,9 +73,18 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mContext = context;
         mExecutor = executor;
         mStateController = overlayStateController;
-        mDreamOverlayComponent = dreamOverlayComponentFactory.create();
+        mDreamOverlayContainerViewController =
+                dreamOverlayComponentFactory.create().getDreamOverlayContainerViewController();
 
         mStateController.addCallback(mOverlayStateCallback);
+    }
+
+    @Override
+    public void onDestroy() {
+        final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
+        windowManager.removeView(mWindow.getDecorView());
+        mStateController.removeCallback(mOverlayStateCallback);
+        super.onDestroy();
     }
 
     @Override
@@ -130,12 +93,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     }
 
     private void reloadComplicationsLocked() {
-        if (mDreamOverlayContentView == null) {
-            return;
-        }
-        mDreamOverlayContentView.removeAllViews();
-        for (ComplicationProvider complicationProvider : mStateController.getComplications()) {
-            addComplication(complicationProvider);
+        mDreamOverlayContainerViewController.removeAllOverlays();
+        for (ComplicationProvider overlayProvider : mStateController.getComplications()) {
+            addComplication(overlayProvider);
         }
     }
 
@@ -147,32 +107,28 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
      *                     into the dream window.
      */
     private void addOverlayWindowLocked(WindowManager.LayoutParams layoutParams) {
-        final PhoneWindow window = new PhoneWindow(mContext);
-        window.setAttributes(layoutParams);
-        window.setWindowManager(null, layoutParams.token, "DreamOverlay", true);
+        mWindow = new PhoneWindow(mContext);
+        mWindow.setAttributes(layoutParams);
+        mWindow.setWindowManager(null, layoutParams.token, "DreamOverlay", true);
 
-        window.setBackgroundDrawable(new ColorDrawable(0));
+        mWindow.setBackgroundDrawable(new ColorDrawable(0));
 
-        window.clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-        window.requestFeature(Window.FEATURE_NO_TITLE);
+        mWindow.clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        mWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         // Hide all insets when the dream is showing
-        window.getDecorView().getWindowInsetsController().hide(WindowInsets.Type.systemBars());
-        window.setDecorFitsSystemWindows(false);
+        mWindow.getDecorView().getWindowInsetsController().hide(WindowInsets.Type.systemBars());
+        mWindow.setDecorFitsSystemWindows(false);
 
         if (DEBUG) {
             Log.d(TAG, "adding overlay window to dream");
         }
 
-        window.setContentView(mDreamOverlayComponent.getDreamOverlayContainerView());
-
-        mDreamOverlayContentView = mDreamOverlayComponent.getDreamOverlayContentView();
-        mDreamOverlayContentView.addOnAttachStateChangeListener(mRootViewAttachListener);
-
-        mDreamOverlayComponent.getDreamOverlayStatusBarViewController().init();
+        mDreamOverlayContainerViewController.init();
+        mWindow.setContentView(mDreamOverlayContainerViewController.getContainerView());
 
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        windowManager.addView(window.getDecorView(), window.getAttributes());
+        windowManager.addView(mWindow.getDecorView(), mWindow.getAttributes());
         mExecutor.execute(this::reloadComplicationsLocked);
     }
 
@@ -181,25 +137,12 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         provider.onCreateComplication(mContext,
                 (view, layoutParams) -> {
                     // Always move UI related work to the main thread.
-                    mExecutor.execute(() -> {
-                        if (mDreamOverlayContentView == null) {
-                            return;
-                        }
-
-                        mDreamOverlayContentView.addView(view, layoutParams);
-                    });
+                    mExecutor.execute(() -> mDreamOverlayContainerViewController
+                            .addOverlay(view, layoutParams));
                 },
                 () -> {
                     // The Callback is set on the main thread.
-                    mExecutor.execute(() -> {
-                        requestExit();
-                    });
+                    mExecutor.execute(this::requestExit);
                 });
-    }
-
-    @Override
-    public void onDestroy() {
-        mStateController.removeCallback(mOverlayStateCallback);
-        super.onDestroy();
     }
 }

@@ -22,6 +22,8 @@ import static com.android.internal.util.CollectionUtils.filter;
 import static com.android.internal.util.CollectionUtils.find;
 import static com.android.internal.util.CollectionUtils.map;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.MainThread;
@@ -50,6 +52,7 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -64,13 +67,17 @@ public class CompanionDeviceDiscoveryService extends Service {
     private static final boolean DEBUG = false;
     private static final String TAG = CompanionDeviceDiscoveryService.class.getSimpleName();
 
+    private static final String SYS_PROP_DEBUG_TIMEOUT = "debug.cdm.discovery_timeout";
+    private static final long TIMEOUT_DEFAULT = 20_000L; // 20 seconds
+    private static final long TIMEOUT_MIN = 1_000L; // 1 sec
+    private static final long TIMEOUT_MAX = 60_000L; // 1 min
+
     private static final String ACTION_START_DISCOVERY =
             "com.android.companiondevicemanager.action.START_DISCOVERY";
     private static final String ACTION_STOP_DISCOVERY =
             "com.android.companiondevicemanager.action.ACTION_STOP_DISCOVERY";
     private static final String EXTRA_ASSOCIATION_REQUEST = "association_request";
 
-    private static final long SCAN_TIMEOUT = 20_000L; // 20 seconds
 
     // TODO: replace with LiveData-s?
     static final Observable TIMEOUT_OBSERVABLE = new MyObservable();
@@ -180,8 +187,7 @@ public class CompanionDeviceDiscoveryService extends Service {
         // Start BLE scanning (if needed)
         mBleScanCallback = startBleScanningIfNeeded(bleFilters, forceStartScanningAll);
 
-        // Schedule a time-out.
-        Handler.getMain().postDelayed(mTimeoutRunnable, SCAN_TIMEOUT);
+        scheduleTimeout();
     }
 
     @MainThread
@@ -336,6 +342,21 @@ public class CompanionDeviceDiscoveryService extends Service {
             // Then: notify observers.
             SCAN_RESULTS_OBSERVABLE.notifyObservers();
         });
+    }
+
+    private void scheduleTimeout() {
+        long timeout = SystemProperties.getLong(SYS_PROP_DEBUG_TIMEOUT, -1);
+        if (timeout <= 0) {
+            // 0 or negative values indicate that the sysprop was never set or should be ignored.
+            timeout = TIMEOUT_DEFAULT;
+        } else {
+            timeout = min(timeout, TIMEOUT_MAX); // should be <= 1 min (TIMEOUT_MAX)
+            timeout = max(timeout, TIMEOUT_MIN); // should be >= 1 sec (TIMEOUT_MIN)
+        }
+
+        if (DEBUG) Log.d(TAG, "scheduleTimeout(), timeout=" + timeout);
+
+        Handler.getMain().postDelayed(mTimeoutRunnable, timeout);
     }
 
     private void timeout() {

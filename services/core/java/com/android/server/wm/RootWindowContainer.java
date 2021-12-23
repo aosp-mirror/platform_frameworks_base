@@ -1037,7 +1037,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 }
             }
 
-            if (curDisplay.mAppTransition.isRunning() && !curDisplay.isAppTransitioning()) {
+            final boolean curDisplayInTransitNotAnimate =
+                    // legacy transition
+                    (curDisplay.mAppTransition.isRunning() && !curDisplay.isAppTransitioning())
+                    // shell transition
+                    || (curDisplay.mTransitionController.isShellTransitionsEnabled()
+                            && !curDisplay.mTransitionController.isPlaying());
+            if (curDisplayInTransitNotAnimate) {
                 // We have finished the animation of an app transition. To do this, we have
                 // delayed a lot of operations like showing and hiding apps, moving apps in
                 // Z-order, etc.

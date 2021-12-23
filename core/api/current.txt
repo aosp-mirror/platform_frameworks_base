@@ -61,6 +61,7 @@ package android {
     field public static final String BLUETOOTH_PRIVILEGED = "android.permission.BLUETOOTH_PRIVILEGED";
     field public static final String BLUETOOTH_SCAN = "android.permission.BLUETOOTH_SCAN";
     field public static final String BODY_SENSORS = "android.permission.BODY_SENSORS";
+    field public static final String BODY_SENSORS_BACKGROUND = "android.permission.BODY_SENSORS_BACKGROUND";
     field public static final String BROADCAST_PACKAGE_REMOVED = "android.permission.BROADCAST_PACKAGE_REMOVED";
     field public static final String BROADCAST_SMS = "android.permission.BROADCAST_SMS";
     field public static final String BROADCAST_STICKY = "android.permission.BROADCAST_STICKY";
@@ -43508,6 +43509,7 @@ package android.telephony {
     field public static final int DATA_ENABLED_REASON_POLICY = 1; // 0x1
     field public static final int DATA_ENABLED_REASON_THERMAL = 3; // 0x3
     field public static final int DATA_ENABLED_REASON_USER = 0; // 0x0
+    field public static final int DATA_HANDOVER_IN_PROGRESS = 5; // 0x5
     field public static final int DATA_SUSPENDED = 3; // 0x3
     field public static final int DATA_UNKNOWN = -1; // 0xffffffff
     field public static final int DEFAULT_PORT_INDEX = 0; // 0x0
@@ -43757,6 +43759,8 @@ package android.telephony.data {
     method public String getMmsProxyAddressAsString();
     method public int getMmsProxyPort();
     method public android.net.Uri getMmsc();
+    method public int getMtuV4();
+    method public int getMtuV6();
     method public int getMvnoType();
     method public int getNetworkTypeBitmask();
     method public String getOperatorNumeric();
@@ -43813,10 +43817,14 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.ApnSetting.Builder setMmsProxyAddress(@Nullable String);
     method @NonNull public android.telephony.data.ApnSetting.Builder setMmsProxyPort(int);
     method @NonNull public android.telephony.data.ApnSetting.Builder setMmsc(@Nullable android.net.Uri);
+    method @NonNull public android.telephony.data.ApnSetting.Builder setMtuV4(int);
+    method @NonNull public android.telephony.data.ApnSetting.Builder setMtuV6(int);
     method @NonNull public android.telephony.data.ApnSetting.Builder setMvnoType(int);
     method @NonNull public android.telephony.data.ApnSetting.Builder setNetworkTypeBitmask(int);
     method @NonNull public android.telephony.data.ApnSetting.Builder setOperatorNumeric(@Nullable String);
     method @NonNull public android.telephony.data.ApnSetting.Builder setPassword(@Nullable String);
+    method @NonNull public android.telephony.data.ApnSetting.Builder setPersistent(boolean);
+    method @NonNull public android.telephony.data.ApnSetting.Builder setProfileId(int);
     method @NonNull public android.telephony.data.ApnSetting.Builder setProtocol(int);
     method @Deprecated public android.telephony.data.ApnSetting.Builder setProxyAddress(java.net.InetAddress);
     method @NonNull public android.telephony.data.ApnSetting.Builder setProxyAddress(@Nullable String);

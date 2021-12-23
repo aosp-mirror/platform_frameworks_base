@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.app.AppOpsManager.OP_COARSE_LOCATION;
+import static android.app.AppOpsManager.OP_FINE_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 
 import static com.android.settingslib.Utils.updateLocationEnabled;
@@ -30,11 +32,13 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.appops.AppOpItem;
 import com.android.systemui.appops.AppOpsController;
@@ -43,6 +47,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
@@ -59,30 +64,47 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
 
     private final Context mContext;
     private final AppOpsController mAppOpsController;
+    private final DeviceConfigProxy mDeviceConfigProxy;
     private final BootCompleteCache mBootCompleteCache;
     private final UserTracker mUserTracker;
     private final H mHandler;
 
 
     private boolean mAreActiveLocationRequests;
+    private boolean mShouldDisplayAllAccesses;
 
     @Inject
     public LocationControllerImpl(Context context, AppOpsController appOpsController,
+            DeviceConfigProxy deviceConfigProxy,
             @Main Looper mainLooper, @Background Handler backgroundHandler,
             BroadcastDispatcher broadcastDispatcher, BootCompleteCache bootCompleteCache,
             UserTracker userTracker) {
         mContext = context;
         mAppOpsController = appOpsController;
+        mDeviceConfigProxy = deviceConfigProxy;
         mBootCompleteCache = bootCompleteCache;
         mHandler = new H(mainLooper);
         mUserTracker = userTracker;
+        mShouldDisplayAllAccesses = getDeviceConfigSetting();
+
+        // Register to listen for changes in DeviceConfig settings.
+        mDeviceConfigProxy.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_PRIVACY,
+                backgroundHandler::post,
+                properties -> {
+                    mShouldDisplayAllAccesses = getDeviceConfigSetting();
+                    updateActiveLocationRequests();
+                });
 
         // Register to listen for changes in location settings.
         IntentFilter filter = new IntentFilter();
         filter.addAction(LocationManager.MODE_CHANGED_ACTION);
         broadcastDispatcher.registerReceiverWithHandler(this, filter, mHandler, UserHandle.ALL);
 
-        mAppOpsController.addCallback(new int[]{OP_MONITOR_HIGH_POWER_LOCATION}, this);
+        // Listen to all accesses and filter the ones interested in based on flags.
+        mAppOpsController.addCallback(
+                new int[]{OP_COARSE_LOCATION, OP_FINE_LOCATION, OP_MONITOR_HIGH_POWER_LOCATION},
+                this);
 
         // Examine the current location state and initialize the status view.
         backgroundHandler.post(this::updateActiveLocationRequests);
@@ -154,6 +176,11 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
                 UserHandle.of(userId));
     }
 
+    private boolean getDeviceConfigSetting() {
+        return mDeviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SMALL_ENABLED, false);
+    }
+
     /**
      * Returns true if there currently exist active high power location requests.
      */
@@ -171,10 +198,37 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         return false;
     }
 
-    // Reads the active location requests and updates the status view if necessary.
+    /**
+     * Returns true if there currently exist active location requests.
+     */
+    @VisibleForTesting
+    protected boolean areActiveLocationRequests() {
+        if (!mShouldDisplayAllAccesses) {
+            return false;
+        }
+        List<AppOpItem> appOpsItems = mAppOpsController.getActiveAppOps();
+
+        final int numItems = appOpsItems.size();
+        for (int i = 0; i < numItems; i++) {
+            if (appOpsItems.get(i).getCode() == OP_FINE_LOCATION
+                    || appOpsItems.get(i).getCode() == OP_COARSE_LOCATION) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Reads the active location requests from either OP_MONITOR_HIGH_POWER_LOCATION,
+    // OP_FINE_LOCATION, or OP_COARSE_LOCATION and updates the status view if necessary.
     private void updateActiveLocationRequests() {
         boolean hadActiveLocationRequests = mAreActiveLocationRequests;
-        mAreActiveLocationRequests = areActiveHighPowerLocationRequests();
+        if (mShouldDisplayAllAccesses) {
+            mAreActiveLocationRequests =
+                    areActiveHighPowerLocationRequests() || areActiveLocationRequests();
+        } else {
+            mAreActiveLocationRequests = areActiveHighPowerLocationRequests();
+        }
         if (mAreActiveLocationRequests != hadActiveLocationRequests) {
             mHandler.sendEmptyMessage(H.MSG_LOCATION_ACTIVE_CHANGED);
         }

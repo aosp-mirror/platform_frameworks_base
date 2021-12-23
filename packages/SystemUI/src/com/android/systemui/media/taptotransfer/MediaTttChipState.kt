@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.taptotransfer
 
+import android.graphics.drawable.Drawable
 import androidx.annotation.StringRes
 import com.android.systemui.R
 import java.util.concurrent.Future
@@ -26,12 +27,15 @@ import java.util.concurrent.Future
  *
  * This is a sealed class where each subclass represents a specific chip state. Each subclass can
  * contain additional information that is necessary for only that state.
+ *
+ * @property chipText a string resource for the text that the chip should display.
+ * @property otherDeviceName the name of the other device involved in the transfer.
+ * @property appIconDrawable a drawable representing the icon of the app playing the media.
  */
 sealed class MediaTttChipState(
-    /** A string resource for the text that the chip should display. */
     @StringRes internal val chipText: Int,
-    /** The name of the other device involved in the transfer. */
-    internal val otherDeviceName: String
+    internal val otherDeviceName: String,
+    internal val appIconDrawable: Drawable,
 )
 
 /**
@@ -39,8 +43,9 @@ sealed class MediaTttChipState(
  * The chip will instruct the user to move closer in order to initiate the transfer.
  */
 class MoveCloserToTransfer(
-    otherDeviceName: String
-) : MediaTttChipState(R.string.media_move_closer_to_transfer, otherDeviceName)
+    otherDeviceName: String,
+    appIconDrawable: Drawable
+) : MediaTttChipState(R.string.media_move_closer_to_transfer, otherDeviceName, appIconDrawable)
 
 /**
  * A state representing that a transfer has been initiated (but not completed).
@@ -52,8 +57,9 @@ class MoveCloserToTransfer(
  */
 class TransferInitiated(
     otherDeviceName: String,
+    appIconDrawable: Drawable,
     val future: Future<Runnable?>
-) : MediaTttChipState(R.string.media_transfer_playing, otherDeviceName)
+) : MediaTttChipState(R.string.media_transfer_playing, otherDeviceName, appIconDrawable)
 
 /**
  * A state representing that a transfer has been successfully completed.
@@ -63,5 +69,6 @@ class TransferInitiated(
  */
 class TransferSucceeded(
     otherDeviceName: String,
+    appIconDrawable: Drawable,
     val undoRunnable: Runnable? = null
-) : MediaTttChipState(R.string.media_transfer_playing, otherDeviceName)
+) : MediaTttChipState(R.string.media_transfer_playing, otherDeviceName, appIconDrawable)

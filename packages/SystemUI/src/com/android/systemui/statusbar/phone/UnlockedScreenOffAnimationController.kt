@@ -9,6 +9,9 @@ import android.os.Handler
 import android.provider.Settings
 import android.view.Surface
 import android.view.View
+import com.android.internal.jank.InteractionJankMonitor
+import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF
+import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
@@ -50,7 +53,8 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val keyguardViewMediatorLazy: dagger.Lazy<KeyguardViewMediator>,
     private val keyguardStateController: KeyguardStateController,
     private val dozeParameters: dagger.Lazy<DozeParameters>,
-    private val globalSettings: GlobalSettings
+    private val globalSettings: GlobalSettings,
+    private val interactionJankMonitor: InteractionJankMonitor
 ) : WakefulnessLifecycle.Observer, ScreenOffAnimation {
     private val handler = Handler()
 
@@ -78,16 +82,27 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             sendUnlockedScreenOffProgressUpdate(
                     1f - (it.animatedFraction as Float),
                     1f - (it.animatedValue as Float))
+            if (lightRevealScrim.isScrimAlmostOccludes &&
+                    interactionJankMonitor.isInstrumenting(CUJ_SCREEN_OFF)) {
+                // ends the instrument when the scrim almost occludes the screen.
+                // because the following janky frames might not be perceptible.
+                interactionJankMonitor.end(CUJ_SCREEN_OFF)
+            }
         }
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationCancel(animation: Animator?) {
                 lightRevealScrim.revealAmount = 1f
                 lightRevealAnimationPlaying = false
                 sendUnlockedScreenOffProgressUpdate(0f, 0f)
+                interactionJankMonitor.cancel(CUJ_SCREEN_OFF)
             }
 
             override fun onAnimationEnd(animation: Animator?) {
                 lightRevealAnimationPlaying = false
+            }
+
+            override fun onAnimationStart(animation: Animator?) {
+                interactionJankMonitor.begin(statusBar.notificationShadeWindowView, CUJ_SCREEN_OFF)
             }
         })
     }
@@ -163,6 +178,16 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                         decidedToAnimateGoingToSleep = null
                         // We need to unset the listener. These are persistent for future animators
                         keyguardView.animate().setListener(null)
+                        interactionJankMonitor.end(CUJ_SCREEN_OFF_SHOW_AOD)
+                    }
+
+                    override fun onAnimationCancel(animation: Animator?) {
+                        interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
+                    }
+
+                    override fun onAnimationStart(animation: Animator?) {
+                        interactionJankMonitor.begin(
+                                statusBar.notificationShadeWindowView, CUJ_SCREEN_OFF_SHOW_AOD)
                     }
                 })
                 .start()
@@ -229,10 +254,6 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             return false
         }
 
-        if (!dozeParameters.get().canControlUnlockedScreenOff()) {
-            return false
-        }
-
         // If animations are disabled system-wide, don't play this one either.
         if (Settings.Global.getString(
                 context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE) == "0") {
@@ -248,10 +269,10 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // already expanded and showing notifications/QS, the animation looks really messy. For now,
         // disable it if the notification panel is not fully collapsed.
         if ((!this::statusBar.isInitialized ||
-                !statusBar.notificationPanelViewController.isFullyCollapsed)
+                !statusBar.notificationPanelViewController.isFullyCollapsed) &&
                 // Status bar might be expanded because we have started
                 // playing the animation already
-                && !isAnimationPlaying()
+                !isAnimationPlaying()
         ) {
             return false
         }

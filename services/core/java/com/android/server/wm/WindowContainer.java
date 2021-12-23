@@ -3181,6 +3181,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /** Cheap way of doing cast and instanceof. */
+    WindowState asWindowState() {
+        return null;
+    }
+
+    /** Cheap way of doing cast and instanceof. */
     ActivityRecord asActivityRecord() {
         return null;
     }
