@@ -53015,11 +53015,11 @@ package android.view.inputmethod {
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.TextAttribute> CREATOR;
   }
 
-  public static final class TextAttribute.TextAttributeBuilder {
-    ctor public TextAttribute.TextAttributeBuilder();
+  public static final class TextAttribute.Builder {
+    ctor public TextAttribute.Builder();
     method @NonNull public android.view.inputmethod.TextAttribute build();
-    method @NonNull public android.view.inputmethod.TextAttribute.TextAttributeBuilder setExtras(@NonNull android.os.PersistableBundle);
-    method @NonNull public android.view.inputmethod.TextAttribute.TextAttributeBuilder setTextConversionSuggestions(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.view.inputmethod.TextAttribute.Builder setExtras(@NonNull android.os.PersistableBundle);
+    method @NonNull public android.view.inputmethod.TextAttribute.Builder setTextConversionSuggestions(@NonNull java.util.List<java.lang.String>);
   }
 
   public final class TextSnapshot {
