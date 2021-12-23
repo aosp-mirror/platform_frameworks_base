@@ -27,7 +27,7 @@ import android.os.Parcelable;
 public final class AitInfo implements Parcelable {
     static final String TAG = "AitInfo";
 
-    public static final Creator<AitInfo> CREATOR = new Creator<AitInfo>() {
+    public static final @NonNull Creator<AitInfo> CREATOR = new Creator<AitInfo>() {
         @Override
         public AitInfo createFromParcel(Parcel in) {
             return new AitInfo(in);
