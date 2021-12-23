@@ -973,11 +973,8 @@ public class CompanionDeviceManagerService extends SystemService {
                 companionAppUids.add(uid);
             }
         }
-        if (mAtmInternal != null) {
-            mAtmInternal.setCompanionAppUids(userId, companionAppUids);
-        }
         if (mAmInternal != null) {
-            // Make a copy of companionAppUids and send it to ActivityManager.
+            // Make a copy of the set and send it to ActivityManager.
             mAmInternal.setCompanionAppUids(userId, new ArraySet<>(companionAppUids));
         }
     }
