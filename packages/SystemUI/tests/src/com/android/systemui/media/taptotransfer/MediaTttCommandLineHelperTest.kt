@@ -18,6 +18,10 @@ package com.android.systemui.media.taptotransfer
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender
+import com.android.systemui.media.taptotransfer.sender.MoveCloserToTransfer
+import com.android.systemui.media.taptotransfer.sender.TransferInitiated
+import com.android.systemui.media.taptotransfer.sender.TransferSucceeded
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -42,14 +46,17 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     private lateinit var mediaTttCommandLineHelper: MediaTttCommandLineHelper
 
     @Mock
-    private lateinit var mediaTttChipController: MediaTttChipController
+    private lateinit var mediaTttChipControllerSender: MediaTttChipControllerSender
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         mediaTttCommandLineHelper =
             MediaTttCommandLineHelper(
-                commandRegistry, context, mediaTttChipController, FakeExecutor(FakeSystemClock())
+                commandRegistry,
+                context,
+                mediaTttChipControllerSender,
+                FakeExecutor(FakeSystemClock())
             )
     }
 
@@ -75,28 +82,28 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     fun moveCloserToTransfer_chipDisplayWithCorrectState() {
         commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
 
-        verify(mediaTttChipController).displayChip(any(MoveCloserToTransfer::class.java))
+        verify(mediaTttChipControllerSender).displayChip(any(MoveCloserToTransfer::class.java))
     }
 
     @Test
     fun transferInitiated_chipDisplayWithCorrectState() {
         commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
 
-        verify(mediaTttChipController).displayChip(any(TransferInitiated::class.java))
+        verify(mediaTttChipControllerSender).displayChip(any(TransferInitiated::class.java))
     }
 
     @Test
     fun transferSucceeded_chipDisplayWithCorrectState() {
         commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
 
-        verify(mediaTttChipController).displayChip(any(TransferSucceeded::class.java))
+        verify(mediaTttChipControllerSender).displayChip(any(TransferSucceeded::class.java))
     }
 
     @Test
     fun removeCommand_chipRemoved() {
         commandRegistry.onShellCommand(pw, arrayOf(REMOVE_CHIP_COMMAND_TAG))
 
-        verify(mediaTttChipController).removeChip()
+        verify(mediaTttChipControllerSender).removeChip()
     }
 
     private fun getMoveCloserToTransferCommand(): Array<String> =
