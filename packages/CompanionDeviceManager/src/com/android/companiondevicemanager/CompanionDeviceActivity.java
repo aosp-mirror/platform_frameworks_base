@@ -200,7 +200,10 @@ public class CompanionDeviceActivity extends Activity {
         if (mRequest.isSelfManaged()) {
             initUiForSelfManagedAssociation(appLabel);
         } else if (mRequest.isSingleDevice()) {
-            initUiForSingleDevice(appLabel);
+            // TODO(b/211722613)
+            // Treat singleDevice as the multipleDevices for now
+            // initUiForSingleDevice(appLabel);
+            initUiForMultipleDevices(appLabel);
         } else {
             initUiForMultipleDevices(appLabel);
         }
