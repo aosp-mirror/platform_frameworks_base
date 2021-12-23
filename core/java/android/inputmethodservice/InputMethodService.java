@@ -1797,15 +1797,19 @@ public class InputMethodService extends AbstractInputMethodService {
     
     void updateExtractFrameVisibility() {
         final int vis;
+        updateCandidatesVisibility(mCandidatesVisibility == View.VISIBLE);
+
         if (isFullscreenMode()) {
             vis = mExtractViewHidden ? View.INVISIBLE : View.VISIBLE;
             // "vis" should be applied for the extract frame as well in the fullscreen mode.
             mExtractFrame.setVisibility(vis);
         } else {
-            vis = View.VISIBLE;
+            // mFullscreenArea visibility will according the candidate frame visibility once the
+            // extract frame is gone.
+            vis = mCandidatesVisibility;
             mExtractFrame.setVisibility(View.GONE);
         }
-        updateCandidatesVisibility(mCandidatesVisibility == View.VISIBLE);
+
         if (mDecorViewWasVisible && mFullscreenArea.getVisibility() != vis) {
             int animRes = mThemeAttrs.getResourceId(vis == View.VISIBLE
                     ? com.android.internal.R.styleable.InputMethodService_imeExtractEnterAnimation
