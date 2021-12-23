@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020, The Android Open Source Project
+ * Copyright (c) 2022, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,10 @@
  */
 package android.hardware.camera2.extension;
 
-import android.view.Surface;
-import android.hardware.camera2.extension.CaptureBundle;
-import android.hardware.camera2.extension.IProcessResultImpl;
-import android.hardware.camera2.extension.Size;
+import android.hardware.camera2.impl.CameraMetadataNative;
 
 /** @hide */
-interface ICaptureProcessorImpl
+interface IProcessResultImpl
 {
-    void onOutputSurface(in Surface surface, int imageFormat);
-    void onResolutionUpdate(in Size size);
-    void onImageFormatUpdate(int imageFormat);
-    void process(in List<CaptureBundle> capturelist, in IProcessResultImpl resultCallback);
+    void onCaptureCompleted(long shutterTimestamp, in CameraMetadataNative results);
 }
