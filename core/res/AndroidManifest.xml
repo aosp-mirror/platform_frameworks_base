@@ -6582,10 +6582,6 @@
                     android:resource="@xml/autofill_compat_accessibility_service" />
         </service>
 
-        <service android:name="com.google.android.startop.iorap.IorapForwardingService$IorapdJobServiceProxy"
-                 android:permission="android.permission.BIND_JOB_SERVICE" >
-        </service>
-
         <service android:name="com.android.server.blob.BlobStoreIdleJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
