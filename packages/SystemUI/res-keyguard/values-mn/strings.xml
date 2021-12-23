@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Төхөөрөмжийг гараар түгжсэн"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Таньж чадсангүй"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Таньж чадсангүй"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Царайгаар түгжээ тайлахыг ашиглахын тулд Тохиргоо &gt; Нууцлал хэсэгт "<b>" Камерын хандалтыг "</b>" асаана уу"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">SIM-н ПИН кодыг оруулна уу. Танд <xliff:g id="NUMBER_1">%d</xliff:g> оролдлого үлдлээ.</item>
       <item quantity="one">SIM-н ПИН кодыг оруулна уу. Танд оператор компанитайгаа холбогдохгүйгээр төхөөрөмжийн түгжээг тайлах <xliff:g id="NUMBER_0">%d</xliff:g> оролдлого үлдлээ.</item>

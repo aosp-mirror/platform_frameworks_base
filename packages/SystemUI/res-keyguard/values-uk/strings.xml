@@ -99,6 +99,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Пристрій заблоковано вручну"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Не розпізнано"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Не розпізнано"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Щоб використовувати фейсконтроль, увімкніть "<b>"Доступ до камери"</b>" в розділі \"Налаштування\" &gt; \"Конфіденційність\""</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">Введіть PIN-код SIM-карти. Залишилася <xliff:g id="NUMBER_1">%d</xliff:g> спроба.</item>
       <item quantity="few">Введіть PIN-код SIM-карти. Залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби.</item>
