@@ -13013,6 +13013,25 @@ public class TelephonyManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface DataEnabledReason{}
 
+    /** @hide */
+    @IntDef({
+            DATA_ENABLED_REASON_UNKNOWN,
+            DATA_ENABLED_REASON_USER,
+            DATA_ENABLED_REASON_POLICY,
+            DATA_ENABLED_REASON_CARRIER,
+            DATA_ENABLED_REASON_THERMAL,
+            DATA_ENABLED_REASON_OVERRIDE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DataEnabledChangedReason{}
+
+    /**
+     * To indicate that data was enabled or disabled due to an unknown reason.
+     * Note that this is not a valid reason for {@link #setDataEnabledForReason(int, boolean)} and
+     * is only used to indicate that data enabled was changed.
+     */
+    public static final int DATA_ENABLED_REASON_UNKNOWN = -1;
+
     /**
      * To indicate that user enabled or disabled data.
      */
@@ -13038,6 +13057,13 @@ public class TelephonyManager {
      * settings and turns off data internally if set to {@code false}.
      */
     public static final int DATA_ENABLED_REASON_THERMAL = 3;
+
+    /**
+     * To indicate data was enabled or disabled due to {@link MobileDataPolicy} overrides.
+     * Note that this is not a valid reason for {@link #setDataEnabledForReason(int, boolean)} and
+     * is only used to indicate that data enabled was changed due to an override.
+     */
+    public static final int DATA_ENABLED_REASON_OVERRIDE = 4;
 
     /**
      * Control of data connection and provide the reason triggering the data connection control.
