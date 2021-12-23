@@ -255,6 +255,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
 import com.android.net.module.util.NetworkIdentityUtils;
+import com.android.net.module.util.NetworkStatsUtils;
 import com.android.net.module.util.PermissionUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -2388,7 +2389,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             templateMeteredness = readIntAttribute(in, ATTR_TEMPLATE_METERED);
 
                         } else {
-                            subscriberIdMatchRule = NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_EXACT;
+                            subscriberIdMatchRule =
+                                    NetworkStatsUtils.SUBSCRIBER_ID_MATCH_RULE_EXACT;
                             if (templateType == MATCH_MOBILE) {
                                 Log.d(TAG, "Update template match rule from mobile to carrier and"
                                         + " force to metered");
@@ -2451,11 +2453,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         } else {
                             inferred = false;
                         }
-                        final NetworkTemplate template = new NetworkTemplate(templateType,
-                                subscriberId, new String[] { subscriberId },
-                                networkId, templateMeteredness, NetworkStats.ROAMING_ALL,
-                                NetworkStats.DEFAULT_NETWORK_ALL, NetworkTemplate.NETWORK_TYPE_ALL,
-                                NetworkTemplate.OEM_MANAGED_ALL, subscriberIdMatchRule);
+                        final NetworkTemplate.Builder builder =
+                                new NetworkTemplate.Builder(templateType)
+                                        .setWifiNetworkKey(networkId)
+                                        .setMeteredness(templateMeteredness);
+                        if (subscriberIdMatchRule
+                                == NetworkStatsUtils.SUBSCRIBER_ID_MATCH_RULE_EXACT) {
+                            final ArraySet<String> ids = new ArraySet<>();
+                            ids.add(subscriberId);
+                            builder.setSubscriberIds(ids);
+                        }
+                        final NetworkTemplate template = builder.build();
                         if (NetworkPolicy.isTemplatePersistable(template)) {
                             mNetworkPolicy.put(template, new NetworkPolicy(template, cycleRule,
                                     warningBytes, limitBytes, lastWarningSnooze,
@@ -2671,8 +2679,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (subscriberId != null) {
                     out.attribute(null, ATTR_SUBSCRIBER_ID, subscriberId);
                 }
-                writeIntAttribute(out, ATTR_SUBSCRIBER_ID_MATCH_RULE,
-                        template.getSubscriberIdMatchRule());
+                final int subscriberIdMatchRule = template.getSubscriberIds().isEmpty()
+                        ? NetworkStatsUtils.SUBSCRIBER_ID_MATCH_RULE_ALL
+                        : NetworkStatsUtils.SUBSCRIBER_ID_MATCH_RULE_EXACT;
+                writeIntAttribute(out, ATTR_SUBSCRIBER_ID_MATCH_RULE, subscriberIdMatchRule);
                 final String networkId = template.getNetworkId();
                 if (networkId != null) {
                     out.attribute(null, ATTR_NETWORK_ID, networkId);
