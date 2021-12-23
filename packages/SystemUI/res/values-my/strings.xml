@@ -250,7 +250,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"ကိရိယာများ မရှိ"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi ချိတ်ဆက်ထားခြင်းမရှိပါ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"အလင်းတောက်ပမှု"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"အရောင်ပြောင်းပြန်"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"အရောင်ပြောင်းပြန်ပြုလုပ်ရန်"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"နောက်ထပ် ဆက်တင်များ"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"အသုံးပြုသူ ဆက်တင်များ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ပြီးပါပြီ"</string>
@@ -529,7 +529,7 @@
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"အကြောင်းကြားချက် ထိန်းချုပ်မှုများ"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"အကြောင်းကြားချက်များကို ဆိုင်းငံ့ရန် ရွေးချယ်စရာများ"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"ကျွန်ုပ်ကို သတိပေးပါ"</string>
-    <string name="snooze_undo" msgid="2738844148845992103">"တစ်ဆင့်နောက်ပြန်ရန်"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"နောက်ပြန်ရန်"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ဆိုင်းငံ့ရန်"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d နာရီ</item>
@@ -747,7 +747,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ဖန်သားပြင်အပြည့် ချဲ့သည်"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ဖန်သားပြင် တစ်စိတ်တစ်ပိုင်းကို ချဲ့ပါ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ခလုတ်"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"အများသုံးစွဲနိုင်မှုခလုတ်က အများသုံးစွဲနိုင်မှုလက်ဟန်ကို အစားထိုးသည်\n\n"<annotation id="link">"ဆက်တင်များကို ကြည့်ပါ"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများ ဖွင့်ရန် တို့ပါ။ ဆက်တင်များတွင် ဤခလုတ်ကို စိတ်ကြိုက်ပြင်ပါ (သို့) လဲပါ။\n\n"<annotation id="link">"ဆက်တင်များ ကြည့်ရန်"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ခလုတ်ကို ယာယီဝှက်ရန် အစွန်းသို့ရွှေ့ပါ"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ဘယ်ဘက်ထိပ်သို့ ရွှေ့ရန်"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ညာဘက်ထိပ်သို့ ရွှေ့ရန်"</string>
@@ -798,10 +798,17 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ဆက်တင်များ"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> ၏ <xliff:g id="SONG_NAME">%1$s</xliff:g> ကို <xliff:g id="APP_LABEL">%3$s</xliff:g> တွင် ဖွင့်ထားသည်"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g> အနက် <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
+    <string name="controls_media_button_play" msgid="2705068099607410633">"ဖွင့်ရန်"</string>
+    <string name="controls_media_button_pause" msgid="8614887780950376258">"ခဏရပ်ရန်"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"ယခင် တစ်ပုဒ်"</string>
+    <string name="controls_media_button_next" msgid="6662636627525947610">"နောက်တစ်ပုဒ်"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ဖွင့်ခြင်း"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ကို ဖွင့်ပါ"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> ၏ <xliff:g id="SONG_NAME">%1$s</xliff:g> ကို <xliff:g id="APP_LABEL">%3$s</xliff:g> တွင် ဖွင့်ပါ"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ကို <xliff:g id="APP_LABEL">%2$s</xliff:g> တွင် ဖွင့်ပါ"</string>
+    <string name="media_transfer_undo" msgid="1895606387620728736">"နောက်ပြန်ရန်"</string>
+    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"<xliff:g id="DEVICENAME">%1$s</xliff:g> တွင်ဖွင့်ရန် အနီးသို့ရွှေ့ပါ"</string>
+    <string name="media_transfer_playing" msgid="3760048096352107789">"<xliff:g id="DEVICENAME">%1$s</xliff:g> တွင်ဖွင့်ထားသည်"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ရပ်နေသည်၊ အက်ပ်ကို စစ်ဆေးပါ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"မတွေ့ပါ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ထိန်းချုပ်မှု မရနိုင်ပါ"</string>
@@ -816,7 +823,7 @@
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"စက်ပစ္စည်း ၁ ခုကို ရွေးချယ်ထားသည်"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"စက်ပစ္စည်း <xliff:g id="COUNT">%1$d</xliff:g> ခုကို ရွေးချယ်ထားသည်"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ချိတ်ဆက်မှု မရှိပါ)"</string>
-    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"ချိတ်ဆက်၍ မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"ပြောင်း၍ မရပါ။ ပြန်စမ်းကြည့်ရန် တို့ပါ။"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"စက်အသစ် တွဲချိတ်ရန်"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"တည်ဆောက်မှုနံပါတ်"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"တည်ဆောက်မှုနံပါတ်ကို ကလစ်ဘုတ်သို့ မိတ္တူကူးပြီးပါပြီ။"</string>
@@ -881,8 +888,11 @@
     <string name="see_all_networks" msgid="3773666844913168122">"အားလုံးကြည့်ရန်"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ကွန်ရက်ပြောင်းရန် အီသာနက်ကို ချိတ်ဆက်မှုဖြုတ်ပါ"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"စက်ပစ္စည်းကို ပိုမိုကောင်းမွန်စွာ အသုံးပြုနိုင်ရန် Wi-Fi ပိတ်ထားသည့်တိုင် အက်ပ်နှင့် ဝန်ဆောင်မှုများက Wi-Fi ကွန်ရက်များကို အချိန်မရွေး စကင်ဖတ်နိုင်သည်။ ၎င်းကို Wi-Fi ရှာဖွေခြင်း ဆက်တင်များတွင် ပြောင်းနိုင်သည်။ "<annotation id="link">"ပြောင်းရန်"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"လေယာဉ်ပျံမုဒ်ကို ပိတ်ရန်"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> က ‘အမြန် ဆက်တင်များ’ တွင် အောက်ပါအကွက်ငယ်ကို ထည့်လိုသည်"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"အကွက်ငယ် ထည့်ရန်"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"အကွက်ငယ် မထည့်ပါ"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"အသုံးပြုသူ ရွေးခြင်း"</string>
+    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"နောက်ခံတွင် ဖွင့်ထားသောအက်ပ်များ"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ရပ်ရန်"</string>
 </resources>

@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"UI del sistema"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"Es posible que te quedes sin batería pronto"</string>
+    <string name="battery_low_title" msgid="6891106956328275225">"Puede que te quedes sin batería pronto"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"No se puede cargar por USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Utiliza el cargador original incluido con el dispositivo"</string>
@@ -250,7 +250,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"No hay dispositivos disponibles"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi‑Fi no conectado"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Invertir colores"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Invertir colores"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Más ajustes"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Ajustes de usuario"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Hecho"</string>
@@ -747,7 +747,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ampliar pantalla completa"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ampliar parte de la pantalla"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Cambiar"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"El botón Accesibilidad ha reemplazado el gesto de accesibilidad\n\nVer ajustes"<annotation id="link"></annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Toca para abrir funciones de accesibilidad. Personaliza o sustituye este botón en Ajustes.\n\n"<annotation id="link">"Ver ajustes"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mueve el botón hacia el borde para ocultarlo temporalmente"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover arriba a la izquierda"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mover arriba a la derecha"</string>
@@ -798,10 +798,17 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ajustes"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Se está reproduciendo <xliff:g id="SONG_NAME">%1$s</xliff:g> de <xliff:g id="ARTIST_NAME">%2$s</xliff:g> en <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> de <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_button_play" msgid="2705068099607410633">"Reproducir"</string>
+    <string name="controls_media_button_pause" msgid="8614887780950376258">"Pausar"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"Pista anterior"</string>
+    <string name="controls_media_button_next" msgid="6662636627525947610">"Siguiente pista"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Reproducir"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Abrir <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Poner <xliff:g id="SONG_NAME">%1$s</xliff:g> de <xliff:g id="ARTIST_NAME">%2$s</xliff:g> en <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Poner <xliff:g id="SONG_NAME">%1$s</xliff:g> en <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="media_transfer_undo" msgid="1895606387620728736">"Deshacer"</string>
+    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para que se reproduzca en ese dispositivo"</string>
+    <string name="media_transfer_playing" msgid="3760048096352107789">"Reproduciendo en <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo, comprobar aplicación"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"No se ha encontrado"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Control no disponible"</string>
@@ -816,7 +823,7 @@
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 dispositivo seleccionado"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> dispositivos seleccionados"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(desconectado)"</string>
-    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"No se ha podido conectar. Inténtalo de nuevo."</string>
+    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"No se puede cambiar. Toca para volver a intentarlo."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Emparejar nuevo dispositivo"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilación"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Número de compilación copiado en el portapapeles."</string>
@@ -881,8 +888,11 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Ver todo"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para cambiar de red, desconecta el cable Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Para mejorar la experiencia con el dispositivo, las aplicaciones y los servicios podrán buscar redes Wi-Fi en cualquier momento, aunque la conexión Wi-Fi esté desactivada. Puedes cambiarlo en los ajustes de búsqueda de redes Wi-Fi. "<annotation id="link">"Cambiar"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Desactivar modo avión"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> quiere añadir el siguiente recuadro a ajustes rápidos"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Añadir recuadro"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"No añadir recuadro"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleccionar usuario"</string>
+    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"Aplicaciones ejecutándose en segundo plano"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Detener"</string>
 </resources>
