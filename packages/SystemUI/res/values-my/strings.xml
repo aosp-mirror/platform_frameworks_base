@@ -779,7 +779,7 @@
     <string name="notification_more_settings" msgid="4936228656989201793">"နောက်ထပ် ဆက်တင်များ"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"စိတ်ကြိုက်ပြုလုပ်ရန်"</string>
     <string name="notification_done" msgid="6215117625922713976">"ပြီးပါပြီ"</string>
-    <string name="inline_undo" msgid="9026953267645116526">"တစ်ဆင့်နောက်ပြန်ရန်"</string>
+    <string name="inline_undo" msgid="9026953267645116526">"နောက်ပြန်ရန်"</string>
     <string name="demote" msgid="6225813324237153980">"ဤအကြောင်းကြားချက်ကို စကားဝိုင်းမဟုတ်ဟု မှတ်ထားရန်"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"အရေးကြီး စကားဝိုင်းများ"</string>
     <string name="notification_conversation_unfavorite" msgid="181383708304763807">"အရေးကြီးစကားဝိုင်း မဟုတ်ပါ"</string>
@@ -793,7 +793,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"အကြောင်းကြားချက်များကို ဆိုင်းငံ့ရန် ရွေးချယ်စရာများ"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"ကျွန်ုပ်ကို သတိပေးပါ"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"ဆက်တင်များ"</string>
-    <string name="snooze_undo" msgid="2738844148845992103">"တစ်ဆင့်နောက်ပြန်ရန်"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"နောက်ပြန်ရန်"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ဆိုင်းငံ့ရန်"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d နာရီ</item>
