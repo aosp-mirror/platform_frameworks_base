@@ -20,18 +20,12 @@
     <string name="confirmation_title" msgid="8455544820286920304">"Tillåt att &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; hanterar din &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"klocka"</string>
     <string name="chooser_title" msgid="2262294130493605839">"Välj en <xliff:g id="PROFILE_NAME">%1$s</xliff:g> för hantering av &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <!-- no translation found for summary_watch (7113724443198337683) -->
-    <skip />
-    <!-- no translation found for summary_watch (7113724443198337683) -->
-    <skip />
-    <!-- no translation found for title_app_streaming (4459136600249308574) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (6105916810614498138) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (2996373715966272792) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (7614171699434639963) -->
-    <skip />
+    <string name="summary_watch" product="default" msgid="7113724443198337683">"<xliff:g id="APP_NAME">%1$s</xliff:g> får behörighet att interagera med dina aviseringar och komma åt behörigheterna för Telefon, Sms, Kontakter och Kalender."</string>
+    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"<xliff:g id="APP_NAME">%1$s</xliff:g> får behörighet att interagera med dina aviseringar och komma åt behörigheterna för Telefon, Sms, Kontakter och Kalender."</string>
+    <string name="title_app_streaming" msgid="4459136600249308574">"Vill du tillåta att &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; streamar appar?"</string>
+    <string name="summary_app_streaming" product="default" msgid="6105916810614498138">"Låt &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ge &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; fjärråtkomst till åt appar som är installerade på den här telefonen när den är ansluten."</string>
+    <string name="summary_app_streaming" product="tablet" msgid="2996373715966272792">"Låt &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ge &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; fjärråtkomst till appar som är installerade på den här surfplattan när den är ansluten."</string>
+    <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"Låt &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ge &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; fjärråtkomst till appar som är installerade på den här enheten när den är ansluten."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"enhet"</string>
