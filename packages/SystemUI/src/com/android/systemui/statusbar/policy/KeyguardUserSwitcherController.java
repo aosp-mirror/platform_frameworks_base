@@ -246,7 +246,6 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
     }
 
     public int getHeight() {
-        // TODO(brzezinski): fix height value when user switcher is back to collapsed
         return mListView.getHeight();
     }
 
