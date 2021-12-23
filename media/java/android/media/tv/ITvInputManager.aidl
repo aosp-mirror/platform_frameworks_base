@@ -104,6 +104,7 @@ interface ITvInputManager {
 
     // For broadcast info
     void requestBroadcastInfo(in IBinder sessionToken, in BroadcastInfoRequest request, int userId);
+    void removeBroadcastInfo(in IBinder sessionToken, int id, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();

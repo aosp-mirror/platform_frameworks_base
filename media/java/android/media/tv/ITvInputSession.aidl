@@ -66,4 +66,5 @@ oneway interface ITvInputSession {
 
     // For broadcast info
     void requestBroadcastInfo(in BroadcastInfoRequest request);
+    void removeBroadcastInfo(int id);
 }
