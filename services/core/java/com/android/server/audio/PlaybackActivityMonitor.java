@@ -783,7 +783,7 @@ public final class PlaybackActivityMonitor
             // the same time if we still have a public client.
             while (clientIterator.hasNext()) {
                 PlayMonitorClient pmc = clientIterator.next();
-                if (pcdb.equals(pmc.mDispatcherCb)) {
+                if (pcdb.asBinder().equals(pmc.mDispatcherCb.asBinder())) {
                     pmc.release();
                     clientIterator.remove();
                 } else {

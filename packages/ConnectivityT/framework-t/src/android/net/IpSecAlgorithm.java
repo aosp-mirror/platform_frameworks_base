@@ -23,7 +23,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.HexDump;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -469,20 +468,12 @@ public final class IpSecAlgorithm implements Parcelable {
         }
     }
 
-    // Because encryption keys are sensitive and userdebug builds are used by large user pools
-    // such as beta testers, we only allow sensitive info such as keys on eng builds.
-    private static boolean isUnsafeBuild() {
-        return Build.IS_DEBUGGABLE && Build.IS_ENG;
-    }
-
     @Override
     @NonNull
     public String toString() {
         return new StringBuilder()
                 .append("{mName=")
                 .append(mName)
-                .append(", mKey=")
-                .append(isUnsafeBuild() ? HexDump.toHexString(mKey) : "<hidden>")
                 .append(", mTruncLenBits=")
                 .append(mTruncLenBits)
                 .append("}")

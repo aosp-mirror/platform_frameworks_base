@@ -1806,32 +1806,33 @@ public final class BluetoothGatt implements BluetoothProfile {
     }
 
     /**
-     * Not supported - please use {@link BluetoothManager#getConnectedDevices(int)}
+     * @deprecated Not supported - please use {@link BluetoothManager#getConnectedDevices(int)}
      * with {@link BluetoothProfile#GATT} as argument
-     *
      * @throws UnsupportedOperationException
      */
     @Override
     @RequiresNoPermission
+    @Deprecated
     public int getConnectionState(BluetoothDevice device) {
         throw new UnsupportedOperationException("Use BluetoothManager#getConnectionState instead.");
     }
 
     /**
-     * Not supported - please use {@link BluetoothManager#getConnectedDevices(int)}
+     * @deprecated Not supported - please use {@link BluetoothManager#getConnectedDevices(int)}
      * with {@link BluetoothProfile#GATT} as argument
      *
      * @throws UnsupportedOperationException
      */
     @Override
     @RequiresNoPermission
+    @Deprecated
     public List<BluetoothDevice> getConnectedDevices() {
         throw new UnsupportedOperationException(
                 "Use BluetoothManager#getConnectedDevices instead.");
     }
 
     /**
-     * Not supported - please use
+     * @deprecated Not supported - please use
      * {@link BluetoothManager#getDevicesMatchingConnectionStates(int, int[])}
      * with {@link BluetoothProfile#GATT} as first argument
      *
@@ -1839,6 +1840,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      */
     @Override
     @RequiresNoPermission
+    @Deprecated
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         throw new UnsupportedOperationException(
                 "Use BluetoothManager#getDevicesMatchingConnectionStates instead.");

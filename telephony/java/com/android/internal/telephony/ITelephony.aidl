@@ -2526,4 +2526,14 @@ interface ITelephony {
      */
     CellIdentity getLastKnownCellIdentity(int subId, String callingPackage,
             String callingFeatureId);
+
+    /**
+     *  @return true if the modem service is set successfully, false otherwise.
+     */
+    boolean setModemService(in String serviceName);
+
+    /**
+     * @return the service name of the modem service which bind to.
+     */
+    String getModemService();
 }

@@ -103,6 +103,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     private static final String TAG = "InternetDialogController";
     private static final String ACTION_NETWORK_PROVIDER_SETTINGS =
             "android.settings.NETWORK_PROVIDER_SETTINGS";
+    private static final String ACTION_WIFI_SCANNING_SETTINGS =
+            "android.settings.WIFI_SCANNING_SETTINGS";
     private static final String EXTRA_CHOSEN_WIFI_ENTRY_KEY = "key_chosen_wifientry_key";
     public static final Drawable EMPTY_DRAWABLE = new ColorDrawable(Color.TRANSPARENT);
     public static final int NO_CELL_DATA_TYPE_ICON = 0;
@@ -601,6 +603,13 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             mCallback.dismissDialog();
             mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
         }
+    }
+
+    void launchWifiScanningSetting() {
+        mCallback.dismissDialog();
+        final Intent intent = new Intent(ACTION_WIFI_SCANNING_SETTINGS);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
     }
 
     void connectCarrierNetwork() {

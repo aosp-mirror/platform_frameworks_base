@@ -130,6 +130,7 @@ import android.net.EthernetManager;
 import android.net.IEthernetManager;
 import android.net.IIpSecService;
 import android.net.INetworkPolicyManager;
+import android.net.INetworkStatsService;
 import android.net.IPacProxyManager;
 import android.net.IVpnManager;
 import android.net.IpSecManager;
@@ -981,7 +982,11 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<NetworkStatsManager>() {
             @Override
             public NetworkStatsManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                return new NetworkStatsManager(ctx.getOuterContext());
+                // TODO: Replace with an initializer in the module, see
+                //  {@code ConnectivityFrameworkInitializer}.
+                final INetworkStatsService service = INetworkStatsService.Stub.asInterface(
+                        ServiceManager.getServiceOrThrow(Context.NETWORK_STATS_SERVICE));
+                return new NetworkStatsManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.PERSISTENT_DATA_BLOCK_SERVICE, PersistentDataBlockManager.class,

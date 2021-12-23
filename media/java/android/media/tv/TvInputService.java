@@ -201,6 +201,21 @@ public abstract class TvInputService extends Service {
             }
 
             @Override
+            public List<String>  getAvailableExtensionInterfaceNames() {
+                return TvInputService.this.getAvailableExtensionInterfaceNames();
+            }
+
+            @Override
+            public IBinder getExtensionInterface(String name) {
+                return TvInputService.this.getExtensionInterface(name);
+            }
+
+            @Override
+            public String getExtensionInterfacePermission(String name) {
+                return TvInputService.this.getExtensionInterfacePermission(name);
+            }
+
+            @Override
             public void notifyHardwareAdded(TvInputHardwareInfo hardwareInfo) {
                 mServiceHandler.obtainMessage(ServiceHandler.DO_ADD_HARDWARE_INPUT,
                         hardwareInfo).sendToTarget();
@@ -249,6 +264,67 @@ public abstract class TvInputService extends Service {
     @Nullable
     @SystemApi
     public IBinder createExtension() {
+        return null;
+    }
+
+    /**
+     * Returns available extension interfaces. This can be used to provide domain-specific
+     * features that are only known between certain hardware TV inputs and their clients.
+     *
+     * <p>Note that this service-level extension interface mechanism is only for hardware
+     * TV inputs that are bound even when sessions are not created.
+     *
+     * @return a non-null list of available extension interface names. An empty list
+     *         indicates the TV input doesn't support any extension interfaces.
+     * @see #getExtensionInterface
+     * @see #getExtensionInterfacePermission
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public List<String> getAvailableExtensionInterfaceNames() {
+        return new ArrayList<>();
+    }
+
+    /**
+     * Returns an extension interface. This can be used to provide domain-specific features
+     * that are only known between certain hardware TV inputs and their clients.
+     *
+     * <p>Note that this service-level extension interface mechanism is only for hardware
+     * TV inputs that are bound even when sessions are not created.
+     *
+     * @param name The extension interface name.
+     * @return an {@link IBinder} for the given extension interface, {@code null} if the TV input
+     *         doesn't support the given extension interface.
+     * @see #getAvailableExtensionInterfaceNames
+     * @see #getExtensionInterfacePermission
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public IBinder getExtensionInterface(@NonNull String name) {
+        return null;
+    }
+
+    /**
+     * Returns a permission for the given extension interface. This can be used to provide
+     * domain-specific features that are only known between certain hardware TV inputs and their
+     * clients.
+     *
+     * <p>Note that this service-level extension interface mechanism is only for hardware
+     * TV inputs that are bound even when sessions are not created.
+     *
+     * @param name The extension interface name.
+     * @return a name of the permission being checked for the given extension interface,
+     *         {@code null} if there is no required permission, or if the TV input doesn't
+     *         support the given extension interface.
+     * @see #getAvailableExtensionInterfaceNames
+     * @see #getExtensionInterface
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public String getExtensionInterfacePermission(@NonNull String name) {
         return null;
     }
 
