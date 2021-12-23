@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
  */
 public class UsageProgressBarPreference extends Preference {
 
-    private final Pattern mNumberPattern = Pattern.compile("[\\d]*[\\.,]?[\\d]+");
+    private final Pattern mNumberPattern = Pattern.compile("[\\d]*[\\٫.,]?[\\d]+");
 
     private CharSequence mUsageSummary;
     private CharSequence mTotalSummary;
