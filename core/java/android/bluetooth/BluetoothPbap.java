@@ -25,15 +25,10 @@ import android.annotation.SystemApi;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -96,10 +91,6 @@ public class BluetoothPbap implements BluetoothProfile {
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
 
-    private volatile IBluetoothPbap mService;
-    private final Context mContext;
-    private ServiceListener mServiceListener;
-    private final BluetoothAdapter mAdapter;
     private final AttributionSource mAttributionSource;
 
     /** @hide */
@@ -113,87 +104,25 @@ public class BluetoothPbap implements BluetoothProfile {
      */
     public static final int RESULT_CANCELED = 2;
 
-    @SuppressLint("AndroidFrameworkBluetoothPermission")
-    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
-            new IBluetoothStateChangeCallback.Stub() {
-                public void onBluetoothStateChange(boolean up) {
-                    log("onBluetoothStateChange: up=" + up);
-                    if (!up) {
-                        doUnbind();
-                    } else {
-                        doBind();
-                    }
+    private BluetoothAdapter mAdapter;
+    private final BluetoothProfileConnector<IBluetoothPbap> mProfileConnector =
+            new BluetoothProfileConnector(this, BluetoothProfile.PBAP, "BluetoothPbap",
+                    IBluetoothPbap.class.getName()) {
+                @Override
+                public IBluetoothPbap getServiceInterface(IBinder service) {
+                    return IBluetoothPbap.Stub.asInterface(service);
                 }
-            };
+    };
 
     /**
      * Create a BluetoothPbap proxy object.
      *
      * @hide
      */
-    public BluetoothPbap(Context context, ServiceListener l, BluetoothAdapter adapter) {
-        mContext = context;
-        mServiceListener = l;
+    public BluetoothPbap(Context context, ServiceListener listener, BluetoothAdapter adapter) {
         mAdapter = adapter;
         mAttributionSource = adapter.getAttributionSource();
-
-        // Preserve legacy compatibility where apps were depending on
-        // registerStateChangeCallback() performing a permissions check which
-        // has been relaxed in modern platform versions
-        if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.R
-                && context.checkSelfPermission(android.Manifest.permission.BLUETOOTH)
-                        != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Need BLUETOOTH permission");
-        }
-
-        IBluetoothManager mgr = mAdapter.getBluetoothManager();
-        if (mgr != null) {
-            try {
-                mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
-            } catch (RemoteException re) {
-                Log.e(TAG, "", re);
-            }
-        }
-        doBind();
-    }
-
-    @SuppressLint("AndroidFrameworkRequiresPermission")
-    boolean doBind() {
-        synchronized (mConnection) {
-            try {
-                if (mService == null) {
-                    log("Binding service...");
-                    Intent intent = new Intent(IBluetoothPbap.class.getName());
-                    ComponentName comp = intent.resolveSystemService(
-                            mContext.getPackageManager(), 0);
-                    intent.setComponent(comp);
-                    if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
-                            UserHandle.CURRENT)) {
-                        Log.e(TAG, "Could not bind to Bluetooth Pbap Service with " + intent);
-                        return false;
-                    }
-                }
-            } catch (SecurityException se) {
-                Log.e(TAG, "", se);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void doUnbind() {
-        synchronized (mConnection) {
-            if (mService != null) {
-                log("Unbinding service...");
-                try {
-                    mContext.unbindService(mConnection);
-                } catch (IllegalArgumentException ie) {
-                    Log.e(TAG, "", ie);
-                } finally {
-                    mService = null;
-                }
-            }
-        }
+        mProfileConnector.connect(context, listener);
     }
 
     /** @hide */
@@ -214,16 +143,11 @@ public class BluetoothPbap implements BluetoothProfile {
      * @hide
      */
     public synchronized void close() {
-        IBluetoothManager mgr = mAdapter.getBluetoothManager();
-        if (mgr != null) {
-            try {
-                mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
-            } catch (RemoteException re) {
-                Log.e(TAG, "", re);
-            }
-        }
-        doUnbind();
-        mServiceListener = null;
+        mProfileConnector.disconnect();
+    }
+
+    private IBluetoothPbap getService() {
+        return (IBluetoothPbap) mProfileConnector.getService();
     }
 
     /**
@@ -236,7 +160,7 @@ public class BluetoothPbap implements BluetoothProfile {
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getConnectedDevices() {
         log("getConnectedDevices()");
-        final IBluetoothPbap service = mService;
+        final IBluetoothPbap service = getService();
         if (service == null) {
             Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
@@ -265,7 +189,7 @@ public class BluetoothPbap implements BluetoothProfile {
     public @BtProfileState int getConnectionState(@NonNull BluetoothDevice device) {
         log("getConnectionState: device=" + device);
         try {
-            final IBluetoothPbap service = mService;
+            final IBluetoothPbap service = getService();
             if (service != null && isEnabled() && isValidDevice(device)) {
                 return service.getConnectionState(device, mAttributionSource);
             }
@@ -289,7 +213,7 @@ public class BluetoothPbap implements BluetoothProfile {
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         log("getDevicesMatchingConnectionStates: states=" + Arrays.toString(states));
-        final IBluetoothPbap service = mService;
+        final IBluetoothPbap service = getService();
         if (service == null) {
             Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
@@ -330,7 +254,7 @@ public class BluetoothPbap implements BluetoothProfile {
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
         try {
-            final IBluetoothPbap service = mService;
+            final IBluetoothPbap service = getService();
             if (service != null && isEnabled()
                     && isValidDevice(device)) {
                 if (connectionPolicy != BluetoothProfile.CONNECTION_POLICY_FORBIDDEN
@@ -359,7 +283,7 @@ public class BluetoothPbap implements BluetoothProfile {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disconnect(BluetoothDevice device) {
         log("disconnect()");
-        final IBluetoothPbap service = mService;
+        final IBluetoothPbap service = getService();
         if (service == null) {
             Log.w(TAG, "Proxy not attached to service");
             return false;
@@ -372,25 +296,6 @@ public class BluetoothPbap implements BluetoothProfile {
         }
         return false;
     }
-
-    @SuppressLint("AndroidFrameworkBluetoothPermission")
-    private final ServiceConnection mConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            log("Proxy object connected");
-            mService = IBluetoothPbap.Stub.asInterface(service);
-            if (mServiceListener != null) {
-                mServiceListener.onServiceConnected(BluetoothProfile.PBAP, BluetoothPbap.this);
-            }
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            log("Proxy object disconnected");
-            doUnbind();
-            if (mServiceListener != null) {
-                mServiceListener.onServiceDisconnected(BluetoothProfile.PBAP);
-            }
-        }
-    };
 
     private boolean isEnabled() {
         if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;

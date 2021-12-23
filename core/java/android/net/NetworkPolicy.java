@@ -18,8 +18,11 @@ package android.net;
 
 import static android.net.NetworkStats.METERED_ALL;
 import static android.net.NetworkStats.METERED_YES;
+import static android.net.NetworkTemplate.MATCH_BLUETOOTH;
 import static android.net.NetworkTemplate.MATCH_CARRIER;
+import static android.net.NetworkTemplate.MATCH_ETHERNET;
 import static android.net.NetworkTemplate.MATCH_MOBILE;
+import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_EXACT;
 
 import android.annotation.NonNull;
@@ -324,7 +327,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
 
     @NonNull
     private byte[] getNetworkTemplateBytesForBackup() throws IOException {
-        if (!template.isPersistable()) {
+        if (!isTemplatePersistable(this.template)) {
             Log.wtf(TAG, "Trying to backup non-persistable template: " + this);
         }
 
@@ -376,6 +379,30 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         } catch (IllegalArgumentException e) {
             throw new BackupUtils.BadVersionException(
                     "Restored network template contains unknown match rule " + matchRule, e);
+        }
+    }
+
+    /**
+     * Check if the template can be persisted into disk.
+     */
+    public static boolean isTemplatePersistable(@NonNull NetworkTemplate template) {
+        switch (template.getMatchRule()) {
+            case MATCH_BLUETOOTH:
+            case MATCH_ETHERNET:
+                return true;
+            case MATCH_CARRIER:
+            case MATCH_MOBILE:
+                return !template.getSubscriberIds().isEmpty();
+            case MATCH_WIFI:
+                if (Objects.equals(template.getWifiNetworkKey(), null)
+                        && template.getSubscriberIds().isEmpty()) {
+                    return false;
+                }
+                return true;
+            default:
+                // Don't allow persistable for unknown types or legacy types such as
+                // MATCH_MOBILE_WILDCARD, MATCH_PROXY, etc.
+                return false;
         }
     }
 }
