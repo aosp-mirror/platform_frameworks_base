@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"இந்த ஆப்ஸை நிறுவல் நீக்க விரும்புகிறீர்களா?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"இந்த ஆப்ஸை "<b>"அனைத்துப்"</b>" பயனர்களுக்கும் நிறுவல் நீக்க விரும்புகிறீர்களா? ஆப்ஸும் அதன் தரவும் சாதனத்திலுள்ள "<b>"அனைத்துப்"</b>" பயனர்களிடமிருந்தும் அகற்றப்படும்."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> என்ற பயனருக்கு இந்த ஆப்ஸை நிறுவல் நீக்க விரும்புகிறீர்களா?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"உங்கள் பணிக் கணக்கிலிருந்து இந்த ஆப்ஸை நிறுவல் நீக்க விரும்புகிறீர்களா?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"ஆரம்பநிலைப் பதிப்புக்கு இந்த ஆப்ஸை மாற்றியமைக்கவா? அனைத்துத் தரவும் அகற்றப்படும்."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ஆரம்பநிலைப் பதிப்புக்கு இந்த ஆப்ஸை மாற்றியமைக்கவா? அனைத்துத் தரவும் அகற்றப்படும். பணிக் கணக்குகளுடன் உள்ளவர்கள் உட்பட இந்தச் சாதனத்தின் அனைத்துப் பயனர்களையும் இது பாதிக்கும்."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ஆப்ஸ் தரவை வைத்திரு."</string>
