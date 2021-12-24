@@ -251,7 +251,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Nije dostupan nijedan uređaj"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"WiFi nije povezan"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Osvetljenost"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Obrni boje"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inverzija boja"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Još podešavanja"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Korisnička podešavanja"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Gotovo"</string>
@@ -752,7 +752,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Uvećajte ceo ekran"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Uvećajte deo ekrana"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Pređi"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Dugme Pristupačnost je zamenilo pokret za pristupačnost\n\n"<annotation id="link">"Prikaži podešavanja"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Dodirnite za funkcije pristupačnosti. Prilagodite ili zamenite ovo dugme u Podešavanjima.\n\n"<annotation id="link">"Podešavanja"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Pomerite dugme do ivice da biste ga privremeno sakrili"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Premesti gore levo"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Premesti gore desno"</string>
@@ -804,10 +804,17 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Podešavanja"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> izvođača <xliff:g id="ARTIST_NAME">%2$s</xliff:g> se pušta iz aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> od <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_button_play" msgid="2705068099607410633">"Pusti"</string>
+    <string name="controls_media_button_pause" msgid="8614887780950376258">"Pauziraj"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"Prethodna pesma"</string>
+    <string name="controls_media_button_next" msgid="6662636627525947610">"Sledeća pesma"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Pusti"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Otvorite <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Pustite <xliff:g id="SONG_NAME">%1$s</xliff:g> izvođača <xliff:g id="ARTIST_NAME">%2$s</xliff:g> iz aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Pustite <xliff:g id="SONG_NAME">%1$s</xliff:g> iz aplikacije <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="media_transfer_undo" msgid="1895606387620728736">"Opozovi"</string>
+    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"Približite da biste puštali muziku na: <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_transfer_playing" msgid="3760048096352107789">"Pušta se na: <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno. Vidite aplikaciju"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nije pronađeno"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrola nije dostupna"</string>
@@ -822,7 +829,7 @@
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Izabran je 1 uređaj"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Izabranih uređaja: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(veza je prekinuta)"</string>
-    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Povezivanje nije uspelo. Probajte ponovo."</string>
+    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Prebacivanje nije uspelo. Probajte ponovo."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Upari novi uređaj"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Broj verzije"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Broj verzije je kopiran u privremenu memoriju."</string>
@@ -887,8 +894,11 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Pogledajte sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da biste promenili mrežu, prekinite eternet vezu"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi boljeg doživljaja uređaja, aplikacije i usluge i dalje mogu da traže WiFi mreže u bilo kom trenutku, čak i kada je WiFi isključen. To možete da promenite u podešavanjima WiFi skeniranja. "<annotation id="link">"Promenite"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Isključite režim rada u avionu"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> želi da doda sledeću pločicu u Brza podešavanja"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj pločicu"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne dodaj pločicu"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Izaberite korisnika"</string>
+    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"Aplikacije pokrenute u pozadini"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zaustavi"</string>
 </resources>

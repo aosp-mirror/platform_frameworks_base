@@ -16,6 +16,7 @@
 
 package android.media.tv.interactive;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
@@ -104,11 +105,11 @@ public class TvIAppView extends ViewGroup {
         }
     };
 
-    public TvIAppView(Context context) {
+    public TvIAppView(@NonNull Context context) {
         this(context, null, 0);
     }
 
-    public TvIAppView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TvIAppView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, /* attrs = */null, /* defStyleAttr = */0);
         int sourceResId = Resources.getAttributeSetSourceResId(attrs);
         if (sourceResId != Resources.ID_NULL) {
@@ -266,7 +267,7 @@ public class TvIAppView extends ViewGroup {
     /**
      * Prepares the interactive application.
      */
-    public void prepareIApp(String iAppServiceId, int type) {
+    public void prepareIApp(@NonNull String iAppServiceId, int type) {
         // TODO: document and handle the cases that this method is called multiple times.
         if (DEBUG) {
             Log.d(TAG, "prepareIApp");

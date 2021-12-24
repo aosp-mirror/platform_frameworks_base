@@ -43506,8 +43506,10 @@ package android.telephony {
     field public static final int DATA_DISCONNECTED = 0; // 0x0
     field public static final int DATA_DISCONNECTING = 4; // 0x4
     field public static final int DATA_ENABLED_REASON_CARRIER = 2; // 0x2
+    field public static final int DATA_ENABLED_REASON_OVERRIDE = 4; // 0x4
     field public static final int DATA_ENABLED_REASON_POLICY = 1; // 0x1
     field public static final int DATA_ENABLED_REASON_THERMAL = 3; // 0x3
+    field public static final int DATA_ENABLED_REASON_UNKNOWN = -1; // 0xffffffff
     field public static final int DATA_ENABLED_REASON_USER = 0; // 0x0
     field public static final int DATA_HANDOVER_IN_PROGRESS = 5; // 0x5
     field public static final int DATA_SUSPENDED = 3; // 0x3
@@ -53013,11 +53015,11 @@ package android.view.inputmethod {
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.TextAttribute> CREATOR;
   }
 
-  public static final class TextAttribute.TextAttributeBuilder {
-    ctor public TextAttribute.TextAttributeBuilder();
+  public static final class TextAttribute.Builder {
+    ctor public TextAttribute.Builder();
     method @NonNull public android.view.inputmethod.TextAttribute build();
-    method @NonNull public android.view.inputmethod.TextAttribute.TextAttributeBuilder setExtras(@NonNull android.os.PersistableBundle);
-    method @NonNull public android.view.inputmethod.TextAttribute.TextAttributeBuilder setTextConversionSuggestions(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.view.inputmethod.TextAttribute.Builder setExtras(@NonNull android.os.PersistableBundle);
+    method @NonNull public android.view.inputmethod.TextAttribute.Builder setTextConversionSuggestions(@NonNull java.util.List<java.lang.String>);
   }
 
   public final class TextSnapshot {

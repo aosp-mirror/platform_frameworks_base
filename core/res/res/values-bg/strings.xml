@@ -1989,6 +1989,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Персонализирано известие за приложение"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Да се разреши ли на <xliff:g id="APP">%1$s</xliff:g> да създаде нов потребител с профила <xliff:g id="ACCOUNT">%2$s</xliff:g> (вече съществува потребител с този профил)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Да се разреши ли на <xliff:g id="APP">%1$s</xliff:g> да създаде нов потребител с профила <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Добавяне на контролиран потребител"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Добавяне на език"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Предпочитание за региона"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Въведете име на език"</string>

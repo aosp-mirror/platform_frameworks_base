@@ -1989,6 +1989,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notificación de aplicacións personalizada"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Xa existe un usuario con esta conta)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Engadir usuario supervisado"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Engadir un idioma"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferencia de rexión"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Escribe o nome do idioma"</string>

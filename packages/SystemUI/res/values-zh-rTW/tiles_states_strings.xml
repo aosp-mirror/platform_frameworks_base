@@ -166,4 +166,9 @@
     <item msgid="146088982397753810">"已關閉"</item>
     <item msgid="460891964396502657">"已開啟"</item>
   </string-array>
+  <string-array name="tile_states_fgsmanager">
+    <item msgid="3054341646818213094">"無法使用"</item>
+    <item msgid="5581384648880018330">"已關閉"</item>
+    <item msgid="8000850843692192257">"已開啟"</item>
+  </string-array>
 </resources>

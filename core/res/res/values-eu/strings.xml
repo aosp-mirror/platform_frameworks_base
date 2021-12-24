@@ -1989,6 +1989,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Aplikazio-jakinarazpen pertsonalizatua"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu <xliff:g id="APP">%1$s</xliff:g> aplikazioari? (Badago kontu hori duen erabiltzaile bat)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu <xliff:g id="APP">%1$s</xliff:g> aplikazioari?"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Gehitu gainbegiratutako erabiltzaile bat"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Gehitu hizkuntza bat"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Lurralde-hobespena"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Adierazi hizkuntza"</string>

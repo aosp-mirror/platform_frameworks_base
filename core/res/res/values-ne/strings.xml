@@ -1989,6 +1989,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"एपसम्बन्धी आफ्नो रोजाइअनुसारको सूचना"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> (यस खाताको प्रयोगकर्ता पहिले नै अवस्थित छ) मा नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने हो?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> मा नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने हो?"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"सुपरिवेक्षित प्रयोगकर्ता हाल्नुहोस्"</string>
     <string name="language_selection_title" msgid="52674936078683285">"भाषा थप्नुहोस्"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"क्षेत्रको प्राथमिकता"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"भाषाको नाम टाइप गर्नुहोस्"</string>

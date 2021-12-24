@@ -9510,7 +9510,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     boolean isOverlayMutable(String packageName) {
-        return mOverlayConfig.isMutable(packageName);
+        return (mOverlayConfig != null ? mOverlayConfig
+                : OverlayConfig.getSystemInstance()).isMutable(packageName);
     }
 
     @ScanFlags int getSystemPackageScanFlags(File codePath) {

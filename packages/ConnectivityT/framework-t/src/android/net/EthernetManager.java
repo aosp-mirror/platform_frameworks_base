@@ -16,7 +16,9 @@
 
 package android.net;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -32,6 +34,7 @@ import com.android.internal.os.BackgroundThread;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 
 /**
  * A class representing the IP configuration of the Ethernet network.
@@ -314,5 +317,84 @@ public class EthernetManager {
             throw e.rethrowFromSystemServer();
         }
         return new TetheredInterfaceRequest(mService, cbInternal);
+    }
+
+    private static final class InternalNetworkManagementListener
+            extends IInternalNetworkManagementListener.Stub {
+        @NonNull
+        private final Executor mExecutor;
+        @NonNull
+        private final BiConsumer<Network, InternalNetworkManagementException> mListener;
+
+        InternalNetworkManagementListener(
+                @NonNull final Executor executor,
+                @NonNull final BiConsumer<Network, InternalNetworkManagementException> listener) {
+            Objects.requireNonNull(executor, "Pass a non-null executor");
+            Objects.requireNonNull(listener, "Pass a non-null listener");
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onComplete(
+                @Nullable final Network network,
+                @Nullable final InternalNetworkManagementException e) {
+            mExecutor.execute(() -> mListener.accept(network, e));
+        }
+    }
+
+    private InternalNetworkManagementListener getInternalNetworkManagementListener(
+            @Nullable final Executor executor,
+            @Nullable final BiConsumer<Network, InternalNetworkManagementException> listener) {
+        if (null != listener) {
+            Objects.requireNonNull(executor, "Pass a non-null executor, or a null listener");
+        }
+        final InternalNetworkManagementListener proxy;
+        if (null == listener) {
+            proxy = null;
+        } else {
+            proxy = new InternalNetworkManagementListener(executor, listener);
+        }
+        return proxy;
+    }
+
+    private void updateConfiguration(
+            @NonNull String iface,
+            @NonNull InternalNetworkUpdateRequest request,
+            @Nullable @CallbackExecutor Executor executor,
+            @Nullable BiConsumer<Network, InternalNetworkManagementException> listener) {
+        final InternalNetworkManagementListener proxy = getInternalNetworkManagementListener(
+                executor, listener);
+        try {
+            mService.updateConfiguration(iface, request, proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private void connectNetwork(
+            @NonNull String iface,
+            @Nullable @CallbackExecutor Executor executor,
+            @Nullable BiConsumer<Network, InternalNetworkManagementException> listener) {
+        final InternalNetworkManagementListener proxy = getInternalNetworkManagementListener(
+                executor, listener);
+        try {
+            mService.connectNetwork(iface, proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private void disconnectNetwork(
+            @NonNull String iface,
+            @Nullable @CallbackExecutor Executor executor,
+            @Nullable BiConsumer<Network, InternalNetworkManagementException> listener) {
+        final InternalNetworkManagementListener proxy = getInternalNetworkManagementListener(
+                executor, listener);
+        try {
+            mService.disconnectNetwork(iface, proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

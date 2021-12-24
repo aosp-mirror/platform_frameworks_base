@@ -1989,6 +1989,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"అనుకూల యాప్ నోటిఫికేషన్"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా (ఈ ఖాతాతో ఇప్పటికే ఒక వినియోగదారు ఉన్నారు) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా?"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"పర్యవేక్షించబడే యూజర్‌ను జోడించండి"</string>
     <string name="language_selection_title" msgid="52674936078683285">"భాషను జోడించండి"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ప్రాంతం ప్రాధాన్యత"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"భాష పేరును టైప్ చేయండి"</string>

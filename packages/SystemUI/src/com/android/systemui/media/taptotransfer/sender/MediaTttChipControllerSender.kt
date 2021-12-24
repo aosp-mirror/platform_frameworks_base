@@ -14,71 +14,40 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.taptotransfer
+package com.android.systemui.media.taptotransfer.sender
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.PixelFormat
-import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.LinearLayout
 import android.widget.TextView
-import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-const val TAG = "MediaTapToTransfer"
-
 /**
- * A controller to display and hide the Media Tap-To-Transfer chip. This chip is shown when a user
- * is currently playing media on a local "media cast sender" device (e.g. a phone) and gets close
- * enough to a "media cast receiver" device (e.g. a tablet). This chip encourages the user to
- * transfer the media from the sender device to the receiver device.
+ * A controller to display and hide the Media Tap-To-Transfer chip on the **sending** device. This
+ * chip is shown when a user is transferring media to/from this device and a receiver device.
  */
 @SysUISingleton
-class MediaTttChipController @Inject constructor(
-    private val context: Context,
-    private val windowManager: WindowManager,
+class MediaTttChipControllerSender @Inject constructor(
+    context: Context,
+    windowManager: WindowManager,
     @Main private val mainExecutor: Executor,
     @Background private val backgroundExecutor: Executor,
+) : MediaTttChipControllerCommon<ChipStateSender>(
+    context, windowManager, R.layout.media_ttt_chip
 ) {
 
-    @SuppressLint("WrongConstant") // We're allowed to use TYPE_VOLUME_OVERLAY
-    private val windowLayoutParams = WindowManager.LayoutParams().apply {
-        width = WindowManager.LayoutParams.WRAP_CONTENT
-        height = WindowManager.LayoutParams.WRAP_CONTENT
-        gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
-        type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY
-        flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-        title = "Media Tap-To-Transfer Chip View"
-        format = PixelFormat.TRANSLUCENT
-        setTrustedOverlay()
-    }
-
-    /** The chip view currently being displayed. Null if the chip is not being displayed. */
-    private var chipView: LinearLayout? = null
-
     /** Displays the chip view for the given state. */
-    fun displayChip(chipState: MediaTttChipState) {
-        val oldChipView = chipView
-        if (chipView == null) {
-            chipView = LayoutInflater
-                .from(context)
-                .inflate(R.layout.media_ttt_chip, null) as LinearLayout
-        }
-        val currentChipView = chipView!!
-
+    override fun updateChipView(chipState: ChipStateSender, currentChipView: ViewGroup) {
         // App icon
-        currentChipView.findViewById<CachingIconView>(R.id.app_icon).apply {
-            this.setImageDrawable(chipState.appIconDrawable)
-        }
+        setIcon(chipState, currentChipView)
 
         // Text
         currentChipView.requireViewById<TextView>(R.id.text).apply {
@@ -108,18 +77,6 @@ class MediaTttChipController @Inject constructor(
         if (chipState is TransferInitiated) {
             addFutureCallback(chipState)
         }
-
-        // Add view if necessary
-        if (oldChipView == null) {
-            windowManager.addView(chipView, windowLayoutParams)
-        }
-    }
-
-    /** Hides the chip. */
-    fun removeChip() {
-        if (chipView == null) { return }
-        windowManager.removeView(chipView)
-        chipView = null
     }
 
     /**
@@ -136,7 +93,7 @@ class MediaTttChipController @Inject constructor(
                 mainExecutor.execute {
                     displayChip(
                         TransferSucceeded(
-                            chipState.otherDeviceName, chipState.appIconDrawable, undoRunnable
+                            chipState.appIconDrawable, chipState.otherDeviceName, undoRunnable
                         )
                     )
                 }

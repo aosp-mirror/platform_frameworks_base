@@ -250,7 +250,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Няма налични устройства"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"не е установена връзка с Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркост"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Инвертиране на цветовете"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инвертиране на цветовете"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Още настройки"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Потребителски настройки"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
@@ -747,7 +747,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Увеличаване на целия екран"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Увеличаване на част от екрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Превключване"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Жестът за достъпност бе заменен от бутон\n\n"<annotation id="link">"Преглед на настройките"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Докоснете, за да отворите функциите за достъпност. Персон./заменете бутона от настройките.\n\n"<annotation id="link">"Преглед на настройките"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Преместете бутона до края, за да го скриете временно"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Преместване горе вляво"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Преместване горе вдясно"</string>
@@ -798,10 +798,17 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Настройки"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> на <xliff:g id="ARTIST_NAME">%2$s</xliff:g> се възпроизвежда от <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> от <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_button_play" msgid="2705068099607410633">"Пускане"</string>
+    <string name="controls_media_button_pause" msgid="8614887780950376258">"Пауза"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"Предишен запис"</string>
+    <string name="controls_media_button_next" msgid="6662636627525947610">"Следващ запис"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Google Play"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Отваряне на <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Пускане на <xliff:g id="SONG_NAME">%1$s</xliff:g> на <xliff:g id="ARTIST_NAME">%2$s</xliff:g> от <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Пускане на <xliff:g id="SONG_NAME">%1$s</xliff:g> от <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="media_transfer_undo" msgid="1895606387620728736">"Отмяна"</string>
+    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"Преместете се по-близо, за да се възпроизведе на <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_transfer_playing" msgid="3760048096352107789">"Възпроизвежда се на <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно, проверете прилож."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не е намерено"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Контролата не е налице"</string>
@@ -816,7 +823,7 @@
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 избрано устройство"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> избрани устройства"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(връзката е прекратена)"</string>
-    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Неуспешно свързване. Опитайте отново."</string>
+    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Не може да се превключи. Докоснете за нов опит."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Сдвояване на ново устройство"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер на компилацията"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номерът на компилацията е копиран в буферната памет."</string>
@@ -881,8 +888,11 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Вижте всички"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"За да превключите мрежите, прекъснете връзката с Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"С цел подобряване на практическата работа с устройството приложенията и услугите пак могат да сканират за Wi‑Fi мрежи по всяко време дори когато функцията за Wi‑Fi e изключена. Можете да промените съответното поведение от настройките за сканиране за Wi‑Fi. "<annotation id="link">"Промяна"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Изключване на самолетния режим"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> иска да добави следния панел към бързите настройки"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Добавяне на панел"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Отмяна на добавянето"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Избор на потребител"</string>
+    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"Приложения, които се изпълняват на заден план"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Спиране"</string>
 </resources>

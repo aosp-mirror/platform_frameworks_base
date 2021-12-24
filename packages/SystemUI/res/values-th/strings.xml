@@ -250,7 +250,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"ไม่มีอุปกรณ์ที่สามารถใช้ได้"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ไม่ได้เชื่อมต่อ Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ความสว่าง"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"กลับสี"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"การกลับสี"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"การตั้งค่าเพิ่มเติม"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"การตั้งค่าของผู้ใช้"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"เสร็จสิ้น"</string>
@@ -747,7 +747,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ขยายเป็นเต็มหน้าจอ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ขยายบางส่วนของหน้าจอ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"เปลี่ยน"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ปุ่มการช่วยเหลือพิเศษแทนที่ท่าทางสัมผัสการช่วยเหลือพิเศษแล้ว\n\n"<annotation id="link">"ดูการตั้งค่า"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"แตะเพื่อเปิดฟีเจอร์การช่วยเหลือพิเศษ ปรับแต่งหรือแทนที่ปุ่มนี้ในการตั้งค่า\n\n"<annotation id="link">"ดูการตั้งค่า"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ย้ายปุ่มไปที่ขอบเพื่อซ่อนชั่วคราว"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ย้ายไปด้านซ้ายบน"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ย้ายไปด้านขวาบน"</string>
@@ -798,10 +798,17 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"การตั้งค่า"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"กำลังเปิดเพลง <xliff:g id="SONG_NAME">%1$s</xliff:g> ของ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> จาก <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> จาก <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_button_play" msgid="2705068099607410633">"เล่น"</string>
+    <string name="controls_media_button_pause" msgid="8614887780950376258">"หยุดชั่วคราว"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"แทร็กก่อนหน้า"</string>
+    <string name="controls_media_button_next" msgid="6662636627525947610">"เพลงถัดไป"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"เล่น"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"เปิด <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"เปิดเพลง <xliff:g id="SONG_NAME">%1$s</xliff:g> ของ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> จาก <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"เปิดเพลง <xliff:g id="SONG_NAME">%1$s</xliff:g> จาก <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="media_transfer_undo" msgid="1895606387620728736">"เลิกทำ"</string>
+    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"ขยับเข้ามาใกล้ขึ้นเพื่อเล่นใน <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_transfer_playing" msgid="3760048096352107789">"กำลังเล่นใน <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ไม่มีการใช้งาน โปรดตรวจสอบแอป"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ไม่พบ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ใช้การควบคุมไม่ได้"</string>
@@ -816,7 +823,7 @@
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"เลือกอุปกรณ์ไว้ 1 รายการ"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"เลือกอุปกรณ์ไว้ <xliff:g id="COUNT">%1$d</xliff:g> รายการ"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ยกเลิกการเชื่อมต่อแล้ว)"</string>
-    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"เชื่อมต่อไม่ได้ ลองใหม่"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"เปลี่ยนไม่ได้ แตะเพื่อลองอีกครั้ง"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"จับคู่อุปกรณ์ใหม่"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"หมายเลขบิลด์"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"คัดลอกหมายเลขบิลด์ไปยังคลิปบอร์ดแล้ว"</string>
@@ -881,8 +888,11 @@
     <string name="see_all_networks" msgid="3773666844913168122">"ดูทั้งหมด"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ตัดการเชื่อมต่ออีเทอร์เน็ตเพื่อสลับเครือข่าย"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"เพื่อปรับปรุงประสบการณ์การใช้อุปกรณ์ แอปและบริการต่างๆ จะยังคงสแกนหาเครือข่าย Wi‑Fi ได้ทุกเมื่อแม้ว่า Wi‑Fi จะปิดอยู่ คุณเปลี่ยนตัวเลือกนี้ได้ในการตั้งค่าการสแกนหา Wi-Fi "<annotation id="link">"เปลี่ยน"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ปิดโหมดบนเครื่องบิน"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ต้องการเพิ่มชิ้นส่วนต่อไปนี้ในการตั้งค่าด่วน"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"เพิ่มชิ้นส่วน"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ไม่ต้องเพิ่มชิ้นส่วน"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"เลือกผู้ใช้"</string>
+    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"แอปที่ทำงานอยู่เบื้องหลัง"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"หยุด"</string>
 </resources>

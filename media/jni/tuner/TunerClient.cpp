@@ -185,4 +185,13 @@ sp<FilterClient> TunerClient::openSharedFilter(const string& filterToken,
     return nullptr;
 }
 
+Result TunerClient::setLna(bool bEnable) {
+    if (mTunerService != nullptr) {
+        Status s = mTunerService->setLna(bEnable);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    return Result::INVALID_STATE;
+}
+
 }  // namespace android

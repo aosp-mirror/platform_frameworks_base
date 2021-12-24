@@ -200,6 +200,7 @@ struct JTuner : public RefBase {
     jint close();
     jint closeFrontend();
     jint closeDemux();
+    Result getFrontendHardwareInfo(string& info);
 
     jweak getObject();
 

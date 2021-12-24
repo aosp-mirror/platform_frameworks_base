@@ -92,6 +92,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
@@ -1172,6 +1173,91 @@ public final class TvInputManagerService extends SystemService {
                     TvInputState state = userState.inputMap.get(inputId);
                     return state == null ? INPUT_STATE_CONNECTED : state.state;
                 }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public List<String> getAvailableExtensionInterfaceNames(String inputId, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
+                    userId, "getAvailableExtensionInterfaceNames");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                ITvInputService service = null;
+                synchronized (mLock) {
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    TvInputState inputState = userState.inputMap.get(inputId);
+                    if (inputState != null) {
+                        ServiceState serviceState =
+                                userState.serviceStateMap.get(inputState.info.getComponent());
+                        if (serviceState != null && serviceState.isHardware
+                                && serviceState.service != null) {
+                            service = serviceState.service;
+                        }
+                    }
+                }
+                try {
+                    if (service != null) {
+                        List<String> interfaces = new ArrayList<>();
+                        for (final String name : CollectionUtils.emptyIfNull(
+                                service.getAvailableExtensionInterfaceNames())) {
+                            String permission = service.getExtensionInterfacePermission(name);
+                            if (permission == null
+                                    || mContext.checkPermission(permission, callingPid, callingUid)
+                                    == PackageManager.PERMISSION_GRANTED) {
+                                interfaces.add(name);
+                            }
+                        }
+                        return interfaces;
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in getAvailableExtensionInterfaceNames "
+                            + "or getExtensionInterfacePermission", e);
+                }
+                return new ArrayList<>();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public IBinder getExtensionInterface(String inputId, String name, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
+                    userId, "getExtensionInterface");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                ITvInputService service = null;
+                synchronized (mLock) {
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    TvInputState inputState = userState.inputMap.get(inputId);
+                    if (inputState != null) {
+                        ServiceState serviceState =
+                                userState.serviceStateMap.get(inputState.info.getComponent());
+                        if (serviceState != null && serviceState.isHardware
+                                && serviceState.service != null) {
+                            service = serviceState.service;
+                        }
+                    }
+                }
+                try {
+                    if (service != null) {
+                        String permission = service.getExtensionInterfacePermission(name);
+                        if (permission == null
+                                || mContext.checkPermission(permission, callingPid, callingUid)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            return service.getExtensionInterface(name);
+                        }
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in getExtensionInterfacePermission "
+                            + "or getExtensionInterface", e);
+                }
+                return null;
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

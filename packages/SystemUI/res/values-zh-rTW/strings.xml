@@ -250,7 +250,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"沒有可用裝置"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"未連線至 Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"亮度"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"反轉顏色"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"色彩反轉"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"更多設定"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"使用者設定"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"完成"</string>
@@ -747,7 +747,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"放大整個螢幕畫面"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"放大局部螢幕畫面"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"切換"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"無障礙工具按鈕已取代無障礙手勢\n\n"<annotation id="link">"查看設定"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"輕觸即可開啟無障礙功能。你可以前往「設定」自訂或更換這個按鈕。\n\n"<annotation id="link">"查看設定"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"將按鈕移到邊緣處即可暫時隱藏"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"移到左上方"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"移到右上方"</string>
@@ -798,10 +798,17 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"系統正透過「<xliff:g id="APP_LABEL">%3$s</xliff:g>」播放<xliff:g id="ARTIST_NAME">%2$s</xliff:g>的〈<xliff:g id="SONG_NAME">%1$s</xliff:g>〉"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g>，共 <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_button_play" msgid="2705068099607410633">"播放"</string>
+    <string name="controls_media_button_pause" msgid="8614887780950376258">"暫停"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"上一首"</string>
+    <string name="controls_media_button_next" msgid="6662636627525947610">"下一首"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"播放"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"開啟「<xliff:g id="APP_LABEL">%1$s</xliff:g>」"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"透過「<xliff:g id="APP_LABEL">%3$s</xliff:g>」播放<xliff:g id="ARTIST_NAME">%2$s</xliff:g>的〈<xliff:g id="SONG_NAME">%1$s</xliff:g>〉"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"透過「<xliff:g id="APP_LABEL">%2$s</xliff:g>」播放〈<xliff:g id="SONG_NAME">%1$s</xliff:g>〉"</string>
+    <string name="media_transfer_undo" msgid="1895606387620728736">"復原"</string>
+    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"如要在「<xliff:g id="DEVICENAME">%1$s</xliff:g>」上播放，請靠近這部裝置"</string>
+    <string name="media_transfer_playing" msgid="3760048096352107789">"正在「<xliff:g id="DEVICENAME">%1$s</xliff:g>」上播放"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"無效，請查看應用程式"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"找不到控制項"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"無法使用控制項"</string>
@@ -816,7 +823,7 @@
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"已選取 1 部裝置"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"已選取 <xliff:g id="COUNT">%1$d</xliff:g> 部裝置"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(連線中斷)"</string>
-    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"無法連線，請再試一次。"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"無法切換，輕觸即可重試。"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"配對新裝置"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本號碼"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"已將版本號碼複製到剪貼簿。"</string>
@@ -881,8 +888,11 @@
     <string name="see_all_networks" msgid="3773666844913168122">"查看全部"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"如要切換網路，請中斷乙太網路連線"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"為提升裝置的使用體驗，應用程式和服務仍可隨時掃描 Wi‑Fi 網路，即使 Wi-Fi 連線功能處於關閉狀態時亦然。你可以前往「掃描 Wi-Fi」設定進行變更。"<annotation id="link">"變更"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"關閉飛航模式"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"「<xliff:g id="APPNAME">%1$s</xliff:g>」想在快速設定選單新增以下設定方塊"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"新增設定方塊"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不要新增設定方塊"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"選取使用者"</string>
+    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"目前在背景執行的應用程式"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
 </resources>

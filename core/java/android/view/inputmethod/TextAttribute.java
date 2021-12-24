@@ -36,7 +36,7 @@ public final class TextAttribute implements Parcelable {
     private final @NonNull List<String> mTextConversionSuggestions;
     private final @NonNull PersistableBundle mExtras;
 
-    private TextAttribute(TextAttributeBuilder builder) {
+    private TextAttribute(Builder builder) {
         mTextConversionSuggestions = builder.mTextConversionSuggestions;
         mExtras = builder.mExtras;
     }
@@ -48,7 +48,7 @@ public final class TextAttribute implements Parcelable {
 
     /**
      * Get the list of text conversion suggestions. More text conversion details in
-     * {@link TextAttributeBuilder#setTextConversionSuggestions(List)}.
+     * {@link Builder#setTextConversionSuggestions(List)}.
      *
      * @return List of text conversion suggestions. If the list is empty, it means that IME not set
      * this field or IME didn't have suggestions for applications.
@@ -59,7 +59,7 @@ public final class TextAttribute implements Parcelable {
 
     /**
      * Get the extras data. More extras data details in
-     * {@link TextAttributeBuilder#setExtras(PersistableBundle)}.
+     * {@link Builder#setExtras(PersistableBundle)}.
      *
      * @return Extras data. If the Bundle is empty, it means that IME not set this field or IME
      * didn't have extras data.
@@ -71,7 +71,7 @@ public final class TextAttribute implements Parcelable {
     /**
      * Builder for creating a {@link TextAttribute}.
      */
-    public static final class TextAttributeBuilder {
+    public static final class Builder {
         private List<String> mTextConversionSuggestions = new ArrayList<>();
         private PersistableBundle mExtras = new PersistableBundle();
 
@@ -87,7 +87,7 @@ public final class TextAttribute implements Parcelable {
          * @param textConversionSuggestions The list of text conversion suggestions.
          * @return This builder
          */
-        public @NonNull TextAttributeBuilder setTextConversionSuggestions(
+        public @NonNull Builder setTextConversionSuggestions(
                 @NonNull List<String> textConversionSuggestions) {
             mTextConversionSuggestions = Collections.unmodifiableList(textConversionSuggestions);
             return this;
@@ -101,7 +101,7 @@ public final class TextAttribute implements Parcelable {
          *
          * @return This builder.
          */
-        public @NonNull TextAttributeBuilder setExtras(@NonNull PersistableBundle extras) {
+        public @NonNull Builder setExtras(@NonNull PersistableBundle extras) {
             mExtras = extras;
             return this;
         }

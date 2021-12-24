@@ -1986,9 +1986,8 @@ public class NetworkPolicyManagerServiceTest {
         assertEquals("Unexpected template match rule in network policies",
                 NetworkTemplate.MATCH_CARRIER,
                 actualPolicy.template.getMatchRule());
-        assertEquals("Unexpected subscriberId match rule in network policies",
-                NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_EXACT,
-                actualPolicy.template.getSubscriberIdMatchRule());
+        assertTrue("Unexpected subscriberIds size in network policies",
+                actualPolicy.template.getSubscriberIds().size() > 0);
         assertEquals("Unexpected template meteredness in network policies",
                 METERED_YES, actualPolicy.template.getMeteredness());
     }
@@ -2003,9 +2002,8 @@ public class NetworkPolicyManagerServiceTest {
         assertEquals("Unexpected template match rule in network policies",
                 NetworkTemplate.MATCH_WIFI,
                 actualPolicy.template.getMatchRule());
-        assertEquals("Unexpected subscriberId match rule in network policies",
-                NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_ALL,
-                actualPolicy.template.getSubscriberIdMatchRule());
+        assertEquals("Unexpected subscriberIds size in network policies",
+                actualPolicy.template.getSubscriberIds().size(), 0);
         assertEquals("Unexpected template meteredness in network policies",
                 METERED_NO, actualPolicy.template.getMeteredness());
     }

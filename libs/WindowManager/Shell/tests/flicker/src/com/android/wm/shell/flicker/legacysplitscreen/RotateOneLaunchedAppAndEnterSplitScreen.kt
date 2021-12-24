@@ -77,7 +77,7 @@ class RotateOneLaunchedAppAndEnterSplitScreen(
     @Test
     fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     fun statusBarLayerRotatesScales() {
         // This test doesn't work in shell transitions because of b/206753786

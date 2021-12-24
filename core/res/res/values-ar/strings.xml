@@ -287,7 +287,7 @@
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"إشعار جديد"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"لوحة المفاتيح الافتراضية"</string>
-    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"لوحة المفاتيح الفعلية"</string>
+    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"لوحة المفاتيح الخارجية"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"الأمان"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"وضع السيارة"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"حالة الحساب"</string>
@@ -2117,6 +2117,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"إشعار تطبيق مخصّص"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"هل تسمح لتطبيق <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> (يوجد مستخدم بهذا الحساب مسبقًا)؟"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"هل تسمح لتطبيق <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> ؟"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"إضافة لغة"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"اكتب اسم اللغة"</string>

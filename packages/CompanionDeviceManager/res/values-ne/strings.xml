@@ -20,18 +20,12 @@
     <string name="confirmation_title" msgid="8455544820286920304">"आफ्नो &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; लाई &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; व्यवस्थापन गर्ने अनुमति दिनुहोस्"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"घडी"</string>
     <string name="chooser_title" msgid="2262294130493605839">"आफूले &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; प्रयोग गरी व्यवस्थापन गर्न चाहेको <xliff:g id="PROFILE_NAME">%1$s</xliff:g> चयन गर्नुहोस्"</string>
-    <!-- no translation found for summary_watch (7113724443198337683) -->
-    <skip />
-    <!-- no translation found for summary_watch (7113724443198337683) -->
-    <skip />
-    <!-- no translation found for title_app_streaming (4459136600249308574) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (6105916810614498138) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (2996373715966272792) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (7614171699434639963) -->
-    <skip />
+    <string name="summary_watch" product="default" msgid="7113724443198337683">"<xliff:g id="APP_NAME">%1$s</xliff:g> लाई तपाईंका सूचना हेर्ने र फोन, SMS, कन्ट्याक्ट तथा पात्रोसम्बन्धी अनुमतिहरू हेर्ने तथा प्रयोग गर्ने अनुमति दिइने छ।"</string>
+    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"<xliff:g id="APP_NAME">%1$s</xliff:g> लाई तपाईंका सूचना हेर्ने र फोन, SMS, कन्ट्याक्ट तथा पात्रोसम्बन्धी अनुमतिहरू हेर्ने तथा प्रयोग गर्ने अनुमति दिइने छ।"</string>
+    <string name="title_app_streaming" msgid="4459136600249308574">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; लाई एपहरू स्ट्रिम गर्ने अनुमति दिने हो?"</string>
+    <string name="summary_app_streaming" product="default" msgid="6105916810614498138">"यो डिभाइस इन्टरनेटमा कनेक्ट भएका बेला, &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;लाई &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; लाई यो फोनमा इन्स्टल गरिएका एप टाढैबाट प्रयोग गर्ने अनुमति दिन दिनुहोस्।"</string>
+    <string name="summary_app_streaming" product="tablet" msgid="2996373715966272792">"यो डिभाइस इन्टरनेटमा कनेक्ट भएका बेला, &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;लाई &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; लाई यो ट्याब्लेटमा इन्स्टल गरिएका एप टाढैबाट प्रयोग गर्ने अनुमति दिन दिनुहोस्।"</string>
+    <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"यो डिभाइस इन्टरनेटमा कनेक्ट भएका बेला, &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; लाई &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; लाई यो डिभाइसमा इन्स्टल गरिएका एप टाढैबाट प्रयोग गर्ने अनुमति दिन दिनुहोस्।"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"यन्त्र"</string>
