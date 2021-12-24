@@ -25,7 +25,6 @@ import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.SharedLibraryInfo;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.os.incremental.PerUidReadTimeouts;
@@ -37,7 +36,6 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
-import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -710,7 +708,7 @@ final class DumpHelper {
                 proto.end(verifierPackageToken);
             }
 
-            dumpSharedLibrariesProto(proto);
+            mPm.mInjector.getSharedLibrariesImpl().dumpProto(proto);
             dumpFeaturesProto(proto);
             mPm.mSettings.dumpPackagesProto(proto);
             mPm.mSettings.dumpSharedUsersProto(proto);
@@ -725,35 +723,6 @@ final class DumpHelper {
             for (int i = 0; i < count; i++) {
                 mPm.mAvailableFeatures.valueAt(i).dumpDebug(proto,
                         PackageServiceDumpProto.FEATURES);
-            }
-        }
-    }
-
-    private void dumpSharedLibrariesProto(ProtoOutputStream proto) {
-        final int count = mPm.mSharedLibraries.size();
-        for (int i = 0; i < count; i++) {
-            final String libName = mPm.mSharedLibraries.keyAt(i);
-            WatchedLongSparseArray<SharedLibraryInfo> versionedLib =
-                    mPm.mSharedLibraries.get(libName);
-            if (versionedLib == null) {
-                continue;
-            }
-            final int versionCount = versionedLib.size();
-            for (int j = 0; j < versionCount; j++) {
-                final SharedLibraryInfo libraryInfo = versionedLib.valueAt(j);
-                final long sharedLibraryToken =
-                        proto.start(PackageServiceDumpProto.SHARED_LIBRARIES);
-                proto.write(PackageServiceDumpProto.SharedLibraryProto.NAME, libraryInfo.getName());
-                final boolean isJar = (libraryInfo.getPath() != null);
-                proto.write(PackageServiceDumpProto.SharedLibraryProto.IS_JAR, isJar);
-                if (isJar) {
-                    proto.write(PackageServiceDumpProto.SharedLibraryProto.PATH,
-                            libraryInfo.getPath());
-                } else {
-                    proto.write(PackageServiceDumpProto.SharedLibraryProto.APK,
-                            libraryInfo.getPackageName());
-                }
-                proto.end(sharedLibraryToken);
             }
         }
     }

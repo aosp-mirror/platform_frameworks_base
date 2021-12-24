@@ -137,6 +137,7 @@ public class PackageManagerServiceInjector {
     private final Singleton<Handler> mHandlerProducer;
     private final Singleton<BackgroundDexOptService> mBackgroundDexOptService;
     private final Singleton<IBackupManager> mIBackupManager;
+    private final Singleton<SharedLibrariesImpl> mSharedLibrariesProducer;
 
     PackageManagerServiceInjector(Context context, PackageManagerTracedLock lock,
             Installer installer, Object installLock, PackageAbiHelper abiHelper,
@@ -173,7 +174,8 @@ public class PackageManagerServiceInjector {
             ServiceProducer getLocalServiceProducer,
             ServiceProducer getSystemServiceProducer,
             Producer<BackgroundDexOptService> backgroundDexOptService,
-            Producer<IBackupManager> iBackupManager) {
+            Producer<IBackupManager> iBackupManager,
+            Producer<SharedLibrariesImpl> sharedLibrariesProducer) {
         mContext = context;
         mLock = lock;
         mInstaller = installer;
@@ -224,6 +226,7 @@ public class PackageManagerServiceInjector {
         mHandlerProducer = new Singleton<>(handlerProducer);
         mBackgroundDexOptService = new Singleton<>(backgroundDexOptService);
         mIBackupManager = new Singleton<>(iBackupManager);
+        mSharedLibrariesProducer = new Singleton<>(sharedLibrariesProducer);
     }
 
     /**
@@ -390,6 +393,10 @@ public class PackageManagerServiceInjector {
 
     public IBackupManager getIBackupManager() {
         return mIBackupManager.get(this, mPackageManager);
+    }
+
+    public SharedLibrariesImpl getSharedLibrariesImpl() {
+        return mSharedLibrariesProducer.get(this, mPackageManager);
     }
 
     /** Provides an abstraction to static access to system state. */

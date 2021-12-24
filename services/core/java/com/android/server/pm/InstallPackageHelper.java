@@ -207,6 +207,7 @@ final class InstallPackageHelper {
     private final PackageAbiHelper mPackageAbiHelper;
     private final ViewCompiler mViewCompiler;
     private final IBackupManager mIBackupManager;
+    private final SharedLibrariesImpl mSharedLibraries;
 
     // TODO(b/198166813): remove PMS dependency
     InstallPackageHelper(PackageManagerService pm, AppDataHelper appDataHelper) {
@@ -226,6 +227,7 @@ final class InstallPackageHelper {
         mPackageAbiHelper = pm.mInjector.getAbiHelper();
         mViewCompiler = pm.mInjector.getViewCompiler();
         mIBackupManager = pm.mInjector.getIBackupManager();
+        mSharedLibraries = pm.mInjector.getSharedLibrariesImpl();
     }
 
     InstallPackageHelper(PackageManagerService pm) {
@@ -325,7 +327,7 @@ final class InstallPackageHelper {
         }
 
         if (reconciledPkg.mCollectedSharedLibraryInfos != null) {
-            mPm.executeSharedLibrariesUpdateLPr(pkg, pkgSetting, null, null,
+            mSharedLibraries.executeSharedLibrariesUpdateLPw(pkg, pkgSetting, null, null,
                     reconciledPkg.mCollectedSharedLibraryInfos, allUsers);
         }
 
@@ -388,13 +390,13 @@ final class InstallPackageHelper {
         synchronized (mPm.mLock) {
             if (!ArrayUtils.isEmpty(reconciledPkg.mAllowedSharedLibraryInfos)) {
                 for (SharedLibraryInfo info : reconciledPkg.mAllowedSharedLibraryInfos) {
-                    mPm.commitSharedLibraryInfoLocked(info);
+                    mSharedLibraries.commitSharedLibraryInfoLPw(info);
                 }
                 final Map<String, AndroidPackage> combinedSigningDetails =
                         reconciledPkg.getCombinedAvailablePackages();
                 try {
                     // Shared libraries for the package need to be updated.
-                    mPm.updateSharedLibrariesLocked(pkg, pkgSetting, null, null,
+                    mSharedLibraries.updateSharedLibrariesLPw(pkg, pkgSetting, null, null,
                             combinedSigningDetails);
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "updateSharedLibrariesLPr failed: ", e);
@@ -402,7 +404,7 @@ final class InstallPackageHelper {
                 // Update all applications that use this library. Skip when booting
                 // since this will be done after all packages are scaned.
                 if ((scanFlags & SCAN_BOOTING) == 0) {
-                    clientLibPkgs = mPm.updateAllSharedLibrariesLocked(pkg, pkgSetting,
+                    clientLibPkgs = mSharedLibraries.updateAllSharedLibrariesLPw(pkg, pkgSetting,
                             combinedSigningDetails);
                 }
             }
@@ -945,7 +947,7 @@ final class InstallPackageHelper {
                     if (result.mStaticSharedLibraryInfo != null
                             || result.mSdkSharedLibraryInfo != null) {
                         final PackageSetting sharedLibLatestVersionSetting =
-                                mPm.getSharedLibLatestVersionSetting(result);
+                                mSharedLibraries.getSharedLibLatestVersionSetting(result);
                         if (sharedLibLatestVersionSetting != null) {
                             lastStaticSharedLibSettings.put(
                                     result.mPkgSetting.getPkg().getPackageName(),
@@ -961,7 +963,7 @@ final class InstallPackageHelper {
                     reconcileRequest = new ReconcileRequest(preparedScans, installArgs,
                     installResults,
                     prepareResults,
-                    mPm.mSharedLibraries,
+                    mSharedLibraries.getAll(),
                     Collections.unmodifiableMap(mPm.mPackages), versionInfos,
                     lastStaticSharedLibSettings);
             CommitRequest commitRequest = null;
@@ -1207,7 +1209,7 @@ final class InstallPackageHelper {
                 // the package setting for the latest library version.
                 PackageSetting signatureCheckPs = ps;
                 if (parsedPackage.isStaticSharedLibrary()) {
-                    SharedLibraryInfo libraryInfo = mPm.getLatestSharedLibraVersionLPr(
+                    SharedLibraryInfo libraryInfo = mSharedLibraries.getLatestSharedLibraVersionLPr(
                             parsedPackage);
                     if (libraryInfo != null) {
                         signatureCheckPs = mPm.mSettings.getPackageLPr(
@@ -2969,7 +2971,8 @@ final class InstallPackageHelper {
                 synchronized (mPm.mLock) {
                     mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
                     try {
-                        mPm.updateSharedLibrariesLocked(pkg, stubPkgSetting, null, null,
+                        mSharedLibraries.updateSharedLibrariesLPw(
+                                pkg, stubPkgSetting, null, null,
                                 Collections.unmodifiableMap(mPm.mPackages));
                     } catch (PackageManagerException e) {
                         Slog.w(TAG, "updateAllSharedLibrariesLPw failed: ", e);
@@ -3180,7 +3183,7 @@ final class InstallPackageHelper {
 
         try {
             // update shared libraries for the newly re-installed system package
-            mPm.updateSharedLibrariesLocked(pkg, pkgSetting, null, null,
+            mSharedLibraries.updateSharedLibrariesLPw(pkg, pkgSetting, null, null,
                     Collections.unmodifiableMap(mPm.mPackages));
         } catch (PackageManagerException e) {
             Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
@@ -3559,15 +3562,14 @@ final class InstallPackageHelper {
                             ReconcilePackageUtils.reconcilePackages(
                                     new ReconcileRequest(
                                             Collections.singletonMap(pkgName, scanResult),
-                                            mPm.mSharedLibraries,
+                                            mSharedLibraries.getAll(),
                                             mPm.mPackages,
                                             Collections.singletonMap(
                                                     pkgName,
                                                     mPm.getSettingsVersionForPackage(
                                                             parsedPackage)),
-                                            Collections.singletonMap(pkgName,
-                                                    mPm.getSharedLibLatestVersionSetting(
-                                                            scanResult))),
+                                            Collections.singletonMap(pkgName, mSharedLibraries
+                                                    .getSharedLibLatestVersionSetting(scanResult))),
                                     mPm.mSettings.getKeySetManagerService(), mPm.mInjector);
                     appIdCreated = optimisticallyRegisterAppId(scanResult);
                     commitReconciledScanResultLocked(
@@ -4192,8 +4194,8 @@ final class InstallPackageHelper {
         long minVersionCode = Long.MIN_VALUE;
         long maxVersionCode = Long.MAX_VALUE;
 
-        WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mPm.mSharedLibraries.get(
-                pkg.getStaticSharedLibName());
+        WatchedLongSparseArray<SharedLibraryInfo> versionedLib =
+                mSharedLibraries.getSharedLibraryInfos(pkg.getStaticSharedLibName());
         if (versionedLib != null) {
             final int versionCount = versionedLib.size();
             for (int i = 0; i < versionCount; i++) {

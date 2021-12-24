@@ -121,6 +121,9 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     /** The active map simulating the in memory storage of Settings  */
     private val mSettingsMap = WatchedArrayMap<String, PackageSetting>()
 
+    /** The shared libraries on the device */
+    private lateinit var mSharedLibraries: SharedLibrariesImpl
+
     init {
         PropertyInvalidatedCache.disableForTestMode()
         val apply = ExtendedMockito.mockitoSession()
@@ -324,6 +327,11 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                 any(AndroidPackage::class.java), anyBoolean(), any(File::class.java))) {
             PackageAbiHelper.NativeLibraryPaths("", false, "", "")
         }
+        whenever(mocks.injector.bootstrap(any(PackageManagerService::class.java))) {
+            mSharedLibraries = SharedLibrariesImpl(
+                getArgument<Any>(0) as PackageManagerService, mocks.injector)
+        }
+        whenever(mocks.injector.sharedLibrariesImpl) { mSharedLibraries }
         // everything visible by default
         whenever(mocks.appsFilter.shouldFilterApplication(
                 anyInt(), nullable(), nullable(), anyInt())) { false }
