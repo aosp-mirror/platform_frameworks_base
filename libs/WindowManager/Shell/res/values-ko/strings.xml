@@ -73,4 +73,10 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"관리"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"대화창을 닫았습니다."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"탭하여 이 앱을 다시 시작하고 전체 화면으로 이동합니다."</string>
+    <!-- no translation found for camera_compat_treatment_suggested_button_description (8103916969024076767) -->
+    <skip />
+    <!-- no translation found for camera_compat_treatment_applied_button_description (2944157113330703897) -->
+    <skip />
+    <!-- no translation found for camera_compat_dismiss_button_description (2795364433503817511) -->
+    <skip />
 </resources>

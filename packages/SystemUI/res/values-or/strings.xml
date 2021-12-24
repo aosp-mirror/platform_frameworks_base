@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"କୌଣସି ଡିଭାଇସ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ୱାଇ-ଫାଇ ସଂଯୋଜିତ ହୋଇନାହିଁ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ଉଜ୍ଜ୍ୱଳତା"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ରଙ୍ଗ ଇନଭାର୍ଟ୍ କରନ୍ତୁ"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ରଙ୍ଗ ଇନଭାର୍ସନ"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ଅଧିକ ସେଟିଂସ୍"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ଉପଯୋଗକର୍ତ୍ତା ସେଟିଂସ୍"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ହୋଇଗଲା"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନକୁ ମ୍ୟାଗ୍ନିଫାଏ କରନ୍ତୁ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ସ୍କ୍ରିନର ଅଂଶ ମାଗ୍ନିଫାଏ କରନ୍ତୁ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ସ୍ୱିଚ୍ କରନ୍ତୁ"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ଆକ୍ସେସିବିଲିଟୀ ଜେଶ୍ଚରକୁ ଆକ୍ସେସିବିଲିଟୀ ବଟନରେ ପରିବର୍ତ୍ତନ କରାଯାଇଛି\n\n"<annotation id="link">"ସେଟିଂସ୍ ଦେଖନ୍ତୁ"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ଆକ୍ସେସିବିଲିଟୀ ଫିଚର ଖୋଲିବାକୁ ଟାପ କରନ୍ତୁ। ସେଟିଂସରେ ଏହି ବଟନକୁ କଷ୍ଟମାଇଜ କର କିମ୍ବା ବଦଳାଅ।\n\n"<annotation id="link">"ସେଟିଂସ ଦେଖନ୍ତୁ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ବଟନକୁ ଅସ୍ଥାୟୀ ଭାବେ ଲୁଚାଇବା ପାଇଁ ଏହାକୁ ଗୋଟିଏ ଧାରକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ଶୀର୍ଷ ବାମକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ଶୀର୍ଷ ଡାହାଣକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"ସବୁ ଦେଖନ୍ତୁ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ନେଟୱାର୍କ ସ୍ୱିଚ୍ କରିବାକୁ, ଇଥରନେଟ୍ ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ଡିଭାଇସ ଅନୁଭୂତିକୁ ଉନ୍ନତ କରିବା ପାଇଁ, ୱାଇ-ଫାଇ ବନ୍ଦ ଥିଲେ ମଧ୍ୟ ଆପ ଓ ସେବାଗୁଡ଼ିକ ଏବେ ବି ଯେ କୌଣସି ସମୟରେ ୱାଇ-ଫାଇ ନେଟୱାର୍କ ପାଇଁ ସ୍କାନ କରିପାରିବ। ଆପଣ ଏହାକୁ ୱାଇ-ଫାଇ ସ୍କାନିଂ ସେଟିଂସରେ ପରିବର୍ତ୍ତନ କରିପାରିବେ। "<annotation id="link">"ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ଏୟାରପ୍ଲେନ ମୋଡ ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ଉପଯୋଗକର୍ତ୍ତା ଚୟନ କର"</string>
 </resources>

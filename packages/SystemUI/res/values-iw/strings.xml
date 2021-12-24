@@ -251,7 +251,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"אין מכשירים זמינים"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"‏אין חיבור ל-Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"בהירות"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"היפוך צבעים"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"היפוך צבעים"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"הגדרות נוספות"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"הגדרות המשתמש"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"בוצע"</string>
@@ -753,7 +753,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"הגדלה של המסך המלא"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"הגדלת חלק מהמסך"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"מעבר"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"לחצן הנגישות החליף את תנועת הנגישות\n\n"<annotation id="link">"להצגת ההגדרות"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"מקישים כדי לפתוח את תכונות הנגישות. אפשר להחליף את הלחצן או להתאים אותו אישית בהגדרות.\n\n"<annotation id="link">"הצגת ההגדרות"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"כדי להסתיר זמנית את הלחצן, יש להזיז אותו לקצה"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"העברה לפינה השמאלית העליונה"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"העברה לפינה הימנית העליונה"</string>
@@ -889,5 +889,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"הצגת הכול"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"כדי לעבור בין רשתות, צריך לנתק את האתרנט"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"‏כדי לשפר את חוויית השימוש במכשיר, אפליקציות ושירותים יוכלו לחפש רשתות Wi-Fi בכל שלב, גם כאשר ה-Wi-Fi כבוי. אפשר לשנות זאת בהגדרות של חיפוש נקודות Wi-Fi. "<annotation id="link">"שינוי"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"השבתה של מצב טיסה"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"בחירת משתמש"</string>
 </resources>

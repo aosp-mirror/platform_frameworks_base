@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"ਕੋਈ ਡਿਵਾਈਸਾਂ ਉਪਲਬਧ ਨਹੀਂ"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ਵਾਈ-ਫਾਈ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ਚਮਕ"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ਰੰਗ ਪਲਟਾਓ"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ਰੰਗ ਪਲਟਨਾ"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ਹੋਰ ਸੈਟਿੰਗਾਂ"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ਵਰਤੋਂਕਾਰ ਸੈਟਿੰਗਾਂ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ਹੋ ਗਿਆ"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਵੱਡਦਰਸ਼ੀ ਕਰੋ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ਸਕ੍ਰੀਨ ਦੇ ਹਿੱਸੇ ਨੂੰ ਵੱਡਾ ਕਰੋ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ਸਵਿੱਚ"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨੂੰ ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਬਦਲ ਦਿੱਤਾ ਗਿਆ\n\n"<annotation id="link">"ਸੈਟਿੰਗਾਂ ਦੇਖੋ"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ। ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਇਹ ਬਟਨ ਵਿਉਂਤਬੱਧ ਕਰੋ ਜਾਂ ਬਦਲੋ।\n\n"<annotation id="link">"ਸੈਟਿੰਗਾਂ ਦੇਖੋ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ਬਟਨ ਨੂੰ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਲੁਕਾਉਣ ਲਈ ਕਿਨਾਰੇ \'ਤੇ ਲਿਜਾਓ"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ਉੱਪਰ ਵੱਲ ਖੱਬੇ ਲਿਜਾਓ"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ਉੱਪਰ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"ਸਭ ਦੇਖੋ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ਨੈੱਟਵਰਕਾਂ ਨੂੰ ਬਦਲਣ ਲਈ, ਈਥਰਨੈੱਟ ਨੂੰ ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ਡੀਵਾਈਸ ਦੇ ਅਨੁਭਵ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ, ਐਪਾਂ ਅਤੇ ਸੇਵਾਵਾਂ ਕਿਸੇ ਵੀ ਸਮੇਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ ਲਈ ਸਕੈਨ ਕਰ ਸਕਦੀਆਂ ਹਨ, ਭਾਵੇਂ ਵਾਈ-ਫਾਈ ਬੰਦ ਹੀ ਕਿਉਂ ਨਾ ਹੋਵੇ। ਤੁਸੀਂ ਇਸ ਨੂੰ ਵਾਈ‑ਫਾਈ ਸਕੈਨਿੰਗ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ ਬਦਲ ਸਕਦੇ ਹੋ। "<annotation id="link">"ਬਦਲੋ"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ਹਵਾਈ-ਜਹਾਜ਼ ਮੋਡ ਬੰਦ ਕਰੋ"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ਵਰਤੋਂਕਾਰ ਚੁਣੋ"</string>
 </resources>

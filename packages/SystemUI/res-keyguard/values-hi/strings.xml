@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"डिवाइस को मैन्युअल रूप से लॉक किया गया था"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"पहचान नहीं हो पाई"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"पहचान नहीं हो पाई"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"फ़ेस अनलॉक की सुविधा का इस्तेमाल करने के लिए, सेटिंग और निजता में जाकर, "<b>"कैमरे का ऐक्सेस"</b>" चालू करें"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">सिम का पिन डालें. आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> मौके बचे हैं.</item>
       <item quantity="other">सिम का पिन डालें. आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> मौके बचे हैं.</item>

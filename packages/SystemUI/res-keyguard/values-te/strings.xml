@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"పరికరం మాన్యువల్‌గా లాక్ చేయబడింది"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"గుర్తించలేదు"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"గుర్తించలేదు"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ఫేస్ అన్‌లాక్‌ను ఉపయోగించడానికి, సెట్టింగ్‌లు &gt; గోప్యతలో "<b>"కెమెరా యాక్సెస్"</b>"ను ఆన్ చేయండి"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">SIM పిన్‌ని నమోదు చేయండి. మీకు <xliff:g id="NUMBER_1">%d</xliff:g> ప్రయత్నలు మిగిలి ఉన్నాయి.</item>
       <item quantity="one">SIM పిన్‌ని నమోదు చేయండి, మీరు మీ పరికరాన్ని అన్‌లాక్ చేయడానికి తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించడానికి ముందు మీకు <xliff:g id="NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది.</item>
