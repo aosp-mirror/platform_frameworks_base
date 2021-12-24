@@ -52,7 +52,7 @@ public class WindowLayout {
     private final Rect mTempDisplayCutoutSafeExceptMaybeBarsRect = new Rect();
     private final Rect mTempRect = new Rect();
 
-    public boolean computeWindowFrames(WindowManager.LayoutParams attrs, InsetsState state,
+    public boolean computeFrames(WindowManager.LayoutParams attrs, InsetsState state,
             Rect displayCutoutSafe, Rect windowBounds, @WindowingMode int windowingMode,
             int requestedWidth, int requestedHeight, InsetsVisibilities requestedVisibilities,
             Rect attachedWindowFrame, float compatScale, Rect outDisplayFrame, Rect outParentFrame,

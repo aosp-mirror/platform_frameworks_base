@@ -1141,7 +1141,7 @@ public final class ViewRootImpl implements ViewParent,
                 final Rect displayCutoutSafe = mTempRect;
                 state.getDisplayCutoutSafe(displayCutoutSafe);
                 final WindowConfiguration winConfig = getConfiguration().windowConfiguration;
-                mWindowLayout.computeWindowFrames(mWindowAttributes, state,
+                mWindowLayout.computeFrames(mWindowAttributes, state,
                         displayCutoutSafe, winConfig.getBounds(), winConfig.getWindowingMode(),
                         UNSPECIFIED_LENGTH, UNSPECIFIED_LENGTH,
                         mInsetsController.getRequestedVisibilities(),
