@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvInputManager;
+import android.media.tv.TvTrackInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -244,6 +245,18 @@ public final class TvIAppManager {
             }
 
             @Override
+            public void onRemoveBroadcastInfo(int requestId, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRemoveBroadcastInfo(requestId);
+                }
+            }
+
+            @Override
             public void onCommandRequest(@TvIAppService.IAppServiceCommandType String cmdType,
                     Bundle parameters, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
@@ -253,6 +266,66 @@ public final class TvIAppManager {
                         return;
                     }
                     record.postCommandRequest(cmdType, parameters);
+                }
+            }
+
+            @Override
+            public void onSetVideoBounds(Rect rect, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postSetVideoBounds(rect);
+                }
+            }
+
+            @Override
+            public void onRequestCurrentChannelUri(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestCurrentChannelUri();
+                }
+            }
+
+            @Override
+            public void onRequestCurrentChannelLcn(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestCurrentChannelLcn();
+                }
+            }
+
+            @Override
+            public void onRequestStreamVolume(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestStreamVolume();
+                }
+            }
+
+            @Override
+            public void onRequestTrackInfoList(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestTrackInfoList();
                 }
             }
 
@@ -634,6 +707,18 @@ public final class TvIAppManager {
             }
         }
 
+        void stopIApp() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.stopIApp(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         void createBiInteractiveApp(Uri biIAppUri, Bundle params) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
@@ -653,6 +738,54 @@ public final class TvIAppManager {
             }
             try {
                 mService.destroyBiInteractiveApp(mToken, biIAppId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendCurrentChannelUri(@Nullable Uri channelUri) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendCurrentChannelUri(mToken, channelUri, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendCurrentChannelLcn(int lcn) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendCurrentChannelLcn(mToken, lcn, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendStreamVolume(float volume) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendStreamVolume(mToken, volume, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendTrackInfoList(@NonNull List<TvTrackInfo> tracks) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendTrackInfoList(mToken, tracks, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -829,7 +962,7 @@ public final class TvIAppManager {
         }
 
         /**
-         * Notifies IAPP session when a channels is tuned.
+         * Notifies IAPP session when a channel is tuned.
          */
         public void notifyTuned(Uri channelUri) {
             if (mToken == null) {
@@ -838,6 +971,36 @@ public final class TvIAppManager {
             }
             try {
                 mService.notifyTuned(mToken, channelUri, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Notifies IAPP session when a track is selected.
+         */
+        public void notifyTrackSelected(int type, String trackId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyTrackSelected(mToken, type, trackId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Notifies IAPP session when tracks are changed.
+         */
+        public void notifyTracksChanged(List<TvTrackInfo> tracks) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyTracksChanged(mToken, tracks, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1095,12 +1258,66 @@ public final class TvIAppManager {
             });
         }
 
+        void postRemoveBroadcastInfo(final int requestId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSession.getInputSession().removeBroadcastInfo(requestId);
+                }
+            });
+        }
+
         void postCommandRequest(final @TvIAppService.IAppServiceCommandType String cmdType,
                 final Bundle parameters) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mSessionCallback.onCommandRequest(mSession, cmdType, parameters);
+                }
+            });
+        }
+
+        void postSetVideoBounds(Rect rect) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onSetVideoBounds(mSession, rect);
+                }
+            });
+        }
+
+        void postRequestCurrentChannelUri() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestCurrentChannelUri(mSession);
+                }
+            });
+        }
+
+        void postRequestCurrentChannelLcn() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestCurrentChannelLcn(mSession);
+                }
+            });
+        }
+
+        void postRequestStreamVolume() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestStreamVolume(mSession);
+                }
+            });
+        }
+
+        void postRequestTrackInfoList() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestTrackInfoList(mSession);
                 }
             });
         }
@@ -1169,6 +1386,46 @@ public final class TvIAppManager {
          */
         public void onCommandRequest(Session session,
                 @TvIAppService.IAppServiceCommandType String cmdType, Bundle parameters) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#SetVideoBounds} is called.
+         *
+         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         */
+        public void onSetVideoBounds(Session session, Rect rect) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#RequestCurrentChannelUri} is called.
+         *
+         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         */
+        public void onRequestCurrentChannelUri(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#RequestCurrentChannelLcn} is called.
+         *
+         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         */
+        public void onRequestCurrentChannelLcn(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#RequestStreamVolume} is called.
+         *
+         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         */
+        public void onRequestStreamVolume(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#RequestTrackInfoList} is called.
+         *
+         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         */
+        public void onRequestTrackInfoList(Session session) {
         }
 
         /**

@@ -19,6 +19,8 @@ package android.media.tv.interactive;
 import android.graphics.Rect;
 import android.media.tv.BroadcastInfoResponse;
 import android.net.Uri;
+import android.media.tv.BroadcastInfoResponse;
+import android.media.tv.TvTrackInfo;
 import android.os.Bundle;
 import android.view.Surface;
 
@@ -28,10 +30,17 @@ import android.view.Surface;
  */
 oneway interface ITvIAppSession {
     void startIApp();
+    void stopIApp();
     void createBiInteractiveApp(in Uri biIAppUri, in Bundle params);
     void destroyBiInteractiveApp(in String biIAppId);
+    void sendCurrentChannelUri(in Uri channelUri);
+    void sendCurrentChannelLcn(int lcn);
+    void sendStreamVolume(float volume);
+    void sendTrackInfoList(in List<TvTrackInfo> tracks);
     void release();
     void notifyTuned(in Uri channelUri);
+    void notifyTrackSelected(int type, in String trackId);
+    void notifyTracksChanged(in List<TvTrackInfo> tracks);
     void setSurface(in Surface surface);
     void dispatchSurfaceChanged(int format, int width, int height);
     void notifyBroadcastInfoResponse(in BroadcastInfoResponse response);
