@@ -16,6 +16,7 @@
 
 package com.android.internal.widget.floatingtoolbar;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.view.MenuItem;
@@ -84,7 +85,8 @@ public interface FloatingToolbarPopup {
      * @see PopupWindow#setFocusable(boolean)
      * @see PopupWindow.OnDismissListener
      */
-    boolean setOutsideTouchable(boolean outsideTouchable, PopupWindow.OnDismissListener onDismiss);
+    boolean setOutsideTouchable(boolean outsideTouchable,
+            @Nullable PopupWindow.OnDismissListener onDismiss);
 
     /**
      * Returns {@link RemoteFloatingToolbarPopup} implementation if the system selection toolbar
