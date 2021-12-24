@@ -279,6 +279,9 @@ message SystemMessage {
     // Notify the user that a CA certificate is pending for the wifi connection.
     NOTE_SERVER_CA_CERTIFICATE = 67;
 
+    // Notify the user to set up dream
+    NOTE_SETUP_DREAM = 68;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
