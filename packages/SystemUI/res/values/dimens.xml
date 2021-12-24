@@ -1371,4 +1371,9 @@
     <item name="dream_overlay_complication_guide_top_percent" format="float" type="dimen">
         0.10
     </item>
+
+    <!-- The percentage of the screen from which a swipe can start to reveal the bouncer. -->
+    <item name="dream_overlay_bouncer_start_region_screen_percentage" format="float" type="dimen">
+        .2
+    </item>
 </resources>

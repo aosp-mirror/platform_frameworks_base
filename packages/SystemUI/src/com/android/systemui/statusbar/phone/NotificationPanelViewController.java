@@ -4188,9 +4188,10 @@ public class NotificationPanelViewController extends PanelViewController
                     return false;
                 }
 
-                // Do not allow panel expansion if bouncer is scrimmed, otherwise user would be able
-                // to pull down QS or expand the shade.
-                if (mStatusBar.isBouncerShowingScrimmed()) {
+                // Do not allow panel expansion if bouncer is scrimmed or showing over a dream,
+                // otherwise user would be able to pull down QS or expand the shade.
+                if (mStatusBar.isBouncerShowingScrimmed()
+                        || mStatusBar.isBouncerShowingOverDream()) {
                     return false;
                 }
 
