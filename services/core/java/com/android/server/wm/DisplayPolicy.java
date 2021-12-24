@@ -1432,33 +1432,6 @@ public class DisplayPolicy {
         return mForceShowSystemBars;
     }
 
-    // TODO: Should probably be moved into DisplayFrames.
-    /**
-     * Return the layout hints for a newly added window. These values are computed on the
-     * most recent layout, so they are not guaranteed to be correct.
-     *
-     * @param attrs The LayoutParams of the window.
-     * @param windowToken The token of the window.
-     * @param outInsetsState The insets state of this display from the client's perspective.
-     * @param localClient Whether the client is from the our process.
-     * @return Whether to always consume the system bars.
-     *         See {@link #areSystemBarsForcedShownLw()}.
-     */
-    boolean getLayoutHint(LayoutParams attrs, WindowToken windowToken, InsetsState outInsetsState,
-            boolean localClient) {
-        final InsetsState state =
-                mDisplayContent.getInsetsPolicy().getInsetsForWindowMetrics(attrs);
-        final boolean hasCompatScale = WindowState.hasCompatScale(attrs, windowToken);
-        outInsetsState.set(state, hasCompatScale || localClient);
-        if (hasCompatScale) {
-            final float compatScale = windowToken != null
-                    ? windowToken.getSizeCompatScale()
-                    : mDisplayContent.mCompatibleScreenScale;
-            outInsetsState.scale(1f / compatScale);
-        }
-        return mForceShowSystemBars;
-    }
-
     /**
      * Computes the frames of display (its logical size, rotation and cutout should already be set)
      * used to layout window. This method only changes the given display frames, insets state and
