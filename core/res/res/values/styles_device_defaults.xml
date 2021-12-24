@@ -42,6 +42,7 @@ easier.
         <item name="outlineSpotShadowColor">@color/btn_colored_background_material</item>
         <item name="textAppearance">?attr/textAppearanceButton</item>
         <item name="textColor">@color/btn_colored_text_material</item>
+        <item name="drawableTint">@color/btn_colored_text_material</item>
     </style>
     <style name="Widget.DeviceDefault.TextView" parent="Widget.Material.TextView" />
     <style name="Widget.DeviceDefault.CheckedTextView" parent="Widget.Material.CheckedTextView"/>

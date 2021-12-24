@@ -1989,6 +1989,8 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"စိတ်ကြိုက်အက်ပ် အကြောင်းကြားချက်"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ်ကို <xliff:g id="APP">%1$s</xliff:g> အား ဖန်တီးခွင့်ပြုလိုပါသလား (ဤအကောင့်ဖြင့် အသုံးပြုသူ ရှိနှင့်ပြီးဖြစ်သည်) ။"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ်ကို <xliff:g id="APP">%1$s</xliff:g> အား ဖန်တီးခွင့်ပြုလိုပါသလား ။"</string>
+    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
+    <skip />
     <string name="language_selection_title" msgid="52674936078683285">"ဘာသာစကားတစ်ခု ထည့်ပါ"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ဒေသရွေးချယ်မှု"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ဘာသာစကားအမည် ထည့်ပါ"</string>

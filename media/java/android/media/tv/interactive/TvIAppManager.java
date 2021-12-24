@@ -337,7 +337,7 @@ public final class TvIAppManager {
          *
          * @param iAppServiceId The ID of the TV IApp service.
          */
-        public void onIAppServiceAdded(String iAppServiceId) {
+        public void onIAppServiceAdded(@NonNull String iAppServiceId) {
         }
 
         /**
@@ -348,7 +348,7 @@ public final class TvIAppManager {
          *
          * @param iAppServiceId The ID of the TV IApp service.
          */
-        public void onIAppServiceRemoved(String iAppServiceId) {
+        public void onIAppServiceRemoved(@NonNull String iAppServiceId) {
         }
 
         /**
@@ -359,7 +359,7 @@ public final class TvIAppManager {
          *
          * @param iAppServiceId The ID of the TV IApp service.
          */
-        public void onIAppServiceUpdated(String iAppServiceId) {
+        public void onIAppServiceUpdated(@NonNull String iAppServiceId) {
         }
 
         /**
@@ -372,7 +372,7 @@ public final class TvIAppManager {
          *
          * @param iAppInfo The <code>TvIAppInfo</code> object that contains new information.
          */
-        public void onTvIAppInfoUpdated(TvIAppInfo iAppInfo) {
+        public void onTvIAppInfoUpdated(@NonNull TvIAppInfo iAppInfo) {
         }
 
 
@@ -381,7 +381,7 @@ public final class TvIAppManager {
          * @hide
          */
         public void onTvIAppServiceStateChanged(
-                String iAppServiceId, int type, @TvIAppRteState int state) {
+                @NonNull String iAppServiceId, int type, @TvIAppRteState int state) {
         }
     }
 
@@ -485,6 +485,7 @@ public final class TvIAppManager {
      *         information.
      * @hide
      */
+    @NonNull
     public List<TvIAppInfo> getTvIAppServiceList() {
         try {
             return mService.getTvIAppServiceList(mUserId);
@@ -497,7 +498,7 @@ public final class TvIAppManager {
      * Prepares TV IApp service for the given type.
      * @hide
      */
-    public void prepare(String tvIAppServiceId, int type) {
+    public void prepare(@NonNull String tvIAppServiceId, int type) {
         try {
             mService.prepare(tvIAppServiceId, type, mUserId);
         } catch (RemoteException e) {
@@ -509,7 +510,7 @@ public final class TvIAppManager {
      * Notifies app link info.
      * @hide
      */
-    public void notifyAppLinkInfo(String tvIAppServiceId, Bundle appLinkInfo) {
+    public void notifyAppLinkInfo(@NonNull String tvIAppServiceId, @NonNull Bundle appLinkInfo) {
         try {
             mService.notifyAppLinkInfo(tvIAppServiceId, appLinkInfo, mUserId);
         } catch (RemoteException e) {

@@ -49,12 +49,14 @@ public class MediaEvent extends FilterEvent {
     private final long mDataId;
     private final int mMpuSequenceNumber;
     private final boolean mIsPrivateData;
+    private final int mScIndexMask;
     private final AudioDescriptor mExtraMetaData;
 
     // This constructor is used by JNI code only
     private MediaEvent(int streamId, boolean isPtsPresent, long pts, boolean isDtsPresent, long dts,
             long dataLength, long offset, LinearBlock buffer, boolean isSecureMemory, long dataId,
-            int mpuSequenceNumber, boolean isPrivateData, AudioDescriptor extraMetaData) {
+            int mpuSequenceNumber, boolean isPrivateData, int scIndexMask,
+            AudioDescriptor extraMetaData) {
         mStreamId = streamId;
         mIsPtsPresent = isPtsPresent;
         mPts = pts;
@@ -67,6 +69,7 @@ public class MediaEvent extends FilterEvent {
         mDataId = dataId;
         mMpuSequenceNumber = mpuSequenceNumber;
         mIsPrivateData = isPrivateData;
+        mScIndexMask = scIndexMask;
         mExtraMetaData = extraMetaData;
     }
 
@@ -191,6 +194,17 @@ public class MediaEvent extends FilterEvent {
      */
     public boolean isPrivateData() {
         return mIsPrivateData;
+    }
+
+    /**
+     * Gets SC (Start Code) index mask.
+     *
+     * <p>This API is only supported by Tuner HAL 2.0 or higher. Unsupported version would return
+     * {@code 0}. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    @RecordSettings.ScIndexMask
+    public int getScIndexMask() {
+        return mScIndexMask;
     }
 
     /**

@@ -244,7 +244,7 @@ public abstract class TvIAppService extends Service {
          *
          * @param context The context of the application
          */
-        public Session(Context context) {
+        public Session(@NonNull Context context) {
             mContext = context;
             mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             mHandler = new Handler(context.getMainLooper());
@@ -332,6 +332,7 @@ public abstract class TvIAppService extends Service {
          *
          * @return a view attached to the media window
          */
+        @Nullable
         public View onCreateMediaView() {
             return null;
         }
@@ -347,14 +348,14 @@ public abstract class TvIAppService extends Service {
          * Called when the corresponding TV input tuned to a channel.
          * @hide
          */
-        public void onTuned(Uri channelUri) {
+        public void onTuned(@NonNull Uri channelUri) {
         }
 
         /**
          * Called when a broadcast info response is received.
          * @hide
          */
-        public void onBroadcastInfoResponse(BroadcastInfoResponse response) {
+        public void onBroadcastInfoResponse(@NonNull BroadcastInfoResponse response) {
         }
 
         /**
@@ -362,7 +363,7 @@ public abstract class TvIAppService extends Service {
          * @hide
          */
         @Override
-        public boolean onKeyDown(int keyCode, KeyEvent event) {
+        public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
             return false;
         }
 
@@ -370,7 +371,7 @@ public abstract class TvIAppService extends Service {
          * @hide
          */
         @Override
-        public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        public boolean onKeyLongPress(int keyCode, @NonNull KeyEvent event) {
             return false;
         }
 
@@ -378,7 +379,7 @@ public abstract class TvIAppService extends Service {
          * @hide
          */
         @Override
-        public boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
+        public boolean onKeyMultiple(int keyCode, int count, @NonNull KeyEvent event) {
             return false;
         }
 
@@ -386,28 +387,28 @@ public abstract class TvIAppService extends Service {
          * @hide
          */
         @Override
-        public boolean onKeyUp(int keyCode, KeyEvent event) {
+        public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
             return false;
         }
 
         /**
          * @hide
          */
-        public boolean onTouchEvent(MotionEvent event) {
+        public boolean onTouchEvent(@NonNull MotionEvent event) {
             return false;
         }
 
         /**
          * @hide
          */
-        public boolean onTrackballEvent(MotionEvent event) {
+        public boolean onTrackballEvent(@NonNull MotionEvent event) {
             return false;
         }
 
         /**
          * @hide
          */
-        public boolean onGenericMotionEvent(MotionEvent event) {
+        public boolean onGenericMotionEvent(@NonNull MotionEvent event) {
             return false;
         }
 

@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Vil du afinstallere denne app?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Vil du afinstallere denne app for "<b>"alle"</b>" brugere? Appen og dens data fjernes fra "<b>"alle"</b>" brugere på denne enhed."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Vil du afinstallere denne app for brugeren <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Vil du afinstallere denne app fra din arbejdsprofil?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Vil du erstatte denne app med fabriksversionen? Alle data fjernes."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Vil du erstatte denne app med fabriksversionen? Alle data fjernes. Dette påvirker alle brugere af denne enhed, bl.a. brugere med arbejdsprofiler."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Behold <xliff:g id="SIZE">%1$s</xliff:g> appdata."</string>

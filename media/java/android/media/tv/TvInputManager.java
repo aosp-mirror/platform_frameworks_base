@@ -1474,6 +1474,57 @@ public final class TvInputManager {
     }
 
     /**
+     * Returns available extension interfaces of a given hardware TV input. This can be used to
+     * provide domain-specific features that are only known between certain hardware TV inputs
+     * and their clients.
+     *
+     * @param inputId The ID of the TV input.
+     * @return a non-null list of extension interface names available to the caller. An empty
+     *         list indicates the given TV input is not found, or the given TV input is not a
+     *         hardware TV input, or the given TV input doesn't support any extension
+     *         interfaces, or the caller doesn't hold the required permission for the extension
+     *         interfaces supported by the given TV input.
+     * @see #getExtensionInterface
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public List<String> getAvailableExtensionInterfaceNames(@NonNull String inputId) {
+        Preconditions.checkNotNull(inputId);
+        try {
+            return mService.getAvailableExtensionInterfaceNames(inputId, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns an extension interface of a given hardware TV input. This can be used to provide
+     * domain-specific features that are only known between certain hardware TV inputs and
+     * their clients.
+     *
+     * @param inputId The ID of the TV input.
+     * @param name The extension interface name.
+     * @return an {@link IBinder} for the given extension interface, {@code null} if the given TV
+     *         input is not found, or if the given TV input is not a hardware TV input, or if the
+     *         given TV input doesn't support the given extension interface, or if the caller
+     *         doesn't hold the required permission for the given extension interface.
+     * @see #getAvailableExtensionInterfaceNames
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public IBinder getExtensionInterface(@NonNull String inputId, @NonNull String name) {
+        Preconditions.checkNotNull(inputId);
+        Preconditions.checkNotNull(name);
+        try {
+            return mService.getExtensionInterface(inputId, name, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Registers a {@link TvInputCallback}.
      *
      * @param callback A callback used to monitor status of the TV inputs.

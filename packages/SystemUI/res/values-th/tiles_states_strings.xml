@@ -166,4 +166,9 @@
     <item msgid="146088982397753810">"ปิด"</item>
     <item msgid="460891964396502657">"เปิด"</item>
   </string-array>
+  <string-array name="tile_states_fgsmanager">
+    <item msgid="3054341646818213094">"ไม่พร้อมใช้งาน"</item>
+    <item msgid="5581384648880018330">"ปิด"</item>
+    <item msgid="8000850843692192257">"เปิด"</item>
+  </string-array>
 </resources>

@@ -1989,6 +1989,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Thông báo tùy chỉnh cho ứng dụng"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g> (đã tồn tại người dùng có tài khoản này)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Thêm người dùng được giám sát"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Thêm ngôn ngữ"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Tùy chọn khu vực"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Nhập tên ngôn ngữ"</string>

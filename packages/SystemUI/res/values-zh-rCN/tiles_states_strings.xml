@@ -153,8 +153,8 @@
   </string-array>
   <string-array name="tile_states_qr_code_scanner">
     <item msgid="7435143266149257618">"不可用"</item>
-    <item msgid="3301403109049256043">"关闭"</item>
-    <item msgid="8878684975184010135">"开启"</item>
+    <item msgid="3301403109049256043">"已关闭"</item>
+    <item msgid="8878684975184010135">"已开启"</item>
   </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"不可用"</item>
@@ -163,7 +163,12 @@
   </string-array>
   <string-array name="tile_states_onehanded">
     <item msgid="8189342855739930015">"不可用"</item>
-    <item msgid="146088982397753810">"关闭"</item>
-    <item msgid="460891964396502657">"开启"</item>
+    <item msgid="146088982397753810">"已关闭"</item>
+    <item msgid="460891964396502657">"已开启"</item>
+  </string-array>
+  <string-array name="tile_states_fgsmanager">
+    <item msgid="3054341646818213094">"不可用"</item>
+    <item msgid="5581384648880018330">"已关闭"</item>
+    <item msgid="8000850843692192257">"已开启"</item>
   </string-array>
 </resources>

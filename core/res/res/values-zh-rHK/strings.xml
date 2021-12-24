@@ -1989,6 +1989,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"自訂應用程式通知"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"要允許 <xliff:g id="APP">%1$s</xliff:g> 使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者 (此帳戶目前已有此使用者) 嗎？"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"要允許 <xliff:g id="APP">%1$s</xliff:g> 使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎？"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"新增受管使用者"</string>
     <string name="language_selection_title" msgid="52674936078683285">"新增語言"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"地區偏好設定"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"輸入語言名稱"</string>

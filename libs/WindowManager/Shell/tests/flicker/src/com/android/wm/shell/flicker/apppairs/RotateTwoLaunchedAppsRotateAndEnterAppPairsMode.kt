@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.apppairs
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -78,6 +79,10 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
     @Presubmit
     @Test
     override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
+
+    @FlakyTest(bugId = 206753786)
+    @Test
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test

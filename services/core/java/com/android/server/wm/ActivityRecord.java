@@ -1615,6 +1615,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!changed) {
             return;
         }
+        mTaskSupervisor.getActivityMetricsLogger().logCameraCompatControlAppearedEventReported(
+                newCameraCompatControlState, info.applicationInfo.uid);
         if (newCameraCompatControlState == TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN) {
             mCameraCompatControlClickedByUser = false;
             mCompatCameraControlCallback = null;
@@ -1637,6 +1639,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!changed) {
             return;
         }
+        mTaskSupervisor.getActivityMetricsLogger().logCameraCompatControlClickedEventReported(
+                state, info.applicationInfo.uid);
         if (state == TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED) {
             mCompatCameraControlCallback = null;
             return;
