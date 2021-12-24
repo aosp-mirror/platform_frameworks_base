@@ -16,9 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 
 import android.annotation.NonNull;
+import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -56,6 +59,7 @@ import com.android.internal.protolog.common.ProtoLog;
  */
 class BLASTSyncEngine {
     private static final String TAG = "BLASTSyncEngine";
+    private static final String TRACE_NAME_SYNC_GROUP_READY = "SyncGroupReady";
 
     interface TransactionReadyListener {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
@@ -72,7 +76,7 @@ class BLASTSyncEngine {
         final ArraySet<WindowContainer> mRootMembers = new ArraySet<>();
         private SurfaceControl.Transaction mOrphanTransaction = null;
 
-        private SyncGroup(TransactionReadyListener listener, int id) {
+        private SyncGroup(TransactionReadyListener listener, int id, String name) {
             mSyncId = id;
             mListener = listener;
             mOnTimeout = () -> {
@@ -81,6 +85,10 @@ class BLASTSyncEngine {
                     onTimeout();
                 }
             };
+            if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+                Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER,
+                        name + TRACE_NAME_SYNC_GROUP_READY, id);
+            }
         }
 
         /**
@@ -113,6 +121,7 @@ class BLASTSyncEngine {
         }
 
         private void finishNow() {
+            Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_SYNC_GROUP_READY, mSyncId);
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Finished!", mSyncId);
             SurfaceControl.Transaction merged = mWm.mTransactionFactory.get();
             if (mOrphanTransaction != null) {
@@ -121,7 +130,9 @@ class BLASTSyncEngine {
             for (WindowContainer wc : mRootMembers) {
                 wc.finishSync(merged, false /* cancel */);
             }
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
             mListener.onTransactionReady(mSyncId, merged);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             mActiveSyncs.remove(mSyncId);
             mWm.mH.removeCallbacks(mOnTimeout);
         }
@@ -168,12 +179,12 @@ class BLASTSyncEngine {
     }
 
     int startSyncSet(TransactionReadyListener listener) {
-        return startSyncSet(listener, WindowState.BLAST_TIMEOUT_DURATION);
+        return startSyncSet(listener, WindowState.BLAST_TIMEOUT_DURATION, "");
     }
 
-    int startSyncSet(TransactionReadyListener listener, long timeoutMs) {
+    int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name) {
         final int id = mNextSyncId++;
-        final SyncGroup s = new SyncGroup(listener, id);
+        final SyncGroup s = new SyncGroup(listener, id, name);
         mActiveSyncs.put(id, s);
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started for listener: %s", id, listener);
         scheduleTimeout(s, timeoutMs);
