@@ -142,7 +142,15 @@ public class NetworkStatsManager {
         setAugmentWithSubscriptionPlan(true);
     }
 
-    /** @hide */
+    /**
+     * Set poll on open flag to indicate the poll is needed before service gets statistics
+     * result. This is default enabled. However, for any non-privileged caller, the poll might
+     * be omitted in case of rate limiting.
+     *
+     * @param pollOnOpen true if poll is needed.
+     * @hide
+     */
+    // @SystemApi(client = MODULE_LIBRARIES)
     public void setPollOnOpen(boolean pollOnOpen) {
         if (pollOnOpen) {
             mFlags |= FLAG_POLL_ON_OPEN;
