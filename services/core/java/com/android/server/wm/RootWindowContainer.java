@@ -983,29 +983,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mWmService.checkDrawnWindowsLocked();
         }
 
-        final int N = mWmService.mPendingRemove.size();
-        if (N > 0) {
-            if (mWmService.mPendingRemoveTmp.length < N) {
-                mWmService.mPendingRemoveTmp = new WindowState[N + 10];
-            }
-            mWmService.mPendingRemove.toArray(mWmService.mPendingRemoveTmp);
-            mWmService.mPendingRemove.clear();
-            ArrayList<DisplayContent> displayList = new ArrayList();
-            for (i = 0; i < N; i++) {
-                final WindowState w = mWmService.mPendingRemoveTmp[i];
-                w.removeImmediately();
-                final DisplayContent displayContent = w.getDisplayContent();
-                if (displayContent != null && !displayList.contains(displayContent)) {
-                    displayList.add(displayContent);
-                }
-            }
-
-            for (int j = displayList.size() - 1; j >= 0; --j) {
-                final DisplayContent dc = displayList.get(j);
-                dc.assignWindowLayers(true /*setLayoutNeeded*/);
-            }
-        }
-
         forAllDisplays(dc -> {
             dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
             dc.updateSystemGestureExclusion();
