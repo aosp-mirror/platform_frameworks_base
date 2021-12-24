@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.metrics.LogMaker;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dumpable;
@@ -80,7 +81,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     private final QSHost.Callback mQSHostCallback = this::setTiles;
 
-    private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
+    @VisibleForTesting
+    protected final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             new QSPanel.OnConfigurationChangedListener() {
                 @Override
                 public void onConfigurationChange(Configuration newConfig) {
@@ -156,6 +158,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mHost.addCallback(mQSHostCallback);
         setTiles();
+        mLastOrientation = getResources().getConfiguration().orientation;
         switchTileLayout(true);
 
         mDumpManager.registerDumpable(mView.getDumpableTag(), this);
@@ -356,8 +359,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             return false;
         }
         return mUsingMediaPlayer && mMediaHost.getVisible()
-                    && getResources().getConfiguration().orientation
-                    == Configuration.ORIENTATION_LANDSCAPE;
+                && mLastOrientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     private void logTiles() {
