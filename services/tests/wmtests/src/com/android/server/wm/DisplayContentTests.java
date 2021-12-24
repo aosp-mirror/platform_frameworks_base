@@ -447,25 +447,6 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     /**
-     * This tests override configuration updates for display content.
-     */
-    @Test
-    public void testDisplayOverrideConfigUpdate() {
-        final Configuration currentOverrideConfig =
-                mDisplayContent.getRequestedOverrideConfiguration();
-
-        // Create new, slightly changed override configuration and apply it to the display.
-        final Configuration newOverrideConfig = new Configuration(currentOverrideConfig);
-        newOverrideConfig.densityDpi += 120;
-        newOverrideConfig.fontScale += 0.3;
-
-        mWm.setNewDisplayOverrideConfiguration(newOverrideConfig, mDisplayContent);
-
-        // Check that override config is applied.
-        assertEquals(newOverrideConfig, mDisplayContent.getRequestedOverrideConfiguration());
-    }
-
-    /**
      * This tests global configuration updates when default display config is updated.
      */
     @Test
@@ -478,7 +459,8 @@ public class DisplayContentTests extends WindowTestsBase {
         newOverrideConfig.densityDpi += 120;
         newOverrideConfig.fontScale += 0.3;
 
-        mWm.setNewDisplayOverrideConfiguration(newOverrideConfig, defaultDisplay);
+        defaultDisplay.updateDisplayOverrideConfigurationLocked(newOverrideConfig,
+                null /* starting */, false /* deferResume */, null /* result */);
 
         // Check that global configuration is updated, as we've updated default display's config.
         Configuration globalConfig = mWm.mRoot.getConfiguration();
@@ -486,7 +468,8 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(newOverrideConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
 
         // Return back to original values.
-        mWm.setNewDisplayOverrideConfiguration(currentConfig, defaultDisplay);
+        defaultDisplay.updateDisplayOverrideConfigurationLocked(currentConfig,
+                null /* starting */, false /* deferResume */, null /* result */);
         globalConfig = mWm.mRoot.getConfiguration();
         assertEquals(currentConfig.densityDpi, globalConfig.densityDpi);
         assertEquals(currentConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
