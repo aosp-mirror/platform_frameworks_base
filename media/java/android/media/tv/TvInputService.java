@@ -849,7 +849,7 @@ public abstract class TvInputService extends Service {
         /**
          * Notifies response for broadcast info.
          *
-         * @param response
+         * @param response broadcast info response.
          * @hide
          */
         public void notifyBroadcastInfoResponse(@NonNull final BroadcastInfoResponse response) {
@@ -864,6 +864,29 @@ public abstract class TvInputService extends Service {
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyBroadcastInfoResponse", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Notifies response for advertisement.
+         *
+         * @param response advertisement response.
+         * @hide
+         */
+        public void notifyAdResponse(@NonNull final AdResponse response) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyAdResponse");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAdResponse(response);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyAdResponse", e);
                     }
                 }
             });
@@ -1038,6 +1061,8 @@ public abstract class TvInputService extends Service {
         public abstract void onSetStreamVolume(@FloatRange(from = 0.0, to = 1.0) float volume);
 
         /**
+         * called when broadcast info is requested.
+         *
          * @param request broadcast info request
          * @hide
          */
@@ -1048,6 +1073,15 @@ public abstract class TvInputService extends Service {
          * @hide
          */
         public void onRemoveBroadcastInfo(int requestId) {
+        }
+
+        /**
+         * called when advertisement is requested.
+         *
+         * @param request advertisement request
+         * @hide
+         */
+        public void onRequestAd(@NonNull AdRequest request) {
         }
 
         /**
@@ -1661,6 +1695,10 @@ public abstract class TvInputService extends Service {
 
         void removeBroadcastInfo(int requestId) {
             onRemoveBroadcastInfo(requestId);
+        }
+
+        void requestAd(AdRequest request) {
+            onRequestAd(request);
         }
 
         /**

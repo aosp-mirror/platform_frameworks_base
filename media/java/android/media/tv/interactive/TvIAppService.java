@@ -27,6 +27,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.media.tv.AdRequest;
+import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvTrackInfo;
@@ -434,6 +436,13 @@ public abstract class TvIAppService extends Service {
         }
 
         /**
+         * Called when an advertisement response is received.
+         * @hide
+         */
+        public void onAdResponse(AdResponse response) {
+        }
+
+        /**
          * TODO: JavaDoc of APIs related to input events.
          * @hide
          */
@@ -703,6 +712,29 @@ public abstract class TvIAppService extends Service {
             });
         }
 
+        /**
+         * requests an advertisement request to be processed by the related TV input.
+         * @param request advertisement request
+         */
+        public void requestAd(@NonNull final AdRequest request) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestAd (id=" + request.getId() + ")");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAdRequest(request);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestAd", e);
+                    }
+                }
+            });
+        }
+
         void startIApp() {
             onStartIApp();
         }
@@ -781,6 +813,16 @@ public abstract class TvIAppService extends Service {
                         + response.getRequestId() + ")");
             }
             onBroadcastInfoResponse(response);
+        }
+
+        /**
+         * Calls {@link #onAdResponse}.
+         */
+        void notifyAdResponse(AdResponse response) {
+            if (DEBUG) {
+                Log.d(TAG, "notifyAdResponse (requestId=" + response.getId() + ")");
+            }
+            onAdResponse(response);
         }
 
         /**
@@ -1139,6 +1181,11 @@ public abstract class TvIAppService extends Service {
         @Override
         public void notifyBroadcastInfoResponse(BroadcastInfoResponse response) {
             mSessionImpl.notifyBroadcastInfoResponse(response);
+        }
+
+        @Override
+        public void notifyAdResponse(AdResponse response) {
+            mSessionImpl.notifyAdResponse(response);
         }
 
         @Override

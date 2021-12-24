@@ -22,6 +22,8 @@ import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.graphics.Rect;
+import android.media.tv.AdRequest;
+import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvInputManager;
@@ -278,6 +280,18 @@ public final class TvIAppManager {
                         return;
                     }
                     record.postSetVideoBounds(rect);
+                }
+            }
+
+            @Override
+            public void onAdRequest(AdRequest request, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postAdRequest(request);
                 }
             }
 
@@ -945,6 +959,23 @@ public final class TvIAppManager {
         }
 
         /**
+         * Notifies of any advertisement response passed in from TIS.
+         *
+         * @param response response passed in from TIS.
+         */
+        public void notifyAdResponse(AdResponse response) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyAdResponse(mToken, response, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Releases this session.
          */
         public void release() {
@@ -1318,6 +1349,17 @@ public final class TvIAppManager {
                 @Override
                 public void run() {
                     mSessionCallback.onRequestTrackInfoList(mSession);
+                }
+            });
+        }
+
+        void postAdRequest(final AdRequest request) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mSession.getInputSession() != null) {
+                        mSession.getInputSession().requestAd(request);
+                    }
                 }
             });
         }
