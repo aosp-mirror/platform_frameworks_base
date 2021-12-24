@@ -19,6 +19,7 @@ package android.media.tv.interactive;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.interactive.ITvIAppSession;
 import android.media.tv.BroadcastInfoRequest;
+import android.net.Uri;
 import android.os.Bundle;
 
 /**
@@ -31,5 +32,6 @@ oneway interface ITvIAppSessionCallback {
     void onLayoutSurface(int left, int top, int right, int bottom);
     void onBroadcastInfoRequest(in BroadcastInfoRequest request);
     void onSessionStateChanged(int state);
+    void onBiInteractiveAppCreated(in Uri biIAppUri, in String biIAppId);
     void onCommandRequest(in String cmdType, in Bundle parameters);
 }

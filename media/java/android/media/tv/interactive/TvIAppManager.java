@@ -267,6 +267,18 @@ public final class TvIAppManager {
                     record.postSessionStateChanged(state);
                 }
             }
+
+            @Override
+            public void onBiInteractiveAppCreated(Uri biIAppUri, String biIAppId, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postBiInteractiveAppCreated(biIAppUri, biIAppId);
+                }
+            }
         };
         ITvIAppManagerCallback managerCallback = new ITvIAppManagerCallback.Stub() {
             @Override
@@ -374,7 +386,6 @@ public final class TvIAppManager {
          */
         public void onTvIAppInfoUpdated(@NonNull TvIAppInfo iAppInfo) {
         }
-
 
         /**
          * This is called when the state of the interactive app service is changed.
@@ -618,6 +629,30 @@ public final class TvIAppManager {
             }
             try {
                 mService.startIApp(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void createBiInteractiveApp(Uri biIAppUri, Bundle params) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.createBiInteractiveApp(mToken, biIAppUri, params, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void destroyBiInteractiveApp(String biIAppId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.destroyBiInteractiveApp(mToken, biIAppId, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1078,6 +1113,15 @@ public final class TvIAppManager {
                 }
             });
         }
+
+        void postBiInteractiveAppCreated(Uri biIAppUri, String biIAppId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onBiInteractiveAppCreated(mSession, biIAppUri, biIAppId);
+                }
+            });
+        }
     }
 
     /**
@@ -1134,6 +1178,19 @@ public final class TvIAppManager {
          * @param state the current state.
          */
         public void onSessionStateChanged(Session session, int state) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#notifyBiInteractiveAppCreated} is
+         * called.
+         *
+         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param biIAppUri URI associated this BI interactive app. This is the same URI in
+         *                  {@link Session#createBiInteractiveApp(Uri, Bundle)}
+         * @param biIAppId BI interactive app ID, which can be used to destroy the BI interactive
+         *                 app.
+         */
+        public void onBiInteractiveAppCreated(Session session, Uri biIAppUri, String biIAppId) {
         }
     }
 }
