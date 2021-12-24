@@ -250,7 +250,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Nema dostupnih uređaja"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi mreža nije povezana"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Svjetlina"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Zamjena boja"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inverzija boja"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Više  postavki"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Korisničke postavke"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Gotovo"</string>
@@ -748,7 +748,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Povećajte cijeli zaslon"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Povećaj dio zaslona"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Prebacivanje"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Gumb za Pristupačnost zamijenio je pokret pristupačnosti\n\n"<annotation id="link">"Prikaz postavki"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Dodirnite za otvaranje značajki pristupačnosti. Prilagodite ili zamijenite taj gumb u postavkama.\n\n"<annotation id="link">"Pregledajte postavke"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Pomaknite gumb do ruba da biste ga privremeno sakrili"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Premjesti u gornji lijevi kut"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Premjesti u gornji desni kut"</string>
@@ -883,5 +883,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaži sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da biste se prebacili na drugu mrežu, odspojite Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Da bi se poboljšao doživljaj uređaja, aplikacije i usluge i dalje mogu tražiti Wi-Fi mreže u bilo kojem trenutku, čak i kada je Wi-Fi isključen. To možete promijeniti u postavkama traženja Wi-Fija. "<annotation id="link">"Promijeni"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Isključi način rada u zrakoplovu"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Odabir korisnika"</string>
 </resources>

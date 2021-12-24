@@ -73,4 +73,10 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"മാനേജ് ചെയ്യുക"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ബബിൾ ഡിസ്മിസ് ചെയ്തു."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"ഈ ആപ്പ് റീസ്‌റ്റാർട്ട് ചെയ്‌ത് പൂർണ്ണ സ്ക്രീനിലേക്ക് മാറാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <!-- no translation found for camera_compat_treatment_suggested_button_description (8103916969024076767) -->
+    <skip />
+    <!-- no translation found for camera_compat_treatment_applied_button_description (2944157113330703897) -->
+    <skip />
+    <!-- no translation found for camera_compat_dismiss_button_description (2795364433503817511) -->
+    <skip />
 </resources>

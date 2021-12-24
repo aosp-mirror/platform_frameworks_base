@@ -249,7 +249,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Няма налични устройства"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"не е установена връзка с Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркост"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Инвертиране на цветовете"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инвертиране на цветовете"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Още настройки"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Потребителски настройки"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
@@ -743,7 +743,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Увеличаване на целия екран"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Увеличаване на част от екрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Превключване"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Жестът за достъпност бе заменен от бутон\n\n"<annotation id="link">"Преглед на настройките"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Докоснете, за да отворите функциите за достъпност. Персон./заменете бутона от настройките.\n\n"<annotation id="link">"Преглед на настройките"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Преместете бутона до края, за да го скриете временно"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Преместване горе вляво"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Преместване горе вдясно"</string>
@@ -877,5 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Вижте всички"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"За да превключите мрежите, прекъснете връзката с Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"С цел подобряване на практическата работа с устройството приложенията и услугите пак могат да сканират за Wi‑Fi мрежи по всяко време дори когато функцията за Wi‑Fi e изключена. Можете да промените съответното поведение от настройките за сканиране за Wi‑Fi. "<annotation id="link">"Промяна"</annotation></string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Изключване на самолетния режим"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Избор на потребител"</string>
 </resources>
