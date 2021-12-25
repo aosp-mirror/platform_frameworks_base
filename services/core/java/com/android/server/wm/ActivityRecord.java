@@ -1623,6 +1623,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // Trigger TaskInfoChanged to update the camera compat UI.
         getTask().dispatchTaskInfoChangedIfNeeded(true /* force */);
+        // TaskOrganizerController#onTaskInfoChanged adds pending task events to the queue waiting
+        // for the surface placement to be ready. So need to trigger surface placement to dispatch
+        // events to avoid stale state for the camera compat control.
+        getDisplayContent().setLayoutNeeded();
+        mWmService.mWindowPlacerLocked.performSurfacePlacement();
     }
 
     void updateCameraCompatStateFromUser(@CameraCompatControlState int state) {
