@@ -27,6 +27,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -98,10 +99,10 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     Resources mResources;
     @Mock
     Configuration mConfiguration;
+    @Mock
+    Runnable mHorizontalLayoutListener;
 
     private QSPanelControllerBase<QSPanel> mController;
-
-
 
     /** Implementation needed to ensure we have a reflectively-available class name. */
     private class TestableQSPanelControllerBase extends QSPanelControllerBase<QSPanel> {
@@ -242,18 +243,44 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mMediaHost.getVisible()).thenReturn(true);
 
         when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(false);
+        when(mQSPanel.getDumpableTag()).thenReturn("QSPanelLandscape");
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
                 mQSCustomizerController, mMediaHost,
                 mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager, mFeatureFlags);
+        mController.init();
 
         assertThat(mController.shouldUseHorizontalLayout()).isTrue();
 
         when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
         when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
+        when(mQSPanel.getDumpableTag()).thenReturn("QSPanelPortrait");
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
                 mQSCustomizerController, mMediaHost,
                 mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager, mFeatureFlags);
+        mController.init();
 
         assertThat(mController.shouldUseHorizontalLayout()).isFalse();
+    }
+
+    @Test
+    public void testChangeConfiguration_shouldUseHorizontalLayout() {
+        when(mMediaHost.getVisible()).thenReturn(true);
+        mController.setUsingHorizontalLayoutChangeListener(mHorizontalLayoutListener);
+
+        // When device is rotated to landscape
+        mConfiguration.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        mController.mOnConfigurationChangedListener.onConfigurationChange(mConfiguration);
+
+        // Then the layout changes
+        assertThat(mController.shouldUseHorizontalLayout()).isTrue();
+        verify(mHorizontalLayoutListener).run(); // not invoked
+
+        // When it is rotated back to portrait
+        mConfiguration.orientation = Configuration.ORIENTATION_PORTRAIT;
+        mController.mOnConfigurationChangedListener.onConfigurationChange(mConfiguration);
+
+        // Then the layout changes back
+        assertThat(mController.shouldUseHorizontalLayout()).isFalse();
+        verify(mHorizontalLayoutListener, times(2)).run();
     }
 }
