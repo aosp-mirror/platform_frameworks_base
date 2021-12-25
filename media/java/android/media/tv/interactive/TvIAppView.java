@@ -24,9 +24,11 @@ import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.tv.TvInputManager;
+import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
 import android.media.tv.interactive.TvIAppManager.Session;
 import android.media.tv.interactive.TvIAppManager.SessionCallback;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -37,6 +39,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.List;
 
 /**
  * Displays contents of interactive TV applications.
@@ -290,6 +294,66 @@ public class TvIAppView extends ViewGroup {
         }
     }
 
+    /**
+     * Stops the interactive application.
+     */
+    public void stopIApp() {
+        if (DEBUG) {
+            Log.d(TAG, "stopIApp");
+        }
+        if (mSession != null) {
+            mSession.stopIApp();
+        }
+    }
+
+    /**
+     * Sends current channel URI to related TV interactive app.
+     */
+    public void sendCurrentChannelUri(Uri channelUri) {
+        if (DEBUG) {
+            Log.d(TAG, "sendCurrentChannelUri");
+        }
+        if (mSession != null) {
+            mSession.sendCurrentChannelUri(channelUri);
+        }
+    }
+
+    /**
+     * Sends current channel logical channel number (LCN) to related TV interactive app.
+     */
+    public void sendCurrentChannelLcn(int lcn) {
+        if (DEBUG) {
+            Log.d(TAG, "sendCurrentChannelLcn");
+        }
+        if (mSession != null) {
+            mSession.sendCurrentChannelLcn(lcn);
+        }
+    }
+
+    /**
+     * Sends stream volume to related TV interactive app.
+     */
+    public void sendStreamVolume(float volume) {
+        if (DEBUG) {
+            Log.d(TAG, "sendStreamVolume");
+        }
+        if (mSession != null) {
+            mSession.sendStreamVolume(volume);
+        }
+    }
+
+    /**
+     * Sends track info list to related TV interactive app.
+     */
+    public void sendTrackInfoList(List<TvTrackInfo> tracks) {
+        if (DEBUG) {
+            Log.d(TAG, "sendTrackInfoList");
+        }
+        if (mSession != null) {
+            mSession.sendTrackInfoList(tracks);
+        }
+    }
+
     private void resetInternal() {
         mSessionCallback = null;
         if (mSession != null) {
@@ -299,6 +363,38 @@ public class TvIAppView extends ViewGroup {
             mSession.release();
             mSession = null;
             resetSurfaceView();
+        }
+    }
+
+    /**
+     * Creates broadcast-independent(BI) interactive application.
+     *
+     * @see #destroyBiInteractiveApp(String)
+     * @hide
+     */
+    public void createBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
+        if (DEBUG) {
+            Log.d(TAG, "createBiInteractiveApp Uri=" + biIAppUri + ", params=" + params);
+        }
+        if (mSession != null) {
+            mSession.createBiInteractiveApp(biIAppUri, params);
+        }
+    }
+
+    /**
+     * Destroys broadcast-independent(BI) interactive application.
+     *
+     * @param biIAppId the BI interactive app ID from {@link #createBiInteractiveApp(Uri, Bundle)}
+     *
+     * @see #createBiInteractiveApp(Uri, Bundle)
+     * @hide
+     */
+    public void destroyBiInteractiveApp(@NonNull String biIAppId) {
+        if (DEBUG) {
+            Log.d(TAG, "destroyBiInteractiveApp biIAppId=" + biIAppId);
+        }
+        if (mSession != null) {
+            mSession.destroyBiInteractiveApp(biIAppId);
         }
     }
 
@@ -347,8 +443,72 @@ public class TvIAppView extends ViewGroup {
          * @param cmdType type of the command
          * @param parameters parameters of the command
          */
-        public void onCommandRequest(String iAppServiceId,
-                @TvIAppService.IAppServiceCommandType String cmdType, Bundle parameters) {
+        public void onCommandRequest(
+                @NonNull String iAppServiceId,
+                @NonNull @TvIAppService.IAppServiceCommandType String cmdType,
+                @Nullable Bundle parameters) {
+        }
+
+        /**
+         * This is called when the session state is changed.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param state current session state.
+         */
+        public void onSessionStateChanged(@NonNull String iAppServiceId, int state) {
+        }
+
+        /**
+         * This is called when broadcast-independent (BI) interactive app is created.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param biIAppUri URI associated this BI interactive app. This is the same URI in
+         *                  {@link Session#createBiInteractiveApp(Uri, Bundle)}
+         * @param biIAppId BI interactive app ID, which can be used to destroy the BI interactive
+         *                 app.
+         */
+        public void onBiInteractiveAppCreated(@NonNull String iAppServiceId, @NonNull Uri biIAppUri,
+                @Nullable String biIAppId) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#SetVideoBounds} is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         */
+        public void onSetVideoBounds(@NonNull String iAppServiceId, @NonNull Rect rect) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#RequestCurrentChannelUri} is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         */
+        public void onRequestCurrentChannelUri(@NonNull String iAppServiceId) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#RequestCurrentChannelLcn} is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         */
+        public void onRequestCurrentChannelLcn(@NonNull String iAppServiceId) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#RequestStreamVolume} is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         */
+        public void onRequestStreamVolume(@NonNull String iAppServiceId) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#RequestTrackInfoList} is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         */
+        public void onRequestTrackInfoList(@NonNull String iAppServiceId) {
         }
     }
 
@@ -439,6 +599,105 @@ public class TvIAppView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onCommandRequest(mIAppServiceId, cmdType, parameters);
+            }
+        }
+
+        @Override
+        public void onSessionStateChanged(Session session, int state) {
+            if (DEBUG) {
+                Log.d(TAG, "onSessionStateChanged (state=" + state +  ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onSessionStateChanged - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onSessionStateChanged(mIAppServiceId, state);
+            }
+        }
+
+        @Override
+        public void onBiInteractiveAppCreated(Session session, Uri biIAppUri, String biIAppId) {
+            if (DEBUG) {
+                Log.d(TAG, "onBiInteractiveAppCreated (biIAppUri=" + biIAppUri + ", biIAppId="
+                        + biIAppId + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onBiInteractiveAppCreated - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onBiInteractiveAppCreated(mIAppServiceId, biIAppUri, biIAppId);
+            }
+        }
+
+        @Override
+        public void onSetVideoBounds(Session session, Rect rect) {
+            if (DEBUG) {
+                Log.d(TAG, "onSetVideoBounds (rect=" + rect + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onSetVideoBounds - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onSetVideoBounds(mIAppServiceId, rect);
+            }
+        }
+
+        @Override
+        public void onRequestCurrentChannelUri(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestCurrentChannelUri");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestCurrentChannelUri - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onRequestCurrentChannelUri(mIAppServiceId);
+            }
+        }
+
+        @Override
+        public void onRequestCurrentChannelLcn(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestCurrentChannelLcn");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestCurrentChannelLcn - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onRequestCurrentChannelLcn(mIAppServiceId);
+            }
+        }
+
+        @Override
+        public void onRequestStreamVolume(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestStreamVolume");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestStreamVolume - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onRequestStreamVolume(mIAppServiceId);
+            }
+        }
+
+        @Override
+        public void onRequestTrackInfoList(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestTrackInfoList");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestTrackInfoList - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onRequestTrackInfoList(mIAppServiceId);
             }
         }
     }

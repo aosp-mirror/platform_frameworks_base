@@ -190,10 +190,6 @@ public class ChooseTypeAndAccountActivity extends Activity
             mAccounts = getAcceptableAccountChoices(AccountManager.get(this));
         }
 
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "selected account name is " + mSelectedAccountName);
-        }
-
         mPossiblyVisibleAccounts = new ArrayList<>(mAccounts.size());
         for (Map.Entry<Account, Integer> entry : mAccounts.entrySet()) {
             if (AccountManager.VISIBILITY_NOT_VISIBLE != entry.getValue()) {
@@ -302,7 +298,7 @@ public class ChooseTypeAndAccountActivity extends Activity
             if (data != null && data.getExtras() != null) data.getExtras().keySet();
             Bundle extras = data != null ? data.getExtras() : null;
             Log.v(TAG, "ChooseTypeAndAccountActivity.onActivityResult(reqCode=" + requestCode
-                    + ", resCode=" + resultCode + ", extras=" + extras + ")");
+                    + ", resCode=" + resultCode + ")");
         }
 
         // we got our result, so clear the fact that we had a pending request
@@ -424,8 +420,8 @@ public class ChooseTypeAndAccountActivity extends Activity
     }
 
     private void onAccountSelected(Account account) {
-      Log.d(TAG, "selected account " + account);
-      setResultAndFinish(account.name, account.type);
+        Log.d(TAG, "selected account " + account.toSafeString());
+        setResultAndFinish(account.name, account.type);
     }
 
     private void setResultAndFinish(final String accountName, final String accountType) {
@@ -451,9 +447,8 @@ public class ChooseTypeAndAccountActivity extends Activity
         setResult(Activity.RESULT_OK, new Intent().putExtras(bundle));
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "ChooseTypeAndAccountActivity.setResultAndFinish: selected account "
-                    + accountName + ", " + accountType);
+                    + account.toSafeString());
         }
-
         finish();
     }
 

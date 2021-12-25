@@ -2468,7 +2468,29 @@ public final class TvInputManagerService extends SystemService {
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
-            };
+            }
+        }
+
+        @Override
+        public void removeBroadcastInfo(IBinder sessionToken, int requestId, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
+                    userId, "removeBroadcastInfo");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).removeBroadcastInfo(requestId);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in removeBroadcastInfo", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override

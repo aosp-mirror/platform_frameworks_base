@@ -62,8 +62,8 @@ import com.google.android.exoplayer2.extractor.wav.WavExtractor;
 import com.google.android.exoplayer2.upstream.DataReader;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.TimestampAdjuster;
-import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.ColorInfo;
+import com.google.common.base.Ascii;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -978,7 +978,7 @@ public final class MediaParser {
     @ParserName
     public static List<String> getParserNames(@NonNull MediaFormat mediaFormat) {
         String mimeType = mediaFormat.getString(MediaFormat.KEY_MIME);
-        mimeType = mimeType == null ? null : Util.toLowerInvariant(mimeType.trim());
+        mimeType = mimeType == null ? null : Ascii.toLowerCase(mimeType);
         if (TextUtils.isEmpty(mimeType)) {
             // No MIME type provided. Return all.
             return Collections.unmodifiableList(
@@ -1420,7 +1420,7 @@ public final class MediaParser {
         int flags = 0;
         TimestampAdjuster timestampAdjuster = null;
         if (mIgnoreTimestampOffset) {
-            timestampAdjuster = new TimestampAdjuster(TimestampAdjuster.DO_NOT_OFFSET);
+            timestampAdjuster = new TimestampAdjuster(TimestampAdjuster.MODE_NO_OFFSET);
         }
         switch (parserName) {
             case PARSER_NAME_MATROSKA:
