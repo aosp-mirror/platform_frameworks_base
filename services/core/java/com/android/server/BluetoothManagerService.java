@@ -1869,6 +1869,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     mHandler.removeMessages(MESSAGE_RESTART_BLUETOOTH_SERVICE);
                     mEnable = true;
 
+                    if (isBle == 0) {
+                        persistBluetoothSetting(BLUETOOTH_ON_BLUETOOTH);
+                    }
+
                     // Use service interface to get the exact state
                     try {
                         mBluetoothLock.readLock().lock();
@@ -1882,7 +1886,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                     } else {
                                         Slog.w(TAG, "BT Enable in BLE_ON State, going to ON");
                                         mBluetooth.onLeServiceUp(mContext.getAttributionSource());
-                                        persistBluetoothSetting(BLUETOOTH_ON_BLUETOOTH);
                                     }
                                     break;
                                 case BluetoothAdapter.STATE_BLE_TURNING_ON:
