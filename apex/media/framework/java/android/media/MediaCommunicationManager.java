@@ -33,6 +33,8 @@ import android.os.UserHandle;
 import android.service.media.MediaBrowserService;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.modules.annotation.MinSdk;
 import com.android.modules.utils.build.SdkLevel;
@@ -48,6 +50,7 @@ import java.util.concurrent.Executor;
  * that applications have published to express their ongoing media playback state.
  */
 @MinSdk(Build.VERSION_CODES.S)
+@RequiresApi(Build.VERSION_CODES.S)
 @SystemService(Context.MEDIA_COMMUNICATION_SERVICE)
 public class MediaCommunicationManager {
     private static final String TAG = "MediaCommunicationManager";
