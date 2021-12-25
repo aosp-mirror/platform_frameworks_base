@@ -1045,6 +1045,12 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * @hide
+         */
+        public void onRemoveBroadcastInfo(int requestId) {
+        }
+
+        /**
          * Tunes to a given channel.
          *
          * <p>No video will be displayed until {@link #notifyVideoAvailable()} is called.
@@ -1651,6 +1657,10 @@ public abstract class TvInputService extends Service {
 
         void requestBroadcastInfo(BroadcastInfoRequest request) {
             onRequestBroadcastInfo(request);
+        }
+
+        void removeBroadcastInfo(int requestId) {
+            onRemoveBroadcastInfo(requestId);
         }
 
         /**

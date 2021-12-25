@@ -1447,7 +1447,7 @@ public class DisplayPolicy {
         final InsetsStateController controller = mDisplayContent.getInsetsStateController();
         for (int i = mInsetsSourceWindowsExceptIme.size() - 1; i >= 0; i--) {
             final WindowState win = mInsetsSourceWindowsExceptIme.valueAt(i);
-            mWindowLayout.computeWindowFrames(win.getLayoutingAttrs(displayFrames.mRotation),
+            mWindowLayout.computeFrames(win.getLayoutingAttrs(displayFrames.mRotation),
                     displayFrames.mInsetsState, displayFrames.mDisplayCutoutSafe,
                     displayFrames.mUnrestricted, win.getWindowingMode(), UNSPECIFIED_LENGTH,
                     UNSPECIFIED_LENGTH, win.getRequestedVisibilities(),
@@ -1496,7 +1496,7 @@ public class DisplayPolicy {
 
         sTmpLastParentFrame.set(pf);
 
-        final boolean clippedByDisplayCutout = mWindowLayout.computeWindowFrames(attrs,
+        final boolean clippedByDisplayCutout = mWindowLayout.computeFrames(attrs,
                 win.getInsetsState(), displayFrames.mDisplayCutoutSafe,
                 win.getBounds(), win.getWindowingMode(), requestedWidth, requestedHeight,
                 win.getRequestedVisibilities(), attachedWindowFrame, win.mGlobalScale,

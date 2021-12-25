@@ -731,6 +731,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onTracksChanged(mSession, tracks);
+                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
+                        mSession.getIAppSession().notifyTracksChanged(tracks);
+                    }
                 }
             });
         }
@@ -740,6 +743,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onTrackSelected(mSession, type, trackId);
+                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
+                        mSession.getIAppSession().notifyTrackSelected(type, trackId);
+                    }
                 }
             });
         }
@@ -1273,12 +1279,6 @@ public final class TvInputManager {
                     }
                     record.postTuned(channelUri);
                     // TODO: synchronized and wrap the channelUri
-                    if (record.mSession.mIAppNotificationEnabled) {
-                        TvIAppManager.Session iappSession = record.mSession.mIAppSession;
-                        if (iappSession != null) {
-                            iappSession.notifyTuned(channelUri);
-                        }
-                    }
                 }
             }
 
@@ -3014,7 +3014,23 @@ public final class TvInputManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
 
+        /**
+         * Removes broadcast info.
+         * @param requestId the corresponding request ID sent from
+         *                  {@link #requestBroadcastInfo(android.media.tv.BroadcastInfoRequest)}
+         */
+        public void removeBroadcastInfo(int requestId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.removeBroadcastInfo(mToken, requestId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         private final class InputEventHandler extends Handler {
