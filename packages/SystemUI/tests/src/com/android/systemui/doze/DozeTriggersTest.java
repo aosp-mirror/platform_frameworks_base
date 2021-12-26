@@ -45,6 +45,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeTriggers.DozingUpdateUiEvent;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
 import com.android.systemui.util.sensors.AsyncSensorManager;
@@ -83,6 +84,8 @@ public class DozeTriggersTest extends SysuiTestCase {
     private AuthController mAuthController;
     @Mock
     private UiEventLogger mUiEventLogger;
+    @Mock
+    private KeyguardStateController mKeyguardStateController;
 
     private DozeTriggers mTriggers;
     private FakeSensorManager mSensors;
@@ -114,7 +117,7 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers = new DozeTriggers(mContext, mHost, config, dozeParameters,
                 asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
                 mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher, new FakeSettings(),
-                mAuthController, mExecutor, mUiEventLogger);
+                mAuthController, mExecutor, mUiEventLogger, mKeyguardStateController);
         mTriggers.setDozeMachine(mMachine);
         waitForSensorManager();
     }
@@ -214,6 +217,32 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         // THEN a log is taken that quick pick up was triggered
         verify(mUiEventLogger).log(DozingUpdateUiEvent.DOZING_UPDATE_QUICK_PICKUP);
+    }
+
+    @Test
+    public void testPickupGesture() {
+        // GIVEN device is in doze (screen blank, but running doze sensors)
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+
+        // WHEN the pick up gesture is triggered and keyguard isn't occluded
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_PICKUP, 100, 100, null);
+
+        // THEN wakeup
+        verify(mMachine).wakeUp();
+    }
+
+    @Test
+    public void testPickupGestureDroppedKeyguardOccluded() {
+        // GIVEN device is in doze (screen blank, but running doze sensors)
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+
+        // WHEN the pick up gesture is triggered and keyguard IS occluded
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_PICKUP, 100, 100, null);
+
+        // THEN never wakeup
+        verify(mMachine, never()).wakeUp();
     }
 
     @Test

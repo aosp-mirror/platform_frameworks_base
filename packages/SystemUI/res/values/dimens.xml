@@ -90,7 +90,7 @@
     <dimen name="status_bar_left_clock_starting_padding">0dp</dimen>
 
     <!-- End padding for left-aligned status bar clock -->
-    <dimen name="status_bar_left_clock_end_padding">7dp</dimen>
+    <dimen name="status_bar_left_clock_end_padding">2dp</dimen>
 
     <!-- Spacing after the wifi signals that is present if there are any icons following it. -->
     <dimen name="status_bar_wifi_signal_spacer_width">2.5dp</dimen>
@@ -331,11 +331,10 @@
     <dimen name="global_screenshot_x_scale">80dp</dimen>
     <dimen name="screenshot_bg_protection_height">242dp</dimen>
     <dimen name="screenshot_preview_elevation">4dp</dimen>
-    <dimen name="screenshot_offset_y">24dp</dimen>
+    <dimen name="screenshot_offset_y">8dp</dimen>
     <dimen name="screenshot_offset_x">16dp</dimen>
     <dimen name="screenshot_dismiss_button_tappable_size">48dp</dimen>
     <dimen name="screenshot_dismiss_button_margin">8dp</dimen>
-    <dimen name="screenshot_action_container_offset_y">16dp</dimen>
     <dimen name="screenshot_action_container_corner_radius">18dp</dimen>
     <dimen name="screenshot_action_container_padding_vertical">4dp</dimen>
     <dimen name="screenshot_action_container_margin_horizontal">8dp</dimen>
@@ -744,9 +743,7 @@
     <!-- The margin between the status view and the notifications on Keyguard.-->
     <dimen name="keyguard_status_view_bottom_margin">20dp</dimen>
     <!-- Minimum margin between clock and status bar -->
-    <dimen name="keyguard_clock_top_margin">36dp</dimen>
-    <!-- The margin between top of clock and bottom of lock icon. -->
-    <dimen name="keyguard_clock_lock_margin">16dp</dimen>
+    <dimen name="keyguard_clock_top_margin">18dp</dimen>
     <!-- The amount to shift the clocks during a small/large transition -->
     <dimen name="keyguard_clock_switch_y_shift">10dp</dimen>
     <!-- When large clock is showing, offset the smartspace by this amount -->
@@ -1150,9 +1147,9 @@
     <dimen name="default_burn_in_prevention_offset">15dp</dimen>
 
     <!-- The maximum offset for the under-display fingerprint sensor (UDFPS) icon in either
-         direction that elements aer moved to prevent burn-in on AOD-->
-    <dimen name="udfps_burn_in_offset_x">2dp</dimen>
-    <dimen name="udfps_burn_in_offset_y">8dp</dimen>
+         direction that elements are moved to prevent burn-in on AOD-->
+    <dimen name="udfps_burn_in_offset_x">7px</dimen>
+    <dimen name="udfps_burn_in_offset_y">28px</dimen>
 
     <dimen name="corner_size">8dp</dimen>
     <dimen name="top_padding">0dp</dimen>
@@ -1243,10 +1240,7 @@
     <integer name="wired_charging_keyguard_text_animation_distance">-30</integer>
 
     <!-- Logout button -->
-    <dimen name="logout_button_layout_height">32dp</dimen>
-    <dimen name="logout_button_padding_horizontal">16dp</dimen>
-    <dimen name="logout_button_margin_bottom">12dp</dimen>
-    <dimen name="logout_button_corner_radius">4dp</dimen>
+    <dimen name="logout_button_corner_radius">50dp</dimen>
 
     <!--  Blur radius on status bar window and power menu  -->
     <dimen name="min_window_blur_radius">1px</dimen>
@@ -1277,7 +1271,7 @@
 
     <dimen name="ongoing_appops_dialog_circle_size">32dp</dimen>
 
-    <dimen name="ongoing_appops_dialog_icon_size">20dp</dimen>
+    <dimen name="ongoing_appops_dialog_icon_size">16dp</dimen>
 
     <dimen name="ongoing_appops_dialog_side_padding">16dp</dimen>
 
@@ -1299,8 +1293,6 @@
     <dimen name="qs_media_action_margin">12dp</dimen>
     <dimen name="qs_seamless_height">24dp</dimen>
     <dimen name="qs_seamless_icon_size">12dp</dimen>
-    <dimen name="qs_seamless_fallback_icon_size">@dimen/qs_seamless_icon_size</dimen>
-    <dimen name="qs_seamless_fallback_margin">20dp</dimen>
     <dimen name="qs_footer_horizontal_margin">22dp</dimen>
     <dimen name="qs_media_disabled_seekbar_height">1dp</dimen>
     <dimen name="qs_media_enabled_seekbar_height">2dp</dimen>
@@ -1310,6 +1302,7 @@
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
     <dimen name="qs_aa_media_rec_album_size_collapsed">72dp</dimen>
     <dimen name="qs_aa_media_rec_album_size_expanded">76dp</dimen>
+    <dimen name="qs_aa_media_gradient_bg_width">32dp</dimen>
     <dimen name="qs_aa_media_rec_album_margin">8dp</dimen>
     <dimen name="qs_aa_media_rec_album_margin_vert">4dp</dimen>
     <dimen name="qq_aa_media_rec_header_text_size">16sp</dimen>
@@ -1462,6 +1455,10 @@
     <!-- Maximum overshoot for the pulse expansion -->
     <dimen name="pulse_expansion_max_top_overshoot">32dp</dimen>
 
+    <!-- Alpha in duration in ms for the auth ripple to become fully vislble. If set to 0,
+         it is immediately visible. -->
+    <integer name="auth_ripple_alpha_in_duration">100</integer>
+
     <dimen name="people_space_widget_radius">28dp</dimen>
     <dimen name="people_space_image_radius">20dp</dimen>
     <dimen name="people_space_messages_count_radius">12dp</dimen>
@@ -1586,4 +1583,42 @@
     <!-- The padding between the icon and the text. -->
     <dimen name="ongoing_call_chip_icon_text_padding">4dp</dimen>
     <dimen name="ongoing_call_chip_corner_radius">28dp</dimen>
+
+    <!-- Internet panel related dimensions -->
+    <dimen name="internet_dialog_list_margin">12dp</dimen>
+    <dimen name="internet_dialog_list_max_height">646dp</dimen>
+    <dimen name="internet_dialog_list_max_width">@dimen/match_parent</dimen>
+
+    <!-- Signal icon in internet dialog -->
+    <dimen name="signal_strength_icon_size">24dp</dimen>
+
+    <!-- Internet dialog related dimensions -->
+    <dimen name="internet_dialog_corner_radius">24dp</dimen>
+    <!-- End margin of network layout -->
+    <dimen name="internet_dialog_network_layout_margin">16dp</dimen>
+    <!-- Size of switch bar in internet dialog -->
+    <dimen name="settingslib_switchbar_margin">16dp</dimen>
+    <!-- Minimum width of switch -->
+    <dimen name="settingslib_min_switch_width">52dp</dimen>
+    <!-- Size of layout margin left -->
+    <dimen name="settingslib_switchbar_padding_left">20dp</dimen>
+    <!-- Size of layout margin right -->
+    <dimen name="settingslib_switchbar_padding_right">20dp</dimen>
+    <!-- Radius of switch bar -->
+    <dimen name="settingslib_switch_bar_radius">35dp</dimen>
+    <!-- Margin of switch thumb -->
+    <dimen name="settingslib_switch_thumb_margin">4dp</dimen>
+    <!-- Size of switch thumb -->
+    <dimen name="settingslib_switch_thumb_size">20dp</dimen>
+    <!-- Width of switch track -->
+    <dimen name="settingslib_switch_track_width">52dp</dimen>
+    <!-- Height of switch track -->
+    <dimen name="settingslib_switch_track_height">28dp</dimen>
+    <!-- Radius of switch track -->
+    <dimen name="settingslib_switch_track_radius">35dp</dimen>
+
+    <!-- Height percentage of the parent container occupied by the communal view -->
+    <item name="communal_source_height_percentage" format="float" type="dimen">0.80</item>
+
+    <dimen name="drag_and_drop_icon_size">70dp</dimen>
 </resources>

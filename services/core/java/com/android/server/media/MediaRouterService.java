@@ -903,26 +903,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             if (intent.getAction().equals(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED)) {
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 synchronized (mLock) {
-                    boolean wasA2dpOn = mGlobalBluetoothA2dpOn;
                     mActiveBluetoothDevice = btDevice;
                     mGlobalBluetoothA2dpOn = btDevice != null;
-                    if (wasA2dpOn != mGlobalBluetoothA2dpOn) {
-                        Slog.d(TAG, "GlobalBluetoothA2dpOn is changed to '"
-                                + mGlobalBluetoothA2dpOn + "'");
-                        UserRecord userRecord = mUserRecords.get(mCurrentUserId);
-                        if (userRecord != null) {
-                            for (ClientRecord cr : userRecord.mClientRecords) {
-                                // mSelectedRouteId will be null for BT and phone speaker.
-                                if (cr.mSelectedRouteId == null) {
-                                    try {
-                                        cr.mClient.onGlobalA2dpChanged(mGlobalBluetoothA2dpOn);
-                                    } catch (RemoteException e) {
-                                        // Ignore exception
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }

@@ -30,7 +30,7 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_REMOVED;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
-import static com.android.internal.net.NetworkUtilsInternal.multiplySafeByRational;
+import static com.android.net.module.util.NetworkStatsUtils.multiplySafeByRational;
 
 import android.os.Binder;
 import android.service.NetworkStatsCollectionKeyProto;

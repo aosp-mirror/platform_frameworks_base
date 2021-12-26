@@ -2720,6 +2720,42 @@ public final class TvContract {
          */
         public static final String COLUMN_GLOBAL_CONTENT_ID = "global_content_id";
 
+        /**
+         * The flag indicating whether this TV program is scrambled or not.
+         *
+         * <p>Use the same coding for scrambled in the underlying broadcast standard
+         * if {@code free_ca_mode} in EIT is defined there (e.g. ETSI EN 300 468).
+         *
+         * <p>Type: INTEGER (boolean)
+         */
+        public static final String COLUMN_SCRAMBLED = "scrambled";
+
+        /**
+         * The comma-separated series IDs of this TV program for episodic TV shows.
+         *
+         * <p>This is used to indicate the series IDs.
+         * Programs in the same series share a series ID.
+         * Use this instead of {@link #COLUMN_SERIES_ID} if more than one series IDs
+         * are assigned to the TV program.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_MULTI_SERIES_ID = "multi_series_id";
+
+        /**
+         * The internal ID used by individual TV input services.
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_ID = "internal_provider_id";
+
         private Programs() {}
 
         /** Canonical genres for TV programs. */
@@ -3051,6 +3087,32 @@ public final class TvContract {
          */
         public static final String COLUMN_RECORDING_EXPIRE_TIME_UTC_MILLIS =
                 "recording_expire_time_utc_millis";
+
+        /**
+         * The comma-separated series IDs of this TV program for episodic TV shows.
+         *
+         * <p>This is used to indicate the series IDs.
+         * Programs in the same series share a series ID.
+         * Use this instead of {@link #COLUMN_SERIES_ID} if more than one series IDs
+         * are assigned to the TV program.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_MULTI_SERIES_ID = "multi_series_id";
+
+        /**
+         * The internal ID used by individual TV input services.
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_ID = "internal_provider_id";
 
         private RecordedPrograms() {}
     }

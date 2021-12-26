@@ -16,7 +16,7 @@
 
 package android.net;
 
-import static com.android.internal.net.NetworkUtilsInternal.multiplySafeByRational;
+import static com.android.net.module.util.NetworkStatsUtils.multiplySafeByRational;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;

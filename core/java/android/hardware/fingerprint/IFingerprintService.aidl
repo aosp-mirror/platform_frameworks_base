@@ -48,15 +48,16 @@ interface IFingerprintService {
     // Retrieve static sensor properties for the specified sensor
     FingerprintSensorPropertiesInternal getSensorProperties(int sensorId, String opPackageName);
 
-    // Authenticate the given sessionId with a fingerprint. This is protected by
-    // USE_FINGERPRINT/USE_BIOMETRIC permission. This is effectively deprecated, since it only comes
-    // through FingerprintManager now.
-    void authenticate(IBinder token, long operationId, int sensorId, int userId,
+    // Authenticate with a fingerprint. This is protected by USE_FINGERPRINT/USE_BIOMETRIC
+    // permission. This is effectively deprecated, since it only comes through FingerprintManager
+    // now. A requestId is returned that can be used to cancel this operation.
+    long authenticate(IBinder token, long operationId, int sensorId, int userId,
             IFingerprintServiceReceiver receiver, String opPackageName);
 
     // Uses the fingerprint hardware to detect for the presence of a finger, without giving details
-    // about accept/reject/lockout.
-    void detectFingerprint(IBinder token, int userId, IFingerprintServiceReceiver receiver,
+    // about accept/reject/lockout. A requestId is returned that can be used to cancel this
+    // operation.
+    long detectFingerprint(IBinder token, int userId, IFingerprintServiceReceiver receiver,
             String opPackageName);
 
     // This method prepares the service to start authenticating, but doesn't start authentication.
@@ -65,21 +66,21 @@ interface IFingerprintService {
     // by BiometricService. To start authentication after the clients are ready, use
     // startPreparedClient().
     void prepareForAuthentication(int sensorId, IBinder token, long operationId, int userId,
-            IBiometricSensorReceiver sensorReceiver, String opPackageName, int cookie,
-            boolean allowBackgroundAuthentication);
+            IBiometricSensorReceiver sensorReceiver, String opPackageName, long requestId,
+            int cookie, boolean allowBackgroundAuthentication);
 
     // Starts authentication with the previously prepared client.
     void startPreparedClient(int sensorId, int cookie);
 
-    // Cancel authentication for the given sessionId
-    void cancelAuthentication(IBinder token, String opPackageName);
+    // Cancel authentication for the given requestId.
+    void cancelAuthentication(IBinder token, String opPackageName, long requestId);
 
-    // Cancel finger detection
-    void cancelFingerprintDetect(IBinder token, String opPackageName);
+    // Cancel finger detection for the given requestId.
+    void cancelFingerprintDetect(IBinder token, String opPackageName, long requestId);
 
     // Same as above, except this is protected by the MANAGE_BIOMETRIC signature permission. Takes
     // an additional uid, pid, userid.
-    void cancelAuthenticationFromService(int sensorId, IBinder token, String opPackageName);
+    void cancelAuthenticationFromService(int sensorId, IBinder token, String opPackageName, long requestId);
 
     // Start fingerprint enrollment
     void enroll(IBinder token, in byte [] hardwareAuthToken, int userId, IFingerprintServiceReceiver receiver,
@@ -118,9 +119,6 @@ interface IFingerprintService {
 
     // Determine if a user has at least one enrolled fingerprint.
     boolean hasEnrolledFingerprints(int sensorId, int userId, String opPackageName);
-
-    // Determine if a user has at least one enrolled fingerprint in any of the specified sensors
-    boolean hasEnrolledTemplatesForAnySensor(int userId, in List<FingerprintSensorPropertiesInternal> sensors, String opPackageName);
 
     // Return the LockoutTracker status for the specified user
     int getLockoutModeForUser(int sensorId, int userId);

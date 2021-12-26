@@ -16,24 +16,37 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
+
+import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.doze.util.BurnInHelperKt;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
 
     private static final int SCREEN_HEIGHT = 2000;
-    private static final int EMPTY_MARGIN = 0;
     private static final int EMPTY_HEIGHT = 0;
     private static final float ZERO_DRAG = 0.f;
     private static final float OPAQUE = 1.f;
@@ -41,10 +54,15 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private static final boolean HAS_CUSTOM_CLOCK = false;
     private static final boolean HAS_VISIBLE_NOTIFS = false;
 
+    @Mock
+    private Resources mResources;
+
     private KeyguardClockPositionAlgorithm mClockPositionAlgorithm;
     private KeyguardClockPositionAlgorithm.Result mClockPosition;
+    private MockitoSession mStaticMockSession;
     private int mNotificationStackHeight;
     private float mPanelExpansion;
+    private int mKeyguardStatusBarHeaderHeight;
     private int mKeyguardStatusHeight;
     private float mDark;
     private boolean mHasCustomClock;
@@ -52,14 +70,30 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private float mQsExpansion;
     private int mCutoutTopInset = 0; // in pixels
     private boolean mIsSplitShade = false;
+    private float mUdfpsTop = -1;
+    private float mClockBottom = SCREEN_HEIGHT / 2;
+    private boolean mClockTopAligned;
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        mStaticMockSession = mockitoSession()
+                .mockStatic(BurnInHelperKt.class)
+                .startMocking();
+
         mClockPositionAlgorithm = new KeyguardClockPositionAlgorithm();
+        when(mResources.getDimensionPixelSize(anyInt())).thenReturn(0);
+        mClockPositionAlgorithm.loadDimens(mResources);
+
         mClockPosition = new KeyguardClockPositionAlgorithm.Result();
 
         mHasCustomClock = HAS_CUSTOM_CLOCK;
         mHasVisibleNotifs = HAS_VISIBLE_NOTIFS;
+    }
+
+    @After
+    public void tearDown() {
+        mStaticMockSession.finishMocking();
     }
 
     @Test
@@ -338,6 +372,155 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         assertThat(mClockPosition.clockAlpha).isEqualTo(TRANSPARENT);
     }
 
+    @Test
+    public void clockPositionMinimizesBurnInMovementToAvoidUdfpsOnAOD() {
+        // GIVEN a center aligned clock
+        mClockTopAligned = false;
+
+        // GIVEN the clock + udfps are 100px apart
+        mClockBottom = SCREEN_HEIGHT - 500;
+        mUdfpsTop = SCREEN_HEIGHT - 400;
+
+        // GIVEN it's AOD and the burn-in y value is 200
+        givenAOD();
+        givenMaxBurnInOffset(200);
+
+        // WHEN the clock position algorithm is run with the highest burn in offset
+        givenHighestBurnInOffset();
+        positionClock();
+
+        // THEN the worst-case clock Y position is shifted only by 100 (not the full 200),
+        // so that it's at the same location as mUdfpsTop
+        assertThat(mClockPosition.clockY).isEqualTo(100);
+
+        // WHEN the clock position algorithm is run with the lowest burn in offset
+        givenLowestBurnInOffset();
+        positionClock();
+
+        // THEN lowest case starts at mCutoutTopInset
+        assertThat(mClockPosition.clockY).isEqualTo(mCutoutTopInset);
+    }
+
+    @Test
+    public void clockPositionShiftsToAvoidUdfpsOnAOD_usesSpaceAboveClock() {
+        // GIVEN a center aligned clock
+        mClockTopAligned = false;
+
+        // GIVEN there's space at the top of the screen on LS (that's available to be used for
+        // burn-in on AOD)
+        mKeyguardStatusBarHeaderHeight = 150;
+
+        // GIVEN the bottom of the clock is beyond the top of UDFPS
+        mClockBottom = SCREEN_HEIGHT - 300;
+        mUdfpsTop = SCREEN_HEIGHT - 400;
+
+        // GIVEN it's AOD and the burn-in y value is 200
+        givenAOD();
+        givenMaxBurnInOffset(200);
+
+        // WHEN the clock position algorithm is run with the highest burn in offset
+        givenHighestBurnInOffset();
+        positionClock();
+
+        // THEN the algo should shift the clock up and use the area above the clock for
+        // burn-in since the burn in offset > space above clock
+        assertThat(mClockPosition.clockY).isEqualTo(mKeyguardStatusBarHeaderHeight);
+
+        // WHEN the clock position algorithm is run with the lowest burn in offset
+        givenLowestBurnInOffset();
+        positionClock();
+
+        // THEN lowest case starts at mCutoutTopInset (0 in this case)
+        assertThat(mClockPosition.clockY).isEqualTo(mCutoutTopInset);
+    }
+
+    @Test
+    public void clockPositionShiftsToAvoidUdfpsOnAOD_usesMaxBurnInOffset() {
+        // GIVEN a center aligned clock
+        mClockTopAligned = false;
+
+        // GIVEN there's 200px space at the top of the screen on LS (that's available to be used for
+        // burn-in on AOD) but 50px are taken up by the cutout
+        mKeyguardStatusBarHeaderHeight = 200;
+        mCutoutTopInset = 50;
+
+        // GIVEN the bottom of the clock is beyond the top of UDFPS
+        mClockBottom = SCREEN_HEIGHT - 300;
+        mUdfpsTop = SCREEN_HEIGHT - 400;
+
+        // GIVEN it's AOD and the burn-in y value is only 25px (less than space above clock)
+        givenAOD();
+        int maxYBurnInOffset = 25;
+        givenMaxBurnInOffset(maxYBurnInOffset);
+
+        // WHEN the clock position algorithm is run with the highest burn in offset
+        givenHighestBurnInOffset();
+        positionClock();
+
+        // THEN the algo should shift the clock up and use the area above the clock for
+        // burn-in
+        assertThat(mClockPosition.clockY).isEqualTo(mKeyguardStatusBarHeaderHeight);
+
+        // WHEN the clock position algorithm is run with the lowest burn in offset
+        givenLowestBurnInOffset();
+        positionClock();
+
+        // THEN lowest case starts above mKeyguardStatusBarHeaderHeight
+        assertThat(mClockPosition.clockY).isEqualTo(
+                mKeyguardStatusBarHeaderHeight - 2 * maxYBurnInOffset);
+    }
+
+    @Test
+    public void clockPositionShiftsToMaximizeUdfpsBurnInMovement() {
+        // GIVEN a center aligned clock
+        mClockTopAligned = false;
+
+        // GIVEN there's 200px space at the top of the screen on LS (that's available to be used for
+        // burn-in on AOD) but 50px are taken up by the cutout
+        mKeyguardStatusBarHeaderHeight = 200;
+        mCutoutTopInset = 50;
+        int upperSpaceAvailable = mKeyguardStatusBarHeaderHeight - mCutoutTopInset;
+
+        // GIVEN the bottom of the clock and the top of UDFPS are 100px apart
+        mClockBottom = SCREEN_HEIGHT - 500;
+        mUdfpsTop = SCREEN_HEIGHT - 400;
+        float lowerSpaceAvailable = mUdfpsTop - mClockBottom;
+
+        // GIVEN it's AOD and the burn-in y value is 200
+        givenAOD();
+        givenMaxBurnInOffset(200);
+
+        // WHEN the clock position algorithm is run with the highest burn in offset
+        givenHighestBurnInOffset();
+        positionClock();
+
+        // THEN the algo should shift the clock up and use both the area above
+        // the clock and below the clock (vertically centered in its allowed area)
+        assertThat(mClockPosition.clockY).isEqualTo(
+                (int) (mCutoutTopInset + upperSpaceAvailable + lowerSpaceAvailable));
+
+        // WHEN the clock position algorithm is run with the lowest burn in offset
+        givenLowestBurnInOffset();
+        positionClock();
+
+        // THEN lowest case starts at mCutoutTopInset
+        assertThat(mClockPosition.clockY).isEqualTo(mCutoutTopInset);
+    }
+
+    private void givenHighestBurnInOffset() {
+        when(BurnInHelperKt.getBurnInOffset(anyInt(), anyBoolean())).then(returnsFirstArg());
+    }
+
+    private void givenLowestBurnInOffset() {
+        when(BurnInHelperKt.getBurnInOffset(anyInt(), anyBoolean())).thenReturn(0);
+    }
+
+    private void givenMaxBurnInOffset(int offset) {
+        when(mResources.getDimensionPixelSize(R.dimen.burn_in_prevention_offset_y_large_clock))
+                .thenReturn(offset);
+        mClockPositionAlgorithm.loadDimens(mResources);
+    }
+
     private void givenAOD() {
         mPanelExpansion = 1.f;
         mDark = 1.f;
@@ -348,13 +531,33 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         mDark = 0.f;
     }
 
+    /**
+     * Setup and run the clock position algorithm.
+     *
+     * mClockPosition.clockY will contain the top y-coordinate for the clock position
+     */
     private void positionClock() {
-        mClockPositionAlgorithm.setup(EMPTY_MARGIN, SCREEN_HEIGHT, mNotificationStackHeight,
-                mPanelExpansion, SCREEN_HEIGHT, mKeyguardStatusHeight,
-                0 /* userSwitchHeight */, 0 /* userSwitchPreferredY */,
-                mHasCustomClock, mHasVisibleNotifs, mDark, ZERO_DRAG, false /* bypassEnabled */,
-                0 /* unlockedStackScrollerPadding */, mQsExpansion,
-                mCutoutTopInset, mIsSplitShade);
+        mClockPositionAlgorithm.setup(
+                mKeyguardStatusBarHeaderHeight,
+                SCREEN_HEIGHT,
+                mNotificationStackHeight,
+                mPanelExpansion,
+                SCREEN_HEIGHT,
+                mKeyguardStatusHeight,
+                0 /* userSwitchHeight */,
+                0 /* userSwitchPreferredY */,
+                mHasCustomClock,
+                mHasVisibleNotifs,
+                mDark,
+                ZERO_DRAG,
+                false /* bypassEnabled */,
+                0 /* unlockedStackScrollerPadding */,
+                mQsExpansion,
+                mCutoutTopInset,
+                mIsSplitShade,
+                mUdfpsTop,
+                mClockBottom,
+                mClockTopAligned);
         mClockPositionAlgorithm.run(mClockPosition);
     }
 }

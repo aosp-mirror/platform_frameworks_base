@@ -87,15 +87,23 @@ public class ProximitySensor implements ThresholdSensor {
                     && (mLastPrimaryEvent == null
                     || !mLastPrimaryEvent.getBelow()
                     || !event.getBelow())) {
-                mSecondaryThresholdSensor.pause();
+                chooseSensor();
                 if (mLastPrimaryEvent == null || !mLastPrimaryEvent.getBelow()) {
                     // Only check the secondary as long as the primary thinks we're near.
-                    mCancelSecondaryRunnable = null;
+                    if (mCancelSecondaryRunnable != null) {
+                        mCancelSecondaryRunnable.run();
+                        mCancelSecondaryRunnable = null;
+                    }
                     return;
                 } else {
                     // Check this sensor again in a moment.
-                    mCancelSecondaryRunnable = mDelayableExecutor.executeDelayed(
-                            mSecondaryThresholdSensor::resume, SECONDARY_PING_INTERVAL_MS);
+                    mCancelSecondaryRunnable = mDelayableExecutor.executeDelayed(() -> {
+                        // This is safe because we know that mSecondaryThresholdSensor
+                        // is loaded, otherwise we wouldn't be here.
+                        mPrimaryThresholdSensor.pause();
+                        mSecondaryThresholdSensor.resume();
+                    },
+                        SECONDARY_PING_INTERVAL_MS);
                 }
             }
             logDebug("Secondary sensor event: " + event.getBelow() + ".");
@@ -159,12 +167,8 @@ public class ProximitySensor implements ThresholdSensor {
      * of what is reported by the primary sensor.
      */
     public void setSecondarySafe(boolean safe) {
-        mSecondarySafe = safe;
-        if (!mSecondarySafe) {
-            mSecondaryThresholdSensor.pause();
-        } else {
-            mSecondaryThresholdSensor.resume();
-        }
+        mSecondarySafe = mSecondaryThresholdSensor.isLoaded() && safe;
+        chooseSensor();
     }
 
     /**
@@ -209,16 +213,30 @@ public class ProximitySensor implements ThresholdSensor {
             return;
         }
         if (!mInitializedListeners) {
+            mPrimaryThresholdSensor.pause();
+            mSecondaryThresholdSensor.pause();
             mPrimaryThresholdSensor.register(mPrimaryEventListener);
-            if (!mSecondarySafe) {
-                mSecondaryThresholdSensor.pause();
-            }
             mSecondaryThresholdSensor.register(mSecondaryEventListener);
             mInitializedListeners = true;
         }
         logDebug("Registering sensor listener");
-        mPrimaryThresholdSensor.resume();
+
         mRegistered = true;
+        chooseSensor();
+    }
+
+    private void chooseSensor() {
+        mExecution.assertIsMainThread();
+        if (!mRegistered || mPaused || mListeners.isEmpty()) {
+            return;
+        }
+        if (mSecondarySafe) {
+            mSecondaryThresholdSensor.resume();
+            mPrimaryThresholdSensor.pause();
+        } else {
+            mPrimaryThresholdSensor.resume();
+            mSecondaryThresholdSensor.pause();
+        }
     }
 
     /**
@@ -312,7 +330,7 @@ public class ProximitySensor implements ThresholdSensor {
         }
 
         if (!mSecondarySafe && !event.getBelow()) {
-            mSecondaryThresholdSensor.pause();
+            chooseSensor();
         }
 
         mLastEvent = event;

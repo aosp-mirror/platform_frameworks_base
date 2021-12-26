@@ -389,7 +389,7 @@ public class SystemVibrator extends Vibrator {
             mExecutor.execute(() -> {
                 boolean anyVibrating;
                 synchronized (mLock) {
-                    int allInitializedMask = 1 << mVibratorListeners.size() - 1;
+                    int allInitializedMask = (1 << mVibratorListeners.size()) - 1;
                     int vibratorMask = 1 << vibratorIdx;
                     if ((mInitializedMask & vibratorMask) == 0) {
                         // First state report for this vibrator, set vibrating initial value.

@@ -70,6 +70,7 @@ import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.carrier.CarrierIdentifier;
+import android.service.carrier.CarrierService;
 import android.sysprop.TelephonyProperties;
 import android.telecom.CallScreeningService;
 import android.telecom.InCallService;
@@ -3503,7 +3504,8 @@ public class TelephonyManager {
      */
     private int getLogicalSlotIndex(int physicalSlotIndex) {
         UiccSlotInfo[] slotInfos = getUiccSlotsInfo();
-        if (slotInfos != null && physicalSlotIndex >= 0 && physicalSlotIndex < slotInfos.length) {
+        if (slotInfos != null && physicalSlotIndex >= 0 && physicalSlotIndex < slotInfos.length
+                && slotInfos[physicalSlotIndex] != null) {
             return slotInfos[physicalSlotIndex].getLogicalSlotIdx();
         }
 
@@ -8320,12 +8322,58 @@ public class TelephonyManager {
     public NetworkScan requestNetworkScan(
             NetworkScanRequest request, Executor executor,
             TelephonyScanManager.NetworkScanCallback callback) {
-        synchronized (this) {
+        return requestNetworkScan(false, request, executor, callback);
+    }
+
+    /**
+     * Request a network scan.
+     *
+     * This method is asynchronous, so the network scan results will be returned by callback.
+     * The returned NetworkScan will contain a callback method which can be used to stop the scan.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges})
+     * and {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
+     *
+     * If the system-wide location switch is off, apps may still call this API, with the
+     * following constraints:
+     * <ol>
+     *     <li>The app must hold the {@code android.permission.NETWORK_SCAN} permission.</li>
+     *     <li>The app must not supply any specific bands or channels to scan.</li>
+     *     <li>The app must only specify MCC/MNC pairs that are
+     *     associated to a SIM in the device.</li>
+     *     <li>Returned results will have no meaningful info other than signal strength
+     *     and MCC/MNC info.</li>
+     * </ol>
+     *
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
+     * @param request Contains all the RAT with bands/channels that need to be scanned.
+     * @param executor The executor through which the callback should be invoked. Since the scan
+     *        request may trigger multiple callbacks and they must be invoked in the same order as
+     *        they are received by the platform, the user should provide an executor which executes
+     *        tasks one at a time in serial order. For example AsyncTask.SERIAL_EXECUTOR.
+     * @param callback Returns network scan results or errors.
+     * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION
+    })
+    public @Nullable NetworkScan requestNetworkScan(
+            boolean renounceFineLocationAccess, @NonNull NetworkScanRequest request,
+            @NonNull Executor executor,
+            @NonNull TelephonyScanManager.NetworkScanCallback callback) {
+        synchronized (sCacheLock) {
             if (mTelephonyScanManager == null) {
                 mTelephonyScanManager = new TelephonyScanManager();
             }
         }
-        return mTelephonyScanManager.requestNetworkScan(getSubId(), request, executor, callback,
+        return mTelephonyScanManager.requestNetworkScan(getSubId(), renounceFineLocationAccess,
+                request, executor, callback,
                 getOpPackageName(), getAttributionTag());
     }
 
@@ -8803,7 +8851,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
+     * Set the preferred network type to global mode which includes NR, LTE, CDMA, EvDo
+     * and GSM/WCDMA.
      *
      * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
@@ -8814,7 +8863,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
+     * Set the preferred network type to global mode which includes NR, LTE, CDMA, EvDo
+     * and GSM/WCDMA.
      *
      * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
@@ -8822,7 +8872,7 @@ public class TelephonyManager {
      * @hide
      */
     public boolean setPreferredNetworkTypeToGlobal(int subId) {
-        return setPreferredNetworkType(subId, RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA);
+        return setPreferredNetworkType(subId, RILConstants.NETWORK_MODE_NR_LTE_CDMA_EVDO_GSM_WCDMA);
     }
 
     /**
@@ -9125,6 +9175,57 @@ public class TelephonyManager {
             Rlog.e(TAG, "getCarrierPackageNamesForIntentAndPhone RemoteException", ex);
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "getCarrierPackageNamesForIntentAndPhone NPE", ex);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the package name that provides the {@link CarrierService} implementation for the
+     * current subscription, or {@code null} if no package with carrier privileges declares one.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, then the provided
+     * subscription ID is used. Otherwise, the default subscription ID will be used.
+     *
+     * @return The system-selected package that provides the {@link CarrierService} implementation
+     * for the current subscription, or {@code null} if none is resolved
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable String getCarrierServicePackageName() {
+        // TODO(b/205736323) plumb this through to CarrierPrivilegesTracker, which will cache the
+        // value instead of re-querying every time.
+        List<String> carrierServicePackages =
+                getCarrierPackageNamesForIntent(
+                        new Intent(CarrierService.CARRIER_SERVICE_INTERFACE));
+        if (carrierServicePackages != null && !carrierServicePackages.isEmpty()) {
+            return carrierServicePackages.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the package name that provides the {@link CarrierService} implementation for the
+     * specified {@code logicalSlotIndex}, or {@code null} if no package with carrier privileges
+     * declares one.
+     *
+     * @param logicalSlotIndex The slot index to fetch the {@link CarrierService} package for
+     * @return The system-selected package that provides the {@link CarrierService} implementation
+     * for the slot, or {@code null} if none is resolved
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable String getCarrierServicePackageNameForLogicalSlot(int logicalSlotIndex) {
+        // TODO(b/205736323) plumb this through to CarrierPrivilegesTracker, which will cache the
+        // value instead of re-querying every time.
+        List<String> carrierServicePackages =
+                getCarrierPackageNamesForIntentAndPhone(
+                        new Intent(CarrierService.CARRIER_SERVICE_INTERFACE), logicalSlotIndex);
+        if (carrierServicePackages != null && !carrierServicePackages.isEmpty()) {
+            return carrierServicePackages.get(0);
         }
         return null;
     }
@@ -11384,7 +11485,6 @@ public class TelephonyManager {
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
      * and {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     *
      * May return {@code null} when the subscription is inactive or when there was an error
      * communicating with the phone process.
      */
@@ -11394,7 +11494,72 @@ public class TelephonyManager {
             Manifest.permission.ACCESS_COARSE_LOCATION
     })
     public @Nullable ServiceState getServiceState() {
-        return getServiceStateForSubscriber(getSubId());
+        return getServiceState(false, false);
+    }
+
+    /**
+     * Returns the current {@link ServiceState} information.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     *
+     * If you want continuous updates of service state info, register a {@link PhoneStateListener}
+     * via {@link #listen} with the {@link PhoneStateListener#LISTEN_SERVICE_STATE} event.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
+     * and {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
+     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
+     * receive location related information which will be sent if the caller already possess
+     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     * May return {@code null} when the subscription is inactive or when there was an error
+     * communicating with the phone process.
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(allOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+    })
+    public @Nullable ServiceState getServiceState(boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess) {
+        return getServiceStateForSubscriber(getSubId(), renounceFineLocationAccess,
+                renounceCoarseLocationAccess);
+    }
+
+    /**
+     * Returns the service state information on specified subscription. Callers require
+     * either READ_PRIVILEGED_PHONE_STATE or READ_PHONE_STATE to retrieve the information.
+     *
+     * May return {@code null} when the subscription is inactive or when there was an error
+     * communicating with the phone process.
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
+     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
+     * receive location related information which will be sent if the caller already possess
+     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     */
+    private ServiceState getServiceStateForSubscriber(int subId,
+            boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getServiceStateForSubscriber(subId, renounceFineLocationAccess,
+                        renounceCoarseLocationAccess,
+                        getOpPackageName(), getAttributionTag());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
+        } catch (NullPointerException e) {
+            AnomalyReporter.reportAnomaly(
+                    UUID.fromString("a3ab0b9d-f2aa-4baf-911d-7096c0d4645a"),
+                    "getServiceStateForSubscriber " + subId + " NPE");
+        }
+        return null;
     }
 
     /**
@@ -11407,20 +11572,7 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public ServiceState getServiceStateForSubscriber(int subId) {
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                return service.getServiceStateForSubscriber(subId, getOpPackageName(),
-                        getAttributionTag());
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
-        } catch (NullPointerException e) {
-            AnomalyReporter.reportAnomaly(
-                    UUID.fromString("a3ab0b9d-f2aa-4baf-911d-7096c0d4645a"),
-                    "getServiceStateForSubscriber " + subId + " NPE");
-        }
-        return null;
+        return getServiceStateForSubscriber(getSubId(), false, false);
     }
 
     /**
@@ -14242,7 +14394,8 @@ public class TelephonyManager {
             if (callForwardingInfo.getNumber() == null) {
                 throw new IllegalArgumentException("callForwarding number is null");
             }
-            if (callForwardingInfo.getTimeoutSeconds() <= 0) {
+            if (callForwardingReason == CallForwardingInfo.REASON_NO_REPLY
+                        && callForwardingInfo.getTimeoutSeconds() <= 0) {
                 throw new IllegalArgumentException("callForwarding timeout isn't positive");
             }
         }
@@ -15270,7 +15423,49 @@ public class TelephonyManager {
      */
     public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
+        registerTelephonyCallback(false, false, executor, callback);
+    }
 
+    /**
+     * Registers a callback object to receive notification of changes in specified telephony states.
+     * <p>
+     * To register a callback, pass a {@link TelephonyCallback} which implements
+     * interfaces of events. For example,
+     * FakeServiceStateCallback extends {@link TelephonyCallback} implements
+     * {@link TelephonyCallback.ServiceStateListener}.
+     *
+     * At registration, and when a specified telephony state changes, the telephony manager invokes
+     * the appropriate callback method on the callback object and passes the current (updated)
+     * values.
+     * <p>
+     *
+     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
+     * applies to the given subId. Otherwise, applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}. To register events for multiple
+     * subIds, pass a separate callback object to each TelephonyManager object created with
+     * {@link #createForSubscriptionId}.
+     *
+     * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
+     * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
+     * {@link SecurityException} will be thrown otherwise.
+     *
+     * This API should be used sparingly -- large numbers of callbacks will cause system
+     * instability. If a process has registered too many callbacks without unregistering them, it
+     * may encounter an {@link IllegalStateException} when trying to register more callbacks.
+     *
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permissions.
+     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
+     * receive location related information which will be sent if the caller already possess
+     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     * @param executor The executor of where the callback will execute.
+     * @param callback The {@link TelephonyCallback} object to register.
+     */
+    public void registerTelephonyCallback(boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull TelephonyCallback callback) {
         if (mContext == null) {
             throw new IllegalStateException("telephony service is null.");
         }
@@ -15281,7 +15476,8 @@ public class TelephonyManager {
         mTelephonyRegistryMgr = (TelephonyRegistryManager)
                 mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
         if (mTelephonyRegistryMgr != null) {
-            mTelephonyRegistryMgr.registerTelephonyCallback(executor, mSubId, getOpPackageName(),
+            mTelephonyRegistryMgr.registerTelephonyCallback(renounceFineLocationAccess,
+                    renounceCoarseLocationAccess, executor, mSubId, getOpPackageName(),
                     getAttributionTag(), callback, getITelephony() != null);
         } else {
             throw new IllegalStateException("telephony service is null.");
@@ -15831,5 +16027,77 @@ public class TelephonyManager {
             ex.rethrowAsRuntimeException();
         }
         return null;
+    }
+
+    /**
+     * Callback to listen for when the set of packages with carrier privileges for a SIM changes.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface CarrierPrivilegesListener {
+        /**
+         * Called when the set of packages with carrier privileges has changed.
+         *
+         * <p>Of note, this callback will <b>not</b> be fired if a carrier triggers a SIM profile
+         * switch and the same set of packages remains privileged after the switch.
+         *
+         * <p>At registration, the callback will receive the current set of privileged packages.
+         *
+         * @param privilegedPackageNames The updated set of package names that have carrier
+         *     privileges
+         * @param privilegedUids The updated set of UIDs that have carrier privileges
+         */
+        void onCarrierPrivilegesChanged(
+                @NonNull List<String> privilegedPackageNames, @NonNull int[] privilegedUids);
+    }
+
+    /**
+     * Registers a {@link CarrierPrivilegesListener} on the given {@code logicalSlotIndex} to
+     * receive callbacks when the set of packages with carrier privileges changes. The callback will
+     * immediately be called with the latest state.
+     *
+     * @param logicalSlotIndex The SIM slot to listen on
+     * @param executor The executor where {@code listener} will be invoked
+     * @param listener The callback to register
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void addCarrierPrivilegesListener(
+            int logicalSlotIndex,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CarrierPrivilegesListener listener) {
+        if (mContext == null) {
+            throw new IllegalStateException("Telephony service is null");
+        } else if (executor == null || listener == null) {
+            throw new IllegalArgumentException(
+                    "CarrierPrivilegesListener and executor must be non-null");
+        }
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        mTelephonyRegistryMgr.addCarrierPrivilegesListener(logicalSlotIndex, executor, listener);
+    }
+
+    /**
+     * Unregisters an existing {@link CarrierPrivilegesListener}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void removeCarrierPrivilegesListener(@NonNull CarrierPrivilegesListener listener) {
+        if (mContext == null) {
+            throw new IllegalStateException("Telephony service is null");
+        } else if (listener == null) {
+            throw new IllegalArgumentException("CarrierPrivilegesListener must be non-null");
+        }
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        mTelephonyRegistryMgr.removeCarrierPrivilegesListener(listener);
     }
 }

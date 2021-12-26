@@ -447,10 +447,6 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 skipCallbacks = true;
             }
         }
-
-        if (skipCallbacks) {
-            mInputConsumer.sendFinishedSignal(seq, false);
-        }
     }
 }
 

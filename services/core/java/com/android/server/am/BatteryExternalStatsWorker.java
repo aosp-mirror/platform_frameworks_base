@@ -478,7 +478,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     for (int uid : uidsToRemove) {
                         FrameworkStatsLog.write(FrameworkStatsLog.ISOLATED_UID_CHANGED, -1, uid,
                                 FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__REMOVED);
-                        mStats.removeIsolatedUidLocked(uid, SystemClock.elapsedRealtime(),
+                        mStats.maybeRemoveIsolatedUidLocked(uid, SystemClock.elapsedRealtime(),
                                 SystemClock.uptimeMillis());
                     }
                     mStats.clearPendingRemovedUids();

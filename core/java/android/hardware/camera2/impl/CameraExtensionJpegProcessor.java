@@ -58,7 +58,7 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
 
     private static final class JpegParameters {
         public HashSet<Long> mTimeStamps = new HashSet<>();
-        public int mRotation = JPEG_DEFAULT_ROTATION; // CCW multiple of 90 degrees
+        public int mRotation = JPEG_DEFAULT_ROTATION; // CW multiple of 90 degrees
         public int mQuality = JPEG_DEFAULT_QUALITY; // [0..100]
     }
 
@@ -100,7 +100,8 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
             Integer orientation = captureBundles.get(0).captureResult.get(
                     CaptureResult.JPEG_ORIENTATION);
             if (orientation != null) {
-                ret.mRotation = orientation / 90;
+                // The jpeg encoder expects CCW rotation, convert from CW
+                ret.mRotation = (360 - (orientation % 360)) / 90;
             } else {
                 Log.w(TAG, "No jpeg rotation set, using default: " + JPEG_DEFAULT_ROTATION);
             }
