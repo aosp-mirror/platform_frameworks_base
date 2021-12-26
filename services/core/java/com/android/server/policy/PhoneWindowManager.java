@@ -4630,6 +4630,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mKeyguardDelegate.isInputRestricted();
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean isKeyguardUnoccluding() {
+        return keyguardOn() && !mWindowManagerFuncs.isAppTransitionStateIdle();
+    }
+
     @Override
     public void dismissKeyguardLw(IKeyguardDismissCallback callback, CharSequence message) {
         if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
