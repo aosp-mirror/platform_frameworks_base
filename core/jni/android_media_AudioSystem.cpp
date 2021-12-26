@@ -2774,6 +2774,46 @@ static jboolean android_media_AudioSystem_canBeSpatialized(JNIEnv *env, jobject 
     return canBeSpatialized;
 }
 
+// keep these values in sync with AudioSystem.java
+#define DIRECT_NOT_SUPPORTED 0
+#define DIRECT_OFFLOAD_SUPPORTED 1
+#define DIRECT_OFFLOAD_GAPLESS_SUPPORTED 3
+#define DIRECT_BITSTREAM_SUPPORTED 4
+
+static jint convertAudioDirectModeFromNative(audio_direct_mode_t directMode) {
+    jint result = DIRECT_NOT_SUPPORTED;
+    if ((directMode | AUDIO_DIRECT_OFFLOAD_SUPPORTED) != AUDIO_DIRECT_NOT_SUPPORTED) {
+        result |= DIRECT_OFFLOAD_SUPPORTED;
+    }
+    if ((directMode | AUDIO_DIRECT_OFFLOAD_GAPLESS_SUPPORTED) != AUDIO_DIRECT_NOT_SUPPORTED) {
+        result |= DIRECT_OFFLOAD_GAPLESS_SUPPORTED;
+    }
+    if ((directMode | AUDIO_DIRECT_BITSTREAM_SUPPORTED) != AUDIO_DIRECT_NOT_SUPPORTED) {
+        result |= DIRECT_BITSTREAM_SUPPORTED;
+    }
+    return result;
+}
+
+static jint android_media_AudioSystem_getDirectPlaybackSupport(JNIEnv *env, jobject thiz,
+                                                               jobject jFormat, jobject jaa) {
+    JNIAudioAttributeHelper::UniqueAaPtr paa = JNIAudioAttributeHelper::makeUnique();
+    jint jStatus = JNIAudioAttributeHelper::nativeFromJava(env, jaa, paa.get());
+    if (jStatus != (jint)AUDIO_JAVA_SUCCESS) {
+        return AUDIO_DIRECT_NOT_SUPPORTED;
+    }
+
+    audio_config_t nConfig;
+    javaAudioFormatToNativeAudioConfig(env, &nConfig, jFormat, false /*isInput*/);
+
+    audio_direct_mode_t directMode;
+    status_t status = AudioSystem::getDirectPlaybackSupport(paa.get(), &nConfig, &directMode);
+    if (status != NO_ERROR) {
+        ALOGW("%s native returned error %d", __func__, status);
+        return AUDIO_DIRECT_NOT_SUPPORTED;
+    }
+    return convertAudioDirectModeFromNative(directMode);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] =
@@ -2917,7 +2957,10 @@ static const JNINativeMethod gMethods[] =
          {"canBeSpatialized",
           "(Landroid/media/AudioAttributes;Landroid/media/AudioFormat;"
           "[Landroid/media/AudioDeviceAttributes;)Z",
-          (void *)android_media_AudioSystem_canBeSpatialized}};
+          (void *)android_media_AudioSystem_canBeSpatialized},
+         {"getDirectPlaybackSupport",
+          "(Landroid/media/AudioFormat;Landroid/media/AudioAttributes;)I",
+          (void *)android_media_AudioSystem_getDirectPlaybackSupport}};
 
 static const JNINativeMethod gEventHandlerMethods[] = {
     {"native_setup",
