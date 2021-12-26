@@ -28,6 +28,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
@@ -45,7 +46,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 class SizeCompatUILayout {
     private static final String TAG = "SizeCompatUILayout";
 
-    private final SyncTransactionQueue mSyncQueue;
+    final SyncTransactionQueue mSyncQueue;
     private final SizeCompatUIController.SizeCompatUICallback mCallback;
     private Context mContext;
     private Configuration mTaskConfig;
@@ -306,6 +307,10 @@ class SizeCompatUILayout {
 
     private void updateSurfacePosition(SurfaceControl leash, int positionX, int positionY) {
         mSyncQueue.runInSync(t -> {
+            if (!leash.isValid()) {
+                Log.w(TAG, "The leash has been released.");
+                return;
+            }
             t.setPosition(leash, positionX, positionY);
             // The size compat UI should be the topmost child of the Task in case there can be more
             // than one children.

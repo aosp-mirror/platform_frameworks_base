@@ -131,6 +131,11 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     @Override
     public void restoreVShapedPlayers(@NonNull FocusRequester winner) {
         mFocusEnforcer.restoreVShapedPlayers(winner);
+        // remove scheduled events to unfade out offending players (if any) corresponding to
+        // this uid, as we're removing any effects of muting/ducking/fade out now
+        mFocusHandler.removeEqualMessages(MSL_L_FORGET_UID,
+                new ForgetFadeUidInfo(winner.getClientUid()));
+
     }
 
     @Override
@@ -1182,6 +1187,13 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 mFocusHandler.obtainMessage(MSG_L_FOCUS_LOSS_AFTER_FADE, focusLoser),
                 FadeOutManager.FADE_OUT_DURATION_MS);
     }
+
+    private void postForgetUidLater(int uid) {
+        mFocusHandler.sendMessageDelayed(
+                mFocusHandler.obtainMessage(MSL_L_FORGET_UID, new ForgetFadeUidInfo(uid)),
+                FadeOutManager.DELAY_FADE_IN_OFFENDERS_MS);
+    }
+
     //=================================================================
     // Message handling
     private Handler mFocusHandler;
@@ -1195,6 +1207,8 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      *         type:FocusRequester
      */
     private static final int MSG_L_FOCUS_LOSS_AFTER_FADE = 1;
+
+    private static final int MSL_L_FORGET_UID = 2;
 
     private void initFocusThreading() {
         mFocusThread = new HandlerThread(TAG);
@@ -1213,15 +1227,56 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                             if (loser.isInFocusLossLimbo()) {
                                 loser.dispatchFocusChange(AudioManager.AUDIOFOCUS_LOSS);
                                 loser.release();
-                                mFocusEnforcer.forgetUid(loser.getClientUid());
+                                postForgetUidLater(loser.getClientUid());
                             }
                         }
+                        break;
+
+                    case MSL_L_FORGET_UID:
+                        final int uid = ((ForgetFadeUidInfo) msg.obj).mUid;
+                        if (DEBUG) {
+                            Log.d(TAG, "MSL_L_FORGET_UID uid=" + uid);
+                        }
+                        mFocusEnforcer.forgetUid(uid);
                         break;
                     default:
                         break;
                 }
             }
         };
+    }
 
+    /**
+     * Class to associate a UID with a scheduled event to "forget" a UID for the fade out behavior.
+     * Having a class with an equals() override allows using Handler.removeEqualsMessage() to
+     * unschedule events when needed. Here we need to unschedule the "unfading out" == "forget uid"
+     * whenever a new, more recent, focus related event happens before this one is handled.
+     */
+    private static final class ForgetFadeUidInfo {
+        private final int mUid;
+
+        ForgetFadeUidInfo(int uid) {
+            mUid = uid;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            final ForgetFadeUidInfo f = (ForgetFadeUidInfo) o;
+            if (f.mUid != mUid) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return mUid;
+        }
     }
 }

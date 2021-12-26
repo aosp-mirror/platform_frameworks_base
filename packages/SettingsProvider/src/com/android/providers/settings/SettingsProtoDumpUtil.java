@@ -763,9 +763,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES,
                 GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_SELECTION_VALUES);
         dumpSetting(s, p,
-                Settings.Global.ANGLE_ALLOWLIST,
-                GlobalSettingsProto.Gpu.ANGLE_ALLOWLIST);
-        dumpSetting(s, p,
                 Settings.Global.ANGLE_EGL_FEATURES,
                 GlobalSettingsProto.Gpu.ANGLE_EGL_FEATURES);
         dumpSetting(s, p,
@@ -1118,10 +1115,6 @@ class SettingsProtoDumpUtil {
         p.end(notificationToken);
 
         dumpSetting(s, p,
-                Settings.Global.NSD_ON,
-                GlobalSettingsProto.NSD_ON);
-
-        dumpSetting(s, p,
                 Settings.Global.NR_NSA_TRACKING_SCREEN_OFF_MODE,
                 GlobalSettingsProto.NR_NSA_TRACKING_SCREEN_OFF_MODE);
 
@@ -1198,6 +1191,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.POWER_MANAGER_CONSTANTS,
                 GlobalSettingsProto.POWER_MANAGER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.POWER_BUTTON_LONG_PRESS_DURATION_MS,
+                GlobalSettingsProto.POWER_BUTTON_LONG_PRESS_DURATION_MS);
 
         final long prepaidSetupToken = p.start(GlobalSettingsProto.PREPAID_SETUP);
         dumpSetting(s, p,
@@ -1478,6 +1474,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.USE_OPEN_WIFI_PACKAGE,
                 GlobalSettingsProto.USE_OPEN_WIFI_PACKAGE);
+        dumpSetting(s, p,
+                Settings.Global.UWB_ENABLED,
+                GlobalSettingsProto.UWB_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.VT_IMS_ENABLED,
                 GlobalSettingsProto.VT_IMS_ENABLED);

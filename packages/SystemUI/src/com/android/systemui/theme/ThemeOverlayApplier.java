@@ -132,14 +132,18 @@ public class ThemeOverlayApplier implements Dumpable {
     /* Target package for each overlay category. */
     private final Map<String, String> mCategoryToTargetPackage = new ArrayMap<>();
     private final OverlayManager mOverlayManager;
-    private final Executor mExecutor;
+    private final Executor mBgExecutor;
+    private final Executor mMainExecutor;
     private final String mLauncherPackage;
     private final String mThemePickerPackage;
 
-    public ThemeOverlayApplier(OverlayManager overlayManager, Executor executor,
+    public ThemeOverlayApplier(OverlayManager overlayManager,
+            Executor bgExecutor,
+            Executor mainExecutor,
             String launcherPackage, String themePickerPackage, DumpManager dumpManager) {
         mOverlayManager = overlayManager;
-        mExecutor = executor;
+        mBgExecutor = bgExecutor;
+        mMainExecutor = mainExecutor;
         mLauncherPackage = launcherPackage;
         mThemePickerPackage = themePickerPackage;
         mTargetPackageToCategories.put(ANDROID_PACKAGE, Sets.newHashSet(
@@ -170,12 +174,12 @@ public class ThemeOverlayApplier implements Dumpable {
      * Apply the set of overlay packages to the set of {@code UserHandle}s provided. Overlays that
      * affect sysui will also be applied to the system user.
      */
-    void applyCurrentUserOverlays(
+    public void applyCurrentUserOverlays(
             Map<String, OverlayIdentifier> categoryToPackage,
             FabricatedOverlay[] pendingCreation,
             int currentUser,
             Set<UserHandle> managedProfiles) {
-        mExecutor.execute(() -> {
+        mBgExecutor.execute(() -> {
 
             // Disable all overlays that have not been specified in the user setting.
             final Set<String> overlayCategoriesToDisable = new HashSet<>(THEME_CATEGORIES);

@@ -906,6 +906,21 @@ public class LocationProviderManagerTest {
     }
 
     @Test
+    public void testProviderRequest_DelayedRequest_Remove() {
+        mProvider.setProviderLocation(createLocation(NAME, mRandom));
+
+        ILocationListener listener1 = createMockLocationListener();
+        LocationRequest request1 = new LocationRequest.Builder(60000)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
+        mManager.unregisterLocationRequest(listener1);
+
+        mInjector.getAlarmHelper().incrementAlarmTime(60000);
+        assertThat(mProvider.getRequest().isActive()).isFalse();
+    }
+
+    @Test
     public void testProviderRequest_SpamRequesting() {
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
 

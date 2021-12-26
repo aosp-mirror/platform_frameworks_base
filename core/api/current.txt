@@ -9178,10 +9178,10 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void disconnect();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean discoverServices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean executeReliableWrite();
-    method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method public int getConnectionState(android.bluetooth.BluetoothDevice);
+    method @Deprecated public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @Deprecated public int getConnectionState(android.bluetooth.BluetoothDevice);
     method public android.bluetooth.BluetoothDevice getDevice();
-    method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
+    method @Deprecated public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
     method public android.bluetooth.BluetoothGattService getService(java.util.UUID);
     method public java.util.List<android.bluetooth.BluetoothGattService> getServices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean readCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
@@ -10091,6 +10091,7 @@ package android.content {
     method @Nullable public String getPackageName();
     method public int getUid();
     method public boolean isTrusted(@NonNull android.content.Context);
+    method @NonNull public static android.content.AttributionSource myAttributionSource();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.AttributionSource> CREATOR;
   }
@@ -21541,6 +21542,7 @@ package android.media {
   public class MediaActionSound {
     ctor public MediaActionSound();
     method public void load(int);
+    method public static boolean mustPlayShutterSound();
     method public void play(int);
     method public void release();
     field public static final int FOCUS_COMPLETE = 1; // 0x1
@@ -25723,11 +25725,14 @@ package android.media.tv {
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG2 = "internal_provider_flag2";
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG3 = "internal_provider_flag3";
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG4 = "internal_provider_flag4";
+    field public static final String COLUMN_INTERNAL_PROVIDER_ID = "internal_provider_id";
     field public static final String COLUMN_LONG_DESCRIPTION = "long_description";
+    field public static final String COLUMN_MULTI_SERIES_ID = "multi_series_id";
     field public static final String COLUMN_POSTER_ART_URI = "poster_art_uri";
     field public static final String COLUMN_RECORDING_PROHIBITED = "recording_prohibited";
     field public static final String COLUMN_REVIEW_RATING = "review_rating";
     field public static final String COLUMN_REVIEW_RATING_STYLE = "review_rating_style";
+    field public static final String COLUMN_SCRAMBLED = "scrambled";
     field public static final String COLUMN_SEARCHABLE = "searchable";
     field public static final String COLUMN_SEASON_DISPLAY_NUMBER = "season_display_number";
     field @Deprecated public static final String COLUMN_SEASON_NUMBER = "season_number";
@@ -25787,7 +25792,9 @@ package android.media.tv {
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG2 = "internal_provider_flag2";
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG3 = "internal_provider_flag3";
     field public static final String COLUMN_INTERNAL_PROVIDER_FLAG4 = "internal_provider_flag4";
+    field public static final String COLUMN_INTERNAL_PROVIDER_ID = "internal_provider_id";
     field public static final String COLUMN_LONG_DESCRIPTION = "long_description";
+    field public static final String COLUMN_MULTI_SERIES_ID = "multi_series_id";
     field public static final String COLUMN_POSTER_ART_URI = "poster_art_uri";
     field public static final String COLUMN_RECORDING_DATA_BYTES = "recording_data_bytes";
     field public static final String COLUMN_RECORDING_DATA_URI = "recording_data_uri";
@@ -38281,9 +38288,11 @@ package android.service.carrier {
 
   public abstract class CarrierService extends android.app.Service {
     ctor public CarrierService();
-    method public final void notifyCarrierNetworkChange(boolean);
+    method @Deprecated public final void notifyCarrierNetworkChange(boolean);
+    method public final void notifyCarrierNetworkChange(int, boolean);
     method @CallSuper public android.os.IBinder onBind(android.content.Intent);
-    method public abstract android.os.PersistableBundle onLoadConfig(android.service.carrier.CarrierIdentifier);
+    method @Deprecated public abstract android.os.PersistableBundle onLoadConfig(android.service.carrier.CarrierIdentifier);
+    method @Nullable public android.os.PersistableBundle onLoadConfig(int, @Nullable android.service.carrier.CarrierIdentifier);
     field public static final String CARRIER_SERVICE_INTERFACE = "android.service.carrier.CarrierService";
   }
 
@@ -42841,6 +42850,7 @@ package android.telephony {
     method public int getPhoneType();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PHONE_STATE}) public int getPreferredOpportunisticDataSubscription();
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState();
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState(boolean, boolean);
     method @Nullable public android.telephony.SignalStrength getSignalStrength();
     method public int getSimCarrierId();
     method @Nullable public CharSequence getSimCarrierIdName();
@@ -42893,8 +42903,10 @@ package android.telephony {
     method public boolean isWorldPhone();
     method @Deprecated public void listen(android.telephony.PhoneStateListener, int);
     method public void registerTelephonyCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
+    method public void registerTelephonyCallback(boolean, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void requestCellInfoUpdate(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
     method @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(android.telephony.NetworkScanRequest, java.util.concurrent.Executor, android.telephony.TelephonyScanManager.NetworkScanCallback);
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(boolean, @NonNull android.telephony.NetworkScanRequest, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyScanManager.NetworkScanCallback);
     method public void sendDialerSpecialCode(String);
     method public String sendEnvelopeWithStatus(String);
     method @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void sendUssdRequest(String, android.telephony.TelephonyManager.UssdResponseCallback, android.os.Handler);

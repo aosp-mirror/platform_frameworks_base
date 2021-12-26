@@ -16,6 +16,7 @@
 
 package com.android.server.location.gnss;
 
+import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
 import static android.location.provider.ProviderProperties.ACCURACY_FINE;
 import static android.location.provider.ProviderProperties.POWER_USAGE_HIGH;
 
@@ -43,6 +44,8 @@ import static com.android.server.location.gnss.hal.GnssNative.GNSS_POSITION_MODE
 import static com.android.server.location.gnss.hal.GnssNative.GNSS_POSITION_MODE_STANDALONE;
 import static com.android.server.location.gnss.hal.GnssNative.GNSS_POSITION_RECURRENCE_PERIODIC;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.max;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import android.app.AlarmManager;
@@ -85,6 +88,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.TimeUtils;
 
@@ -103,7 +107,9 @@ import com.android.server.location.provider.AbstractLocationProvider;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -156,6 +162,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final long LOCATION_UPDATE_DURATION_MILLIS = 10 * 1000;
     // Update duration extension multiplier for emergency REQUEST_LOCATION.
     private static final int EMERGENCY_LOCATION_UPDATE_DURATION_MULTIPLIER = 3;
+    // maximum length gnss batching may go for (1 day)
+    private static final int MIN_BATCH_INTERVAL_MS = (int) DateUtils.SECOND_IN_MILLIS;
+    private static final long MAX_BATCH_LENGTH_MS = DateUtils.DAY_IN_MILLIS;
+    private static final long MAX_BATCH_TIMESTAMP_DELTA_MS = 500;
 
     // Threadsafe class to hold stats reported in the Extras Bundle
     private static class LocationExtras {
@@ -245,6 +255,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private boolean mShutdown;
     private boolean mStarted;
     private boolean mBatchingStarted;
+    private AlarmManager.OnAlarmListener mBatchingAlarm;
     private long mStartedChangedElapsedRealtime;
     private int mFixInterval = 1000;
 
@@ -845,18 +856,15 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 mFixInterval = Integer.MAX_VALUE;
             }
 
-            // requested batch size, or zero to disable batching
-            long batchSize =
-                    mBatchingEnabled ? mProviderRequest.getMaxUpdateDelayMillis() / Math.max(
-                            mFixInterval, 1) : 0;
-            if (batchSize < getBatchSize()) {
-                batchSize = 0;
-            }
+            int batchIntervalMs = max(mFixInterval, MIN_BATCH_INTERVAL_MS);
+            long batchLengthMs = Math.min(mProviderRequest.getMaxUpdateDelayMillis(),
+                    MAX_BATCH_LENGTH_MS);
 
             // apply request to GPS engine
-            if (batchSize > 0) {
+            if (mBatchingEnabled && batchLengthMs / 2 >= batchIntervalMs) {
                 stopNavigating();
-                startBatching();
+                mFixInterval = batchIntervalMs;
+                startBatching(batchLengthMs);
             } else {
                 stopBatching();
 
@@ -875,7 +883,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     if (mFixInterval >= NO_FIX_TIMEOUT) {
                         // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
                         // and our fix interval is not short
-                        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                        mAlarmManager.set(ELAPSED_REALTIME_WAKEUP,
                                 SystemClock.elapsedRealtime() + NO_FIX_TIMEOUT, TAG,
                                 mTimeoutListener, mHandler);
                     }
@@ -1066,7 +1074,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
                 // and our fix interval is not short
                 if (mFixInterval >= NO_FIX_TIMEOUT) {
-                    mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    mAlarmManager.set(ELAPSED_REALTIME_WAKEUP,
                             SystemClock.elapsedRealtime() + NO_FIX_TIMEOUT, TAG, mTimeoutListener,
                             mHandler);
                 }
@@ -1090,12 +1098,37 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mAlarmManager.cancel(mWakeupListener);
     }
 
-    private void startBatching() {
+    private void startBatching(long batchLengthMs) {
+        long batchSize = batchLengthMs / mFixInterval;
+
         if (DEBUG) {
-            Log.d(TAG, "startBatching " + mFixInterval);
+            Log.d(TAG, "startBatching " + mFixInterval + " " + batchLengthMs);
         }
         if (mGnssNative.startBatch(MILLISECONDS.toNanos(mFixInterval), true)) {
             mBatchingStarted = true;
+
+            if (batchSize < getBatchSize()) {
+                // if the batch size is smaller than the hardware batch size, use an alarm to flush
+                // locations as appropriate
+                mBatchingAlarm = () -> {
+                    boolean flush = false;
+                    synchronized (mLock) {
+                        if (mBatchingAlarm != null) {
+                            flush = true;
+                            mAlarmManager.setExact(ELAPSED_REALTIME_WAKEUP,
+                                    SystemClock.elapsedRealtime() + batchLengthMs, TAG,
+                                    mBatchingAlarm, FgThread.getHandler());
+                        }
+                    }
+
+                    if (flush) {
+                        mGnssNative.flushBatch();
+                    }
+                };
+                mAlarmManager.setExact(ELAPSED_REALTIME_WAKEUP,
+                        SystemClock.elapsedRealtime() + batchLengthMs, TAG,
+                        mBatchingAlarm, FgThread.getHandler());
+            }
         } else {
             Log.e(TAG, "native_start_batch failed in startBatching()");
         }
@@ -1104,6 +1137,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private void stopBatching() {
         if (DEBUG) Log.d(TAG, "stopBatching");
         if (mBatchingStarted) {
+            if (mBatchingAlarm != null) {
+                mAlarmManager.cancel(mBatchingAlarm);
+                mBatchingAlarm = null;
+            }
             mGnssNative.stopBatch();
             mBatchingStarted = false;
         }
@@ -1120,7 +1157,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         // stop GPS until our next fix interval arrives
         stopNavigating();
         long now = SystemClock.elapsedRealtime();
-        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, now + mFixInterval, TAG,
+        mAlarmManager.set(ELAPSED_REALTIME_WAKEUP, now + mFixInterval, TAG,
                 mWakeupListener, mHandler);
     }
 
@@ -1485,16 +1522,50 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             Log.d(TAG, "Location batch of size " + locations.length + " reported");
         }
 
+        if (locations.length > 0) {
+            // attempt to fix up timestamps if necessary
+            if (locations.length > 1) {
+                // check any realtimes outside of expected bounds
+                boolean fixRealtime = false;
+                for (int i = locations.length - 2; i >= 0; i--) {
+                    long timeDeltaMs = locations[i + 1].getTime() - locations[i].getTime();
+                    long realtimeDeltaMs = locations[i + 1].getElapsedRealtimeMillis()
+                            - locations[i].getElapsedRealtimeMillis();
+                    if (abs(timeDeltaMs - realtimeDeltaMs) > MAX_BATCH_TIMESTAMP_DELTA_MS) {
+                        fixRealtime = true;
+                        break;
+                    }
+                }
+
+                if (fixRealtime) {
+                    // sort for monotonically increasing time before fixing realtime - realtime will
+                    // thus also be monotonically increasing
+                    Arrays.sort(locations,
+                            Comparator.comparingLong(Location::getTime));
+
+                    long expectedDeltaMs =
+                            locations[locations.length - 1].getTime()
+                                    - locations[locations.length - 1].getElapsedRealtimeMillis();
+                    for (int i = locations.length - 2; i >= 0; i--) {
+                        locations[i].setElapsedRealtimeNanos(
+                                MILLISECONDS.toNanos(
+                                        max(locations[i].getTime() - expectedDeltaMs, 0)));
+                    }
+                } else {
+                    // sort for monotonically increasing realttime
+                    Arrays.sort(locations,
+                            Comparator.comparingLong(Location::getElapsedRealtimeNanos));
+                }
+            }
+
+            reportLocation(LocationResult.wrap(locations).validate());
+        }
+
         Runnable[] listeners;
         synchronized (mLock) {
             listeners = mFlushListeners.toArray(new Runnable[0]);
             mFlushListeners.clear();
         }
-
-        if (locations.length > 0) {
-            reportLocation(LocationResult.wrap(locations).validate());
-        }
-
         for (Runnable listener : listeners) {
             listener.run();
         }

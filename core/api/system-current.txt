@@ -66,6 +66,7 @@ package android {
     field public static final String BIND_TRANSLATION_SERVICE = "android.permission.BIND_TRANSLATION_SERVICE";
     field public static final String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
+    field public static final String BLUETOOTH_MAP = "android.permission.BLUETOOTH_MAP";
     field public static final String BRICK = "android.permission.BRICK";
     field public static final String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final String BROADCAST_CLOSE_SYSTEM_DIALOGS = "android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS";
@@ -5840,9 +5841,11 @@ package android.media.tv {
     method @Nullable @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, @NonNull android.media.tv.TvInputInfo, @Nullable String, int, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.TvInputManager.HardwareCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void addBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean captureFrame(String, android.view.Surface, android.media.tv.TvStreamConfig);
+    method @NonNull public java.util.List<java.lang.String> getAvailableExtensionInterfaceNames(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(String);
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TUNED_INFO) public java.util.List<android.media.tv.TunedInfo> getCurrentTunedInfos();
     method @NonNull @RequiresPermission("android.permission.DVB_DEVICE") public java.util.List<android.media.tv.DvbDeviceInfo> getDvbDeviceList();
+    method @Nullable public android.os.IBinder getExtensionInterface(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public java.util.List<android.media.tv.TvInputHardwareInfo> getHardwareList();
     method @RequiresPermission(android.Manifest.permission.READ_CONTENT_RATING_SYSTEMS) public java.util.List<android.media.tv.TvContentRatingSystemInfo> getTvContentRatingSystemList();
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean isSingleSessionActive();
@@ -5873,6 +5876,9 @@ package android.media.tv {
 
   public abstract class TvInputService extends android.app.Service {
     method @Nullable public android.os.IBinder createExtension();
+    method @NonNull public java.util.List<java.lang.String> getAvailableExtensionInterfaceNames();
+    method @Nullable public android.os.IBinder getExtensionInterface(@NonNull String);
+    method @Nullable public String getExtensionInterfacePermission(@NonNull String);
     method @Nullable public android.media.tv.TvInputInfo onHardwareAdded(android.media.tv.TvInputHardwareInfo);
     method @Nullable public String onHardwareRemoved(android.media.tv.TvInputHardwareInfo);
     method @Nullable public android.media.tv.TvInputInfo onHdmiDeviceAdded(android.hardware.hdmi.HdmiDeviceInfo);
@@ -11697,6 +11703,14 @@ package android.telephony {
     field public static final int ROAMING_TYPE_UNKNOWN = 1; // 0x1
   }
 
+  public final class SignalStrengthUpdateRequest implements android.os.Parcelable {
+    method public boolean isSystemThresholdReportingRequestedWhileIdle();
+  }
+
+  public static final class SignalStrengthUpdateRequest.Builder {
+    method @NonNull @RequiresPermission("android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH") public android.telephony.SignalStrengthUpdateRequest.Builder setSystemThresholdReportingRequestedWhileIdle(boolean);
+  }
+
   public final class SmsCbCmasInfo implements android.os.Parcelable {
     ctor public SmsCbCmasInfo(int, int, int, int, int, int);
     method public int describeContents();
@@ -11992,6 +12006,7 @@ package android.telephony {
   }
 
   public class TelephonyManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void addCarrierPrivilegesListener(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CarrierPrivilegesListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) @WorkerThread public void bootstrapAuthenticationRequest(int, @NonNull android.net.Uri, @NonNull android.telephony.gba.UaSecurityProtocolIdentifier, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.BootstrapAuthenticationCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void call(String, String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult changeIccLockPin(@NonNull String, @NonNull String);
@@ -12016,6 +12031,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCarrierPrivilegeStatus(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<java.lang.String> getCarrierPrivilegedPackagesForAllActiveSubscriptions();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.CarrierRestrictionRules getCarrierRestrictionRules();
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getCarrierServicePackageName();
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getCarrierServicePackageNameForLogicalSlot(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCdmaEnhancedRoamingIndicatorDisplayNumber();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMdn();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMdn(int);
@@ -12084,6 +12101,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyOtaEmergencyNumberDbInstalled();
     method @RequiresPermission(android.Manifest.permission.REBOOT) public int prepareForUnattendedReboot();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean rebootRadio();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void removeCarrierPrivilegesListener(@NonNull android.telephony.TelephonyManager.CarrierPrivilegesListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void reportDefaultNetworkStatus(boolean);
     method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.MODIFY_PHONE_STATE}) public void requestCellInfoUpdate(@NonNull android.os.WorkSource, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void requestModemActivityInfo(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telephony.ModemActivityInfo,android.telephony.TelephonyManager.ModemActivityInfoException>);
@@ -12257,6 +12275,10 @@ package android.telephony {
     field public static final int RESULT_ERROR_NOT_SUPPORTED = 3; // 0x3
     field public static final int RESULT_ERROR_UNKNOWN = 1; // 0x1
     field public static final int RESULT_SUCCESS = 0; // 0x0
+  }
+
+  public static interface TelephonyManager.CarrierPrivilegesListener {
+    method public void onCarrierPrivilegesChanged(@NonNull java.util.List<java.lang.String>, @NonNull int[]);
   }
 
   public static class TelephonyManager.ModemActivityInfoException extends java.lang.Exception {
@@ -13489,12 +13511,14 @@ package android.telephony.ims {
   }
 
   public final class RcsClientConfiguration implements android.os.Parcelable {
-    ctor public RcsClientConfiguration(@NonNull String, @NonNull String, @NonNull String, @NonNull String);
+    ctor @Deprecated public RcsClientConfiguration(@NonNull String, @NonNull String, @NonNull String, @NonNull String);
+    ctor public RcsClientConfiguration(@NonNull String, @NonNull String, @NonNull String, @NonNull String, boolean);
     method public int describeContents();
     method @NonNull public String getClientVendor();
     method @NonNull public String getClientVersion();
     method @NonNull public String getRcsProfile();
     method @NonNull public String getRcsVersion();
+    method public boolean isRcsEnabledByUser();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RcsClientConfiguration> CREATOR;
     field public static final String RCS_PROFILE_1_0 = "UP_1.0";
@@ -13631,6 +13655,7 @@ package android.telephony.ims {
     field public static final int PUBLISH_STATE_NOT_PUBLISHED = 2; // 0x2
     field public static final int PUBLISH_STATE_OK = 1; // 0x1
     field public static final int PUBLISH_STATE_OTHER_ERROR = 6; // 0x6
+    field public static final int PUBLISH_STATE_PUBLISHING = 7; // 0x7
     field public static final int PUBLISH_STATE_RCS_PROVISION_ERROR = 4; // 0x4
     field public static final int PUBLISH_STATE_REQUEST_TIMEOUT = 5; // 0x5
     field public static final int PUBLISH_STATE_VOICE_PROVISION_ERROR = 3; // 0x3
@@ -13893,6 +13918,7 @@ package android.telephony.ims.feature {
 package android.telephony.ims.stub {
 
   public interface CapabilityExchangeEventListener {
+    method public default void onPublishUpdated(int, @NonNull String, int, @NonNull String) throws android.telephony.ims.ImsException;
     method public void onRemoteCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.Set<java.lang.String>, @NonNull android.telephony.ims.stub.CapabilityExchangeEventListener.OptionsRequestCallback) throws android.telephony.ims.ImsException;
     method public void onRequestPublishCapabilities(int) throws android.telephony.ims.ImsException;
     method public void onUnpublish() throws android.telephony.ims.ImsException;

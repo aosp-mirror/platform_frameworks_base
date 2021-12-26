@@ -1,7 +1,7 @@
 # TODO(b/196084106): Refine and optimize this configuration. Note that this
 # configuration is only used when `SOONG_CONFIG_ANDROID_SYSTEM_OPTIMIZE_JAVA=true`.
 -keep,allowoptimization,allowaccessmodification class ** {
-  *;
+  !synthetic *;
 }
 
 # Various classes subclassed in ethernet-service (avoid marking final).
@@ -9,3 +9,13 @@
 
 # Referenced via CarServiceHelperService in car-frameworks-service (avoid removing).
 -keep public class com.android.server.utils.Slogf { *; }
+
+# Allows making private and protected methods/fields public as part of
+# optimization. This enables inlining of trivial getter/setter methods.
+-allowaccessmodification
+
+# Disallow accessmodification for soundtrigger classes. Logging via reflective
+# public member traversal can cause infinite loops. See b/210901706.
+-keep,allowoptimization class com.android.server.soundtrigger_middleware.** {
+  !synthetic *;
+}

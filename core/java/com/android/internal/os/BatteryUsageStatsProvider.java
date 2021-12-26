@@ -29,6 +29,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -234,8 +235,9 @@ public class BatteryUsageStatsProvider {
         final boolean includePowerModels = (query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
 
+        final String[] customEnergyConsumerNames = mStats.getCustomEnergyConsumerNames();
         final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                mStats.getCustomEnergyConsumerNames(), includePowerModels);
+                customEnergyConsumerNames, includePowerModels);
         if (mBatteryUsageStatsStore == null) {
             Log.e(TAG, "BatteryUsageStatsStore is unavailable");
             return builder.build();
@@ -247,7 +249,14 @@ public class BatteryUsageStatsProvider {
                 final BatteryUsageStats snapshot =
                         mBatteryUsageStatsStore.loadBatteryUsageStats(timestamp);
                 if (snapshot != null) {
-                    builder.add(snapshot);
+                    if (Arrays.equals(snapshot.getCustomPowerComponentNames(),
+                            customEnergyConsumerNames)) {
+                        builder.add(snapshot);
+                    } else {
+                        Log.w(TAG, "Ignoring older BatteryUsageStats snapshot, which has different "
+                                + "custom power components: "
+                                + Arrays.toString(snapshot.getCustomPowerComponentNames()));
+                    }
                 }
             }
         }

@@ -18,7 +18,6 @@ package android.bluetooth;
 
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.Attributable;
 import android.content.AttributionSource;
 import android.os.Build;
 import android.os.Parcel;
