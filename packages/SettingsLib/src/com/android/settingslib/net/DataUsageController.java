@@ -32,7 +32,6 @@ import android.net.INetworkStatsSession;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkTemplate;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -172,7 +171,7 @@ public class DataUsageController {
                 return bucket.getRxBytes() + bucket.getTxBytes();
             }
             Log.w(TAG, "Failed to get data usage, no entry data");
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.w(TAG, "Failed to get data usage, remote call failed");
         }
         return -1L;
