@@ -2279,7 +2279,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingIntentController = hasHandlerThread
                 ? new PendingIntentController(handlerThread.getLooper(), mUserController,
                         mConstants) : null;
-        mAppRestrictionController = new AppRestrictionController(mContext);
+        mAppRestrictionController = new AppRestrictionController(mContext, this);
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
@@ -2389,7 +2389,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingIntentController = new PendingIntentController(
                 mHandlerThread.getLooper(), mUserController, mConstants);
 
-        mAppRestrictionController = new AppRestrictionController(mContext);
+        mAppRestrictionController = new AppRestrictionController(mContext, this);
 
         mUseFifoUiScheduling = SystemProperties.getInt("sys.use_fifo_ui", 0) != 0;
 
@@ -15857,6 +15857,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (mProcLock) {
                     mDeviceIdleAllowlist = allAppids;
                     mDeviceIdleExceptIdleAllowlist = exceptIdleAppids;
+                    mAppRestrictionController.setDeviceIdleAllowlist(allAppids, exceptIdleAppids);
                 }
             }
         }

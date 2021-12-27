@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_EXEMPTED;
@@ -25,6 +26,7 @@ import static android.app.ActivityManager.RESTRICTION_LEVEL_UNKNOWN;
 import static android.app.ActivityManager.UID_OBSERVER_ACTIVE;
 import static android.app.ActivityManager.UID_OBSERVER_GONE;
 import static android.app.ActivityManager.UID_OBSERVER_IDLE;
+import static android.app.ActivityManager.UID_OBSERVER_PROCSTATE;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_DEFAULT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_SYSTEM;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
@@ -53,6 +55,7 @@ import static android.os.Process.SYSTEM_UID;
 import static com.android.internal.notification.SystemNotificationChannels.ABUSIVE_BACKGROUND_APPS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.AppFGSTracker.foregroundServiceTypeToIndex;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
@@ -78,6 +81,8 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ServiceInfo;
+import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.database.ContentObserver;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
@@ -113,6 +118,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -158,9 +164,21 @@ public final class AppRestrictionController {
     // No lock is needed as it's accessed in bg handler thread only.
     private final ArrayList<Runnable> mTmpRunnables = new ArrayList<>();
 
+    /**
+     * Power-save allowlisted app-ids (not including except-idle-allowlisted ones).
+     */
+    private int[] mDeviceIdleAllowlist = new int[0]; // No lock is needed.
+
+    /**
+     * Power-save allowlisted app-ids (including except-idle-allowlisted ones).
+     */
+    private int[] mDeviceIdleExceptIdleAllowlist = new int[0]; // No lock is needed.
+
     private final Object mLock = new Object();
     private final Injector mInjector;
     private final NotificationHelper mNotificationHelper;
+
+    final ActivityManagerService mActivityManagerService;
 
     /**
      * The restriction levels that each package is on, the levels here are defined in
@@ -359,7 +377,8 @@ public final class AppRestrictionController {
         private @RestrictionLevel int getLastRestrictionLevel(int uid, String packageName) {
             synchronized (mLock) {
                 final PkgSettings settings = mRestrictionLevels.get(uid, packageName);
-                return settings.getLastRestrictionLevel();
+                return settings == null
+                        ? RESTRICTION_LEVEL_UNKNOWN : settings.mLastRestrictionLevel;
             }
         }
 
@@ -563,25 +582,27 @@ public final class AppRestrictionController {
     private final IUidObserver mUidObserver =
             new IUidObserver.Stub() {
                 @Override
-                public void onUidGone(int uid, boolean disabled) {
-                    mBgHandler.obtainMessage(BgHandler.MSG_UID_INACTIVE, uid, disabled ? 1 : 0)
+                public void onUidStateChanged(int uid, int procState, long procStateSeq,
+                        int capability) {
+                    mBgHandler.obtainMessage(BgHandler.MSG_UID_PROC_STATE_CHANGED, uid, procState)
                             .sendToTarget();
                 }
 
                 @Override
                 public void onUidIdle(int uid, boolean disabled) {
-                    mBgHandler.obtainMessage(BgHandler.MSG_UID_INACTIVE, uid, disabled ? 1 : 0)
+                    mBgHandler.obtainMessage(BgHandler.MSG_UID_IDLE, uid, disabled ? 1 : 0)
+                            .sendToTarget();
+                }
+
+                @Override
+                public void onUidGone(int uid, boolean disabled) {
+                    mBgHandler.obtainMessage(BgHandler.MSG_UID_GONE, uid, disabled ? 1 : 0)
                             .sendToTarget();
                 }
 
                 @Override
                 public void onUidActive(int uid) {
                     mBgHandler.obtainMessage(BgHandler.MSG_UID_ACTIVE, uid, 0).sendToTarget();
-                }
-
-                @Override
-                public void onUidStateChanged(int uid, int procState, long procStateSeq,
-                        int capability) {
                 }
 
                 @Override
@@ -597,13 +618,14 @@ public final class AppRestrictionController {
         mRestrictionListeners.add(listener);
     }
 
-    AppRestrictionController(final Context context) {
-        this(new Injector(context));
+    AppRestrictionController(final Context context, final ActivityManagerService service) {
+        this(new Injector(context), service);
     }
 
-    AppRestrictionController(final Injector injector) {
+    AppRestrictionController(final Injector injector, final ActivityManagerService service) {
         mInjector = injector;
         mContext = injector.getContext();
+        mActivityManagerService = service;
         mBgHandlerThread = new HandlerThread("bgres-controller");
         mBgHandlerThread.start();
         mBgHandler = new BgHandler(mBgHandlerThread.getLooper(), injector);
@@ -644,8 +666,8 @@ public final class AppRestrictionController {
     private void registerForUidObservers() {
         try {
             mInjector.getIActivityManager().registerUidObserver(mUidObserver,
-                    UID_OBSERVER_ACTIVE | UID_OBSERVER_GONE | UID_OBSERVER_IDLE,
-                    ActivityManager.PROCESS_STATE_UNKNOWN, "android");
+                    UID_OBSERVER_ACTIVE | UID_OBSERVER_GONE | UID_OBSERVER_IDLE
+                    | UID_OBSERVER_PROCSTATE, PROCESS_STATE_FOREGROUND_SERVICE, "android");
         } catch (RemoteException e) {
             // Intra-process call, it won't happen.
         }
@@ -796,11 +818,113 @@ public final class AppRestrictionController {
         return mRestrictionSettings.getRestrictionLevel(packageName, userId);
     }
 
+    /**
+     * @return The total foreground service durations for the given package/uid with given
+     * foreground service type, or the total durations regardless the type if the given type is 0.
+     */
+    long getForegroundServiceTotalDurations(String packageName, int uid, long now,
+            @ForegroundServiceType int serviceType) {
+        return mInjector.getAppFGSTracker().getTotalDurations(packageName, uid, now,
+                foregroundServiceTypeToIndex(serviceType));
+    }
+
+    /**
+     * @return The total foreground service durations for the given uid with given
+     * foreground service type, or the total durations regardless the type if the given type is 0.
+     */
+    long getForegroundServiceTotalDurations(int uid, long now,
+            @ForegroundServiceType int serviceType) {
+        return mInjector.getAppFGSTracker().getTotalDurations(uid, now,
+                foregroundServiceTypeToIndex(serviceType));
+    }
+
+    /**
+     * @return The foreground service durations since given timestamp for the given package/uid
+     * with given foreground service type, or the total durations regardless the type if the given
+     * type is 0.
+     */
+    long getForegroundServiceTotalDurationsSince(String packageName, int uid, long since, long now,
+            @ForegroundServiceType int serviceType) {
+        return mInjector.getAppFGSTracker().getTotalDurationsSince(packageName, uid, since, now,
+                foregroundServiceTypeToIndex(serviceType));
+    }
+
+    /**
+     * @return The foreground service durations since given timestamp for the given uid with given
+     * foreground service type, or the total durations regardless the type if the given type is 0.
+     */
+    long getForegroundServiceTotalDurationsSince(int uid, long since, long now,
+            @ForegroundServiceType int serviceType) {
+        return mInjector.getAppFGSTracker().getTotalDurationsSince(uid, since, now,
+                foregroundServiceTypeToIndex(serviceType));
+    }
+
+    /**
+     * @return The total durations for the given package/uid with active media session.
+     */
+    long getMediaSessionTotalDurations(String packageName, int uid, long now) {
+        return mInjector.getAppMediaSessionTracker().getTotalDurations(packageName, uid, now);
+    }
+
+    /**
+     * @return The total durations for the given uid with active media session.
+     */
+    long getMediaSessionTotalDurations(int uid, long now) {
+        return mInjector.getAppMediaSessionTracker().getTotalDurations(uid, now);
+    }
+
+    /**
+     * @return The durations since given timestamp for the given package/uid with
+     * active media session.
+     */
+    long getMediaSessionTotalDurationsSince(String packageName, int uid, long since, long now) {
+        return mInjector.getAppMediaSessionTracker().getTotalDurationsSince(packageName, uid, since,
+                now);
+    }
+
+    /**
+     * @return The durations since given timestamp for the given uid with active media session.
+     */
+    long getMediaSessionTotalDurationsSince(int uid, long since, long now) {
+        return mInjector.getAppMediaSessionTracker().getTotalDurationsSince(uid, since, now);
+    }
+
+    /**
+     * @return The durations over the given window, where the given package/uid has either
+     * foreground services with type "mediaPlayback" running, or active media session running.
+     */
+    long getCompositeMediaPlaybackDurations(String packageName, int uid, long now, long window) {
+        final long since = Math.max(0, now - window);
+        final long mediaPlaybackDuration = Math.max(
+                getMediaSessionTotalDurationsSince(packageName, uid, since, now),
+                getForegroundServiceTotalDurationsSince(packageName, uid, since, now,
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK));
+        return mediaPlaybackDuration;
+    }
+
+    /**
+     * @return The durations over the given window, where the given uid has either foreground
+     * services with type "mediaPlayback" running, or active media session running.
+     */
+    long getCompositeMediaPlaybackDurations(int uid, long now, long window) {
+        final long since = Math.max(0, now - window);
+        final long mediaPlaybackDuration = Math.max(
+                getMediaSessionTotalDurationsSince(uid, since, now),
+                getForegroundServiceTotalDurationsSince(uid, since, now,
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK));
+        return mediaPlaybackDuration;
+    }
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix);
         pw.println("BACKGROUND RESTRICTION LEVEL SETTINGS");
+        prefix = "  " + prefix;
         synchronized (mLock) {
-            mRestrictionSettings.dumpLocked(pw, prefix + "  ");
+            mRestrictionSettings.dumpLocked(pw, prefix);
+        }
+        for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
+            pw.println();
+            mAppStateTrackers.get(i).dump(pw, prefix);
         }
     }
 
@@ -970,6 +1094,18 @@ public final class AppRestrictionController {
         mNotificationHelper.cancelRequestBgRestrictedIfNecessary(packageName, uid);
     }
 
+    void handleUidProcStateChanged(int uid, int procState) {
+        for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
+            mAppStateTrackers.get(i).onUidProcStateChanged(uid, procState);
+        }
+    }
+
+    void handleUidGone(int uid) {
+        for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
+            mAppStateTrackers.get(i).onUidGone(uid);
+        }
+    }
+
     static class NotificationHelper {
         static final String PACKAGE_SCHEME = "package";
         static final String GROUP_KEY = "com.android.app.abusive_bg_apps";
@@ -1044,6 +1180,9 @@ public final class AppRestrictionController {
             synchronized (mLock) {
                 final RestrictionSettings.PkgSettings settings = mBgController.mRestrictionSettings
                         .getRestrictionSettingsLocked(uid, packageName);
+                if (settings == null) {
+                    return 0;
+                }
 
                 final long now = SystemClock.elapsedRealtime();
                 final long lastNotificationShownTimeElapsed =
@@ -1137,10 +1276,12 @@ public final class AppRestrictionController {
             synchronized (mLock) {
                 final RestrictionSettings.PkgSettings settings = mBgController.mRestrictionSettings
                         .getRestrictionSettingsLocked(uid, packageName);
-                final int notificationId =
-                        settings.getNotificationId(NOTIFICATION_TYPE_ABUSIVE_CURRENT_DRAIN);
-                if (notificationId > 0) {
-                    mNotificationManager.cancel(notificationId);
+                if (settings != null) {
+                    final int notificationId =
+                            settings.getNotificationId(NOTIFICATION_TYPE_ABUSIVE_CURRENT_DRAIN);
+                    if (notificationId > 0) {
+                        mNotificationManager.cancel(notificationId);
+                    }
                 }
             }
         }
@@ -1149,10 +1290,12 @@ public final class AppRestrictionController {
             synchronized (mLock) {
                 final RestrictionSettings.PkgSettings settings = mBgController.mRestrictionSettings
                         .getRestrictionSettingsLocked(uid, packageName);
-                final int notificationId =
-                        settings.getNotificationId(NOTIFICATION_TYPE_LONG_RUNNING_FGS);
-                if (notificationId > 0) {
-                    mNotificationManager.cancel(notificationId);
+                if (settings != null) {
+                    final int notificationId =
+                            settings.getNotificationId(NOTIFICATION_TYPE_LONG_RUNNING_FGS);
+                    if (notificationId > 0) {
+                        mNotificationManager.cancel(notificationId);
+                    }
                 }
             }
         }
@@ -1193,6 +1336,21 @@ public final class AppRestrictionController {
                 }
             });
         }
+    }
+
+    boolean isOnDeviceIdleAllowlist(int uid, boolean allowExceptIdle) {
+        final int appId = UserHandle.getAppId(uid);
+
+        final int[] allowlist = allowExceptIdle
+                ? mDeviceIdleExceptIdleAllowlist
+                : mDeviceIdleAllowlist;
+
+        return Arrays.binarySearch(allowlist, appId) >= 0;
+    }
+
+    void setDeviceIdleAllowlist(int[] allAppids, int[] exceptIdleAppids) {
+        mDeviceIdleAllowlist = allAppids;
+        mDeviceIdleExceptIdleAllowlist = exceptIdleAppids;
     }
 
     /**
@@ -1242,15 +1400,21 @@ public final class AppRestrictionController {
         mNotificationHelper.cancelLongRunningFGSNotificationIfNecessary(packageName, uid);
     }
 
+    String getPackageName(int pid) {
+        return mInjector.getPackageName(pid);
+    }
+
     static class BgHandler extends Handler {
         static final int MSG_BACKGROUND_RESTRICTION_CHANGED = 0;
         static final int MSG_APP_RESTRICTION_LEVEL_CHANGED = 1;
         static final int MSG_APP_STANDBY_BUCKET_CHANGED = 2;
         static final int MSG_USER_INTERACTION_STARTED = 3;
         static final int MSG_REQUEST_BG_RESTRICTED = 4;
-        static final int MSG_UID_INACTIVE = 5;
+        static final int MSG_UID_IDLE = 5;
         static final int MSG_UID_ACTIVE = 6;
-        static final int MSG_CANCEL_REQUEST_BG_RESTRICTED = 7;
+        static final int MSG_UID_GONE = 7;
+        static final int MSG_UID_PROC_STATE_CHANGED = 8;
+        static final int MSG_CANCEL_REQUEST_BG_RESTRICTED = 9;
 
         private final Injector mInjector;
 
@@ -1279,7 +1443,7 @@ public final class AppRestrictionController {
                 case MSG_REQUEST_BG_RESTRICTED: {
                     c.handleRequestBgRestricted((String) msg.obj, msg.arg1);
                 } break;
-                case MSG_UID_INACTIVE : {
+                case MSG_UID_IDLE: {
                     c.handleUidInactive(msg.arg1, msg.arg2 == 1);
                 } break;
                 case MSG_UID_ACTIVE: {
@@ -1287,6 +1451,14 @@ public final class AppRestrictionController {
                 } break;
                 case MSG_CANCEL_REQUEST_BG_RESTRICTED: {
                     c.handleCancelRequestBgRestricted((String) msg.obj, msg.arg1);
+                } break;
+                case MSG_UID_PROC_STATE_CHANGED: {
+                    c.handleUidProcStateChanged(msg.arg1, msg.arg2);
+                } break;
+                case MSG_UID_GONE: {
+                    // It also means this UID is inactive now.
+                    c.handleUidInactive(msg.arg1, msg.arg2 == 1);
+                    c.handleUidGone(msg.arg1);
                 } break;
             }
         }
@@ -1303,6 +1475,8 @@ public final class AppRestrictionController {
         private UserManagerInternal mUserManagerInternal;
         private PackageManagerInternal mPackageManagerInternal;
         private NotificationManager mNotificationManager;
+        private AppFGSTracker mAppFGSTracker;
+        private AppMediaSessionTracker mAppMediaSessionTracker;
 
         Injector(Context context) {
             mContext = context;
@@ -1314,8 +1488,11 @@ public final class AppRestrictionController {
 
         void initAppStateTrackers(AppRestrictionController controller) {
             mAppRestrictionController = controller;
+            mAppFGSTracker = new AppFGSTracker(mContext, controller);
+            mAppMediaSessionTracker = new AppMediaSessionTracker(mContext, controller);
             controller.mAppStateTrackers.add(new AppBatteryTracker(mContext, controller));
-            controller.mAppStateTrackers.add(new AppFGSTracker(mContext, controller));
+            controller.mAppStateTrackers.add(mAppFGSTracker);
+            controller.mAppStateTrackers.add(mAppMediaSessionTracker);
         }
 
         AppRestrictionController getAppRestrictionController() {
@@ -1378,6 +1555,33 @@ public final class AppRestrictionController {
                 mNotificationManager = getContext().getSystemService(NotificationManager.class);
             }
             return mNotificationManager;
+        }
+
+        AppFGSTracker getAppFGSTracker() {
+            return mAppFGSTracker;
+        }
+
+        AppMediaSessionTracker getAppMediaSessionTracker() {
+            return mAppMediaSessionTracker;
+        }
+
+        ActivityManagerService getActivityManagerService() {
+            return mAppRestrictionController.mActivityManagerService;
+        }
+
+        String getPackageName(int pid) {
+            final ActivityManagerService am = getActivityManagerService();
+            final ProcessRecord app;
+            synchronized (am.mPidsSelfLocked) {
+                app = am.mPidsSelfLocked.get(pid);
+                if (app != null) {
+                    final ApplicationInfo ai = app.info;
+                    if (ai != null) {
+                        return ai.packageName;
+                    }
+                }
+            }
+            return null;
         }
     }
 

@@ -170,6 +170,15 @@ public class ServiceInfo extends ComponentInfo
     public static final int FOREGROUND_SERVICE_TYPE_MICROPHONE = 1 << 7;
 
     /**
+     * The number of foreground service types, this doesn't include
+     * the {@link #FOREGROUND_SERVICE_TYPE_MANIFEST} and {@link #FOREGROUND_SERVICE_TYPE_NONE}
+     * as they're not real service types.
+     *
+     * @hide
+     */
+    public static final int NUM_OF_FOREGROUND_SERVICE_TYPES = 8;
+
+    /**
      * A special value indicates to use all types set in manifest file.
      */
     public static final int FOREGROUND_SERVICE_TYPE_MANIFEST = -1;
@@ -237,6 +246,38 @@ public class ServiceInfo extends ComponentInfo
         return "ServiceInfo{"
             + Integer.toHexString(System.identityHashCode(this))
             + " " + name + "}";
+    }
+
+    /**
+     * @return The label for the given foreground service type.
+     *
+     * @hide
+     */
+    public static String foregroundServiceTypeToLabel(@ForegroundServiceType int type) {
+        switch (type) {
+            case FOREGROUND_SERVICE_TYPE_MANIFEST:
+                return "manifest";
+            case FOREGROUND_SERVICE_TYPE_NONE:
+                return "none";
+            case FOREGROUND_SERVICE_TYPE_DATA_SYNC:
+                return "dataSync";
+            case FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK:
+                return "mediaPlayback";
+            case FOREGROUND_SERVICE_TYPE_PHONE_CALL:
+                return "phoneCall";
+            case FOREGROUND_SERVICE_TYPE_LOCATION:
+                return "location";
+            case FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE:
+                return "connectedDevice";
+            case FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION:
+                return "mediaProjection";
+            case FOREGROUND_SERVICE_TYPE_CAMERA:
+                return "camera";
+            case FOREGROUND_SERVICE_TYPE_MICROPHONE:
+                return "microphone";
+            default:
+                return "unknown";
+        }
     }
 
     public int describeContents() {

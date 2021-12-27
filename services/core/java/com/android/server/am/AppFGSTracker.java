@@ -16,7 +16,13 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.RESTRICTION_LEVEL_UNKNOWN;
+import static android.Manifest.permission.ACCESS_BACKGROUND_LOCATION;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
+import static android.content.pm.ServiceInfo.NUM_OF_FOREGROUND_SERVICE_TYPES;
+import static android.content.pm.ServiceInfo.foregroundServiceTypeToLabel;
+import static android.os.PowerExemptionManager.REASON_DENIED;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -25,34 +31,37 @@ import static com.android.server.am.BaseAppStateTracker.ONE_DAY;
 import static com.android.server.am.BaseAppStateTracker.ONE_HOUR;
 
 import android.annotation.NonNull;
-import android.annotation.UserIdInt;
-import android.app.ActivityManager.RestrictionLevel;
 import android.app.ActivityManagerInternal.ForegroundServiceStateListener;
+import android.app.IProcessObserver;
 import android.content.Context;
+import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerExemptionManager.ReasonCode;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.ProcessMap;
 import com.android.server.am.AppFGSTracker.AppFGSPolicy;
+import com.android.server.am.AppFGSTracker.PackageDurations;
+import com.android.server.am.BaseAppStateEventsTracker.BaseAppStateEventsPolicy;
 import com.android.server.am.BaseAppStateTracker.Injector;
 
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
  * The tracker for monitoring abusive (long-running) FGS.
  */
-final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
+final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, PackageDurations>
         implements ForegroundServiceStateListener {
     static final String TAG = TAG_WITH_CLASS_NAME ? "AppFGSTracker" : TAG_AM;
 
@@ -60,11 +69,27 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
 
     private final MyHandler mHandler;
 
-    @GuardedBy("mLock")
-    private final ProcessMap<PackageDurations> mPkgFgsDurations = new ProcessMap<>();
-
     // Unlocked since it's only accessed in single thread.
-    private final ArraySet<PackageDurations> mTmpPkgDurations = new ArraySet<>();
+    private final ArrayMap<PackageDurations, Long> mTmpPkgDurations = new ArrayMap<>();
+
+    final IProcessObserver.Stub mProcessObserver = new IProcessObserver.Stub() {
+        @Override
+        public void onForegroundActivitiesChanged(int pid, int uid, boolean fg) {
+        }
+
+        @Override
+        public void onForegroundServicesChanged(int pid, int uid, int serviceTypes) {
+            final String packageName = mAppRestrictionController.getPackageName(pid);
+            if (packageName != null) {
+                mHandler.obtainMessage(MyHandler.MSG_FOREGROUND_SERVICES_CHANGED,
+                        uid, serviceTypes, packageName).sendToTarget();
+            }
+        }
+
+        @Override
+        public void onProcessDied(int pid, int uid) {
+        }
+    };
 
     @Override
     public void onForegroundServiceStateChanged(String packageName,
@@ -76,7 +101,8 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
     private static class MyHandler extends Handler {
         static final int MSG_FOREGROUND_SERVICES_STARTED = 0;
         static final int MSG_FOREGROUND_SERVICES_STOPPED = 1;
-        static final int MSG_CHECK_LONG_RUNNING_FGS = 2;
+        static final int MSG_FOREGROUND_SERVICES_CHANGED = 2;
+        static final int MSG_CHECK_LONG_RUNNING_FGS = 3;
 
         private final AppFGSTracker mTracker;
 
@@ -95,6 +121,10 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
                 case MSG_FOREGROUND_SERVICES_STOPPED:
                     mTracker.handleForegroundServicesChanged(
                             (String) msg.obj, msg.arg1, msg.arg2, false);
+                    break;
+                case MSG_FOREGROUND_SERVICES_CHANGED:
+                    mTracker.handleForegroundServicesChanged(
+                            (String) msg.obj, msg.arg1, msg.arg2);
                     break;
                 case MSG_CHECK_LONG_RUNNING_FGS:
                     mTracker.checkLongRunningFgs();
@@ -118,28 +148,44 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
     void onSystemReady() {
         super.onSystemReady();
         mInjector.getActivityManagerInternal().addForegroundServiceStateListener(this);
+        mInjector.getActivityManagerInternal().registerProcessObserver(mProcessObserver);
     }
 
     @VisibleForTesting
+    @Override
     void reset() {
         mHandler.removeMessages(MyHandler.MSG_CHECK_LONG_RUNNING_FGS);
-        synchronized (mLock) {
-            mPkgFgsDurations.clear();
-        }
+        super.reset();
+    }
+
+    @Override
+    public PackageDurations createAppStateEvents(int uid, String packageName) {
+        return new PackageDurations(uid, packageName, mInjector.getPolicy());
+    }
+
+    @Override
+    public PackageDurations createAppStateEvents(PackageDurations other) {
+        return new PackageDurations(other);
     }
 
     private void handleForegroundServicesChanged(String packageName, int pid, int uid,
             boolean started) {
-        if (!mInjector.getPolicy().isEnabled() || mInjector.getPolicy().shouldExemptUid(uid)) {
+        if (!mInjector.getPolicy().isEnabled()) {
             return;
         }
         final long now = SystemClock.elapsedRealtime();
         boolean longRunningFGSGone = false;
+        final int exemptReason = mInjector.getPolicy().shouldExemptUid(uid);
+        if (DEBUG_BACKGROUND_FGS_TRACKER) {
+            Slog.i(TAG, (started ? "Starting" : "Stopping") + " fgs in "
+                    + packageName + "/" + UserHandle.formatUid(uid)
+                    + " exemptReason=" + exemptReason);
+        }
         synchronized (mLock) {
-            PackageDurations pkg = mPkgFgsDurations.get(packageName, uid);
+            PackageDurations pkg = mPkgEvents.get(uid, packageName);
             if (pkg == null) {
-                pkg = new PackageDurations(uid, packageName);
-                mPkgFgsDurations.put(packageName, uid, pkg);
+                pkg = createAppStateEvents(uid, packageName);
+                mPkgEvents.put(uid, packageName, pkg);
             }
             final boolean wasLongRunning = pkg.isLongRunning();
             pkg.addEvent(started, now);
@@ -147,6 +193,7 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
             if (longRunningFGSGone) {
                 pkg.setIsLongRunning(false);
             }
+            pkg.mExemptReason = exemptReason;
             // Reschedule the checks.
             scheduleDurationCheckLocked(now);
         }
@@ -159,24 +206,26 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
     @GuardedBy("mLock")
     private void scheduleDurationCheckLocked(long now) {
         // Look for the active FGS with longest running time till now.
-        final ArrayMap<String, SparseArray<PackageDurations>> map = mPkgFgsDurations.getMap();
+        final SparseArray<ArrayMap<String, PackageDurations>> map = mPkgEvents.getMap();
         long longest = -1;
         for (int i = map.size() - 1; i >= 0; i--) {
-            final SparseArray<PackageDurations> val = map.valueAt(i);
+            final ArrayMap<String, PackageDurations> val = map.valueAt(i);
             for (int j = val.size() - 1; j >= 0; j--) {
                 final PackageDurations pkg = val.valueAt(j);
                 if (!pkg.hasForegroundServices() || pkg.isLongRunning()) {
                     // No FGS or it's a known long-running FGS, ignore it.
                     continue;
                 }
-                longest = Math.max(pkg.getTotalDurations(now), longest);
+                longest = Math.max(getTotalDurations(pkg, now), longest);
             }
         }
         // Schedule a check in the future.
         mHandler.removeMessages(MyHandler.MSG_CHECK_LONG_RUNNING_FGS);
         if (longest >= 0) {
-            final long future = Math.max(0,
-                    mInjector.getPolicy().getFgsLongRunningThreshold() - longest);
+            // We'd add the "service start foreground timeout", as the apps are allowed
+            // to call startForeground() within that timeout after the FGS being started.
+            final long future = mInjector.getServiceStartForegroundTimeout()
+                    + Math.max(0, mInjector.getPolicy().getFgsLongRunningThreshold() - longest);
             if (DEBUG_BACKGROUND_FGS_TRACKER) {
                 Slog.i(TAG, "Scheduling a FGS duration check at "
                         + TimeUtils.formatDuration(future));
@@ -189,22 +238,22 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
 
     private void checkLongRunningFgs() {
         final AppFGSPolicy policy = mInjector.getPolicy();
-        final ArraySet<PackageDurations> pkgWithLongFgs = mTmpPkgDurations;
+        final ArrayMap<PackageDurations, Long> pkgWithLongFgs = mTmpPkgDurations;
         final long now = SystemClock.elapsedRealtime();
         final long threshold = policy.getFgsLongRunningThreshold();
         final long windowSize = policy.getFgsLongRunningWindowSize();
         final long trimTo = Math.max(0, now - windowSize);
 
         synchronized (mLock) {
-            final ArrayMap<String, SparseArray<PackageDurations>> map = mPkgFgsDurations.getMap();
+            final SparseArray<ArrayMap<String, PackageDurations>> map = mPkgEvents.getMap();
             for (int i = map.size() - 1; i >= 0; i--) {
-                final SparseArray<PackageDurations> val = map.valueAt(i);
+                final ArrayMap<String, PackageDurations> val = map.valueAt(i);
                 for (int j = val.size() - 1; j >= 0; j--) {
                     final PackageDurations pkg = val.valueAt(j);
                     if (pkg.hasForegroundServices() && !pkg.isLongRunning()) {
-                        final long totalDuration = pkg.getTotalDurations(now);
+                        final long totalDuration = getTotalDurations(pkg, now);
                         if (totalDuration >= threshold) {
-                            pkgWithLongFgs.add(pkg);
+                            pkgWithLongFgs.put(pkg, totalDuration);
                             pkg.setIsLongRunning(true);
                             if (DEBUG_BACKGROUND_FGS_TRACKER) {
                                 Slog.i(TAG, pkg.mPackageName
@@ -215,20 +264,53 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
                             }
                         }
                     }
-                    // Trim the duration list, we don't need to keep track of all old records.
-                    pkg.trim(trimTo);
                 }
             }
+            // Trim the duration list, we don't need to keep track of all old records.
+            trim(trimTo);
         }
 
-        for (int i = pkgWithLongFgs.size() - 1; i >= 0; i--) {
-            final PackageDurations pkg = pkgWithLongFgs.valueAt(i);
-            policy.onLongRunningFgs(pkg.mPackageName, pkg.mUid);
+        final int size = pkgWithLongFgs.size();
+        if (size > 0) {
+            // Sort it by the durations.
+            final Integer[] indices = new Integer[size];
+            for (int i = 0; i < size; i++) {
+                indices[i] = i;
+            }
+            Arrays.sort(indices, (a, b) -> Long.compare(
+                    pkgWithLongFgs.valueAt(a), pkgWithLongFgs.valueAt(b)));
+            // Notify it in the order of from longest to shortest durations.
+            for (int i = size - 1; i >= 0; i--) {
+                final PackageDurations pkg = pkgWithLongFgs.keyAt(indices[i]);
+                policy.onLongRunningFgs(pkg.mPackageName, pkg.mUid, pkg.mExemptReason);
+            }
+            pkgWithLongFgs.clear();
         }
-        pkgWithLongFgs.clear();
 
         synchronized (mLock) {
             scheduleDurationCheckLocked(now);
+        }
+    }
+
+    private void handleForegroundServicesChanged(String packageName, int uid, int serviceTypes) {
+        if (!mInjector.getPolicy().isEnabled()) {
+            return;
+        }
+        final int exemptReason = mInjector.getPolicy().shouldExemptUid(uid);
+        final long now = SystemClock.elapsedRealtime();
+        if (DEBUG_BACKGROUND_FGS_TRACKER) {
+            Slog.i(TAG, "Updating fgs type for " + packageName + "/" + UserHandle.formatUid(uid)
+                    + " to " + Integer.toHexString(serviceTypes)
+                    + " exemptReason=" + exemptReason);
+        }
+        synchronized (mLock) {
+            PackageDurations pkg = mPkgEvents.get(uid, packageName);
+            if (pkg == null) {
+                pkg = new PackageDurations(uid, packageName, mInjector.getPolicy());
+                mPkgEvents.put(uid, packageName, pkg);
+            }
+            pkg.setForegroundServiceType(serviceTypes, now);
+            pkg.mExemptReason = exemptReason;
         }
     }
 
@@ -240,7 +322,7 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
         } else {
             mHandler.removeMessages(MyHandler.MSG_CHECK_LONG_RUNNING_FGS);
             synchronized (mLock) {
-                mPkgFgsDurations.clear();
+                mPkgEvents.clear();
             }
         }
     }
@@ -253,92 +335,114 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
         }
     }
 
-    @Override
-    void onUidRemoved(final int uid) {
-        synchronized (mLock) {
-            final ArrayMap<String, SparseArray<PackageDurations>> map = mPkgFgsDurations.getMap();
-            for (int i = map.size() - 1; i >= 0; i--) {
-                final SparseArray<PackageDurations> val = map.valueAt(i);
-                final int index = val.indexOfKey(uid);
-                if (index >= 0) {
-                    val.removeAt(index);
-                    if (val.size() == 0) {
-                        map.removeAt(i);
-                    }
-                }
-            }
-        }
+    static int foregroundServiceTypeToIndex(@ForegroundServiceType int serviceType) {
+        return serviceType == FOREGROUND_SERVICE_TYPE_NONE ? 0
+                : Integer.numberOfTrailingZeros(serviceType) + 1;
+    }
+
+    static @ForegroundServiceType int indexToForegroundServiceType(int index) {
+        return index == PackageDurations.DEFAULT_INDEX
+                ? FOREGROUND_SERVICE_TYPE_NONE : (1 << (index - 1));
+    }
+
+    long getTotalDurations(PackageDurations pkg, long now) {
+        return getTotalDurations(pkg.mPackageName, pkg.mUid, now,
+                foregroundServiceTypeToIndex(FOREGROUND_SERVICE_TYPE_NONE));
     }
 
     @Override
-    void onUserRemoved(final @UserIdInt int userId) {
-        synchronized (mLock) {
-            final ArrayMap<String, SparseArray<PackageDurations>> map = mPkgFgsDurations.getMap();
-            for (int i = map.size() - 1; i >= 0; i--) {
-                final SparseArray<PackageDurations> val = map.valueAt(i);
-                for (int j = val.size() - 1; j >= 0; j--) {
-                    final int uid = val.keyAt(j);
-                    if (UserHandle.getUserId(uid) == userId) {
-                        val.removeAt(j);
-                    }
-                }
-                if (val.size() == 0) {
-                    map.removeAt(i);
-                }
-            }
-        }
+    void dump(PrintWriter pw, String prefix) {
+        pw.print(prefix);
+        pw.println("APP FOREGROUND SERVICE TRACKER:");
+        super.dump(pw, "  " + prefix);
     }
 
     /**
      * Tracks the durations with active FGS for a given package.
      */
-    static class PackageDurations {
-        final int mUid;
-        final String mPackageName;
-
+    static class PackageDurations extends BaseAppStateDurations {
         /**
-         * A list of timestamps when the FGS start/stop occurred, we may trim/modify the start time
-         * in this list, so don't use this timestamp anywhere else.
+         * Whether or not this package is considered as having long-running FGS.
          */
-        final LinkedList<Long> mStartStopTime = new LinkedList<>();
-
-        private long mKnownDuration;
-        private int mNest; // A counter to track in case that the package gets multiple FGS starts.
         private boolean mIsLongRunning;
 
-        PackageDurations(int uid, String packageName) {
-            mUid = uid;
-            mPackageName = packageName;
+        /**
+         * The current foreground service types, should be a combination of the values in
+         * {@link android.content.pm.ServiceInfo.ForegroundServiceType}.
+         */
+        private int mForegroundServiceTypes;
+
+        /**
+         * The index to the duration list array, where it holds the overall FGS stats of this
+         * package.
+         */
+        static final int DEFAULT_INDEX = foregroundServiceTypeToIndex(FOREGROUND_SERVICE_TYPE_NONE);
+
+        PackageDurations(int uid, String packageName,
+                MaxTrackingDurationConfig maxTrackingDurationConfig) {
+            super(uid, packageName, NUM_OF_FOREGROUND_SERVICE_TYPES + 1, TAG,
+                    maxTrackingDurationConfig);
+            mEvents[DEFAULT_INDEX] = new LinkedList<Long>();
         }
 
-        void addEvent(boolean startFgs, long now) {
-            final int size = mStartStopTime.size();
-            final boolean hasForegroundServices = hasForegroundServices();
+        PackageDurations(@NonNull PackageDurations other) {
+            super(other);
+            mIsLongRunning = other.mIsLongRunning;
+            mForegroundServiceTypes = other.mForegroundServiceTypes;
+        }
 
-            if (startFgs) {
-                mNest++;
-            } else {
-                if (DEBUG_BACKGROUND_FGS_TRACKER && mNest <= 0) {
-                    Slog.wtf(TAG, "Under-counted FGS start event mNest=" + mNest);
-                    return;
-                }
-                mNest--;
-                if (mNest == 0) {
-                    mKnownDuration += now - mStartStopTime.getLast();
-                    mIsLongRunning = false;
-                }
+        /**
+         * Add a foreground service start/stop event.
+         */
+        void addEvent(boolean startFgs, long now) {
+            addEvent(startFgs, now, DEFAULT_INDEX);
+            if (!startFgs && !hasForegroundServices()) {
+                mIsLongRunning = false;
             }
-            if (startFgs == hasForegroundServices) {
-                // It's actually the same state as we have now, don't record the event time.
+
+            if (!startFgs && mForegroundServiceTypes != FOREGROUND_SERVICE_TYPE_NONE) {
+                // Save the stop time per service type.
+                for (int i = 1; i < mEvents.length; i++) {
+                    if (mEvents[i] == null) {
+                        continue;
+                    }
+                    if (isActive(i)) {
+                        mEvents[i].add(now);
+                    }
+                }
+                mForegroundServiceTypes = FOREGROUND_SERVICE_TYPE_NONE;
+            }
+        }
+
+        /**
+         * Called on the service type changes via the {@link android.app.Service#startForeground}.
+         */
+        void setForegroundServiceType(int serviceTypes, long now) {
+            if (serviceTypes == mForegroundServiceTypes || !hasForegroundServices()) {
+                // Nothing to do.
                 return;
             }
-            if (DEBUG_BACKGROUND_FGS_TRACKER) {
-                if (startFgs != ((mStartStopTime.size() & 1) == 0)) {
-                    Slog.wtf(TAG, "Unmatched start/stop event, current=" + mStartStopTime.size());
-                    return;
+            int changes = serviceTypes ^ mForegroundServiceTypes;
+            for (int serviceType = Integer.highestOneBit(changes); serviceType != 0;) {
+                final int i = foregroundServiceTypeToIndex(serviceType);
+                if ((serviceTypes & serviceType) != 0) {
+                    // Start this type.
+                    if (mEvents[i] == null) {
+                        mEvents[i] = new LinkedList<Long>();
+                    }
+                    if (!isActive(i)) {
+                        mEvents[i].add(now);
+                    }
+                } else {
+                    // Stop this type.
+                    if (mEvents[i] != null && isActive(i)) {
+                        mEvents[i].add(now);
+                    }
                 }
+                changes &= ~serviceType;
+                serviceType = Integer.highestOneBit(changes);
             }
-            mStartStopTime.add(now);
+            mForegroundServiceTypes = serviceTypes;
         }
 
         void setIsLongRunning(boolean isLongRunning) {
@@ -349,62 +453,21 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
             return mIsLongRunning;
         }
 
-        /**
-         * Remove/trim earlier durations with start time older than the given timestamp.
-         */
-        void trim(long earliest) {
-            while (mStartStopTime.size() > 1) {
-                final long current = mStartStopTime.peek();
-                if (current >= earliest) {
-                    break; // All we have are newer than the given timestamp.
-                }
-                // Check the timestamp of FGS stop event.
-                if (mStartStopTime.get(1) > earliest) {
-                    // Trim the duration by moving the start time.
-                    mStartStopTime.set(0, earliest);
-                    break;
-                }
-                // Discard the 1st duration as it's older than the given timestamp.
-                mStartStopTime.pop();
-                mStartStopTime.pop();
-            }
-            mKnownDuration = 0;
-            if (mStartStopTime.size() == 1) {
-                // Trim the duration by moving the start time.
-                mStartStopTime.set(0, Math.max(earliest, mStartStopTime.peek()));
-                return;
-            }
-            // Update the known durations.
-            int index = 0;
-            long last = 0;
-            for (long timestamp : mStartStopTime) {
-                if ((index & 1) == 1) {
-                    mKnownDuration += timestamp - last;
-                } else {
-                    last = timestamp;
-                }
-                index++;
-            }
-        }
-
-        long getTotalDurations(long now) {
-            return hasForegroundServices()
-                    ? mKnownDuration + (now - mStartStopTime.getLast()) : mKnownDuration;
-        }
-
         boolean hasForegroundServices() {
-            return mNest > 0;
+            return isActive(DEFAULT_INDEX);
         }
 
         @Override
-        public String toString() {
-            return mPackageName + "/" + UserHandle.formatUid(mUid)
-                    + " hasForegroundServices=" + hasForegroundServices()
-                    + " totalDurations=" + getTotalDurations(SystemClock.elapsedRealtime());
+        String formatEventTypeLabel(int index) {
+            if (index == DEFAULT_INDEX) {
+                return "Overall foreground services: ";
+            } else {
+                return foregroundServiceTypeToLabel(indexToForegroundServiceType(index)) + ": ";
+            }
         }
     }
 
-    static final class AppFGSPolicy extends BaseAppStatePolicy<AppFGSTracker> {
+    static final class AppFGSPolicy extends BaseAppStateEventsPolicy<AppFGSTracker> {
         /**
          * Whether or not we should enable the monitoring on abusive FGS.
          */
@@ -426,12 +489,26 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "fgs_long_running_threshold";
 
         /**
-         * Default value to {@link #mBgFgsMonitorEnabled}.
+         * If a package has run FGS with "mediaPlayback" over this threshold, it won't be considered
+         * as a long-running FGS.
+         */
+        static final String KEY_BG_FGS_MEDIA_PLAYBACK_THRESHOLD =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "fgs_media_playback_threshold";
+
+        /**
+         * If a package has run FGS with "location" over this threshold, it won't be considered
+         * as a long-running FGS.
+         */
+        static final String KEY_BG_FGS_LOCATION_THRESHOLD =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "fgs_location_threshold";
+
+        /**
+         * Default value to {@link #mTrackerEnabled}.
          */
         static final boolean DEFAULT_BG_FGS_MONITOR_ENABLED = true;
 
         /**
-         * Default value to {@link #mBgFgsLongRunningWindowMs}.
+         * Default value to {@link #mMaxTrackingDuration}.
          */
         static final long DEFAULT_BG_FGS_LONG_RUNNING_WINDOW = ONE_DAY;
 
@@ -441,77 +518,95 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
         static final long DEFAULT_BG_FGS_LONG_RUNNING_THRESHOLD = 20 * ONE_HOUR;
 
         /**
-         * @see #KEY_BG_FGS_MONITOR_ENABLED.
+         * Default value to {@link #mBgFgsMediaPlaybackThresholdMs}.
          */
-        private volatile boolean mBgFgsMonitorEnabled = DEFAULT_BG_FGS_MONITOR_ENABLED;
+        static final long DEFAULT_BG_FGS_MEDIA_PLAYBACK_THRESHOLD = 4 * ONE_HOUR;
 
         /**
-         * @see #KEY_BG_FGS_LONG_RUNNING_WINDOW.
+         * Default value to {@link #mBgFgsLocationThresholdMs}.
          */
-        private volatile long mBgFgsLongRunningWindowMs = DEFAULT_BG_FGS_LONG_RUNNING_WINDOW;
+        static final long DEFAULT_BG_FGS_LOCATION_THRESHOLD = 4 * ONE_HOUR;
 
         /**
          * @see #KEY_BG_FGS_LONG_RUNNING_THRESHOLD.
          */
         private volatile long mBgFgsLongRunningThresholdMs = DEFAULT_BG_FGS_LONG_RUNNING_THRESHOLD;
 
-        @NonNull
-        private final Object mLock;
+        /**
+         * @see #KEY_BG_FGS_MEDIA_PLAYBACK_THRESHOLD.
+         */
+        private volatile long mBgFgsMediaPlaybackThresholdMs =
+                DEFAULT_BG_FGS_MEDIA_PLAYBACK_THRESHOLD;
+
+        /**
+         * @see #KEY_BG_FGS_LOCATION_THRESHOLD.
+         */
+        private volatile long mBgFgsLocationThresholdMs = DEFAULT_BG_FGS_LOCATION_THRESHOLD;
 
         AppFGSPolicy(@NonNull Injector injector, @NonNull AppFGSTracker tracker) {
-            super(injector, tracker);
-            mLock = tracker.mLock;
+            super(injector, tracker, KEY_BG_FGS_MONITOR_ENABLED, DEFAULT_BG_FGS_MONITOR_ENABLED,
+                    KEY_BG_FGS_LONG_RUNNING_WINDOW, DEFAULT_BG_FGS_LONG_RUNNING_WINDOW);
         }
 
         @Override
         public void onSystemReady() {
-            updateBgFgsMonitorEnabled();
+            super.onSystemReady();
             updateBgFgsLongRunningThreshold();
+            updateBgFgsMediaPlaybackThreshold();
+            updateBgFgsLocationThreshold();
         }
 
         @Override
         public void onPropertiesChanged(String name) {
             switch (name) {
-                case KEY_BG_FGS_MONITOR_ENABLED:
-                    updateBgFgsMonitorEnabled();
-                    break;
-                case KEY_BG_FGS_LONG_RUNNING_WINDOW:
                 case KEY_BG_FGS_LONG_RUNNING_THRESHOLD:
                     updateBgFgsLongRunningThreshold();
                     break;
+                case KEY_BG_FGS_MEDIA_PLAYBACK_THRESHOLD:
+                    updateBgFgsMediaPlaybackThreshold();
+                    break;
+                case KEY_BG_FGS_LOCATION_THRESHOLD:
+                    updateBgFgsLocationThreshold();
+                    break;
+                default:
+                    super.onPropertiesChanged(name);
+                    break;
             }
         }
 
-        private void updateBgFgsMonitorEnabled() {
-            final boolean enabled = DeviceConfig.getBoolean(
-                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                    KEY_BG_FGS_MONITOR_ENABLED,
-                    DEFAULT_BG_FGS_MONITOR_ENABLED);
-            if (enabled != mBgFgsMonitorEnabled) {
-                mBgFgsMonitorEnabled = enabled;
-                mTracker.onBgFgsMonitorEnabled(enabled);
-            }
+        @Override
+        public void onTrackerEnabled(boolean enabled) {
+            mTracker.onBgFgsMonitorEnabled(enabled);
+        }
+
+        @Override
+        public void onMaxTrackingDurationChanged(long maxDuration) {
+            mTracker.onBgFgsLongRunningThresholdChanged();
         }
 
         private void updateBgFgsLongRunningThreshold() {
-            final long window = DeviceConfig.getLong(
-                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                    KEY_BG_FGS_LONG_RUNNING_WINDOW,
-                    DEFAULT_BG_FGS_LONG_RUNNING_WINDOW);
             final long threshold = DeviceConfig.getLong(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_FGS_LONG_RUNNING_THRESHOLD,
                     DEFAULT_BG_FGS_LONG_RUNNING_THRESHOLD);
-            if (threshold != mBgFgsLongRunningThresholdMs || window != mBgFgsLongRunningWindowMs) {
-                mBgFgsLongRunningWindowMs = window;
+            if (threshold != mBgFgsLongRunningThresholdMs) {
                 mBgFgsLongRunningThresholdMs = threshold;
                 mTracker.onBgFgsLongRunningThresholdChanged();
             }
         }
 
-        @Override
-        public boolean isEnabled() {
-            return mBgFgsMonitorEnabled;
+        private void updateBgFgsMediaPlaybackThreshold() {
+            mBgFgsMediaPlaybackThresholdMs = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_FGS_MEDIA_PLAYBACK_THRESHOLD,
+                    DEFAULT_BG_FGS_MEDIA_PLAYBACK_THRESHOLD);
+        }
+
+        private void updateBgFgsLocationThreshold() {
+            mBgFgsLocationThresholdMs = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_FGS_LOCATION_THRESHOLD,
+                    DEFAULT_BG_FGS_LOCATION_THRESHOLD);
         }
 
         long getFgsLongRunningThreshold() {
@@ -519,11 +614,90 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
         }
 
         long getFgsLongRunningWindowSize() {
-            return mBgFgsLongRunningWindowMs;
+            return getMaxTrackingDuration();
         }
 
-        void onLongRunningFgs(String packageName, int uid) {
+        long getFGSMediaPlaybackThreshold() {
+            return mBgFgsMediaPlaybackThresholdMs;
+        }
+
+        long getLocationFGSThreshold() {
+            return mBgFgsLocationThresholdMs;
+        }
+
+        void onLongRunningFgs(String packageName, int uid, @ReasonCode int exemptReason) {
+            if (exemptReason != REASON_DENIED) {
+                return;
+            }
+            final long now = SystemClock.elapsedRealtime();
+            final long window = getFgsLongRunningWindowSize();
+            final long since = Math.max(0, now - window);
+            if (shouldExemptMediaPlaybackFGS(packageName, uid, now, window)) {
+                return;
+            }
+            if (shouldExemptLocationFGS(packageName, uid, now, since)) {
+                return;
+            }
+            if (hasBackgroundLocationPermission(packageName, uid)) {
+                // This package has background location permission, ignore it.
+                return;
+            }
             mTracker.mAppRestrictionController.postLongRunningFgsIfNecessary(packageName, uid);
+        }
+
+        boolean shouldExemptMediaPlaybackFGS(String packageName, int uid, long now, long window) {
+            final long mediaPlaybackMs = mTracker.mAppRestrictionController
+                    .getCompositeMediaPlaybackDurations(packageName, uid, now, window);
+            if (mediaPlaybackMs > 0 && mediaPlaybackMs >= getFGSMediaPlaybackThreshold()) {
+                if (DEBUG_BACKGROUND_FGS_TRACKER) {
+                    Slog.i(TAG, "Ignoring long-running FGS in " + packageName + "/"
+                            + UserHandle.formatUid(uid) + " media playback for "
+                            + TimeUtils.formatDuration(mediaPlaybackMs));
+                }
+                return true;
+            }
+            return false;
+        }
+
+        boolean shouldExemptLocationFGS(String packageName, int uid, long now, long since) {
+            final long locationMs = mTracker.mAppRestrictionController
+                    .getForegroundServiceTotalDurationsSince(packageName, uid, since, now,
+                            FOREGROUND_SERVICE_TYPE_LOCATION);
+            if (locationMs > 0 && locationMs >= getLocationFGSThreshold()) {
+                if (DEBUG_BACKGROUND_FGS_TRACKER) {
+                    Slog.i(TAG, "Ignoring long-running FGS in " + packageName + "/"
+                            + UserHandle.formatUid(uid) + " location for "
+                            + TimeUtils.formatDuration(locationMs));
+                }
+                return true;
+            }
+            return false;
+        }
+
+        boolean hasBackgroundLocationPermission(String packageName, int uid) {
+            if (mInjector.getPermissionManagerServiceInternal().checkPermission(
+                    packageName, ACCESS_BACKGROUND_LOCATION, UserHandle.getUserId(uid))
+                    == PERMISSION_GRANTED) {
+                if (DEBUG_BACKGROUND_FGS_TRACKER) {
+                    Slog.i(TAG, "Ignoring bg-location FGS in " + packageName + "/"
+                            + UserHandle.formatUid(uid));
+                }
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        String getExemptionReasonString(String packageName, int uid, @ReasonCode int reason) {
+            if (reason != REASON_DENIED) {
+                return super.getExemptionReasonString(packageName, uid, reason);
+            }
+            final long now = SystemClock.elapsedRealtime();
+            final long window = getFgsLongRunningWindowSize();
+            final long since = Math.max(0, now - getFgsLongRunningWindowSize());
+            return "{mediaPlayback=" + shouldExemptMediaPlaybackFGS(packageName, uid, now, window)
+                    + ", location=" + shouldExemptLocationFGS(packageName, uid, now, since)
+                    + ", bgLocationPerm=" + hasBackgroundLocationPermission(packageName, uid) + "}";
         }
 
         void onLongRunningFgsGone(String packageName, int uid) {
@@ -532,8 +706,26 @@ final class AppFGSTracker extends BaseAppStateTracker<AppFGSPolicy>
         }
 
         @Override
-        public @RestrictionLevel int getProposedRestrictionLevel(String packageName, int uid) {
-            return RESTRICTION_LEVEL_UNKNOWN;
+        void dump(PrintWriter pw, String prefix) {
+            pw.print(prefix);
+            pw.println("APP FOREGROUND SERVICE TRACKER POLICY SETTINGS:");
+            final String indent = "  ";
+            prefix = indent + prefix;
+            super.dump(pw, prefix);
+            if (isEnabled()) {
+                pw.print(prefix);
+                pw.print(KEY_BG_FGS_LONG_RUNNING_THRESHOLD);
+                pw.print('=');
+                pw.println(mBgFgsLongRunningThresholdMs);
+                pw.print(prefix);
+                pw.print(KEY_BG_FGS_MEDIA_PLAYBACK_THRESHOLD);
+                pw.print('=');
+                pw.println(mBgFgsMediaPlaybackThresholdMs);
+                pw.print(prefix);
+                pw.print(KEY_BG_FGS_LOCATION_THRESHOLD);
+                pw.print('=');
+                pw.println(mBgFgsLocationThresholdMs);
+            }
         }
     }
 }

@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActiveServices.SERVICE_START_FOREGROUND_TIMEOUT;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -23,7 +24,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
+import android.app.AppOpsManager;
+import android.app.role.RoleManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.media.session.MediaSessionManager;
 import android.os.BatteryManagerInternal;
 import android.os.BatteryStatsInternal;
 import android.os.Handler;
@@ -32,7 +37,9 @@ import android.util.Slog;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 
 /**
@@ -142,6 +149,27 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
     void onBackgroundRestrictionChanged(int uid, String pkgName, boolean restricted) {
     }
 
+    /**
+     * Called when the process state of the given UID has been changed.
+     *
+     * <p>Note: as of now, for simplification, we're tracking the TOP state changes only.</p>
+     */
+    void onUidProcStateChanged(int uid, int procState) {
+    }
+
+    /**
+     * Called when all the processes in the given UID have died.
+     */
+    void onUidGone(int uid) {
+    }
+
+    /**
+     * Dump to the given printer writer.
+     */
+    void dump(PrintWriter pw, String prefix) {
+        mInjector.getPolicy().dump(pw, "  " + prefix);
+    }
+
     static class Injector<T extends BaseAppStatePolicy> {
         T mAppStatePolicy;
 
@@ -150,6 +178,11 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
         BatteryStatsInternal mBatteryStatsInternal;
         DeviceIdleInternal mDeviceIdleInternal;
         UserManagerInternal mUserManagerInternal;
+        PackageManager mPackageManager;
+        PermissionManagerServiceInternal mPermissionManagerServiceInternal;
+        AppOpsManager mAppOpsManager;
+        MediaSessionManager mMediaSessionManager;
+        RoleManager mRoleManager;
 
         void setPolicy(T policy) {
             mAppStatePolicy = policy;
@@ -161,6 +194,13 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
             mBatteryStatsInternal = LocalServices.getService(BatteryStatsInternal.class);
             mDeviceIdleInternal = LocalServices.getService(DeviceIdleInternal.class);
             mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+            mPermissionManagerServiceInternal = LocalServices.getService(
+                    PermissionManagerServiceInternal.class);
+            final Context context = mAppStatePolicy.mTracker.mContext;
+            mPackageManager = context.getPackageManager();
+            mAppOpsManager = context.getSystemService(AppOpsManager.class);
+            mMediaSessionManager = context.getSystemService(MediaSessionManager.class);
+            mRoleManager = context.getSystemService(RoleManager.class);
 
             getPolicy().onSystemReady();
         }
@@ -194,6 +234,30 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
          */
         long currentTimeMillis() {
             return System.currentTimeMillis();
+        }
+
+        PackageManager getPackageManager() {
+            return mPackageManager;
+        }
+
+        PermissionManagerServiceInternal getPermissionManagerServiceInternal() {
+            return mPermissionManagerServiceInternal;
+        }
+
+        AppOpsManager getAppOpsManager() {
+            return mAppOpsManager;
+        }
+
+        MediaSessionManager getMediaSessionManager() {
+            return mMediaSessionManager;
+        }
+
+        long getServiceStartForegroundTimeout() {
+            return SERVICE_START_FOREGROUND_TIMEOUT;
+        }
+
+        RoleManager getRoleManager() {
+            return mRoleManager;
         }
     }
 }

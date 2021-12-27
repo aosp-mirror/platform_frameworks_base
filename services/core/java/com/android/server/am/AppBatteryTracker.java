@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.ACCESS_BACKGROUND_LOCATION;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
@@ -24,10 +25,13 @@ import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_SYSTEM;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACTION;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.BatteryConsumer.POWER_COMPONENT_ANY;
 import static android.os.BatteryConsumer.PROCESS_STATE_BACKGROUND;
 import static android.os.BatteryConsumer.PROCESS_STATE_FOREGROUND;
 import static android.os.BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE;
+import static android.os.PowerExemptionManager.REASON_DENIED;
+import static android.util.TimeUtils.formatTime;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -39,9 +43,12 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager.RestrictionLevel;
 import android.content.Context;
+import android.content.pm.ServiceInfo;
 import android.os.BatteryConsumer;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
+import android.os.PowerExemptionManager;
+import android.os.PowerExemptionManager.ReasonCode;
 import android.os.SystemClock;
 import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
@@ -54,11 +61,13 @@ import android.util.SparseDoubleArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
 import com.android.server.am.BaseAppStateTracker.Injector;
 import com.android.server.pm.UserManagerInternal;
 
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.List;
@@ -183,7 +192,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
             for (int i = 0, size = uidConsumers.size(); i < size; i++) {
                 final int uid = uidConsumers.keyAt(i);
                 final double bgConsumption = uidConsumers.valueAt(i);
-                final double percentage = bgPolicy.getPercentage(bgConsumption);
+                final double percentage = bgPolicy.getPercentage(uid, bgConsumption);
                 if (DEBUG_BACKGROUND_BATTERY_TRACKER) {
                     Slog.i(TAG, String.format("UID consumed %6.3f mAh (or %4.2f%%) in the past %s",
                             bgConsumption, percentage,
@@ -261,16 +270,18 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
         }
         final BatteryUsageStats stats = statsList.get(0);
         final List<UidBatteryConsumer> uidConsumers = stats.getUidBatteryConsumers();
-        for (UidBatteryConsumer uidConsumer : uidConsumers) {
-            // TODO: b/200326767 - as we are not supporting per proc state attribution yet,
-            // we couldn't distinguish between a real FGS vs. a bound FGS proc state.
-            final int uid = uidConsumer.getUid();
-            final double bgConsumption = bgPolicy.getBgConsumption(uidConsumer);
-            int index = buf.indexOfKey(uid);
-            if (index < 0) {
-                buf.put(uid, bgConsumption);
-            } else {
-                buf.setValueAt(index, buf.valueAt(index) + bgConsumption);
+        if (uidConsumers != null) {
+            for (UidBatteryConsumer uidConsumer : uidConsumers) {
+                // TODO: b/200326767 - as we are not supporting per proc state attribution yet,
+                // we couldn't distinguish between a real FGS vs. a bound FGS proc state.
+                final int uid = uidConsumer.getUid();
+                final double bgConsumption = bgPolicy.getBgConsumption(uidConsumer);
+                int index = buf.indexOfKey(uid);
+                if (index < 0) {
+                    buf.put(uid, bgConsumption);
+                } else {
+                    buf.setValueAt(index, buf.valueAt(index) + bgConsumption);
+                }
             }
         }
         return stats;
@@ -285,6 +296,34 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
         } else {
             mBgHandler.removeCallbacks(mBgBatteryUsageStatsPolling);
         }
+    }
+
+    @Override
+    void dump(PrintWriter pw, String prefix) {
+        pw.print(prefix);
+        pw.println("APP BATTERY STATE TRACKER:");
+        final SparseArray<Double> uidConsumers = new SparseArray<>();
+        updateBatteryUsageStatsOnce(uidConsumers, new ArraySet<>());
+        pw.print("  " + prefix);
+        pw.print("Over last ");
+        final String newPrefix = "    " + prefix;
+        final AppBatteryPolicy bgPolicy = mInjector.getPolicy();
+        pw.println(TimeUtils.formatDuration(bgPolicy.mBgCurrentDrainWindowMs));
+        if (uidConsumers.size() == 0) {
+            pw.print(newPrefix);
+            pw.println("(none)");
+        } else {
+            for (int i = 0, size = uidConsumers.size(); i < size; i++) {
+                final int uid = uidConsumers.keyAt(i);
+                final double bgConsumption = uidConsumers.valueAt(i);
+                final double percentage = bgPolicy.getPercentage(uid, bgConsumption);
+                pw.format("%s%s: exemption=%s %6.3f mAh (%4.2f%%)\n",
+                        newPrefix, UserHandle.formatUid(uid),
+                        PowerExemptionManager.reasonCodeToString(bgPolicy.shouldExemptUid(uid)),
+                        bgConsumption, percentage);
+            }
+        }
+        super.dump(pw, prefix);
     }
 
     static final class AppBatteryPolicy extends BaseAppStatePolicy<AppBatteryTracker> {
@@ -321,18 +360,51 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "current_drain_window";
 
         /**
-         * Default value to {@link #mBgCurrentDrainMonitorEnabled}.
+         * Similar to {@link #KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_RESTRICTED_BUCKET}, but a higher
+         * value for the legitimate cases with higher background current drain.
+         */
+        static final String KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_RESTRICTED_BUCKET =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX
+                + "current_drain_high_threshold_to_restricted_bucket";
+
+        /**
+         * Similar to {@link #KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_BG_RESTRICTED}, but a higher value
+         * for the legitimate cases with higher background current drain.
+         */
+        static final String KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_BG_RESTRICTED =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "current_drain_high_threshold_to_bg_restricted";
+
+        /**
+         * The threshold of minimal time of hosting a foreground service with type "mediaPlayback"
+         * or a media session, over the given window, so it'd subject towards the higher
+         * background current drain threshold as defined in
+         * {@link #mBgCurrentDrainBgRestrictedHighThreshold}.
+         */
+        static final String KEY_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "current_drain_media_playback_min_duration";
+
+        /**
+         * Similar to {@link #KEY_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION} but for foreground
+         * service with type "location".
+         */
+        static final String KEY_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "current_drain_location_min_duration";
+
+        /**
+         * Default value to {@link #mTrackerEnabled}.
          */
         static final boolean DEFAULT_BG_CURRENT_DRAIN_MONITOR_ENABLED = true;
 
         /**
-         * Default value to {@link #mBgCurrentDrainRestrictedBucketThreshold}.
+         * Default value to the {@link #INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD} of
+         * the {@link #mBgCurrentDrainRestrictedBucketThreshold}.
          */
         static final float DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_THRESHOLD =
                 isLowRamDeviceStatic() ? 4.0f : 2.0f;
 
         /**
-         * Default value to {@link #mBgCurrentDrainBgRestrictedThreshold}.
+         * Default value to the {@link #INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD} of
+         * the {@link #mBgCurrentDrainBgRestrictedThreshold}.
          */
         static final float DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_THRESHOLD =
                 isLowRamDeviceStatic() ? 8.0f : 4.0f;
@@ -343,26 +415,70 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
         static final long DEFAULT_BG_CURRENT_DRAIN_WINDOW_MS = ONE_DAY;
 
         /**
-         * @see #KEY_BG_CURRENT_DRAIN_MONITOR_ENABLED.
+         * Default value to the {@link #INDEX_HIGH_CURRENT_DRAIN_THRESHOLD} of
+         * the {@link #mBgCurrentDrainRestrictedBucketThreshold}.
          */
-        volatile boolean mBgCurrentDrainMonitorEnabled = DEFAULT_BG_CURRENT_DRAIN_MONITOR_ENABLED;
+        static final float DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_HIGH_THRESHOLD =
+                isLowRamDeviceStatic() ? 60.0f : 30.0f;
+
+        /**
+         * Default value to the {@link #INDEX_HIGH_CURRENT_DRAIN_THRESHOLD} of
+         * the {@link #mBgCurrentDrainBgRestrictedThreshold}.
+         */
+        static final float DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_HIGH_THRESHOLD =
+                isLowRamDeviceStatic() ? 60.0f : 30.0f;
+
+        /**
+         * Default value to {@link #mBgCurrentDrainMediaPlaybackMinDuration}.
+         */
+        static final long DEFAULT_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION = 30 * ONE_MINUTE;
+
+        /**
+         * Default value to {@link #mBgCurrentDrainLocationMinDuration}.
+         */
+        static final long DEFAULT_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION = 30 * ONE_MINUTE;
+
+        /**
+         * The index to {@link #mBgCurrentDrainRestrictedBucketThreshold}
+         * and {@link #mBgCurrentDrainBgRestrictedThreshold}.
+         */
+        static final int INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD = 0;
+        static final int INDEX_HIGH_CURRENT_DRAIN_THRESHOLD = 1;
 
         /**
          * @see #KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_RESTRICTED_BUCKET.
+         * @see #KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_RESTRICTED_BUCKET.
          */
-        volatile float mBgCurrentDrainRestrictedBucketThreshold =
-                DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_THRESHOLD;
+        volatile float[] mBgCurrentDrainRestrictedBucketThreshold = {
+                DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_THRESHOLD,
+                DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_HIGH_THRESHOLD,
+        };
 
         /**
          * @see #KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_BG_RESTRICTED.
+         * @see #KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_BG_RESTRICTED.
          */
-        volatile float mBgCurrentDrainBgRestrictedThreshold =
-                DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_THRESHOLD;
+        volatile float[] mBgCurrentDrainBgRestrictedThreshold = {
+                DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_THRESHOLD,
+                DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_HIGH_THRESHOLD,
+        };
 
         /**
          * @see #KEY_BG_CURRENT_DRAIN_WINDOW.
          */
         volatile long mBgCurrentDrainWindowMs = DEFAULT_BG_CURRENT_DRAIN_WINDOW_MS;
+
+        /**
+         * @see #KEY_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION.
+         */
+        volatile long mBgCurrentDrainMediaPlaybackMinDuration =
+                DEFAULT_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION;
+
+        /**
+         * @see #KEY_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION.
+         */
+        volatile long mBgCurrentDrainLocationMinDuration =
+                DEFAULT_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION;
 
         /**
          * The capacity of the battery when fully charged in mAh.
@@ -385,47 +501,65 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
         private static final int TIME_STAMP_INDEX_LAST = 2;
 
         AppBatteryPolicy(@NonNull Injector injector, @NonNull AppBatteryTracker tracker) {
-            super(injector, tracker);
+            super(injector, tracker, KEY_BG_CURRENT_DRAIN_MONITOR_ENABLED,
+                    DEFAULT_BG_CURRENT_DRAIN_MONITOR_ENABLED);
             mLock = tracker.mLock;
         }
 
         @Override
         public void onPropertiesChanged(String name) {
             switch (name) {
-                case KEY_BG_CURRENT_DRAIN_MONITOR_ENABLED:
-                    updateCurrentDrainMonitorEnabled();
-                    break;
                 case KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_RESTRICTED_BUCKET:
                 case KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_BG_RESTRICTED:
+                case KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_RESTRICTED_BUCKET:
+                case KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_BG_RESTRICTED:
                     updateCurrentDrainThreshold();
                     break;
                 case KEY_BG_CURRENT_DRAIN_WINDOW:
                     updateCurrentDrainWindow();
                     break;
+                case KEY_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION:
+                    updateCurrentDrainMediaPlaybackMinDuration();
+                    break;
+                case KEY_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION:
+                    updateCurrentDrainLocationMinDuration();
+                    break;
+                default:
+                    super.onPropertiesChanged(name);
+                    break;
             }
         }
 
-        private void updateCurrentDrainMonitorEnabled() {
-            final boolean enabled = mBatteryFullChargeMah > 0
-                    && DeviceConfig.getBoolean(
-                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                    KEY_BG_CURRENT_DRAIN_MONITOR_ENABLED,
-                    DEFAULT_BG_CURRENT_DRAIN_MONITOR_ENABLED);
-            if (enabled != mBgCurrentDrainMonitorEnabled) {
-                mBgCurrentDrainMonitorEnabled = enabled;
-                mTracker.onCurrentDrainMonitorEnabled(enabled);
+        void updateTrackerEnabled() {
+            if (mBatteryFullChargeMah > 0) {
+                super.updateTrackerEnabled();
+            } else {
+                mTrackerEnabled = false;
+                onTrackerEnabled(false);
             }
+        }
+
+        public void onTrackerEnabled(boolean enabled) {
+            mTracker.onCurrentDrainMonitorEnabled(enabled);
         }
 
         private void updateCurrentDrainThreshold() {
-            mBgCurrentDrainRestrictedBucketThreshold = DeviceConfig.getFloat(
-                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+            mBgCurrentDrainRestrictedBucketThreshold[INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD] =
+                    DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_RESTRICTED_BUCKET,
                     DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_THRESHOLD);
-            mBgCurrentDrainBgRestrictedThreshold = DeviceConfig.getFloat(
-                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+            mBgCurrentDrainRestrictedBucketThreshold[INDEX_HIGH_CURRENT_DRAIN_THRESHOLD] =
+                    DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_RESTRICTED_BUCKET,
+                    DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_HIGH_THRESHOLD);
+            mBgCurrentDrainBgRestrictedThreshold[INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD] =
+                    DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_BG_RESTRICTED,
                     DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_THRESHOLD);
+            mBgCurrentDrainBgRestrictedThreshold[INDEX_HIGH_CURRENT_DRAIN_THRESHOLD] =
+                    DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_BG_RESTRICTED,
+                    DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_HIGH_THRESHOLD);
         }
 
         private void updateCurrentDrainWindow() {
@@ -436,13 +570,29 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
                     ? mBgCurrentDrainWindowMs : DEFAULT_BG_CURRENT_DRAIN_WINDOW_MS);
         }
 
+        private void updateCurrentDrainMediaPlaybackMinDuration() {
+            mBgCurrentDrainMediaPlaybackMinDuration = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION,
+                    DEFAULT_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION);
+        }
+
+        private void updateCurrentDrainLocationMinDuration() {
+            mBgCurrentDrainLocationMinDuration = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION,
+                    DEFAULT_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION);
+        }
+
         @Override
         public void onSystemReady() {
             mBatteryFullChargeMah =
                     mInjector.getBatteryManagerInternal().getBatteryFullCharge() / 1000;
-            updateCurrentDrainMonitorEnabled();
+            super.onSystemReady();
             updateCurrentDrainThreshold();
             updateCurrentDrainWindow();
+            updateCurrentDrainMediaPlaybackMinDuration();
+            updateCurrentDrainLocationMinDuration();
         }
 
         @Override
@@ -460,22 +610,24 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
             }
         }
 
-        @Override
-        public boolean isEnabled() {
-            return mBgCurrentDrainMonitorEnabled;
-        }
-
         double getBgConsumption(final UidBatteryConsumer uidConsumer) {
             return getConsumedPowerNoThrow(uidConsumer, BATT_DIMEN_BG)
                     + getConsumedPowerNoThrow(uidConsumer, BATT_DIMEN_FGS);
         }
 
-        double getPercentage(final double consumption) {
-            return consumption / mBatteryFullChargeMah * 100;
+        double getPercentage(final int uid, final double consumption) {
+            final double actualPercentage = consumption / mBatteryFullChargeMah * 100;
+            return DEBUG_BACKGROUND_BATTERY_TRACKER
+                    ? mTracker.mDebugUidPercentages.get(uid, actualPercentage) : actualPercentage;
         }
 
         void handleUidBatteryConsumption(final int uid, final double percentage) {
-            if (shouldExemptUid(uid)) {
+            final @ReasonCode int reason = shouldExemptUid(uid);
+            if (reason != REASON_DENIED) {
+                if (DEBUG_BACKGROUND_BATTERY_TRACKER) {
+                    Slog.i(TAG, "Exempting battery consumption in " + UserHandle.formatUid(uid)
+                            + " " + PowerExemptionManager.reasonCodeToString(reason));
+                }
                 return;
             }
             boolean notifyController = false;
@@ -486,29 +638,31 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
                     // We're already in the background restricted level, nothing more we could do.
                     return;
                 }
+                final long now = SystemClock.elapsedRealtime();
+                final int thresholdIndex = getCurrentDrainThresholdIndex(uid, now,
+                        mBgCurrentDrainWindowMs);
                 final int index = mHighBgBatteryPackages.indexOfKey(uid);
                 if (index < 0) {
-                    if (percentage >= mBgCurrentDrainRestrictedBucketThreshold) {
+                    if (percentage >= mBgCurrentDrainRestrictedBucketThreshold[thresholdIndex]) {
                         // New findings to us, track it and let the controller know.
                         final long[] ts = new long[TIME_STAMP_INDEX_LAST];
-                        ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET] = SystemClock.elapsedRealtime();
+                        ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET] = now;
                         mHighBgBatteryPackages.put(uid, ts);
                         notifyController = excessive = true;
                     }
                 } else {
                     final long[] ts = mHighBgBatteryPackages.valueAt(index);
-                    if (percentage < mBgCurrentDrainRestrictedBucketThreshold) {
+                    if (percentage < mBgCurrentDrainRestrictedBucketThreshold[thresholdIndex]) {
                         // it's actually back to normal, but we don't untrack it until
                         // explicit user interactions.
                         notifyController = true;
                     } else {
                         excessive = true;
-                        if (percentage >= mBgCurrentDrainBgRestrictedThreshold) {
+                        if (percentage >= mBgCurrentDrainBgRestrictedThreshold[thresholdIndex]) {
                             // If we're in the restricted standby bucket but still seeing high
                             // current drains, tell the controller again.
                             if (curLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET
                                     && ts[TIME_STAMP_INDEX_BG_RESTRICTED] == 0) {
-                                final long now = SystemClock.elapsedRealtime();
                                 if (now > ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET]
                                         + mBgCurrentDrainWindowMs) {
                                     ts[TIME_STAMP_INDEX_BG_RESTRICTED] = now;
@@ -540,6 +694,29 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
                 // For now, we're not lifting the restrictions if the bg current drain backs to
                 // normal util an explicit user interaction.
             }
+        }
+
+        private int getCurrentDrainThresholdIndex(int uid, long now, long window) {
+            return (hasMediaPlayback(uid, now, window) || hasLocation(uid, now, window))
+                    ? INDEX_HIGH_CURRENT_DRAIN_THRESHOLD
+                    : INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD;
+        }
+
+        private boolean hasMediaPlayback(int uid, long now, long window) {
+            return mTracker.mAppRestrictionController.getCompositeMediaPlaybackDurations(
+                    uid, now, window) >= mBgCurrentDrainMediaPlaybackMinDuration;
+        }
+
+        private boolean hasLocation(int uid, long now, long window) {
+            final AppRestrictionController controller = mTracker.mAppRestrictionController;
+            if (mInjector.getPermissionManagerServiceInternal().checkUidPermission(
+                    uid, ACCESS_BACKGROUND_LOCATION) == PERMISSION_GRANTED) {
+                return true;
+            }
+            final long since = Math.max(0, now - window);
+            final long locationDuration = controller.getForegroundServiceTotalDurationsSince(
+                    uid, since, now, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
+            return locationDuration >= mBgCurrentDrainLocationMinDuration;
         }
 
         void onUserInteractionStarted(String packageName, int uid) {
@@ -588,16 +765,80 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
             }
         }
 
-        /**
-         * Note: The {@link com.android.server.usage.AppStandbyController} has a complete exemption
-         * list and will place exempted packages in exempted bucket eventually.
-         */
+        @VisibleForTesting
+        void reset() {
+            mHighBgBatteryPackages.clear();
+        }
+
         @Override
-        public boolean shouldExemptUid(int uid) {
-            if (!super.shouldExemptUid(uid)) {
-                // TODO: b/200326767 - Exempt the location/music/pinned apps.
+        void dump(PrintWriter pw, String prefix) {
+            pw.print(prefix);
+            pw.println("APP BATTERY TRACKER POLICY SETTINGS:");
+            final String indent = "  ";
+            prefix = indent + prefix;
+            super.dump(pw, prefix);
+            if (isEnabled()) {
+                pw.print(prefix);
+                pw.print(KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_RESTRICTED_BUCKET);
+                pw.print('=');
+                pw.println(mBgCurrentDrainRestrictedBucketThreshold[
+                        INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD]);
+                pw.print(prefix);
+                pw.print(KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_RESTRICTED_BUCKET);
+                pw.print('=');
+                pw.println(mBgCurrentDrainRestrictedBucketThreshold[
+                        INDEX_HIGH_CURRENT_DRAIN_THRESHOLD]);
+                pw.print(prefix);
+                pw.print(KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_BG_RESTRICTED);
+                pw.print('=');
+                pw.println(mBgCurrentDrainBgRestrictedThreshold[
+                        INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD]);
+                pw.print(prefix);
+                pw.print(KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_BG_RESTRICTED);
+                pw.print('=');
+                pw.println(mBgCurrentDrainBgRestrictedThreshold[
+                        INDEX_HIGH_CURRENT_DRAIN_THRESHOLD]);
+                pw.print(prefix);
+                pw.print(KEY_BG_CURRENT_DRAIN_WINDOW);
+                pw.print('=');
+                pw.println(mBgCurrentDrainWindowMs);
+                pw.print(prefix);
+                pw.print(KEY_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION);
+                pw.print('=');
+                pw.println(mBgCurrentDrainMediaPlaybackMinDuration);
+                pw.print(prefix);
+                pw.print(KEY_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION);
+                pw.print('=');
+                pw.println(mBgCurrentDrainLocationMinDuration);
+
+                pw.print(prefix);
+                pw.println("Excessive current drain detected:");
+                synchronized (mLock) {
+                    final int size = mHighBgBatteryPackages.size();
+                    prefix = indent + prefix;
+                    if (size > 0) {
+                        final long now = SystemClock.elapsedRealtime();
+                        for (int i = 0; i < size; i++) {
+                            final int uid = mHighBgBatteryPackages.keyAt(i);
+                            final long[] ts = mHighBgBatteryPackages.valueAt(i);
+                            final int thresholdIndex = getCurrentDrainThresholdIndex(uid, now,
+                                    mBgCurrentDrainWindowMs);
+                            pw.format("%s%s: (threshold=%4.2f%%/%4.2f%%) %s/%s\n",
+                                    prefix,
+                                    UserHandle.formatUid(uid),
+                                    mBgCurrentDrainRestrictedBucketThreshold[thresholdIndex],
+                                    mBgCurrentDrainBgRestrictedThreshold[thresholdIndex],
+                                    ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET] == 0 ? "0"
+                                        : formatTime(ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET], now),
+                                    ts[TIME_STAMP_INDEX_BG_RESTRICTED] == 0 ? "0"
+                                        : formatTime(ts[TIME_STAMP_INDEX_BG_RESTRICTED], now));
+                        }
+                    } else {
+                        pw.print(prefix);
+                        pw.println("(none)");
+                    }
+                }
             }
-            return false;
         }
     }
 }
