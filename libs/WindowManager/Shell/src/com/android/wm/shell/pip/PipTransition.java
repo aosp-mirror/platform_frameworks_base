@@ -19,6 +19,7 @@ package com.android.wm.shell.pip;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.util.RotationUtils.deltaRotation;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
@@ -154,6 +155,25 @@ public class PipTransition extends PipTransitionController {
         // We only support TRANSIT_PIP type (from RootWindowContainer) or TRANSIT_OPEN (from apps
         // that enter PiP instantly on opening, mostly from CTS/Flicker tests)
         if (info.getType() != TRANSIT_PIP && info.getType() != TRANSIT_OPEN) {
+            // In case the PIP window is part of rotation transition, reset the bounds and rounded
+            // corner.
+            for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                final TransitionInfo.Change change = info.getChanges().get(i);
+                if (change.getMode() == TRANSIT_CHANGE && change.getTaskInfo() != null
+                        && change.getTaskInfo().configuration.windowConfiguration.getWindowingMode()
+                        == WINDOWING_MODE_PINNED) {
+                    final SurfaceControl leash = change.getLeash();
+                    final Rect destBounds = mPipBoundsState.getBounds();
+                    final boolean isInPip = mPipTransitionState.isInPip();
+                    mSurfaceTransactionHelper
+                            .crop(startTransaction, leash, destBounds)
+                            .round(startTransaction, leash, isInPip);
+                    mSurfaceTransactionHelper
+                            .crop(finishTransaction, leash, destBounds)
+                            .round(finishTransaction, leash, isInPip);
+                    break;
+                }
+            }
             return false;
         }
 

@@ -72,6 +72,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -138,10 +141,22 @@ public class ContextHubService extends IContextHubService.Stub {
     // The manager for the internal nanoapp state cache
     private final NanoAppStateManager mNanoAppStateManager = new NanoAppStateManager();
 
+    // An executor and the future object for scheduling timeout timers
+    private final ScheduledThreadPoolExecutor mDailyMetricTimer =
+            new ScheduledThreadPoolExecutor(1);
+
+
+    // The period of the recurring time
+    private static final int PERIOD_METRIC_QUERY_DAYS = 1;
+
     // True if WiFi is available for the Context Hub
     private boolean mIsWifiAvailable = false;
     private boolean mIsWifiScanningEnabled = false;
     private boolean mIsWifiMainEnabled = false;
+
+    // A hashmap used to record if a contexthub is waiting for daily query
+    private Set<Integer> mMetricQueryPendingContextHubIds =
+            Collections.newSetFromMap(new ConcurrentHashMap<Integer, Boolean>());
 
     // Lock object for sendWifiSettingUpdate()
     private final Object mSendWifiSettingUpdateLock = new Object();
@@ -317,6 +332,8 @@ public class ContextHubService extends IContextHubService.Stub {
                     });
 
         }
+
+        scheduleDailyMetricSnapshot();
     }
 
     /**
@@ -747,6 +764,18 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param nanoappStateList the list of loaded nanoapps
      */
     private void handleQueryAppsCallback(int contextHubId, List<NanoAppState> nanoappStateList) {
+        if (mMetricQueryPendingContextHubIds.contains(contextHubId)) {
+            for (NanoAppState nanoappState : nanoappStateList) {
+                ContextHubStatsLog.write(
+                        ContextHubStatsLog.CONTEXT_HUB_LOADED_NANOAPP_SNAPSHOT_REPORTED,
+                        contextHubId, nanoappState.getNanoAppId(),
+                        (int) nanoappState.getNanoAppVersion());
+            }
+            mMetricQueryPendingContextHubIds.remove(contextHubId);
+            if (mMetricQueryPendingContextHubIds.isEmpty()) {
+                scheduleDailyMetricSnapshot();
+            }
+        }
         mNanoAppStateManager.updateCache(contextHubId, nanoappStateList);
         mTransactionManager.onQueryResponse(nanoappStateList);
     }
@@ -1135,6 +1164,23 @@ public class ContextHubService extends IContextHubService.Stub {
         sendMicrophoneDisableSettingUpdate(isEnabled);
     }
 
+    /**
+     *  Invokes a daily timer to query all context hubs
+     */
+    private void scheduleDailyMetricSnapshot() {
+        Runnable queryAllContextHub = () -> {
+            for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
+                mMetricQueryPendingContextHubIds.add(contextHubId);
+                queryNanoAppsInternal(contextHubId);
+            }
+        };
+        try {
+            mDailyMetricTimer.schedule(queryAllContextHub, PERIOD_METRIC_QUERY_DAYS,
+                    TimeUnit.DAYS);
+        } catch (Exception e) {
+            Log.e(TAG, "Error when schedule a timer", e);
+        }
+    }
 
     private String getCallingPackageName() {
         return mContext.getPackageManager().getNameForUid(Binder.getCallingUid());

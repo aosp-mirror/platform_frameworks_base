@@ -24,6 +24,7 @@ import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
@@ -357,6 +358,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     continue;
                 }
 
+                // There is no default animation for Pip window in rotation transition, and the
+                // PipTransition will update the surface of its own window at start/finish.
+                if (isTask && change.getTaskInfo().configuration.windowConfiguration
+                        .getWindowingMode() == WINDOWING_MODE_PINNED) {
+                    continue;
+                }
                 // No default animation for this, so just update bounds/position.
                 startTransaction.setPosition(change.getLeash(),
                         change.getEndAbsBounds().left - info.getRootOffset().x,
