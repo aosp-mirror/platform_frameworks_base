@@ -2180,7 +2180,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public int relayoutWindow(Session session, IWindow client, LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility, int flags,
-            long frameNumber, ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
+            ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {
         Arrays.fill(outActiveControls, null);
@@ -2201,8 +2201,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (viewVisibility != View.GONE) {
                 win.setRequestedSize(requestedWidth, requestedHeight);
             }
-
-            win.setFrameNumber(frameNumber);
 
             int attrChanges = 0;
             int flagChanges = 0;

@@ -221,7 +221,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public int relayout(IWindow window, WindowManager.LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
+            int requestedWidth, int requestedHeight, int viewFlags, int flags,
             ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {
@@ -229,7 +229,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 + Binder.getCallingPid());
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
         int res = mService.relayoutWindow(this, window, attrs,
-                requestedWidth, requestedHeight, viewFlags, flags, frameNumber,
+                requestedWidth, requestedHeight, viewFlags, flags,
                 outFrames, mergedConfiguration, outSurfaceControl, outInsetsState,
                 outActiveControls);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);

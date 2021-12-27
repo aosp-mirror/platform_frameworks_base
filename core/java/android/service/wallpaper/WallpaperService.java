@@ -1142,7 +1142,7 @@ public abstract class WallpaperService extends Service {
 
                     final int relayoutResult = mSession.relayout(
                             mWindow, mLayout, mWidth, mHeight,
-                            View.VISIBLE, 0, -1, mWinFrames, mMergedConfiguration, mSurfaceControl,
+                            View.VISIBLE, 0, mWinFrames, mMergedConfiguration, mSurfaceControl,
                             mInsetsState, mTempControls);
 
                     final int transformHint = SurfaceControl.rotationToBufferTransform(
