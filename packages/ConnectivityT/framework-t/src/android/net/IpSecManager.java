@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.annotations.PolicyDirection;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -975,6 +976,29 @@ public final class IpSecManager {
                     transform.getResourceId(), mContext.getOpPackageName());
         } catch (ServiceSpecificException e) {
             throw rethrowCheckedExceptionFromServiceSpecificException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public IpSecTransformResponse createTransform(IpSecConfig config, IBinder binder,
+            String callingPackage) {
+        try {
+            return mService.createTransform(config, binder, callingPackage);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void deleteTransform(int resourceId) {
+        try {
+            mService.deleteTransform(resourceId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
