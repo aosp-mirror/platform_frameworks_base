@@ -96,6 +96,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
 import android.net.NetworkIdentitySet;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStateSnapshot;
@@ -850,7 +851,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             if (LOGD) Log.d(TAG, "Resolving plan for " + template);
             final long token = Binder.clearCallingIdentity();
             try {
-                plan = LocalServices.getService(NetworkPolicyManagerInternal.class)
+                plan = mContext.getSystemService(NetworkPolicyManager.class)
                         .getSubscriptionPlan(template);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -2021,10 +2022,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
         Objects.requireNonNull(provider, "provider is null");
         Objects.requireNonNull(tag, "tag is null");
+        final NetworkPolicyManager netPolicyManager = mContext
+                .getSystemService(NetworkPolicyManager.class);
         try {
             NetworkStatsProviderCallbackImpl callback = new NetworkStatsProviderCallbackImpl(
                     tag, provider, mStatsProviderSem, mAlertObserver,
-                    mStatsProviderCbList);
+                    mStatsProviderCbList, netPolicyManager);
             mStatsProviderCbList.add(callback);
             Log.d(TAG, "registerNetworkStatsProvider from " + callback.mTag + " uid/pid="
                     + getCallingUid() + "/" + getCallingPid());
@@ -2066,6 +2069,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         @NonNull private final Semaphore mSemaphore;
         @NonNull final AlertObserver mAlertObserver;
         @NonNull final CopyOnWriteArrayList<NetworkStatsProviderCallbackImpl> mStatsProviderCbList;
+        @NonNull final NetworkPolicyManager mNetworkPolicyManager;
 
         @NonNull private final Object mProviderStatsLock = new Object();
 
@@ -2079,7 +2083,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 @NonNull String tag, @NonNull INetworkStatsProvider provider,
                 @NonNull Semaphore semaphore,
                 @NonNull AlertObserver alertObserver,
-                @NonNull CopyOnWriteArrayList<NetworkStatsProviderCallbackImpl> cbList)
+                @NonNull CopyOnWriteArrayList<NetworkStatsProviderCallbackImpl> cbList,
+                @NonNull NetworkPolicyManager networkPolicyManager)
                 throws RemoteException {
             mTag = tag;
             mProvider = provider;
@@ -2087,6 +2092,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             mSemaphore = semaphore;
             mAlertObserver = alertObserver;
             mStatsProviderCbList = cbList;
+            mNetworkPolicyManager = networkPolicyManager;
         }
 
         @NonNull
@@ -2133,8 +2139,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public void notifyWarningOrLimitReached() {
             Log.d(TAG, mTag + ": notifyWarningOrLimitReached");
             BinderUtils.withCleanCallingIdentity(() ->
-                    LocalServices.getService(NetworkPolicyManagerInternal.class)
-                            .onStatsProviderWarningOrLimitReached(mTag));
+                    mNetworkPolicyManager.onStatsProviderWarningOrLimitReached());
         }
 
         @Override
