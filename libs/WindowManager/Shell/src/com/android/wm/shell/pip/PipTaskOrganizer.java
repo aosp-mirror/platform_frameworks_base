@@ -882,7 +882,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (animator == null || !animator.isRunning()
                 || animator.getTransitionDirection() != TRANSITION_DIRECTION_TO_PIP) {
             final boolean rotatingPip = mPipTransitionState.isInPip() && fromRotation;
-            if (rotatingPip && mWaitForFixedRotation && mHasFadeOut) {
+            if (rotatingPip && Transitions.ENABLE_SHELL_TRANSITIONS) {
+                // The animation and surface update will be handled by the shell transition handler.
+                mPipBoundsState.setBounds(destinationBoundsOut);
+            } else if (rotatingPip && mWaitForFixedRotation && mHasFadeOut) {
                 // The position will be used by fade-in animation when the fixed rotation is done.
                 mPipBoundsState.setBounds(destinationBoundsOut);
             } else if (rotatingPip) {
