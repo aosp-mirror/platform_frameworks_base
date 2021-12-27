@@ -158,13 +158,25 @@ public interface UsbPortHal {
      *                 completion.
      * @param callback callback object to be invoked when the operation is complete.
      * @return True when the operation is asynchronous. The caller of
-     *         {@link UsbOperationCallbackInternal} must therefore call
-     *         {@link UsbOperationCallbackInternal#waitForOperationComplete} for processing
+     *         {@link UsbOperationInternal} must therefore call
+     *         {@link UsbOperationInternal#waitForOperationComplete} for processing
      *         the result.
      *         False when the operation is synchronous. Caller can proceed reading the result
-     *         through {@link UsbOperationCallbackInternal#getStatus}
+     *         through {@link UsbOperationInternal#getStatus}
      */
     public boolean enableUsbData(String portName, boolean enable, long transactionId,
+            IUsbOperationInternal callback);
+
+    /**
+     * Invoked to enable  UsbData when disabled due to docking event.
+     *
+     * @param portName Port Identifier.
+     * @param transactionId Used for tracking the current request and is passed down to the HAL
+     *                      implementation as needed.
+     * @param callback callback object to be invoked to invoke the status of the operation upon
+     *                 completion.
+     */
+    public void enableUsbDataWhileDocked(String portName, long transactionId,
             IUsbOperationInternal callback);
 
     /**

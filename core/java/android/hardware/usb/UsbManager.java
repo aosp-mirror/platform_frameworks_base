@@ -1359,6 +1359,35 @@ public class UsbManager {
     }
 
     /**
+     * Should only be called by {@link UsbPort#enableUsbDataWhileDocked}.
+     * <p>
+     * Enables or disables USB data when disabled due to docking event.
+     *
+     * @param port USB port for which USB data needs to be enabled.
+     * @param operationId operationId for the request.
+     * @param callback callback object to be invoked when the operation is complete.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    void enableUsbDataWhileDocked(@NonNull UsbPort port, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(port, "enableUsbDataWhileDocked: port must not be null. opId:"
+                + operationId);
+        try {
+            mService.enableUsbDataWhileDocked(port.getId(), operationId, callback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "enableUsbDataWhileDocked: failed. opId:" + operationId, e);
+            try {
+                callback.onOperationComplete(UsbOperationInternal.USB_OPERATION_ERROR_INTERNAL);
+            } catch (RemoteException r) {
+                Log.e(TAG, "enableUsbDataWhileDocked: failed to call onOperationComplete. opId:"
+                        + operationId, r);
+            }
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Sets the component that will handle USB device connection.
      * <p>
      * Setting component allows to specify external USB host manager to handle use cases, where
