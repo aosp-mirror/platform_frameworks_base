@@ -170,16 +170,44 @@ public class NetworkStatsManager {
         }
     }
 
-    /** @hide */
-    public Bucket querySummaryForDevice(NetworkTemplate template,
-            long startTime, long endTime) throws SecurityException, RemoteException {
-        Bucket bucket = null;
-        NetworkStats stats = new NetworkStats(mContext, template, mFlags, startTime, endTime,
-                mService);
-        bucket = stats.getDeviceSummaryForNetwork();
-
-        stats.close();
-        return bucket;
+    /**
+     * Query network usage statistics summaries.
+     *
+     * Result is summarised data usage for the whole
+     * device. Result is a single Bucket aggregated over time, state, uid, tag, metered, and
+     * roaming. This means the bucket's start and end timestamp will be the same as the
+     * 'startTime' and 'endTime' arguments. State is going to be
+     * {@link NetworkStats.Bucket#STATE_ALL}, uid {@link NetworkStats.Bucket#UID_ALL},
+     * tag {@link NetworkStats.Bucket#TAG_NONE},
+     * default network {@link NetworkStats.Bucket#DEFAULT_NETWORK_ALL},
+     * metered {@link NetworkStats.Bucket#METERED_ALL},
+     * and roaming {@link NetworkStats.Bucket#ROAMING_ALL}.
+     * This may take a long time, and apps should avoid calling this on their main thread.
+     *
+     * @param template Template used to match networks. See {@link NetworkTemplate}.
+     * @param startTime Start of period, in milliseconds since the Unix epoch, see
+     *            {@link java.lang.System#currentTimeMillis}.
+     * @param endTime End of period, in milliseconds since the Unix epoch, see
+     *            {@link java.lang.System#currentTimeMillis}.
+     * @return Bucket Summarised data usage.
+     *
+     * @hide
+     */
+    @NonNull
+    @WorkerThread
+    // @SystemApi(client = MODULE_LIBRARIES)
+    public Bucket querySummaryForDevice(@NonNull NetworkTemplate template,
+            long startTime, long endTime) {
+        try {
+            NetworkStats stats =
+                    new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
+            Bucket bucket = stats.getDeviceSummaryForNetwork();
+            stats.close();
+            return bucket;
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return null; // To make the compiler happy.
     }
 
     /**
@@ -323,14 +351,37 @@ public class NetworkStatsManager {
         return querySummary(template, startTime, endTime);
     }
 
-    /** @hide */
-    public NetworkStats querySummary(NetworkTemplate template, long startTime,
-            long endTime) throws SecurityException, RemoteException {
-        NetworkStats result;
-        result = new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
-        result.startSummaryEnumeration();
-
-        return result;
+    /**
+     * Query network usage statistics summaries.
+     *
+     * The results will only include traffic made by UIDs belonging to the calling user profile.
+     * The results are aggregated over time, so that all buckets will have the same start and
+     * end timestamps as the passed arguments. Not aggregated over state, uid, default network,
+     * metered, or roaming.
+     * This may take a long time, and apps should avoid calling this on their main thread.
+     *
+     * @param template Template used to match networks. See {@link NetworkTemplate}.
+     * @param startTime Start of period, in milliseconds since the Unix epoch, see
+     *            {@link java.lang.System#currentTimeMillis}.
+     * @param endTime End of period, in milliseconds since the Unix epoch, see
+     *            {@link java.lang.System#currentTimeMillis}.
+     * @return Statistics which is described above.
+     * @hide
+     */
+    @Nullable
+    // @SystemApi(client = MODULE_LIBRARIES)
+    @WorkerThread
+    public NetworkStats querySummary(@NonNull NetworkTemplate template, long startTime,
+            long endTime) throws SecurityException {
+        try {
+            NetworkStats result =
+                    new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
+            result.startSummaryEnumeration();
+            return result;
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return null; // To make the compiler happy.
     }
 
     /**
