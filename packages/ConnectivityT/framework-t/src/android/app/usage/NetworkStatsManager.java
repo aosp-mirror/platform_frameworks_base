@@ -47,7 +47,6 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.DataUnit;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -119,7 +118,7 @@ public class NetworkStatsManager {
      * is reached.
      * @hide
      */
-    public static final long MIN_THRESHOLD_BYTES = DataUnit.MEBIBYTES.toBytes(2);
+    public static final long MIN_THRESHOLD_BYTES = 2 * 1_048_576L; // 2MiB
 
     private final Context mContext;
     private final INetworkStatsService mService;
