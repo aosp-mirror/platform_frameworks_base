@@ -559,6 +559,8 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     private UUID mStorageUuid;
     private long mLongVersionCode;
 
+    private int mLocaleConfigRes;
+
     @VisibleForTesting
     public ParsingPackageImpl(@NonNull String packageName, @NonNull String baseApkPath,
             @NonNull String path, @Nullable TypedArray manifestArray) {
@@ -1136,6 +1138,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         appInfo.setSplitResourcePaths(splitCodePaths);
         appInfo.setVersionCode(mLongVersionCode);
         appInfo.setAppClassNamesByProcess(buildAppClassNamesByProcess());
+        appInfo.setLocaleConfigRes(mLocaleConfigRes);
 
         return appInfo;
     }
@@ -1314,6 +1317,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         dest.writeInt(this.memtagMode);
         dest.writeInt(this.nativeHeapZeroInitialized);
         sForBoolean.parcel(this.requestRawExternalStorageAccess, dest, flags);
+        dest.writeInt(this.mLocaleConfigRes);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1461,6 +1465,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         this.memtagMode = in.readInt();
         this.nativeHeapZeroInitialized = in.readInt();
         this.requestRawExternalStorageAccess = sForBoolean.unparcel(in);
+        this.mLocaleConfigRes = in.readInt();
         assignDerivedFields();
     }
 
@@ -2279,6 +2284,11 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         return nativeHeapZeroInitialized;
     }
 
+    @Override
+    public int getLocaleConfigRes() {
+        return mLocaleConfigRes;
+    }
+
     @Nullable
     @Override
     public Boolean hasRequestRawExternalStorageAccess() {
@@ -2934,6 +2944,12 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
             boolean resetEnabledSettingsOnAppDataCleared) {
         setBoolean(Booleans.RESET_ENABLED_SETTINGS_ON_APP_DATA_CLEARED,
                 resetEnabledSettingsOnAppDataCleared);
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setLocaleConfigRes(int value) {
+        mLocaleConfigRes = value;
         return this;
     }
 }

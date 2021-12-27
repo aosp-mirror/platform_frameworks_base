@@ -375,6 +375,8 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage setResetEnabledSettingsOnAppDataCleared(
             boolean resetEnabledSettingsOnAppDataCleared);
 
+    ParsingPackage setLocaleConfigRes(int localeConfigRes);
+
     // TODO(b/135203078): This class no longer has access to ParsedPackage, find a replacement
     //  for moving to the next step
     @CallSuper

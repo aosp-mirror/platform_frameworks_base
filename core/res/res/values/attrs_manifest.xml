@@ -1519,6 +1519,9 @@
     <!-- An XML resource with the application's Network Security Config. -->
     <attr name="networkSecurityConfig" format="reference" />
 
+    <!-- An XML resource with the application's {@link android.app.LocaleConfig} -->
+    <attr name="localeConfig" format="reference" />
+
     <!-- When an application is partitioned into splits, this is the name of the
          split that contains the defined component. -->
     <attr name="splitName" format="string" />
@@ -1801,6 +1804,7 @@
         <attr name="maxAspectRatio" />
         <attr name="minAspectRatio" />
         <attr name="networkSecurityConfig" />
+        <attr name="localeConfig" />
         <!-- Declare the category of this app. Categories are used to cluster multiple apps
              together into meaningful groups, such as when summarizing battery, network, or
              disk usage. Apps should only define this value when they fit well into one of
