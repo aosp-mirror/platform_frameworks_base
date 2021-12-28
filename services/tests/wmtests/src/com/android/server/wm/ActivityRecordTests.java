@@ -2311,17 +2311,15 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Set initial orientation and update.
         activity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-        mDisplayContent.updateOrientation(
-                mDisplayContent.getRequestedOverrideConfiguration(),
-                null /* freezeThisOneIfNeeded */, false /* forceUpdate */);
+        mDisplayContent.updateOrientation(null /* freezeThisOneIfNeeded */,
+                false /* forceUpdate */);
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, mDisplayContent.getLastOrientation());
         appWindow.mResizeReported = false;
 
         // Update the orientation to perform 180 degree rotation and check that resize was reported.
         activity.setOrientation(SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-        mDisplayContent.updateOrientation(
-                mDisplayContent.getRequestedOverrideConfiguration(),
-                null /* freezeThisOneIfNeeded */, false /* forceUpdate */);
+        mDisplayContent.updateOrientation(null /* freezeThisOneIfNeeded */,
+                false /* forceUpdate */);
         // In this test, DC will not get config update. Set the waiting flag to false.
         mDisplayContent.mWaitingForConfig = false;
         mWm.mRoot.performSurfacePlacement();

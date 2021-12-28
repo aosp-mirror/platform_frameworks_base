@@ -1823,8 +1823,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final DisplayContent displayContent = getDisplayContent(displayId);
         Configuration config = null;
         if (displayContent != null) {
-            config = displayContent.updateOrientation(
-                    getDisplayOverrideConfiguration(displayId), starting, true /* forceUpdate */);
+            config = displayContent.updateOrientation(starting, true /* forceUpdate */);
         }
         // Visibilities may change so let the starting activity have a chance to report. Can't do it
         // when visibility is changed in each AppWindowToken because it may trigger wrong
@@ -2559,24 +2558,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
         // Store updated lists in DisplayManager. Callers from outside of AM should get them there.
         mDisplayManagerInternal.setDisplayAccessUIDs(mDisplayAccessUIDs);
-    }
-
-    Configuration getDisplayOverrideConfiguration(int displayId) {
-        final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
-        if (displayContent == null) {
-            throw new IllegalArgumentException("No display found with id: " + displayId);
-        }
-
-        return displayContent.getRequestedOverrideConfiguration();
-    }
-
-    void setDisplayOverrideConfiguration(Configuration overrideConfiguration, int displayId) {
-        final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
-        if (displayContent == null) {
-            throw new IllegalArgumentException("No display found with id: " + displayId);
-        }
-
-        displayContent.onRequestedOverrideConfigurationChanged(overrideConfiguration);
     }
 
     void prepareForShutdown() {
