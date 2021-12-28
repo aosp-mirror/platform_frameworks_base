@@ -139,6 +139,7 @@ public class NetworkStatsManager {
         mContext = context;
         mService = service;
         setPollOnOpen(true);
+        setAugmentWithSubscriptionPlan(true);
     }
 
     /** @hide */
