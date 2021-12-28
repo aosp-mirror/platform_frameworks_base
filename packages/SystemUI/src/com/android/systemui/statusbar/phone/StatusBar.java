@@ -232,6 +232,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -337,9 +338,11 @@ public class StatusBar extends CoreStartable implements
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private StatusBarCommandQueueCallbacks mCommandQueueCallbacks;
 
-    void setWindowState(int state) {
-        mStatusBarWindowState =  state;
+    void onStatusBarWindowStateChanged(@WindowVisibleState int state) {
+        updateBubblesVisibility();
+        mStatusBarWindowState = state;
         mStatusBarWindowHidden = state == WINDOW_STATE_HIDDEN;
+        // TODO(b/212424936): Have this icon manager just implement its own listener.
         mStatusBarHideIconsForBouncerManager.setStatusBarWindowHidden(mStatusBarWindowHidden);
         if (mStatusBarView != null) {
             // Should #updateHideIconsForBouncer always be called, regardless of whether we have a
@@ -464,7 +467,7 @@ public class StatusBar extends CoreStartable implements
     private PhoneStatusBarViewController mPhoneStatusBarViewController;
     private PhoneStatusBarTransitions mStatusBarTransitions;
     private AuthRippleController mAuthRippleController;
-    private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
+    @WindowVisibleState private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarWindowController mStatusBarWindowController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -692,6 +695,7 @@ public class StatusBar extends CoreStartable implements
             LightBarController lightBarController,
             AutoHideController autoHideController,
             StatusBarWindowController statusBarWindowController,
+            StatusBarWindowStateController statusBarWindowStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarSignalPolicy statusBarSignalPolicy,
             PulseExpansionHandler pulseExpansionHandler,
@@ -872,6 +876,7 @@ public class StatusBar extends CoreStartable implements
         mStartingSurfaceOptional = startingSurfaceOptional;
         mNotifPipelineFlags = notifPipelineFlags;
         lockscreenShadeTransitionController.setStatusbar(this);
+        statusBarWindowStateController.addListener(this::onStatusBarWindowStateChanged);
 
         mScreenOffAnimationController = screenOffAnimationController;
 
