@@ -1133,7 +1133,8 @@ public class StatusBar extends CoreStartable implements
                     mStatusBarView = statusBarView;
                     mPhoneStatusBarViewController = statusBarViewController;
                     mStatusBarTransitions = statusBarTransitions;
-                    mNotificationShadeWindowViewController.setStatusBarView(mStatusBarView);
+                    mNotificationShadeWindowViewController
+                            .setStatusBarViewController(mPhoneStatusBarViewController);
                     // Ensure we re-propagate panel expansion values to the panel controller and
                     // any listeners it may have, such as PanelBar. This will also ensure we
                     // re-display the notification panel if necessary (for example, if

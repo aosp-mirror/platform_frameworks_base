@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 
 import android.app.StatusBarManager;
-import android.graphics.RectF;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.media.AudioManager;
 import android.media.session.MediaSessionLegacyHelper;
@@ -75,7 +74,7 @@ public class NotificationShadeWindowViewController {
     private boolean mTouchCancelled;
     private boolean mExpandAnimationRunning;
     private NotificationStackScrollLayout mStackScrollLayout;
-    private PhoneStatusBarView mStatusBarView;
+    private PhoneStatusBarViewController mStatusBarViewController;
     private StatusBar mService;
     private NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
@@ -86,8 +85,6 @@ public class NotificationShadeWindowViewController {
     private final NotificationPanelViewController mNotificationPanelViewController;
     private final PanelExpansionStateManager mPanelExpansionStateManager;
 
-    // Used for determining view / touch intersection
-    private final RectF mTempRect = new RectF();
     private boolean mIsTrackingBarGesture = false;
 
     @Inject
@@ -175,7 +172,7 @@ public class NotificationShadeWindowViewController {
         mView.setInteractionEventHandler(new NotificationShadeWindowView.InteractionEventHandler() {
             @Override
             public Boolean handleDispatchTouchEvent(MotionEvent ev) {
-                if (mStatusBarView == null) {
+                if (mStatusBarViewController == null) { // Fix for b/192490822
                     Log.w(TAG, "Ignoring touch while statusBarView not yet set.");
                     return false;
                 }
@@ -243,27 +240,27 @@ public class NotificationShadeWindowViewController {
                     expandingBelowNotch = true;
                 }
                 if (expandingBelowNotch) {
-                    return mStatusBarView.dispatchTouchEvent(ev);
+                    return mStatusBarViewController.sendTouchToView(ev);
                 }
 
                 if (!mIsTrackingBarGesture && isDown
                         && mNotificationPanelViewController.isFullyCollapsed()) {
                     float x = ev.getRawX();
                     float y = ev.getRawY();
-                    if (isIntersecting(mStatusBarView, x, y)) {
+                    if (mStatusBarViewController.touchIsWithinView(x, y)) {
                         if (mService.isSameStatusBarState(WINDOW_STATE_SHOWING)) {
                             mIsTrackingBarGesture = true;
-                            return mStatusBarView.dispatchTouchEvent(ev);
+                            return mStatusBarViewController.sendTouchToView(ev);
                         } else { // it's hidden or hiding, don't send to notification shade.
                             return true;
                         }
                     }
                 } else if (mIsTrackingBarGesture) {
-                    final boolean sendToNotification = mStatusBarView.dispatchTouchEvent(ev);
+                    final boolean sendToStatusBar = mStatusBarViewController.sendTouchToView(ev);
                     if (isUp || isCancel) {
                         mIsTrackingBarGesture = false;
                     }
-                    return sendToNotification;
+                    return sendToStatusBar;
                 }
 
                 return null;
@@ -442,8 +439,8 @@ public class NotificationShadeWindowViewController {
         }
     }
 
-    public void setStatusBarView(PhoneStatusBarView statusBarView) {
-        mStatusBarView = statusBarView;
+    public void setStatusBarViewController(PhoneStatusBarViewController statusBarViewController) {
+        mStatusBarViewController = statusBarViewController;
     }
 
     public void setService(StatusBar statusBar, NotificationShadeWindowController controller) {
@@ -454,12 +451,5 @@ public class NotificationShadeWindowViewController {
     @VisibleForTesting
     void setDragDownHelper(DragDownHelper dragDownHelper) {
         mDragDownHelper = dragDownHelper;
-    }
-
-    private boolean isIntersecting(View view, float x, float y) {
-        int[] mTempLocation = view.getLocationOnScreen();
-        mTempRect.set(mTempLocation[0], mTempLocation[1], mTempLocation[0] + view.getWidth(),
-                mTempLocation[1] + view.getHeight());
-        return mTempRect.contains(x, y);
     }
 }
