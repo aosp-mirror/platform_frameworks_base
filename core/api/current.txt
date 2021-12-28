@@ -48174,6 +48174,18 @@ package android.view {
     method @NonNull public android.graphics.Insets getWaterfallInsets();
   }
 
+  public static final class DisplayCutout.Builder {
+    ctor public DisplayCutout.Builder();
+    method @NonNull public android.view.DisplayCutout build();
+    method @NonNull public android.view.DisplayCutout.Builder setBoundingRectBottom(@NonNull android.graphics.Rect);
+    method @NonNull public android.view.DisplayCutout.Builder setBoundingRectLeft(@NonNull android.graphics.Rect);
+    method @NonNull public android.view.DisplayCutout.Builder setBoundingRectRight(@NonNull android.graphics.Rect);
+    method @NonNull public android.view.DisplayCutout.Builder setBoundingRectTop(@NonNull android.graphics.Rect);
+    method @NonNull public android.view.DisplayCutout.Builder setCutoutPath(@NonNull android.graphics.Path);
+    method @NonNull public android.view.DisplayCutout.Builder setSafeInsets(@NonNull android.graphics.Insets);
+    method @NonNull public android.view.DisplayCutout.Builder setWaterfallInsets(@NonNull android.graphics.Insets);
+  }
+
   public final class DragAndDropPermissions implements android.os.Parcelable {
     method public int describeContents();
     method public void release();
