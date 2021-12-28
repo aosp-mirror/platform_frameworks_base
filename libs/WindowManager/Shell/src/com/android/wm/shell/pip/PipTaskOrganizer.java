@@ -69,7 +69,6 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TaskOrganizer;
-import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -867,14 +866,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (info.displayId != Display.DEFAULT_DISPLAY && mOnDisplayIdChangeCallback != null) {
             mOnDisplayIdChangeCallback.accept(Display.DEFAULT_DISPLAY);
         }
-    }
-
-    /** Whether the given {@link TransitionInfo.Change} is for the PIP window. */
-    boolean isPipChange(TransitionInfo.Change change) {
-        if (mToken == null) {
-            Log.e(TAG, "We no longer keep track of the PIP token");
-        }
-        return mToken.equals(change.getContainer());
     }
 
     private void fadeExistingPip(boolean show) {
