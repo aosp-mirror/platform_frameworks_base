@@ -28,6 +28,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Pair;
+import android.util.SparseArray;
 import android.view.selectiontoolbar.ISelectionToolbarCallback;
 import android.view.selectiontoolbar.ShowInfo;
 import android.view.selectiontoolbar.ToolbarMenuItem;
@@ -42,6 +44,10 @@ public abstract class SelectionToolbarRenderService extends Service {
 
     private static final String TAG = "SelectionToolbarRenderService";
 
+    // TODO(b/215497659): read from DeviceConfig
+    // The timeout to clean the cache if the client forgot to call dismiss()
+    private static final int CACHE_CLEAN_AFTER_SHOW_TIMEOUT_IN_MS = 10 * 60 * 1000; // 10 minutes
+
     /**
      * The {@link Intent} that must be declared as handled by the service.
      *
@@ -53,6 +59,10 @@ public abstract class SelectionToolbarRenderService extends Service {
             "android.service.selectiontoolbar.SelectionToolbarRenderService";
 
     private Handler mHandler;
+    private ISelectionToolbarRenderServiceCallback mServiceCallback;
+
+    private final SparseArray<Pair<RemoteCallbackWrapper, CleanCacheRunnable>> mCache =
+            new SparseArray<>();
 
     /**
      * Binder to receive calls from system server.
@@ -61,10 +71,18 @@ public abstract class SelectionToolbarRenderService extends Service {
             new ISelectionToolbarRenderService.Stub() {
 
         @Override
-        public void onShow(ShowInfo showInfo, ISelectionToolbarCallback callback) {
+        public void onShow(int callingUid, ShowInfo showInfo, ISelectionToolbarCallback callback) {
+            if (mCache.indexOfKey(callingUid) < 0) {
+                mCache.put(callingUid, new Pair<>(new RemoteCallbackWrapper(callback),
+                        new CleanCacheRunnable(callingUid)));
+            }
+            Pair<RemoteCallbackWrapper, CleanCacheRunnable> toolbarPair = mCache.get(callingUid);
+            CleanCacheRunnable cleanRunnable = toolbarPair.second;
+            mHandler.removeCallbacks(cleanRunnable);
             mHandler.sendMessage(obtainMessage(SelectionToolbarRenderService::onShow,
-                    SelectionToolbarRenderService.this, showInfo,
-                    new RemoteCallbackWrapper(callback)));
+                    SelectionToolbarRenderService.this, callingUid, showInfo,
+                    toolbarPair.first));
+            mHandler.postDelayed(cleanRunnable, CACHE_CLEAN_AFTER_SHOW_TIMEOUT_IN_MS);
         }
 
         @Override
@@ -74,9 +92,20 @@ public abstract class SelectionToolbarRenderService extends Service {
         }
 
         @Override
-        public void onDismiss(long widgetToken) {
+        public void onDismiss(int callingUid, long widgetToken) {
             mHandler.sendMessage(obtainMessage(SelectionToolbarRenderService::onDismiss,
                     SelectionToolbarRenderService.this, widgetToken));
+            Pair<RemoteCallbackWrapper, CleanCacheRunnable> toolbarPair = mCache.get(callingUid);
+            if (toolbarPair != null) {
+                mHandler.removeCallbacks(toolbarPair.second);
+                mCache.remove(callingUid);
+            }
+        }
+
+        @Override
+        public void onConnected(IBinder callback) {
+            mHandler.sendMessage(obtainMessage(SelectionToolbarRenderService::handleOnConnected,
+                    SelectionToolbarRenderService.this, callback));
         }
     };
 
@@ -97,11 +126,28 @@ public abstract class SelectionToolbarRenderService extends Service {
         return null;
     }
 
+    private void handleOnConnected(@NonNull IBinder callback) {
+        mServiceCallback = ISelectionToolbarRenderServiceCallback.Stub.asInterface(callback);
+    }
+
+    protected void transferTouch(@NonNull IBinder source, @NonNull IBinder target) {
+        final ISelectionToolbarRenderServiceCallback callback = mServiceCallback;
+        if (callback == null) {
+            Log.e(TAG, "transferTouch(): no server callback");
+            return;
+        }
+        try {
+            callback.transferTouch(source, target);
+        } catch (RemoteException e) {
+            // no-op
+        }
+    }
 
     /**
      * Called when showing the selection toolbar.
      */
-    public abstract void onShow(ShowInfo showInfo, RemoteCallbackWrapper callbackWrapper);
+    public abstract void onShow(int callingUid, ShowInfo showInfo,
+            RemoteCallbackWrapper callbackWrapper);
 
     /**
      * Called when hiding the selection toolbar.
@@ -115,13 +161,22 @@ public abstract class SelectionToolbarRenderService extends Service {
     public abstract void onDismiss(long widgetToken);
 
     /**
-     * Add avadoc.
+     * Called when showing the selection toolbar for a specific timeout. This avoids the client
+     * forgot to call dismiss to clean the state.
+     */
+    public void onToolbarShowTimeout(int callingUid) {
+        // no-op
+    }
+
+    /**
+     * Callback to notify the client toolbar events.
      */
     public static final class RemoteCallbackWrapper implements SelectionToolbarRenderCallback {
 
         private final ISelectionToolbarCallback mRemoteCallback;
 
         RemoteCallbackWrapper(ISelectionToolbarCallback remoteCallback) {
+            // TODO(b/215497659): handle if the binder dies.
             mRemoteCallback = remoteCallback;
         }
 
@@ -130,25 +185,16 @@ public abstract class SelectionToolbarRenderService extends Service {
             try {
                 mRemoteCallback.onShown(widgetInfo);
             } catch (RemoteException e) {
-                e.rethrowAsRuntimeException();
+                // no-op
             }
         }
 
         @Override
-        public void onHidden(long widgetToken) {
+        public void onToolbarShowTimeout() {
             try {
-                mRemoteCallback.onHidden(widgetToken);
+                mRemoteCallback.onToolbarShowTimeout();
             } catch (RemoteException e) {
-                e.rethrowAsRuntimeException();
-            }
-        }
-
-        @Override
-        public void onDismissed(long widgetToken) {
-            try {
-                mRemoteCallback.onDismissed(widgetToken);
-            } catch (RemoteException e) {
-                e.rethrowAsRuntimeException();
+                // no-op
             }
         }
 
@@ -157,7 +203,7 @@ public abstract class SelectionToolbarRenderService extends Service {
             try {
                 mRemoteCallback.onWidgetUpdated(widgetInfo);
             } catch (RemoteException e) {
-                e.rethrowAsRuntimeException();
+                // no-op
             }
         }
 
@@ -166,7 +212,7 @@ public abstract class SelectionToolbarRenderService extends Service {
             try {
                 mRemoteCallback.onMenuItemClicked(item);
             } catch (RemoteException e) {
-                e.rethrowAsRuntimeException();
+                // no-op
             }
         }
 
@@ -175,8 +221,37 @@ public abstract class SelectionToolbarRenderService extends Service {
             try {
                 mRemoteCallback.onError(errorCode);
             } catch (RemoteException e) {
-                e.rethrowAsRuntimeException();
+                // no-op
             }
         }
+    }
+
+    private class CleanCacheRunnable implements Runnable {
+
+        int mCleanUid;
+
+        CleanCacheRunnable(int cleanUid) {
+            mCleanUid = cleanUid;
+        }
+
+        @Override
+        public void run() {
+            Pair<RemoteCallbackWrapper, CleanCacheRunnable> toolbarPair = mCache.get(mCleanUid);
+            if (toolbarPair != null) {
+                Log.w(TAG, "CleanCacheRunnable: remove " + mCleanUid + " from cache.");
+                mCache.remove(mCleanUid);
+                onToolbarShowTimeout(mCleanUid);
+            }
+        }
+    }
+
+    /**
+     * A listener to notify the service to the transfer touch focus.
+     */
+    public interface TransferTouchListener {
+        /**
+         * Notify the service to transfer the touch focus.
+         */
+        void onTransferTouch(IBinder source, IBinder target);
     }
 }

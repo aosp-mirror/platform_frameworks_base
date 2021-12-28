@@ -18,7 +18,9 @@ package android.view.selectiontoolbar;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.drawable.Icon;
 import android.os.Parcelable;
+import android.view.MenuItem;
 
 import com.android.internal.util.DataClass;
 
@@ -31,9 +33,83 @@ import com.android.internal.util.DataClass;
 public final class ToolbarMenuItem implements Parcelable {
 
     /**
+     * The priority of menu item is unknown.
+     */
+    public static final int PRIORITY_UNKNOWN = 0;
+
+    /**
+     * The priority of menu item is shown in primary selection toolbar.
+     */
+    public static final int PRIORITY_PRIMARY = 1;
+
+    /**
+     * The priority of menu item is shown in overflow selection toolbar.
+     */
+    public static final int PRIORITY_OVERFLOW = 2;
+
+    /**
      * The id of the menu item.
+     *
+     * @see MenuItem#getItemId()
      */
     private final int mItemId;
+
+    /**
+     * The title of the menu item.
+     *
+     * @see MenuItem#getTitle()
+     */
+    @NonNull
+    private final CharSequence mTitle;
+
+    /**
+     * The content description of the menu item.
+     *
+     * @see MenuItem#getContentDescription()
+     */
+    @Nullable
+    private final CharSequence mContentDescription;
+
+    /**
+     * The group id of the menu item.
+     *
+     * @see MenuItem#getGroupId()
+     */
+    private final int mGroupId;
+
+    /**
+     * The icon id of the menu item.
+     *
+     * @see MenuItem#getIcon()
+     */
+    @Nullable
+    private final Icon mIcon;
+
+    /**
+     * The tooltip text of the menu item.
+     *
+     * @see MenuItem#getTooltipText()
+     */
+    @Nullable
+    private final CharSequence mTooltipText;
+
+    /**
+     * The priority of the menu item used to display the order of the menu item.
+     */
+    private final int mPriority;
+
+    /**
+     * Returns the priority from a given {@link MenuItem}.
+     */
+    public static int getPriorityFromMenuItem(MenuItem menuItem) {
+        if (menuItem.requiresActionButton()) {
+            return PRIORITY_PRIMARY;
+        } else if (menuItem.requiresOverflow()) {
+            return PRIORITY_OVERFLOW;
+        }
+        return PRIORITY_UNKNOWN;
+    }
+
 
 
 
@@ -50,20 +126,116 @@ public final class ToolbarMenuItem implements Parcelable {
     //@formatter:off
 
 
+    @android.annotation.IntDef(prefix = "PRIORITY_", value = {
+        PRIORITY_UNKNOWN,
+        PRIORITY_PRIMARY,
+        PRIORITY_OVERFLOW
+    })
+    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE)
+    @DataClass.Generated.Member
+    public @interface Priority {}
+
+    @DataClass.Generated.Member
+    public static String priorityToString(@Priority int value) {
+        switch (value) {
+            case PRIORITY_UNKNOWN:
+                    return "PRIORITY_UNKNOWN";
+            case PRIORITY_PRIMARY:
+                    return "PRIORITY_PRIMARY";
+            case PRIORITY_OVERFLOW:
+                    return "PRIORITY_OVERFLOW";
+            default: return Integer.toHexString(value);
+        }
+    }
+
     @DataClass.Generated.Member
     /* package-private */ ToolbarMenuItem(
-            int itemId) {
+            int itemId,
+            @NonNull CharSequence title,
+            @Nullable CharSequence contentDescription,
+            int groupId,
+            @Nullable Icon icon,
+            @Nullable CharSequence tooltipText,
+            int priority) {
         this.mItemId = itemId;
+        this.mTitle = title;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mTitle);
+        this.mContentDescription = contentDescription;
+        this.mGroupId = groupId;
+        this.mIcon = icon;
+        this.mTooltipText = tooltipText;
+        this.mPriority = priority;
 
         // onConstructed(); // You can define this method to get a callback
     }
 
     /**
      * The id of the menu item.
+     *
+     * @see MenuItem#getItemId()
      */
     @DataClass.Generated.Member
     public int getItemId() {
         return mItemId;
+    }
+
+    /**
+     * The title of the menu item.
+     *
+     * @see MenuItem#getTitle()
+     */
+    @DataClass.Generated.Member
+    public @NonNull CharSequence getTitle() {
+        return mTitle;
+    }
+
+    /**
+     * The content description of the menu item.
+     *
+     * @see MenuItem#getContentDescription()
+     */
+    @DataClass.Generated.Member
+    public @Nullable CharSequence getContentDescription() {
+        return mContentDescription;
+    }
+
+    /**
+     * The group id of the menu item.
+     *
+     * @see MenuItem#getGroupId()
+     */
+    @DataClass.Generated.Member
+    public int getGroupId() {
+        return mGroupId;
+    }
+
+    /**
+     * The icon id of the menu item.
+     *
+     * @see MenuItem#getIcon()
+     */
+    @DataClass.Generated.Member
+    public @Nullable Icon getIcon() {
+        return mIcon;
+    }
+
+    /**
+     * The tooltip text of the menu item.
+     *
+     * @see MenuItem#getTooltipText()
+     */
+    @DataClass.Generated.Member
+    public @Nullable CharSequence getTooltipText() {
+        return mTooltipText;
+    }
+
+    /**
+     * The priority of the menu item used to display the order of the menu item.
+     */
+    @DataClass.Generated.Member
+    public int getPriority() {
+        return mPriority;
     }
 
     @Override
@@ -73,7 +245,13 @@ public final class ToolbarMenuItem implements Parcelable {
         // String fieldNameToString() { ... }
 
         return "ToolbarMenuItem { " +
-                "itemId = " + mItemId +
+                "itemId = " + mItemId + ", " +
+                "title = " + mTitle + ", " +
+                "contentDescription = " + mContentDescription + ", " +
+                "groupId = " + mGroupId + ", " +
+                "icon = " + mIcon + ", " +
+                "tooltipText = " + mTooltipText + ", " +
+                "priority = " + mPriority +
         " }";
     }
 
@@ -90,7 +268,13 @@ public final class ToolbarMenuItem implements Parcelable {
         ToolbarMenuItem that = (ToolbarMenuItem) o;
         //noinspection PointlessBooleanExpression
         return true
-                && mItemId == that.mItemId;
+                && mItemId == that.mItemId
+                && java.util.Objects.equals(mTitle, that.mTitle)
+                && java.util.Objects.equals(mContentDescription, that.mContentDescription)
+                && mGroupId == that.mGroupId
+                && java.util.Objects.equals(mIcon, that.mIcon)
+                && java.util.Objects.equals(mTooltipText, that.mTooltipText)
+                && mPriority == that.mPriority;
     }
 
     @Override
@@ -101,6 +285,12 @@ public final class ToolbarMenuItem implements Parcelable {
 
         int _hash = 1;
         _hash = 31 * _hash + mItemId;
+        _hash = 31 * _hash + java.util.Objects.hashCode(mTitle);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mContentDescription);
+        _hash = 31 * _hash + mGroupId;
+        _hash = 31 * _hash + java.util.Objects.hashCode(mIcon);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mTooltipText);
+        _hash = 31 * _hash + mPriority;
         return _hash;
     }
 
@@ -110,7 +300,18 @@ public final class ToolbarMenuItem implements Parcelable {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
+        byte flg = 0;
+        if (mContentDescription != null) flg |= 0x4;
+        if (mIcon != null) flg |= 0x10;
+        if (mTooltipText != null) flg |= 0x20;
+        dest.writeByte(flg);
         dest.writeInt(mItemId);
+        dest.writeCharSequence(mTitle);
+        if (mContentDescription != null) dest.writeCharSequence(mContentDescription);
+        dest.writeInt(mGroupId);
+        if (mIcon != null) dest.writeTypedObject(mIcon, flags);
+        if (mTooltipText != null) dest.writeCharSequence(mTooltipText);
+        dest.writeInt(mPriority);
     }
 
     @Override
@@ -124,9 +325,24 @@ public final class ToolbarMenuItem implements Parcelable {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
+        byte flg = in.readByte();
         int itemId = in.readInt();
+        CharSequence title = (CharSequence) in.readCharSequence();
+        CharSequence contentDescription = (flg & 0x4) == 0 ? null : (CharSequence) in.readCharSequence();
+        int groupId = in.readInt();
+        Icon icon = (flg & 0x10) == 0 ? null : (Icon) in.readTypedObject(Icon.CREATOR);
+        CharSequence tooltipText = (flg & 0x20) == 0 ? null : (CharSequence) in.readCharSequence();
+        int priority = in.readInt();
 
         this.mItemId = itemId;
+        this.mTitle = title;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mTitle);
+        this.mContentDescription = contentDescription;
+        this.mGroupId = groupId;
+        this.mIcon = icon;
+        this.mTooltipText = tooltipText;
+        this.mPriority = priority;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -153,6 +369,12 @@ public final class ToolbarMenuItem implements Parcelable {
     public static final class Builder {
 
         private int mItemId;
+        private @NonNull CharSequence mTitle;
+        private @Nullable CharSequence mContentDescription;
+        private int mGroupId;
+        private @Nullable Icon mIcon;
+        private @Nullable CharSequence mTooltipText;
+        private int mPriority;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -161,14 +383,42 @@ public final class ToolbarMenuItem implements Parcelable {
          *
          * @param itemId
          *   The id of the menu item.
+         * @param title
+         *   The title of the menu item.
+         * @param contentDescription
+         *   The content description of the menu item.
+         * @param groupId
+         *   The group id of the menu item.
+         * @param icon
+         *   The icon id of the menu item.
+         * @param tooltipText
+         *   The tooltip text of the menu item.
+         * @param priority
+         *   The priority of the menu item used to display the order of the menu item.
          */
         public Builder(
-                int itemId) {
+                int itemId,
+                @NonNull CharSequence title,
+                @Nullable CharSequence contentDescription,
+                int groupId,
+                @Nullable Icon icon,
+                @Nullable CharSequence tooltipText,
+                int priority) {
             mItemId = itemId;
+            mTitle = title;
+            com.android.internal.util.AnnotationValidations.validate(
+                    NonNull.class, null, mTitle);
+            mContentDescription = contentDescription;
+            mGroupId = groupId;
+            mIcon = icon;
+            mTooltipText = tooltipText;
+            mPriority = priority;
         }
 
         /**
          * The id of the menu item.
+         *
+         * @see MenuItem#getItemId()
          */
         @DataClass.Generated.Member
         public @NonNull Builder setItemId(int value) {
@@ -178,18 +428,100 @@ public final class ToolbarMenuItem implements Parcelable {
             return this;
         }
 
+        /**
+         * The title of the menu item.
+         *
+         * @see MenuItem#getTitle()
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setTitle(@NonNull CharSequence value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x2;
+            mTitle = value;
+            return this;
+        }
+
+        /**
+         * The content description of the menu item.
+         *
+         * @see MenuItem#getContentDescription()
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setContentDescription(@NonNull CharSequence value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x4;
+            mContentDescription = value;
+            return this;
+        }
+
+        /**
+         * The group id of the menu item.
+         *
+         * @see MenuItem#getGroupId()
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setGroupId(int value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x8;
+            mGroupId = value;
+            return this;
+        }
+
+        /**
+         * The icon id of the menu item.
+         *
+         * @see MenuItem#getIcon()
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setIcon(@NonNull Icon value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x10;
+            mIcon = value;
+            return this;
+        }
+
+        /**
+         * The tooltip text of the menu item.
+         *
+         * @see MenuItem#getTooltipText()
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setTooltipText(@NonNull CharSequence value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x20;
+            mTooltipText = value;
+            return this;
+        }
+
+        /**
+         * The priority of the menu item used to display the order of the menu item.
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setPriority(int value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x40;
+            mPriority = value;
+            return this;
+        }
+
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull ToolbarMenuItem build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x2; // Mark builder used
+            mBuilderFieldsSet |= 0x80; // Mark builder used
 
             ToolbarMenuItem o = new ToolbarMenuItem(
-                    mItemId);
+                    mItemId,
+                    mTitle,
+                    mContentDescription,
+                    mGroupId,
+                    mIcon,
+                    mTooltipText,
+                    mPriority);
             return o;
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x2) != 0) {
+            if ((mBuilderFieldsSet & 0x80) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -197,10 +529,10 @@ public final class ToolbarMenuItem implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1639488328542L,
+            time = 1643200806234L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/selectiontoolbar/ToolbarMenuItem.java",
-            inputSignatures = "private final  int mItemId\nclass ToolbarMenuItem extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genBuilder=true, genToString=true, genEqualsHashCode=true)")
+            inputSignatures = "public static final  int PRIORITY_UNKNOWN\npublic static final  int PRIORITY_PRIMARY\npublic static final  int PRIORITY_OVERFLOW\nprivate final  int mItemId\nprivate final @android.annotation.NonNull java.lang.CharSequence mTitle\nprivate final @android.annotation.Nullable java.lang.CharSequence mContentDescription\nprivate final  int mGroupId\nprivate final @android.annotation.Nullable android.graphics.drawable.Icon mIcon\nprivate final @android.annotation.Nullable java.lang.CharSequence mTooltipText\nprivate final  int mPriority\npublic static  int getPriorityFromMenuItem(android.view.MenuItem)\nclass ToolbarMenuItem extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genBuilder=true, genToString=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 

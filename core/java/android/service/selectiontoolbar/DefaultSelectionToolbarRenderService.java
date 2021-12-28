@@ -16,11 +16,20 @@
 
 package android.service.selectiontoolbar;
 
-import android.util.Log;
+import static android.view.selectiontoolbar.SelectionToolbarManager.ERROR_DO_NOT_ALLOW_MULTIPLE_TOOL_BAR;
+import static android.view.selectiontoolbar.SelectionToolbarManager.NO_TOOLBAR_ID;
+
+import android.util.Pair;
+import android.util.Slog;
+import android.util.SparseArray;
 import android.view.selectiontoolbar.ShowInfo;
+
+import java.util.UUID;
 
 /**
  * The default implementation of {@link SelectionToolbarRenderService}.
+ *
+ * <p><b>NOTE:<b/> The requests are handled on the service main thread.
  *
  *  @hide
  */
@@ -29,22 +38,97 @@ public final class DefaultSelectionToolbarRenderService extends SelectionToolbar
 
     private static final String TAG = "DefaultSelectionToolbarRenderService";
 
+    // TODO(b/215497659): handle remove if the client process dies.
+    // Only show one toolbar, dismiss the old ones and remove from cache
+    private final SparseArray<Pair<Long, RemoteSelectionToolbar>> mToolbarCache =
+            new SparseArray<>();
+
+    /**
+     * Only allow one package to create one toolbar.
+     */
+    private boolean canShowToolbar(int uid, ShowInfo showInfo) {
+        if (showInfo.getWidgetToken() != NO_TOOLBAR_ID) {
+            return true;
+        }
+        return mToolbarCache.indexOfKey(uid) < 0;
+    }
+
     @Override
-    public void onShow(ShowInfo showInfo,
+    public void onShow(int callingUid, ShowInfo showInfo,
             SelectionToolbarRenderService.RemoteCallbackWrapper callbackWrapper) {
-        // TODO: Add implementation
-        Log.w(TAG, "onShow()");
+        if (!canShowToolbar(callingUid, showInfo)) {
+            Slog.e(TAG, "Do not allow multiple toolbar for the app.");
+            callbackWrapper.onError(ERROR_DO_NOT_ALLOW_MULTIPLE_TOOL_BAR);
+            return;
+        }
+        long widgetToken = showInfo.getWidgetToken() == NO_TOOLBAR_ID
+                ? UUID.randomUUID().getMostSignificantBits()
+                : showInfo.getWidgetToken();
+
+        if (mToolbarCache.indexOfKey(callingUid) < 0) {
+            RemoteSelectionToolbar toolbar = new RemoteSelectionToolbar(this,
+                    widgetToken, showInfo.getHostInputToken(),
+                    callbackWrapper, this::transferTouch);
+            mToolbarCache.put(callingUid, new Pair<>(widgetToken, toolbar));
+        }
+        Slog.v(TAG, "onShow() for " + widgetToken);
+        Pair<Long, RemoteSelectionToolbar> toolbarPair = mToolbarCache.get(callingUid);
+        if (toolbarPair.first == widgetToken) {
+            toolbarPair.second.show(showInfo);
+        } else {
+            Slog.w(TAG, "onShow() for unknown " + widgetToken);
+        }
     }
 
     @Override
     public void onHide(long widgetToken) {
-        // TODO: Add implementation
-        Log.w(TAG, "onHide()");
+        RemoteSelectionToolbar toolbar = getRemoteSelectionToolbarByTokenLocked(widgetToken);
+        if (toolbar != null) {
+            Slog.v(TAG, "onHide() for " + widgetToken);
+            toolbar.hide(widgetToken);
+        }
     }
 
     @Override
     public void onDismiss(long widgetToken) {
-        // TODO: Add implementation
-        Log.w(TAG, "onDismiss()");
+        RemoteSelectionToolbar toolbar = getRemoteSelectionToolbarByTokenLocked(widgetToken);
+        if (toolbar != null) {
+            Slog.v(TAG, "onDismiss() for " + widgetToken);
+            toolbar.dismiss(widgetToken);
+            removeRemoteSelectionToolbarByTokenLocked(widgetToken);
+        }
+    }
+
+    @Override
+    public void onToolbarShowTimeout(int callingUid) {
+        Slog.w(TAG, "onToolbarShowTimeout for callingUid = " + callingUid);
+        Pair<Long, RemoteSelectionToolbar> toolbarPair = mToolbarCache.get(callingUid);
+        if (toolbarPair != null) {
+            RemoteSelectionToolbar remoteToolbar = toolbarPair.second;
+            remoteToolbar.dismiss(toolbarPair.first);
+            remoteToolbar.onToolbarShowTimeout();
+            mToolbarCache.remove(callingUid);
+        }
+    }
+
+    private RemoteSelectionToolbar getRemoteSelectionToolbarByTokenLocked(long widgetToken) {
+        for (int i = 0; i < mToolbarCache.size(); i++) {
+            Pair<Long, RemoteSelectionToolbar> toolbarPair = mToolbarCache.valueAt(i);
+            if (toolbarPair.first == widgetToken) {
+                return toolbarPair.second;
+            }
+        }
+        return null;
+    }
+
+    private void removeRemoteSelectionToolbarByTokenLocked(long widgetToken) {
+        for (int i = 0; i < mToolbarCache.size(); i++) {
+            Pair<Long, RemoteSelectionToolbar> toolbarPair = mToolbarCache.valueAt(i);
+            if (toolbarPair.first == widgetToken) {
+                mToolbarCache.remove(mToolbarCache.keyAt(i));
+                return;
+            }
+        }
     }
 }
+
