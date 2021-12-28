@@ -655,8 +655,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public INetworkStatsSession openSession() {
-        // NOTE: if callers want to get non-augmented data, they should go
-        // through the public API
         return openSessionInternal(NetworkStatsManager.FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN, null);
     }
 
@@ -876,8 +874,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
         assertSystemReady();
 
-        // NOTE: if callers want to get non-augmented data, they should go
-        // through the public API
         return internalGetSummaryForNetwork(template,
                 NetworkStatsManager.FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN, start, end,
                 NetworkStatsAccess.Level.DEVICE, Binder.getCallingUid()).getTotalBytes();
