@@ -632,6 +632,12 @@ public final class BroadcastQueue {
     private void deliverToRegisteredReceiverLocked(BroadcastRecord r,
             BroadcastFilter filter, boolean ordered, int index) {
         boolean skip = false;
+        if (r.options != null && !r.options.testRequireCompatChange(filter.owningUid)) {
+            Slog.w(TAG, "Compat change filtered: broadcasting " + r.intent.toString()
+                    + " to uid " + filter.owningUid + " due to compat change "
+                    + r.options.getRequireCompatChangeId());
+            skip = true;
+        }
         if (!mService.validateAssociationAllowedLocked(r.callerPackage, r.callingUid,
                 filter.packageName, filter.owningUid)) {
             Slog.w(TAG, "Association not allowed: broadcasting "
@@ -1405,6 +1411,13 @@ public final class BroadcastQueue {
                     + brOptions.getMinManifestReceiverApiLevel() + ", "
                     + brOptions.getMaxManifestReceiverApiLevel()
                     + "] broadcasting " + broadcastDescription(r, component));
+            skip = true;
+        }
+        if (brOptions != null &&
+                !brOptions.testRequireCompatChange(info.activityInfo.applicationInfo.uid)) {
+            Slog.w(TAG, "Compat change filtered: broadcasting " + broadcastDescription(r, component)
+                    + " to uid " + info.activityInfo.applicationInfo.uid + " due to compat change "
+                    + r.options.getRequireCompatChangeId());
             skip = true;
         }
         if (!skip && !mService.validateAssociationAllowedLocked(r.callerPackage, r.callingUid,

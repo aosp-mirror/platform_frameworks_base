@@ -2780,6 +2780,23 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
+     * Blocking call to clear all cached app data above quota.
+     */
+    public void freeAllAppCacheAboveQuota(String volumeUuid) throws IOException {
+        synchronized (mInstallLock) {
+            // To avoid refactoring Installer.freeCache() and InstalldNativeService.freeCache(),
+            // Long.MAX_VALUE is passed as an argument which is used in neither of two methods
+            // when FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES is set
+            try {
+                mInstaller.freeCache(volumeUuid, Long.MAX_VALUE, Installer.FLAG_FREE_CACHE_V2
+                        | Installer.FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES);
+            } catch (InstallerException ignored) {
+            }
+        }
+        return;
+    }
+
+    /**
      * Blocking call to clear various types of cached data across the system
      * until the requested bytes are available.
      */
