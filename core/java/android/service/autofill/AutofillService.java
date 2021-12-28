@@ -465,7 +465,7 @@ import com.android.internal.os.IResultReceiver;
  * <p>Prior to Android {@link android.os.Build.VERSION_CODES#P}, the metrics covered just the
  * scenarios where the service knew how to autofill an activity, but Android
  * {@link android.os.Build.VERSION_CODES#P} introduced a new mechanism called field classification,
- * which allows the service to dinamically classify the meaning of fields based on the existing user
+ * which allows the service to dynamically classify the meaning of fields based on the existing user
  * data known by the service.
  *
  * <p>Typically, field classification can be used to detect fields that can be autofilled with
