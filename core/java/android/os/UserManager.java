@@ -1993,10 +1993,19 @@ public class UserManager {
      * @return Whether guest user is always ephemeral
      * @hide
      */
-    @TestApi
-    public static boolean isGuestUserEphemeral() {
+    public static boolean isGuestUserAlwaysEphemeral() {
         return Resources.getSystem()
                 .getBoolean(com.android.internal.R.bool.config_guestUserEphemeral);
+    }
+
+    /**
+     * @return true, when we want to enable user manager API and UX to allow
+     *           guest user ephemeral state change based on user input
+     * @hide
+     */
+    public static boolean isGuestUserAllowEphemeralStateChange() {
+        return Resources.getSystem()
+                .getBoolean(com.android.internal.R.bool.config_guestUserAllowEphemeralStateChange);
     }
 
     /**
@@ -3420,6 +3429,20 @@ public class UserManager {
             if (guest != null) {
                 Settings.Secure.putStringForUser(context.getContentResolver(),
                         Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
+
+                if (UserManager.isGuestUserAllowEphemeralStateChange()) {
+                    // Mark guest as (changeably) ephemeral if REMOVE_GUEST_ON_EXIT is 1
+                    // This is done so that a user via a UI controller can choose to
+                    // make a guest as ephemeral or not.
+                    // Settings.Global.REMOVE_GUEST_ON_EXIT holds the choice on what the guest state
+                    // should be, with default being ephemeral.
+                    boolean resetGuestOnExit = Settings.Global.getInt(context.getContentResolver(),
+                                                 Settings.Global.REMOVE_GUEST_ON_EXIT, 1) == 1;
+
+                    if (resetGuestOnExit && !guest.isEphemeral()) {
+                        setUserEphemeral(guest.id, true);
+                    }
+                }
             }
             return guest;
         } catch (ServiceSpecificException e) {
@@ -4931,6 +4954,31 @@ public class UserManager {
     public void setUserName(@UserIdInt int userId, String name) {
         try {
             mService.setUserName(userId, name);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the user as ephemeral or non-ephemeral.
+     *
+     * If the user was initially created as ephemeral then this
+     * method has no effect and false is returned.
+     *
+     * @param userId the user's integer id
+     * @param enableEphemeral true: change user state to ephemeral,
+     *                        false: change user state to non-ephemeral
+     * @return true: user now has the desired ephemeral state,
+     *         false: desired user ephemeral state could not be set
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS})
+    public boolean setUserEphemeral(@UserIdInt int userId, boolean enableEphemeral) {
+        try {
+            return mService.setUserEphemeral(userId, enableEphemeral);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
