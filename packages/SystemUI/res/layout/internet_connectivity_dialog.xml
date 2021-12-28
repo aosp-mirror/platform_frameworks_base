@@ -53,21 +53,22 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/internet_dialog_progress_bar_width"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:layout_marginBottom="@dimen/internet_dialog_network_layout_margin"
         android:orientation="vertical">
 
         <View
             android:id="@+id/divider"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:layout_width="340dp"
+            android:layout_width="match_parent"
             android:layout_height="4dp"
+            android:layout_gravity="center_vertical|center_horizontal"
             android:background="?androidprv:attr/colorSurfaceVariant"/>
 
         <ProgressBar
             android:id="@+id/wifi_searching_progress"
-            android:layout_width="340dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:visibility="gone"
