@@ -718,6 +718,7 @@
     <protected-broadcast android:name="android.safetycenter.action.REFRESH_SAFETY_SOURCES" />
     <protected-broadcast android:name="android.app.action.DEVICE_POLICY_RESOURCE_UPDATED" />
     <protected-broadcast android:name="android.intent.action.SHOW_FOREGROUND_SERVICE_MANAGER" />
+    <protected-broadcast android:name="android.service.autofill.action.DELAYED_FILL" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
