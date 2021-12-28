@@ -94,7 +94,6 @@ import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
-import android.view.Gravity;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -1340,8 +1339,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mInflater = (LayoutInflater)getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.initSoftInputWindow");
-        mWindow = new SoftInputWindow(this, "InputMethod", mTheme, null, null, mDispatcherState,
-                WindowManager.LayoutParams.TYPE_INPUT_METHOD, Gravity.BOTTOM, false);
+        mWindow = new SoftInputWindow(this, mTheme, mDispatcherState);
         mWindow.getWindow().getAttributes().setFitInsetsTypes(statusBars() | navigationBars());
         mWindow.getWindow().getAttributes().setFitInsetsSides(Side.all() & ~Side.BOTTOM);
         mWindow.getWindow().getAttributes().receiveInsetsIgnoringZOrder = true;

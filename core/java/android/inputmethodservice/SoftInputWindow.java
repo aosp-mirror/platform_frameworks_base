@@ -42,23 +42,15 @@ import android.view.WindowManager;
 import java.lang.annotation.Retention;
 
 /**
- * A SoftInputWindow is a Dialog that is intended to be used for a top-level input
- * method window.  It will be displayed along the edge of the screen, moving
- * the application user interface away from it so that the focused item is
- * always visible.
- * @hide
+ * A {@link SoftInputWindow} is a {@link Dialog} that is intended to be used for a top-level input
+ * method window.  It will be displayed along the edge of the screen, moving the application user
+ * interface away from it so that the focused item is always visible.
  */
-public final class SoftInputWindow extends Dialog {
+final class SoftInputWindow extends Dialog {
     private static final boolean DEBUG = false;
     private static final String TAG = "SoftInputWindow";
 
-    private final String mName;
-    private final Callback mCallback;
-    private final KeyEvent.Callback mKeyEventCallback;
     private final KeyEvent.DispatcherState mDispatcherState;
-    private final int mWindowType;
-    private final int mGravity;
-    private final boolean mTakesFocus;
     private final Rect mBounds = new Rect();
 
     @Retention(SOURCE)
@@ -93,22 +85,12 @@ public final class SoftInputWindow extends Dialog {
     private int mWindowState = WindowState.TOKEN_PENDING;
 
     /**
-     * Used to provide callbacks.
-     */
-    public interface Callback {
-        /**
-         * Used to be notified when {@link Dialog#onBackPressed()} gets called.
-         */
-        void onBackPressed();
-    }
-
-    /**
      * Set {@link IBinder} window token to the window.
      *
      * <p>This method can be called only once.</p>
      * @param token {@link IBinder} token to be associated with the window.
      */
-    public void setToken(IBinder token) {
+    void setToken(IBinder token) {
         switch (mWindowState) {
             case WindowState.TOKEN_PENDING:
                 // Normal scenario.  Nothing to worry about.
@@ -152,17 +134,9 @@ public final class SoftInputWindow extends Dialog {
      *        using styles. This theme is applied on top of the current theme in
      *        <var>context</var>. If 0, the default dialog theme will be used.
      */
-    public SoftInputWindow(Context context, String name, int theme, Callback callback,
-            KeyEvent.Callback keyEventCallback, KeyEvent.DispatcherState dispatcherState,
-            int windowType, int gravity, boolean takesFocus) {
+    SoftInputWindow(Context context, int theme, KeyEvent.DispatcherState dispatcherState) {
         super(context, theme);
-        mName = name;
-        mCallback = callback;
-        mKeyEventCallback = keyEventCallback;
         mDispatcherState = dispatcherState;
-        mWindowType = windowType;
-        mGravity = gravity;
-        mTakesFocus = takesFocus;
         initDockWindow();
     }
 
@@ -188,79 +162,23 @@ public final class SoftInputWindow extends Dialog {
         }
     }
 
-    private void updateWidthHeight(WindowManager.LayoutParams lp) {
-        if (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM) {
-            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        } else {
-            lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
-            lp.height = WindowManager.LayoutParams.MATCH_PARENT;
-        }
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mKeyEventCallback != null && mKeyEventCallback.onKeyDown(keyCode, event)) {
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
-    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-        if (mKeyEventCallback != null && mKeyEventCallback.onKeyLongPress(keyCode, event)) {
-            return true;
-        }
-        return super.onKeyLongPress(keyCode, event);
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (mKeyEventCallback != null && mKeyEventCallback.onKeyUp(keyCode, event)) {
-            return true;
-        }
-        return super.onKeyUp(keyCode, event);
-    }
-
-    @Override
-    public boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
-        if (mKeyEventCallback != null && mKeyEventCallback.onKeyMultiple(keyCode, count, event)) {
-            return true;
-        }
-        return super.onKeyMultiple(keyCode, count, event);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mCallback != null) {
-            mCallback.onBackPressed();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
     private void initDockWindow() {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
 
-        lp.type = mWindowType;
-        lp.setTitle(mName);
-
-        lp.gravity = mGravity;
-        updateWidthHeight(lp);
+        lp.setTitle("InputMethod");
+        lp.type = WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp.gravity = Gravity.BOTTOM;
 
         getWindow().setAttributes(lp);
 
-        int windowSetFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-        int windowModFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+        final int windowModFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 
-        if (!mTakesFocus) {
-            windowSetFlags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        } else {
-            windowSetFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-            windowModFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        }
+        final int windowSetFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 
         getWindow().setFlags(windowSetFlags, windowModFlags);
     }
@@ -372,10 +290,11 @@ public final class SoftInputWindow extends Dialog {
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        proto.write(NAME, mName);
-        proto.write(WINDOW_TYPE, mWindowType);
-        proto.write(GRAVITY, mGravity);
-        proto.write(TAKES_FOCUS, mTakesFocus);
+        // TODO(b/192412909): Deprecate the following 4 entries, as they are all constant.
+        proto.write(NAME, "InputMethod");
+        proto.write(WINDOW_TYPE, WindowManager.LayoutParams.TYPE_INPUT_METHOD);
+        proto.write(GRAVITY, Gravity.BOTTOM);
+        proto.write(TAKES_FOCUS, false);
         mBounds.dumpDebug(proto, BOUNDS);
         proto.write(WINDOW_STATE, mWindowState);
         proto.end(token);
