@@ -1,17 +1,17 @@
 /*
- * Copyright (C) 2007-2008 The Android Open Source Project
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * Copyright (C) 2007 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package android.inputmethodservice;
@@ -48,23 +48,24 @@ import java.lang.annotation.Retention;
  * always visible.
  * @hide
  */
-public class SoftInputWindow extends Dialog {
+public final class SoftInputWindow extends Dialog {
     private static final boolean DEBUG = false;
     private static final String TAG = "SoftInputWindow";
 
-    final String mName;
-    final Callback mCallback;
-    final KeyEvent.Callback mKeyEventCallback;
-    final KeyEvent.DispatcherState mDispatcherState;
-    final int mWindowType;
-    final int mGravity;
-    final boolean mTakesFocus;
+    private final String mName;
+    private final Callback mCallback;
+    private final KeyEvent.Callback mKeyEventCallback;
+    private final KeyEvent.DispatcherState mDispatcherState;
+    private final int mWindowType;
+    private final int mGravity;
+    private final boolean mTakesFocus;
     private final Rect mBounds = new Rect();
 
     @Retention(SOURCE)
-    @IntDef(value = {SoftInputWindowState.TOKEN_PENDING, SoftInputWindowState.TOKEN_SET,
-            SoftInputWindowState.SHOWN_AT_LEAST_ONCE, SoftInputWindowState.REJECTED_AT_LEAST_ONCE})
-    private @interface SoftInputWindowState {
+    @IntDef(value = {WindowState.TOKEN_PENDING, WindowState.TOKEN_SET,
+            WindowState.SHOWN_AT_LEAST_ONCE, WindowState.REJECTED_AT_LEAST_ONCE,
+            WindowState.DESTROYED})
+    private @interface WindowState {
         /**
          * The window token is not set yet.
          */
@@ -88,21 +89,33 @@ public class SoftInputWindow extends Dialog {
         int DESTROYED = 4;
     }
 
-    @SoftInputWindowState
-    private int mWindowState = SoftInputWindowState.TOKEN_PENDING;
+    @WindowState
+    private int mWindowState = WindowState.TOKEN_PENDING;
 
+    /**
+     * Used to provide callbacks.
+     */
     public interface Callback {
-        public void onBackPressed();
+        /**
+         * Used to be notified when {@link Dialog#onBackPressed()} gets called.
+         */
+        void onBackPressed();
     }
 
+    /**
+     * Set {@link IBinder} window token to the window.
+     *
+     * <p>This method can be called only once.</p>
+     * @param token {@link IBinder} token to be associated with the window.
+     */
     public void setToken(IBinder token) {
         switch (mWindowState) {
-            case SoftInputWindowState.TOKEN_PENDING:
+            case WindowState.TOKEN_PENDING:
                 // Normal scenario.  Nothing to worry about.
                 WindowManager.LayoutParams lp = getWindow().getAttributes();
                 lp.token = token;
                 getWindow().setAttributes(lp);
-                updateWindowState(SoftInputWindowState.TOKEN_SET);
+                updateWindowState(WindowState.TOKEN_SET);
 
                 // As soon as we have a token, make sure the window is added (but not shown) by
                 // setting visibility to INVISIBLE and calling show() on Dialog. Note that
@@ -111,11 +124,11 @@ public class SoftInputWindow extends Dialog {
                 getWindow().getDecorView().setVisibility(View.INVISIBLE);
                 show();
                 return;
-            case SoftInputWindowState.TOKEN_SET:
-            case SoftInputWindowState.SHOWN_AT_LEAST_ONCE:
-            case SoftInputWindowState.REJECTED_AT_LEAST_ONCE:
+            case WindowState.TOKEN_SET:
+            case WindowState.SHOWN_AT_LEAST_ONCE:
+            case WindowState.REJECTED_AT_LEAST_ONCE:
                 throw new IllegalStateException("setToken can be called only once");
-            case SoftInputWindowState.DESTROYED:
+            case WindowState.DESTROYED:
                 // Just ignore.  Since there are multiple event queues from the token is issued
                 // in the system server to the timing when it arrives here, it can be delivered
                 // after the is already destroyed.  No one should be blamed because of such an
@@ -129,7 +142,7 @@ public class SoftInputWindow extends Dialog {
 
     /**
      * Create a SoftInputWindow that uses a custom style.
-     * 
+     *
      * @param context The Context in which the DockWindow should run. In
      *        particular, it uses the window manager and theme from this context
      *        to present its UI.
@@ -175,25 +188,6 @@ public class SoftInputWindow extends Dialog {
         }
     }
 
-    /**
-     * Set which boundary of the screen the DockWindow sticks to.
-     * 
-     * @param gravity The boundary of the screen to stick. See {@link
-     *        android.view.Gravity.LEFT}, {@link android.view.Gravity.TOP},
-     *        {@link android.view.Gravity.BOTTOM}, {@link
-     *        android.view.Gravity.RIGHT}.
-     */
-    public void setGravity(int gravity) {
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        lp.gravity = gravity;
-        updateWidthHeight(lp);
-        getWindow().setAttributes(lp);
-    }
-
-    public int getGravity() {
-        return getWindow().getAttributes().gravity;
-    }
-
     private void updateWidthHeight(WindowManager.LayoutParams lp) {
         if (lp.gravity == Gravity.TOP || lp.gravity == Gravity.BOTTOM) {
             lp.width = WindowManager.LayoutParams.MATCH_PARENT;
@@ -204,6 +198,7 @@ public class SoftInputWindow extends Dialog {
         }
     }
 
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (mKeyEventCallback != null && mKeyEventCallback.onKeyDown(keyCode, event)) {
             return true;
@@ -211,6 +206,7 @@ public class SoftInputWindow extends Dialog {
         return super.onKeyDown(keyCode, event);
     }
 
+    @Override
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {
         if (mKeyEventCallback != null && mKeyEventCallback.onKeyLongPress(keyCode, event)) {
             return true;
@@ -218,6 +214,7 @@ public class SoftInputWindow extends Dialog {
         return super.onKeyLongPress(keyCode, event);
     }
 
+    @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (mKeyEventCallback != null && mKeyEventCallback.onKeyUp(keyCode, event)) {
             return true;
@@ -225,6 +222,7 @@ public class SoftInputWindow extends Dialog {
         return super.onKeyUp(keyCode, event);
     }
 
+    @Override
     public boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
         if (mKeyEventCallback != null && mKeyEventCallback.onKeyMultiple(keyCode, count, event)) {
             return true;
@@ -232,6 +230,7 @@ public class SoftInputWindow extends Dialog {
         return super.onKeyMultiple(keyCode, count, event);
     }
 
+    @Override
     public void onBackPressed() {
         if (mCallback != null) {
             mCallback.onBackPressed();
@@ -252,9 +251,9 @@ public class SoftInputWindow extends Dialog {
         getWindow().setAttributes(lp);
 
         int windowSetFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-        int windowModFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-                WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        int windowModFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 
         if (!mTakesFocus) {
             windowSetFlags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -267,16 +266,16 @@ public class SoftInputWindow extends Dialog {
     }
 
     @Override
-    public final void show() {
+    public void show() {
         switch (mWindowState) {
-            case SoftInputWindowState.TOKEN_PENDING:
+            case WindowState.TOKEN_PENDING:
                 throw new IllegalStateException("Window token is not set yet.");
-            case SoftInputWindowState.TOKEN_SET:
-            case SoftInputWindowState.SHOWN_AT_LEAST_ONCE:
+            case WindowState.TOKEN_SET:
+            case WindowState.SHOWN_AT_LEAST_ONCE:
                 // Normal scenario.  Nothing to worry about.
                 try {
                     super.show();
-                    updateWindowState(SoftInputWindowState.SHOWN_AT_LEAST_ONCE);
+                    updateWindowState(WindowState.SHOWN_AT_LEAST_ONCE);
                 } catch (WindowManager.BadTokenException e) {
                     // Just ignore this exception.  Since show() can be requested from other
                     // components such as the system and there could be multiple event queues before
@@ -286,14 +285,14 @@ public class SoftInputWindow extends Dialog {
                     // the state so that we do not touch this window later.
                     Log.i(TAG, "Probably the IME window token is already invalidated."
                             + " show() does nothing.");
-                    updateWindowState(SoftInputWindowState.REJECTED_AT_LEAST_ONCE);
+                    updateWindowState(WindowState.REJECTED_AT_LEAST_ONCE);
                 }
                 return;
-            case SoftInputWindowState.REJECTED_AT_LEAST_ONCE:
+            case WindowState.REJECTED_AT_LEAST_ONCE:
                 // Just ignore.  In general we cannot completely avoid this kind of race condition.
                 Log.i(TAG, "Not trying to call show() because it was already rejected once.");
                 return;
-            case SoftInputWindowState.DESTROYED:
+            case WindowState.DESTROYED:
                 // Just ignore.  In general we cannot completely avoid this kind of race condition.
                 Log.i(TAG, "Ignoring show() because the window is already destroyed.");
                 return;
@@ -302,14 +301,14 @@ public class SoftInputWindow extends Dialog {
         }
     }
 
-    final void dismissForDestroyIfNecessary() {
+    void dismissForDestroyIfNecessary() {
         switch (mWindowState) {
-            case SoftInputWindowState.TOKEN_PENDING:
-            case SoftInputWindowState.TOKEN_SET:
+            case WindowState.TOKEN_PENDING:
+            case WindowState.TOKEN_SET:
                 // nothing to do because the window has never been shown.
-                updateWindowState(SoftInputWindowState.DESTROYED);
+                updateWindowState(WindowState.DESTROYED);
                 return;
-            case SoftInputWindowState.SHOWN_AT_LEAST_ONCE:
+            case WindowState.SHOWN_AT_LEAST_ONCE:
                 // Disable exit animation for the current IME window
                 // to avoid the race condition between the exit and enter animations
                 // when the current IME is being switched to another one.
@@ -327,16 +326,16 @@ public class SoftInputWindow extends Dialog {
                             + "No need to dismiss it.");
                 }
                 // Either way, consider that the window is destroyed.
-                updateWindowState(SoftInputWindowState.DESTROYED);
+                updateWindowState(WindowState.DESTROYED);
                 return;
-            case SoftInputWindowState.REJECTED_AT_LEAST_ONCE:
+            case WindowState.REJECTED_AT_LEAST_ONCE:
                 // Just ignore.  In general we cannot completely avoid this kind of race condition.
                 Log.i(TAG,
                         "Not trying to dismiss the window because it is most likely unnecessary.");
                 // Anyway, consider that the window is destroyed.
-                updateWindowState(SoftInputWindowState.DESTROYED);
+                updateWindowState(WindowState.DESTROYED);
                 return;
-            case SoftInputWindowState.DESTROYED:
+            case WindowState.DESTROYED:
                 throw new IllegalStateException(
                         "dismissForDestroyIfNecessary can be called only once");
             default:
@@ -344,7 +343,7 @@ public class SoftInputWindow extends Dialog {
         }
     }
 
-    private void updateWindowState(@SoftInputWindowState int newState) {
+    private void updateWindowState(@WindowState int newState) {
         if (DEBUG) {
             if (mWindowState != newState) {
                 Log.d(TAG, "WindowState: " + stateToString(mWindowState) + " -> "
@@ -354,17 +353,17 @@ public class SoftInputWindow extends Dialog {
         mWindowState = newState;
     }
 
-    private static String stateToString(@SoftInputWindowState int state) {
+    private static String stateToString(@WindowState int state) {
         switch (state) {
-            case SoftInputWindowState.TOKEN_PENDING:
+            case WindowState.TOKEN_PENDING:
                 return "TOKEN_PENDING";
-            case SoftInputWindowState.TOKEN_SET:
+            case WindowState.TOKEN_SET:
                 return "TOKEN_SET";
-            case SoftInputWindowState.SHOWN_AT_LEAST_ONCE:
+            case WindowState.SHOWN_AT_LEAST_ONCE:
                 return "SHOWN_AT_LEAST_ONCE";
-            case SoftInputWindowState.REJECTED_AT_LEAST_ONCE:
+            case WindowState.REJECTED_AT_LEAST_ONCE:
                 return "REJECTED_AT_LEAST_ONCE";
-            case SoftInputWindowState.DESTROYED:
+            case WindowState.DESTROYED:
                 return "DESTROYED";
             default:
                 throw new IllegalStateException("Unknown state=" + state);
