@@ -124,7 +124,7 @@ public:
     void setASurfaceTransactionCallback(
             const std::function<bool(int64_t, int64_t, int64_t)>& callback);
     void setPrepareSurfaceControlForWebviewCallback(const std::function<void()>& callback);
-    void setFrameCallback(std::function<void(int64_t)>&& callback);
+    void setFrameCallback(std::function<std::function<void(bool)>(int32_t, int64_t)>&& callback);
     void setFrameCommitCallback(std::function<void(bool)>&& callback);
     void setFrameCompleteCallback(std::function<void()>&& callback);
 
