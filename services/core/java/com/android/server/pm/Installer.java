@@ -100,6 +100,8 @@ public class Installer extends SystemService {
     public static final int FLAG_FREE_CACHE_V2 = IInstalld.FLAG_FREE_CACHE_V2;
     public static final int FLAG_FREE_CACHE_V2_DEFY_QUOTA = IInstalld.FLAG_FREE_CACHE_V2_DEFY_QUOTA;
     public static final int FLAG_FREE_CACHE_NOOP = IInstalld.FLAG_FREE_CACHE_NOOP;
+    public static final int FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES =
+            IInstalld.FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES;
 
     public static final int FLAG_USE_QUOTA = IInstalld.FLAG_USE_QUOTA;
     public static final int FLAG_FORCE = IInstalld.FLAG_FORCE;

@@ -21,6 +21,11 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledSince;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerExemptionManager;
@@ -45,6 +50,35 @@ public class BroadcastOptions extends ComponentOptions {
     private boolean mAllowBackgroundActivityStarts;
     private String[] mRequireAllOfPermissions;
     private String[] mRequireNoneOfPermissions;
+    private long mRequireCompatChangeId = CHANGE_INVALID;
+    private boolean mRequireCompatChangeEnabled = true;
+
+    /**
+     * Change ID which is invalid.
+     *
+     * @hide
+     */
+    public static final long CHANGE_INVALID = Long.MIN_VALUE;
+
+    /**
+     * Change ID which is always enabled, for testing purposes.
+     *
+     * @hide
+     */
+    @TestApi
+    @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.BASE)
+    public static final long CHANGE_ALWAYS_ENABLED = 209888056L;
+
+    /**
+     * Change ID which is always disabled, for testing purposes.
+     *
+     * @hide
+     */
+    @TestApi
+    @ChangeId
+    @Disabled
+    public static final long CHANGE_ALWAYS_DISABLED = 210856463L;
 
     /**
      * How long to temporarily put an app on the power allowlist when executing this broadcast
@@ -101,6 +135,18 @@ public class BroadcastOptions extends ComponentOptions {
             "android:broadcast.requireNoneOfPermissions";
 
     /**
+     * Corresponds to {@link #setRequireCompatChange(long, boolean)}
+     */
+    private static final String KEY_REQUIRE_COMPAT_CHANGE_ID =
+            "android:broadcast.requireCompatChangeId";
+
+    /**
+     * Corresponds to {@link #setRequireCompatChange(long, boolean)}
+     */
+    private static final String KEY_REQUIRE_COMPAT_CHANGE_ENABLED =
+            "android:broadcast.requireCompatChangeEnabled";
+
+    /**
      * @hide
      * @deprecated Use {@link android.os.PowerExemptionManager#
      * TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED} instead.
@@ -150,6 +196,8 @@ public class BroadcastOptions extends ComponentOptions {
                 false);
         mRequireAllOfPermissions = opts.getStringArray(KEY_REQUIRE_ALL_OF_PERMISSIONS);
         mRequireNoneOfPermissions = opts.getStringArray(KEY_REQUIRE_NONE_OF_PERMISSIONS);
+        mRequireCompatChangeId = opts.getLong(KEY_REQUIRE_COMPAT_CHANGE_ID, CHANGE_INVALID);
+        mRequireCompatChangeEnabled = opts.getBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, true);
     }
 
     /**
@@ -270,16 +318,32 @@ public class BroadcastOptions extends ComponentOptions {
      * Set the minimum target API level of receivers of the broadcast.  If an application
      * is targeting an API level less than this, the broadcast will not be delivered to
      * them.  This only applies to receivers declared in the app's AndroidManifest.xml.
+     *
+     * @deprecated to give developers the most flexibility during beta releases,
+     *             we strongly encourage using {@link ChangeId} instead of
+     *             target SDK checks; callers should use
+     *             {@link #setRequireCompatChange(long, boolean)} instead,
+     *             possibly combined with
+     *             {@link Intent#FLAG_RECEIVER_REGISTERED_ONLY}.
      * @hide
      */
+    @Deprecated
     public void setMinManifestReceiverApiLevel(int apiLevel) {
         mMinManifestReceiverApiLevel = apiLevel;
     }
 
     /**
      * Return {@link #setMinManifestReceiverApiLevel}.
+     *
+     * @deprecated to give developers the most flexibility during beta releases,
+     *             we strongly encourage using {@link ChangeId} instead of
+     *             target SDK checks; callers should use
+     *             {@link #setRequireCompatChange(long, boolean)} instead,
+     *             possibly combined with
+     *             {@link Intent#FLAG_RECEIVER_REGISTERED_ONLY}.
      * @hide
      */
+    @Deprecated
     public int getMinManifestReceiverApiLevel() {
         return mMinManifestReceiverApiLevel;
     }
@@ -288,20 +352,36 @@ public class BroadcastOptions extends ComponentOptions {
      * Set the maximum target API level of receivers of the broadcast.  If an application
      * is targeting an API level greater than this, the broadcast will not be delivered to
      * them.  This only applies to receivers declared in the app's AndroidManifest.xml.
+     *
+     * @deprecated to give developers the most flexibility during beta releases,
+     *             we strongly encourage using {@link ChangeId} instead of
+     *             target SDK checks; callers should use
+     *             {@link #setRequireCompatChange(long, boolean)} instead,
+     *             possibly combined with
+     *             {@link Intent#FLAG_RECEIVER_REGISTERED_ONLY}.
      * @hide
      */
     @TestApi
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @Deprecated
     public void setMaxManifestReceiverApiLevel(int apiLevel) {
         mMaxManifestReceiverApiLevel = apiLevel;
     }
 
     /**
      * Return {@link #setMaxManifestReceiverApiLevel}.
+     *
+     * @deprecated to give developers the most flexibility during beta releases,
+     *             we strongly encourage using {@link ChangeId} instead of
+     *             target SDK checks; callers should use
+     *             {@link #setRequireCompatChange(long, boolean)} instead,
+     *             possibly combined with
+     *             {@link Intent#FLAG_RECEIVER_REGISTERED_ONLY}.
      * @hide
      */
     @TestApi
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @Deprecated
     public int getMaxManifestReceiverApiLevel() {
         return mMaxManifestReceiverApiLevel;
     }
@@ -379,6 +459,58 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
+     * When set, this broadcast will only be delivered to apps which have the
+     * given {@link ChangeId} in the given state.
+     * <p>
+     * Each {@link BroadcastOptions} instance supports only a single
+     * {@link ChangeId} requirement, so any subsequent calls will override any
+     * previously defined requirement.
+     * <p>
+     * This requirement applies to both manifest registered and runtime
+     * registered receivers.
+     *
+     * @param changeId the {@link ChangeId} to inspect
+     * @param enabled the required enabled state of the inspected
+     *            {@link ChangeId} for this broadcast to be delivered
+     * @see CompatChanges#isChangeEnabled
+     * @see #clearRequireCompatChange()
+     */
+    public void setRequireCompatChange(long changeId, boolean enabled) {
+        mRequireCompatChangeId = changeId;
+        mRequireCompatChangeEnabled = enabled;
+    }
+
+    /**
+     * Clear any previously defined requirement for this broadcast requested via
+     * {@link #setRequireCompatChange(long, boolean)}.
+     */
+    public void clearRequireCompatChange() {
+        mRequireCompatChangeId = CHANGE_INVALID;
+        mRequireCompatChangeEnabled = true;
+    }
+
+    /** {@hide} */
+    public long getRequireCompatChangeId() {
+        return mRequireCompatChangeId;
+    }
+
+    /**
+     * Test if the given app meets the {@link ChangeId} state required by this
+     * broadcast, if any.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean testRequireCompatChange(int uid) {
+        if (mRequireCompatChangeId != CHANGE_INVALID) {
+            return CompatChanges.isChangeEnabled(mRequireCompatChangeId,
+                    uid) == mRequireCompatChangeEnabled;
+        } else {
+            return true;
+        }
+    }
+
+    /**
      * Returns the created options as a Bundle, which can be passed to
      * {@link android.content.Context#sendBroadcast(android.content.Intent)
      * Context.sendBroadcast(Intent)} and related methods.
@@ -412,6 +544,10 @@ public class BroadcastOptions extends ComponentOptions {
         }
         if (mRequireNoneOfPermissions != null) {
             b.putStringArray(KEY_REQUIRE_NONE_OF_PERMISSIONS, mRequireNoneOfPermissions);
+        }
+        if (mRequireCompatChangeId != CHANGE_INVALID) {
+            b.putLong(KEY_REQUIRE_COMPAT_CHANGE_ID, mRequireCompatChangeId);
+            b.putBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, mRequireCompatChangeEnabled);
         }
         return b.isEmpty() ? null : b;
     }
