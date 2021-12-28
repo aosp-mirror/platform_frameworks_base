@@ -41,6 +41,7 @@ import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -119,6 +120,25 @@ public class StartingSurfaceDrawer {
     private final WindowManagerGlobal mWindowManagerGlobal;
     private StartingSurface.SysuiProxy mSysuiProxy;
     private final StartingWindowRemovalInfo mTmpRemovalInfo = new StartingWindowRemovalInfo();
+
+    /**
+     * The minimum duration during which the splash screen is shown when the splash screen icon is
+     * animated.
+     */
+    static final long MINIMAL_ANIMATION_DURATION = 400L;
+
+    /**
+     * Allow the icon style splash screen to be displayed for longer to give time for the animation
+     * to finish, i.e. the extra buffer time to keep the splash screen if the animation is slightly
+     * longer than the {@link #MINIMAL_ANIMATION_DURATION} duration.
+     */
+    static final long TIME_WINDOW_DURATION = 100L;
+
+    /**
+     * The maximum duration during which the splash screen will be shown if the application is ready
+     * to show before the icon animation finishes.
+     */
+    static final long MAX_ANIMATION_DURATION = MINIMAL_ANIMATION_DURATION + TIME_WINDOW_DURATION;
 
     /**
      * @param splashScreenExecutor The thread used to control add and remove starting window.
@@ -593,7 +613,8 @@ public class StartingSurfaceDrawer {
                         if (removalInfo.playRevealAnimation) {
                             mSplashscreenContentDrawer.applyExitAnimation(record.mContentView,
                                     removalInfo.windowAnimationLeash, removalInfo.mainFrame,
-                                    () -> removeWindowInner(record.mDecorView, true));
+                                    () -> removeWindowInner(record.mDecorView, true),
+                                    record.mCreateTime);
                         } else {
                             // the SplashScreenView has been copied to client, hide the view to skip
                             // default exit animation
@@ -641,6 +662,7 @@ public class StartingSurfaceDrawer {
         private boolean mSetSplashScreen;
         private @StartingWindowType int mSuggestType;
         private int mBGColor;
+        private final long mCreateTime;
 
         StartingWindowRecord(IBinder appToken, View decorView,
                 TaskSnapshotWindow taskSnapshotWindow, @StartingWindowType int suggestType) {
@@ -651,6 +673,7 @@ public class StartingSurfaceDrawer {
                 mBGColor = mTaskSnapshotWindow.getBackgroundColor();
             }
             mSuggestType = suggestType;
+            mCreateTime = SystemClock.uptimeMillis();
         }
 
         private void setSplashScreenView(SplashScreenView splashScreenView) {
