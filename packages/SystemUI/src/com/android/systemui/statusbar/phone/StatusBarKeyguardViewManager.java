@@ -51,7 +51,6 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -87,7 +86,7 @@ import dagger.Lazy;
 public class StatusBarKeyguardViewManager implements RemoteInputController.Callback,
         StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
         PanelExpansionListener, NavigationModeController.ModeChangedListener,
-        KeyguardViewController, WakefulnessLifecycle.Observer {
+        KeyguardViewController {
 
     // When hiding the Keyguard with timing supplied from WindowManager, better be early than late.
     private static final long HIDE_TIMING_CORRECTION_MS = - 16 * 3;
@@ -392,15 +391,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else {
             mStatusBar.showKeyguard();
             if (hideBouncerWhenShowing) {
-                hideBouncer(shouldDestroyViewOnReset() /* destroyView */);
+                hideBouncer(false /* destroyView */);
                 mBouncer.prepare();
             }
         }
         updateStates();
-    }
-
-    protected boolean shouldDestroyViewOnReset() {
-        return false;
     }
 
     /**
