@@ -262,48 +262,12 @@ public class EuiccCardManager {
      * @param refresh  Whether sending the REFRESH command to modem.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
-     * @deprecated instead use {@link #disableProfile(String, String, int, boolean, Executor,
-     * ResultCallback)}
      */
-    @Deprecated
     public void disableProfile(String cardId, String iccid, boolean refresh,
             @CallbackExecutor Executor executor, ResultCallback<Void> callback) {
         try {
             getIEuiccCardController().disableProfile(mContext.getOpPackageName(), cardId, iccid,
-                    TelephonyManager.DEFAULT_PORT_INDEX, refresh,
-                    new IDisableProfileCallback.Stub() {
-                        @Override
-                        public void onComplete(int resultCode) {
-                            final long token = Binder.clearCallingIdentity();
-                            try {
-                                executor.execute(() -> callback.onComplete(resultCode, null));
-                            } finally {
-                                Binder.restoreCallingIdentity(token);
-                            }
-                        }
-                    });
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling disableProfile", e);
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Disables the profile of the given ICCID.
-     *
-     * @param cardId    The Id of the eUICC.
-     * @param iccid     The iccid of the profile.
-     * @param portIndex the Port index is the unique index referring to a port.
-     * @param refresh   Whether sending the REFRESH command to modem.
-     * @param executor  The executor through which the callback should be invoked.
-     * @param callback  The callback to get the result code.
-     */
-    public void disableProfile(@Nullable String cardId, @Nullable String iccid, int portIndex,
-            boolean refresh, @NonNull @CallbackExecutor Executor executor,
-            @NonNull ResultCallback<Void> callback) {
-        try {
-            getIEuiccCardController().disableProfile(mContext.getOpPackageName(), cardId, iccid,
-                    portIndex, refresh, new IDisableProfileCallback.Stub() {
+                    refresh, new IDisableProfileCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode) {
                             final long token = Binder.clearCallingIdentity();
