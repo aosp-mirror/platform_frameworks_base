@@ -42,6 +42,7 @@
         <item>@string/config_systemUIVendorServiceComponent</item>
         <item>com.android.systemui.SliceBroadcastRelayHandler</item>
         <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
+        <item>com.android.systemui.accessibility.WindowMagnification</item>
         <item>com.android.systemui.toast.ToastUI</item>
         <item>com.android.systemui.wmshell.WMShell</item>
         <item>com.android.systemui.media.systemsounds.HomeSoundEffectController</item>
