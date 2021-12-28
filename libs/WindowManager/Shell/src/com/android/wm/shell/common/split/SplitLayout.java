@@ -123,7 +123,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mDividerWindowWidth = mDividerSize + 2 * mDividerInsets;
 
         mRootBounds.set(configuration.windowConfiguration.getBounds());
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, null);
         resetDividerPosition();
     }
 
@@ -201,7 +201,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mTempRect.set(mRootBounds);
         mRootBounds.set(rootBounds);
         mRotation = rotation;
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, null);
         initDividerPosition(mTempRect);
 
         if (mInitialized) {
@@ -212,8 +212,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return true;
     }
 
-    /** Rotate the layout to specific rotation and assume its new bounds. */
-    public void rotateTo(int newRotation) {
+    /** Rotate the layout to specific rotation and calculate new bounds. The stable insets value
+     *  should be calculated by display layout. */
+    public void rotateTo(int newRotation, Rect stableInsets) {
         final int rotationDelta = (newRotation - mRotation + 4) % 4;
         final boolean changeOrient = (rotationDelta % 2) != 0;
 
@@ -223,11 +224,11 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             tmpRect.set(mRootBounds.top, mRootBounds.left, mRootBounds.bottom, mRootBounds.right);
         }
 
-        final Configuration config = new Configuration();
-        config.setTo(mContext.getResources().getConfiguration());
-        config.orientation = mOrientation;
-        config.windowConfiguration.setBounds(tmpRect);
-        updateConfiguration(config);
+        // We only need new bounds here, other configuration should be update later.
+        mTempRect.set(mRootBounds);
+        mRootBounds.set(tmpRect);
+        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, stableInsets);
+        initDividerPosition(mTempRect);
     }
 
     private void initDividerPosition(Rect oldBounds) {
@@ -372,7 +373,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return mDividerSnapAlgorithm.calculateSnapTarget(position, velocity, hardDismiss);
     }
 
-    private DividerSnapAlgorithm getSnapAlgorithm(Context context, Rect rootBounds) {
+    private DividerSnapAlgorithm getSnapAlgorithm(Context context, Rect rootBounds,
+            @Nullable Rect stableInsets) {
         final boolean isLandscape = isLandscape(rootBounds);
         return new DividerSnapAlgorithm(
                 context.getResources(),
@@ -380,7 +382,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 rootBounds.height(),
                 mDividerSize,
                 !isLandscape,
-                getDisplayInsets(context),
+                stableInsets != null ? stableInsets : getDisplayInsets(context),
                 isLandscape ? DOCKED_LEFT : DOCKED_TOP /* dockSide */);
     }
 
