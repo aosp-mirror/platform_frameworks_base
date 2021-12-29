@@ -40,21 +40,17 @@ import android.telephony.SubscriptionPlan;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
-import android.util.IntArray;
-import android.util.MathUtils;
+import android.util.IndentingPrintWriter;
+import android.util.Log;
 import android.util.Range;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastDataInput;
 import com.android.internal.util.FastDataOutput;
 import com.android.internal.util.FileRotator;
-import com.android.internal.util.IndentingPrintWriter;
-
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
+import com.android.net.module.util.CollectionUtils;
+import com.android.net.module.util.NetworkStatsUtils;
 
 import libcore.io.IoUtils;
 
@@ -196,11 +192,11 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
     public int[] getRelevantUids(@NetworkStatsAccess.Level int accessLevel,
                 final int callerUid) {
-        IntArray uids = new IntArray();
+        final ArrayList<Integer> uids = new ArrayList<>();
         for (int i = 0; i < mStats.size(); i++) {
             final Key key = mStats.keyAt(i);
             if (NetworkStatsAccess.isAccessibleToUser(key.uid, callerUid, accessLevel)) {
-                int j = uids.binarySearch(key.uid);
+                int j = Collections.binarySearch(uids, new Integer(key.uid));
 
                 if (j < 0) {
                     j = ~j;
@@ -208,7 +204,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
                 }
             }
         }
-        return uids.toArray();
+        return CollectionUtils.toIntArray(uids);
     }
 
     /**
@@ -225,7 +221,8 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
         // 180 days of history should be enough for anyone; if we end up needing
         // more, we'll dynamically grow the history object.
-        final int bucketEstimate = (int) MathUtils.constrain(((end - start) / mBucketDuration), 0,
+        final int bucketEstimate = (int) NetworkStatsUtils.constrain(
+                ((end - start) / mBucketDuration), 0,
                 (180 * DateUtils.DAY_IN_MILLIS) / mBucketDuration);
         final NetworkStatsHistory combined = new NetworkStatsHistory(
                 mBucketDuration, bucketEstimate, fields);
@@ -316,7 +313,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
             final long deltaTotal = combined.getTotalBytes() - beforeTotal;
             if (deltaTotal != 0) {
-                Slog.d(TAG, "Augmented network usage by " + deltaTotal + " bytes");
+                Log.d(TAG, "Augmented network usage by " + deltaTotal + " bytes");
             }
 
             // Finally we can slice data as originally requested
@@ -489,11 +486,11 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
     private void write(DataOutput out) throws IOException {
         // cluster key lists grouped by ident
-        final HashMap<NetworkIdentitySet, ArrayList<Key>> keysByIdent = Maps.newHashMap();
+        final HashMap<NetworkIdentitySet, ArrayList<Key>> keysByIdent = new HashMap<>();
         for (Key key : mStats.keySet()) {
             ArrayList<Key> keys = keysByIdent.get(key.ident);
             if (keys == null) {
-                keys = Lists.newArrayList();
+                keys = new ArrayList<>();
                 keysByIdent.put(key.ident, keys);
             }
             keys.add(key);
@@ -640,12 +637,12 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
      * {@link TrafficStats#UID_REMOVED}.
      */
     public void removeUids(int[] uids) {
-        final ArrayList<Key> knownKeys = Lists.newArrayList();
+        final ArrayList<Key> knownKeys = new ArrayList<>();
         knownKeys.addAll(mStats.keySet());
 
         // migrate all UID stats into special "removed" bucket
         for (Key key : knownKeys) {
-            if (ArrayUtils.contains(uids, key.uid)) {
+            if (CollectionUtils.contains(uids, key.uid)) {
                 // only migrate combined TAG_NONE history
                 if (key.tag == TAG_NONE) {
                     final NetworkStatsHistory uidHistory = mStats.get(key);
@@ -672,7 +669,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
     }
 
     private ArrayList<Key> getSortedKeys() {
-        final ArrayList<Key> keys = Lists.newArrayList();
+        final ArrayList<Key> keys = new ArrayList<>();
         keys.addAll(mStats.keySet());
         Collections.sort(keys);
         return keys;
