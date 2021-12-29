@@ -4655,18 +4655,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void ensureRemovedFromTransientContainer(View v) {
-        if (v.getParent() == this && v instanceof ExpandableView) {
-            ExpandableView expandableView = (ExpandableView) v;
-            ViewGroup transientContainer = expandableView.getTransientContainer();
-            // If the child is animating away, it will still have a parent, so
-            // detach it first
+        if (v.getParent() != null && v instanceof ExpandableView) {
+            // If the child is animating away, it will still have a parent, so detach it first
             // TODO: We should really cancel the active animations here. This will
             //  happen automatically when the view's intro animation starts, but
             //  it's a fragile link.
-            if (transientContainer != null) {
-                transientContainer.removeTransientView(v);
-                expandableView.setTransientContainer(null);
-            }
+            ((ExpandableView) v).removeFromTransientContainerForAdditionTo(this);
         }
     }
 
