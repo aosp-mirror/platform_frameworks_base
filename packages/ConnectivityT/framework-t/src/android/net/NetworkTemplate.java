@@ -49,7 +49,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
-import com.android.internal.util.ArrayUtils;
+import com.android.net.module.util.CollectionUtils;
 import com.android.net.module.util.NetworkIdentityUtils;
 import com.android.net.module.util.NetworkStatsUtils;
 
@@ -703,7 +703,7 @@ public final class NetworkTemplate implements Parcelable {
      */
     public boolean matchesSubscriberId(@Nullable String subscriberId) {
         return mSubscriberIdMatchRule == NetworkStatsUtils.SUBSCRIBER_ID_MATCH_RULE_ALL
-                || ArrayUtils.contains(mMatchSubscriberIds, subscriberId);
+                || CollectionUtils.contains(mMatchSubscriberIds, subscriberId);
     }
 
     /**
@@ -723,8 +723,8 @@ public final class NetworkTemplate implements Parcelable {
             // TODO: consider matching against WiMAX subscriber identity
             return true;
         } else {
-            return ident.mType == TYPE_MOBILE && !ArrayUtils.isEmpty(mMatchSubscriberIds)
-                    && ArrayUtils.contains(mMatchSubscriberIds, ident.mSubscriberId)
+            return ident.mType == TYPE_MOBILE && !CollectionUtils.isEmpty(mMatchSubscriberIds)
+                    && CollectionUtils.contains(mMatchSubscriberIds, ident.mSubscriberId)
                     && matchesCollapsedRatType(ident);
         }
     }
@@ -835,8 +835,8 @@ public final class NetworkTemplate implements Parcelable {
      */
     private boolean matchesCarrier(NetworkIdentity ident) {
         return ident.mSubscriberId != null
-                && !ArrayUtils.isEmpty(mMatchSubscriberIds)
-                && ArrayUtils.contains(mMatchSubscriberIds, ident.mSubscriberId);
+                && !CollectionUtils.isEmpty(mMatchSubscriberIds)
+                && CollectionUtils.contains(mMatchSubscriberIds, ident.mSubscriberId);
     }
 
     private boolean matchesMobileWildcard(NetworkIdentity ident) {
@@ -953,7 +953,7 @@ public final class NetworkTemplate implements Parcelable {
         if (template.mSubscriberId == null) return template;
 
         for (String[] merged : mergedList) {
-            if (ArrayUtils.contains(merged, template.mSubscriberId)) {
+            if (CollectionUtils.contains(merged, template.mSubscriberId)) {
                 // Requested template subscriber is part of the merge group; return
                 // a template that matches all merged subscribers.
                 return new NetworkTemplate(template.mMatchRule, merged[0], merged,
