@@ -29,7 +29,7 @@ public class WifiEnterpriseRestrictionUtils {
     private static final String TAG = "WifiEntResUtils";
 
     /**
-     * Confirm Wi-Fi tethering is available according to whether user restriction is set
+     * Confirm Wi-Fi tethering is allowed according to whether user restriction is set
      *
      * @param context A context
      * @return whether the device is permitted to use Wi-Fi Tethering
@@ -39,6 +39,22 @@ public class WifiEnterpriseRestrictionUtils {
         final Bundle restrictions = userManager.getUserRestrictions();
         if (isAtLeastT() && restrictions.getBoolean(UserManager.DISALLOW_WIFI_TETHERING)) {
             Log.i(TAG, "Wi-Fi Tethering isn't available due to user restriction.");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Confirm Wi-Fi Direct is allowed according to whether user restriction is set
+     *
+     * @param context A context
+     * @return whether the device is permitted to use Wi-Fi Direct
+     */
+    public static boolean isWifiDirectAllowed(Context context) {
+        final UserManager userManager = context.getSystemService(UserManager.class);
+        final Bundle restrictions = userManager.getUserRestrictions();
+        if (isAtLeastT() && restrictions.getBoolean(UserManager.DISALLOW_WIFI_DIRECT)) {
+            Log.i(TAG, "Wi-Fi Direct isn't available due to user restriction.");
             return false;
         }
         return true;
