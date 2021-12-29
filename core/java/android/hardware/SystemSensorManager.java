@@ -464,7 +464,8 @@ public class SystemSensorManager extends SensorManager {
 
             IntentFilter filter = new IntentFilter("dynamic_sensor_change");
             filter.addAction(Intent.ACTION_DYNAMIC_SENSOR_CHANGED);
-            mContext.registerReceiver(mDynamicSensorBroadcastReceiver, filter);
+            mContext.registerReceiver(mDynamicSensorBroadcastReceiver, filter,
+                    Context.RECEIVER_NOT_EXPORTED);
         }
     }
 
