@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-package android.inputmethodservice;
-
-import static android.inputmethodservice.SoftInputWindowProto.BOUNDS;
-import static android.inputmethodservice.SoftInputWindowProto.GRAVITY;
-import static android.inputmethodservice.SoftInputWindowProto.NAME;
-import static android.inputmethodservice.SoftInputWindowProto.TAKES_FOCUS;
-import static android.inputmethodservice.SoftInputWindowProto.WINDOW_STATE;
-import static android.inputmethodservice.SoftInputWindowProto.WINDOW_TYPE;
+package android.service.voice;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -32,7 +25,6 @@ import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Log;
-import android.util.proto.ProtoOutputStream;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -42,15 +34,13 @@ import android.view.WindowManager;
 import java.lang.annotation.Retention;
 
 /**
- * A SoftInputWindow is a Dialog that is intended to be used for a top-level input
- * method window.  It will be displayed along the edge of the screen, moving
- * the application user interface away from it so that the focused item is
- * always visible.
- * @hide
+ * A {@link VoiceInteractionWindow} is a {@link Dialog} that is intended to be used for a top-level
+ * {@link VoiceInteractionSession}. It will be displayed along the edge of the screen, moving the
+ * application user interface away from it so that the focused item is always visible.
  */
-public final class SoftInputWindow extends Dialog {
+final class VoiceInteractionWindow extends Dialog {
     private static final boolean DEBUG = false;
-    private static final String TAG = "SoftInputWindow";
+    private static final String TAG = "VoiceInteractionWindow";
 
     private final String mName;
     private final Callback mCallback;
@@ -79,7 +69,7 @@ public final class SoftInputWindow extends Dialog {
          */
         int SHOWN_AT_LEAST_ONCE = 2;
         /**
-         * {@link android.view.WindowManager.BadTokenException} was sent when calling
+         * {@link WindowManager.BadTokenException} was sent when calling
          * {@link Dialog#show()} at least once.
          */
         int REJECTED_AT_LEAST_ONCE = 3;
@@ -95,7 +85,7 @@ public final class SoftInputWindow extends Dialog {
     /**
      * Used to provide callbacks.
      */
-    public interface Callback {
+    interface Callback {
         /**
          * Used to be notified when {@link Dialog#onBackPressed()} gets called.
          */
@@ -108,7 +98,7 @@ public final class SoftInputWindow extends Dialog {
      * <p>This method can be called only once.</p>
      * @param token {@link IBinder} token to be associated with the window.
      */
-    public void setToken(IBinder token) {
+    void setToken(IBinder token) {
         switch (mWindowState) {
             case WindowState.TOKEN_PENDING:
                 // Normal scenario.  Nothing to worry about.
@@ -141,7 +131,7 @@ public final class SoftInputWindow extends Dialog {
     }
 
     /**
-     * Create a SoftInputWindow that uses a custom style.
+     * Create a {@link VoiceInteractionWindow} that uses a custom style.
      *
      * @param context The Context in which the DockWindow should run. In
      *        particular, it uses the window manager and theme from this context
@@ -152,7 +142,7 @@ public final class SoftInputWindow extends Dialog {
      *        using styles. This theme is applied on top of the current theme in
      *        <var>context</var>. If 0, the default dialog theme will be used.
      */
-    public SoftInputWindow(Context context, String name, int theme, Callback callback,
+    VoiceInteractionWindow(Context context, String name, int theme, Callback callback,
             KeyEvent.Callback keyEventCallback, KeyEvent.DispatcherState dispatcherState,
             int windowType, int gravity, boolean takesFocus) {
         super(context, theme);
@@ -301,48 +291,6 @@ public final class SoftInputWindow extends Dialog {
         }
     }
 
-    void dismissForDestroyIfNecessary() {
-        switch (mWindowState) {
-            case WindowState.TOKEN_PENDING:
-            case WindowState.TOKEN_SET:
-                // nothing to do because the window has never been shown.
-                updateWindowState(WindowState.DESTROYED);
-                return;
-            case WindowState.SHOWN_AT_LEAST_ONCE:
-                // Disable exit animation for the current IME window
-                // to avoid the race condition between the exit and enter animations
-                // when the current IME is being switched to another one.
-                try {
-                    getWindow().setWindowAnimations(0);
-                    dismiss();
-                } catch (WindowManager.BadTokenException e) {
-                    // Just ignore this exception.  Since show() can be requested from other
-                    // components such as the system and there could be multiple event queues before
-                    // the request finally arrives here, the system may have already invalidated the
-                    // window token attached to our window.  In such a scenario, receiving
-                    // BadTokenException here is an expected behavior.  We just ignore it and update
-                    // the state so that we do not touch this window later.
-                    Log.i(TAG, "Probably the IME window token is already invalidated. "
-                            + "No need to dismiss it.");
-                }
-                // Either way, consider that the window is destroyed.
-                updateWindowState(WindowState.DESTROYED);
-                return;
-            case WindowState.REJECTED_AT_LEAST_ONCE:
-                // Just ignore.  In general we cannot completely avoid this kind of race condition.
-                Log.i(TAG,
-                        "Not trying to dismiss the window because it is most likely unnecessary.");
-                // Anyway, consider that the window is destroyed.
-                updateWindowState(WindowState.DESTROYED);
-                return;
-            case WindowState.DESTROYED:
-                throw new IllegalStateException(
-                        "dismissForDestroyIfNecessary can be called only once");
-            default:
-                throw new IllegalStateException("Unexpected state=" + mWindowState);
-        }
-    }
-
     private void updateWindowState(@WindowState int newState) {
         if (DEBUG) {
             if (mWindowState != newState) {
@@ -368,16 +316,5 @@ public final class SoftInputWindow extends Dialog {
             default:
                 throw new IllegalStateException("Unknown state=" + state);
         }
-    }
-
-    void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        final long token = proto.start(fieldId);
-        proto.write(NAME, mName);
-        proto.write(WINDOW_TYPE, mWindowType);
-        proto.write(GRAVITY, mGravity);
-        proto.write(TAKES_FOCUS, mTakesFocus);
-        mBounds.dumpDebug(proto, BOUNDS);
-        proto.write(WINDOW_STATE, mWindowState);
-        proto.end(token);
     }
 }

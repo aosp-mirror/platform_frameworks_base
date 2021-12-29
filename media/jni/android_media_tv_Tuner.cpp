@@ -62,6 +62,8 @@
 #include <aidl/android/hardware/tv/tuner/DemuxTsFilterType.h>
 #include <aidl/android/hardware/tv/tuner/DemuxTsIndex.h>
 #include <aidl/android/hardware/tv/tuner/DvrSettings.h>
+#include <aidl/android/hardware/tv/tuner/FilterDelayHint.h>
+#include <aidl/android/hardware/tv/tuner/FilterDelayHintType.h>
 #include <aidl/android/hardware/tv/tuner/FrontendAnalogAftFlag.h>
 #include <aidl/android/hardware/tv/tuner/FrontendAnalogSettings.h>
 #include <aidl/android/hardware/tv/tuner/FrontendAnalogSifStandard.h>
@@ -210,6 +212,8 @@ using ::aidl::android::hardware::tv::tuner::DemuxTsFilterSettingsFilterSettings;
 using ::aidl::android::hardware::tv::tuner::DemuxTsFilterType;
 using ::aidl::android::hardware::tv::tuner::DemuxTsIndex;
 using ::aidl::android::hardware::tv::tuner::DvrSettings;
+using ::aidl::android::hardware::tv::tuner::FilterDelayHint;
+using ::aidl::android::hardware::tv::tuner::FilterDelayHintType;
 using ::aidl::android::hardware::tv::tuner::FrontendAnalogAftFlag;
 using ::aidl::android::hardware::tv::tuner::FrontendAnalogSettings;
 using ::aidl::android::hardware::tv::tuner::FrontendAnalogSifStandard;
@@ -4058,6 +4062,36 @@ static void android_media_tv_Tuner_free_shared_filter_token(
     filterClient->freeSharedFilterToken(filterToken);
 }
 
+static jint android_media_tv_Tuner_set_filter_time_delay_hint(
+        JNIEnv *env, jobject filter, int timeDelayInMs) {
+    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    if (filterClient == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Failed to set filter delay: filter client not found");
+    }
+
+    FilterDelayHint delayHint {
+        .hintType = FilterDelayHintType::TIME_DELAY_IN_MS,
+        .hintValue = timeDelayInMs,
+    };
+    return static_cast<jint>(filterClient->setDelayHint(delayHint));
+}
+
+static jint android_media_tv_Tuner_set_filter_data_size_delay_hint(
+        JNIEnv *env, jobject filter, int dataSizeDelayInBytes) {
+    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    if (filterClient == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Failed to set filter delay: filter client not found");
+    }
+
+    FilterDelayHint delayHint {
+        .hintType = FilterDelayHintType::DATA_SIZE_DELAY_IN_BYTES,
+        .hintValue = dataSizeDelayInBytes,
+    };
+    return static_cast<jint>(filterClient->setDelayHint(delayHint));
+}
+
 static sp<TimeFilterClient> getTimeFilterClient(JNIEnv *env, jobject filter) {
     return (TimeFilterClient *)env->GetLongField(filter, gFields.timeFilterContext);
 }
@@ -4578,6 +4612,10 @@ static const JNINativeMethod gFilterMethods[] = {
             (void *)android_media_tv_Tuner_acquire_shared_filter_token},
     { "nativeFreeSharedFilterToken", "(Ljava/lang/String;)V",
             (void *)android_media_tv_Tuner_free_shared_filter_token},
+    {"nativeSetTimeDelayHint", "(I)I",
+            (void *)android_media_tv_Tuner_set_filter_time_delay_hint},
+    {"nativeSetDataSizeDelayHint", "(I)I",
+            (void *)android_media_tv_Tuner_set_filter_data_size_delay_hint},
 };
 
 static const JNINativeMethod gSharedFilterMethods[] = {

@@ -66,7 +66,7 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
     }
 
     @Override
-    @NonNull String getTag() {
+    @NonNull protected String getTag() {
         return "UdfpsEnrollViewController";
     }
 

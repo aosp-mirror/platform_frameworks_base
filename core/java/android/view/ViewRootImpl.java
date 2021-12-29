@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.graphics.HardwareRenderer.SYNC_CONTEXT_IS_STOPPED;
+import static android.graphics.HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUND;
 import static android.os.IInputConstants.INVALID_INPUT_EVENT_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -1392,11 +1394,20 @@ public final class ViewRootImpl implements ViewParent,
      */
     public void registerRtFrameCallback(@NonNull FrameDrawingCallback callback) {
         if (mAttachInfo.mThreadedRenderer != null) {
-            mAttachInfo.mThreadedRenderer.registerRtFrameCallback(frame -> {
-                try {
-                    callback.onFrameDraw(frame);
-                } catch (Exception e) {
-                    Log.e(TAG, "Exception while executing onFrameDraw", e);
+            mAttachInfo.mThreadedRenderer.registerRtFrameCallback(new FrameDrawingCallback() {
+                @Override
+                public void onFrameDraw(long frame) {
+                }
+
+                @Override
+                public HardwareRenderer.FrameCommitCallback onFrameDraw(int syncResult,
+                        long frame) {
+                    try {
+                        return callback.onFrameDraw(syncResult, frame);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Exception while executing onFrameDraw", e);
+                    }
+                    return null;
                 }
             });
         }
@@ -4020,61 +4031,6 @@ public final class ViewRootImpl implements ViewParent,
         return mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled();
     }
 
-    private boolean addFrameCompleteCallbackIfNeeded(boolean useBlastSync,
-            boolean reportNextDraw) {
-        if (!isHardwareEnabled()) {
-            return false;
-        }
-
-        if (!useBlastSync && !reportNextDraw) {
-            return false;
-        }
-
-        if (DEBUG_BLAST) {
-            Log.d(mTag, "Creating frameCompleteCallback");
-        }
-
-        final Consumer<SurfaceControl.Transaction> blastSyncConsumer = mBLASTDrawConsumer;
-        mBLASTDrawConsumer = null;
-
-        mAttachInfo.mThreadedRenderer.setFrameCompleteCallback(() -> {
-            long frameNr = mBlastBufferQueue.getLastAcquiredFrameNum();
-            if (DEBUG_BLAST) {
-                Log.d(mTag, "Received frameCompleteCallback "
-                        + " lastAcquiredFrameNum=" + frameNr
-                        + " lastAttemptedDrawFrameNum=" + mRtLastAttemptedDrawFrameNum);
-            }
-
-            boolean frameWasNotDrawn = frameNr != mRtLastAttemptedDrawFrameNum;
-            // If frame wasn't drawn, clear out the next transaction so it doesn't affect the next
-            // draw attempt. The next transaction and transaction complete callback were only set
-            // for the current draw attempt.
-            if (frameWasNotDrawn) {
-                mBlastBufferQueue.setSyncTransaction(null);
-                // Apply the transactions that were sent to mergeWithNextTransaction since the
-                // frame didn't draw on this vsync. It's possible the frame will draw later, but
-                // it's better to not be sync than to block on a frame that may never come.
-                mBlastBufferQueue.applyPendingTransactions(mRtLastAttemptedDrawFrameNum);
-            }
-
-            Transaction tmpTransaction = new Transaction();
-            tmpTransaction.merge(mRtBLASTSyncTransaction);
-            mHandler.postAtFrontOfQueue(() -> {
-                if (useBlastSync) {
-                    mSurfaceChangedTransaction.merge(tmpTransaction);
-                    if (blastSyncConsumer != null) {
-                        blastSyncConsumer.accept(mSurfaceChangedTransaction);
-                    }
-                }
-
-                if (reportNextDraw) {
-                    pendingDrawFinished();
-                }
-            });
-        });
-        return true;
-    }
-
     private void addFrameCommitCallbackIfNeeded() {
         if (!isHardwareEnabled()) {
             return;
@@ -4105,51 +4061,131 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
-    private void addFrameCallbackIfNeeded(boolean useBlastSync) {
+    private HardwareRenderer.FrameCommitCallback createFrameCommitCallbackForSync(
+            boolean useBlastSync, boolean reportNextDraw, Consumer<Transaction> blastSyncConsumer) {
+        return didProduceBuffer -> {
+            if (DEBUG_BLAST) {
+                Log.d(mTag, "Received frameCommittedCallback "
+                        + " lastAttemptedDrawFrameNum=" + mRtLastAttemptedDrawFrameNum
+                        + " didProduceBuffer=" + didProduceBuffer);
+            }
+
+            // If frame wasn't drawn, clear out the next transaction so it doesn't affect the next
+            // draw attempt. The next transaction and transaction complete callback were only set
+            // for the current draw attempt.
+            if (!didProduceBuffer) {
+                mBlastBufferQueue.setSyncTransaction(null);
+                // Apply the transactions that were sent to mergeWithNextTransaction since the
+                // frame didn't draw on this vsync. It's possible the frame will draw later, but
+                // it's better to not be sync than to block on a frame that may never come.
+                mBlastBufferQueue.applyPendingTransactions(mRtLastAttemptedDrawFrameNum);
+            }
+
+            Transaction tmpTransaction = new Transaction();
+            tmpTransaction.merge(mRtBLASTSyncTransaction);
+            // Post at front of queue so the buffer can be processed immediately and allow RT
+            // to continue processing new buffers. If RT tries to process buffers before the sync
+            // buffer is applied, the new buffers will not get acquired and could result in a
+            // deadlock. UI thread would wait on RT, but RT would be blocked waiting for a free
+            // buffer.
+            mHandler.postAtFrontOfQueue(() -> {
+                if (useBlastSync) {
+                    mSurfaceChangedTransaction.merge(tmpTransaction);
+                    if (blastSyncConsumer != null) {
+                        blastSyncConsumer.accept(mSurfaceChangedTransaction);
+                    }
+                }
+
+                if (reportNextDraw) {
+                    pendingDrawFinished();
+                }
+            });
+        };
+    }
+
+    @Nullable
+    private FrameDrawingCallback createFrameDrawingCallbackIfNeeded(boolean useBlastSync,
+            boolean reportNextDraw) {
+        if (!isHardwareEnabled()) {
+            return null;
+        }
         final boolean hasBlurUpdates = mBlurRegionAggregator.hasUpdates();
         final boolean needsCallbackForBlur = hasBlurUpdates || mBlurRegionAggregator.hasRegions();
 
-        if (!useBlastSync && !needsCallbackForBlur) {
-            return;
+        if (!useBlastSync && !needsCallbackForBlur && !reportNextDraw) {
+            return null;
         }
+
+        final Consumer<SurfaceControl.Transaction> blastSyncConsumer = mBLASTDrawConsumer;
+        mBLASTDrawConsumer = null;
 
         if (DEBUG_BLAST) {
             Log.d(mTag, "Creating frameDrawingCallback"
                     + " nextDrawUseBlastSync=" + useBlastSync
-                    + " hasBlurUpdates=" + hasBlurUpdates);
+                    + " reportNextDraw=" + reportNextDraw
+                    + " hasBlurUpdates=" + hasBlurUpdates
+                    + " hasBlastSyncConsumer=" + (blastSyncConsumer != null));
         }
+
         final BackgroundBlurDrawable.BlurRegion[] blurRegionsForFrame =
                 needsCallbackForBlur ?  mBlurRegionAggregator.getBlurRegionsCopyForRT() : null;
 
         // The callback will run on the render thread.
-        HardwareRenderer.FrameDrawingCallback frameDrawingCallback = frame -> {
-            if (DEBUG_BLAST) {
-                Log.d(mTag, "Received frameDrawingCallback frameNum=" + frame + "."
-                        + " Creating transactionCompleteCallback=" + useBlastSync);
+        return new FrameDrawingCallback() {
+            @Override
+            public void onFrameDraw(long frame) {
             }
 
-            mRtLastAttemptedDrawFrameNum = frame;
+            @Override
+            public HardwareRenderer.FrameCommitCallback onFrameDraw(int syncResult, long frame) {
+                if (DEBUG_BLAST) {
+                    Log.d(mTag,
+                            "Received frameDrawingCallback syncResult=" + syncResult + " frameNum="
+                                    + frame + ".");
+                }
 
-            if (needsCallbackForBlur) {
-                mBlurRegionAggregator
-                    .dispatchBlurTransactionIfNeeded(frame, blurRegionsForFrame, hasBlurUpdates);
-            }
+                mRtLastAttemptedDrawFrameNum = frame;
 
-            if (mBlastBufferQueue == null) {
-                return;
-            }
+                if (needsCallbackForBlur) {
+                    mBlurRegionAggregator.dispatchBlurTransactionIfNeeded(frame,
+                            blurRegionsForFrame, hasBlurUpdates);
+                }
 
-            if (useBlastSync) {
-                // Frame callbacks will always occur after submitting draw requests and before
-                // the draw actually occurs. This will ensure that we set the next transaction
-                // for the frame that's about to get drawn and not on a previous frame that.
+                if (mBlastBufferQueue == null) {
+                    return null;
+                }
 
-                // We don't need to synchronize mRtBLASTSyncTransaction here since it's not
-                // being modified and only sent to BlastBufferQueue.
-                mBlastBufferQueue.setSyncTransaction(mRtBLASTSyncTransaction);
+                if (!useBlastSync && !reportNextDraw) {
+                    return null;
+                }
+
+                // If the syncResults are SYNC_LOST_SURFACE_REWARD_IF_FOUND or
+                // SYNC_CONTEXT_IS_STOPPED it means nothing will draw. There's no need to set up
+                // any blast sync or commit callback, and the code should directly call
+                // pendingDrawFinished.
+                if ((syncResult
+                        & (SYNC_LOST_SURFACE_REWARD_IF_FOUND | SYNC_CONTEXT_IS_STOPPED)) != 0) {
+                    if (reportNextDraw) {
+                        mHandler.postAtFrontOfQueue(() -> pendingDrawFinished());
+                    }
+                    return null;
+                }
+
+                if (DEBUG_BLAST) {
+                    Log.d(mTag, "Setting up sync and frameCommitCallback");
+                }
+
+                if (useBlastSync) {
+                    // Frame callbacks will always occur after submitting draw requests and before
+                    // the draw actually occurs. This will ensure that we set the next transaction
+                    // for the frame that's about to get drawn and not on a previous frame.
+                    mBlastBufferQueue.setSyncTransaction(mRtBLASTSyncTransaction);
+                }
+
+                return createFrameCommitCallbackForSync(useBlastSync, reportNextDraw,
+                        blastSyncConsumer);
             }
         };
-        registerRtFrameCallback(frameDrawingCallback);
     }
 
     private void performDraw(boolean useBlastSync) {
@@ -4165,15 +4201,20 @@ public final class ViewRootImpl implements ViewParent,
         mIsDrawing = true;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
 
-        addFrameCallbackIfNeeded(useBlastSync);
+        FrameDrawingCallback frameDrawingCallback = createFrameDrawingCallbackIfNeeded(useBlastSync,
+                mReportNextDraw);
+        if (frameDrawingCallback != null) {
+            mAttachInfo.mThreadedRenderer.registerRtFrameCallback(frameDrawingCallback);
+        }
         addFrameCommitCallbackIfNeeded();
-        boolean usingAsyncReport = addFrameCompleteCallbackIfNeeded(useBlastSync, mReportNextDraw);
+        boolean usingAsyncReport = isHardwareEnabled() && (useBlastSync || mReportNextDraw);
 
         try {
             boolean canUseAsync = draw(fullRedrawNeeded);
             if (usingAsyncReport && !canUseAsync) {
-                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback(null);
+                mAttachInfo.mThreadedRenderer.setFrameCallback(null);
                 usingAsyncReport = false;
+                mAttachInfo.mThreadedRenderer.unregisterRtFrameCallback(frameDrawingCallback);
             }
         } finally {
             mIsDrawing = false;

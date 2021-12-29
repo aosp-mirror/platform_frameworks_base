@@ -17,12 +17,15 @@
 package com.android.systemui.media.taptotransfer
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
+import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender
 import com.android.systemui.media.taptotransfer.sender.MoveCloserToTransfer
 import com.android.systemui.media.taptotransfer.sender.TransferInitiated
@@ -43,17 +46,26 @@ class MediaTttCommandLineHelper @Inject constructor(
     commandRegistry: CommandRegistry,
     context: Context,
     private val mediaTttChipControllerSender: MediaTttChipControllerSender,
+    private val mediaTttChipControllerReceiver: MediaTttChipControllerReceiver,
     @Main private val mainExecutor: DelayableExecutor,
 ) {
     private val appIconDrawable =
-        Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
+        Icon.createWithResource(context, R.drawable.ic_avatar_user).loadDrawable(context).also {
+            it.setTint(Color.YELLOW)
+        }
 
     init {
-        commandRegistry.registerCommand(ADD_CHIP_COMMAND_TAG) { AddChipCommand() }
-        commandRegistry.registerCommand(REMOVE_CHIP_COMMAND_TAG) { RemoveChipCommand() }
+        commandRegistry.registerCommand(
+            ADD_CHIP_COMMAND_SENDER_TAG) { AddChipCommandSender() }
+        commandRegistry.registerCommand(
+            REMOVE_CHIP_COMMAND_SENDER_TAG) { RemoveChipCommandSender() }
+        commandRegistry.registerCommand(
+            ADD_CHIP_COMMAND_RECEIVER_TAG) { AddChipCommandReceiver() }
+        commandRegistry.registerCommand(
+            REMOVE_CHIP_COMMAND_RECEIVER_TAG) { RemoveChipCommandReceiver() }
     }
 
-    inner class AddChipCommand : Command {
+    inner class AddChipCommandSender : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
             val otherDeviceName = args[0]
             when (args[1]) {
@@ -86,18 +98,40 @@ class MediaTttCommandLineHelper @Inject constructor(
         }
 
         override fun help(pw: PrintWriter) {
-            pw.println(
-                "Usage: adb shell cmd statusbar $ADD_CHIP_COMMAND_TAG <deviceName> <chipStatus>"
+            pw.println("Usage: adb shell cmd statusbar " +
+                    "$ADD_CHIP_COMMAND_SENDER_TAG <deviceName> <chipStatus>"
             )
         }
     }
 
-    inner class RemoveChipCommand : Command {
+    /** A command to REMOVE the media ttt chip on the SENDER device. */
+    inner class RemoveChipCommandSender : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
             mediaTttChipControllerSender.removeChip()
         }
         override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar $REMOVE_CHIP_COMMAND_TAG")
+            pw.println("Usage: adb shell cmd statusbar $REMOVE_CHIP_COMMAND_SENDER_TAG")
+        }
+    }
+
+
+    /** A command to DISPLAY the media ttt chip on the RECEIVER device. */
+    inner class AddChipCommandReceiver : Command {
+        override fun execute(pw: PrintWriter, args: List<String>) {
+            mediaTttChipControllerReceiver.displayChip(ChipStateReceiver(appIconDrawable))
+        }
+        override fun help(pw: PrintWriter) {
+            pw.println("Usage: adb shell cmd statusbar $ADD_CHIP_COMMAND_RECEIVER_TAG")
+        }
+    }
+
+    /** A command to REMOVE the media ttt chip on the RECEIVER device. */
+    inner class RemoveChipCommandReceiver : Command {
+        override fun execute(pw: PrintWriter, args: List<String>) {
+            mediaTttChipControllerReceiver.removeChip()
+        }
+        override fun help(pw: PrintWriter) {
+            pw.println("Usage: adb shell cmd statusbar $REMOVE_CHIP_COMMAND_RECEIVER_TAG")
         }
     }
 
@@ -107,9 +141,13 @@ class MediaTttCommandLineHelper @Inject constructor(
 }
 
 @VisibleForTesting
-const val ADD_CHIP_COMMAND_TAG = "media-ttt-chip-add"
+const val ADD_CHIP_COMMAND_SENDER_TAG = "media-ttt-chip-add-sender"
 @VisibleForTesting
-const val REMOVE_CHIP_COMMAND_TAG = "media-ttt-chip-remove"
+const val REMOVE_CHIP_COMMAND_SENDER_TAG = "media-ttt-chip-remove-sender"
+@VisibleForTesting
+const val ADD_CHIP_COMMAND_RECEIVER_TAG = "media-ttt-chip-add-receiver"
+@VisibleForTesting
+const val REMOVE_CHIP_COMMAND_RECEIVER_TAG = "media-ttt-chip-remove-receiver"
 @VisibleForTesting
 val MOVE_CLOSER_TO_TRANSFER_COMMAND_NAME = MoveCloserToTransfer::class.simpleName!!
 @VisibleForTesting
