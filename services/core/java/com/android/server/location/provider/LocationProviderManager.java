@@ -2846,10 +2846,13 @@ public class LocationProviderManager extends
 
         @Override
         public void sendResult(Bundle data) {
+            final long identity = Binder.clearCallingIdentity();
             try {
                 mWakeLock.release();
             } catch (RuntimeException e) {
                 Log.e(TAG, "wakelock over-released by " + mIdentity, e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }
