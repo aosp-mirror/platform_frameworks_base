@@ -16,6 +16,9 @@
 
 package com.android.server.accessibility.magnification;
 
+import static com.android.server.accessibility.magnification.MockWindowMagnificationConnection.TEST_DISPLAY;
+import static com.android.server.accessibility.magnification.MockWindowMagnificationConnection.TEST_DISPLAY_2;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,13 +41,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
-import android.view.Display;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
@@ -67,8 +70,8 @@ import org.mockito.invocation.InvocationOnMock;
  */
 public class WindowMagnificationManagerTest {
 
-    private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
     private static final int CURRENT_USER_ID = UserHandle.USER_SYSTEM;
+    private static final int SERVICE_ID = 1;
 
     private MockWindowMagnificationConnection mMockConnection;
     @Mock
@@ -185,7 +188,7 @@ public class WindowMagnificationManagerTest {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
 
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2f, 200f, 300f,
-                mAnimationCallback);
+                mAnimationCallback, SERVICE_ID);
 
         verify(mMockConnection.getConnection()).enableWindowMagnification(eq(TEST_DISPLAY), eq(2f),
                 eq(200f), eq(300f), eq(0f), eq(0f),
@@ -377,14 +380,51 @@ public class WindowMagnificationManagerTest {
     }
 
     @Test
-    public void resetMagnification_enabled_windowMagnifierDisabled() {
+    public void requestConnectionToNull_expectedGetterResults() {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
-        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, NaN, NaN);
-        assertTrue(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, 1, 1);
 
-        mWindowMagnificationManager.reset(TEST_DISPLAY);
+        mWindowMagnificationManager.requestConnection(false);
+
+        assertEquals(1f, mWindowMagnificationManager.getScale(TEST_DISPLAY), 0);
+        assertTrue(Float.isNaN(mWindowMagnificationManager.getCenterX(TEST_DISPLAY)));
+        assertTrue(Float.isNaN(mWindowMagnificationManager.getCenterY(TEST_DISPLAY)));
+        final Region bounds = new Region();
+        mWindowMagnificationManager.getMagnificationSourceBounds(TEST_DISPLAY, bounds);
+        assertTrue(bounds.isEmpty());
+    }
+
+    @Test
+    public void resetAllMagnification_enabledBySameId_windowMagnifiersDisabled() {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f,
+                100f, 200f, null, WindowMagnificationManager.WINDOW_POSITION_AT_CENTER, SERVICE_ID);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY_2, 3f,
+                100f, 200f, null, WindowMagnificationManager.WINDOW_POSITION_AT_CENTER, SERVICE_ID);
+        assertTrue(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
+        assertTrue(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY_2));
+
+        mWindowMagnificationManager.resetAllIfNeeded(SERVICE_ID);
 
         assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
+        assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY_2));
+    }
+
+    @Test
+    public void resetAllMagnification_enabledByDifferentId_windowMagnifierDisabled() {
+        final int serviceId2 = SERVICE_ID + 1;
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f,
+                100f, 200f, null, WindowMagnificationManager.WINDOW_POSITION_AT_CENTER, SERVICE_ID);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY_2, 3f,
+                100f, 200f, null, WindowMagnificationManager.WINDOW_POSITION_AT_CENTER, serviceId2);
+        assertTrue(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
+        assertTrue(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY_2));
+
+        mWindowMagnificationManager.resetAllIfNeeded(SERVICE_ID);
+
+        assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
+        assertTrue(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY_2));
     }
 
     @Test
@@ -436,6 +476,22 @@ public class WindowMagnificationManagerTest {
 
         verify(mMockConnection.getConnection()).enableWindowMagnification(eq(TEST_DISPLAY), eq(3f),
                 eq(100f), eq(200f), eq(-1f), eq(-1f), notNull());
+    }
+
+    @Test
+    public void magnifierGetters_disabled_expectedValues() {
+        mWindowMagnificationManager.requestConnection(true);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f,
+                100f, 200f, WindowMagnificationManager.WINDOW_POSITION_AT_CENTER);
+
+        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, false);
+
+        assertEquals(1f, mWindowMagnificationManager.getScale(TEST_DISPLAY), 0);
+        assertTrue(Float.isNaN(mWindowMagnificationManager.getCenterX(TEST_DISPLAY)));
+        assertTrue(Float.isNaN(mWindowMagnificationManager.getCenterY(TEST_DISPLAY)));
+        final Region bounds = new Region();
+        mWindowMagnificationManager.getMagnificationSourceBounds(TEST_DISPLAY, bounds);
+        assertTrue(bounds.isEmpty());
     }
 
     @Test

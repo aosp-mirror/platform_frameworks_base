@@ -293,7 +293,7 @@ public class MagnificationControllerTest {
 
         // Enable window magnification while animating.
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, DEFAULT_SCALE,
-                Float.NaN, Float.NaN, null);
+                Float.NaN, Float.NaN, null, TEST_SERVICE_ID);
         mMockConnection.invokeCallbacks();
 
         assertTrue(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
@@ -310,7 +310,7 @@ public class MagnificationControllerTest {
 
         mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
                 obtainMagnificationConfig(MODE_WINDOW),
-                false);
+                false, TEST_SERVICE_ID);
 
         verify(mScreenMagnificationController).reset(eq(TEST_DISPLAY), eq(false));
         mMockConnection.invokeCallbacks();
@@ -325,13 +325,13 @@ public class MagnificationControllerTest {
         activateMagnifier(MODE_WINDOW, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
         mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
                 obtainMagnificationConfig(MODE_FULLSCREEN),
-                animate);
+                animate, TEST_SERVICE_ID);
         mMockConnection.invokeCallbacks();
 
         assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
         verify(mScreenMagnificationController).setScaleAndCenter(TEST_DISPLAY,
                 DEFAULT_SCALE, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
-                animate, MAGNIFICATION_GESTURE_HANDLER_ID);
+                animate, TEST_SERVICE_ID);
     }
 
     @Test
@@ -345,7 +345,7 @@ public class MagnificationControllerTest {
         // Config-setting mode
         mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
                 obtainMagnificationConfig(MODE_FULLSCREEN),
-                true);
+                true, TEST_SERVICE_ID);
 
         assertEquals(DEFAULT_SCALE, mScreenMagnificationController.getScale(TEST_DISPLAY), 0);
         assertEquals(MAGNIFIED_CENTER_X, mScreenMagnificationController.getCenterX(TEST_DISPLAY),
@@ -365,7 +365,7 @@ public class MagnificationControllerTest {
         // Config-setting mode
         mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
                 obtainMagnificationConfig(MODE_FULLSCREEN),
-                true);
+                true, TEST_SERVICE_ID);
 
         verify(mTransitionCallBack, never()).onResult(TEST_DISPLAY, true);
     }
@@ -772,7 +772,7 @@ public class MagnificationControllerTest {
                     centerY, true, AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
         } else {
             mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, DEFAULT_SCALE,
-                    centerX, centerY, null);
+                    centerX, centerY, null, TEST_SERVICE_ID);
             mMockConnection.invokeCallbacks();
         }
     }
