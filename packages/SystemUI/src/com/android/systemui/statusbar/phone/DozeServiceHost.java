@@ -254,7 +254,6 @@ public final class DozeServiceHost implements DozeHost {
 
             private void setPulsing(boolean pulsing) {
                 mStatusBarKeyguardViewManager.setPulsing(pulsing);
-                mKeyguardViewMediator.setPulsing(pulsing);
                 mNotificationPanel.setPulsing(pulsing);
                 mStatusBarStateController.setPulsing(pulsing);
                 mIgnoreTouchWhilePulsing = false;

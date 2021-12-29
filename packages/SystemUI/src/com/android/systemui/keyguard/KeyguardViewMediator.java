@@ -146,7 +146,7 @@ import dagger.Lazy;
  * so that once the screen comes on, it will be ready immediately.
  *
  * Example queries about the keyguard:
- * - is {movement, key} one that should wake the keygaurd?
+ * - is {movement, key} one that should wake the keyguard?
  * - is the keyguard showing?
  * - are input events restricted due to the state of the keyguard?
  *
@@ -428,11 +428,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
      * tasks when the current user has been unlocked but the profile is still locked.
      */
     private WorkLockActivityController mWorkLockController;
-
-    /**
-     * @see #setPulsing(boolean)
-     */
-    private boolean mPulsing;
 
     private boolean mLockLater;
     private boolean mShowHomeOverLockscreen;
@@ -1263,7 +1258,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     public void onScreenTurnedOn() {
         Trace.beginSection("KeyguardViewMediator#onScreenTurnedOn");
         notifyScreenTurnedOn();
-        mUpdateMonitor.dispatchScreenTurnedOn();
         Trace.endSection();
     }
 
@@ -1283,7 +1277,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             // Skipping the lockscreen because we're not yet provisioned, but we still need to
             // notify the StrongAuthTracker that it's now safe to run trust agents, in case the
             // user sets a credential later.
-            getLockPatternUtils().userPresent(KeyguardUpdateMonitor.getCurrentUser());
+            mLockPatternUtils.userPresent(KeyguardUpdateMonitor.getCurrentUser());
         }
     }
 
@@ -1984,7 +1978,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                     for (int profileId : um.getProfileIdsWithDisabled(currentUser.getIdentifier())) {
                         mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, UserHandle.of(profileId));
                     }
-                    getLockPatternUtils().userPresent(currentUserId);
+                    mLockPatternUtils.userPresent(currentUserId);
                 });
             } else {
                 mBootSendUserPresent = true;
@@ -2584,7 +2578,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                         .onScreenTurningOn(mPendingDrawnTasks.registerTask("fold-to-aod"));
             }
 
-            mKeyguardViewControllerLazy.get().onScreenTurningOn();
             if (callback != null) {
                 if (mWakeAndUnlocking) {
                     mWakeAndUnlockingDrawnCallback =
@@ -2603,7 +2596,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             if (DEBUG) Log.d(TAG, "handleNotifyScreenTurnedOn");
 
             mPendingDrawnTasks.reset();
-            mKeyguardViewControllerLazy.get().onScreenTurnedOn();
         }
         Trace.endSection();
     }
@@ -2762,10 +2754,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         return mViewMediatorCallback;
     }
 
-    public LockPatternUtils getLockPatternUtils() {
-        return mLockPatternUtils;
-    }
-
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("  mSystemReady: "); pw.println(mSystemReady);
@@ -2824,13 +2812,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             mAnimatingScreenOff = false;
             setShowingLocked(mShowing, true);
         }
-    }
-
-    /**
-     * @param pulsing true when device temporarily wakes up to display an incoming notification.
-     */
-    public void setPulsing(boolean pulsing) {
-        mPulsing = pulsing;
     }
 
     /**

@@ -31,6 +31,7 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_RESTING;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_USER_LOCKED;
+import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
 
 import android.animation.Animator;
@@ -78,6 +79,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
+import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -172,6 +174,18 @@ public class KeyguardIndicationController {
                     return view == mIndicationArea;
                 }
             };
+    private ScreenLifecycle mScreenLifecycle;
+    private final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
+        @Override
+        public void onScreenTurnedOn() {
+            if (mMessageToShowOnScreenOn != null) {
+                showBiometricMessage(mMessageToShowOnScreenOn);
+                // We want to keep this message around in case the screen was off
+                hideBiometricMessageDelayed(BaseKeyguardCallback.HIDE_DELAY_MS);
+                mMessageToShowOnScreenOn = null;
+            }
+        }
+    };
 
     /**
      * Creates a new KeyguardIndicationController and registers callbacks.
@@ -190,6 +204,7 @@ public class KeyguardIndicationController {
             @Main DelayableExecutor executor,
             FalsingManager falsingManager,
             LockPatternUtils lockPatternUtils,
+            ScreenLifecycle screenLifecycle,
             IActivityManager iActivityManager,
             KeyguardBypassController keyguardBypassController) {
         mContext = context;
@@ -208,7 +223,8 @@ public class KeyguardIndicationController {
         mIActivityManager = iActivityManager;
         mFalsingManager = falsingManager;
         mKeyguardBypassController = keyguardBypassController;
-
+        mScreenLifecycle = screenLifecycle;
+        mScreenLifecycle.addObserver(mScreenObserver);
     }
 
     /** Call this after construction to finish setting up the instance. */
@@ -991,7 +1007,7 @@ public class KeyguardIndicationController {
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
                         mInitialTextColorState);
-            } else if (mKeyguardUpdateMonitor.isScreenOn()) {
+            } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
                 if (biometricSourceType == BiometricSourceType.FACE
                         && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
                     showTryFingerprintMsg(msgId, helpString);
@@ -1013,7 +1029,7 @@ public class KeyguardIndicationController {
             if (biometricSourceType == BiometricSourceType.FACE
                     && shouldSuppressFaceMsgAndShowTryFingerprintMsg()
                     && !mStatusBarKeyguardViewManager.isBouncerShowing()
-                    && mKeyguardUpdateMonitor.isScreenOn()) {
+                    && mScreenLifecycle.getScreenState() == SCREEN_ON) {
                 showTryFingerprintMsg(msgId, errString);
                 return;
             }
@@ -1035,7 +1051,7 @@ public class KeyguardIndicationController {
                 }
             } else if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(errString, mInitialTextColorState);
-            } else if (mKeyguardUpdateMonitor.isScreenOn()) {
+            } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
                 showBiometricMessage(errString);
             } else {
                 mMessageToShowOnScreenOn = errString;
@@ -1083,16 +1099,6 @@ public class KeyguardIndicationController {
         @Override
         public void onTrustAgentErrorMessage(CharSequence message) {
             showBiometricMessage(message);
-        }
-
-        @Override
-        public void onScreenTurnedOn() {
-            if (mMessageToShowOnScreenOn != null) {
-                showBiometricMessage(mMessageToShowOnScreenOn);
-                // We want to keep this message around in case the screen was off
-                hideBiometricMessageDelayed(HIDE_DELAY_MS);
-                mMessageToShowOnScreenOn = null;
-            }
         }
 
         @Override
