@@ -2111,10 +2111,6 @@ public class StatusBar extends CoreStartable implements
         }
     }
 
-    boolean isSameStatusBarState(int state) {
-        return mStatusBarWindowState == state;
-    }
-
     public GestureRecorder getGestureRecorder() {
         return mGestureRec;
     }

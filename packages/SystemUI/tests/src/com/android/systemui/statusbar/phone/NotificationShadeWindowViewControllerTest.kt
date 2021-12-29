@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
+import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.tuner.TunerService
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -40,7 +41,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.anyFloat
-import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -72,6 +72,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var mStatusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock
+    private lateinit var mStatusBarWindowStateController: StatusBarWindowStateController
+    @Mock
     private lateinit var mLockscreenShadeTransitionController: LockscreenShadeTransitionController
     @Mock
     private lateinit var mLockIconViewController: LockIconViewController
@@ -98,6 +100,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             PanelExpansionStateManager(),
             stackScrollLayoutController,
             mStatusBarKeyguardViewManager,
+            mStatusBarWindowStateController,
             mLockIconViewController
         )
         mController.setupExpandedStatusBar()
@@ -155,7 +158,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Test
     fun handleDispatchTouchEvent_downAndPanelCollapsedAndInSbBoundAndSbWindowShow_sendsTouchToSb() {
         mController.setStatusBarViewController(mPhoneStatusBarViewController)
-        whenever(mStatusBar.isSameStatusBarState(anyInt())).thenReturn(true)
+        whenever(mStatusBarWindowStateController.windowIsShowing()).thenReturn(true)
         whenever(mNotificationPanelViewController.isFullyCollapsed).thenReturn(true)
         whenever(mPhoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
             .thenReturn(true)
@@ -170,7 +173,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Test
     fun handleDispatchTouchEvent_panelNotCollapsed_returnsNull() {
         mController.setStatusBarViewController(mPhoneStatusBarViewController)
-        whenever(mStatusBar.isSameStatusBarState(anyInt())).thenReturn(true)
+        whenever(mStatusBarWindowStateController.windowIsShowing()).thenReturn(true)
         whenever(mPhoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
             .thenReturn(true)
         // Item we're testing
@@ -185,7 +188,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Test
     fun handleDispatchTouchEvent_touchNotInSbBounds_returnsNull() {
         mController.setStatusBarViewController(mPhoneStatusBarViewController)
-        whenever(mStatusBar.isSameStatusBarState(anyInt())).thenReturn(true)
+        whenever(mStatusBarWindowStateController.windowIsShowing()).thenReturn(true)
         whenever(mNotificationPanelViewController.isFullyCollapsed).thenReturn(true)
         // Item we're testing
         whenever(mPhoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
@@ -204,7 +207,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         whenever(mPhoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
             .thenReturn(true)
         // Item we're testing
-        whenever(mStatusBar.isSameStatusBarState(anyInt())).thenReturn(false)
+        whenever(mStatusBarWindowStateController.windowIsShowing()).thenReturn(false)
 
         val returnVal = mInteractionEventHandler.handleDispatchTouchEvent(downEv)
 
@@ -215,7 +218,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Test
     fun handleDispatchTouchEvent_downEventSentToSbThenAnotherEvent_sendsTouchToSb() {
         mController.setStatusBarViewController(mPhoneStatusBarViewController)
-        whenever(mStatusBar.isSameStatusBarState(anyInt())).thenReturn(true)
+        whenever(mStatusBarWindowStateController.windowIsShowing()).thenReturn(true)
         whenever(mNotificationPanelViewController.isFullyCollapsed).thenReturn(true)
         whenever(mPhoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
             .thenReturn(true)

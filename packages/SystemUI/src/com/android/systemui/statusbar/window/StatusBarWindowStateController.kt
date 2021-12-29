@@ -61,6 +61,9 @@ class StatusBarWindowStateController @Inject constructor(
         listeners.add(listener)
     }
 
+    /** Returns true if the window is currently showing. */
+    fun windowIsShowing() = windowState == WINDOW_STATE_SHOWING
+
     private fun setWindowState(
         displayId: Int,
         @StatusBarManager.WindowType window: Int,

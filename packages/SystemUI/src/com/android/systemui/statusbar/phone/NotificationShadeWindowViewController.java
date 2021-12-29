@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
-
 import android.app.StatusBarManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.media.AudioManager;
@@ -46,6 +44,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
@@ -67,6 +66,7 @@ public class NotificationShadeWindowViewController {
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final LockIconViewController mLockIconViewController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final StatusBarWindowStateController mStatusBarWindowStateController;
 
     private GestureDetector mGestureDetector;
     private View mBrightnessMirror;
@@ -100,6 +100,7 @@ public class NotificationShadeWindowViewController {
             PanelExpansionStateManager panelExpansionStateManager,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            StatusBarWindowStateController statusBarWindowStateController,
             LockIconViewController lockIconViewController) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
@@ -112,6 +113,7 @@ public class NotificationShadeWindowViewController {
         mDepthController = depthController;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
 
         // This view is not part of the newly inflated expanded status bar.
@@ -248,7 +250,7 @@ public class NotificationShadeWindowViewController {
                     float x = ev.getRawX();
                     float y = ev.getRawY();
                     if (mStatusBarViewController.touchIsWithinView(x, y)) {
-                        if (mService.isSameStatusBarState(WINDOW_STATE_SHOWING)) {
+                        if (mStatusBarWindowStateController.windowIsShowing()) {
                             mIsTrackingBarGesture = true;
                             return mStatusBarViewController.sendTouchToView(ev);
                         } else { // it's hidden or hiding, don't send to notification shade.
