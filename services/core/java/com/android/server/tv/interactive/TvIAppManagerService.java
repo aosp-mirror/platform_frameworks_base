@@ -29,6 +29,8 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
+import android.media.tv.AdRequest;
+import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvTrackInfo;
@@ -1178,6 +1180,28 @@ public class TvIAppManagerService extends SystemService {
         }
 
         @Override
+        public void notifyAdResponse(IBinder sessionToken, AdResponse response, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
+                    "notifyAdResponse");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).notifyAdResponse(response);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in notifyAdResponse", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void registerCallback(final ITvIAppManagerCallback callback, int userId) {
             int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
@@ -1903,6 +1927,23 @@ public class TvIAppManagerService extends SystemService {
                     mSessionState.mClient.onRequestTrackInfoList(mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onRequestTrackInfoList", e);
+                }
+            }
+        }
+
+        @Override
+        public void onAdRequest(AdRequest request) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onAdRequest (id=" + request.getId() + ")");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onAdRequest(request, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onAdRequest", e);
                 }
             }
         }

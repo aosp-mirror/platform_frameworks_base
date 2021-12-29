@@ -17,6 +17,7 @@
 package android.media.tv.interactive;
 
 import android.graphics.Rect;
+import android.media.tv.AdRequest;
 import android.media.tv.BroadcastInfoRequest;
 import android.net.Uri;
 import android.os.Bundle;
@@ -41,4 +42,5 @@ oneway interface ITvIAppClient {
     void onRequestCurrentChannelLcn(int seq);
     void onRequestStreamVolume(int seq);
     void onRequestTrackInfoList(int seq);
+    void onAdRequest(in AdRequest request, int Seq);
 }

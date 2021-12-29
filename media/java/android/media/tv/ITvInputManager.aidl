@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.media.PlaybackParams;
+import android.media.tv.AdRequest;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.DvbDeviceInfo;
 import android.media.tv.ITvInputClient;
@@ -105,6 +106,9 @@ interface ITvInputManager {
     // For broadcast info
     void requestBroadcastInfo(in IBinder sessionToken, in BroadcastInfoRequest request, int userId);
     void removeBroadcastInfo(in IBinder sessionToken, int id, int userId);
+
+    // For ad request
+    void requestAd(in IBinder sessionToken, in AdRequest request, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();
