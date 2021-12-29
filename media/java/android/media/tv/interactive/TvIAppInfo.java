@@ -17,6 +17,7 @@
 package android.media.tv.interactive;
 
 import android.annotation.NonNull;
+import android.annotation.StringDef;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +36,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +48,21 @@ import java.util.List;
 public final class TvIAppInfo implements Parcelable {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvIAppInfo";
+
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(prefix = { "INTERACTIVE_APP_TYPE_" }, value = {
+            INTERACTIVE_APP_TYPE_HBBTV,
+            INTERACTIVE_APP_TYPE_ATSC,
+            INTERACTIVE_APP_TYPE_GINGA,
+    })
+    @interface InteractiveAppType {}
+
+    /** HbbTV interactive app type */
+    public static final String INTERACTIVE_APP_TYPE_HBBTV = "hbbtv";
+    /** ATSC interactive app type */
+    public static final String INTERACTIVE_APP_TYPE_ATSC = "atsc";
+    /** Ginga interactive app type */
+    public static final String INTERACTIVE_APP_TYPE_GINGA = "ginga";
 
     private final ResolveInfo mService;
     private final String mId;
@@ -104,6 +122,13 @@ public final class TvIAppInfo implements Parcelable {
      */
     public ServiceInfo getServiceInfo() {
         return mService.serviceInfo;
+    }
+
+    /**
+     * Gets supported interactive app types
+     */
+    public List<String> getSupportedTypes() {
+        return new ArrayList<>(mTypes);
     }
 
     /**
@@ -186,7 +211,7 @@ public final class TvIAppInfo implements Parcelable {
                 CharSequence[] types = sa.getTextArray(
                         com.android.internal.R.styleable.TvIAppService_supportedTypes);
                 for (CharSequence cs : types) {
-                    mTypes.add(cs.toString());
+                    mTypes.add(cs.toString().toLowerCase());
                 }
 
                 sa.recycle();
