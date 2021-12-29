@@ -1319,7 +1319,7 @@ package android.location {
     method public void setAccumulatedDeltaRangeMeters(double);
     method public void setAccumulatedDeltaRangeState(int);
     method public void setAccumulatedDeltaRangeUncertaintyMeters(double);
-    method public void setAutomaticGainControlLevelInDb(double);
+    method @Deprecated public void setAutomaticGainControlLevelInDb(double);
     method public void setBasebandCn0DbHz(double);
     method @Deprecated public void setCarrierCycles(long);
     method public void setCarrierFrequencyHz(float);
@@ -1344,10 +1344,6 @@ package android.location {
     method public void setSvid(int);
     method public void setTimeOffsetNanos(double);
     field public static final int ADR_STATE_ALL = 31; // 0x1f
-  }
-
-  public final class GnssMeasurementsEvent implements android.os.Parcelable {
-    ctor public GnssMeasurementsEvent(android.location.GnssClock, android.location.GnssMeasurement[]);
   }
 
   public final class GnssNavigationMessage implements android.os.Parcelable {
