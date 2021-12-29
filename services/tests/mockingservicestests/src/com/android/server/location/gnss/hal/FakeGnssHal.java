@@ -673,7 +673,8 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     protected void setAgpsSetId(int type, String setId) {}
 
     @Override
-    protected void setAgpsReferenceLocationCellId(int type, int mcc, int mnc, int lac, int cid) {}
+    protected void setAgpsReferenceLocationCellId(int type, int mcc, int mnc, int lac, long cid,
+            int tac, int pcid, int arfcn) {}
 
     @Override
     protected boolean isPsdsSupported() {
