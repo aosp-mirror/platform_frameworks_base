@@ -375,6 +375,9 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Init divider first to make divider leash for remote animation target.
         mSplitLayout.init();
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
+        prepareEvictChildTasks(SPLIT_POSITION_TOP_OR_LEFT, evictWct);
+        prepareEvictChildTasks(SPLIT_POSITION_BOTTOM_OR_RIGHT, evictWct);
         // Need to add another wrapper here in shell so that we can inject the divider bar
         // and also manage the process elevation via setRunningRemote
         IRemoteAnimationRunner wrapper = new IRemoteAnimationRunner.Stub() {
@@ -395,6 +398,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         new IRemoteAnimationFinishedCallback.Stub() {
                             @Override
                             public void onAnimationFinished() throws RemoteException {
+                                mSyncQueue.queue(evictWct);
                                 mSyncQueue.runInSync(t -> setDividerVisibility(true, t));
                                 finishedCallback.onAnimationFinished();
                             }
@@ -416,6 +420,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
             @Override
             public void onAnimationCancelled() {
+                mSyncQueue.queue(evictWct);
                 mSyncQueue.runInSync(t -> setDividerVisibility(true, t));
                 try {
                     adapter.getRunner().onAnimationCancelled();
@@ -439,10 +444,14 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setSideStagePosition(sidePosition, wct);
 
         mSplitLayout.setDivideRatio(splitRatio);
-        // Build a request WCT that will launch both apps such that task 0 is on the main stage
-        // while task 1 is on the side stage.
-        mMainStage.activate(getMainStageBounds(), wct, false /* reparent */);
-        mSideStage.setBounds(getSideStageBounds(), wct);
+        if (mMainStage.isActive()) {
+            mMainStage.moveToTop(getMainStageBounds(), wct);
+        } else {
+            // Build a request WCT that will launch both apps such that task 0 is on the main stage
+            // while task 1 is on the side stage.
+            mMainStage.activate(getMainStageBounds(), wct, false /* reparent */);
+        }
+        mSideStage.moveToTop(getSideStageBounds(), wct);
 
         // Make sure the launch options will put tasks in the corresponding split roots
         addActivityOptions(mainOptions, mMainStage);
@@ -899,6 +908,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         if (mDividerVisible) {
             t.show(dividerLeash);
+            t.setAlpha(dividerLeash, 1);
             t.setLayer(dividerLeash, SPLIT_DIVIDER_LAYER);
             t.setPosition(dividerLeash,
                     mSplitLayout.getDividerBounds().left, mSplitLayout.getDividerBounds().top);
