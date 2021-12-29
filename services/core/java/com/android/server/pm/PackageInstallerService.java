@@ -135,7 +135,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     /** Automatically destroy sessions older than this */
     private static final long MAX_AGE_MILLIS = 3 * DateUtils.DAY_IN_MILLIS;
     /** Automatically destroy staged sessions that have not changed state in this time */
-    private static final long MAX_TIME_SINCE_UPDATE_MILLIS = 21 * DateUtils.DAY_IN_MILLIS;
+    private static final long MAX_TIME_SINCE_UPDATE_MILLIS = 7 * DateUtils.DAY_IN_MILLIS;
     /** Upper bound on number of active sessions for a UID that has INSTALL_PACKAGES */
     private static final long MAX_ACTIVE_SESSIONS_WITH_PERMISSION = 1024;
     /** Upper bound on number of active sessions for a UID without INSTALL_PACKAGES */
