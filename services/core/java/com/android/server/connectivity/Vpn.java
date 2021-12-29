@@ -17,6 +17,8 @@
 package com.android.server.connectivity;
 
 import static android.Manifest.permission.BIND_VPN_SERVICE;
+import static android.Manifest.permission.CONTROL_VPN;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
@@ -891,6 +893,7 @@ public class Vpn {
      * - oldPackage null, newPackage non-null: ConfirmDialog calling prepareVpn().
      * - oldPackage null, newPackage=LEGACY_VPN: Used internally to disconnect
      *   and revoke any current app VPN and re-prepare legacy vpn.
+     * - oldPackage null, newPackage null: always returns true for backward compatibility.
      *
      * TODO: Rename the variables - or split this method into two - and end this confusion.
      * TODO: b/29032008 Migrate code from prepare(oldPackage=non-null, newPackage=LEGACY_VPN)
@@ -904,6 +907,18 @@ public class Vpn {
      */
     public synchronized boolean prepare(
             String oldPackage, String newPackage, @VpnManager.VpnType int vpnType) {
+        // Except for Settings and VpnDialogs, the caller should be matched one of oldPackage or
+        // newPackage. Otherwise, non VPN owner might get the VPN always-on status of the VPN owner.
+        // See b/191382886.
+        if (mContext.checkCallingOrSelfPermission(CONTROL_VPN) != PERMISSION_GRANTED) {
+            if (oldPackage != null) {
+                verifyCallingUidAndPackage(oldPackage);
+            }
+            if (newPackage != null) {
+                verifyCallingUidAndPackage(newPackage);
+            }
+        }
+
         if (oldPackage != null) {
             // Stop an existing always-on VPN from being dethroned by other apps.
             if (mAlwaysOn && !isCurrentPreparedPackage(oldPackage)) {
@@ -1803,14 +1818,13 @@ public class Vpn {
     }
 
     private void enforceControlPermission() {
-        mContext.enforceCallingPermission(Manifest.permission.CONTROL_VPN, "Unauthorized Caller");
+        mContext.enforceCallingPermission(CONTROL_VPN, "Unauthorized Caller");
     }
 
     private void enforceControlPermissionOrInternalCaller() {
         // Require the caller to be either an application with CONTROL_VPN permission or a process
         // in the system server.
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONTROL_VPN,
-                "Unauthorized Caller");
+        mContext.enforceCallingOrSelfPermission(CONTROL_VPN, "Unauthorized Caller");
     }
 
     private void enforceSettingsPermission() {
@@ -3115,8 +3129,9 @@ public class Vpn {
     }
 
     private void verifyCallingUidAndPackage(String packageName) {
-        if (getAppUid(packageName, mUserId) != Binder.getCallingUid()) {
-            throw new SecurityException("Mismatched package and UID");
+        final int callingUid = Binder.getCallingUid();
+        if (getAppUid(packageName, mUserId) != callingUid) {
+            throw new SecurityException(packageName + " does not belong to uid " + callingUid);
         }
     }
 
