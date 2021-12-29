@@ -19,6 +19,6 @@ package com.android.systemui.statusbar.window
 import android.app.StatusBarManager
 
 /** Listener interface for changes in the status bar window state. */
-interface StatusBarWindowStateListener {
+fun interface StatusBarWindowStateListener {
     fun onStatusBarWindowStateChanged(@StatusBarManager.WindowVisibleState state: Int)
 }

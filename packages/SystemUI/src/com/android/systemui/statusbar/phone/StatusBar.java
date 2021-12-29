@@ -341,14 +341,6 @@ public class StatusBar extends CoreStartable implements
     void onStatusBarWindowStateChanged(@WindowVisibleState int state) {
         updateBubblesVisibility();
         mStatusBarWindowState = state;
-        mStatusBarWindowHidden = state == WINDOW_STATE_HIDDEN;
-        // TODO(b/212424936): Have this icon manager just implement its own listener.
-        mStatusBarHideIconsForBouncerManager.setStatusBarWindowHidden(mStatusBarWindowHidden);
-        if (mStatusBarView != null) {
-            // Should #updateHideIconsForBouncer always be called, regardless of whether we have a
-            //   status bar view? If so, we can make #updateHideIconsForBouncer private.
-            mStatusBarHideIconsForBouncerManager.updateHideIconsForBouncer(/* animate= */ false);
-        }
     }
 
     void acquireGestureWakeLock(long time) {

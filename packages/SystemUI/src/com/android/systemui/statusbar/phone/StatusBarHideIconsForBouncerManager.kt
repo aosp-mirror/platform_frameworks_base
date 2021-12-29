@@ -1,10 +1,12 @@
 package com.android.systemui.statusbar.phone
 
+import android.app.StatusBarManager
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -25,6 +27,7 @@ import javax.inject.Inject
 class StatusBarHideIconsForBouncerManager @Inject constructor(
     private val commandQueue: CommandQueue,
     @Main private val mainExecutor: DelayableExecutor,
+    statusBarWindowStateController: StatusBarWindowStateController,
     dumpManager: DumpManager
 ) : Dumpable {
     // State variables set by external classes.
@@ -42,6 +45,9 @@ class StatusBarHideIconsForBouncerManager @Inject constructor(
 
     init {
         dumpManager.registerDumpable(this)
+        statusBarWindowStateController.addListener {
+                state -> setStatusBarStateAndTriggerUpdate(state)
+        }
     }
 
     /** Returns true if the status bar icons should be hidden in the bouncer. */
@@ -49,8 +55,9 @@ class StatusBarHideIconsForBouncerManager @Inject constructor(
         return hideIconsForBouncer || wereIconsJustHidden
     }
 
-    fun setStatusBarWindowHidden(statusBarWindowHidden: Boolean) {
-        this.statusBarWindowHidden = statusBarWindowHidden
+    private fun setStatusBarStateAndTriggerUpdate(@StatusBarManager.WindowVisibleState state: Int) {
+        statusBarWindowHidden = state == StatusBarManager.WINDOW_STATE_HIDDEN
+        updateHideIconsForBouncer(animate = false)
     }
 
     fun setDisplayId(displayId: Int) {
@@ -87,7 +94,7 @@ class StatusBarHideIconsForBouncerManager @Inject constructor(
      * Updates whether the status bar icons should be hidden in the bouncer. May trigger
      * [commandQueue.recomputeDisableFlags] if the icon visibility status changes.
      */
-    fun updateHideIconsForBouncer(animate: Boolean) {
+    private fun updateHideIconsForBouncer(animate: Boolean) {
         val hideBecauseApp =
             topAppHidesStatusBar &&
                     isOccluded &&

@@ -265,6 +265,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private BrightnessSliderController.Factory mBrightnessSliderFactory;
     @Mock private WallpaperController mWallpaperController;
     @Mock private OngoingCallController mOngoingCallController;
+    @Mock private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock private LockscreenShadeTransitionController mLockscreenTransitionController;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
@@ -452,7 +453,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mScreenOffAnimationController,
                 mWallpaperController,
                 mOngoingCallController,
-                new StatusBarHideIconsForBouncerManager(mCommandQueue, mMainExecutor, mDumpManager),
+                mStatusBarHideIconsForBouncerManager,
                 mLockscreenTransitionController,
                 mFeatureFlags,
                 mKeyguardUnlockAnimationController,
