@@ -1782,6 +1782,14 @@ public final class DisplayManagerService extends SystemService {
         return mDisplayModeDirector.getModeSwitchingType();
     }
 
+    private boolean getDisplayDecorationSupportInternal(int displayId) {
+        final IBinder displayToken = getDisplayToken(displayId);
+        if (null == displayToken) {
+            return false;
+        }
+        return SurfaceControl.getDisplayDecorationSupport(displayToken);
+    }
+
     private void setBrightnessConfigurationForDisplayInternal(
             @Nullable BrightnessConfiguration c, String uniqueId, @UserIdInt int userId,
             String packageName) {
@@ -3438,6 +3446,16 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return getRefreshRateSwitchingTypeInternal();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public boolean getDisplayDecorationSupport(int displayId) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return getDisplayDecorationSupportInternal(displayId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
