@@ -34,6 +34,7 @@ import android.graphics.Rect;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
@@ -302,6 +303,11 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     void addTask(ActivityManager.RunningTaskInfo task, WindowContainerTransaction wct) {
         wct.reparent(task.token, mRootTaskInfo.token, true /* onTop*/);
+    }
+
+    void moveToTop(Rect rootBounds, WindowContainerTransaction wct) {
+        final WindowContainerToken rootToken = mRootTaskInfo.token;
+        wct.setBounds(rootToken, rootBounds).reorder(rootToken, true /* onTop */);
     }
 
     void setBounds(Rect bounds, WindowContainerTransaction wct) {
