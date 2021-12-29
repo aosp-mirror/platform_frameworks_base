@@ -158,6 +158,7 @@ public class TvIAppManagerService extends SystemService {
             }
             iAppState.mInfo = info;
             iAppState.mUid = getIAppUid(info);
+            iAppState.mComponentName = info.getComponent();
             iAppMap.put(iAppServiceId, iAppState);
             iAppState.mIAppNumber = count;
         }
