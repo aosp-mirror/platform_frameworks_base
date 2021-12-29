@@ -527,7 +527,7 @@ public class CachedBluetoothDeviceTest {
 
         // Set PAN profile to be disconnected and test connection state summary
         updateProfileStatus(mPanProfile, BluetoothProfile.STATE_DISCONNECTED);
-        assertThat(mCachedDevice.getCarConnectionSummary()).isNull();
+        assertThat(mCachedDevice.getCarConnectionSummary()).isEqualTo("Disconnected");
 
         // Test with battery level
         mBatteryLevel = 10;
@@ -537,7 +537,7 @@ public class CachedBluetoothDeviceTest {
 
         // Set PAN profile to be disconnected and test connection state summary
         updateProfileStatus(mPanProfile, BluetoothProfile.STATE_DISCONNECTED);
-        assertThat(mCachedDevice.getCarConnectionSummary()).isNull();
+        assertThat(mCachedDevice.getCarConnectionSummary()).isEqualTo("Disconnected");
 
         // Test with BluetoothDevice.BATTERY_LEVEL_UNKNOWN battery level
         mBatteryLevel = BluetoothDevice.BATTERY_LEVEL_UNKNOWN;
@@ -548,7 +548,7 @@ public class CachedBluetoothDeviceTest {
 
         // Set PAN profile to be disconnected and test connection state summary
         updateProfileStatus(mPanProfile, BluetoothProfile.STATE_DISCONNECTED);
-        assertThat(mCachedDevice.getCarConnectionSummary()).isNull();
+        assertThat(mCachedDevice.getCarConnectionSummary()).isEqualTo("Disconnected");
     }
 
     @Test
@@ -579,7 +579,7 @@ public class CachedBluetoothDeviceTest {
 
         // Disconnect all profiles and test connection state summary
         updateProfileStatus(mPanProfile, BluetoothProfile.STATE_DISCONNECTED);
-        assertThat(mCachedDevice.getCarConnectionSummary()).isNull();
+        assertThat(mCachedDevice.getCarConnectionSummary()).isEqualTo("Disconnected");
     }
 
     @Test
@@ -600,7 +600,7 @@ public class CachedBluetoothDeviceTest {
 
         // Set A2DP profile to be disconnected and test connection state summary
         updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_DISCONNECTED);
-        assertThat(mCachedDevice.getCarConnectionSummary()).isNull();
+        assertThat(mCachedDevice.getCarConnectionSummary()).isEqualTo("Disconnected");
 
         // Test with BluetoothDevice.BATTERY_LEVEL_UNKNOWN battery level
         mBatteryLevel = BluetoothDevice.BATTERY_LEVEL_UNKNOWN;
@@ -611,7 +611,7 @@ public class CachedBluetoothDeviceTest {
 
         // Set A2DP profile to be disconnected and test connection state summary
         updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_DISCONNECTED);
-        assertThat(mCachedDevice.getCarConnectionSummary()).isNull();
+        assertThat(mCachedDevice.getCarConnectionSummary()).isEqualTo("Disconnected");
     }
 
     @Test
@@ -632,7 +632,7 @@ public class CachedBluetoothDeviceTest {
 
         // Set HFP profile to be disconnected and test connection state summary
         updateProfileStatus(mHfpProfile, BluetoothProfile.STATE_DISCONNECTED);
-        assertThat(mCachedDevice.getCarConnectionSummary()).isNull();
+        assertThat(mCachedDevice.getCarConnectionSummary()).isEqualTo("Disconnected");
 
         // Test with BluetoothDevice.BATTERY_LEVEL_UNKNOWN battery level
         mBatteryLevel = BluetoothDevice.BATTERY_LEVEL_UNKNOWN;
@@ -643,7 +643,7 @@ public class CachedBluetoothDeviceTest {
 
         // Set HFP profile to be disconnected and test connection state summary
         updateProfileStatus(mHfpProfile, BluetoothProfile.STATE_DISCONNECTED);
-        assertThat(mCachedDevice.getCarConnectionSummary()).isNull();
+        assertThat(mCachedDevice.getCarConnectionSummary()).isEqualTo("Disconnected");
     }
 
     @Test
@@ -660,7 +660,7 @@ public class CachedBluetoothDeviceTest {
         // Set Hearing Aid profile to be disconnected and test connection state summary
         mCachedDevice.onActiveDeviceChanged(false, BluetoothProfile.HEARING_AID);
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_DISCONNECTED);
-        assertThat(mCachedDevice.getCarConnectionSummary()).isNull();
+        assertThat(mCachedDevice.getCarConnectionSummary()).isEqualTo("Disconnected");
     }
 
     @Test
@@ -707,9 +707,32 @@ public class CachedBluetoothDeviceTest {
         // Set A2DP and HFP profiles to be disconnected and test connection state summary
         updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_DISCONNECTED);
         updateProfileStatus(mHfpProfile, BluetoothProfile.STATE_DISCONNECTED);
-        assertThat(mCachedDevice.getCarConnectionSummary()).isNull();
+        assertThat(mCachedDevice.getCarConnectionSummary()).isEqualTo("Disconnected");
     }
 
+    @Test
+    public void getCarConnectionSummary_shortSummary_returnShortSummary() {
+        // Test without battery level
+        // Set A2DP profile to be connected and test connection state summary
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        assertThat(mCachedDevice.getCarConnectionSummary(true /* shortSummary */))
+                .isEqualTo("Connected");
+
+        // Set device as Active for A2DP and test connection state summary
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
+        assertThat(mCachedDevice.getCarConnectionSummary(true /* shortSummary */))
+                .isEqualTo("Connected");
+
+        // Test with battery level
+        mBatteryLevel = 10;
+        assertThat(mCachedDevice.getCarConnectionSummary(true /* shortSummary */))
+                .isEqualTo("Connected");
+
+        // Set A2DP profile to be disconnected and test connection state summary
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_DISCONNECTED);
+        assertThat(mCachedDevice.getCarConnectionSummary(true /* shortSummary */))
+                .isEqualTo("Disconnected");
+    }
 
     @Test
     public void deviceName_testAliasNameAvailable() {

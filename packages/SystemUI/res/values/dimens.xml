@@ -981,13 +981,17 @@
     <dimen name="qs_aa_media_rec_album_margin_vert">4dp</dimen>
     <dimen name="qq_aa_media_rec_header_text_size">16sp</dimen>
 
-    <!-- Media tap-to-transfer chip -->
+    <!-- Media tap-to-transfer chip for sender device -->
     <dimen name="media_ttt_chip_outer_padding">16dp</dimen>
     <dimen name="media_ttt_text_size">16sp</dimen>
     <dimen name="media_ttt_icon_size">24dp</dimen>
     <dimen name="media_ttt_loading_size">20dp</dimen>
     <dimen name="media_ttt_undo_button_vertical_padding">8dp</dimen>
     <dimen name="media_ttt_undo_button_vertical_negative_margin">-8dp</dimen>
+
+    <!-- Media tap-to-transfer chip for receiver device -->
+    <dimen name="media_ttt_chip_size_receiver">100dp</dimen>
+    <dimen name="media_ttt_icon_size_receiver">95dp</dimen>
 
     <!-- Window magnification -->
     <dimen name="magnification_border_drag_size">35dp</dimen>
@@ -1264,6 +1268,8 @@
 
     <!-- Internet dialog related dimensions -->
     <dimen name="internet_dialog_corner_radius">24dp</dimen>
+    <!-- Width of progress bar -->
+    <dimen name="internet_dialog_progress_bar_width">152dp</dimen>
     <!-- End margin of network layout -->
     <dimen name="internet_dialog_network_layout_margin">16dp</dimen>
     <!-- Size of switch bar in internet dialog -->

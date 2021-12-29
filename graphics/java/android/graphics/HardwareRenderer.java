@@ -902,6 +902,20 @@ public class HardwareRenderer {
          * @param frame The id of the frame being drawn.
          */
         void onFrameDraw(long frame);
+
+        /**
+         * Invoked during a frame drawing.
+         *
+         * @param syncResult The result of the draw. Should be a value or a combination of values
+         *                   from {@link SyncAndDrawResult}
+         * @param frame The id of the frame being drawn.
+         *
+         * @return A {@link FrameCommitCallback} that will report back if the current vsync draws.
+         */
+        default FrameCommitCallback onFrameDraw(@SyncAndDrawResult int syncResult, long frame) {
+            onFrameDraw(frame);
+            return null;
+        }
     }
 
     /**

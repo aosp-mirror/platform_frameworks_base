@@ -138,20 +138,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private boolean mDisableBackgroundLayer = false;
 
     /**
-     * We use this lock in SOME cases when reading or writing SurfaceControl,
-     * but use the following model so that the RenderThread can run locklessly
-     * in the position up-date case.
-     *
-     * 1. UI Thread can read from mSurfaceControl (use in Transactions) without
-     * holding the lock.
-     * 2. UI Thread will hold the lock when writing to mSurfaceControl (calling release
-     * or remove).
-     * 3. Render thread will also hold the lock when writing to mSurfaceControl (e.g.
-     * calling release from positionLost).
-     * 3. RenderNode.PositionUpdateListener::positionChanged will only be called
-     * when the UI thread is paused (blocked on the Render thread).
-     * 4. positionChanged thus will not be required to hold the lock as the
-     * UI thread is blocked, and the other writer is the RT itself.
+     * We use this lock to protect access to mSurfaceControl and 
+     * SurfaceViewPositionUpdateListener#mPositionChangedTransaction. Both are accessed on the UI
+     * thread and the render thread.
      */
     final Object mSurfaceControlLock = new Object();
     final Rect mTmpRect = new Rect();
@@ -951,7 +940,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             Transaction geometryTransaction) {
         if (mPositionListener != null) {
             mRenderNode.removePositionUpdateListener(mPositionListener);
-            geometryTransaction = mPositionListener.getTransaction().merge(geometryTransaction);
+            synchronized (mSurfaceControlLock) {
+                geometryTransaction = mPositionListener.getTransaction().merge(geometryTransaction);
+            }
         }
         mPositionListener = new SurfaceViewPositionUpdateListener(surfaceWidth, surfaceHeight,
                 geometryTransaction);
@@ -1480,43 +1471,45 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 if (mSurfaceControl == null) {
                     return;
                 }
-            }
-            if (mRTLastReportedPosition.left == left
-                    && mRTLastReportedPosition.top == top
-                    && mRTLastReportedPosition.right == right
-                    && mRTLastReportedPosition.bottom == bottom
-                    && mRTLastReportedSurfaceSize.x == mRtSurfaceWidth
-                    && mRTLastReportedSurfaceSize.y == mRtSurfaceHeight
-                    && !mPendingTransaction) {
-                return;
-            }
-            try {
-                if (DEBUG_POSITION) {
-                    Log.d(TAG, String.format(
-                            "%d updateSurfacePosition RenderWorker, frameNr = %d, "
-                                    + "position = [%d, %d, %d, %d] surfaceSize = %dx%d",
-                            System.identityHashCode(SurfaceView.this), frameNumber,
-                            left, top, right, bottom, mRtSurfaceWidth, mRtSurfaceHeight));
+                if (mRTLastReportedPosition.left == left
+                        && mRTLastReportedPosition.top == top
+                        && mRTLastReportedPosition.right == right
+                        && mRTLastReportedPosition.bottom == bottom
+                        && mRTLastReportedSurfaceSize.x == mRtSurfaceWidth
+                        && mRTLastReportedSurfaceSize.y == mRtSurfaceHeight
+                        && !mPendingTransaction) {
+                    return;
                 }
-                mRTLastReportedPosition.set(left, top, right, bottom);
-                mRTLastReportedSurfaceSize.set(mRtSurfaceWidth, mRtSurfaceHeight);
-                onSetSurfacePositionAndScaleRT(mPositionChangedTransaction, mSurfaceControl,
-                        mRTLastReportedPosition.left /*positionLeft*/,
-                        mRTLastReportedPosition.top /*positionTop*/,
-                        mRTLastReportedPosition.width() / (float) mRtSurfaceWidth /*postScaleX*/,
-                        mRTLastReportedPosition.height() / (float) mRtSurfaceHeight /*postScaleY*/);
-                if (mViewVisibility) {
-                    mPositionChangedTransaction.show(mSurfaceControl);
+                try {
+                    if (DEBUG_POSITION) {
+                        Log.d(TAG, String.format(
+                                "%d updateSurfacePosition RenderWorker, frameNr = %d, "
+                                        + "position = [%d, %d, %d, %d] surfaceSize = %dx%d",
+                                System.identityHashCode(SurfaceView.this), frameNumber,
+                                left, top, right, bottom, mRtSurfaceWidth, mRtSurfaceHeight));
+                    }
+                    mRTLastReportedPosition.set(left, top, right, bottom);
+                    mRTLastReportedSurfaceSize.set(mRtSurfaceWidth, mRtSurfaceHeight);
+                    onSetSurfacePositionAndScaleRT(mPositionChangedTransaction, mSurfaceControl,
+                            mRTLastReportedPosition.left /*positionLeft*/,
+                            mRTLastReportedPosition.top /*positionTop*/,
+                            mRTLastReportedPosition.width()
+                                    / (float) mRtSurfaceWidth /*postScaleX*/,
+                            mRTLastReportedPosition.height()
+                                    / (float) mRtSurfaceHeight /*postScaleY*/);
+                    if (mViewVisibility) {
+                        mPositionChangedTransaction.show(mSurfaceControl);
+                    }
+                    final ViewRootImpl viewRoot = getViewRootImpl();
+                    if (viewRoot != null) {
+                        applyChildSurfaceTransaction_renderWorker(mPositionChangedTransaction,
+                                viewRoot.mSurface, frameNumber);
+                    }
+                    applyOrMergeTransaction(mPositionChangedTransaction, frameNumber);
+                    mPendingTransaction = false;
+                } catch (Exception ex) {
+                    Log.e(TAG, "Exception from repositionChild", ex);
                 }
-                final ViewRootImpl viewRoot = getViewRootImpl();
-                if (viewRoot != null) {
-                    applyChildSurfaceTransaction_renderWorker(mPositionChangedTransaction,
-                            viewRoot.mSurface, frameNumber);
-                }
-                applyOrMergeTransaction(mPositionChangedTransaction, frameNumber);
-                mPendingTransaction = false;
-            } catch (Exception ex) {
-                Log.e(TAG, "Exception from repositionChild", ex);
             }
         }
 
@@ -1539,18 +1532,18 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             }
             mRTLastReportedPosition.setEmpty();
             mRTLastReportedSurfaceSize.set(-1, -1);
-            if (mPendingTransaction) {
-                Log.w(TAG, System.identityHashCode(SurfaceView.this)
-                        + "Pending transaction cleared.");
-                mPositionChangedTransaction.clear();
-                mPendingTransaction = false;
-            }
 
             /**
              * positionLost can be called while UI thread is un-paused so we
              * need to hold the lock here.
              */
             synchronized (mSurfaceControlLock) {
+                if (mPendingTransaction) {
+                    Log.w(TAG, System.identityHashCode(SurfaceView.this)
+                            + "Pending transaction cleared.");
+                    mPositionChangedTransaction.clear();
+                    mPendingTransaction = false;
+                }
                 if (mSurfaceControl == null) {
                     return;
                 }

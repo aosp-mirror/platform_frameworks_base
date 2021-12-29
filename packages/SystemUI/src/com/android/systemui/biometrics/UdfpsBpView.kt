@@ -13,33 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.biometrics
 
-package com.android.systemui.biometrics;
-
-import android.content.Context;
-import android.util.AttributeSet;
-
-import androidx.annotation.Nullable;
+import android.content.Context
+import android.util.AttributeSet
 
 /**
  * Class that coordinates non-HBM animations during BiometricPrompt.
  *
  * Currently doesn't draw anything.
  *
- * Note that {@link AuthBiometricUdfpsView} also shows UDFPS animations. At some point we should
+ * Note that [AuthBiometricUdfpsView] also shows UDFPS animations. At some point we should
  * de-dupe this if necessary.
  */
-public class UdfpsBpView extends UdfpsAnimationView {
-    private UdfpsFpDrawable mFingerprintDrawable;
+class UdfpsBpView(context: Context, attrs: AttributeSet?) : UdfpsAnimationView(context, attrs) {
 
-    public UdfpsBpView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        // Drawable isn't ever added to the view, so we don't currently show anything
-        mFingerprintDrawable = new UdfpsFpDrawable(mContext);
-    }
+    // Drawable isn't ever added to the view, so we don't currently show anything
+    private val fingerprintDrawable: UdfpsFpDrawable = UdfpsFpDrawable(context)
 
-    @Override
-    UdfpsDrawable getDrawable() {
-        return mFingerprintDrawable;
-    }
+    override fun getDrawable(): UdfpsDrawable = fingerprintDrawable
 }
