@@ -354,6 +354,7 @@ class PackageManagerComponentLabelIconOverrideTest {
                 PackageManager.PERMISSION_GRANTED
             }
         }
+        val mockSharedLibrariesImpl: SharedLibrariesImpl = mock()
         val mockInjector: PackageManagerServiceInjector = mock {
             whenever(this.lock) { PackageManagerTracedLock() }
             whenever(this.componentResolver) { mockComponentResolver }
@@ -366,6 +367,7 @@ class PackageManagerComponentLabelIconOverrideTest {
             whenever(this.appsFilter) { mockAppsFilter }
             whenever(this.context) { mockContext }
             whenever(this.getHandler()) { testHandler }
+            whenever(this.sharedLibrariesImpl) { mockSharedLibrariesImpl }
         }
         val testParams = PackageManagerServiceTestParams().apply {
             this.pendingPackageBroadcasts = mockPendingBroadcasts
