@@ -17,18 +17,28 @@
 package android.service.games;
 
 import android.annotation.Hide;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.RemoteException;
+import android.util.Slog;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.function.pooled.PooledLambda;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * An active game session, providing a facility for the implementation to interact with the game.
@@ -42,6 +52,8 @@ import com.android.internal.util.function.pooled.PooledLambda;
 @SystemApi
 public abstract class GameSession {
 
+    private static final String TAG = "GameSession";
+
     final IGameSession mInterface = new IGameSession.Stub() {
         @Override
         public void destroy() {
@@ -50,15 +62,24 @@ public abstract class GameSession {
         }
     };
 
+    private IGameSessionController mGameSessionController;
+    private int mTaskId;
     private GameSessionRootView mGameSessionRootView;
     private SurfaceControlViewHost mSurfaceControlViewHost;
 
-    @Hide
-    void attach(
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public void attach(
+            IGameSessionController gameSessionController,
+            int taskId,
             @NonNull Context context,
             @NonNull SurfaceControlViewHost surfaceControlViewHost,
             int widthPx,
             int heightPx) {
+        mGameSessionController = gameSessionController;
+        mTaskId = taskId;
         mSurfaceControlViewHost = surfaceControlViewHost;
         mGameSessionRootView = new GameSessionRootView(context, mSurfaceControlViewHost);
         surfaceControlViewHost.setView(mGameSessionRootView, widthPx, heightPx);
@@ -131,6 +152,108 @@ public abstract class GameSession {
             // not changed.
             Rect bounds = newConfig.windowConfiguration.getBounds();
             mSurfaceControlViewHost.relayout(bounds.width(), bounds.height());
+        }
+    }
+
+    /**
+     * Interface for returning screenshot outcome from calls to {@link #takeScreenshot}.
+     */
+    public interface ScreenshotCallback {
+
+        /**
+         * The status of a failed screenshot attempt provided by {@link #onFailure}.
+         *
+         * @hide
+         */
+        @IntDef(flag = false, prefix = {"ERROR_TAKE_SCREENSHOT_"}, value = {
+                ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR, // 0
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        @interface ScreenshotFailureStatus {
+        }
+
+        /**
+         * An error code indicating that an internal error occurred when attempting to take a
+         * screenshot of the game task. If this code is returned, the caller should verify that the
+         * conditions for taking a screenshot are met (device screen is on and the game task is
+         * visible). To do so, the caller can monitor the lifecycle methods for this session to
+         * make sure that the game task is focused. If the conditions are met, then the caller may
+         * try again immediately.
+         */
+        int ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR = 0;
+
+        /**
+         * Called when taking the screenshot failed.
+         * @param statusCode Indicates the reason for failure.
+         */
+        void onFailure(@ScreenshotFailureStatus int statusCode);
+
+        /**
+         * Called when taking the screenshot succeeded.
+         * @param bitmap The screenshot.
+         */
+        void onSuccess(@NonNull Bitmap bitmap);
+    }
+
+    /**
+     * Takes a screenshot of the associated game. For this call to succeed, the device screen
+     * must be turned on and the game task must be visible.
+     *
+     * If the callback is called with {@link ScreenshotCallback#onSuccess}, the provided {@link
+     * Bitmap} may be used.
+     *
+     * If the callback is called with {@link ScreenshotCallback#onFailure}, the provided status
+     * code should be checked.
+     *
+     * If the status code is {@link ScreenshotCallback#ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR},
+     * then the caller should verify that the conditions for calling this method are met (device
+     * screen is on and the game task is visible). To do so, the caller can monitor the lifecycle
+     * methods for this session to make sure that the game task is focused. If the conditions are
+     * met, then the caller may try again immediately.
+     *
+     * @param executor Executor on which to run the callback.
+     * @param callback The callback invoked when taking screenshot has succeeded
+     *                 or failed.
+     * @throws IllegalStateException if this method is called prior to {@link #onCreate}.
+     */
+    public void takeScreenshot(@NonNull Executor executor, @NonNull ScreenshotCallback callback) {
+        if (mGameSessionController == null) {
+            throw new IllegalStateException("Can not call before onCreate()");
+        }
+
+        AndroidFuture<GameScreenshotResult> takeScreenshotResult =
+                new AndroidFuture<GameScreenshotResult>().whenCompleteAsync((result, error) -> {
+                    handleScreenshotResult(callback, result, error);
+                }, executor);
+
+        try {
+            mGameSessionController.takeScreenshot(mTaskId, takeScreenshotResult);
+        } catch (RemoteException ex) {
+            takeScreenshotResult.completeExceptionally(ex);
+        }
+    }
+
+    private void handleScreenshotResult(
+            @NonNull ScreenshotCallback callback,
+            @NonNull GameScreenshotResult result,
+            @NonNull Throwable error) {
+        if (error != null) {
+            Slog.w(TAG, error.getMessage(), error.getCause());
+            callback.onFailure(
+                    ScreenshotCallback.ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR);
+            return;
+        }
+
+        @GameScreenshotResult.GameScreenshotStatus int status = result.getStatus();
+        switch (status) {
+            case GameScreenshotResult.GAME_SCREENSHOT_SUCCESS:
+                callback.onSuccess(result.getBitmap());
+                break;
+            case GameScreenshotResult.GAME_SCREENSHOT_ERROR_INTERNAL_ERROR:
+                Slog.w(TAG, "Error taking screenshot");
+                callback.onFailure(
+                        ScreenshotCallback.ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR);
+                break;
         }
     }
 }
