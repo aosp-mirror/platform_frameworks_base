@@ -40,7 +40,7 @@ import java.util.function.Supplier;
 @DependsOn(target = Icon.class)
 @DependsOn(target = State.class)
 public interface QSTile {
-    int VERSION = 1;
+    int VERSION = 2;
 
     DetailAdapter getDetailAdapter();
     String getTileSpec();
@@ -79,6 +79,12 @@ public interface QSTile {
     void longClick(@Nullable View view);
 
     void userSwitch(int currentUser);
+
+    /**
+     * @deprecated not needed as {@link com.android.internal.logging.UiEvent} will use
+     * {@link #getMetricsSpec}
+     */
+    @Deprecated
     int getMetricsCategory();
 
     void setListening(Object client, boolean listening);
@@ -117,7 +123,6 @@ public interface QSTile {
         void onShowDetail(boolean show);
         void onToggleStateChanged(boolean state);
         void onScanStateChanged(boolean state);
-        void onAnnouncementRequested(CharSequence announcement);
     }
 
     @ProvidesInterface(version = Icon.VERSION)

@@ -129,11 +129,6 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
         return mContext.getString(R.string.accessibility_quick_settings_rotation);
     }
 
-    @Override
-    protected String composeChangeAnnouncement() {
-        return getAccessibilityString(mState.value);
-    }
-
     private final RotationLockControllerCallback mCallback = new RotationLockControllerCallback() {
         @Override
         public void onRotationLockStateChanged(boolean rotationLocked, boolean affordanceVisible) {

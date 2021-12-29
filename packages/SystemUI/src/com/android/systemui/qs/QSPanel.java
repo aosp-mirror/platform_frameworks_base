@@ -558,14 +558,6 @@ public class QSPanel extends LinearLayout implements Tunable {
                     fireScanStateChanged(tileRecord.scanState);
                 }
             }
-
-            @Override
-            public void onAnnouncementRequested(CharSequence announcement) {
-                if (announcement != null) {
-                    mHandler.obtainMessage(H.ANNOUNCE_FOR_ACCESSIBILITY, announcement)
-                            .sendToTarget();
-                }
-            }
         };
 
         tileRecord.tile.addCallback(callback);
