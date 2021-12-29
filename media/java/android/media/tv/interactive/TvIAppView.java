@@ -27,6 +27,7 @@ import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
 import android.media.tv.interactive.TvIAppManager.Session;
+import android.media.tv.interactive.TvIAppManager.Session.FinishedInputEventCallback;
 import android.media.tv.interactive.TvIAppManager.SessionCallback;
 import android.net.Uri;
 import android.os.Bundle;
@@ -34,11 +35,14 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
+import android.view.InputEvent;
+import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 
 import java.util.List;
 
@@ -80,6 +84,7 @@ public class TvIAppView extends ViewGroup {
     private final AttributeSet mAttrs;
     private final int mDefStyleAttr;
     private final XmlResourceParser mParser;
+    private OnUnhandledInputEventListener mOnUnhandledInputEventListener;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -266,6 +271,77 @@ public class TvIAppView extends ViewGroup {
             return;
         }
         mSession.dispatchSurfaceChanged(format, width, height);
+    }
+
+    private final FinishedInputEventCallback mFinishedInputEventCallback =
+            new FinishedInputEventCallback() {
+                @Override
+                public void onFinishedInputEvent(Object token, boolean handled) {
+                    if (DEBUG) {
+                        Log.d(TAG, "onFinishedInputEvent(token=" + token + ", handled="
+                                + handled + ")");
+                    }
+                    if (handled) {
+                        return;
+                    }
+                    // TODO: Re-order unhandled events.
+                    InputEvent event = (InputEvent) token;
+                    if (dispatchUnhandledInputEvent(event)) {
+                        return;
+                    }
+                    ViewRootImpl viewRootImpl = getViewRootImpl();
+                    if (viewRootImpl != null) {
+                        viewRootImpl.dispatchUnhandledInputEvent(event);
+                    }
+                }
+            };
+
+    /**
+     * Dispatches an unhandled input event to the next receiver.
+     */
+    public boolean dispatchUnhandledInputEvent(@NonNull InputEvent event) {
+        if (mOnUnhandledInputEventListener != null) {
+            if (mOnUnhandledInputEventListener.onUnhandledInputEvent(event)) {
+                return true;
+            }
+        }
+        return onUnhandledInputEvent(event);
+    }
+
+    /**
+     * Called when an unhandled input event also has not been handled by the user provided
+     * callback. This is the last chance to handle the unhandled input event in the TvIAppView.
+     *
+     * @param event The input event.
+     * @return If you handled the event, return {@code true}. If you want to allow the event to be
+     *         handled by the next receiver, return {@code false}.
+     */
+    public boolean onUnhandledInputEvent(@NonNull InputEvent event) {
+        return false;
+    }
+
+    /**
+     * Registers a callback to be invoked when an input event is not handled
+     * by the TV Interactive App.
+     *
+     * @param listener The callback to be invoked when the unhandled input event is received.
+     */
+    public void setOnUnhandledInputEventListener(@NonNull OnUnhandledInputEventListener listener) {
+        mOnUnhandledInputEventListener = listener;
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(@NonNull KeyEvent event) {
+        if (super.dispatchKeyEvent(event)) {
+            return true;
+        }
+        if (mSession == null) {
+            return false;
+        }
+        InputEvent copiedEvent = event.copy();
+        int ret = mSession.dispatchInputEvent(copiedEvent, copiedEvent, mFinishedInputEventCallback,
+                mHandler);
+        return ret != Session.DISPATCH_NOT_HANDLED;
     }
 
     /**
@@ -510,6 +586,24 @@ public class TvIAppView extends ViewGroup {
          */
         public void onRequestTrackInfoList(@NonNull String iAppServiceId) {
         }
+
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the unhandled input event is received.
+     */
+    public interface OnUnhandledInputEventListener {
+        /**
+         * Called when an input event was not handled by the TV Interactive App.
+         *
+         * <p>This is called asynchronously from where the event is dispatched. It gives the host
+         * application a chance to handle the unhandled input events.
+         *
+         * @param event The input event.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         */
+        boolean onUnhandledInputEvent(@NonNull InputEvent event);
     }
 
     private class MySessionCallback extends SessionCallback {
