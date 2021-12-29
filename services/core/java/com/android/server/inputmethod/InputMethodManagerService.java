@@ -5706,7 +5706,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final PrintWriter pw = shellCommand.getOutPrintWriter();
         switch (cmd) {
             case "start":
-                ImeTracing.getInstance().getInstance().startTrace(pw);
+                ImeTracing.getInstance().startTrace(pw);
                 break;  // proceed to the next step to update the IME client processes.
             case "stop":
                 ImeTracing.getInstance().stopTrace(pw);
