@@ -493,6 +493,9 @@ public final class ViewRootImpl implements ViewParent,
     protected final ViewFrameInfo mViewFrameInfo = new ViewFrameInfo();
     private final InputEventAssigner mInputEventAssigner = new InputEventAssigner();
 
+    // Whether to draw this surface as DISPLAY_DECORATION.
+    boolean mDisplayDecorationCached = false;
+
     /**
      * Update the Choreographer's FrameInfo object with the timing information for the current
      * ViewRootImpl instance. Erase the data in the current ViewFrameInfo to prepare for the next
@@ -2853,6 +2856,9 @@ public final class ViewRootImpl implements ViewParent,
                 if (mSurfaceControl.isValid()) {
                     updateOpacity(mWindowAttributes, dragResizing,
                             surfaceControlChanged /*forceUpdate */);
+                    if (surfaceControlChanged) {
+                        updateDisplayDecoration();
+                    }
                 }
 
                 if (DEBUG_LAYOUT) Log.v(mTag, "relayout: frame=" + frame.toShortString()
@@ -10437,6 +10443,23 @@ public final class ViewRootImpl implements ViewParent,
             }
             return false;
         }
+    }
+
+    /**
+     * @hide
+     */
+    public void setDisplayDecoration(boolean displayDecoration) {
+        if (displayDecoration == mDisplayDecorationCached) return;
+
+        mDisplayDecorationCached = displayDecoration;
+
+        if (mSurfaceControl.isValid()) {
+            updateDisplayDecoration();
+        }
+    }
+
+    private void updateDisplayDecoration() {
+        mTransaction.setDisplayDecoration(mSurfaceControl, mDisplayDecorationCached).apply();
     }
 
     /**
