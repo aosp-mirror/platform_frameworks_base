@@ -920,7 +920,7 @@ public final class CachedAppOptimizer {
     void unfreezeTemporarily(ProcessRecord app) {
         if (mUseFreezer) {
             synchronized (mProcLock) {
-                if (app.mOptRecord.isFrozen()) {
+                if (app.mOptRecord.isFrozen() || app.mOptRecord.isPendingFreeze()) {
                     unfreezeAppLSP(app);
                     freezeAppAsyncLSP(app);
                 }
