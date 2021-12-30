@@ -239,6 +239,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         enterSplitScreen(taskId, leftOrTop, new WindowContainerTransaction());
     }
 
+    public void prepareEnterSplitScreen(WindowContainerTransaction wct,
+            ActivityManager.RunningTaskInfo taskInfo, int startPosition) {
+        mStageCoordinator.prepareEnterSplitScreen(wct, taskInfo, startPosition);
+    }
+
+    public void finishEnterSplitScreen(SurfaceControl.Transaction t) {
+        mStageCoordinator.finishEnterSplitScreen(t);
+    }
+
     public void enterSplitScreen(int taskId, boolean leftOrTop, WindowContainerTransaction wct) {
         final int stageType = isSplitScreenVisible() ? STAGE_TYPE_UNDEFINED : STAGE_TYPE_SIDE;
         final int stagePosition =

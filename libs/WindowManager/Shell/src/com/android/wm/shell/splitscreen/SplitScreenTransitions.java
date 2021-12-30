@@ -28,7 +28,8 @@ import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON
 import static com.android.wm.shell.splitscreen.SplitScreenController.exitReasonToString;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS_SNAP;
-import static com.android.wm.shell.transition.Transitions.isOpeningType;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -148,7 +149,7 @@ class SplitScreenTransitions {
                 t.setWindowCrop(leash, change.getEndAbsBounds().width(),
                         change.getEndAbsBounds().height());
             }
-            boolean isOpening = isOpeningType(info.getType());
+            boolean isOpening = isOpeningTransition(info);
             if (isOpening && (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT)) {
                 // fade in
                 startExampleAnimation(leash, true /* show */);
@@ -303,6 +304,12 @@ class SplitScreenTransitions {
         });
         mAnimations.add(va);
         mTransitions.getAnimExecutor().execute(va::start);
+    }
+
+    private boolean isOpeningTransition(TransitionInfo info) {
+        return Transitions.isOpeningType(info.getType())
+                || info.getType() == TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE
+                || info.getType() == TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
     }
 
     /** Bundled information of dismiss transition. */
