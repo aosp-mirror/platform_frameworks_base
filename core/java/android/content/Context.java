@@ -3615,9 +3615,8 @@ public abstract class Context {
      *          {@link #BIND_ADJUST_WITH_ACTIVITY}.
      * @return {@code true} if the system is in the process of bringing up a
      *         service that your client has permission to bind to; {@code false}
-     *         if the system couldn't find the service. If this value is {@code true}, you
-     *         should later call {@link #unbindService} to release the
-     *         connection.
+     *         if the system couldn't find the service. You should call {@link #unbindService}
+     *         to release the connection even if this method returned {@code false}.
      *
      * @throws SecurityException if the client does not have the required permission to bind.
      */
