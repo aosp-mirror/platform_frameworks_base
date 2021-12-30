@@ -65,6 +65,7 @@ import android.content.res.XmlResourceParser;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -230,6 +231,8 @@ public class ParsingPackageUtils {
      * of required system property within the overlay tag.
      */
     public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
+    public static final int PARSE_FRAMEWORK_RES_SPLITS = 1 << 8;
+
     public static final int PARSE_CHATTY = 1 << 31;
 
     @IntDef(flag = true, prefix = { "PARSE_" }, value = {
@@ -241,6 +244,7 @@ public class ParsingPackageUtils {
             PARSE_IS_SYSTEM_DIR,
             PARSE_MUST_BE_APK,
             PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY,
+            PARSE_FRAMEWORK_RES_SPLITS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ParseFlags {}
@@ -289,7 +293,7 @@ public class ParsingPackageUtils {
                 return new ParsingPackageImpl(packageName, baseApkPath, path, manifestArray);
             }
         });
-        result = parser.parsePackage(input, file, parseFlags);
+        result = parser.parsePackage(input, file, parseFlags, /* frameworkSplits= */ null);
         if (result.isError()) {
             return input.error(result);
         }
@@ -343,26 +347,44 @@ public class ParsingPackageUtils {
      * not check whether {@code packageFile} has changed since the last parse, it's up to callers to
      * do so.
      */
-    public ParseResult<ParsingPackage> parsePackage(ParseInput input, File packageFile, int flags) {
-        if (packageFile.isDirectory()) {
-            return parseClusterPackage(input, packageFile, flags);
+    public ParseResult<ParsingPackage> parsePackage(ParseInput input, File packageFile, int flags,
+            List<File> frameworkSplits) {
+        if (((flags & PARSE_FRAMEWORK_RES_SPLITS) != 0)
+                && frameworkSplits.size() > 0
+                && packageFile.getAbsolutePath().endsWith("/framework-res.apk")) {
+            return parseClusterPackage(input, packageFile, frameworkSplits, flags);
+        } else if (packageFile.isDirectory()) {
+            return parseClusterPackage(input, packageFile, /* frameworkSplits= */null, flags);
         } else {
             return parseMonolithicPackage(input, packageFile, flags);
         }
     }
 
     /**
-     * Parse all APKs contained in the given directory, treating them as a single package. This also
-     * performs validity checking, such as requiring identical package name and version codes, a
-     * single base APK, and unique split names.
+     * Parse all APKs contained in the given directory, treating them as a
+     * single package. This also performs validity checking, such as requiring
+     * identical package name and version codes, a single base APK, and unique
+     * split names.
+     * <p>
+     * Can also be passed the framework-res.apk file and a list of split apks coming from apexes
+     * (via {@code frameworkSplits}) in which case they will be parsed similar to cluster packages
+     * even if they are in different folders. Note that this code path may have other behaviour
+     * differences.
      * <p>
      * Note that this <em>does not</em> perform signature verification; that must be done separately
      * in {@link #getSigningDetails(ParseInput, ParsingPackageRead, boolean)}.
      */
     private ParseResult<ParsingPackage> parseClusterPackage(ParseInput input, File packageDir,
-            int flags) {
+            List<File> frameworkSplits, int flags) {
+        // parseClusterPackageLite should receive no flags (0) for regular splits but we want to
+        // pass the flags for framework splits
+        int liteParseFlags = 0;
+        if ((flags & PARSE_FRAMEWORK_RES_SPLITS) != 0) {
+            liteParseFlags = flags;
+        }
         final ParseResult<PackageLite> liteResult =
-                ApkLiteParseUtils.parseClusterPackageLite(input, packageDir, 0);
+                ApkLiteParseUtils.parseClusterPackageLite(input, packageDir, frameworkSplits,
+                        liteParseFlags);
         if (liteResult.isError()) {
             return input.error(liteResult);
         }
@@ -2989,9 +3011,12 @@ public class ParsingPackageUtils {
             }
 
             signingDetails = result.getResult();
-
+            final File frameworkRes = new File(Environment.getRootDirectory(),
+                    "framework/framework-res.apk");
+            boolean isFrameworkResSplit = frameworkRes.getAbsolutePath()
+                    .equals(pkg.getBaseApkPath());
             String[] splitCodePaths = pkg.getSplitCodePaths();
-            if (!ArrayUtils.isEmpty(splitCodePaths)) {
+            if (!ArrayUtils.isEmpty(splitCodePaths) && !isFrameworkResSplit) {
                 for (int i = 0; i < splitCodePaths.length; i++) {
                     result = getSigningDetails(
                             input,

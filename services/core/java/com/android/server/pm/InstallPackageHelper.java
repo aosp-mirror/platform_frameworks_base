@@ -3401,8 +3401,9 @@ final class InstallPackageHelper {
     }
 
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    public void installPackagesFromDir(File scanDir, int parseFlags, int scanFlags,
-            long currentTime, PackageParser2 packageParser, ExecutorService executorService) {
+    public void installPackagesFromDir(File scanDir, List<File> frameworkSplits, int parseFlags,
+            int scanFlags, long currentTime, PackageParser2 packageParser,
+            ExecutorService executorService) {
         final File[] files = scanDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             Log.d(TAG, "No files in app dir " + scanDir);
@@ -3414,7 +3415,7 @@ final class InstallPackageHelper {
                     + " flags=0x" + Integer.toHexString(parseFlags));
         }
         ParallelPackageParser parallelPackageParser =
-                new ParallelPackageParser(packageParser, executorService);
+                new ParallelPackageParser(packageParser, executorService, frameworkSplits);
 
         // Submit files for parsing in parallel
         int fileCount = 0;
