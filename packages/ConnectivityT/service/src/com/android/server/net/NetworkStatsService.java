@@ -809,7 +809,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private @NetworkStatsAccess.Level int checkAccessLevel(String callingPackage) {
         return NetworkStatsAccess.checkAccessLevel(
-                mContext, Binder.getCallingUid(), callingPackage);
+                mContext, Binder.getCallingPid(), Binder.getCallingUid(), callingPackage);
     }
 
     /**
