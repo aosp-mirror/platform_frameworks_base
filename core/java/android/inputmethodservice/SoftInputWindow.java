@@ -137,7 +137,6 @@ final class SoftInputWindow extends Dialog {
     SoftInputWindow(Context context, int theme, KeyEvent.DispatcherState dispatcherState) {
         super(context, theme);
         mDispatcherState = dispatcherState;
-        initDockWindow();
     }
 
     @Override
@@ -160,27 +159,6 @@ final class SoftInputWindow extends Dialog {
             temp.recycle();
             return handled;
         }
-    }
-
-    private void initDockWindow() {
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-
-        lp.setTitle("InputMethod");
-        lp.type = WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        lp.gravity = Gravity.BOTTOM;
-
-        getWindow().setAttributes(lp);
-
-        final int windowModFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_DIM_BEHIND;
-
-        final int windowSetFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-
-        getWindow().setFlags(windowSetFlags, windowModFlags);
     }
 
     @Override
