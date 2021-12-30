@@ -19,8 +19,6 @@ package com.android.server.pm.permission;
 import static android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.app.AppOpsManager.MODE_ALLOWED;
-import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKED;
@@ -63,7 +61,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -244,9 +241,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     /** Permission controller: User space permission management */
     private PermissionControllerManager mPermissionControllerManager;
 
-    /** App ops manager */
-    private final AppOpsManager mAppOpsManager;
-
     /**
      * Built-in permissions. Read from system configuration files. Mapping is from
      * UID to permission name.
@@ -374,7 +368,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         mContext = context;
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
         mUserManagerInt = LocalServices.getService(UserManagerInternal.class);
-        mAppOpsManager = context.getSystemService(AppOpsManager.class);
 
         mPrivilegedPermissionAllowlistSourcePackageNames.add(PLATFORM_PACKAGE_NAME);
         // PackageManager.hasSystemFeature() is not used here because PackageManagerService
@@ -4905,15 +4898,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             addAllowlistedRestrictedPermissionsInternal(pkg,
                     params.getAllowlistedRestrictedPermissions(),
                     FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
-            final int autoRevokePermissionsMode = params.getAutoRevokePermissionsMode();
-            if (autoRevokePermissionsMode == AppOpsManager.MODE_ALLOWED
-                    || autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED) {
-                // TODO: theianchen Bug: 182523293
-                // We should move this portion of code that's calling
-                // setAutoRevokeExemptedInternal() into the old PMS
-                setAutoRevokeExemptedInternal(pkg,
-                        autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED, userId);
-            }
             grantRequestedRuntimePermissionsInternal(pkg, params.getGrantedPermissions(), userId);
         }
     }
@@ -5180,25 +5164,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final int[] userIds = userId == UserHandle.USER_ALL ? getAllUserIds()
                 : new int[] { userId };
         onPackageUninstalledInternal(packageName, appId, pkg, sharedUserPkgs, userIds);
-    }
-
-    private boolean setAutoRevokeExemptedInternal(@NonNull AndroidPackage pkg, boolean exempted,
-            @UserIdInt int userId) {
-        final int packageUid = UserHandle.getUid(userId, pkg.getUid());
-        if (mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_AUTO_REVOKE_MANAGED_BY_INSTALLER,
-                packageUid, pkg.getPackageName()) != MODE_ALLOWED) {
-            // Allowlist user set - don't override
-            return false;
-        }
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            mAppOpsManager.setMode(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, packageUid,
-                    pkg.getPackageName(), exempted ? MODE_IGNORED : MODE_ALLOWED);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        return true;
     }
 
     /**
