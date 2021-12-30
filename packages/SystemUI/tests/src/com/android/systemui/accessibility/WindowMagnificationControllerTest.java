@@ -88,6 +88,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @LargeTest
 @TestableLooper.RunWithLooper
@@ -345,15 +346,17 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @Test
     public void onOrientationChanged_disabled_updateDisplayRotation() {
-        final Display display = Mockito.spy(mContext.getDisplay());
-        when(display.getRotation()).thenReturn(Surface.ROTATION_90);
-        when(mContext.getDisplay()).thenReturn(display);
+        final Rect windowBounds = new Rect(mWindowManager.getCurrentWindowMetrics().getBounds());
+        // Rotate the window clockwise 90 degree.
+        windowBounds.set(windowBounds.top, windowBounds.left, windowBounds.bottom,
+                windowBounds.right);
+        mWindowManager.setWindowBounds(windowBounds);
+        final int newRotation = simulateRotateTheDevice();
 
-        mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_ORIENTATION);
-        });
+        mInstrumentation.runOnMainSync(() -> mWindowMagnificationController.onConfigurationChanged(
+                ActivityInfo.CONFIG_ORIENTATION));
 
-        assertEquals(Surface.ROTATION_90, mWindowMagnificationController.mRotation);
+        assertEquals(newRotation, mWindowMagnificationController.mRotation);
     }
 
     @Test
@@ -601,6 +604,113 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         });
 
         ReferenceTestUtils.waitForCondition(() -> hasMagnificationOverlapFlag());
+    }
+
+    @Test
+    public void setMinimumWindowSize_enabled_expectedWindowSize() {
+        final int minimumWindowSize = mResources.getDimensionPixelSize(
+                com.android.internal.R.dimen.accessibility_window_magnifier_min_size);
+        final int  expectedWindowHeight = minimumWindowSize;
+        final int  expectedWindowWidth = minimumWindowSize;
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                        Float.NaN, Float.NaN));
+
+        final AtomicInteger actualWindowHeight = new AtomicInteger();
+        final AtomicInteger actualWindowWidth = new AtomicInteger();
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.setWindowSize(expectedWindowWidth, expectedWindowHeight);
+            actualWindowHeight.set(mWindowManager.getLayoutParamsFromAttachedView().height);
+            actualWindowWidth.set(mWindowManager.getLayoutParamsFromAttachedView().width);
+
+        });
+
+        assertEquals(expectedWindowHeight, actualWindowHeight.get());
+        assertEquals(expectedWindowWidth, actualWindowWidth.get());
+    }
+
+    @Test
+    public void setMinimumWindowSizeThenEnable_expectedWindowSize() {
+        final int minimumWindowSize = mResources.getDimensionPixelSize(
+                com.android.internal.R.dimen.accessibility_window_magnifier_min_size);
+        final int  expectedWindowHeight = minimumWindowSize;
+        final int  expectedWindowWidth = minimumWindowSize;
+
+        final AtomicInteger actualWindowHeight = new AtomicInteger();
+        final AtomicInteger actualWindowWidth = new AtomicInteger();
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.setWindowSize(expectedWindowWidth, expectedWindowHeight);
+            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                    Float.NaN, Float.NaN);
+            actualWindowHeight.set(mWindowManager.getLayoutParamsFromAttachedView().height);
+            actualWindowWidth.set(mWindowManager.getLayoutParamsFromAttachedView().width);
+        });
+
+        assertEquals(expectedWindowHeight, actualWindowHeight.get());
+        assertEquals(expectedWindowWidth, actualWindowWidth.get());
+    }
+
+    @Test
+    public void setWindowSizeLessThanMin_enabled_minimumWindowSize() {
+        final int minimumWindowSize = mResources.getDimensionPixelSize(
+                com.android.internal.R.dimen.accessibility_window_magnifier_min_size);
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                        Float.NaN, Float.NaN));
+
+        final AtomicInteger actualWindowHeight = new AtomicInteger();
+        final AtomicInteger actualWindowWidth = new AtomicInteger();
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.setWindowSize(minimumWindowSize - 10,
+                    minimumWindowSize - 10);
+            actualWindowHeight.set(mWindowManager.getLayoutParamsFromAttachedView().height);
+            actualWindowWidth.set(mWindowManager.getLayoutParamsFromAttachedView().width);
+        });
+
+        assertEquals(minimumWindowSize, actualWindowHeight.get());
+        assertEquals(minimumWindowSize, actualWindowWidth.get());
+    }
+
+    @Test
+    public void setWindowSizeLargerThanScreenSize_enabled_windowSizeIsScreenSize() {
+        final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                        Float.NaN, Float.NaN));
+
+        final AtomicInteger actualWindowHeight = new AtomicInteger();
+        final AtomicInteger actualWindowWidth = new AtomicInteger();
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.setWindowSize(bounds.width() + 10, bounds.height() + 10);
+            actualWindowHeight.set(mWindowManager.getLayoutParamsFromAttachedView().height);
+            actualWindowWidth.set(mWindowManager.getLayoutParamsFromAttachedView().width);
+        });
+
+        assertEquals(bounds.height(), actualWindowHeight.get());
+        assertEquals(bounds.width(), actualWindowWidth.get());
+    }
+
+    @Test
+    public void setWindowCenterOutOfScreen_enabled_magnificationCenterIsInsideTheScreen() {
+
+        final int minimumWindowSize = mResources.getDimensionPixelSize(
+                com.android.internal.R.dimen.accessibility_window_magnifier_min_size);
+        final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                        Float.NaN, Float.NaN));
+
+        final AtomicInteger magnificationCenterX = new AtomicInteger();
+        final AtomicInteger magnificationCenterY = new AtomicInteger();
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.setWindowSizeAndCenter(minimumWindowSize,
+                    minimumWindowSize, bounds.right, bounds.bottom);
+            magnificationCenterX.set((int) mWindowMagnificationController.getCenterX());
+            magnificationCenterY.set((int) mWindowMagnificationController.getCenterY());
+        });
+
+        assertTrue(magnificationCenterX.get() < bounds.right);
+        assertTrue(magnificationCenterY.get() < bounds.bottom);
     }
 
     private CharSequence getAccessibilityWindowTitle() {

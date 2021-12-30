@@ -606,6 +606,9 @@
     <!-- The padding ratio of the Accessibility icon foreground drawable -->
     <item name="accessibility_icon_foreground_padding_ratio" type="dimen">21.88%</item>
 
+    <!-- The minimum window size of the accessibility window magnifier -->
+    <dimen name="accessibility_window_magnifier_min_size">122dp</dimen>
+
     <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">8dp</dimen>
 
