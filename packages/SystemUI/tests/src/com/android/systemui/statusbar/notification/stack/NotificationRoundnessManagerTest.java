@@ -32,7 +32,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -44,7 +43,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.HashSet;
@@ -59,8 +57,6 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     private Runnable mRoundnessCallback = mock(Runnable.class);
     private ExpandableNotificationRow mFirst;
     private ExpandableNotificationRow mSecond;
-    @Mock
-    private FeatureFlags mFeatureFlags;
     private float mSmallRadiusRatio;
 
     @Before
@@ -70,8 +66,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
         mSmallRadiusRatio = resources.getDimension(R.dimen.notification_corner_radius_small)
                 / resources.getDimension(R.dimen.notification_corner_radius);
         mRoundnessManager = new NotificationRoundnessManager(
-                new NotificationSectionsFeatureManager(new DeviceConfigProxy(), mContext),
-                mFeatureFlags);
+                new NotificationSectionsFeatureManager(new DeviceConfigProxy(), mContext));
         allowTestableLooperAsMainThread();
         NotificationTestHelper testHelper = new NotificationTestHelper(
                 mContext,
