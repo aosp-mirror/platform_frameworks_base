@@ -22,6 +22,7 @@ import android.app.Notification;
 import android.app.WallpaperColors;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
@@ -45,6 +46,8 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.graphics.drawable.IconCompat;
+import androidx.mediarouter.media.MediaRouter;
+import androidx.mediarouter.media.MediaRouterParams;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtilsInternal;
@@ -171,6 +174,12 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mLocalMediaManager.startScan();
     }
 
+    boolean shouldShowLaunchSection() {
+        MediaRouterParams routerParams = MediaRouter.getInstance(mContext).getRouterParams();
+        Log.d(TAG, "try to get routerParams: " + routerParams);
+        return routerParams != null && !routerParams.isMediaTransferReceiverEnabled();
+    }
+
     void stop() {
         if (mMediaController != null) {
             mMediaController.unregisterCallback(mCb);
@@ -218,6 +227,32 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
             Log.d(TAG, "icon not found");
             return null;
         }
+    }
+
+    String getAppSourceName() {
+        if (mPackageName.isEmpty()) {
+            return null;
+        }
+        final PackageManager packageManager = mContext.getPackageManager();
+        ApplicationInfo applicationInfo;
+        try {
+            applicationInfo = packageManager.getApplicationInfo(mPackageName,
+                    PackageManager.ApplicationInfoFlags.of(0));
+        } catch (PackageManager.NameNotFoundException e) {
+            applicationInfo = null;
+        }
+        final String applicationName =
+                (String) (applicationInfo != null ? packageManager.getApplicationLabel(
+                        applicationInfo)
+                        : mContext.getString(R.string.media_output_dialog_unknown_launch_app_name));
+        return applicationName;
+    }
+
+    Intent getAppLaunchIntent() {
+        if (mPackageName.isEmpty()) {
+            return null;
+        }
+        return mContext.getPackageManager().getLaunchIntentForPackage(mPackageName);
     }
 
     CharSequence getHeaderTitle() {
