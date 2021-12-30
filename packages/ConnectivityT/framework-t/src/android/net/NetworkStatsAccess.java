@@ -160,6 +160,8 @@ public final class NetworkStatsAccess {
      */
     public static boolean isAccessibleToUser(int uid, int callerUid,
             @NetworkStatsAccess.Level int accessLevel) {
+        final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+        final int callerUserId = UserHandle.getUserHandleForUid(callerUid).getIdentifier();
         switch (accessLevel) {
             case NetworkStatsAccess.Level.DEVICE:
                 // Device-level access - can access usage for any uid.
@@ -170,13 +172,13 @@ public final class NetworkStatsAccess {
                 // anonymized uids
                 return uid == android.os.Process.SYSTEM_UID || uid == UID_REMOVED
                         || uid == UID_TETHERING || uid == UID_ALL
-                        || UserHandle.getUserId(uid) == UserHandle.getUserId(callerUid);
+                        || userId == callerUserId;
             case NetworkStatsAccess.Level.USER:
                 // User-level access - can access usage for any app running in the same user, along
                 // with some special uids (system, removed, or tethering).
                 return uid == android.os.Process.SYSTEM_UID || uid == UID_REMOVED
                         || uid == UID_TETHERING
-                        || UserHandle.getUserId(uid) == UserHandle.getUserId(callerUid);
+                        || userId == callerUserId;
             case NetworkStatsAccess.Level.DEFAULT:
             default:
                 // Default access level - can only access one's own usage.
