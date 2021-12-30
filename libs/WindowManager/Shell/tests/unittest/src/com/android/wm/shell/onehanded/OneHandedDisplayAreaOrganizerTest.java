@@ -432,4 +432,11 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
 
         assertThat(testSpiedDisplayAreaOrganizer.isReady()).isFalse();
     }
+
+    @Test
+    public void testDisplayArea_setDisplayLayout_should_updateDisplayBounds() {
+        mSpiedDisplayAreaOrganizer.setDisplayLayout(mDisplayLayout);
+
+        verify(mSpiedDisplayAreaOrganizer).updateDisplayBounds();
+    }
 }
