@@ -28,7 +28,6 @@ import static android.net.NetworkStatsHistory.ParcelUtils.readLongArray;
 import static android.net.NetworkStatsHistory.ParcelUtils.writeLongArray;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
-import static com.android.internal.util.ArrayUtils.total;
 import static com.android.net.module.util.NetworkStatsUtils.multiplySafeByRational;
 
 import android.compat.annotation.UnsupportedAppUsage;
@@ -37,10 +36,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.NetworkStatsHistoryBucketProto;
 import android.service.NetworkStatsHistoryProto;
-import android.util.MathUtils;
+import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.IndentingPrintWriter;
+import com.android.net.module.util.CollectionUtils;
+import com.android.net.module.util.NetworkStatsUtils;
 
 import libcore.util.EmptyArray;
 
@@ -174,7 +174,7 @@ public class NetworkStatsHistory implements Parcelable {
                 txPackets = new long[bucketStart.length];
                 operations = new long[bucketStart.length];
                 bucketCount = bucketStart.length;
-                totalBytes = total(rxBytes) + total(txBytes);
+                totalBytes = CollectionUtils.total(rxBytes) + CollectionUtils.total(txBytes);
                 break;
             }
             case VERSION_ADD_PACKETS:
@@ -189,7 +189,7 @@ public class NetworkStatsHistory implements Parcelable {
                 txPackets = readVarLongArray(in);
                 operations = readVarLongArray(in);
                 bucketCount = bucketStart.length;
-                totalBytes = total(rxBytes) + total(txBytes);
+                totalBytes = CollectionUtils.total(rxBytes) + CollectionUtils.total(txBytes);
                 break;
             }
             default: {
@@ -267,7 +267,7 @@ public class NetworkStatsHistory implements Parcelable {
         } else {
             index -= 1;
         }
-        return MathUtils.constrain(index, 0, bucketCount - 1);
+        return NetworkStatsUtils.constrain(index, 0, bucketCount - 1);
     }
 
     /**
@@ -281,7 +281,7 @@ public class NetworkStatsHistory implements Parcelable {
         } else {
             index += 1;
         }
-        return MathUtils.constrain(index, 0, bucketCount - 1);
+        return NetworkStatsUtils.constrain(index, 0, bucketCount - 1);
     }
 
     /**
@@ -349,6 +349,9 @@ public class NetworkStatsHistory implements Parcelable {
 
         // create any buckets needed by this range
         ensureBuckets(start, end);
+        // Return fast if there is still no entry. This would typically happen when the start,
+        // end or duration are not valid values, e.g. start > end, negative duration value, etc.
+        if (bucketCount == 0) return;
 
         // distribute data usage into buckets
         long duration = end - start;
@@ -559,6 +562,9 @@ public class NetworkStatsHistory implements Parcelable {
         entry.txBytes = txBytes != null ? 0 : UNKNOWN;
         entry.txPackets = txPackets != null ? 0 : UNKNOWN;
         entry.operations = operations != null ? 0 : UNKNOWN;
+
+        // Return fast if there is no entry.
+        if (bucketCount == 0) return entry;
 
         final int startIndex = getIndexAfter(end);
         for (int i = startIndex; i >= 0; i--) {
