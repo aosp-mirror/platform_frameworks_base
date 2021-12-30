@@ -379,6 +379,7 @@ public class NotificationMediaManager implements Dumpable {
         }
     }
 
+    @Nullable
     public String getMediaNotificationKey() {
         return mMediaNotificationKey;
     }
