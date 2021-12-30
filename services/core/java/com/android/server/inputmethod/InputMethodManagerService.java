@@ -149,6 +149,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
+import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.ImeTracing;
@@ -1869,8 +1870,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return true;
     }
 
-    @Override
-    public List<InputMethodInfo> getInputMethodList(@UserIdInt int userId) {
+    private List<InputMethodInfo> getInputMethodListInternal(@UserIdInt int userId,
+            @DirectBootAwareness int directBootAwareness) {
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
@@ -1883,11 +1884,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                return getInputMethodListLocked(resolvedUserIds[0]);
+                return getInputMethodListLocked(resolvedUserIds[0], directBootAwareness);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+    }
+
+    @Override
+    public List<InputMethodInfo> getInputMethodList(@UserIdInt int userId) {
+        return getInputMethodListInternal(userId, DirectBootAwareness.AUTO);
+    }
+
+    @Override
+    public List<InputMethodInfo> getAwareLockedInputMethodList(@UserIdInt int userId,
+            @DirectBootAwareness int directBootAwareness) {
+        return getInputMethodListInternal(userId, directBootAwareness);
     }
 
     @Override
@@ -1912,9 +1924,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("mMethodMap")
-    private List<InputMethodInfo> getInputMethodListLocked(@UserIdInt int userId) {
+    private List<InputMethodInfo> getInputMethodListLocked(@UserIdInt int userId,
+            @DirectBootAwareness int directBootAwareness) {
         final ArrayList<InputMethodInfo> methodList;
-        if (userId == mSettings.getCurrentUserId()) {
+        if (userId == mSettings.getCurrentUserId()
+                && directBootAwareness == DirectBootAwareness.AUTO) {
             // Create a copy.
             methodList = new ArrayList<>(mMethodList);
         } else {
@@ -1924,7 +1938,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     new ArrayMap<>();
             AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
             queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
-                    methodList);
+                    methodList, directBootAwareness);
         }
         return methodList;
     }
@@ -4389,17 +4403,31 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     static void queryInputMethodServicesInternal(Context context,
             @UserIdInt int userId, ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
-            ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList) {
+            ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
+            @DirectBootAwareness int directBootAwareness) {
         methodList.clear();
         methodMap.clear();
 
-        // Note: We do not specify PackageManager.MATCH_ENCRYPTION_* flags here because the default
-        // behavior of PackageManager is exactly what we want.  It by default picks up appropriate
-        // services depending on the unlock state for the specified user.
+        final int directBootAwarenessFlags;
+        switch (directBootAwareness) {
+            case DirectBootAwareness.ANY:
+                directBootAwarenessFlags = PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+                break;
+            case DirectBootAwareness.AUTO:
+                directBootAwarenessFlags = PackageManager.MATCH_DIRECT_BOOT_AUTO;
+                break;
+            default:
+                directBootAwarenessFlags = PackageManager.MATCH_DIRECT_BOOT_AUTO;
+                Slog.e(TAG, "Unknown directBootAwareness=" + directBootAwareness
+                        + ". Falling back to DirectBootAwareness.AUTO");
+                break;
+        }
+        final int flags = PackageManager.GET_META_DATA
+                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                | directBootAwarenessFlags;
         final List<ResolveInfo> services = context.getPackageManager().queryIntentServicesAsUser(
-                new Intent(InputMethod.SERVICE_INTERFACE),
-                PackageManager.GET_META_DATA | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS,
-                userId);
+                new Intent(InputMethod.SERVICE_INTERFACE), flags, userId);
 
         methodList.ensureCapacity(services.size());
         methodMap.ensureCapacity(services.size());
@@ -4448,7 +4476,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mMyPackageMonitor.clearKnownImePackageNamesLocked();
 
         queryInputMethodServicesInternal(mContext, mSettings.getCurrentUserId(),
-                mAdditionalSubtypeMap, mMethodMap, mMethodList);
+                mAdditionalSubtypeMap, mMethodMap, mMethodList, DirectBootAwareness.AUTO);
 
         // Construct the set of possible IME packages for onPackageChanged() to avoid false
         // negatives when the package state remains to be the same but only the component state is
@@ -4752,7 +4780,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
         synchronized (mMethodMap) {
-            return getInputMethodListLocked(userId);
+            return getInputMethodListLocked(userId, DirectBootAwareness.AUTO);
         }
     }
 
@@ -4777,7 +4805,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 new ArrayMap<>();
         AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
         queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                methodMap, methodList);
+                methodMap, methodList, DirectBootAwareness.AUTO);
         return methodMap;
     }
 
@@ -5406,7 +5434,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
             for (int userId : userIds) {
                 final List<InputMethodInfo> methods = all
-                        ? getInputMethodListLocked(userId)
+                        ? getInputMethodListLocked(userId, DirectBootAwareness.AUTO)
                         : getEnabledInputMethodListLocked(userId);
                 if (userIds.length > 1) {
                     pr.print("User #");
@@ -5641,7 +5669,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             new ArrayMap<>();
                     AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
                     queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                            methodMap, methodList);
+                            methodMap, methodList, DirectBootAwareness.AUTO);
                     final InputMethodSettings settings = new InputMethodSettings(
                             mContext.getResources(), mContext.getContentResolver(), methodMap,
                             userId, false);
@@ -5678,7 +5706,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final PrintWriter pw = shellCommand.getOutPrintWriter();
         switch (cmd) {
             case "start":
-                ImeTracing.getInstance().getInstance().startTrace(pw);
+                ImeTracing.getInstance().startTrace(pw);
                 break;  // proceed to the next step to update the IME client processes.
             case "stop":
                 ImeTracing.getInstance().stopTrace(pw);

@@ -23,8 +23,10 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.IndentingPrintWriter;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
@@ -515,6 +517,36 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     public boolean isChangingPosition() {
         return mChangingPosition;
+    }
+
+    /**
+     * Called before adding this view to a group, which would always throw an exception if this view
+     * has a parent, so clean up the transient container and throw an exception if the parent isn't
+     * a transient container.  Provide as much detail in the event of a crash as possible.
+     */
+    public void removeFromTransientContainerForAdditionTo(ViewGroup newParent) {
+        final ViewParent parent = getParent();
+        if (parent == null) {
+            // If this view has no parent, the add will succeed, so do nothing.
+            return;
+        }
+        ViewGroup transientContainer = getTransientContainer();
+        if (transientContainer == null) {
+            throw new IllegalStateException(
+                    "Can't add view " + this + " to container " + newParent + "; current parent "
+                            + parent + " is not a transient container");
+        }
+        if (transientContainer != parent) {
+            throw new IllegalStateException(
+                    "Expandable view " + this + " has transient container " + transientContainer
+                            + " which is not the same as its parent " + parent);
+        }
+        if (parent != newParent) {
+            Log.w(TAG, "Moving view " + this + " from transient container "
+                    + transientContainer + " to parent " + newParent);
+        }
+        transientContainer.removeTransientView(this);
+        setTransientContainer(null);
     }
 
     public void setTransientContainer(ViewGroup transientContainer) {

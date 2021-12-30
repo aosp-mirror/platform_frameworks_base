@@ -1467,7 +1467,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Override
     boolean onDescendantOrientationChanged(WindowContainer requestingContainer) {
         final Configuration config = updateOrientation(
-                getRequestedOverrideConfiguration(), requestingContainer, false /* forceUpdate */);
+                requestingContainer, false /* forceUpdate */);
         // If display rotation class tells us that it doesn't consider app requested orientation,
         // this display won't rotate just because of an app changes its requested orientation. Thus
         // it indicates that this display chooses not to handle this request.
@@ -1516,14 +1516,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * DisplayContent)} to tell the window manager it can unfreeze the screen. This will typically
      * be done by calling {@link #sendNewConfiguration}.
      *
-     * @param currentConfig The current requested override configuration (it is usually set from
-     *                      the last {@link #sendNewConfiguration}) of the display. It is used to
-     *                      check if the configuration container has the latest state.
      * @param freezeDisplayWindow Freeze the app window if the orientation is changed.
      * @param forceUpdate See {@link DisplayRotation#updateRotationUnchecked(boolean)}
      */
-    Configuration updateOrientation(Configuration currentConfig,
-            WindowContainer freezeDisplayWindow, boolean forceUpdate) {
+    Configuration updateOrientation(WindowContainer<?> freezeDisplayWindow, boolean forceUpdate) {
         if (!mDisplayReady) {
             return null;
         }
@@ -1540,15 +1536,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             config = new Configuration();
             computeScreenConfiguration(config);
-        } else if (currentConfig != null
+        } else if (!(mTransitionController.isCollecting(this)
                 // If waiting for a remote rotation, don't prematurely update configuration.
-                && !(mDisplayRotation.isWaitingForRemoteRotation()
-                        || mTransitionController.isCollecting(this))) {
+                || mDisplayRotation.isWaitingForRemoteRotation())) {
             // No obvious action we need to take, but if our current state mismatches the
             // activity manager's, update it, disregarding font scale, which should remain set
             // to the value of the previous configuration.
             // Here we're calling Configuration#unset() instead of setToDefaults() because we
             // need to keep override configs clear of non-empty values (e.g. fontSize).
+            final Configuration currentConfig = getRequestedOverrideConfiguration();
             mTmpConfiguration.unset();
             mTmpConfiguration.updateFrom(currentConfig);
             computeScreenConfiguration(mTmpConfiguration);
@@ -1598,6 +1594,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     @Rotation
     int rotationForActivityInDifferentOrientation(@NonNull ActivityRecord r) {
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            return ROTATION_UNDEFINED;
+        }
         if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM) {
             return ROTATION_UNDEFINED;
         }

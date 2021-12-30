@@ -193,6 +193,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
 
+    public static final int INVALID_SERVICE_ID = -1;
+
     // Each service has an ID. Also provide one for magnification gesture handling
     public static final int MAGNIFICATION_GESTURE_HANDLER_ID = 0;
 

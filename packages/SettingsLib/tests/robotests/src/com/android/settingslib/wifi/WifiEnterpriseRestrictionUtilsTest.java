@@ -77,4 +77,30 @@ public class WifiEnterpriseRestrictionUtilsTest {
 
         assertThat(WifiEnterpriseRestrictionUtils.isWifiTetheringAllowed(mContext)).isTrue();
     }
+
+    @Test
+    public void isWifiDirectAllowed_setSDKForS_shouldReturnTrue() {
+        ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", Build.VERSION_CODES.S);
+        when(mBundle.getBoolean(UserManager.DISALLOW_WIFI_DIRECT)).thenReturn(true);
+
+        assertThat(WifiEnterpriseRestrictionUtils.isWifiDirectAllowed(mContext)).isTrue();
+    }
+
+    @Test
+    public void isWifiDirectAllowed_setSDKForTAndDisallowForRestriction_shouldReturnFalse() {
+        ReflectionHelpers.setStaticField(
+            Build.VERSION.class, "SDK_INT", Build.VERSION_CODES.TIRAMISU);
+        when(mBundle.getBoolean(UserManager.DISALLOW_WIFI_DIRECT)).thenReturn(true);
+
+        assertThat(WifiEnterpriseRestrictionUtils.isWifiDirectAllowed(mContext)).isFalse();
+    }
+
+    @Test
+    public void isWifiDirectAllowed_setSDKForTAndAllowForRestriction_shouldReturnTrue() {
+        ReflectionHelpers.setStaticField(
+            Build.VERSION.class, "SDK_INT", Build.VERSION_CODES.TIRAMISU);
+        when(mBundle.getBoolean(UserManager.DISALLOW_WIFI_DIRECT)).thenReturn(false);
+
+        assertThat(WifiEnterpriseRestrictionUtils.isWifiDirectAllowed(mContext)).isTrue();
+    }
 }

@@ -19,6 +19,8 @@ package com.android.server.accessibility.magnification;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
 import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
+import static com.android.server.accessibility.AccessibilityManagerService.INVALID_SERVICE_ID;
+
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
@@ -117,8 +119,7 @@ public class FullScreenMagnificationController implements
 
         private final int mDisplayId;
 
-        private static final int INVALID_ID = -1;
-        private int mIdOfLastServiceToMagnify = INVALID_ID;
+        private int mIdOfLastServiceToMagnify = INVALID_SERVICE_ID;
         private boolean mMagnificationActivated = false;
 
         DisplayMagnification(int displayId) {
@@ -425,7 +426,7 @@ public class FullScreenMagnificationController implements
                 }
 
                 final float scale = getScale();
-                offsetMagnifiedRegion(scrollX * scale, scrollY * scale, INVALID_ID);
+                offsetMagnifiedRegion(scrollX * scale, scrollY * scale, INVALID_SERVICE_ID);
             }
         }
 
@@ -472,7 +473,7 @@ public class FullScreenMagnificationController implements
                 spec.clear();
                 onMagnificationChangedLocked();
             }
-            mIdOfLastServiceToMagnify = INVALID_ID;
+            mIdOfLastServiceToMagnify = INVALID_SERVICE_ID;
             mForceShowMagnifiableBounds = false;
             sendSpecToAnimation(spec, animationCallback);
             return changed;
@@ -519,7 +520,7 @@ public class FullScreenMagnificationController implements
             }
             final boolean changed = updateMagnificationSpecLocked(scale, centerX, centerY);
             sendSpecToAnimation(mCurrentMagnificationSpec, animationCallback);
-            if (isMagnifying() && (id != INVALID_ID)) {
+            if (isMagnifying() && (id != INVALID_SERVICE_ID)) {
                 mIdOfLastServiceToMagnify = id;
                 mMagnificationInfoChangedCallback.onRequestMagnificationSpec(mDisplayId,
                         mIdOfLastServiceToMagnify);
@@ -583,7 +584,7 @@ public class FullScreenMagnificationController implements
             if (updateCurrentSpecWithOffsetsLocked(nonNormOffsetX, nonNormOffsetY)) {
                 onMagnificationChangedLocked();
             }
-            if (id != INVALID_ID) {
+            if (id != INVALID_SERVICE_ID) {
                 mIdOfLastServiceToMagnify = id;
             }
             sendSpecToAnimation(mCurrentMagnificationSpec, null);

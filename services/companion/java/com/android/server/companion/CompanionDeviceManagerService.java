@@ -90,6 +90,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.PowerWhitelistManager;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -183,6 +184,8 @@ public class CompanionDeviceManagerService extends SystemService {
             mUnbindDeviceListenersRunnable = new UnbindDeviceListenersRunnable();
     private ArrayMap<String, TriggerDeviceDisappearedRunnable> mTriggerDeviceDisappearedRunnables =
             new ArrayMap<>();
+    private final RemoteCallbackList<IOnAssociationsChangedListener> mListeners =
+            new RemoteCallbackList<>();
 
     final Object mLock = new Object();
     final Handler mMainHandler = Handler.getMain();
@@ -441,13 +444,17 @@ public class CompanionDeviceManagerService extends SystemService {
             enforceCallerCanManageCompanionDevice(getContext(),
                     "addOnAssociationsChangedListener");
 
-            //TODO: Implement.
+            mListeners.register(listener, userId);
         }
 
         @Override
         public void removeOnAssociationsChangedListener(IOnAssociationsChangedListener listener,
                 int userId) {
-            //TODO: Implement.
+            enforceCallerCanInteractWithUserId(getContext(), userId);
+            enforceCallerCanManageCompanionDevice(
+                    getContext(), "removeOnAssociationsChangedListener");
+
+            mListeners.unregister(listener);
         }
 
         @Override
@@ -941,6 +948,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private void updateAssociations(Function<Set<AssociationInfo>, Set<AssociationInfo>> update,
             int userId) {
+        final List<AssociationInfo> associationList;
         synchronized (mLock) {
             if (DEBUG) Slog.d(LOG_TAG, "Updating Associations set...");
 
@@ -950,6 +958,8 @@ public class CompanionDeviceManagerService extends SystemService {
             final Set<AssociationInfo> updatedAssociations = update.apply(
                     new ArraySet<>(prevAssociations));
             if (DEBUG) Slog.d(LOG_TAG, "  > After: " + updatedAssociations);
+
+            associationList = new ArrayList<>(updatedAssociations);
 
             mCachedAssociations.put(userId, unmodifiableSet(updatedAssociations));
 
@@ -962,6 +972,15 @@ public class CompanionDeviceManagerService extends SystemService {
 
             updateAtm(userId, updatedAssociations);
         }
+
+        mListeners.broadcast((listener, callbackUserId) -> {
+            if ((int) callbackUserId == userId) {
+                try {
+                    listener.onAssociationsChanged(associationList);
+                } catch (RemoteException ignored) {
+                }
+            }
+        });
     }
 
     private void updateAtm(int userId, Set<AssociationInfo> associations) {

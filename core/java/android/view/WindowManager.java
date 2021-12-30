@@ -105,6 +105,7 @@ import android.graphics.Region;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IInputConstants;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -120,6 +121,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -3325,21 +3327,13 @@ public interface WindowManager extends ViewManager {
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS = 3;
 
         /**
-         * When this window has focus, disable touch pad pointer gesture processing.
-         * The window will receive raw position updates from the touch pad instead
-         * of pointer movements and synthetic touch events.
-         *
-         * @hide
-         */
-        public static final int INPUT_FEATURE_DISABLE_POINTER_GESTURES = 0x00000001;
-
-        /**
          * Does not construct an input channel for this window.  The channel will therefore
          * be incapable of receiving input.
          *
          * @hide
          */
-        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL = 0x00000002;
+        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL =
+                IInputConstants.InputFeature.NO_INPUT_CHANNEL;
 
         /**
          * When this window has focus, does not call user activity for all input events so
@@ -3352,7 +3346,8 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 0x00000004;
+        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY =
+                IInputConstants.InputFeature.DISABLE_USER_ACTIVITY;
 
         /**
          * An input spy window. This window will receive all pointer events within its touchable
@@ -3361,7 +3356,25 @@ public interface WindowManager extends ViewManager {
          * event's coordinates.
          * @hide
          */
-        public static final int INPUT_FEATURE_SPY = 0x00000020;
+        public static final int INPUT_FEATURE_SPY =
+                IInputConstants.InputFeature.SPY;
+
+        /**
+         * When used with the window flag {@link #FLAG_NOT_TOUCHABLE}, this window will continue
+         * to receive events from a stylus device within its touchable region. All other pointer
+         * events, such as from a mouse or touchscreen, will be dispatched to the windows behind it.
+         *
+         * This input feature has no effect when the window flag {@link #FLAG_NOT_TOUCHABLE} is
+         * not set.
+         *
+         * The window must be a trusted overlay to use this input feature.
+         *
+         * @see #FLAG_NOT_TOUCHABLE
+         *
+         * @hide
+         */
+        public static final int INPUT_FEATURE_INTERCEPTS_STYLUS =
+                IInputConstants.InputFeature.INTERCEPTS_STYLUS;
 
         /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.
@@ -3370,18 +3383,20 @@ public interface WindowManager extends ViewManager {
          */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(flag = true, prefix = { "INPUT_FEATURE_" }, value = {
-            INPUT_FEATURE_DISABLE_POINTER_GESTURES,
             INPUT_FEATURE_NO_INPUT_CHANNEL,
             INPUT_FEATURE_DISABLE_USER_ACTIVITY,
+            INPUT_FEATURE_SPY,
+            INPUT_FEATURE_INTERCEPTS_STYLUS,
         })
         public @interface InputFeatureFlags {}
 
         /**
          * Control special features of the input subsystem.
          *
-         * @see #INPUT_FEATURE_DISABLE_POINTER_GESTURES
          * @see #INPUT_FEATURE_NO_INPUT_CHANNEL
          * @see #INPUT_FEATURE_DISABLE_USER_ACTIVITY
+         * @see #INPUT_FEATURE_SPY
+         * @see #INPUT_FEATURE_INTERCEPTS_STYLUS
          * @hide
          */
         @InputFeatureFlags
@@ -4485,7 +4500,7 @@ public interface WindowManager extends ViewManager {
                 sb.append(hasSystemUiListeners);
             }
             if (inputFeatures != 0) {
-                sb.append(" if=").append(inputFeatureToString(inputFeatures));
+                sb.append(" if=").append(inputFeaturesToString(inputFeatures));
             }
             if (userActivityTimeout >= 0) {
                 sb.append(" userActivityTimeout=").append(userActivityTimeout);
@@ -4787,17 +4802,28 @@ public interface WindowManager extends ViewManager {
             }
         }
 
-        private static String inputFeatureToString(int inputFeature) {
-            switch (inputFeature) {
-                case INPUT_FEATURE_DISABLE_POINTER_GESTURES:
-                    return "DISABLE_POINTER_GESTURES";
-                case INPUT_FEATURE_NO_INPUT_CHANNEL:
-                    return "NO_INPUT_CHANNEL";
-                case INPUT_FEATURE_DISABLE_USER_ACTIVITY:
-                    return "DISABLE_USER_ACTIVITY";
-                default:
-                    return Integer.toString(inputFeature);
+        private static String inputFeaturesToString(int inputFeatures) {
+            final List<String> features = new ArrayList<>();
+            if ((inputFeatures & INPUT_FEATURE_NO_INPUT_CHANNEL) != 0) {
+                inputFeatures &= ~INPUT_FEATURE_NO_INPUT_CHANNEL;
+                features.add("INPUT_FEATURE_NO_INPUT_CHANNEL");
             }
+            if ((inputFeatures & INPUT_FEATURE_DISABLE_USER_ACTIVITY) != 0) {
+                inputFeatures &= ~INPUT_FEATURE_DISABLE_USER_ACTIVITY;
+                features.add("INPUT_FEATURE_DISABLE_USER_ACTIVITY");
+            }
+            if ((inputFeatures & INPUT_FEATURE_SPY) != 0) {
+                inputFeatures &= ~INPUT_FEATURE_SPY;
+                features.add("INPUT_FEATURE_SPY");
+            }
+            if ((inputFeatures & INPUT_FEATURE_INTERCEPTS_STYLUS) != 0) {
+                inputFeatures &= ~INPUT_FEATURE_INTERCEPTS_STYLUS;
+                features.add("INPUT_FEATURE_INTERCEPTS_STYLUS");
+            }
+            if (inputFeatures != 0) {
+                features.add(Integer.toHexString(inputFeatures));
+            }
+            return String.join(" | ", features);
         }
 
         /**

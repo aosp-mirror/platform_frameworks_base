@@ -6191,18 +6191,20 @@ public class Activity extends ContextThemeWrapper
     @Nullable
     public Uri getReferrer() {
         Intent intent = getIntent();
-        try {
-            Uri referrer = intent.getParcelableExtra(Intent.EXTRA_REFERRER);
-            if (referrer != null) {
-                return referrer;
+        if (intent != null) {
+            try {
+                Uri referrer = intent.getParcelableExtra(Intent.EXTRA_REFERRER);
+                if (referrer != null) {
+                    return referrer;
+                }
+                String referrerName = intent.getStringExtra(Intent.EXTRA_REFERRER_NAME);
+                if (referrerName != null) {
+                    return Uri.parse(referrerName);
+                }
+            } catch (BadParcelableException e) {
+                Log.w(TAG, "Cannot read referrer from intent;"
+                        + " intent extras contain unknown custom Parcelable objects");
             }
-            String referrerName = intent.getStringExtra(Intent.EXTRA_REFERRER_NAME);
-            if (referrerName != null) {
-                return Uri.parse(referrerName);
-            }
-        } catch (BadParcelableException e) {
-            Log.w(TAG, "Cannot read referrer from intent;"
-                    + " intent extras contain unknown custom Parcelable objects");
         }
         if (mReferrer != null) {
             return new Uri.Builder().scheme("android-app").authority(mReferrer).build();

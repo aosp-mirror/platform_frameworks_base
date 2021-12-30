@@ -26,6 +26,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
+import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -310,7 +311,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public void startIntent(PendingIntent intent, Intent fillInIntent, @SplitPosition int position,
             @Nullable Bundle options) {
-        if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
+        if (!ENABLE_SHELL_TRANSITIONS) {
             startIntentLegacy(intent, fillInIntent, position, options);
             return;
         }
@@ -366,7 +367,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel, RemoteAnimationTarget[] apps) {
-        if (!isSplitScreenVisible()) return null;
+        if (ENABLE_SHELL_TRANSITIONS || apps.length < 2) return null;
+        // TODO(b/206487881): Integrate this with shell transition.
         final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
                 .setContainerLayer()
                 .setName("RecentsAnimationSplitTasks")
