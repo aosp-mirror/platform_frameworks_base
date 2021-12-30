@@ -99,7 +99,7 @@ public class MagnificationProcessor {
      */
     public boolean setMagnificationConfig(int displayId, @NonNull MagnificationConfig config,
             boolean animate, int id) {
-        if (transitionModeIfNeeded(displayId, config, animate)) {
+        if (transitionModeIfNeeded(displayId, config, animate, id)) {
             return true;
         }
 
@@ -114,7 +114,8 @@ public class MagnificationProcessor {
         } else if (configMode == MAGNIFICATION_MODE_WINDOW) {
             return mController.getWindowMagnificationMgr().enableWindowMagnification(displayId,
                     config.getScale(), config.getCenterX(), config.getCenterY(),
-                    animate ? STUB_ANIMATION_CALLBACK : null);
+                    animate ? STUB_ANIMATION_CALLBACK : null,
+                    id);
         }
         return false;
     }
@@ -136,13 +137,13 @@ public class MagnificationProcessor {
      * mode when the controlling mode is unchanged or the controlling magnifier is not activated.
      */
     private boolean transitionModeIfNeeded(int displayId, MagnificationConfig config,
-            boolean animate) {
+            boolean animate, int id) {
         int currentMode = getControllingMode(displayId);
         if (currentMode == config.getMode()
                 || !mController.hasDisableMagnificationCallback(displayId)) {
             return false;
         }
-        mController.transitionMagnificationConfigMode(displayId, config, animate);
+        mController.transitionMagnificationConfigMode(displayId, config, animate, id);
         return true;
     }
 
@@ -237,7 +238,8 @@ public class MagnificationProcessor {
         if (mode == MAGNIFICATION_MODE_FULLSCREEN) {
             return mController.getFullScreenMagnificationController().reset(displayId, animate);
         } else if (mode == MAGNIFICATION_MODE_WINDOW) {
-            return mController.getWindowMagnificationMgr().reset(displayId);
+            return mController.getWindowMagnificationMgr().disableWindowMagnification(displayId,
+                    false, animate ? STUB_ANIMATION_CALLBACK : null);
         }
         return false;
     }
@@ -256,11 +258,15 @@ public class MagnificationProcessor {
     }
 
     /**
-     * {@link FullScreenMagnificationController#resetIfNeeded(int, boolean)}
+     * Resets all the magnifiers on all the displays.
+     * Called when the a11y service connection that has changed the current magnification spec is
+     * unbound or the binder died.
+     *
+     * @param connectionId The connection id
      */
-    // TODO: support window magnification
     public void resetAllIfNeeded(int connectionId) {
         mController.getFullScreenMagnificationController().resetAllIfNeeded(connectionId);
+        mController.getWindowMagnificationMgr().resetAllIfNeeded(connectionId);
     }
 
     /**

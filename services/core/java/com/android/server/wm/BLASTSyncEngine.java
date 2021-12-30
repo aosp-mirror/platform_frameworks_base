@@ -59,7 +59,6 @@ import com.android.internal.protolog.common.ProtoLog;
  */
 class BLASTSyncEngine {
     private static final String TAG = "BLASTSyncEngine";
-    private static final String TRACE_NAME_SYNC_GROUP_READY = "SyncGroupReady";
 
     interface TransactionReadyListener {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
@@ -75,6 +74,7 @@ class BLASTSyncEngine {
         boolean mReady = false;
         final ArraySet<WindowContainer> mRootMembers = new ArraySet<>();
         private SurfaceControl.Transaction mOrphanTransaction = null;
+        private String mTraceName;
 
         private SyncGroup(TransactionReadyListener listener, int id, String name) {
             mSyncId = id;
@@ -86,8 +86,8 @@ class BLASTSyncEngine {
                 }
             };
             if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
-                Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER,
-                        name + TRACE_NAME_SYNC_GROUP_READY, id);
+                mTraceName = name + "SyncGroupReady";
+                Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, mTraceName, id);
             }
         }
 
@@ -121,7 +121,9 @@ class BLASTSyncEngine {
         }
 
         private void finishNow() {
-            Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_SYNC_GROUP_READY, mSyncId);
+            if (mTraceName != null) {
+                Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, mTraceName, mSyncId);
+            }
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Finished!", mSyncId);
             SurfaceControl.Transaction merged = mWm.mTransactionFactory.get();
             if (mOrphanTransaction != null) {

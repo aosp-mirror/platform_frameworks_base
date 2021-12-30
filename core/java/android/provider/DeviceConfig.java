@@ -564,6 +564,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT = "window_manager_native_boot";
 
     /**
+     * Definitions for selection toolbar related functions.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String NAMESPACE_SELECTION_TOOLBAR = "selection_toolbar";
+
+    /**
      * List of namespaces which can be read without READ_DEVICE_CONFIG permission
      *
      * @hide
@@ -571,7 +579,7 @@ public final class DeviceConfig {
     @NonNull
     private static final List<String> PUBLIC_NAMESPACES =
             Arrays.asList(NAMESPACE_TEXTCLASSIFIER, NAMESPACE_RUNTIME, NAMESPACE_STATSD_JAVA,
-                    NAMESPACE_STATSD_JAVA_BOOT);
+                    NAMESPACE_STATSD_JAVA_BOOT, NAMESPACE_SELECTION_TOOLBAR);
     /**
      * Privacy related properties definitions.
      *

@@ -273,13 +273,14 @@ public class ActivityThreadTest {
             newerConfig.orientation = orientation == ORIENTATION_LANDSCAPE
                     ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
             newerConfig.seq = seq + 2;
-            final ActivityClientRecord r = getActivityClientRecord(activity);
-            activityThread.updatePendingActivityConfiguration(r, newerConfig);
+            activityThread.updatePendingActivityConfiguration(activity.getActivityToken(),
+                    newerConfig);
 
             final Configuration olderConfig = new Configuration();
             olderConfig.orientation = orientation;
             olderConfig.seq = seq + 1;
 
+            final ActivityClientRecord r = getActivityClientRecord(activity);
             activityThread.handleActivityConfigurationChanged(r, olderConfig, INVALID_DISPLAY);
             assertEquals(numOfConfig, activity.mNumOfConfigChanges);
             assertEquals(olderConfig.orientation, activity.mConfig.orientation);
@@ -504,7 +505,8 @@ public class ActivityThreadTest {
                     ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
 
             final ActivityClientRecord r = getActivityClientRecord(activity);
-            activityThread.updatePendingActivityConfiguration(r, newActivityConfig);
+            activityThread.updatePendingActivityConfiguration(activity.getActivityToken(),
+                    newActivityConfig);
             activityThread.handleActivityConfigurationChanged(r, newActivityConfig,
                     INVALID_DISPLAY);
 

@@ -86,6 +86,7 @@ import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.InputMethodDebug;
@@ -1228,6 +1229,26 @@ public final class InputMethodManager {
     public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
         try {
             return mService.getInputMethodList(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of installed input methods for the specified user.
+     *
+     * @param userId user ID to query
+     * @param directBootAwareness {@code true} if caller want to query installed input methods list
+     * on user locked state.
+     * @return {@link List} of {@link InputMethodInfo}.
+     * @hide
+     */
+    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
+    @NonNull
+    public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId,
+            @DirectBootAwareness int directBootAwareness) {
+        try {
+            return mService.getAwareLockedInputMethodList(userId, directBootAwareness);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

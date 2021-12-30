@@ -894,6 +894,19 @@ public final class TvInputManager {
                 });
             }
         }
+
+        void postAdResponse(final AdResponse response) {
+            if (mSession.mIAppNotificationEnabled) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mSession.getIAppSession() != null) {
+                            mSession.getIAppSession().notifyAdResponse(response);
+                        }
+                    }
+                });
+            }
+        }
     }
 
     /**
@@ -1315,6 +1328,18 @@ public final class TvInputManager {
                         return;
                     }
                     record.postBroadcastInfoResponse(response);
+                }
+            }
+
+            @Override
+            public void onAdResponse(AdResponse response, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postAdResponse(response);
                 }
             }
         };
@@ -3028,6 +3053,18 @@ public final class TvInputManager {
             }
             try {
                 mService.removeBroadcastInfo(mToken, requestId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        public void requestAd(AdRequest request) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.requestAd(mToken, request, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

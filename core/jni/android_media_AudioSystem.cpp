@@ -2782,13 +2782,13 @@ static jboolean android_media_AudioSystem_canBeSpatialized(JNIEnv *env, jobject 
 
 static jint convertAudioDirectModeFromNative(audio_direct_mode_t directMode) {
     jint result = DIRECT_NOT_SUPPORTED;
-    if ((directMode | AUDIO_DIRECT_OFFLOAD_SUPPORTED) != AUDIO_DIRECT_NOT_SUPPORTED) {
+    if ((directMode & AUDIO_DIRECT_OFFLOAD_SUPPORTED) != AUDIO_DIRECT_NOT_SUPPORTED) {
         result |= DIRECT_OFFLOAD_SUPPORTED;
     }
-    if ((directMode | AUDIO_DIRECT_OFFLOAD_GAPLESS_SUPPORTED) != AUDIO_DIRECT_NOT_SUPPORTED) {
+    if ((directMode & AUDIO_DIRECT_OFFLOAD_GAPLESS_SUPPORTED) != AUDIO_DIRECT_NOT_SUPPORTED) {
         result |= DIRECT_OFFLOAD_GAPLESS_SUPPORTED;
     }
-    if ((directMode | AUDIO_DIRECT_BITSTREAM_SUPPORTED) != AUDIO_DIRECT_NOT_SUPPORTED) {
+    if ((directMode & AUDIO_DIRECT_BITSTREAM_SUPPORTED) != AUDIO_DIRECT_NOT_SUPPORTED) {
         result |= DIRECT_BITSTREAM_SUPPORTED;
     }
     return result;
@@ -2799,7 +2799,7 @@ static jint android_media_AudioSystem_getDirectPlaybackSupport(JNIEnv *env, jobj
     JNIAudioAttributeHelper::UniqueAaPtr paa = JNIAudioAttributeHelper::makeUnique();
     jint jStatus = JNIAudioAttributeHelper::nativeFromJava(env, jaa, paa.get());
     if (jStatus != (jint)AUDIO_JAVA_SUCCESS) {
-        return AUDIO_DIRECT_NOT_SUPPORTED;
+        return DIRECT_NOT_SUPPORTED;
     }
 
     audio_config_t nConfig;
@@ -2809,7 +2809,7 @@ static jint android_media_AudioSystem_getDirectPlaybackSupport(JNIEnv *env, jobj
     status_t status = AudioSystem::getDirectPlaybackSupport(paa.get(), &nConfig, &directMode);
     if (status != NO_ERROR) {
         ALOGW("%s native returned error %d", __func__, status);
-        return AUDIO_DIRECT_NOT_SUPPORTED;
+        return DIRECT_NOT_SUPPORTED;
     }
     return convertAudioDirectModeFromNative(directMode);
 }

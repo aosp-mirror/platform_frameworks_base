@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
@@ -235,7 +236,17 @@ public class MagnificationProcessorTest {
 
         mMagnificationProcessor.resetCurrentMagnification(TEST_DISPLAY, /* animate= */false);
 
-        verify(mMockWindowMagnificationManager).reset(TEST_DISPLAY);
+        verify(mMockWindowMagnificationManager).disableWindowMagnification(TEST_DISPLAY, false,
+                null);
+    }
+
+    @Test
+    public void resetAllIfNeeded_resetFullscreenAndWindowMagnificationByConnectionId() {
+        final int connectionId = 1;
+        mMagnificationProcessor.resetAllIfNeeded(connectionId);
+
+        verify(mMockFullScreenMagnificationController).resetAllIfNeeded(eq(connectionId));
+        verify(mMockWindowMagnificationManager).resetAllIfNeeded(eq(connectionId));
     }
 
     @Test
@@ -322,7 +333,7 @@ public class MagnificationProcessorTest {
         final MagnificationConfig result = mMagnificationProcessor.getMagnificationConfig(
                 TEST_DISPLAY);
         verify(mMockMagnificationController).transitionMagnificationConfigMode(eq(TEST_DISPLAY),
-                eq(newConfig), anyBoolean());
+                eq(newConfig), anyBoolean(), anyInt());
         assertConfigEquals(newConfig, result);
     }
 
@@ -438,7 +449,7 @@ public class MagnificationProcessorTest {
                     anyFloat(), anyFloat(), anyFloat());
             doAnswer(enableWindowMagnificationStubAnswer).when(
                     mWindowMagnificationManager).enableWindowMagnification(eq(TEST_DISPLAY),
-                    anyFloat(), anyFloat(), anyFloat(), any());
+                    anyFloat(), anyFloat(), anyFloat(), any(), anyInt());
         }
 
         public void resetAndStubMethods() {

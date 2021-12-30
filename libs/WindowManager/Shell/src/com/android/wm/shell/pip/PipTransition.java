@@ -219,7 +219,6 @@ public class PipTransition extends PipTransitionController {
             @NonNull TransitionRequestInfo request) {
         if (request.getType() == TRANSIT_PIP) {
             WindowContainerTransaction wct = new WindowContainerTransaction();
-            mPipTransitionState.setTransitionState(PipTransitionState.ENTRY_SCHEDULED);
             if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
                 wct.setActivityWindowingMode(request.getTriggerTask().token,
                         WINDOWING_MODE_UNDEFINED);

@@ -114,7 +114,7 @@ public class TvIAppView extends ViewGroup {
     }
 
     public TvIAppView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, /* attrs = */null, /* defStyleAttr = */0);
+        super(context, attrs, defStyleAttr);
         int sourceResId = Resources.getAttributeSetSourceResId(attrs);
         if (sourceResId != Resources.ID_NULL) {
             Log.d(TAG, "Build local AttributeSet");
@@ -127,7 +127,7 @@ public class TvIAppView extends ViewGroup {
         }
         mDefStyleAttr = defStyleAttr;
         resetSurfaceView();
-        mTvIAppManager = (TvIAppManager) getContext().getSystemService("tv_interactive_app");
+        mTvIAppManager = (TvIAppManager) getContext().getSystemService(Context.TV_IAPP_SERVICE);
     }
 
     /**
