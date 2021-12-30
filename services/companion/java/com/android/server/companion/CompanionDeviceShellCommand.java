@@ -16,7 +16,6 @@
 
 package com.android.server.companion;
 
-import static com.android.internal.util.CollectionUtils.forEach;
 import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
 
 import android.companion.AssociationInfo;
@@ -24,24 +23,33 @@ import android.util.Log;
 import android.util.Slog;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 class CompanionDeviceShellCommand extends android.os.ShellCommand {
     private final CompanionDeviceManagerService mService;
+    private final AssociationStore mAssociationStore;
 
-    CompanionDeviceShellCommand(CompanionDeviceManagerService service) {
+    CompanionDeviceShellCommand(CompanionDeviceManagerService service,
+            AssociationStore associationStore) {
         mService = service;
+        mAssociationStore = associationStore;
     }
 
     @Override
     public int onCommand(String cmd) {
+        final PrintWriter out = getOutPrintWriter();
         try {
             switch (cmd) {
                 case "list": {
-                    forEach(
-                            mService.getAllAssociationsForUser(getNextArgInt()),
-                            a -> getOutPrintWriter()
-                                    .println(a.getPackageName() + " "
-                                            + a.getDeviceMacAddress()));
+                    final int userId = getNextArgInt();
+                    final List<AssociationInfo> associationsForUser =
+                            mAssociationStore.getAssociationsForUser(userId);
+                    for (AssociationInfo association : associationsForUser) {
+                        // TODO(b/212535524): use AssociationInfo.toShortString(), once it's not
+                        //  longer referenced in tests.
+                        out.println(association.getPackageName() + " "
+                                + association.getDeviceMacAddress());
+                    }
                 }
                 break;
 
@@ -60,7 +68,7 @@ class CompanionDeviceShellCommand extends android.os.ShellCommand {
                     final AssociationInfo association =
                             mService.getAssociationWithCallerChecks(userId, packageName, address);
                     if (association != null) {
-                        mService.disassociateInternal(userId, association.getId());
+                        mService.disassociateInternal(association.getId());
                     }
                 }
                 break;
