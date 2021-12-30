@@ -306,7 +306,8 @@ public class EventConditionProvider extends SystemConditionProviderService {
             filter.addAction(Intent.ACTION_TIME_CHANGED);
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(ACTION_EVALUATE);
-            registerReceiver(mReceiver, filter);
+            registerReceiver(mReceiver, filter,
+                    Context.RECEIVER_EXPORTED_UNAUDITED);
         } else {
             unregisterReceiver(mReceiver);
         }
