@@ -1435,7 +1435,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     /**
      * Fades out and removes an overlay surface.
      */
-    private void fadeOutAndRemoveOverlay(SurfaceControl surface, Runnable callback,
+    void fadeOutAndRemoveOverlay(SurfaceControl surface, Runnable callback,
             boolean withStartDelay) {
         if (surface == null) {
             return;
