@@ -90,6 +90,7 @@ public class KeyguardCoordinator implements Coordinator {
         readShowSilentNotificationSetting();
 
         setupInvalidateNotifListCallbacks();
+        // Filter at the "finalize" stage so that views remain bound by PreparationCoordinator
         pipeline.addFinalizeFilter(mNotifFilter);
     }
 
