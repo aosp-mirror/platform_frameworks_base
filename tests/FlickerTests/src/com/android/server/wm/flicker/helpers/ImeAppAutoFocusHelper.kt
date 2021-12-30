@@ -17,7 +17,9 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.server.wm.traces.parser.toFlickerComponent
@@ -46,5 +48,30 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
             getPackage()
         }
         launcherStrategy.launch(appName, expectedPackage)
+    }
+
+    fun startDialogThemedActivity(wmHelper: WindowManagerStateHelper) {
+        val button = uiDevice.wait(Until.findObject(By.res(getPackage(),
+                "start_dialog_themed_activity_btn")), FIND_TIMEOUT)
+
+        require(button != null) {
+            "Button not found, this usually happens when the device " +
+                    "was left in an unknown state (e.g. Screen turned off)"
+        }
+        button.click()
+        wmHelper.waitForAppTransitionIdle()
+        wmHelper.waitForFullScreenApp(
+                ActivityOptions.DIALOG_THEMED_ACTIVITY_COMPONENT_NAME.toFlickerComponent())
+    }
+    fun dismissDialog(wmHelper: WindowManagerStateHelper) {
+        val dialog = uiDevice.wait(
+                Until.findObject(By.text("Dialog for test")), FIND_TIMEOUT)
+
+        // Tapping outside of the dialog to dismiss
+        if (dialog != null) {
+            val dialogBounds = dialog.visibleBounds
+            uiDevice.click(dialogBounds.left, dialogBounds.top - 300)
+            wmHelper.waitForAppTransitionIdle()
+        }
     }
 }
