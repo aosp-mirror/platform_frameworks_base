@@ -36,7 +36,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
@@ -2169,10 +2168,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             boolean forceNonResizable) {
         final boolean isSecondaryDisplayPreferred = preferredTaskDisplayArea != null
                 && preferredTaskDisplayArea.getDisplayId() != DEFAULT_DISPLAY;
-        final boolean inSplitScreenMode = actualRootTask != null
-                && actualRootTask.getDisplayArea().isSplitScreenModeActivated();
-        if (((!inSplitScreenMode && preferredWindowingMode != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
-                && !isSecondaryDisplayPreferred) || !task.isActivityTypeStandardOrUndefined()) {
+        if (!task.isActivityTypeStandardOrUndefined()) {
             return;
         }
 
@@ -2513,10 +2509,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                                 == PERMISSION_GRANTED) {
                     mRecentTasks.setFreezeTaskListReordering();
                 }
-                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                        || activityOptions.getLaunchRootTask() != null) {
-                    // Don't move home activity forward if we are launching into primary split or
-                    // there is a launch root set.
+                if (activityOptions.getLaunchRootTask() != null) {
+                    // Don't move home activity forward if there is a launch root set.
                     moveHomeTaskForward = false;
                 }
             }
