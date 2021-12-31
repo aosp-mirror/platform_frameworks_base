@@ -113,6 +113,10 @@ public class TvIAppView extends ViewGroup {
         this(context, null, 0);
     }
 
+    public TvIAppView(@NonNull Context context, @Nullable AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
     public TvIAppView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         int sourceResId = Resources.getAttributeSetSourceResId(attrs);

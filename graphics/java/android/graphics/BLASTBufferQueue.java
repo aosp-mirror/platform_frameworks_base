@@ -27,8 +27,6 @@ public final class BLASTBufferQueue {
     // Note: This field is accessed by native code.
     public long mNativeObject; // BLASTBufferQueue*
 
-    private static native long nativeCreateAndUpdate(String name, long surfaceControl, long width,
-            long height, int format);
     private static native long nativeCreate(String name);
     private static native void nativeDestroy(long ptr);
     private static native Surface nativeGetSurface(long ptr, boolean includeSurfaceControlHandle);
@@ -40,11 +38,13 @@ public final class BLASTBufferQueue {
                                                               long frameNumber);
     private static native long nativeGetLastAcquiredFrameNum(long ptr);
     private static native void nativeApplyPendingTransactions(long ptr, long frameNumber);
+    private static native boolean nativeIsSameSurfaceControl(long ptr, long surfaceControlPtr);
 
     /** Create a new connection with the surface flinger. */
     public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
             @PixelFormat.Format int format) {
-        mNativeObject = nativeCreateAndUpdate(name, sc.mNativeObject, width, height, format);
+        this(name);
+        update(sc, width, height, format);
     }
 
     public BLASTBufferQueue(String name) {
@@ -151,5 +151,12 @@ public final class BLASTBufferQueue {
 
     public long getLastAcquiredFrameNum() {
         return nativeGetLastAcquiredFrameNum(mNativeObject);
+    }
+
+    /**
+     * @return True if the associated SurfaceControl has the same handle as {@param sc}.
+     */
+    public boolean isSameSurfaceControl(SurfaceControl sc) {
+        return nativeIsSameSurfaceControl(mNativeObject, sc.mNativeObject);
     }
 }

@@ -857,7 +857,7 @@ final class InstallPackageHelper {
         mPm.notifyInstallObserver(request.mInstallResult, request.mArgs.mObserver);
     }
 
-    @GuardedBy("mInstallLock")
+    @GuardedBy("mPm.mInstallLock")
     private void installPackagesTracedLI(List<InstallRequest> requests) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackages");
@@ -886,7 +886,7 @@ final class InstallPackageHelper {
      *
      * Failure at any phase will result in a full failure to install all packages.
      */
-    @GuardedBy("mInstallLock")
+    @GuardedBy("mPm.mInstallLock")
     private void installPackagesLI(List<InstallRequest> requests) {
         final Map<String, ScanResult> preparedScans = new ArrayMap<>(requests.size());
         final Map<String, InstallArgs> installArgs = new ArrayMap<>(requests.size());
@@ -1038,7 +1038,7 @@ final class InstallPackageHelper {
         }
     }
 
-    @GuardedBy("mInstallLock")
+    @GuardedBy("mPm.mInstallLock")
     private PrepareResult preparePackageLI(InstallArgs args, PackageInstalledInfo res)
             throws PrepareFailure {
         final int installFlags = args.mInstallFlags;
@@ -1882,7 +1882,7 @@ final class InstallPackageHelper {
         }
     }
 
-    @GuardedBy("mLock")
+    @GuardedBy("mPm.mLock")
     private void commitPackagesLocked(final CommitRequest request) {
         // TODO: remove any expected failures from this method; this should only be able to fail due
         //       to unavoidable errors (I/O, etc.)
@@ -1999,7 +1999,7 @@ final class InstallPackageHelper {
         ApplicationPackageManager.invalidateGetPackagesForUidCache();
     }
 
-    @GuardedBy("mLock")
+    @GuardedBy("mPm.mLock")
     private boolean disableSystemPackageLPw(AndroidPackage oldPkg) {
         return mPm.mSettings.disableSystemPackageLPw(oldPkg.getPackageName(), true);
     }
