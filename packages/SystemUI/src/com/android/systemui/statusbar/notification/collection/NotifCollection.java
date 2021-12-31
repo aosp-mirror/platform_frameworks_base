@@ -44,7 +44,6 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.IntDef;
 import android.annotation.MainThread;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Notification;
 import android.os.Handler;
@@ -59,6 +58,7 @@ import android.util.ArrayMap;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dumpable;
@@ -193,7 +193,8 @@ public class NotifCollection implements Dumpable {
     }
 
     /** @see NotifPipeline#getEntry(String) () */
-    NotificationEntry getEntry(String key) {
+    @Nullable
+    NotificationEntry getEntry(@NonNull String key) {
         return mNotificationSet.get(key);
     }
 

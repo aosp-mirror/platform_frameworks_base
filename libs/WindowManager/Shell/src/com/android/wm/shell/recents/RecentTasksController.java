@@ -292,6 +292,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
          * Invalidates this instance, preventing future calls from updating the controller.
          */
         void invalidate() {
+            Slog.d("b/206648922", "invalidating controller: " + mController);
             mController = null;
         }
 
@@ -317,7 +318,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
                     (controller) -> out[0] = controller.getRecentTasks(maxNum, flags, userId)
                             .toArray(new GroupedRecentTaskInfo[0]),
                     true /* blocking */);
-            Slog.d("b/206648922", "getRecentTasks(" + maxNum + "): " + out[0]);
+            Slog.d("b/206648922", "getRecentTasks(" + maxNum + "): " + out[0]
+                    + " mController=" + mController);
             return out[0];
         }
     }

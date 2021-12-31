@@ -20,8 +20,6 @@ import static android.service.notification.NotificationListenerService.REASON_ER
 import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_UNKNOWN;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Notification;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -32,6 +30,9 @@ import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
@@ -123,8 +124,8 @@ public class NotificationEntryManager implements
      * filtered out if for instance they are not for the current user
      */
     private final ArrayMap<String, NotificationEntry> mActiveNotifications = new ArrayMap<>();
-    @VisibleForTesting
     /** This is the list of "active notifications for this user in this context" */
+    @VisibleForTesting
     protected final ArrayList<NotificationEntry> mSortedAndFiltered = new ArrayList<>();
     private final List<NotificationEntry> mReadOnlyNotifications =
             Collections.unmodifiableList(mSortedAndFiltered);
@@ -899,7 +900,7 @@ public class NotificationEntryManager implements
     }
 
     /** Calls to NotificationRankingManager and updates mSortedAndFiltered */
-    private void updateRankingAndSort(@NonNull RankingMap rankingMap, String reason) {
+    private void updateRankingAndSort(RankingMap rankingMap, String reason) {
         if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             mLogger.logUseWhileNewPipelineActive("updateRankingAndSort", reason);
             return;
@@ -961,6 +962,7 @@ public class NotificationEntryManager implements
      * Returns a collections containing ALL notifications we know about, including ones that are
      * hidden or for other users. See {@link CommonNotifCollection#getAllNotifs()}.
      */
+    @NonNull
     @Override
     public Collection<NotificationEntry> getAllNotifs() {
         mNotifPipelineFlags.checkLegacyPipelineEnabled();
@@ -969,7 +971,7 @@ public class NotificationEntryManager implements
 
     @Nullable
     @Override
-    public NotificationEntry getEntry(String key) {
+    public NotificationEntry getEntry(@NonNull String key) {
         mNotifPipelineFlags.checkLegacyPipelineEnabled();
         return getPendingOrActiveNotif(key);
     }
@@ -989,7 +991,7 @@ public class NotificationEntryManager implements
     }
 
     @Override
-    public void addCollectionListener(NotifCollectionListener listener) {
+    public void addCollectionListener(@NonNull NotifCollectionListener listener) {
         mNotifCollectionListeners.add(listener);
     }
 

@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_REMOVE_STACK;
 
+import android.annotation.Nullable;
 import android.app.PictureInPictureParams;
 import android.app.TaskInfo;
 import android.content.ComponentName;
@@ -98,9 +99,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /**
-     * Called when the Shell wants to starts a transition/animation.
+     * Called when the Shell wants to start an exit Pip transition/animation.
      */
-    public void startTransition(Rect destinationBounds, WindowContainerTransaction out) {
+    public void startExitTransition(int type, WindowContainerTransaction out,
+            @Nullable Rect destinationBounds) {
         // Default implementation does nothing.
     }
 

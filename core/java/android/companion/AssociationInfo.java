@@ -197,6 +197,20 @@ public final class AssociationInfo implements Parcelable {
         return macAddress.equals(mDeviceMacAddress);
     }
 
+    /** @hide */
+    public @NonNull String toShortString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("id=").append(mId);
+        if (mDeviceMacAddress != null) {
+            sb.append(", addr=").append(getDeviceMacAddressAsString());
+        }
+        if (mSelfManaged) {
+            sb.append(", self-managed");
+        }
+        sb.append(", pkg=u").append(mUserId).append('/').append(mPackageName);
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         return "Association{"

@@ -22,7 +22,6 @@ import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.companion.CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME;
 import static android.content.ComponentName.createRelative;
 
-import static com.android.internal.util.CollectionUtils.filter;
 import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
 import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
 import static com.android.server.companion.PermissionsUtils.enforcePermissionsForAssociation;
@@ -57,6 +56,7 @@ import com.android.internal.util.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -124,14 +124,17 @@ class AssociationRequestsProcessor {
     private static final int ASSOCIATE_WITHOUT_PROMPT_MAX_PER_TIME_WINDOW = 5;
     private static final long ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS = 60 * 60 * 1000; // 60 min;
 
-    private final Context mContext;
-    private final CompanionDeviceManagerService mService;
-    private final PackageManagerInternal mPackageManager;
+    private final @NonNull Context mContext;
+    private final @NonNull CompanionDeviceManagerService mService;
+    private final @NonNull PackageManagerInternal mPackageManager;
+    private final @NonNull AssociationStore mAssociationStore;
 
-    AssociationRequestsProcessor(CompanionDeviceManagerService service) {
+    AssociationRequestsProcessor(@NonNull CompanionDeviceManagerService service,
+            @NonNull AssociationStore associationStore) {
         mContext = service.getContext();
         mService = service;
         mPackageManager = service.mPackageManagerInternal;
+        mAssociationStore = associationStore;
     }
 
     /**
@@ -330,18 +333,24 @@ class AssociationRequestsProcessor {
         }
 
         // Throttle frequent associations
-        long now = System.currentTimeMillis();
-        Set<AssociationInfo> recentAssociations = filter(
-                mService.getAssociations(userId, packageName),
-                a -> now - a.getTimeApprovedMs() < ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS);
-
-        if (recentAssociations.size() >= ASSOCIATE_WITHOUT_PROMPT_MAX_PER_TIME_WINDOW) {
-            Slog.w(TAG, "Too many associations. " + packageName
-                    + " already associated " + recentAssociations.size()
-                    + " devices within the last " + ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS
-                    + "ms: " + recentAssociations);
-            return false;
+        final long now = System.currentTimeMillis();
+        final List<AssociationInfo> associationForPackage =
+                mAssociationStore.getAssociationsForPackage(userId, packageName);
+        // Number of "recent" associations.
+        int recent = 0;
+        for (AssociationInfo association : associationForPackage) {
+            final boolean isRecent =
+                    now - association.getTimeApprovedMs() < ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS;
+            if (isRecent) {
+                if (++recent >= ASSOCIATE_WITHOUT_PROMPT_MAX_PER_TIME_WINDOW) {
+                    Slog.w(TAG, "Too many associations: " + packageName + " already "
+                            + "associated " + recent + " devices within the last "
+                            + ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS + "ms");
+                    return false;
+                }
+            }
         }
+
         String[] sameOemCerts = mContext.getResources()
                 .getStringArray(com.android.internal.R.array.config_companionDeviceCerts);
 

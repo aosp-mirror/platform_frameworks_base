@@ -49,6 +49,6 @@ public class MediaCoordinator implements Coordinator {
 
     @Override
     public void attach(NotifPipeline pipeline) {
-        pipeline.addFinalizeFilter(mMediaFilter);
+        pipeline.addPreGroupFilter(mMediaFilter);
     }
 }

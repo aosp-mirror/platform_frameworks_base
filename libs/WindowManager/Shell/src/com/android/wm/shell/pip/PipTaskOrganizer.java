@@ -25,6 +25,8 @@ import static android.util.RotationUtils.rotateBounds;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
 import static com.android.wm.shell.pip.PipAnimationController.FRACTION_START;
@@ -40,6 +42,10 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isRemovePipDirection;
+import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP_TO_SPLIT;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -394,6 +400,18 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipUiEventLoggerLogger.log(
                 PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_EXPAND_TO_FULLSCREEN);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+
+        if (ENABLE_SHELL_TRANSITIONS) {
+            if (requestEnterSplit && mSplitScreenOptional.isPresent()) {
+                mSplitScreenOptional.get().prepareEnterSplitScreen(wct, mTaskInfo,
+                        isPipTopLeft()
+                                ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT);
+                mPipTransitionController.startExitTransition(
+                        TRANSIT_EXIT_PIP_TO_SPLIT, wct, null /* destinationBounds */);
+                return;
+            }
+        }
+
         final Rect destinationBounds = mPipBoundsState.getDisplayBounds();
         final int direction = syncWithSplitScreenBounds(destinationBounds, requestEnterSplit)
                 ? TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
@@ -414,7 +432,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipTransitionState.setTransitionState(PipTransitionState.EXITING_PIP);
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mPipTransitionController.startTransition(destinationBounds, wct);
+            mPipTransitionController.startExitTransition(TRANSIT_EXIT_PIP, wct, destinationBounds);
             return;
         }
         mSyncTransactionQueue.queue(wct);
@@ -479,7 +497,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             wct.setBounds(mToken, null);
             wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
             wct.reorder(mToken, false);
-            mPipTransitionController.startTransition(null, wct);
+            mPipTransitionController.startExitTransition(TRANSIT_REMOVE_PIP, wct,
+                    null /* destinationBounds */);
             return;
         }
 
@@ -1280,7 +1299,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void applyFinishBoundsResize(@NonNull WindowContainerTransaction wct,
             @PipAnimationController.TransitionDirection int direction, boolean wasPipTopLeft) {
         if (direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
-            mSplitScreenOptional.get().enterSplitScreen(mTaskInfo.taskId, wasPipTopLeft, wct);
+            mSplitScreenOptional.ifPresent(splitScreenController ->
+                    splitScreenController.enterSplitScreen(mTaskInfo.taskId, wasPipTopLeft, wct));
         } else {
             mTaskOrganizer.applyTransaction(wct);
         }

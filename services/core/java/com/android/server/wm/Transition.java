@@ -497,6 +497,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         if (fadeRotationController != null) {
             fadeRotationController.onTransitionFinished();
         }
+        // Transient-launch activities cannot be IME target (WindowState#canBeImeTarget),
+        // so re-compute in case the IME target is changed after transition.
+        if (mTransientLaunches != null) {
+            mTargetDisplay.computeImeTarget(true /* updateImeTarget */);
+        }
     }
 
     void abort() {

@@ -77,11 +77,11 @@ class BypassHeadsUpNotifier @Inject constructor(
 
     override fun onPrimaryMetadataOrStateChanged(metadata: MediaMetadata?, state: Int) {
         val previous = currentMediaEntry
-        var newEntry = commonNotifCollection.getEntry(mediaManager.mediaNotificationKey)
-        if (!NotificationMediaManager.isPlayingState(state)) {
-            newEntry = null
-        }
-        currentMediaEntry = newEntry
+        val mediaNotificationKey = mediaManager.mediaNotificationKey
+        currentMediaEntry =
+            if (mediaNotificationKey != null && NotificationMediaManager.isPlayingState(state))
+                commonNotifCollection.getEntry(mediaNotificationKey)
+            else null
         updateAutoHeadsUp(previous)
         updateAutoHeadsUp(currentMediaEntry)
     }
