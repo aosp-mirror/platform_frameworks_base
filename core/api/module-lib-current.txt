@@ -127,6 +127,7 @@ package android.media {
 
   public final class BtProfileConnectionInfo implements android.os.Parcelable {
     method @NonNull public static android.media.BtProfileConnectionInfo a2dpInfo(boolean, int);
+    method @NonNull public static android.media.BtProfileConnectionInfo a2dpSinkInfo(int);
     method public int describeContents();
     method public boolean getIsLeOutput();
     method public int getProfile();
