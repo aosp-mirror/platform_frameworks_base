@@ -915,6 +915,20 @@ public final class AppRestrictionController {
         return mediaPlaybackDuration;
     }
 
+    /**
+     * @return If the given package/uid has an active foreground service running.
+     */
+    boolean hasForegroundServices(String packageName, int uid) {
+        return mInjector.getAppFGSTracker().hasForegroundServices(packageName, uid);
+    }
+
+    /**
+     * @return If the given uid has an active foreground service running.
+     */
+    boolean hasForegroundServices(int uid) {
+        return mInjector.getAppFGSTracker().hasForegroundServices(uid);
+    }
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix);
         pw.println("BACKGROUND RESTRICTION LEVEL SETTINGS");
@@ -1493,6 +1507,8 @@ public final class AppRestrictionController {
             controller.mAppStateTrackers.add(new AppBatteryTracker(mContext, controller));
             controller.mAppStateTrackers.add(mAppFGSTracker);
             controller.mAppStateTrackers.add(mAppMediaSessionTracker);
+            controller.mAppStateTrackers.add(new AppBroadcastEventsTracker(mContext, controller));
+            controller.mAppStateTrackers.add(new AppBindServiceEventsTracker(mContext, controller));
         }
 
         AppRestrictionController getAppRestrictionController() {

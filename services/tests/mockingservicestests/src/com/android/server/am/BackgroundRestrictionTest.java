@@ -73,6 +73,8 @@ import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
+import android.app.ActivityManagerInternal.BindServiceEventListener;
+import android.app.ActivityManagerInternal.BroadcastEventListener;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
@@ -107,6 +109,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
+import com.android.server.am.AppBindServiceEventsTracker.AppBindServiceEventsPolicy;
+import com.android.server.am.AppBroadcastEventsTracker.AppBroadcastEventsPolicy;
 import com.android.server.am.AppFGSTracker.AppFGSPolicy;
 import com.android.server.am.AppMediaSessionTracker.AppMediaSessionPolicy;
 import com.android.server.am.AppRestrictionController.NotificationHelper;
@@ -134,6 +138,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
 
 /**
  * Tests for {@link AppRestrictionController}.
@@ -216,11 +221,19 @@ public final class BackgroundRestrictionTest {
     @Captor private ArgumentCaptor<OnActiveSessionsChangedListener> mActiveSessionListenerCap;
     private OnActiveSessionsChangedListener mActiveSessionListener;
 
+    @Captor private ArgumentCaptor<BroadcastEventListener> mBroadcastEventListenerCap;
+    private BroadcastEventListener mBroadcastEventListener;
+
+    @Captor private ArgumentCaptor<BindServiceEventListener> mBindServiceEventListenerCap;
+    private BindServiceEventListener mBindServiceEventListener;
+
     private Context mContext = getInstrumentation().getTargetContext();
     private TestBgRestrictionInjector mInjector;
     private AppRestrictionController mBgRestrictionController;
     private AppBatteryTracker mAppBatteryTracker;
     private AppBatteryPolicy mAppBatteryPolicy;
+    private AppBroadcastEventsTracker mAppBroadcastEventsTracker;
+    private AppBindServiceEventsTracker mAppBindServiceEventsTracker;
     private AppFGSTracker mAppFGSTracker;
     private AppMediaSessionTracker mAppMediaSessionTracker;
 
@@ -291,6 +304,12 @@ public final class BackgroundRestrictionTest {
                 .addOnActiveSessionsChangedListener(any(), any(), any(),
                         mActiveSessionListenerCap.capture());
         mActiveSessionListener = mActiveSessionListenerCap.getValue();
+        verify(mAppBroadcastEventsTracker.mInjector.getActivityManagerInternal())
+                .addBroadcastEventListener(mBroadcastEventListenerCap.capture());
+        mBroadcastEventListener = mBroadcastEventListenerCap.getValue();
+        verify(mAppBindServiceEventsTracker.mInjector.getActivityManagerInternal())
+                .addBindServiceEventListener(mBindServiceEventListenerCap.capture());
+        mBindServiceEventListener = mBindServiceEventListenerCap.getValue();
     }
 
     @After
@@ -1495,6 +1514,144 @@ public final class BackgroundRestrictionTest {
         );
     }
 
+    @Test
+    public void testExcessiveBroadcasts() throws Exception {
+        final long windowMs = 5_000;
+        final int threshold = 10;
+        runTestExcessiveEvent(AppBroadcastEventsPolicy.KEY_BG_BROADCAST_MONITOR_ENABLED,
+                AppBroadcastEventsPolicy.DEFAULT_BG_BROADCAST_MONITOR_ENABLED,
+                AppBroadcastEventsPolicy.KEY_BG_BROADCAST_WINDOW,
+                AppBroadcastEventsPolicy.DEFAULT_BG_BROADCAST_WINDOW,
+                AppBroadcastEventsPolicy.KEY_BG_EX_BROADCAST_THRESHOLD,
+                AppBroadcastEventsPolicy.DEFAULT_BG_EX_BROADCAST_THRESHOLD,
+                windowMs, threshold, mBroadcastEventListener::onSendingBroadcast,
+                mAppBroadcastEventsTracker,
+                new long[][] {
+                    new long[] {1_000L, 2_000L, 2_000L},
+                    new long[] {2_000L, 2_000L, 1_000L},
+                },
+                new int[][] {
+                    new int[] {3, 3, 3},
+                    new int[] {3, 3, 4},
+                },
+                new boolean[] {
+                    true,
+                    false,
+                }
+        );
+    }
+
+    @Test
+    public void testExcessiveBindServices() throws Exception {
+        final long windowMs = 5_000;
+        final int threshold = 10;
+        runTestExcessiveEvent(AppBindServiceEventsPolicy.KEY_BG_BIND_SVC_MONITOR_ENABLED,
+                AppBindServiceEventsPolicy.DEFAULT_BG_BIND_SVC_MONITOR_ENABLED,
+                AppBindServiceEventsPolicy.KEY_BG_BIND_SVC_WINDOW,
+                AppBindServiceEventsPolicy.DEFAULT_BG_BIND_SVC_WINDOW,
+                AppBindServiceEventsPolicy.KEY_BG_EX_BIND_SVC_THRESHOLD,
+                AppBindServiceEventsPolicy.DEFAULT_BG_EX_BIND_SVC_THRESHOLD,
+                windowMs, threshold, mBindServiceEventListener::onBindingService,
+                mAppBindServiceEventsTracker,
+                new long[][] {
+                    new long[] {0L, 2_000L, 4_000L, 1_000L},
+                    new long[] {2_000L, 2_000L, 2_000L, 2_000L},
+                },
+                new int[][] {
+                    new int[] {8, 3, 1, 0}, // Will goto restricted bucket.
+                    new int[] {3, 3, 3, 3},
+                },
+                new boolean[] {
+                    false,
+                    true,
+                }
+        );
+    }
+
+    private void runTestExcessiveEvent(String keyEnable, boolean defaultEnable,
+            String keyWindow, long defaultWindow, String keyThreshold, int defaultThreshold,
+            long windowMs, int threshold, BiConsumer<String, Integer> eventEmitter,
+            BaseAppStateEventsTracker tracker, long[][] waitMs, int[][] events,
+            boolean[] expectingTimeout) throws Exception {
+        final int testPkgIndex = 1;
+        final String testPkgName = TEST_PACKAGE_BASE + testPkgIndex;
+        final int testUser = TEST_USER0;
+        final int testUid = UserHandle.getUid(testUser, TEST_PACKAGE_APPID_BASE + testPkgIndex);
+        final int testPid = 1234;
+
+        final long timeoutMs = 2_000;
+
+        final TestAppRestrictionLevelListener listener = new TestAppRestrictionLevelListener();
+
+        mBgRestrictionController.addAppBackgroundRestrictionListener(listener);
+        setBackgroundRestrict(testPkgName, testUid, false, listener);
+
+        DeviceConfigSession<Boolean> enableMonitor = null;
+        DeviceConfigSession<Long> eventsWindow = null;
+        DeviceConfigSession<Integer> eventsThreshold = null;
+
+        doReturn(testPkgName).when(mInjector).getPackageName(testPid);
+
+        verifyRestrictionLevel(RESTRICTION_LEVEL_ADAPTIVE_BUCKET, testPkgName, testUid);
+
+        try {
+            enableMonitor = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    keyEnable,
+                    DeviceConfig::getBoolean,
+                    defaultEnable);
+            enableMonitor.set(true);
+
+            eventsWindow = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    keyWindow,
+                    DeviceConfig::getLong,
+                    defaultWindow);
+            eventsWindow.set(windowMs);
+
+            eventsThreshold = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    keyThreshold,
+                    DeviceConfig::getInt,
+                    defaultThreshold);
+            eventsThreshold.set(threshold);
+
+            for (int i = 0; i < waitMs.length; i++) {
+                resetBgRestrictionController();
+                listener.mLatchHolder[0] = new CountDownLatch(1);
+                tracker.reset();
+                clearInvocations(mInjector.getAppStandbyInternal());
+                clearInvocations(mBgRestrictionController);
+                for (int j = 0; j < waitMs[i].length; j++) {
+                    for (int k = 0; k < events[i][j]; k++) {
+                        eventEmitter.accept(testPkgName, testUid);
+                    }
+                    Thread.sleep(waitMs[i][j]);
+                }
+                waitForIdleHandler(mBgRestrictionController.getBackgroundHandler());
+                if (expectingTimeout[i]) {
+                    verifyRestrictionLevel(RESTRICTION_LEVEL_ADAPTIVE_BUCKET, testPkgName, testUid);
+                    try {
+                        listener.verify(timeoutMs, testUid, testPkgName,
+                                RESTRICTION_LEVEL_RESTRICTED_BUCKET);
+                        fail("There shouldn't be any level change events");
+                    } catch (TimeoutException e) {
+                        // expected.
+                    }
+                } else {
+                    verifyRestrictionLevel(RESTRICTION_LEVEL_RESTRICTED_BUCKET,
+                            testPkgName, testUid);
+                    listener.verify(timeoutMs, testUid, testPkgName,
+                            RESTRICTION_LEVEL_RESTRICTED_BUCKET);
+                }
+            }
+        } finally {
+            closeIfNotNull(enableMonitor);
+            closeIfNotNull(eventsWindow);
+            closeIfNotNull(eventsThreshold);
+        }
+    }
+
     private int[] checkNotificationShown(String[] packageName, VerificationMode mode,
             boolean verifyNotification) throws Exception {
         final ArgumentCaptor<Integer> notificationIdCaptor =
@@ -1682,8 +1839,15 @@ public final class BackgroundRestrictionTest {
 
     private void assertAppStateDurations(LinkedList<Long> expected, LinkedList<Long> actual)
             throws Exception {
+        assertListEquals(expected, actual);
+    }
+
+    private <T> void assertListEquals(LinkedList<T> expected, LinkedList<T> actual) {
         assertEquals(expected == null || expected.isEmpty(), actual == null || actual.isEmpty());
         if (expected != null) {
+            if (expected.size() > 0) {
+                assertEquals(expected.size(), actual.size());
+            }
             while (expected.peek() != null) {
                 assertEquals(expected.poll(), actual.poll());
             }
@@ -1693,6 +1857,68 @@ public final class BackgroundRestrictionTest {
     private LinkedList<Long> createDurations(long... timestamps) {
         return Arrays.stream(timestamps).collect(LinkedList<Long>::new, LinkedList<Long>::add,
                 (a, b) -> a.addAll(b));
+    }
+
+    private LinkedList<Integer> createIntLinkedList(int[] vals) {
+        return Arrays.stream(vals).collect(LinkedList<Integer>::new, LinkedList<Integer>::add,
+                (a, b) -> a.addAll(b));
+    }
+
+    @Test
+    public void testAppStateTimeSlotEvents() throws Exception {
+        final long maxTrackingDuration = 5_000L;
+        assertAppStateTimeSlotEvents(new int[] {2, 2, 0, 0, 1},
+                new long[] {1_500, 1_500, 2_100, 2_999, 5_999}, 5_000);
+        assertAppStateTimeSlotEvents(new int[] {2, 2, 0, 0, 1, 1},
+                new long[] {1_500, 1_500, 2_100, 2_999, 5_999, 6_000}, 6_000);
+        assertAppStateTimeSlotEvents(new int[] {2, 0, 0, 1, 1, 1},
+                new long[] {1_500, 1_500, 2_100, 2_999, 5_999, 6_000, 7_000}, 7_000);
+        assertMergeAppStateTimeSlotEvents(new int[] {}, new long[] {}, new long[] {}, 0);
+        assertMergeAppStateTimeSlotEvents(new int[] {1}, new long[] {}, new long[] {1_500}, 1_000);
+        assertMergeAppStateTimeSlotEvents(new int[] {1}, new long[] {1_500}, new long[] {}, 1_000);
+        assertMergeAppStateTimeSlotEvents(new int[] {1, 1},
+                new long[] {1_500}, new long[] {2_500}, 2_000);
+        assertMergeAppStateTimeSlotEvents(new int[] {1, 1},
+                new long[] {2_500}, new long[] {1_500}, 2_000);
+        assertMergeAppStateTimeSlotEvents(new int[] {1, 2, 1},
+                new long[] {1_500, 2_500}, new long[] {2_600, 3_000}, 3_000);
+        assertMergeAppStateTimeSlotEvents(new int[] {2, 1, 1},
+                new long[] {2_600, 3_500}, new long[] {1_500, 1_600}, 3_000);
+        assertMergeAppStateTimeSlotEvents(new int[] {1, 2, 1},
+                new long[] {1_500, 3_500}, new long[] {2_600, 2_700}, 3_000);
+        assertMergeAppStateTimeSlotEvents(new int[] {1, 2, 1},
+                new long[] {2_500, 2_600}, new long[] {1_500, 3_700}, 3_000);
+        assertMergeAppStateTimeSlotEvents(new int[] {1, 0, 0, 0, 0, 1},
+                new long[] {2_500, 8_600}, new long[] {1_500, 3_700}, 8_000);
+    }
+
+    private BaseAppStateTimeSlotEvents createBaseAppStateTimeSlotEvents(
+            long slotSize, long maxTrackingDuration, long[] timestamps) {
+        final BaseAppStateTimeSlotEvents testObj = new BaseAppStateTimeSlotEvents(
+                0, "", 1, slotSize, "", () -> maxTrackingDuration) {};
+        for (int i = 0; i < timestamps.length; i++) {
+            testObj.addEvent(timestamps[i], 0);
+        }
+        return testObj;
+    }
+
+    private void assertAppStateTimeSlotEvents(int[] expectedEvents, long[] timestamps,
+            long expectedCurTimeslot) {
+        final BaseAppStateTimeSlotEvents testObj = createBaseAppStateTimeSlotEvents(1_000L,
+                5_000L, timestamps);
+        assertEquals(expectedCurTimeslot, testObj.getCurrentSlotStartTime(0));
+        assertListEquals(createIntLinkedList(expectedEvents), testObj.getRawEvents(0));
+    }
+
+    private void assertMergeAppStateTimeSlotEvents(int[] expectedEvents, long[] timestamps1,
+            long[] timestamps2, long expectedCurTimeslot) {
+        final BaseAppStateTimeSlotEvents testObj1 = createBaseAppStateTimeSlotEvents(1_000L,
+                5_000L, timestamps1);
+        final BaseAppStateTimeSlotEvents testObj2 = createBaseAppStateTimeSlotEvents(1_000L,
+                5_000L, timestamps2);
+        testObj1.add(testObj2);
+        assertEquals(expectedCurTimeslot, testObj1.getCurrentSlotStartTime(0));
+        assertListEquals(createIntLinkedList(expectedEvents), testObj1.getRawEvents(0));
     }
 
     private class TestBgRestrictionInjector extends AppRestrictionController.Injector {
@@ -1721,6 +1947,16 @@ public final class BackgroundRestrictionTest {
                                 BackgroundRestrictionTest.class),
                         BackgroundRestrictionTest.this);
                 controller.addAppStateTracker(mAppMediaSessionTracker);
+                mAppBroadcastEventsTracker = new AppBroadcastEventsTracker(mContext, controller,
+                        TestAppBroadcastEventsTrackerInjector.class.getDeclaredConstructor(
+                                BackgroundRestrictionTest.class),
+                        BackgroundRestrictionTest.this);
+                controller.addAppStateTracker(mAppBroadcastEventsTracker);
+                mAppBindServiceEventsTracker = new AppBindServiceEventsTracker(mContext, controller,
+                        TestAppBindServiceEventsTrackerInjector.class.getDeclaredConstructor(
+                                BackgroundRestrictionTest.class),
+                        BackgroundRestrictionTest.this);
+                controller.addAppStateTracker(mAppBindServiceEventsTracker);
             } catch (NoSuchMethodException e) {
                 // Won't happen.
             }
@@ -1873,5 +2109,23 @@ public final class BackgroundRestrictionTest {
 
     private class TestAppMediaSessionTrackerInjector
             extends TestBaseTrackerInjector<AppMediaSessionPolicy> {
+    }
+
+    private class TestAppBroadcastEventsTrackerInjector
+            extends TestBaseTrackerInjector<AppBroadcastEventsPolicy> {
+        @Override
+        void setPolicy(AppBroadcastEventsPolicy policy) {
+            super.setPolicy(policy);
+            policy.setTimeSlotSize(1_000L);
+        }
+    }
+
+    private class TestAppBindServiceEventsTrackerInjector
+            extends TestBaseTrackerInjector<AppBindServiceEventsPolicy> {
+        @Override
+        void setPolicy(AppBindServiceEventsPolicy policy) {
+            super.setPolicy(policy);
+            policy.setTimeSlotSize(1_000L);
+        }
     }
 }

@@ -776,4 +776,34 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void addForegroundServiceStateListener(
             @NonNull ForegroundServiceStateListener listener);
+
+    /**
+     * A listener interface, which will be notified on the package sends a broadcast.
+     */
+    public interface BroadcastEventListener {
+        /**
+         * Called when the given package/uid is sending a broadcast.
+         */
+        void onSendingBroadcast(String packageName, int uid);
+    }
+
+    /**
+     * Register the broadcast event listener callback.
+     */
+    public abstract void addBroadcastEventListener(@NonNull BroadcastEventListener listener);
+
+    /**
+     * A listener interface, which will be notified on the package binding to a service.
+     */
+    public interface BindServiceEventListener {
+        /**
+         * Called when the given package/uid is binding to a service
+         */
+        void onBindingService(String packageName, int uid);
+    }
+
+    /**
+     * Register the bind service event listener callback.
+     */
+    public abstract void addBindServiceEventListener(@NonNull BindServiceEventListener listener);
 }

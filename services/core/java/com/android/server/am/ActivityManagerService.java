@@ -156,6 +156,8 @@ import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityManager.RestrictionLevel;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.BindServiceEventListener;
+import android.app.ActivityManagerInternal.BroadcastEventListener;
 import android.app.ActivityManagerInternal.ForegroundServiceStateListener;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.ActivityThread;
@@ -439,6 +441,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -1381,6 +1384,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             new ArrayList<>();
 
     /**
+     * The list of broadcast event listeners.
+     */
+    final CopyOnWriteArrayList<BroadcastEventListener> mBroadcastEventListeners =
+            new CopyOnWriteArrayList<>();
+
+    /**
+     * The list of bind service event listeners.
+     */
+    final CopyOnWriteArrayList<BindServiceEventListener> mBindServiceEventListeners =
+            new CopyOnWriteArrayList<>();
+
+    /**
      * Set if the systemServer made a call to enterSafeMode.
      */
     @GuardedBy("this")
@@ -1522,6 +1537,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int KILL_APP_ZYGOTE_MSG = 71;
     static final int BINDER_HEAVYHITTER_AUTOSAMPLER_TIMEOUT_MSG = 72;
     static final int WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG = 73;
+    static final int DISPATCH_SENDING_BROADCAST_EVENT = 74;
+    static final int DISPATCH_BINDING_SERVICE_EVENT = 75;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1838,6 +1855,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     synchronized (ActivityManagerService.this) {
                         ((ContentProviderRecord) msg.obj).onProviderPublishStatusLocked(false);
                     }
+                } break;
+                case DISPATCH_SENDING_BROADCAST_EVENT: {
+                    mBroadcastEventListeners.forEach(l ->
+                            l.onSendingBroadcast((String) msg.obj, msg.arg1));
+                } break;
+                case DISPATCH_BINDING_SERVICE_EVENT: {
+                    mBindServiceEventListeners.forEach(l ->
+                            l.onBindingService((String) msg.obj, msg.arg1));
                 } break;
             }
         }
@@ -16873,6 +16898,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 mForegroundServiceStateListeners.add(listener);
             }
+        }
+
+        @Override
+        public void addBroadcastEventListener(@NonNull BroadcastEventListener listener) {
+            // It's a CopyOnWriteArrayList, so no lock is needed.
+            mBroadcastEventListeners.add(listener);
+        }
+
+        @Override
+        public void addBindServiceEventListener(@NonNull BindServiceEventListener listener) {
+            // It's a CopyOnWriteArrayList, so no lock is needed.
+            mBindServiceEventListeners.add(listener);
         }
     }
 

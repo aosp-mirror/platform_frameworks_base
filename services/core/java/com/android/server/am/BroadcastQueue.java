@@ -45,6 +45,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
@@ -2024,6 +2025,13 @@ public final class BroadcastQueue {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 createBroadcastTraceTitle(original, BroadcastRecord.DELIVERY_DELIVERED),
                 System.identityHashCode(original));
+        }
+
+        final ApplicationInfo info = original.callerApp != null ? original.callerApp.info : null;
+        final String callerPackage = info != null ? info.packageName : original.callerPackage;
+        if (callerPackage != null) {
+            mService.mHandler.obtainMessage(ActivityManagerService.DISPATCH_SENDING_BROADCAST_EVENT,
+                    original.callingUid, 0, callerPackage).sendToTarget();
         }
 
         // Note sometimes (only for sticky broadcasts?) we reuse BroadcastRecords,

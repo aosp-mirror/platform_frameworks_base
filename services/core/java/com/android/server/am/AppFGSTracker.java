@@ -350,6 +350,29 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
                 foregroundServiceTypeToIndex(FOREGROUND_SERVICE_TYPE_NONE));
     }
 
+    boolean hasForegroundServices(String packageName, int uid) {
+        synchronized (mLock) {
+            final PackageDurations pkg = mPkgEvents.get(uid, packageName);
+            return pkg != null && pkg.hasForegroundServices();
+        }
+    }
+
+    boolean hasForegroundServices(int uid) {
+        synchronized (mLock) {
+            final SparseArray<ArrayMap<String, PackageDurations>> map = mPkgEvents.getMap();
+            final ArrayMap<String, PackageDurations> pkgs = map.get(uid);
+            if (pkgs != null) {
+                for (int i = pkgs.size() - 1; i >= 0; i--) {
+                    final PackageDurations pkg = pkgs.valueAt(i);
+                    if (pkg.hasForegroundServices()) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
     @Override
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix);

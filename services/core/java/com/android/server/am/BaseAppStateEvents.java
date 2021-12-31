@@ -25,6 +25,8 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.util.LinkedList;
 
@@ -134,6 +136,11 @@ abstract class BaseAppStateEvents<E> {
         for (int i = 0; i < mEvents.length; i++) {
             mEvents[i] = add(mEvents[i], other.mEvents[i]);
         }
+    }
+
+    @VisibleForTesting
+    LinkedList<E> getRawEvents(int index) {
+        return mEvents[index];
     }
 
     /**
