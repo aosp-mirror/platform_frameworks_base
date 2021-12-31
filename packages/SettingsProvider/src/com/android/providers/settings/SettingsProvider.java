@@ -2102,7 +2102,7 @@ public class SettingsProvider extends ContentProvider {
         }
         if ((ai.flags & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
             // Skip checking readable annotations for test_only apps
-            checkReadableAnnotation(settingsType, settingName, ai.targetSandboxVersion);
+            checkReadableAnnotation(settingsType, settingName, ai.targetSdkVersion);
         }
         /**
          * some settings need additional permission check, this is to have a matching security
