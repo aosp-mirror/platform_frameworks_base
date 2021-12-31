@@ -23,8 +23,6 @@ import android.annotation.Nullable;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ServiceInfo;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseInput.DeferredError;
 import android.content.pm.parsing.result.ParseResult;
@@ -34,6 +32,8 @@ import android.content.res.XmlResourceParser;
 import android.os.Build;
 
 import com.android.internal.R;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -133,14 +133,14 @@ public class ParsedServiceUtils {
             final ParseResult parseResult;
             switch (parser.getName()) {
                 case "intent-filter":
-                    ParseResult<ParsedIntentInfo> intentResult = ParsedMainComponentUtils
+                    ParseResult<ParsedIntentInfoImpl> intentResult = ParsedMainComponentUtils
                             .parseIntentFilter(service, pkg, res, parser, visibleToEphemeral,
                                     true /*allowGlobs*/, false /*allowAutoVerify*/,
                                     false /*allowImplicitEphemeralVisibility*/,
                                     false /*failOnNoActions*/, input);
                     parseResult = intentResult;
                     if (intentResult.isSuccess()) {
-                        ParsedIntentInfo intent = intentResult.getResult();
+                        ParsedIntentInfoImpl intent = intentResult.getResult();
                         IntentFilter intentFilter = intent.getIntentFilter();
                         service.setOrder(Math.max(intentFilter.getOrder(), service.getOrder()));
                         service.addIntent(intent);

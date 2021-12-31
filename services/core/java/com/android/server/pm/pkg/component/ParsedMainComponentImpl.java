@@ -18,6 +18,7 @@ package com.android.server.pm.pkg.component;
 
 import static com.android.server.pm.pkg.parsing.ParsingPackageImpl.sForInternedString;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,10 +28,15 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
-/** @hide */
+import libcore.util.EmptyArray;
+
+/**
+ * @hide
+ */
 @DataClass(genGetters = true, genSetters = true, genBuilder = false, genParcelable = false)
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public class ParsedMainComponentImpl extends ParsedComponentImpl implements ParsedMainComponent {
+public class ParsedMainComponentImpl extends ParsedComponentImpl implements ParsedMainComponent,
+        Parcelable {
 
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
@@ -69,6 +75,12 @@ public class ParsedMainComponentImpl extends ParsedComponentImpl implements Pars
      */
     public String getClassName() {
         return getName();
+    }
+
+    @NonNull
+    @Override
+    public String[] getAttributionTags() {
+        return attributionTags == null ? EmptyArray.STRING : attributionTags;
     }
 
     @Override
@@ -178,51 +190,46 @@ public class ParsedMainComponentImpl extends ParsedComponentImpl implements Pars
     }
 
     @DataClass.Generated.Member
-    public @Nullable String[] getAttributionTags() {
-        return attributionTags;
-    }
-
-    @DataClass.Generated.Member
-    public @android.annotation.NonNull ParsedMainComponentImpl setDirectBootAware( boolean value) {
+    public @NonNull ParsedMainComponentImpl setDirectBootAware( boolean value) {
         directBootAware = value;
         return this;
     }
 
     @DataClass.Generated.Member
-    public @android.annotation.NonNull ParsedMainComponentImpl setEnabled( boolean value) {
+    public @NonNull ParsedMainComponentImpl setEnabled( boolean value) {
         enabled = value;
         return this;
     }
 
     @DataClass.Generated.Member
-    public @android.annotation.NonNull ParsedMainComponentImpl setExported( boolean value) {
+    public @NonNull ParsedMainComponentImpl setExported( boolean value) {
         exported = value;
         return this;
     }
 
     @DataClass.Generated.Member
-    public @android.annotation.NonNull ParsedMainComponentImpl setOrder( int value) {
+    public @NonNull ParsedMainComponentImpl setOrder( int value) {
         order = value;
         return this;
     }
 
     @DataClass.Generated.Member
-    public @android.annotation.NonNull ParsedMainComponentImpl setSplitName(@android.annotation.NonNull String value) {
+    public @NonNull ParsedMainComponentImpl setSplitName(@NonNull String value) {
         splitName = value;
         return this;
     }
 
     @DataClass.Generated.Member
-    public @android.annotation.NonNull ParsedMainComponentImpl setAttributionTags(@android.annotation.NonNull String... value) {
+    public @NonNull ParsedMainComponentImpl setAttributionTags(@NonNull String... value) {
         attributionTags = value;
         return this;
     }
 
     @DataClass.Generated(
-            time = 1627324857874L,
+            time = 1641414540422L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedMainComponentImpl.java",
-            inputSignatures = "private @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String processName\nprivate  boolean directBootAware\nprivate  boolean enabled\nprivate  boolean exported\nprivate  int order\nprivate @android.annotation.Nullable java.lang.String splitName\nprivate @android.annotation.Nullable java.lang.String[] attributionTags\npublic static final  android.os.Parcelable.Creator<android.content.pm.parsing.component.ParsedMainComponentImpl> CREATOR\npublic  android.content.pm.parsing.component.ParsedMainComponentImpl setProcessName(java.lang.String)\npublic  java.lang.String getClassName()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedMainComponentImpl extends android.content.pm.parsing.component.ParsedComponentImpl implements [android.content.pm.parsing.component.ParsedMainComponent]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=false)")
+            inputSignatures = "private @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String processName\nprivate  boolean directBootAware\nprivate  boolean enabled\nprivate  boolean exported\nprivate  int order\nprivate @android.annotation.Nullable java.lang.String splitName\nprivate @android.annotation.Nullable java.lang.String[] attributionTags\npublic static final  android.os.Parcelable.Creator<android.content.pm.parsing.component.ParsedMainComponentImpl> CREATOR\npublic  android.content.pm.parsing.component.ParsedMainComponentImpl setProcessName(java.lang.String)\npublic  java.lang.String getClassName()\npublic @android.annotation.NonNull @java.lang.Override java.lang.String[] getAttributionTags()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedMainComponentImpl extends android.content.pm.parsing.component.ParsedComponentImpl implements [android.content.pm.parsing.component.ParsedMainComponent, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=false)")
     @Deprecated
     private void __metadata() {}
 

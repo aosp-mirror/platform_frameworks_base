@@ -21,11 +21,13 @@ import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 
 /** @hide **/
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface ParsedActivity extends ParsedMainComponent {
 
     /**
      * Generate activity object that forwards user to App Details page automatically.
      * This activity should be invisible to user and user should not know or see it.
+     * @hide
      */
     @NonNull
     static ParsedActivity makeAppDetailsActivity(String packageName, String processName,

@@ -17,15 +17,16 @@
 package com.android.server.pm.pkg.component;
 
 /** @hide */
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface ParsedPermissionGroup extends ParsedComponent {
 
-    int getBackgroundRequestDetailResourceId();
+    int getBackgroundRequestDetailRes();
 
-    int getBackgroundRequestResourceId();
+    int getBackgroundRequestRes();
 
     int getPriority();
 
-    int getRequestDetailResourceId();
+    int getRequestDetailRes();
 
     int getRequestRes();
 }

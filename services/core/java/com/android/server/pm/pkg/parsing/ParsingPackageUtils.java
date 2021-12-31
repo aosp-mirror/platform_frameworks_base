@@ -101,6 +101,7 @@ import com.android.server.pm.pkg.component.ParsedComponent;
 import com.android.server.pm.pkg.component.ParsedInstrumentation;
 import com.android.server.pm.pkg.component.ParsedInstrumentationUtils;
 import com.android.server.pm.pkg.component.ParsedIntentInfo;
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl;
 import com.android.server.pm.pkg.component.ParsedIntentInfoUtils;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.component.ParsedPermission;
@@ -1673,7 +1674,7 @@ public class ParsingPackageUtils {
                 continue;
             }
             if (parser.getName().equals("intent")) {
-                ParseResult<ParsedIntentInfo> result = ParsedIntentInfoUtils.parseIntentInfo(
+                ParseResult<ParsedIntentInfoImpl> result = ParsedIntentInfoUtils.parseIntentInfo(
                         null /*className*/, pkg, res, parser, true /*allowGlobs*/,
                         true /*allowAutoVerify*/, input);
                 if (result.isError()) {
@@ -2679,9 +2680,8 @@ public class ParsingPackageUtils {
             // as it would have already been set when we processed the activity. We wait to
             // process the meta data here since this method is called at the end of processing
             // the application and all meta data is guaranteed.
-            final float activityAspectRatio = activity.getMetaData() != null
-                    ? activity.getMetaData().getFloat(METADATA_MAX_ASPECT_RATIO, maxAspectRatio)
-                    : maxAspectRatio;
+            final float activityAspectRatio = activity.getMetaData()
+                    .getFloat(METADATA_MAX_ASPECT_RATIO, maxAspectRatio);
 
             ComponentMutateUtils.setMaxAspectRatio(activity, activity.getResizeMode(),
                     activityAspectRatio);
@@ -2716,9 +2716,8 @@ public class ParsingPackageUtils {
         int activitiesSize = activities.size();
         for (int index = 0; index < activitiesSize; index++) {
             ParsedActivity activity = activities.get(index);
-            if (supportsSizeChanges || (activity.getMetaData() != null
-                    && activity.getMetaData().getBoolean(
-                            METADATA_SUPPORTS_SIZE_CHANGES, false))) {
+            if (supportsSizeChanges || activity.getMetaData()
+                    .getBoolean(METADATA_SUPPORTS_SIZE_CHANGES, false)) {
                 ComponentMutateUtils.setSupportsSizeChanges(activity, true);
             }
         }

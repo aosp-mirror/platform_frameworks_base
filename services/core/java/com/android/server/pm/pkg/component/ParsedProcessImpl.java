@@ -36,7 +36,7 @@ import java.util.Set;
 @DataClass(genGetters = true, genSetters = true, genParcelable = true, genAidl = false,
         genBuilder = false)
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public class ParsedProcessImpl implements ParsedProcess {
+public class ParsedProcessImpl implements ParsedProcess, Parcelable {
 
     @NonNull
     private String name;
@@ -305,10 +305,10 @@ public class ParsedProcessImpl implements ParsedProcess {
     };
 
     @DataClass.Generated(
-            time = 1639076603310L,
+            time = 1641431953775L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedProcessImpl.java",
-            inputSignatures = "private @android.annotation.NonNull java.lang.String name\nprivate @android.annotation.NonNull android.util.ArrayMap<java.lang.String,java.lang.String> appClassNamesByPackage\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet.class) java.util.Set<java.lang.String> deniedPermissions\nprivate @android.content.pm.ApplicationInfo.GwpAsanMode int gwpAsanMode\nprivate @android.content.pm.ApplicationInfo.MemtagMode int memtagMode\nprivate @android.content.pm.ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized\npublic  void addStateFrom(android.content.pm.parsing.component.ParsedProcess)\npublic  void putAppClassNameForPackage(java.lang.String,java.lang.String)\nclass ParsedProcessImpl extends java.lang.Object implements [android.content.pm.parsing.component.ParsedProcess]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genParcelable=true, genAidl=false, genBuilder=false)")
+            inputSignatures = "private @android.annotation.NonNull java.lang.String name\nprivate @android.annotation.NonNull android.util.ArrayMap<java.lang.String,java.lang.String> appClassNamesByPackage\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet.class) java.util.Set<java.lang.String> deniedPermissions\nprivate @android.content.pm.ApplicationInfo.GwpAsanMode int gwpAsanMode\nprivate @android.content.pm.ApplicationInfo.MemtagMode int memtagMode\nprivate @android.content.pm.ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized\npublic  void addStateFrom(android.content.pm.parsing.component.ParsedProcess)\npublic  void putAppClassNameForPackage(java.lang.String,java.lang.String)\nclass ParsedProcessImpl extends java.lang.Object implements [android.content.pm.parsing.component.ParsedProcess, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genParcelable=true, genAidl=false, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 

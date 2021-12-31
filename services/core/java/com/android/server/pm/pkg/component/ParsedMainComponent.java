@@ -16,17 +16,20 @@
 
 package com.android.server.pm.pkg.component;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 /** @hide */
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface ParsedMainComponent extends ParsedComponent {
 
-    @Nullable
+    @NonNull
     String[] getAttributionTags();
 
     /**
      * A main component's name is a class name. This makes code slightly more readable.
      */
+    @NonNull
     String getClassName();
 
     boolean isDirectBootAware();

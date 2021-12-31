@@ -1806,10 +1806,8 @@ final class InstallPackageHelper {
                 final PackageSetting ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
                 if (ps != null && ps.isPrivileged()) {
                     fsverityCandidates.put(pkg.getBaseApkPath(), null);
-                    if (pkg.getSplitCodePaths() != null) {
-                        for (String splitPath : pkg.getSplitCodePaths()) {
-                            fsverityCandidates.put(splitPath, null);
-                        }
+                    for (String splitPath : pkg.getSplitCodePaths()) {
+                        fsverityCandidates.put(splitPath, null);
                     }
                 }
             }
@@ -1825,15 +1823,13 @@ final class InstallPackageHelper {
                 fsverityCandidates.put(dmPath, VerityUtils.getFsveritySignatureFilePath(dmPath));
             }
 
-            if (pkg.getSplitCodePaths() != null) {
-                for (String path : pkg.getSplitCodePaths()) {
-                    fsverityCandidates.put(path, VerityUtils.getFsveritySignatureFilePath(path));
+            for (String path : pkg.getSplitCodePaths()) {
+                fsverityCandidates.put(path, VerityUtils.getFsveritySignatureFilePath(path));
 
-                    final String splitDmPath = DexMetadataHelper.buildDexMetadataPathForApk(path);
-                    if (new File(splitDmPath).exists()) {
-                        fsverityCandidates.put(splitDmPath,
-                                VerityUtils.getFsveritySignatureFilePath(splitDmPath));
-                    }
+                final String splitDmPath = DexMetadataHelper.buildDexMetadataPathForApk(path);
+                if (new File(splitDmPath).exists()) {
+                    fsverityCandidates.put(splitDmPath,
+                            VerityUtils.getFsveritySignatureFilePath(splitDmPath));
                 }
             }
         }
@@ -1989,9 +1985,7 @@ final class InstallPackageHelper {
                             oldCodePaths = new ArraySet<>();
                         }
                         Collections.addAll(oldCodePaths, oldPackage.getBaseApkPath());
-                        if (oldPackage.getSplitCodePaths() != null) {
-                            Collections.addAll(oldCodePaths, oldPackage.getSplitCodePaths());
-                        }
+                        Collections.addAll(oldCodePaths, oldPackage.getSplitCodePaths());
                         ps1.setOldCodePaths(oldCodePaths);
                     } else {
                         ps1.setOldCodePaths(null);

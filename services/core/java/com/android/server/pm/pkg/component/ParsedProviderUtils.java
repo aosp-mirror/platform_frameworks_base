@@ -16,16 +16,14 @@
 
 package com.android.server.pm.pkg.component;
 
-import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.RIGID_PARSER;
 import static com.android.server.pm.pkg.component.ComponentParseUtils.flag;
+import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.RIGID_PARSER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.IntentFilter;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
@@ -36,6 +34,8 @@ import android.os.PatternMatcher;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -173,14 +173,14 @@ public class ParsedProviderUtils {
             final ParseResult result;
             switch (name) {
                 case "intent-filter":
-                    ParseResult<ParsedIntentInfo> intentResult = ParsedMainComponentUtils
+                    ParseResult<ParsedIntentInfoImpl> intentResult = ParsedMainComponentUtils
                             .parseIntentFilter(provider, pkg, res, parser, visibleToEphemeral,
                                     true /*allowGlobs*/, false /*allowAutoVerify*/,
                                     false /*allowImplicitEphemeralVisibility*/,
                                     false /*failOnNoActions*/, input);
                     result = intentResult;
                     if (intentResult.isSuccess()) {
-                        ParsedIntentInfo intent = intentResult.getResult();
+                        ParsedIntentInfoImpl intent = intentResult.getResult();
                         IntentFilter intentFilter = intent.getIntentFilter();
                         provider.setOrder(Math.max(intentFilter.getOrder(), provider.getOrder()));
                         provider.addIntent(intent);
@@ -253,16 +253,7 @@ public class ParsedProviderUtils {
             }
 
             if (pa != null) {
-                if (provider.getUriPermissionPatterns() == null) {
-                    provider.setUriPermissionPatterns(new PatternMatcher[1]);
-                    provider.getUriPermissionPatterns()[0] = pa;
-                } else {
-                    final int N = provider.getUriPermissionPatterns().length;
-                    PatternMatcher[] newp = new PatternMatcher[N + 1];
-                    System.arraycopy(provider.getUriPermissionPatterns(), 0, newp, 0, N);
-                    newp[N] = pa;
-                    provider.setUriPermissionPatterns(newp);
-                }
+                provider.addUriPermissionPattern(pa);
                 provider.setGrantUriPermissions(true);
             } else {
                 if (RIGID_PARSER) {
@@ -357,16 +348,7 @@ public class ParsedProviderUtils {
             }
 
             if (pa != null) {
-                if (provider.getPathPermissions() == null) {
-                    provider.setPathPermissions(new PathPermission[1]);
-                    provider.getPathPermissions()[0] = pa;
-                } else {
-                    final int N = provider.getPathPermissions().length;
-                    PathPermission[] newp = new PathPermission[N + 1];
-                    System.arraycopy(provider.getPathPermissions(), 0, newp, 0, N);
-                    newp[N] = pa;
-                    provider.setPathPermissions(newp);
-                }
+                provider.addPathPermission(pa);
             } else {
                 if (RIGID_PARSER) {
                     return input.error(

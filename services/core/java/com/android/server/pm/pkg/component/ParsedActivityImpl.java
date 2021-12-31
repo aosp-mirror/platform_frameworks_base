@@ -20,8 +20,9 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static com.android.server.pm.pkg.parsing.ParsingPackageImpl.sForInternedString;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
+
+import static com.android.server.pm.pkg.parsing.ParsingPackageImpl.sForInternedString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,7 +30,6 @@ import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -37,11 +37,15 @@ import android.text.TextUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
+import com.android.server.pm.pkg.parsing.ParsingUtils;
 
-/** @hide **/
+/**
+ * @hide
+ **/
 @DataClass(genGetters = true, genSetters = true, genBuilder = false, genParcelable = false)
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public class ParsedActivityImpl extends ParsedMainComponentImpl implements ParsedActivity {
+public class ParsedActivityImpl extends ParsedMainComponentImpl implements ParsedActivity,
+        Parcelable {
 
     private int theme;
     private int uiOptions;
@@ -112,8 +116,8 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
     }
 
     /**
-     * Generate activity object that forwards user to App Details page automatically.
-     * This activity should be invisible to user and user should not know or see it.
+     * Generate activity object that forwards user to App Details page automatically. This activity
+     * should be invisible to user and user should not know or see it.
      */
     @NonNull
     static ParsedActivityImpl makeAppDetailsActivity(String packageName, String processName,
@@ -641,10 +645,10 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
     }
 
     @DataClass.Generated(
-            time = 1630600615936L,
+            time = 1641431949361L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedActivityImpl.java",
-            inputSignatures = "private  int theme\nprivate  int uiOptions\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String targetActivity\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String parentActivityName\nprivate @android.annotation.Nullable java.lang.String taskAffinity\nprivate  int privateFlags\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String permission\nprivate  int launchMode\nprivate  int documentLaunchMode\nprivate  int maxRecents\nprivate  int configChanges\nprivate  int softInputMode\nprivate  int persistableMode\nprivate  int lockTaskLaunchMode\nprivate  int screenOrientation\nprivate  int resizeMode\nprivate  float maxAspectRatio\nprivate  float minAspectRatio\nprivate  boolean supportsSizeChanges\nprivate @android.annotation.Nullable java.lang.String requestedVrComponent\nprivate  int rotationAnimation\nprivate  int colorMode\nprivate @android.annotation.Nullable android.content.pm.ActivityInfo.WindowLayout windowLayout\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<android.content.pm.parsing.component.ParsedActivityImpl> CREATOR\nstatic @android.annotation.NonNull android.content.pm.parsing.component.ParsedActivityImpl makeAppDetailsActivity(java.lang.String,java.lang.String,int,java.lang.String,boolean)\nstatic @android.annotation.NonNull android.content.pm.parsing.component.ParsedActivityImpl makeAlias(java.lang.String,android.content.pm.parsing.component.ParsedActivity)\npublic  android.content.pm.parsing.component.ParsedActivityImpl setMaxAspectRatio(int,float)\npublic  android.content.pm.parsing.component.ParsedActivityImpl setMinAspectRatio(int,float)\npublic  android.content.pm.parsing.component.ParsedActivityImpl setTargetActivity(java.lang.String)\npublic  android.content.pm.parsing.component.ParsedActivityImpl setPermission(java.lang.String)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedActivityImpl extends android.content.pm.parsing.component.ParsedMainComponentImpl implements [android.content.pm.parsing.component.ParsedActivity]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=false)")
+            inputSignatures = "private  int theme\nprivate  int uiOptions\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String targetActivity\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String parentActivityName\nprivate @android.annotation.Nullable java.lang.String taskAffinity\nprivate  int privateFlags\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String permission\nprivate  int launchMode\nprivate  int documentLaunchMode\nprivate  int maxRecents\nprivate  int configChanges\nprivate  int softInputMode\nprivate  int persistableMode\nprivate  int lockTaskLaunchMode\nprivate  int screenOrientation\nprivate  int resizeMode\nprivate  float maxAspectRatio\nprivate  float minAspectRatio\nprivate  boolean supportsSizeChanges\nprivate @android.annotation.Nullable java.lang.String requestedVrComponent\nprivate  int rotationAnimation\nprivate  int colorMode\nprivate @android.annotation.Nullable android.content.pm.ActivityInfo.WindowLayout windowLayout\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<android.content.pm.parsing.component.ParsedActivityImpl> CREATOR\nstatic @android.annotation.NonNull android.content.pm.parsing.component.ParsedActivityImpl makeAppDetailsActivity(java.lang.String,java.lang.String,int,java.lang.String,boolean)\nstatic @android.annotation.NonNull android.content.pm.parsing.component.ParsedActivityImpl makeAlias(java.lang.String,android.content.pm.parsing.component.ParsedActivity)\npublic  android.content.pm.parsing.component.ParsedActivityImpl setMaxAspectRatio(int,float)\npublic  android.content.pm.parsing.component.ParsedActivityImpl setMinAspectRatio(int,float)\npublic  android.content.pm.parsing.component.ParsedActivityImpl setTargetActivity(java.lang.String)\npublic  android.content.pm.parsing.component.ParsedActivityImpl setPermission(java.lang.String)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedActivityImpl extends android.content.pm.parsing.component.ParsedMainComponentImpl implements [android.content.pm.parsing.component.ParsedActivity, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=false)")
     @Deprecated
     private void __metadata() {}
 

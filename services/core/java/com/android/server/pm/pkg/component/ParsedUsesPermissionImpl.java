@@ -33,7 +33,7 @@ import com.android.internal.util.Parcelling;
 @DataClass(genGetters = true, genSetters = true, genBuilder = false, genParcelable = true,
         genAidl = false)
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public class ParsedUsesPermissionImpl implements ParsedUsesPermission {
+public class ParsedUsesPermissionImpl implements ParsedUsesPermission, Parcelable {
 
     @DataClass.ParcelWith(Parcelling.BuiltIn.ForInternedString.class)
     @NonNull
@@ -157,10 +157,10 @@ public class ParsedUsesPermissionImpl implements ParsedUsesPermission {
     };
 
     @DataClass.Generated(
-            time = 1627674645598L,
+            time = 1641431955242L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedUsesPermissionImpl.java",
-            inputSignatures = "private @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) @android.annotation.NonNull java.lang.String name\nprivate @android.content.pm.parsing.component.ParsedUsesPermission.UsesPermissionFlags int usesPermissionFlags\nclass ParsedUsesPermissionImpl extends java.lang.Object implements [android.content.pm.parsing.component.ParsedUsesPermission]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=true, genAidl=false)")
+            inputSignatures = "private @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) @android.annotation.NonNull java.lang.String name\nprivate @android.content.pm.parsing.component.ParsedUsesPermission.UsesPermissionFlags int usesPermissionFlags\nclass ParsedUsesPermissionImpl extends java.lang.Object implements [android.content.pm.parsing.component.ParsedUsesPermission, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=true, genAidl=false)")
     @Deprecated
     private void __metadata() {}
 

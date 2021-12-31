@@ -24,6 +24,7 @@ import android.annotation.CallSuper;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
@@ -81,11 +82,8 @@ import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.pm.pkg.component.ParsedServiceImpl;
 import com.android.server.pm.pkg.component.ParsedUsesPermission;
 import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageHidden;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
+
+import libcore.util.EmptyArray;
 
 import java.security.PublicKey;
 import java.util.Collections;
@@ -107,6 +105,7 @@ import java.util.UUID;
  */
 public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden, Parcelable {
 
+    private static final SparseArray<int[]> EMPTY_INT_ARRAY_SPARSE_ARRAY = new SparseArray<>();
     public static ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
     public static ForInternedString sForInternedString = Parcelling.Cache.getOrCreate(
             ForInternedString.class);
@@ -660,6 +659,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         return this;
     }
 
+    @SuppressLint("MissingSuperCall")
     @CallSuper
     @Override
     public Object hideAsParsed() {
@@ -1125,7 +1125,8 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
 //        appInfo.sharedLibraryInfos
 //        appInfo.showUserIcon
         appInfo.splitClassLoaderNames = splitClassLoaderNames;
-        appInfo.splitDependencies = splitDependencies;
+        appInfo.splitDependencies = (splitDependencies == null || splitDependencies.size() == 0)
+                ? null : splitDependencies;
         appInfo.splitNames = splitNames;
         appInfo.storageUuid = mStorageUuid;
         appInfo.targetSandboxVersion = targetSandboxVersion;
@@ -1144,8 +1145,8 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         appInfo.setBaseResourcePath(mBaseApkPath);
         appInfo.setCodePath(mPath);
         appInfo.setResourcePath(mPath);
-        appInfo.setSplitCodePaths(splitCodePaths);
-        appInfo.setSplitResourcePaths(splitCodePaths);
+        appInfo.setSplitCodePaths(ArrayUtils.size(splitCodePaths) == 0 ? null : splitCodePaths);
+        appInfo.setSplitResourcePaths(ArrayUtils.size(splitCodePaths) == 0 ? null : splitCodePaths);
         appInfo.setVersionCode(mLongVersionCode);
         appInfo.setAppClassNamesByProcess(buildAppClassNamesByProcess());
         appInfo.setLocaleConfigRes(mLocaleConfigRes);
@@ -1257,20 +1258,20 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         dest.writeStringList(this.originalPackages);
         sForInternedStringList.parcel(this.adoptPermissions, dest, flags);
         sForInternedStringList.parcel(this.requestedPermissions, dest, flags);
-        dest.writeTypedList(this.usesPermissions);
+        ParsingUtils.writeParcelableList(dest, this.usesPermissions);
         sForInternedStringList.parcel(this.implicitPermissions, dest, flags);
         sForStringSet.parcel(this.upgradeKeySets, dest, flags);
         ParsingPackageUtils.writeKeySetMapping(dest, this.keySetMapping);
         sForInternedStringList.parcel(this.protectedBroadcasts, dest, flags);
-        dest.writeTypedList(this.activities);
-        dest.writeTypedList(this.apexSystemServices);
-        dest.writeTypedList(this.receivers);
-        dest.writeTypedList(this.services);
-        dest.writeTypedList(this.providers);
-        dest.writeTypedList(this.attributions);
-        dest.writeTypedList(this.permissions);
-        dest.writeTypedList(this.permissionGroups);
-        dest.writeTypedList(this.instrumentations);
+        ParsingUtils.writeParcelableList(dest, this.activities);
+        ParsingUtils.writeParcelableList(dest, this.apexSystemServices);
+        ParsingUtils.writeParcelableList(dest, this.receivers);
+        ParsingUtils.writeParcelableList(dest, this.services);
+        ParsingUtils.writeParcelableList(dest, this.providers);
+        ParsingUtils.writeParcelableList(dest, this.attributions);
+        ParsingUtils.writeParcelableList(dest, this.permissions);
+        ParsingUtils.writeParcelableList(dest, this.permissionGroups);
+        ParsingUtils.writeParcelableList(dest, this.instrumentations);
         sForIntentInfoPairs.parcel(this.preferredActivityFilters, dest, flags);
         dest.writeMap(this.processes);
         dest.writeBundle(this.metaData);
@@ -1906,22 +1907,22 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         return queriesProviders;
     }
 
-    @Nullable
+    @NonNull
     @Override
     public String[] getSplitClassLoaderNames() {
-        return splitClassLoaderNames;
+        return splitClassLoaderNames == null ? EmptyArray.STRING : splitClassLoaderNames;
     }
 
-    @Nullable
+    @NonNull
     @Override
     public String[] getSplitCodePaths() {
-        return splitCodePaths;
+        return splitCodePaths == null ? EmptyArray.STRING : splitCodePaths;
     }
 
     @Nullable
     @Override
     public SparseArray<int[]> getSplitDependencies() {
-        return splitDependencies;
+        return splitDependencies == null ? EMPTY_INT_ARRAY_SPARSE_ARRAY : splitDependencies;
     }
 
     @Nullable
@@ -1930,16 +1931,16 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         return splitFlags;
     }
 
-    @Nullable
+    @NonNull
     @Override
     public String[] getSplitNames() {
-        return splitNames;
+        return splitNames == null ? EmptyArray.STRING : splitNames;
     }
 
-    @Nullable
+    @NonNull
     @Override
     public int[] getSplitRevisionCodes() {
-        return splitRevisionCodes;
+        return splitRevisionCodes == null ? EmptyArray.INT : splitRevisionCodes;
     }
 
     @Nullable

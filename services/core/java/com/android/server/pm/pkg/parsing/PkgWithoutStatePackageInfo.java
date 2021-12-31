@@ -249,12 +249,13 @@ public interface PkgWithoutStatePackageInfo {
      * @see ApplicationInfo#splitNames
      * @see PackageInfo#splitNames
      */
-    @Nullable
+    @NonNull
     String[] getSplitNames();
 
     /**
      * @see PackageInfo#splitRevisionCodes
      */
+    @NonNull
     int[] getSplitRevisionCodes();
 
     /**

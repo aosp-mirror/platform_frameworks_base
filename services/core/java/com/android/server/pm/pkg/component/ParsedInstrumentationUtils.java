@@ -19,7 +19,6 @@ package com.android.server.pm.pkg.component;
 import static com.android.server.pm.pkg.parsing.ParsingUtils.NOT_SET;
 
 import android.annotation.NonNull;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
@@ -27,12 +26,15 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 
 import com.android.internal.R;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 
-/** @hide */
+/**
+ * @hide
+ */
 public class ParsedInstrumentationUtils {
 
     @NonNull

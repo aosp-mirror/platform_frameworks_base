@@ -20,8 +20,6 @@ import static com.android.server.pm.pkg.parsing.ParsingUtils.NOT_SET;
 
 import android.annotation.NonNull;
 import android.content.pm.PermissionInfo;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
@@ -31,13 +29,17 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.List;
 
-/** @hide */
+/**
+ * @hide
+ */
 public class ParsedPermissionUtils {
 
     private static final String TAG = ParsingUtils.TAG;
@@ -107,7 +109,7 @@ public class ParsedPermissionUtils {
                         permission.setKnownCert(knownCert);
                     }
                 }
-                if (permission.getKnownCerts() == null) {
+                if (permission.getKnownCerts().isEmpty()) {
                     Slog.w(TAG, packageName + " defines a knownSigner permission but"
                             + " the provided knownCerts resource is null");
                 }
@@ -228,9 +230,9 @@ public class ParsedPermissionUtils {
             }
 
             // @formatter:off
-            permissionGroup.setRequestDetailResourceId(sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_requestDetail, 0))
-                    .setBackgroundRequestResourceId(sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_backgroundRequest, 0))
-                    .setBackgroundRequestDetailResourceId(sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_backgroundRequestDetail, 0))
+            permissionGroup.setRequestDetailRes(sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_requestDetail, 0))
+                    .setBackgroundRequestRes(sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_backgroundRequest, 0))
+                    .setBackgroundRequestDetailRes(sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_backgroundRequestDetail, 0))
                     .setRequestRes(sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_request, 0))
                     .setPriority(sa.getInt(R.styleable.AndroidManifestPermissionGroup_priority, 0))
                     .setFlags(sa.getInt(R.styleable.AndroidManifestPermissionGroup_permissionGroupFlags,0));

@@ -19,10 +19,10 @@ package com.android.server.pm.pkg.component;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.IntentFilter;
-import android.os.Parcelable;
 
 /** @hide **/
-public interface ParsedIntentInfo extends Parcelable {
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+public interface ParsedIntentInfo {
 
     boolean isHasDefault();
 

@@ -60,7 +60,7 @@ import com.android.server.pm.Settings;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
-import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.PackageUserStateUtils;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
@@ -1751,7 +1751,7 @@ public class DomainVerificationService extends SystemService
         int approvalLevel = approvalLevelForDomainInternal(pkgSetting, host, includeNegative,
                 userId, debugObject);
         if (includeNegative && approvalLevel == APPROVAL_LEVEL_NONE) {
-            PackageUserState pkgUserState = pkgSetting.getUserStateOrDefault(userId);
+            PackageUserStateInternal pkgUserState = pkgSetting.getUserStateOrDefault(userId);
             if (!pkgUserState.isInstalled()) {
                 return APPROVAL_LEVEL_NOT_INSTALLED;
             }
@@ -1783,7 +1783,7 @@ public class DomainVerificationService extends SystemService
             return APPROVAL_LEVEL_UNDECLARED;
         }
 
-        final PackageUserState pkgUserState = pkgSetting.getUserStates().get(userId);
+        final PackageUserStateInternal pkgUserState = pkgSetting.getUserStates().get(userId);
         if (pkgUserState == null) {
             if (DEBUG_APPROVAL) {
                 debugApproval(packageName, debugObject, userId, false,
