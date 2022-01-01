@@ -17,6 +17,7 @@
 package com.android.server.policy.keyguard;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -249,6 +250,24 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     public void onShortPowerPressedGoHome() {
         try {
             mService.onShortPowerPressedGoHome();
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
+    @Override
+    public void dismissKeyguardToLaunch(Intent intentToLaunch) {
+        try {
+            mService.dismissKeyguardToLaunch(intentToLaunch);
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
+    @Override
+    public void onSystemKeyPressed(int keycode) {
+        try {
+            mService.onSystemKeyPressed(keycode);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }

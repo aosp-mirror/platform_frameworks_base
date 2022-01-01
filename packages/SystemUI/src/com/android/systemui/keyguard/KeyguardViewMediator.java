@@ -2750,6 +2750,14 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         // do nothing
     }
 
+    public void dismissKeyguardToLaunch(Intent intentToLaunch) {
+        // do nothing
+    }
+
+    public void onSystemKeyPressed(int keycode) {
+        // do nothing
+    }
+
     public ViewMediatorCallback getViewMediatorCallback() {
         return mViewMediatorCallback;
     }

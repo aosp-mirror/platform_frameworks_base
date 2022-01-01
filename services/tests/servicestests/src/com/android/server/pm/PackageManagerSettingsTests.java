@@ -264,17 +264,17 @@ public class PackageManagerSettingsTests {
         final SuspendParams params = packageUserState1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("fetch user state");
         assertThat(params, is(notNullValue()));
-        assertThat(params.appExtras.size(), is(1));
-        assertThat(params.appExtras.getString("app_extra_string"), is("value"));
-        assertThat(params.launcherExtras.size(), is(1));
-        assertThat(params.launcherExtras.getLong("launcher_extra_long"), is(4L));
-        assertThat(params.dialogInfo, is(notNullValue()));
-        assertThat(params.dialogInfo.getDialogMessage(), is("Dialog Message"));
-        assertThat(params.dialogInfo.getTitleResId(), is(ID_NULL));
-        assertThat(params.dialogInfo.getIconResId(), is(TEST_RESOURCE_ID));
-        assertThat(params.dialogInfo.getNeutralButtonTextResId(), is(ID_NULL));
-        assertThat(params.dialogInfo.getNeutralButtonAction(), is(BUTTON_ACTION_MORE_DETAILS));
-        assertThat(params.dialogInfo.getDialogMessageResId(), is(ID_NULL));
+        assertThat(params.getAppExtras().size(), is(1));
+        assertThat(params.getAppExtras().getString("app_extra_string"), is("value"));
+        assertThat(params.getLauncherExtras().size(), is(1));
+        assertThat(params.getLauncherExtras().getLong("launcher_extra_long"), is(4L));
+        assertThat(params.getDialogInfo(), is(notNullValue()));
+        assertThat(params.getDialogInfo().getDialogMessage(), is("Dialog Message"));
+        assertThat(params.getDialogInfo().getTitleResId(), is(ID_NULL));
+        assertThat(params.getDialogInfo().getIconResId(), is(TEST_RESOURCE_ID));
+        assertThat(params.getDialogInfo().getNeutralButtonTextResId(), is(ID_NULL));
+        assertThat(params.getDialogInfo().getNeutralButtonAction(), is(BUTTON_ACTION_MORE_DETAILS));
+        assertThat(params.getDialogInfo().getDialogMessageResId(), is(ID_NULL));
     }
 
     @Test
@@ -351,18 +351,18 @@ public class PackageManagerSettingsTests {
         final SuspendParams params11 = readPus1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("read package param");
         assertThat(params11, is(notNullValue()));
-        assertThat(params11.dialogInfo, is(dialogInfo1));
-        assertThat(BaseBundle.kindofEquals(params11.appExtras, appExtras1), is(true));
-        assertThat(BaseBundle.kindofEquals(params11.launcherExtras, launcherExtras1),
+        assertThat(params11.getDialogInfo(), is(dialogInfo1));
+        assertThat(BaseBundle.kindofEquals(params11.getAppExtras(), appExtras1), is(true));
+        assertThat(BaseBundle.kindofEquals(params11.getLauncherExtras(), launcherExtras1),
                 is(true));
         watcher.verifyNoChangeReported("read package param");
 
         assertThat(readPus1.getSuspendParams().keyAt(1), is("suspendingPackage2"));
         final SuspendParams params12 = readPus1.getSuspendParams().valueAt(1);
         assertThat(params12, is(notNullValue()));
-        assertThat(params12.dialogInfo, is(dialogInfo2));
-        assertThat(BaseBundle.kindofEquals(params12.appExtras, appExtras2), is(true));
-        assertThat(BaseBundle.kindofEquals(params12.launcherExtras, launcherExtras2),
+        assertThat(params12.getDialogInfo(), is(dialogInfo2));
+        assertThat(BaseBundle.kindofEquals(params12.getAppExtras(), appExtras2), is(true));
+        assertThat(BaseBundle.kindofEquals(params12.getLauncherExtras(), launcherExtras2),
                 is(true));
         watcher.verifyNoChangeReported("read package param");
 
@@ -373,9 +373,9 @@ public class PackageManagerSettingsTests {
         assertThat(readPus2.getSuspendParams().keyAt(0), is("suspendingPackage3"));
         final SuspendParams params21 = readPus2.getSuspendParams().valueAt(0);
         assertThat(params21, is(notNullValue()));
-        assertThat(params21.dialogInfo, is(nullValue()));
-        assertThat(BaseBundle.kindofEquals(params21.appExtras, appExtras1), is(true));
-        assertThat(params21.launcherExtras, is(nullValue()));
+        assertThat(params21.getDialogInfo(), is(nullValue()));
+        assertThat(BaseBundle.kindofEquals(params21.getAppExtras(), appExtras1), is(true));
+        assertThat(params21.getLauncherExtras(), is(nullValue()));
         watcher.verifyNoChangeReported("read package param");
 
         final PackageUserStateInternal readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3)
@@ -388,7 +388,7 @@ public class PackageManagerSettingsTests {
     @Test
     public void testPackageRestrictionsSuspendedDefault() {
         final PackageSetting defaultSetting = createPackageSetting(PACKAGE_NAME_1);
-        assertThat(defaultSetting.getSuspended(0), is(false));
+        assertThat(defaultSetting.getUserStateOrDefault(0).isSuspended(), is(false));
     }
 
     @Test

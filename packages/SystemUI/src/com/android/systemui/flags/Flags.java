@@ -49,6 +49,12 @@ public class Flags {
     public static final ResourceBooleanFlag NOTIFICATION_SHADE_DRAG =
             new ResourceBooleanFlag(104, R.bool.config_enableNotificationShadeDrag);
 
+    public static final BooleanFlag NSSL_DEBUG_LINES =
+            new BooleanFlag(105, false);
+
+    public static final BooleanFlag NSSL_DEBUG_REMOVE_ANIMATION =
+            new BooleanFlag(106, false);
+
     /***************************************/
     // 200 - keyguard/lockscreen
     public static final BooleanFlag KEYGUARD_LAYOUT =

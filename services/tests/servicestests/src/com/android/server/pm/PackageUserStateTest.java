@@ -82,7 +82,8 @@ public class PackageUserStateTest {
         assertThat(testUserState.equals(oldUserState), is(false));
 
         oldUserState = new PackageUserStateImpl();
-        oldUserState.setSuspended(true);
+        oldUserState.putSuspendParams("suspendingPackage",
+                SuspendParams.getInstanceOrNull(null, new PersistableBundle(), null));
         assertThat(testUserState.equals(oldUserState), is(false));
 
         oldUserState = new PackageUserStateImpl();
@@ -231,7 +232,6 @@ public class PackageUserStateTest {
 
 
         final PackageUserStateImpl testUserState1 = new PackageUserStateImpl();
-        testUserState1.setSuspended(true);
         testUserState1.setSuspendParams(paramsMap1);
 
         PackageUserStateImpl testUserState2 =
