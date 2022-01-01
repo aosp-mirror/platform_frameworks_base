@@ -50,6 +50,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.mutate.PackageStateMutator;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -885,17 +886,6 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     public abstract boolean userNeedsBadging(int userId);
 
     /**
-     * Perform the given action for each package.
-     * Note that packages lock will be held while performing the actions.
-     *
-     * If the caller does not need all packages, prefer the potentially non-locking
-     * {@link #withPackageSettingsSnapshot(Consumer)}.
-     *
-     * @param actionLocked action to be performed
-     */
-    public abstract void forEachPackage(Consumer<AndroidPackage> actionLocked);
-
-    /**
      * Perform the given action for each {@link PackageSetting}.
      * Note that packages lock will be held while performing the actions.
      *
@@ -918,11 +908,23 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     public abstract void forEachPackageState(boolean locked, Consumer<PackageStateInternal> action);
 
     /**
+     * {@link #forEachPackageState(boolean, Consumer)} but filtered to only states with packages
+     * on device where {@link PackageStateInternal#getPkg()} is not null.
+     */
+    public abstract void forEachPackage(Consumer<AndroidPackage> action);
+
+    /**
      * Perform the given action for each installed package for a user.
      * Note that packages lock will be held while performing the actions.
      */
     public abstract void forEachInstalledPackage(
             @NonNull Consumer<AndroidPackage> actionLocked, @UserIdInt int userId);
+
+    /**
+     * Perform the given action for each installed package for a user.
+     */
+    public abstract void forEachInstalledPackage(boolean locked,
+            @NonNull Consumer<AndroidPackage> action, @UserIdInt int userId);
 
     /** Returns the list of enabled components */
     public abstract ArraySet<String> getEnabledComponents(String packageName, int userId);
@@ -1265,4 +1267,62 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      */
     public abstract void reconcileAppsData(int userId, @StorageManager.StorageFlags int flags,
             boolean migrateAppsData);
+
+    /**
+     * Initiates a package state mutation request, returning the current state as known by
+     * PackageManager. This allows the later commit request to compare the initial values and
+     * determine if any state was changed or any packages were updated since the whole request
+     * was initiated.
+     *
+     * As a concrete example, consider the following steps:
+     * <ol>
+     *     <li>Read a package state without taking a lock</li>
+     *     <li>Check some values in that state, determine that a mutation needs to occur</li>
+     *     <li>Call to commit the change with the new value, takes lock</li>
+     * </ol>
+     *
+     * Between steps 1 and 3, because the lock was not taken for the entire flow, it's possible
+     * a package state was changed by another consumer or a package was updated/installed.
+     *
+     * If anything has changed,
+     * {@link #commitPackageStateMutation(PackageStateMutator.InitialState, Consumer)} will return
+     * a {@link PackageStateMutator.Result} indicating so. If the caller has not indicated it can
+     * ignore changes, it can opt to re-run the commit logic from the top with a true write lock
+     * around all of its read-logic-commit loop.
+     *
+     * Note that if the caller does not care about potential race conditions or package/state
+     * changes between steps 1 and 3, it can simply opt to not call this method and pass in null
+     * for the initial state. This is useful to avoid long running data structure locks when the
+     * caller is changing a value as part of a one-off request. Perhaps from an app side API which
+     * mutates only a single package, where it doesn't care what the state of that package is or
+     * any other packages on the devices.
+     *
+     * Important to note is that if no locking is enforced, callers themselves will not be
+     * synchronized with themselves. The caller may be relying on the PackageManager lock to
+     * enforce ordering within their own code path, and that has to be adjusted if migrated off
+     * the lock.
+     */
+    @NonNull
+    public abstract PackageStateMutator.InitialState recordInitialState();
+
+    /**
+     * Some questions to ask when designing a mutation:
+     * <ol>
+     *     <li>What external system state is required and is it synchronized properly?</li>
+     *     <li>Are there any package/state changes that could happen to the target (or another)
+     *     package that could result in the commit being invalid?</li>
+     *     <li>Is the caller synchronized with itself and can handle multiple mutations being
+     *     requested from different threads?</li>
+     *     <li>What should be done in case of a conflict and the commit can't be finished?</li>
+     * </ol>
+     *
+     * @param state See {@link #recordInitialState()}. If null, no result is returned.
+     * @param consumer Lean wrapper around just the logic that changes state values
+     * @return result if anything changed since initial state, or null if nothing changed and
+     * commit was successful
+     */
+    @Nullable
+    public abstract PackageStateMutator.Result commitPackageStateMutation(
+            @Nullable PackageStateMutator.InitialState state,
+            @NonNull Consumer<PackageStateMutator> consumer);
 }

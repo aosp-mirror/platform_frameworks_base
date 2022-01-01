@@ -17058,6 +17058,15 @@ public final class Settings {
              */
             public static final String CLOCKWORK_SYSUI_MAIN_ACTIVITY =
                     "clockwork_sysui_main_activity";
+
+            /**
+             * Setting to disable power button long press launching Assistant. It's boolean, i.e.
+             * enabled = 1, disabled = 0. By default, this setting is enabled.
+             *
+             * @hide
+             */
+            public static final String CLOCKWORK_LONG_PRESS_TO_ASSISTANT_ENABLED =
+                    "clockwork_long_press_to_assistant_enabled";
         }
     }
 

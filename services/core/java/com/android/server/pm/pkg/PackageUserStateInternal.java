@@ -32,6 +32,7 @@ public interface PackageUserStateInternal extends PackageUserState {
 
     PackageUserStateInternal DEFAULT = new PackageUserStateDefault();
 
+    // TODO: Make non-null with emptyMap()
     @Nullable
     ArrayMap<String, SuspendParams> getSuspendParams();
 
