@@ -24,13 +24,15 @@ import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
 import android.os.RemoteException;
-import android.util.IntArray;
 import android.util.Log;
+
+import com.android.net.module.util.CollectionUtils;
 
 import dalvik.system.CloseGuard;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 
 /**
  * Class providing enumeration over buckets of network usage statistics. {@link NetworkStats} objects
@@ -568,7 +570,7 @@ public final class NetworkStats implements AutoCloseable {
         //       the filtering logic below can be removed.
         int[] uids = mSession.getRelevantUids();
         // Filtering of uids with empty history.
-        IntArray filteredUids = new IntArray(uids.length);
+        final ArrayList<Integer> filteredUids = new ArrayList<>();
         for (int uid : uids) {
             try {
                 NetworkStatsHistory history = mSession.getHistoryIntervalForUid(mTemplate, uid,
@@ -581,7 +583,7 @@ public final class NetworkStats implements AutoCloseable {
                 Log.w(TAG, "Error while getting history of uid " + uid, e);
             }
         }
-        mUids = filteredUids.toArray();
+        mUids = CollectionUtils.toIntArray(filteredUids);
         mUidOrUidIndex = -1;
         stepHistory();
     }
