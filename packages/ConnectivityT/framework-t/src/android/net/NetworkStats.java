@@ -31,7 +31,7 @@ import android.os.SystemClock;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
+import com.android.net.module.util.CollectionUtils;
 
 import libcore.util.EmptyArray;
 
@@ -1185,7 +1185,7 @@ public final class NetworkStats implements Parcelable {
      * @hide
      */
     public void removeUids(int[] uids) {
-        filter(e -> !ArrayUtils.contains(uids, e.uid));
+        filter(e -> !CollectionUtils.contains(uids, e.uid));
     }
 
     /**
@@ -1218,7 +1218,7 @@ public final class NetworkStats implements Parcelable {
         filter(e -> (limitUid == UID_ALL || limitUid == e.uid)
                 && (limitTag == TAG_ALL || limitTag == e.tag)
                 && (limitIfaces == INTERFACES_ALL
-                    || ArrayUtils.contains(limitIfaces, e.iface)));
+                    || CollectionUtils.contains(limitIfaces, e.iface)));
     }
 
     /**
