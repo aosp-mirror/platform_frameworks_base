@@ -7671,6 +7671,33 @@ public class AudioManager {
     }
 
     /**
+     * Returns a list of direct {@link AudioProfile} that are supported for the specified
+     * {@link AudioAttributes}. This can be empty in case of an error or if no direct playback
+     * is possible.
+     *
+     * <p>Direct playback means that the audio stream is not resampled or downmixed
+     * by the framework. Checking for direct support can help the app select the representation
+     * of audio content that most closely matches the capabilities of the device and peripherals
+     * (e.g. A/V receiver) connected to it. Note that the provided stream can still be re-encoded
+     * or mixed with other streams, if needed.
+     * <p>When using this information to inform your application which audio format to play,
+     * query again whenever audio output devices change (see {@link AudioDeviceCallback}).
+     * @param attributes a non-null {@link AudioAttributes} instance.
+     * @return a list of {@link AudioProfile}
+     */
+    @NonNull
+    public List<AudioProfile> getDirectProfilesForAttributes(@NonNull AudioAttributes attributes) {
+        Objects.requireNonNull(attributes);
+        ArrayList<AudioProfile> audioProfilesList = new ArrayList<>();
+        int status = AudioSystem.getDirectProfilesForAttributes(attributes, audioProfilesList);
+        if (status != SUCCESS) {
+            Log.w(TAG, "getDirectProfilesForAttributes failed.");
+            return new ArrayList<>();
+        }
+        return audioProfilesList;
+    }
+
+    /**
      * @hide
      * Returns an {@link AudioDeviceInfo} corresponding to a connected device of the type provided.
      * The type must be a valid output type defined in <code>AudioDeviceInfo</code> class,
