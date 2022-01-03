@@ -1661,9 +1661,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     }
                     synchronized (mSessions) {
                         // Child sessions will be removed along with its parent as a whole
-                        if (!session.hasParentSessionId()
-                                && (!session.isStaged() || session.isDestroyed())) {
-                            removeActiveSession(session);
+                        if (!session.hasParentSessionId()) {
+                            // Retain policy:
+                            // 1. Don't keep non-staged sessions
+                            // 2. Don't keep explicitly abandoned sessions
+                            // 3. Don't keep sessions that fail validation (isCommitted() is false)
+                            boolean shouldRemove = !session.isStaged() || session.isDestroyed()
+                                    || !session.isCommitted();
+                            if (shouldRemove) {
+                                removeActiveSession(session);
+                            }
                         }
 
                         final File appIconFile = buildAppIconFile(session.sessionId);
