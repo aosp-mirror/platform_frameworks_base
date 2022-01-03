@@ -6337,7 +6337,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
             } else if (w.isDrawn()) {
                 // The starting window for this container is drawn.
-                mTaskSupervisor.getActivityMetricsLogger().notifyStartingWindowDrawn(this);
                 startingDisplayed = true;
             }
         }
