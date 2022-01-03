@@ -37,16 +37,21 @@ class TwoActivitiesAppHelper @JvmOverloads constructor(
         .launcherStrategy
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
     fun openSecondActivity(device: UiDevice, wmHelper: WindowManagerStateHelper) {
-        val button = device.wait(
-                Until.findObject(By.res(getPackage(), "launch_second_activity")),
-                FIND_TIMEOUT)
+        val launchActivityButton = By.res(getPackage(), LAUNCH_SECOND_ACTIVITY)
+        val button = device.wait(Until.findObject(launchActivityButton), FIND_TIMEOUT)
 
         require(button != null) {
             "Button not found, this usually happens when the device " +
                     "was left in an unknown state (e.g. in split screen)"
         }
         button.click()
+
+        device.wait(Until.gone(launchActivityButton), FIND_TIMEOUT)
         wmHelper.waitForAppTransitionIdle()
         wmHelper.waitForFullScreenApp(component)
+    }
+
+    companion object {
+        private const val LAUNCH_SECOND_ACTIVITY = "launch_second_activity"
     }
 }
