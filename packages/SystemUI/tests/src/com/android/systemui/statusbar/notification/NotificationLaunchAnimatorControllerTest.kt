@@ -4,6 +4,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
@@ -29,6 +30,7 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
     @Mock lateinit var notificationShadeWindowViewController: NotificationShadeWindowViewController
     @Mock lateinit var notificationListContainer: NotificationListContainer
     @Mock lateinit var headsUpManager: HeadsUpManagerPhone
+    @Mock lateinit var jankMonitor: InteractionJankMonitor
 
     private lateinit var notificationTestHelper: NotificationTestHelper
     private lateinit var notification: ExpandableNotificationRow
@@ -49,7 +51,8 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
                 notificationShadeWindowViewController,
                 notificationListContainer,
                 headsUpManager,
-                notification
+                notification,
+                jankMonitor
         )
     }
 

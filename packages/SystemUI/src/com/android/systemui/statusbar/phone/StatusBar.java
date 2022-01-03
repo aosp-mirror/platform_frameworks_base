@@ -116,6 +116,7 @@ import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -677,6 +678,8 @@ public class StatusBar extends CoreStartable implements
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();
 
+    private final InteractionJankMonitor mJankMonitor;
+
 
     /**
      * Public constructor for StatusBar.
@@ -779,7 +782,8 @@ public class StatusBar extends CoreStartable implements
             WallpaperManager wallpaperManager,
             Optional<StartingSurface> startingSurfaceOptional,
             ActivityLaunchAnimator activityLaunchAnimator,
-            NotifPipelineFlags notifPipelineFlags) {
+            NotifPipelineFlags notifPipelineFlags,
+            InteractionJankMonitor jankMonitor) {
         super(context);
         mNotificationsController = notificationsController;
         mFragmentService = fragmentService;
@@ -867,6 +871,7 @@ public class StatusBar extends CoreStartable implements
         mMainExecutor = delayableExecutor;
         mMessageRouter = messageRouter;
         mWallpaperManager = wallpaperManager;
+        mJankMonitor = jankMonitor;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -1387,7 +1392,8 @@ public class StatusBar extends CoreStartable implements
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
                 mNotificationShadeWindowViewController,
                 mStackScrollerController.getNotificationListContainer(),
-                mHeadsUpManager
+                mHeadsUpManager,
+                mJankMonitor
         );
 
         // TODO: inject this.

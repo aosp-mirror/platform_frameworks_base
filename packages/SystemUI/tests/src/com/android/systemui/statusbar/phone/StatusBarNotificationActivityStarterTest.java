@@ -48,6 +48,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
@@ -64,7 +65,6 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -143,6 +143,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private StatusBarNotificationActivityStarter mNotificationActivityStarter;
     @Mock
     private ActivityLaunchAnimator mActivityLaunchAnimator;
+    @Mock
+    private InteractionJankMonitor mJankMonitor;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     private NotificationTestHelper mNotificationTestHelper;
@@ -197,7 +199,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 new NotificationLaunchAnimatorControllerProvider(
                         mock(NotificationShadeWindowViewController.class), mock(
                         NotificationListContainer.class),
-                        headsUpManager);
+                        headsUpManager,
+                        mJankMonitor);
 
         mNotificationActivityStarter =
                 new StatusBarNotificationActivityStarter.Builder(
