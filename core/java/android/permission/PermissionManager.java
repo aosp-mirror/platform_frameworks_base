@@ -218,7 +218,8 @@ public final class PermissionManager {
     /**
      * Checks whether a given data access chain described by the given {@link AttributionSource}
      * has a given permission. Call this method if you are the datasource which would not blame you
-     * for access to the data since you are the data.
+     * for access to the data since you are the data. Use this API if you are the datasource of the
+     * protected state.
      *
      * <strong>NOTE:</strong> Use this method only for permission checks at the
      * point where you will deliver the permission protected data to clients.
