@@ -32,13 +32,12 @@ import android.net.TrafficStats;
 import android.os.Binder;
 import android.os.DropBoxManager;
 import android.service.NetworkStatsRecorderProto;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FileRotator;
-import com.android.internal.util.IndentingPrintWriter;
 
 import com.google.android.collect.Sets;
 
@@ -132,7 +131,7 @@ public class NetworkStatsRecorder {
     }
 
     public void setPersistThreshold(long thresholdBytes) {
-        if (LOGV) Slog.v(TAG, "setPersistThreshold() with " + thresholdBytes);
+        if (LOGV) Log.v(TAG, "setPersistThreshold() with " + thresholdBytes);
         mPersistThresholdBytes = MathUtils.constrain(
                 thresholdBytes, 1 * KB_IN_BYTES, 100 * MB_IN_BYTES);
     }
@@ -185,7 +184,7 @@ public class NetworkStatsRecorder {
     }
 
     private NetworkStatsCollection loadLocked(long start, long end) {
-        if (LOGD) Slog.d(TAG, "loadLocked() reading from disk for " + mCookie);
+        if (LOGD) Log.d(TAG, "loadLocked() reading from disk for " + mCookie);
         final NetworkStatsCollection res = new NetworkStatsCollection(mBucketDuration);
         try {
             mRotator.readMatching(res, start, end);
@@ -272,7 +271,7 @@ public class NetworkStatsRecorder {
         mLastSnapshot = snapshot;
 
         if (LOGV && unknownIfaces.size() > 0) {
-            Slog.w(TAG, "unknown interfaces " + unknownIfaces + ", ignoring those stats");
+            Log.w(TAG, "unknown interfaces " + unknownIfaces + ", ignoring those stats");
         }
     }
 
@@ -296,7 +295,7 @@ public class NetworkStatsRecorder {
     public void forcePersistLocked(long currentTimeMillis) {
         Objects.requireNonNull(mRotator, "missing FileRotator");
         if (mPending.isDirty()) {
-            if (LOGD) Slog.d(TAG, "forcePersistLocked() writing for " + mCookie);
+            if (LOGD) Log.d(TAG, "forcePersistLocked() writing for " + mCookie);
             try {
                 mRotator.rewriteActive(mPendingRewriter, currentTimeMillis);
                 mRotator.maybeRotate(currentTimeMillis);
