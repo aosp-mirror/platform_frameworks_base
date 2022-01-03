@@ -21,7 +21,6 @@ import static android.net.ConnectivityManager.TYPE_WIFI;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.service.NetworkIdentityProto;
 import android.telephony.Annotation.NetworkType;
 import android.util.proto.ProtoOutputStream;
@@ -228,11 +227,11 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         final int oemManaged = getOemBitfield(snapshot.getNetworkCapabilities());
 
         if (legacyType == TYPE_WIFI) {
-            networkId = snapshot.getNetworkCapabilities().getSsid();
-            if (networkId == null) {
-                final WifiManager wifi = context.getSystemService(WifiManager.class);
-                final WifiInfo info = wifi.getConnectionInfo();
-                networkId = info != null ? info.getSSID() : null;
+            final TransportInfo transportInfo = snapshot.getNetworkCapabilities()
+                    .getTransportInfo();
+            if (transportInfo instanceof WifiInfo) {
+                final WifiInfo info = (WifiInfo) transportInfo;
+                networkId = info != null ? info.getCurrentNetworkKey() : null;
             }
         }
 
