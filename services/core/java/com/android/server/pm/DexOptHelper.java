@@ -379,7 +379,7 @@ final class DexOptHelper {
         // at boot, or background job), the passed 'targetCompilerFilter' stays the same,
         // and the first package that uses the library will dexopt it. The
         // others will see that the compiled code for the library is up to date.
-        Collection<SharedLibraryInfo> deps = SharedLibraryHelper.findSharedLibraries(pkgSetting);
+        Collection<SharedLibraryInfo> deps = SharedLibraryUtils.findSharedLibraries(pkgSetting);
         final String[] instructionSets = getAppDexInstructionSets(
                 AndroidPackageUtils.getPrimaryCpuAbi(p, pkgSetting),
                 AndroidPackageUtils.getSecondaryCpuAbi(p, pkgSetting));

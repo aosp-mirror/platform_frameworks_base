@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-final class SharedLibraryHelper {
+final class SharedLibraryUtils {
     private static final boolean DEBUG_SHARED_LIBRARIES = false;
 
     /**

@@ -67,11 +67,11 @@ final class ReconcilePackageUtils {
 
             // in the first pass, we'll build up the set of incoming shared libraries
             final List<SharedLibraryInfo> allowedSharedLibInfos =
-                    SharedLibraryHelper.getAllowedSharedLibInfos(scanResult,
+                    SharedLibraryUtils.getAllowedSharedLibInfos(scanResult,
                             request.mSharedLibrarySource);
             if (allowedSharedLibInfos != null) {
                 for (SharedLibraryInfo info : allowedSharedLibInfos) {
-                    if (!SharedLibraryHelper.addSharedLibraryToPackageVersionMap(
+                    if (!SharedLibraryUtils.addSharedLibraryToPackageVersionMap(
                             incomingSharedLibraries, info)) {
                         throw new ReconcileFailure("Shared Library " + info.getName()
                                 + " is being installed twice in this set!");
@@ -264,7 +264,7 @@ final class ReconcilePackageUtils {
             }
             try {
                 result.get(installPackageName).mCollectedSharedLibraryInfos =
-                        SharedLibraryHelper.collectSharedLibraryInfos(
+                        SharedLibraryUtils.collectSharedLibraryInfos(
                                 scanResult.mRequest.mParsedPackage,
                                 combinedPackages, request.mSharedLibrarySource,
                                 incomingSharedLibraries, injector.getCompatibility());

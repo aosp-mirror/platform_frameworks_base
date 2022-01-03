@@ -494,7 +494,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
             @NonNull Map<String, AndroidPackage> availablePackages)
             throws PackageManagerException {
         final ArrayList<SharedLibraryInfo> sharedLibraryInfos =
-                SharedLibraryHelper.collectSharedLibraryInfos(
+                SharedLibraryUtils.collectSharedLibraryInfos(
                         pkgSetting.getPkg(), availablePackages, mSharedLibraries,
                         null /* newLibraries */, mInjector.getCompatibility());
         executeSharedLibrariesUpdateLPw(pkg, pkgSetting, changingLib, changingLibSetting,
