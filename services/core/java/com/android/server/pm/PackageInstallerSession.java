@@ -2229,7 +2229,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 final PackageInstallerSession root = hasParentSessionId()
                         ? allSessions.get(getParentSessionId())
                         : this;
-                if (root != null) {
+                if (root != null && !root.isStagedAndInTerminalState()) {
                     if (isApexSession()) {
                         validateApexInstallLocked();
                     } else {
