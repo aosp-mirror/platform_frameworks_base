@@ -2332,6 +2332,17 @@
              contrast between the window background and the icon. Note the shape would also be
              masking like an icon. -->
         <attr name="windowSplashScreenIconBackgroundColor" format="color"/>
+
+        <!-- Specify whether this application always wants the icon to be displayed on the splash
+             screen. -->
+        <attr name="windowSplashScreenBehavior">
+            <!-- The icon is shown when the launching activity sets the splashScreenStyle to
+                 SPLASH_SCREEN_STYLE_ICON. If the launching activity does not specify any style,
+                 follow the system behavior. -->
+            <enum name="default" value="0" />
+            <!-- The icon is shown unless the launching app specified SPLASH_SCREEN_STYLE_EMPTY -->
+            <enum name="icon_preferred" value="1" />
+        </attr>
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
