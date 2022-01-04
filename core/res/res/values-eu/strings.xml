@@ -668,10 +668,10 @@
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Kontu baten sinkronizazio-ezarpenak aldatzeko baimena ematen die aplikazioei. Adibidez, Jendea aplikazioa kontu batekin sinkronizatzeko erabil daiteke."</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"irakurri sinkronizazio-estatistikak"</string>
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Kontu baten sinkronizazio-estatistikak irakurtzeko baimena ematen dio; besteak beste, sinkronizazio-gertaeren historia eta sinkronizatutako datu kopurua."</string>
-    <string name="permlab_sdcardRead" msgid="5791467020950064920">"Irakurri biltegiratze partekatuko edukia"</string>
-    <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Biltegiratze partekatuko edukia irakurtzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"aldatu edo ezabatu biltegiratze partekatuko edukia"</string>
-    <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Biltegiratze partekatuko edukian idazteko baimena ematen die aplikazioei."</string>
+    <string name="permlab_sdcardRead" msgid="5791467020950064920">"Irakurri biltegi partekatuko edukia"</string>
+    <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Biltegi partekatuko edukia irakurtzeko baimena ematen die aplikazioei."</string>
+    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"aldatu edo ezabatu biltegi partekatuko edukia"</string>
+    <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Biltegi partekatuko edukian idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"egin/jaso SIP deiak"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"SIP deiak egitea eta jasotzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"erregistratu telekomunikabideekiko SIM konexio berriak"</string>
@@ -1519,7 +1519,7 @@
       <item quantity="one">Emaitza bat</item>
     </plurals>
     <string name="action_mode_done" msgid="2536182504764803222">"Eginda"</string>
-    <string name="progress_erasing" msgid="6891435992721028004">"Biltegiratze partekatuko eduki guztia ezabatzen…"</string>
+    <string name="progress_erasing" msgid="6891435992721028004">"Biltegi partekatuko eduki guztia ezabatzen…"</string>
     <string name="share" msgid="4157615043345227321">"Partekatu"</string>
     <string name="find" msgid="5015737188624767706">"Aurkitu"</string>
     <string name="websearch" msgid="5624340204512793290">"Web-bilaketa"</string>
@@ -1574,7 +1574,7 @@
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Aukera gehiago"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="8490227947584914460">"Barneko memoria partekatua"</string>
+    <string name="storage_internal" msgid="8490227947584914460">"Barneko biltegi partekatua"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD txartela"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD txartela"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"USB bidezko unitatea"</string>

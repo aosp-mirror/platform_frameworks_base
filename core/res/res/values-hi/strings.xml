@@ -1048,7 +1048,7 @@
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"छूकर, उससे जुड़ी जानकारी सुनना चालू करें?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> छूकर, उससे जुड़ी जानकारी सुनना चालू करना चाहती है. छूकर, उससे जुड़ी जानकारी सुनना चालू होने पर, जो भी आपकी उंगली के नीचे है आप उसकी जानकारी सुन या देख सकते हैं या टैबलेट के ज़रिये बातचीत करने के लिए हाथ के जेश्चर (स्पर्श) का इस्तेमाल कर सकते हैं."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> छूकर, उससे जुड़ी जानकारी सुनना चालू करना चाहती है. छूकर, उससे जुड़ी जानकारी सुनना चालू होने पर, जो भी आपकी उंगली के नीचे है आप उसकी जानकारी सुन या देख सकते हैं या फ़ोन के ज़रिये बातचीत करने के लिए हाथ के जेश्चर (स्पर्श) का इस्तेमाल कर सकते हैं."</string>
-    <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 माह पहले"</string>
+    <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 महीने पहले"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"1 माह से पहले"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
       <item quantity="one">पिछले <xliff:g id="COUNT_1">%d</xliff:g> दिनों में</item>
