@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,7 +78,13 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
 
         mHeadsUpManager = new TestableHeadsUpManager(mContext);
         super.setUp();
+        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
         mHeadsUpManager.mHandler = mTestHandler;
+    }
+
+    @After
+    public void tearDown() {
+        mTestHandler.removeCallbacksAndMessages(null);
     }
 
     @Test

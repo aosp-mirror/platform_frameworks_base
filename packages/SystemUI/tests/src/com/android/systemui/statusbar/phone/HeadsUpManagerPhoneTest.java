@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -115,7 +116,13 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mConfigurationController
         );
         super.setUp();
+        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
         mHeadsUpManager.mHandler = mTestHandler;
+    }
+
+    @After
+    public void tearDown() {
+        mTestHandler.removeCallbacksAndMessages(null);
     }
 
     @Test
