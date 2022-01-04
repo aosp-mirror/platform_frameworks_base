@@ -16525,6 +16525,7 @@ package android.graphics {
     method @NonNull public static android.graphics.RenderEffect createColorFilterEffect(@NonNull android.graphics.ColorFilter);
     method @NonNull public static android.graphics.RenderEffect createOffsetEffect(float, float);
     method @NonNull public static android.graphics.RenderEffect createOffsetEffect(float, float, @NonNull android.graphics.RenderEffect);
+    method @NonNull public static android.graphics.RenderEffect createRuntimeShaderEffect(@NonNull android.graphics.RuntimeShader, @NonNull String);
     method @NonNull public static android.graphics.RenderEffect createShaderEffect(@NonNull android.graphics.Shader);
   }
 
