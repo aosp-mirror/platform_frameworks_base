@@ -59,8 +59,13 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     /** The list to store the drawn tokens before the rotation animation starts. */
     private ArrayList<WindowToken> mPendingShowTokens;
 
-    /** It is used when the display has rotated, but some windows fade out in old rotation. */
-    private SeamlessRotator mRotator;
+    /**
+     * The sync transactions of the target windows. It is used when the display has rotated but
+     * the windows need to fade out in previous rotation. These transactions will be applied with
+     * fade-in animation, so there won't be a flickering such as the windows have redrawn during
+     * fading out.
+     */
+    private ArrayMap<WindowState, SurfaceControl.Transaction> mCapturedDrawTransactions;
 
     private final int mOriginalRotation;
     private final boolean mHasScreenRotationAnimation;
@@ -110,16 +115,36 @@ public class FadeRotationAnimationController extends FadeAnimationController {
                 mTargetWindowTokens.put(w.mToken, null);
             }
         }, true /* traverseTopToBottom */);
+
+        // The transition sync group may be finished earlier because it doesn't wait for these
+        // target windows. But the windows still need to use sync transaction to keep the appearance
+        // in previous rotation, so request a no-op sync to keep the state.
+        if (!mIsChangeTransition && transitionType != WindowManager.TRANSIT_NONE) {
+            for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
+                final WindowToken token = mTargetWindowTokens.keyAt(i);
+                for (int j = token.getChildCount() - 1; j >= 0; j--) {
+                    token.getChildAt(j).applyWithNextDraw(t -> {});
+                }
+            }
+        }
     }
 
     @Override
     public void fadeWindowToken(boolean show, WindowToken windowToken, int animationType) {
         if (show) {
-            final SurfaceControl leash = mTargetWindowTokens.remove(windowToken);
-            if (leash != null && mRotator != null) {
-                // The leash was unrotated by start transaction of transition. Clear the transform
-                // to reshow the window in current rotation.
-                mRotator.setIdentityMatrix(mDisplayContent.getPendingTransaction(), leash);
+            // The previous animation leash will be dropped when preparing fade-in animation, so
+            // simply remove it without restoring the transformation.
+            mTargetWindowTokens.remove(windowToken);
+            if (mCapturedDrawTransactions != null) {
+                // Unblock the window to draw its latest content with fade-in animation.
+                final SurfaceControl.Transaction t = mDisplayContent.getPendingTransaction();
+                for (int i = windowToken.getChildCount() - 1; i >= 0; i--) {
+                    final SurfaceControl.Transaction drawT =
+                            mCapturedDrawTransactions.remove(windowToken.getChildAt(i));
+                    if (drawT != null) {
+                        t.merge(drawT);
+                    }
+                }
             }
         }
         super.fadeWindowToken(show, windowToken, animationType);
@@ -225,14 +250,14 @@ public class FadeRotationAnimationController extends FadeAnimationController {
             // Take OPEN/CLOSE transition type as the example, the non-activity windows need to
             // fade out in previous rotation while display has rotated to the new rotation, so
             // their leashes are unrotated with the start transaction.
-            mRotator = new SeamlessRotator(mOriginalRotation,
+            final SeamlessRotator rotator = new SeamlessRotator(mOriginalRotation,
                     mDisplayContent.getWindowConfiguration().getRotation(),
                     mDisplayContent.getDisplayInfo(),
                     false /* applyFixedTransformationHint */);
             for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
                 final SurfaceControl leash = mTargetWindowTokens.valueAt(i);
                 if (leash != null) {
-                    mRotator.applyTransform(t, leash);
+                    rotator.applyTransform(t, leash);
                 }
             }
             return;
@@ -278,6 +303,25 @@ public class FadeRotationAnimationController extends FadeAnimationController {
                 }
             }
         }
+    }
+
+    /** Captures the post draw transaction if the window should update with fade-in animation. */
+    boolean handleFinishDrawing(WindowState w, SurfaceControl.Transaction postDrawTransaction) {
+        if (mIsChangeTransition || !isTargetToken(w.mToken)) return false;
+        if (postDrawTransaction != null && w.mTransitionController.inTransition()) {
+            if (mCapturedDrawTransactions == null) {
+                mCapturedDrawTransactions = new ArrayMap<>();
+            }
+            final SurfaceControl.Transaction t = mCapturedDrawTransactions.get(w);
+            if (t == null) {
+                mCapturedDrawTransactions.put(w, postDrawTransaction);
+            } else {
+                t.merge(postDrawTransaction);
+            }
+            return true;
+        }
+        mDisplayContent.finishFadeRotationAnimation(w.mToken);
+        return false;
     }
 
     @Override

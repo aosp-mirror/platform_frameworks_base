@@ -556,8 +556,15 @@ public class TransitionTests extends WindowTestsBase {
 
         // The redrawn window will be faded in when the transition finishes. And because this test
         // only use one non-activity window, the fade rotation controller should also be cleared.
-        statusBar.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        statusBar.mWinAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
+        final SurfaceControl.Transaction postDrawTransaction =
+                mock(SurfaceControl.Transaction.class);
+        final boolean layoutNeeded = statusBar.finishDrawing(postDrawTransaction);
+        assertFalse(layoutNeeded);
         player.finish();
+        // The controller should capture the draw transaction and merge it when preparing to run
+        // fade-in animation.
+        verify(mDisplayContent.getPendingTransaction()).merge(eq(postDrawTransaction));
         assertNull(mDisplayContent.getFadeRotationAnimationController());
     }
 
