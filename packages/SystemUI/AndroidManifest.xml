@@ -255,6 +255,8 @@
     <uses-permission android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS" />
     <!-- For handling silent audio recordings -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
+    <!-- For asking AudioManager audio information -->
+    <uses-permission android:name="android.permission.QUERY_AUDIO_STATE"/>
 
     <!-- to read and change hvac values in a car -->
     <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
