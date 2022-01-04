@@ -29,6 +29,7 @@ import static com.android.server.wm.ActivityInterceptorCallback.COMMUNAL_MODE_OR
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
@@ -138,7 +139,7 @@ public class CommunalManagerServiceTest {
         ArgumentCaptor<BroadcastReceiver> packageReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
         verify(mContextSpy).registerReceiverAsUser(packageReceiverCaptor.capture(),
-                eq(UserHandle.SYSTEM), any(), any(), any());
+                eq(UserHandle.SYSTEM), any(), any(), any(), anyInt());
         mPackageReceiver = packageReceiverCaptor.getValue();
 
         mBinder = mService.getBinderServiceInstance();
