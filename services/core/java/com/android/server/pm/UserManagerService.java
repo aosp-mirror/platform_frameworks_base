@@ -3667,9 +3667,18 @@ public class UserManagerService extends IUserManager.Stub {
             @UserInfoFlag int flags, @UserIdInt int parentId,
             @Nullable String[] disallowedPackages)
             throws UserManager.CheckedUserOperationException {
-        String restriction = (UserManager.isUserTypeManagedProfile(userType))
-                ? UserManager.DISALLOW_ADD_MANAGED_PROFILE
-                : UserManager.DISALLOW_ADD_USER;
+
+        // Checking user restriction before creating new user,
+        // default check is for DISALLOW_ADD_USER
+        // If new user is of type CLONE, check if creation of clone profile is allowed
+        // If new user is of type MANAGED, check if creation of managed profile is allowed
+        String restriction = UserManager.DISALLOW_ADD_USER;
+        if (UserManager.isUserTypeCloneProfile(userType)) {
+            restriction = UserManager.DISALLOW_ADD_CLONE_PROFILE;
+        } else if (UserManager.isUserTypeManagedProfile(userType)) {
+            restriction = UserManager.DISALLOW_ADD_MANAGED_PROFILE;
+        }
+
         enforceUserRestriction(restriction, UserHandle.getCallingUserId(),
                 "Cannot add user");
         return createUserInternalUnchecked(name, userType, flags, parentId,
