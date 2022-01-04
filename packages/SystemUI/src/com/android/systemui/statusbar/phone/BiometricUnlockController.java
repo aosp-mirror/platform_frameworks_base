@@ -634,20 +634,22 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         Optional.ofNullable(BiometricUiEvent.FAILURE_EVENT_BY_SOURCE_TYPE.get(biometricSourceType))
                 .ifPresent(UI_EVENT_LOGGER::log);
 
-        long currUptimeMillis = SystemClock.uptimeMillis();
-        if (currUptimeMillis - mLastFpFailureUptimeMillis < 2000) { // attempt within 2 seconds
-            mNumConsecutiveFpFailures += 1;
-        } else {
-            mNumConsecutiveFpFailures = 1;
-        }
-        mLastFpFailureUptimeMillis = currUptimeMillis;
+        if (biometricSourceType == BiometricSourceType.FINGERPRINT
+                && mUpdateMonitor.isUdfpsSupported()) {
+            long currUptimeMillis = SystemClock.uptimeMillis();
+            if (currUptimeMillis - mLastFpFailureUptimeMillis
+                    < (mStatusBarStateController.isDozing() ? 3500 : 2000)) {
+                mNumConsecutiveFpFailures += 1;
+            } else {
+                mNumConsecutiveFpFailures = 1;
+            }
+            mLastFpFailureUptimeMillis = currUptimeMillis;
 
-        if (biometricSourceType.equals(BiometricSourceType.FINGERPRINT)
-                && mUpdateMonitor.isUdfpsSupported()
-                && mNumConsecutiveFpFailures >= FP_ATTEMPTS_BEFORE_SHOW_BOUNCER) {
-            startWakeAndUnlock(MODE_SHOW_BOUNCER);
-            UI_EVENT_LOGGER.log(BiometricUiEvent.BIOMETRIC_BOUNCER_SHOWN);
-            mNumConsecutiveFpFailures = 0;
+            if (mNumConsecutiveFpFailures >= FP_ATTEMPTS_BEFORE_SHOW_BOUNCER) {
+                startWakeAndUnlock(MODE_SHOW_BOUNCER);
+                UI_EVENT_LOGGER.log(BiometricUiEvent.BIOMETRIC_BOUNCER_SHOWN);
+                mNumConsecutiveFpFailures = 0;
+            }
         }
         cleanup();
     }
@@ -736,6 +738,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         pw.println(" BiometricUnlockController:");
         pw.print("   mMode="); pw.println(mMode);
         pw.print("   mWakeLock="); pw.println(mWakeLock);
+        if (mUpdateMonitor.isUdfpsSupported()) {
+            pw.print("   mNumConsecutiveFpFailures="); pw.println(mNumConsecutiveFpFailures);
+            pw.print("   time since last failure=");
+            pw.println(SystemClock.uptimeMillis() - mLastFpFailureUptimeMillis);
+        }
     }
 
     /**
