@@ -515,7 +515,7 @@ final class InputMethodBindingController {
             if (DEBUG) {
                 Slog.d(TAG, "Cannot show input: no IME bound. Rebinding.");
             }
-            bindCurrentMethodLocked();
+            bindCurrentMethod();
             return;
         }
 

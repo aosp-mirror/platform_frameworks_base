@@ -2411,7 +2411,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) {
                 Slog.d(TAG, "Avoiding IME startup and unbinding current input method.");
             }
-            mBindingController.unbindCurrentMethodLocked();
+            mBindingController.unbindCurrentMethod();
             return InputBindResult.NO_EDITOR;
         }
 
