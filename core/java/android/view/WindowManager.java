@@ -2757,7 +2757,7 @@ public interface WindowManager extends ViewManager {
          *
          * <p>Applications that target {@link android.os.Build.VERSION_CODES#P} and later, this flag
          * is ignored unless there is a focused view that returns {@code true} from
-         * {@link View#isInEditMode()} when the window is focused.</p>
+         * {@link View#onCheckIsTextEditor()} when the window is focused.</p>
          */
         public static final int SOFT_INPUT_STATE_VISIBLE = 4;
 
@@ -2767,7 +2767,7 @@ public interface WindowManager extends ViewManager {
          *
          * <p>Applications that target {@link android.os.Build.VERSION_CODES#P} and later, this flag
          * is ignored unless there is a focused view that returns {@code true} from
-         * {@link View#isInEditMode()} when the window is focused.</p>
+         * {@link View#onCheckIsTextEditor()} when the window is focused.</p>
          */
         public static final int SOFT_INPUT_STATE_ALWAYS_VISIBLE = 5;
 
