@@ -17,6 +17,7 @@
 package android.telephony.data;
 
 import android.telephony.data.DataCallResponse;
+import android.telephony.data.DataProfile;
 
 /**
  * The call back interface
@@ -33,4 +34,5 @@ oneway interface IDataServiceCallback
     void onHandoverStarted(int result);
     void onHandoverCancelled(int result);
     void onApnUnthrottled(in String apn);
+    void onDataProfileUnthrottled(in DataProfile dp);
 }
