@@ -148,22 +148,28 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
         val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
 
         testSpec.assertLayers {
-            this.coversExactly(displayBounds, LAUNCH_NEW_TASK_ACTIVITY)
+            this.invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
+                    it.visibleRegion(LAUNCH_NEW_TASK_ACTIVITY).coversExactly(displayBounds)
+                }
                 .isInvisible(bgColorLayer)
                 .then()
                 // Transitioning
                 .isVisible(bgColorLayer)
                 .then()
                 // Fully transitioned to simple SIMPLE_ACTIVITY
-                .coversExactly(displayBounds, SIMPLE_ACTIVITY)
+                .invoke("SIMPLE_ACTIVITY coversExactly displayBounds") {
+                    it.visibleRegion(SIMPLE_ACTIVITY).coversExactly(displayBounds)
+                }
                 .isInvisible(bgColorLayer)
                 .then()
                 // Transitioning back
                 .isVisible(bgColorLayer)
                 .then()
                 // Fully transitioned back to LAUNCH_NEW_TASK_ACTIVITY
+                .invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
+                    it.visibleRegion(LAUNCH_NEW_TASK_ACTIVITY).coversExactly(displayBounds)
+                }
                 .isInvisible(bgColorLayer)
-                .coversExactly(displayBounds, LAUNCH_NEW_TASK_ACTIVITY)
         }
     }
 
