@@ -6081,10 +6081,20 @@
     <permission android:name="android.permission.CAPTURE_BLACKOUT_CONTENT"
         android:protectionLevel="signature" />
 
-      <!-- @SystemApi Allows an application to query over global data in AppSearch.
+    <!-- @SystemApi Allows an application to query over global data in AppSearch.
            @hide -->
     <permission android:name="android.permission.READ_GLOBAL_APP_SEARCH_DATA"
                 android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to query over global data in AppSearch that's visible to the
+         ASSISTANT role.  -->
+    <permission android:name="android.permission.READ_ASSISTANT_APP_SEARCH_DATA"
+        android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to query over global data in AppSearch that's visible to the
+         HOME role.  -->
+    <permission android:name="android.permission.READ_HOME_APP_SEARCH_DATA"
+        android:protectionLevel="internal|role" />
 
     <!-- @SystemApi Allows an application to create virtual devices in VirtualDeviceManager.
          @hide -->
