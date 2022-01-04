@@ -20,21 +20,27 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * The UiccCardInfo represents information about a currently inserted UICC or embedded eUICC.
  */
 public final class UiccCardInfo implements Parcelable {
-
     private final boolean mIsEuicc;
     private final int mCardId;
     private final String mEid;
     private final String mIccId;
-    private final int mSlotIndex;
+    private final int mPhysicalSlotIndex;
     private final boolean mIsRemovable;
+    private final boolean mIsMultipleEnabledProfilesSupported;
+    private final List<UiccPortInfo> mPortList;
+    private boolean mIccIdAccessRestricted = false;
 
-    public static final @android.annotation.NonNull Creator<UiccCardInfo> CREATOR = new Creator<UiccCardInfo>() {
+    public static final @NonNull Creator<UiccCardInfo> CREATOR = new Creator<UiccCardInfo>() {
         @Override
         public UiccCardInfo createFromParcel(Parcel in) {
             return new UiccCardInfo(in);
@@ -47,22 +53,29 @@ public final class UiccCardInfo implements Parcelable {
     };
 
     private UiccCardInfo(Parcel in) {
-        mIsEuicc = in.readByte() != 0;
+        mIsEuicc = in.readBoolean();
         mCardId = in.readInt();
-        mEid = in.readString();
-        mIccId = in.readString();
-        mSlotIndex = in.readInt();
-        mIsRemovable = in.readByte() != 0;
+        mEid = in.readString8();
+        mIccId = in.readString8();
+        mPhysicalSlotIndex = in.readInt();
+        mIsRemovable = in.readBoolean();
+        mIsMultipleEnabledProfilesSupported = in.readBoolean();
+        mPortList = new ArrayList<UiccPortInfo>();
+        in.readTypedList(mPortList, UiccPortInfo.CREATOR);
+        mIccIdAccessRestricted = in.readBoolean();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte((byte) (mIsEuicc ? 1 : 0));
+        dest.writeBoolean(mIsEuicc);
         dest.writeInt(mCardId);
-        dest.writeString(mEid);
-        dest.writeString(mIccId);
-        dest.writeInt(mSlotIndex);
-        dest.writeByte((byte) (mIsRemovable ? 1 : 0));
+        dest.writeString8(mEid);
+        dest.writeString8(mIccId);
+        dest.writeInt(mPhysicalSlotIndex);
+        dest.writeBoolean(mIsRemovable);
+        dest.writeBoolean(mIsMultipleEnabledProfilesSupported);
+        dest.writeTypedList(mPortList, flags);
+        dest.writeBoolean(mIccIdAccessRestricted);
     }
 
     @Override
@@ -71,20 +84,34 @@ public final class UiccCardInfo implements Parcelable {
     }
 
     /**
+     * Construct a UiccCardInfo.
+     *
+     * @param isEuicc is a flag to check is eUICC or not
+     * @param cardId is unique ID used to identify a UiccCard.
+     * @param eid is unique eUICC Identifier
+     * @param physicalSlotIndex is unique index referring to a physical SIM slot.
+     * @param isRemovable is a flag to check is removable or embedded
+     * @param isMultipleEnabledProfilesSupported is a flag to check is MEP enabled or not
+     * @param portList has the information regarding port, ICCID and its active status
+     *
      * @hide
      */
-    public UiccCardInfo(boolean isEuicc, int cardId, String eid, String iccId, int slotIndex,
-            boolean isRemovable) {
+    public UiccCardInfo(boolean isEuicc, int cardId, String eid, int physicalSlotIndex,
+            boolean isRemovable, boolean isMultipleEnabledProfilesSupported,
+            @NonNull List<UiccPortInfo> portList) {
         this.mIsEuicc = isEuicc;
         this.mCardId = cardId;
         this.mEid = eid;
-        this.mIccId = iccId;
-        this.mSlotIndex = slotIndex;
+        this.mIccId = null;
+        this.mPhysicalSlotIndex = physicalSlotIndex;
         this.mIsRemovable = isRemovable;
+        this.mIsMultipleEnabledProfilesSupported = isMultipleEnabledProfilesSupported;
+        this.mPortList = portList;
     }
 
     /**
      * Return whether the UICC is an eUICC.
+     *
      * @return true if the UICC is an eUICC.
      */
     public boolean isEuicc() {
@@ -119,39 +146,82 @@ public final class UiccCardInfo implements Parcelable {
      * <p>
      * Note that this field may be omitted if the caller does not have the correct permissions
      * (see {@link TelephonyManager#getUiccCardsInfo()}).
+     *
+     * @deprecated with support for MEP(multiple enabled profile), a SIM card can have more than one
+     * ICCID active at the same time.Instead use {@link UiccPortInfo#getIccId()} to retrieve ICCID.
+     * To find {@link UiccPortInfo} use {@link UiccCardInfo#getPorts()}
+     *
+     * @throws UnsupportedOperationException if the calling app's target SDK is T and beyond.
      */
     @Nullable
+    @Deprecated
     public String getIccId() {
-        return mIccId;
+        if (mIccIdAccessRestricted) {
+            throw new UnsupportedOperationException("getIccId from UiccPortInfo");
+        }
+        //always return ICCID from first port.
+        return getPorts().stream().findFirst().get().getIccId();
     }
 
     /**
      * Gets the slot index for the slot that the UICC is currently inserted in.
+     *
+     * @deprecated use {@link #getPhysicalSlotIndex()}
      */
+    @Deprecated
     public int getSlotIndex() {
-        return mSlotIndex;
+        return mPhysicalSlotIndex;
     }
 
     /**
-     * Returns a copy of the UiccCardinfo with the EID and ICCID set to null. These values are
-     * generally private and require carrier privileges to view.
-     *
-     * @hide
+     * Gets the physical slot index for the slot that the UICC is currently inserted in.
      */
-    @NonNull
-    public UiccCardInfo getUnprivileged() {
-        return new UiccCardInfo(mIsEuicc, mCardId, null, null, mSlotIndex, mIsRemovable);
+    public int getPhysicalSlotIndex() {
+        return mPhysicalSlotIndex;
     }
 
     /**
      * Return whether the UICC or eUICC is removable.
      * <p>
      * UICCs are generally removable, but eUICCs may be removable or built in to the device.
+     *
      * @return true if the UICC or eUICC is removable
      */
     public boolean isRemovable() {
         return mIsRemovable;
     }
+
+    /*
+     * Whether the UICC card supports multiple enable profile(MEP)
+     * UICCs are generally MEP disabled, there can be only one active profile on the physical
+     * sim card.
+     *
+     * @return {@code true} if the eUICC is supporting multiple enabled profile(MEP).
+     */
+    public boolean isMultipleEnabledProfilesSupported() {
+        return mIsMultipleEnabledProfilesSupported;
+    }
+
+    /**
+     * Get information regarding port, ICCID and its active status.
+     *
+     * @return Collection of {@link UiccPortInfo}
+     */
+    public @NonNull Collection<UiccPortInfo> getPorts() {
+        return Collections.unmodifiableList(mPortList);
+    }
+
+    /**
+     * if the flag is set to {@code true} the calling app is not allowed to access deprecated
+     * {@link #getIccId()}
+     * @param iccIdAccessRestricted is the flag to check if app is allowed to access ICCID
+     *
+     * @hide
+     */
+    public void setIccIdAccessRestricted(boolean iccIdAccessRestricted) {
+        this.mIccIdAccessRestricted = iccIdAccessRestricted;
+    }
+
 
     @Override
     public boolean equals(Object obj) {
@@ -167,13 +237,16 @@ public final class UiccCardInfo implements Parcelable {
                 && (mCardId == that.mCardId)
                 && (Objects.equals(mEid, that.mEid))
                 && (Objects.equals(mIccId, that.mIccId))
-                && (mSlotIndex == that.mSlotIndex)
-                && (mIsRemovable == that.mIsRemovable));
+                && (mPhysicalSlotIndex == that.mPhysicalSlotIndex)
+                && (mIsRemovable == that.mIsRemovable)
+                && (mIsMultipleEnabledProfilesSupported == that.mIsMultipleEnabledProfilesSupported)
+                && (Objects.equals(mPortList, that.mPortList)));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mIsEuicc, mCardId, mEid, mIccId, mSlotIndex, mIsRemovable);
+        return Objects.hash(mIsEuicc, mCardId, mEid, mIccId, mPhysicalSlotIndex, mIsRemovable,
+                mIsMultipleEnabledProfilesSupported, mPortList);
     }
 
     @Override
@@ -185,11 +258,17 @@ public final class UiccCardInfo implements Parcelable {
                 + ", mEid="
                 + mEid
                 + ", mIccId="
-                + mIccId
-                + ", mSlotIndex="
-                + mSlotIndex
+                + SubscriptionInfo.givePrintableIccid(mIccId)
+                + ", mPhysicalSlotIndex="
+                + mPhysicalSlotIndex
                 + ", mIsRemovable="
                 + mIsRemovable
+                + ", mIsMultipleEnabledProfilesSupported="
+                + mIsMultipleEnabledProfilesSupported
+                + ", mPortList="
+                + mPortList
+                + ", mIccIdAccessRestricted="
+                + mIccIdAccessRestricted
                 + ")";
     }
 }
