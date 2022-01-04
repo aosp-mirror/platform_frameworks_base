@@ -10225,6 +10225,13 @@ public final class Settings {
         public static final int ACCESSIBILITY_MAGNIFICATION_MODE_ALL = 0x3;
 
         /**
+         * Whether the following typing focus feature for magnification is enabled.
+         * @hide
+         */
+        public static final String ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED =
+                "accessibility_magnification_follow_typing_enabled";
+
+        /**
          * Controls magnification capability. Accessibility magnification is capable of at least one
          * of the magnification modes.
          *

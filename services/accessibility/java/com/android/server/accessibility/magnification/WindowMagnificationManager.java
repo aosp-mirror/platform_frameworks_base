@@ -97,6 +97,8 @@ public class WindowMagnificationManager implements
     private ConnectionCallback mConnectionCallback;
     @GuardedBy("mLock")
     private SparseArray<WindowMagnifier> mWindowMagnifiers = new SparseArray<>();
+    // Whether the following typing focus feature for magnification is enabled.
+    private boolean mMagnificationFollowTypingEnabled = true;
 
     private boolean mReceiverRegistered = false;
     @VisibleForTesting
@@ -291,6 +293,9 @@ public class WindowMagnificationManager implements
     @Override
     public void onRectangleOnScreenRequested(int displayId, int left, int top, int right,
             int bottom) {
+        if (!mMagnificationFollowTypingEnabled) {
+            return;
+        }
 
         float toCenterX = (float) (left + right) / 2;
         float toCenterY = (float) (top + bottom) / 2;
@@ -299,6 +304,10 @@ public class WindowMagnificationManager implements
                 && isTrackingTypingFocusEnabled(displayId)) {
             enableWindowMagnification(displayId, Float.NaN, toCenterX, toCenterY);
         }
+    }
+
+    void setMagnificationFollowTypingEnabled(boolean enabled) {
+        mMagnificationFollowTypingEnabled = enabled;
     }
 
     /**

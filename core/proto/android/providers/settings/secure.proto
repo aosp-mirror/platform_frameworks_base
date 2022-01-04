@@ -86,6 +86,8 @@ message SecureSettingsProto {
         optional SettingProto accessibility_floating_menu_opacity = 40 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_floating_menu_fade_enabled = 41 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto odi_captions_volume_ui_enabled = 42 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Setting for accessibility magnification for following typing.
+        optional SettingProto accessibility_magnification_follow_typing_enabled = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Accessibility accessibility = 2;
 

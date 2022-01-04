@@ -1816,6 +1816,10 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED,
                 SecureSettingsProto.Accessibility.ODI_CAPTIONS_VOLUME_UI_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED);
         p.end(accessibilityToken);
 
         final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);

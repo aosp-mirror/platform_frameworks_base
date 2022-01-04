@@ -2393,6 +2393,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         somethingChanged |= readUserRecommendedUiTimeoutSettingsLocked(userState);
         somethingChanged |= readMagnificationModeForDefaultDisplayLocked(userState);
         somethingChanged |= readMagnificationCapabilitiesLocked(userState);
+        somethingChanged |= readMagnificationFollowTypingLocked(userState);
         return somethingChanged;
     }
 
@@ -3868,6 +3869,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mMagnificationCapabilityUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY);
 
+        private final Uri mMagnificationFollowTypingUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED);
+
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
         }
@@ -3906,6 +3910,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mMagnificationModeUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mMagnificationCapabilityUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mMagnificationFollowTypingUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -3973,6 +3979,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (readMagnificationCapabilitiesLocked(userState)) {
                         updateMagnificationCapabilitiesSettingsChangeLocked(userState);
                     }
+                } else if (mMagnificationFollowTypingUri.equals(uri)) {
+                    readMagnificationFollowTypingLocked(userState);
                 }
             }
         }
@@ -4064,6 +4072,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (capabilities != userState.getMagnificationCapabilitiesLocked()) {
             userState.setMagnificationCapabilitiesLocked(capabilities);
             mMagnificationController.setMagnificationCapabilities(capabilities);
+            return true;
+        }
+        return false;
+    }
+
+    boolean readMagnificationFollowTypingLocked(AccessibilityUserState userState) {
+        final boolean followTypeEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED,
+                1, userState.mUserId) == 1;
+        if (followTypeEnabled != userState.isMagnificationFollowTypingEnabled()) {
+            userState.setMagnificationFollowTypingEnabled(followTypeEnabled);
+            mMagnificationController.setMagnificationFollowTypingEnabled(followTypeEnabled);
             return true;
         }
         return false;
