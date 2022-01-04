@@ -641,22 +641,35 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             intent.setComponent(new ComponentName(
                     aInfo.applicationInfo.packageName, aInfo.name));
 
-            // Don't debug things in the system process
-            if (!aInfo.processName.equals("system")) {
-                if ((startFlags & (START_FLAG_DEBUG | START_FLAG_NATIVE_DEBUGGING
-                        | START_FLAG_TRACK_ALLOCATION)) != 0 || profilerInfo != null) {
-
+            final boolean requestDebug = (startFlags & (START_FLAG_DEBUG
+                    | START_FLAG_NATIVE_DEBUGGING | START_FLAG_TRACK_ALLOCATION)) != 0;
+            final boolean requestProfile = profilerInfo != null;
+            if (requestDebug || requestProfile) {
+                final boolean debuggable = (Build.IS_DEBUGGABLE
+                        || (aInfo.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0)
+                        && !aInfo.processName.equals("system");
+                if ((requestDebug && !debuggable) || (requestProfile
+                        && (!debuggable && !aInfo.applicationInfo.isProfileableByShell()))) {
+                    Slog.w(TAG, "Ignore debugging for non-debuggable app: " + aInfo.packageName);
+                } else {
                      // Mimic an AMS synchronous call by passing a message to AMS and wait for AMS
                      // to notify us that the task has completed.
                      // TODO(b/80414790) look into further untangling for the situation where the
                      // caller is on the same thread as the handler we are posting to.
                     synchronized (mService.mGlobalLock) {
                         // Post message to AMS.
-                        final Message msg = PooledLambda.obtainMessage(
-                                ActivityManagerInternal::setDebugFlagsForStartingActivity,
-                                mService.mAmInternal, aInfo, startFlags, profilerInfo,
-                                mService.mGlobalLock);
-                        mService.mH.sendMessage(msg);
+                        mService.mH.post(() -> {
+                            try {
+                                mService.mAmInternal.setDebugFlagsForStartingActivity(aInfo,
+                                        startFlags, profilerInfo, mService.mGlobalLock);
+                            } catch (Throwable e) {
+                                // Simply ignore it because the debugging doesn't take effect.
+                                Slog.w(TAG, e);
+                                synchronized (mService.mGlobalLockWithoutBoost) {
+                                    mService.mGlobalLockWithoutBoost.notifyAll();
+                                }
+                            }
+                        });
                         try {
                             mService.mGlobalLock.wait();
                         } catch (InterruptedException ignore) {
