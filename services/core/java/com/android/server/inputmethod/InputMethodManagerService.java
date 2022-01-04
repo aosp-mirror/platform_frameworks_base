@@ -262,6 +262,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final String ACTION_SHOW_INPUT_METHOD_PICKER =
             "com.android.server.inputmethod.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER";
 
+    /**
+     * When set, {@link #startInputUncheckedLocked} will return
+     * {@link InputBindResult#NO_EDITOR} instead of starting an IME connection
+     * unless {@link StartInputFlags#IS_TEXT_EDITOR} is set. This behavior overrides
+     * {@link LayoutParams#SOFT_INPUT_STATE_VISIBLE SOFT_INPUT_STATE_VISIBLE} and
+     * {@link LayoutParams#SOFT_INPUT_STATE_ALWAYS_VISIBLE SOFT_INPUT_STATE_ALWAYS_VISIBLE}
+     * starting from {@link android.os.Build.VERSION_CODES#P}.
+     */
+    private final boolean mPreventImeStartupUnlessTextEditor;
+
     @UserIdInt
     private int mLastSwitchUserId;
 
@@ -1663,6 +1673,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mSettings, context);
         mMenuController = new InputMethodMenuController(this);
         mBindingController = new InputMethodBindingController(this);
+        mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
+                com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
     }
 
     @GuardedBy("mMethodMap")
@@ -2342,7 +2354,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
             @NonNull EditorInfo attribute, @StartInputFlags int startInputFlags,
-            @StartInputReason int startInputReason) {
+            @StartInputReason int startInputReason, int unverifiedTargetSdkVersion) {
         // If no method is currently selected, do nothing.
         String selectedMethodId = getSelectedMethodIdLocked();
         if (selectedMethodId == null) {
@@ -2390,6 +2402,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurClient = cs;
         mCurInputContext = inputContext;
         mCurAttribute = attribute;
+
+        // If configured, we want to avoid starting up the IME if it is not supposed to be showing
+        if (mPreventImeStartupUnlessTextEditor
+                && !InputMethodUtils.isSoftInputModeStateVisibleAllowed(unverifiedTargetSdkVersion,
+                startInputFlags)
+                && !mShowRequested) {
+            if (DEBUG) {
+                Slog.d(TAG, "Avoiding IME startup and unbinding current input method.");
+            }
+            mBindingController.unbindCurrentMethodLocked();
+            return InputBindResult.NO_EDITOR;
+        }
 
         // Check if the input method is changing.
         // We expect the caller has already verified that the client is allowed to access this
@@ -3334,7 +3358,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (attribute != null) {
                 return startInputUncheckedLocked(cs, inputContext, attribute, startInputFlags,
-                        startInputReason);
+                        startInputReason, unverifiedTargetSdkVersion);
             }
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
@@ -3375,7 +3399,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (isTextEditor && attribute != null
                 && shouldRestoreImeVisibility(windowToken, softInputMode)) {
             res = startInputUncheckedLocked(cs, inputContext, attribute, startInputFlags,
-                    startInputReason);
+                    startInputReason, unverifiedTargetSdkVersion);
             showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
                     SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY);
             return res;
@@ -3414,7 +3438,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     if (DEBUG) Slog.v(TAG, "Unspecified window will show input");
                     if (attribute != null) {
                         res = startInputUncheckedLocked(cs, inputContext, attribute,
-                                startInputFlags, startInputReason);
+                                startInputFlags, startInputReason, unverifiedTargetSdkVersion);
                         didStart = true;
                     }
                     showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
@@ -3445,7 +3469,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             unverifiedTargetSdkVersion, startInputFlags)) {
                         if (attribute != null) {
                             res = startInputUncheckedLocked(cs, inputContext, attribute,
-                                    startInputFlags, startInputReason);
+                                    startInputFlags, startInputReason, unverifiedTargetSdkVersion);
                             didStart = true;
                         }
                         showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
@@ -3464,7 +3488,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     if (!sameWindowFocused) {
                         if (attribute != null) {
                             res = startInputUncheckedLocked(cs, inputContext, attribute,
-                                    startInputFlags, startInputReason);
+                                    startInputFlags, startInputReason, unverifiedTargetSdkVersion);
                             didStart = true;
                         }
                         showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
@@ -3493,7 +3517,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
                 res = startInputUncheckedLocked(cs, inputContext, attribute, startInputFlags,
-                        startInputReason);
+                        startInputReason, unverifiedTargetSdkVersion);
             } else {
                 res = InputBindResult.NULL_EDITOR_INFO;
             }
