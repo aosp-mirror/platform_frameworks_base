@@ -19,6 +19,7 @@ package android.media.tv.tuner;
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -688,6 +689,8 @@ public class Tuner implements AutoCloseable  {
     private native Filter nativeOpenFilter(int type, int subType, long bufferSize);
     private native TimeFilter nativeOpenTimeFilter();
     private native String nativeGetFrontendHardwareInfo();
+    private native int nativeSetMaxNumberOfFrontends(int frontendType, int maxNumber);
+    private native int nativeGetMaxNumberOfFrontends(int frontendType);
 
     private native Lnb nativeOpenLnbByHandle(int handle);
     private native Lnb nativeOpenLnbByName(String name);
@@ -1305,6 +1308,55 @@ public class Tuner implements AutoCloseable  {
         } finally {
             mFrontendLock.unlock();
         }
+    }
+
+    /**
+     * Sets the maximum usable frontends number of a given frontend type. It is used to enable or
+     * disable frontends when cable connection status is changed by user.
+     *
+     * <p>This API is only supported by Tuner HAL 2.0 or higher. Unsupported version would return
+     * {@link RESULT_UNAVAILABLE}. Use {@link TunerVersionChecker#getTunerVersion()} to check the
+     * version.
+     *
+     * @param frontendType the {@link android.media.tv.tuner.frontend.FrontendSettings.Type} which
+     *                     the maximum usable number will be set.
+     * @param maxNumber the new maximum usable number.
+     * @return result status of the operation.
+     */
+    @Result
+    public int setMaxNumberOfFrontends(
+            @FrontendSettings.Type int frontendType, @IntRange(from = 0) int maxNumber) {
+        if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                    TunerVersionChecker.TUNER_VERSION_2_0, "Set maximum Frontends")) {
+            return RESULT_UNAVAILABLE;
+        }
+        if (maxNumber < 0) {
+            return RESULT_INVALID_ARGUMENT;
+        }
+        int res = nativeSetMaxNumberOfFrontends(frontendType, maxNumber);
+        if (res == RESULT_SUCCESS) {
+            // TODO: b/211778848 Update Tuner Resource Manager.
+        }
+        return res;
+    }
+
+    /**
+     * Get the maximum usable frontends number of a given frontend type.
+     *
+     * <p>This API is only supported by Tuner HAL 2.0 or higher. Unsupported version would return
+     * {@code -1}. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * @param frontendType the {@link android.media.tv.tuner.frontend.FrontendSettings.Type} which
+     *                     the maximum usable number will be queried.
+     * @return the maximum usable number of the queried frontend type.
+     */
+    @IntRange(from = -1)
+    public int getMaxNumberOfFrontends(@FrontendSettings.Type int frontendType) {
+        if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                    TunerVersionChecker.TUNER_VERSION_2_0, "Set maximum Frontends")) {
+            return -1;
+        }
+        return nativeGetMaxNumberOfFrontends(frontendType);
     }
 
     /** @hide */

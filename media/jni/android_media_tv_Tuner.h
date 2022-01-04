@@ -201,6 +201,8 @@ struct JTuner : public RefBase {
     jint closeFrontend();
     jint closeDemux();
     Result getFrontendHardwareInfo(string& info);
+    jint setMaxNumberOfFrontends(int32_t frontendType, int32_t maxNumber);
+    int32_t getMaxNumberOfFrontends(int32_t frontendType);
 
     jweak getObject();
 
