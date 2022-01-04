@@ -78,13 +78,6 @@ public class AccessibilityRecord {
         | AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS
         | AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS;
 
-    // Housekeeping
-    private static final int MAX_POOL_SIZE = 10;
-    private static final Object sPoolLock = new Object();
-    private static AccessibilityRecord sPool;
-    private static int sPoolSize;
-    private AccessibilityRecord mNext;
-    private boolean mIsInPool;
 
     @UnsupportedAppUsage
     boolean mSealed;
@@ -821,15 +814,14 @@ public class AccessibilityRecord {
     }
 
     /**
-     * Returns a cached instance if such is available or a new one is
-     * instantiated. The instance is initialized with data from the
+     * Instantiates a new record initialized with data from the
      * given record.
      *
-     * <p>In most situations object pooling is not beneficial. Create a new instance using the
-     * constructor {@link #AccessibilityRecord(AccessibilityRecord)} instead.
-     *
+     * @deprecated Object pooling has been discontinued. Create a new instance using the
+     * constructor {@link #AccessibilityRecord()} instead.
      * @return An instance.
      */
+    @Deprecated
     public static AccessibilityRecord obtain(AccessibilityRecord record) {
        AccessibilityRecord clone = AccessibilityRecord.obtain();
        clone.init(record);
@@ -837,51 +829,25 @@ public class AccessibilityRecord {
     }
 
     /**
-     * Returns a cached instance if such is available or a new one is
-     * instantiated.
+     * Instantiates a new record.
      *
-     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * @deprecated Object pooling has been discontinued. Create a new instance using the
      * constructor {@link #AccessibilityRecord()} instead.
-     *
      * @return An instance.
      */
+    @Deprecated
     public static AccessibilityRecord obtain() {
-        synchronized (sPoolLock) {
-            if (sPool != null) {
-                AccessibilityRecord record = sPool;
-                sPool = sPool.mNext;
-                sPoolSize--;
-                record.mNext = null;
-                record.mIsInPool = false;
-                return record;
-            }
-            return new AccessibilityRecord();
-        }
+        return new AccessibilityRecord();
     }
 
     /**
-     * Return an instance back to be reused.
-     * <p>
-     * <strong>Note:</strong> You must not touch the object after calling this function.
+     * Would previously return an instance back to be reused.
      *
-     * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
-     *
-     * @throws IllegalStateException If the record is already recycled.
+     * @deprecated Object pooling has been discontinued. Calling this function now will have
+     * no effect.
      */
-    public void recycle() {
-        if (mIsInPool) {
-            throw new IllegalStateException("Record already recycled!");
-        }
-        clear();
-        synchronized (sPoolLock) {
-            if (sPoolSize <= MAX_POOL_SIZE) {
-                mNext = sPool;
-                sPool = this;
-                mIsInPool = true;
-                sPoolSize++;
-            }
-        }
-    }
+    @Deprecated
+    public void recycle() { }
 
     /**
      * Initialize this record from another one.

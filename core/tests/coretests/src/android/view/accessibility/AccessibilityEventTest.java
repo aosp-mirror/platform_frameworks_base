@@ -42,14 +42,14 @@ public class AccessibilityEventTest {
     // and assertAccessibilityEventCleared
 
     /** The number of properties of the {@link AccessibilityEvent} class. */
-    private static final int A11Y_EVENT_NON_STATIC_FIELD_COUNT = 34;
+    private static final int A11Y_EVENT_NON_STATIC_FIELD_COUNT = 32;
 
     // The number of fields tested in the corresponding CTS AccessibilityRecordTest:
     // assertAccessibilityRecordCleared, fullyPopulateAccessibilityRecord,
     // and assertEqualAccessibilityRecord
 
     /** The number of properties of the {@link AccessibilityRecord} class. */
-    private static final int A11Y_RECORD_NON_STATIC_FIELD_COUNT = 25;
+    private static final int A11Y_RECORD_NON_STATIC_FIELD_COUNT = 23;
 
     @Test
     public void testImportantForAccessibiity_getSetWorkAcrossParceling() {
