@@ -93,7 +93,10 @@ class MediaTttChipControllerSender @Inject constructor(
                 mainExecutor.execute {
                     displayChip(
                         TransferSucceeded(
-                            chipState.appIconDrawable, chipState.otherDeviceName, undoRunnable
+                            chipState.appIconDrawable,
+                            chipState.appIconContentDescription,
+                            chipState.otherDeviceName,
+                            undoRunnable
                         )
                     )
                 }
