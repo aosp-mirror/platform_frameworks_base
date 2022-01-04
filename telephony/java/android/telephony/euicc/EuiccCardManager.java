@@ -17,6 +17,7 @@ package android.telephony.euicc;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
@@ -24,6 +25,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.service.euicc.EuiccProfileInfo;
 import android.telephony.TelephonyFrameworkInitializer;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.telephony.euicc.IAuthenticateServerCallback;
@@ -122,7 +124,6 @@ public class EuiccCardManager {
 
     /** Result code indicating the caller is not the active LPA. */
     public static final int RESULT_CALLER_NOT_ALLOWED = -3;
-
     /**
      * Callback to receive the result of an eUICC card API.
      *
@@ -220,12 +221,48 @@ public class EuiccCardManager {
      * @param refresh Whether sending the REFRESH command to modem.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
+     *
+     * @deprecated instead use {@link #disableProfile(String, String, int, boolean, Executor,
+     *             ResultCallback)}
      */
+    @Deprecated
     public void disableProfile(String cardId, String iccid, boolean refresh,
             @CallbackExecutor Executor executor, ResultCallback<Void> callback) {
         try {
             getIEuiccCardController().disableProfile(mContext.getOpPackageName(), cardId, iccid,
-                    refresh, new IDisableProfileCallback.Stub() {
+                    TelephonyManager.DEFAULT_PORT_INDEX, refresh,
+                    new IDisableProfileCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode) {
+                            final long token = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onComplete(resultCode, null));
+                            } finally {
+                                Binder.restoreCallingIdentity(token);
+                            }
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling disableProfile", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+    /**
+     * Disables the profile of the given ICCID.
+     *
+     * @param cardId The Id of the eUICC.
+     * @param iccid The iccid of the profile.
+     * @param portIndex the Port index is the unique index referring to a port.
+     * @param refresh Whether sending the REFRESH command to modem.
+     * @param executor The executor through which the callback should be invoked.
+     * @param callback The callback to get the result code.
+     */
+    public void disableProfile(@Nullable String cardId, @Nullable String iccid, int portIndex,
+            boolean refresh, @NonNull @CallbackExecutor Executor executor,
+            @NonNull ResultCallback<Void> callback) {
+        try {
+            getIEuiccCardController().disableProfile(mContext.getOpPackageName(), cardId, iccid,
+                    portIndex, refresh, new IDisableProfileCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode) {
                             final long token = Binder.clearCallingIdentity();
@@ -251,12 +288,51 @@ public class EuiccCardManager {
      * @param refresh Whether sending the REFRESH command to modem.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and the EuiccProfileInfo enabled.
+     *
+     * @deprecated instead use {@link #switchToProfile(String, String, int, boolean, Executor,
+     *             ResultCallback)}
      */
+    @Deprecated
     public void switchToProfile(String cardId, String iccid, boolean refresh,
             @CallbackExecutor Executor executor, ResultCallback<EuiccProfileInfo> callback) {
         try {
             getIEuiccCardController().switchToProfile(mContext.getOpPackageName(), cardId, iccid,
-                    refresh, new ISwitchToProfileCallback.Stub() {
+                    TelephonyManager.DEFAULT_PORT_INDEX, refresh,
+                    new ISwitchToProfileCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, EuiccProfileInfo profile) {
+                            final long token = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onComplete(resultCode, profile));
+                            } finally {
+                                Binder.restoreCallingIdentity(token);
+                            }
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling switchToProfile", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Switches from the current profile to another profile. The current profile will be disabled
+     * and the specified profile will be enabled. Here portIndex specifies on which port the
+     * profile is to be enabled.
+     *
+     * @param cardId The Id of the eUICC.
+     * @param iccid The iccid of the profile to switch to.
+     * @param portIndex The Port index is the unique index referring to a port.
+     * @param refresh Whether sending the REFRESH command to modem.
+     * @param executor The executor through which the callback should be invoked.
+     * @param callback The callback to get the result code and the EuiccProfileInfo enabled.
+     */
+    public void switchToProfile(@Nullable String cardId, @Nullable String iccid, int portIndex,
+            boolean refresh, @NonNull @CallbackExecutor Executor executor,
+            @NonNull ResultCallback<EuiccProfileInfo> callback) {
+        try {
+            getIEuiccCardController().switchToProfile(mContext.getOpPackageName(), cardId, iccid,
+                    portIndex, refresh, new ISwitchToProfileCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode, EuiccProfileInfo profile) {
                             final long token = Binder.clearCallingIdentity();

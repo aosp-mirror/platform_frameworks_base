@@ -24,6 +24,10 @@ import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -64,8 +68,10 @@ public class UiccSlotInfo implements Parcelable {
     private final int mLogicalSlotIdx;
     private final boolean mIsExtendedApduSupported;
     private final boolean mIsRemovable;
+    private final List<UiccPortInfo> mPortList;
+    private boolean mLogicalSlotAccessRestricted = false;
 
-    public static final @android.annotation.NonNull Creator<UiccSlotInfo> CREATOR = new Creator<UiccSlotInfo>() {
+    public static final @NonNull Creator<UiccSlotInfo> CREATOR = new Creator<UiccSlotInfo>() {
         @Override
         public UiccSlotInfo createFromParcel(Parcel in) {
             return new UiccSlotInfo(in);
@@ -78,24 +84,29 @@ public class UiccSlotInfo implements Parcelable {
     };
 
     private UiccSlotInfo(Parcel in) {
-        mIsActive = in.readByte() != 0;
-        mIsEuicc = in.readByte() != 0;
-        mCardId = in.readString();
+        mIsActive = in.readBoolean();
+        mIsEuicc = in.readBoolean();
+        mCardId = in.readString8();
         mCardStateInfo = in.readInt();
         mLogicalSlotIdx = in.readInt();
-        mIsExtendedApduSupported = in.readByte() != 0;
-        mIsRemovable = in.readByte() != 0;
+        mIsExtendedApduSupported = in.readBoolean();
+        mIsRemovable = in.readBoolean();
+        mPortList = new ArrayList<UiccPortInfo>();
+        in.readTypedList(mPortList, UiccPortInfo.CREATOR);
+        mLogicalSlotAccessRestricted = in.readBoolean();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte((byte) (mIsActive ? 1 : 0));
-        dest.writeByte((byte) (mIsEuicc ? 1 : 0));
-        dest.writeString(mCardId);
+        dest.writeBoolean(mIsActive);
+        dest.writeBoolean(mIsEuicc);
+        dest.writeString8(mCardId);
         dest.writeInt(mCardStateInfo);
         dest.writeInt(mLogicalSlotIdx);
-        dest.writeByte((byte) (mIsExtendedApduSupported ? 1 : 0));
-        dest.writeByte((byte) (mIsRemovable ? 1 : 0));
+        dest.writeBoolean(mIsExtendedApduSupported);
+        dest.writeBoolean(mIsRemovable);
+        dest.writeTypedList(mPortList, flags);
+        dest.writeBoolean(mLogicalSlotAccessRestricted);
     }
 
     @Override
@@ -117,25 +128,42 @@ public class UiccSlotInfo implements Parcelable {
         this.mLogicalSlotIdx = logicalSlotIdx;
         this.mIsExtendedApduSupported = isExtendedApduSupported;
         this.mIsRemovable = false;
+        this.mPortList = null;
     }
 
     /**
+     * Construct a UiccSlotInfo.
      * @hide
      */
-    public UiccSlotInfo(boolean isActive, boolean isEuicc, String cardId,
-            @CardStateInfo int cardStateInfo, int logicalSlotIdx, boolean isExtendedApduSupported,
-            boolean isRemovable) {
-        this.mIsActive = isActive;
+    public UiccSlotInfo(boolean isEuicc, String cardId,
+            @CardStateInfo int cardStateInfo, boolean isExtendedApduSupported,
+            boolean isRemovable, @NonNull List<UiccPortInfo> portList) {
+        this.mIsActive = portList.get(0).isActive();
         this.mIsEuicc = isEuicc;
         this.mCardId = cardId;
         this.mCardStateInfo = cardStateInfo;
-        this.mLogicalSlotIdx = logicalSlotIdx;
+        this.mLogicalSlotIdx = portList.get(0).getLogicalSlotIndex();
         this.mIsExtendedApduSupported = isExtendedApduSupported;
         this.mIsRemovable = isRemovable;
+        this.mPortList = portList;
     }
 
+    /**
+     * @deprecated There is no longer isActive state for each slot because ports belonging
+     * to the physical slot could have different states
+     * we instead use {@link UiccPortInfo#isActive()}
+     * To get UiccPortInfo use {@link UiccSlotInfo#getPorts()}
+     *
+     * @return {@code true} if status is active.
+     * @throws UnsupportedOperationException if the calling app's target SDK is T and beyond.
+     */
+    @Deprecated
     public boolean getIsActive() {
-        return mIsActive;
+        if (mLogicalSlotAccessRestricted) {
+            throw new UnsupportedOperationException("get port status from UiccPortInfo");
+        }
+        //always return status from first port.
+        return getPorts().stream().findFirst().get().isActive();
     }
 
     public boolean getIsEuicc() {
@@ -159,8 +187,21 @@ public class UiccSlotInfo implements Parcelable {
         return mCardStateInfo;
     }
 
+    /**
+     * @deprecated There is no longer getLogicalSlotIndex
+     * There is no longer getLogicalSlotIdx as each port belonging to this physical slot could have
+     * different logical slot index. Use {@link UiccPortInfo#getLogicalSlotIndex()} instead
+     *
+     * @throws UnsupportedOperationException if the calling app's target SDK is T and beyond.
+     */
+    @Deprecated
     public int getLogicalSlotIdx() {
-        return mLogicalSlotIdx;
+        if (mLogicalSlotAccessRestricted) {
+            throw new UnsupportedOperationException("get logical slot index from UiccPortInfo");
+        }
+        //always return logical slot index from first port.
+        //portList always have at least one element.
+        return getPorts().stream().findFirst().get().getLogicalSlotIndex();
     }
 
     /**
@@ -170,14 +211,35 @@ public class UiccSlotInfo implements Parcelable {
         return mIsExtendedApduSupported;
     }
 
-   /**
+    /**
      * Return whether the UICC slot is for a removable UICC.
      * <p>
      * UICCs are generally removable, but eUICCs may be removable or built in to the device.
+     *
      * @return true if the slot is for removable UICCs
      */
     public boolean isRemovable() {
         return mIsRemovable;
+    }
+
+    /**
+     * Get Information regarding port, iccid and its active status.
+     *
+     * @return Collection of {@link UiccPortInfo}
+     */
+    public @NonNull Collection<UiccPortInfo> getPorts() {
+        return Collections.unmodifiableList(mPortList);
+    }
+
+    /**
+     * Set the flag to check compatibility of the calling app's target SDK is T and beyond.
+     *
+     * @param logicalSlotAccessRestricted is the flag to check compatibility.
+     *
+     * @hide
+     */
+    public void setLogicalSlotAccessRestricted(boolean logicalSlotAccessRestricted) {
+        this.mLogicalSlotAccessRestricted = logicalSlotAccessRestricted;
     }
 
     @Override
@@ -196,20 +258,14 @@ public class UiccSlotInfo implements Parcelable {
                 && (mCardStateInfo == that.mCardStateInfo)
                 && (mLogicalSlotIdx == that.mLogicalSlotIdx)
                 && (mIsExtendedApduSupported == that.mIsExtendedApduSupported)
-                && (mIsRemovable == that.mIsRemovable);
+                && (mIsRemovable == that.mIsRemovable)
+                && (Objects.equals(mPortList, that.mPortList));
     }
 
     @Override
     public int hashCode() {
-        int result = 1;
-        result = 31 * result + (mIsActive ? 1 : 0);
-        result = 31 * result + (mIsEuicc ? 1 : 0);
-        result = 31 * result + Objects.hashCode(mCardId);
-        result = 31 * result + mCardStateInfo;
-        result = 31 * result + mLogicalSlotIdx;
-        result = 31 * result + (mIsExtendedApduSupported ? 1 : 0);
-        result = 31 * result + (mIsRemovable ? 1 : 0);
-        return result;
+        return Objects.hash(mIsActive, mIsEuicc, mCardId, mCardStateInfo, mLogicalSlotIdx,
+                mIsExtendedApduSupported, mIsRemovable, mPortList);
     }
 
     @NonNull
@@ -229,6 +285,10 @@ public class UiccSlotInfo implements Parcelable {
                 + mIsExtendedApduSupported
                 + ", mIsRemovable="
                 + mIsRemovable
+                + ", mPortList="
+                + mPortList
+                + ", mLogicalSlotAccessRestricted="
+                + mLogicalSlotAccessRestricted
                 + ")";
     }
 }
