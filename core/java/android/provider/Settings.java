@@ -6524,6 +6524,16 @@ public final class Settings {
         @Readable
         public static final String ODI_CAPTIONS_ENABLED = "odi_captions_enabled";
 
+
+        /**
+         * Setting to indicate live caption button show or hide in the volume
+         * rocker.
+         *
+         * @hide
+         */
+        public static final String ODI_CAPTIONS_VOLUME_UI_ENABLED =
+                "odi_captions_volume_ui_enabled";
+
         /**
          * On Android 8.0 (API level 26) and higher versions of the platform,
          * a 64-bit number (expressed as a hexadecimal string), unique to
