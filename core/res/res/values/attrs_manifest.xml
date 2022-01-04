@@ -3070,7 +3070,6 @@
     <declare-styleable name="AndroidManifestMetaData"
          parent="AndroidManifestApplication
                  AndroidManifestActivity
-                 AndroidManifestApexSystemService
                  AndroidManifestReceiver
                  AndroidManifestProvider
                  AndroidManifestService
@@ -3105,7 +3104,6 @@
     <declare-styleable name="AndroidManifestProperty"
          parent="AndroidManifestApplication
                  AndroidManifestActivity
-                 AndroidManifestApexSystemService
                  AndroidManifestReceiver
                  AndroidManifestProvider
                  AndroidManifestService">
