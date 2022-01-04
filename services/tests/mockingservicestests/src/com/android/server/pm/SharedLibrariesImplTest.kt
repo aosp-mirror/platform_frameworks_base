@@ -16,6 +16,7 @@
 
 package com.android.server.pm
 
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.SharedLibraryInfo
 import android.content.pm.VersionedPackage
@@ -32,6 +33,7 @@ import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
+import com.android.server.testutils.mock
 import com.android.server.testutils.nullable
 import com.android.server.testutils.spy
 import com.android.server.testutils.whenever
@@ -277,6 +279,40 @@ class SharedLibrariesImplTest {
         assertThat(testPackageSetting.usesLibraryFiles).contains(builtinLibPath(BUILTIN_LIB_NAME))
         assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(DYNAMIC_LIB_PACKAGE_NAME))
         assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(STATIC_LIB_PACKAGE_NAME))
+    }
+
+    @Test
+    fun getAllowedSharedLibInfos_withStaticSharedLibInfo() {
+        val testInfo = libOfStatic(TEST_LIB_PACKAGE_NAME, TEST_LIB_NAME, 1L)
+        val scanResult = ScanResult(mock(), true, null, null,
+            false, 0, null, testInfo, null)
+
+        val allowedInfos = mSharedLibrariesImpl.getAllowedSharedLibInfos(scanResult)
+
+        assertThat(allowedInfos).hasSize(1)
+        assertThat(allowedInfos[0].name).isEqualTo(TEST_LIB_NAME)
+    }
+
+    @Test
+    fun getAllowedSharedLibInfos_withDynamicSharedLibInfo() {
+        val testInfo = libOfDynamic(TEST_LIB_PACKAGE_NAME, TEST_LIB_NAME)
+        val pair = createBasicAndroidPackage(
+            TEST_LIB_PACKAGE_NAME, 10L, libraries = arrayOf(TEST_LIB_NAME))
+        val parsedPackage = pair.second.apply {
+            isSystem = true
+        } as ParsedPackage
+        val packageSetting = mRule.system()
+            .createBasicSettingBuilder(pair.first.parentFile, parsedPackage.hideAsFinal())
+            .setPkgFlags(ApplicationInfo.FLAG_SYSTEM).build()
+        val scanRequest = ScanRequest(parsedPackage, null, null, null,
+            null, null, null, 0, 0, false, null, null)
+        val scanResult = ScanResult(scanRequest, true, packageSetting, null,
+            false, 0, null, null, listOf(testInfo))
+
+        val allowedInfos = mSharedLibrariesImpl.getAllowedSharedLibInfos(scanResult)
+
+        assertThat(allowedInfos).hasSize(1)
+        assertThat(allowedInfos[0].name).isEqualTo(TEST_LIB_NAME)
     }
 
     private fun addExistingPackages() {
