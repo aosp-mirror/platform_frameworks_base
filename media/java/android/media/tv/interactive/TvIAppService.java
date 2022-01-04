@@ -113,6 +113,19 @@ public abstract class TvIAppService extends Service {
     public static final String IAPP_SERVICE_COMMAND_TYPE_SET_STREAM_VOLUME = "set_stream_volume";
     /** @hide */
     public static final String IAPP_SERVICE_COMMAND_TYPE_SELECT_TRACK = "select_track";
+    /** @hide */
+    public static final String COMMAND_PARAMETER_KEY_CHANNEL_URI = "command_channel_uri";
+    /** @hide */
+    public static final String COMMAND_PARAMETER_KEY_INPUT_ID = "command_input_id";
+    /** @hide */
+    public static final String COMMAND_PARAMETER_KEY_VOLUME = "command_volume";
+    /** @hide */
+    public static final String COMMAND_PARAMETER_KEY_TRACK_TYPE = "command_track_type";
+    /** @hide */
+    public static final String COMMAND_PARAMETER_KEY_TRACK_ID = "command_track_id";
+    /** @hide */
+    public static final String COMMAND_PARAMETER_KEY_TRACK_SELECT_MODE =
+            "command_track_select_mode";
 
     private final Handler mServiceHandler = new ServiceHandler();
     private final RemoteCallbackList<ITvIAppServiceCallback> mCallbacks =
