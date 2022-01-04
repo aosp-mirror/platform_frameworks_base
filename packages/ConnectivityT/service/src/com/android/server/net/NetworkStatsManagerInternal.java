@@ -17,16 +17,8 @@
 package com.android.server.net;
 
 import android.annotation.NonNull;
-import android.net.NetworkStats;
-import android.net.NetworkTemplate;
 
 public abstract class NetworkStatsManagerInternal {
-    /** Return network layer usage total for traffic that matches template. */
-    public abstract long getNetworkTotalBytes(NetworkTemplate template, long start, long end);
-
-    /** Return network layer usage per-UID for traffic that matches template. */
-    public abstract NetworkStats getNetworkUidBytes(NetworkTemplate template, long start, long end);
-
     /** Mark given UID as being in foreground for stats purposes. */
     public abstract void setUidForeground(int uid, boolean uidForeground);
 

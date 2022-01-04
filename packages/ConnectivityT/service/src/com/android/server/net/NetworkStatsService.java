@@ -1691,26 +1691,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private class NetworkStatsManagerInternalImpl extends NetworkStatsManagerInternal {
         @Override
-        public long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
-            Trace.traceBegin(TRACE_TAG_NETWORK, "getNetworkTotalBytes");
-            try {
-                return NetworkStatsService.this.getNetworkTotalBytes(template, start, end);
-            } finally {
-                Trace.traceEnd(TRACE_TAG_NETWORK);
-            }
-        }
-
-        @Override
-        public NetworkStats getNetworkUidBytes(NetworkTemplate template, long start, long end) {
-            Trace.traceBegin(TRACE_TAG_NETWORK, "getNetworkUidBytes");
-            try {
-                return NetworkStatsService.this.getNetworkUidBytes(template, start, end);
-            } finally {
-                Trace.traceEnd(TRACE_TAG_NETWORK);
-            }
-        }
-
-        @Override
         public void setUidForeground(int uid, boolean uidForeground) {
             NetworkStatsService.this.setUidForeground(uid, uidForeground);
         }
