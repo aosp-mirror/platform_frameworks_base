@@ -34,12 +34,10 @@ import android.os.DropBoxManager;
 import android.service.NetworkStatsRecorderProto;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
-import android.util.MathUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FileRotator;
-
-import com.google.android.collect.Sets;
+import com.android.net.module.util.NetworkStatsUtils;
 
 import libcore.io.IoUtils;
 
@@ -132,7 +130,7 @@ public class NetworkStatsRecorder {
 
     public void setPersistThreshold(long thresholdBytes) {
         if (LOGV) Log.v(TAG, "setPersistThreshold() with " + thresholdBytes);
-        mPersistThresholdBytes = MathUtils.constrain(
+        mPersistThresholdBytes = NetworkStatsUtils.constrain(
                 thresholdBytes, 1 * KB_IN_BYTES, 100 * MB_IN_BYTES);
     }
 
@@ -206,7 +204,7 @@ public class NetworkStatsRecorder {
      */
     public void recordSnapshotLocked(NetworkStats snapshot,
             Map<String, NetworkIdentitySet> ifaceIdent, long currentTimeMillis) {
-        final HashSet<String> unknownIfaces = Sets.newHashSet();
+        final HashSet<String> unknownIfaces = new HashSet<>();
 
         // skip recording when snapshot missing
         if (snapshot == null) return;
