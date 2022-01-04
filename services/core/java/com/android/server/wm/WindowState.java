@@ -5427,7 +5427,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void assignLayer(Transaction t, int layer) {
-        if (isStartingWindowAssociatedToTask()) {
+        if (mStartingData != null) {
             // The starting window should cover the task.
             t.setLayer(mSurfaceControl, Integer.MAX_VALUE);
             return;
@@ -5747,29 +5747,36 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Slog.i(TAG, "finishDrawing of relaunch: " + this + " " + duration + "ms");
             mActivityRecord.mRelaunchStartTime = 0;
         }
-
-        executeDrawHandlers(postDrawTransaction);
-
-        final boolean applyPostDrawNow = mClientWasDrawingForSync && postDrawTransaction != null;
-        mClientWasDrawingForSync = false;
-        if (!onSyncFinishedDrawing()) {
-            return mWinAnimator.finishDrawingLocked(postDrawTransaction, applyPostDrawNow);
-        }
-
-        if (mActivityRecord != null
-                && mTransitionController.isShellTransitionsEnabled()
-                && mAttrs.type == TYPE_APPLICATION_STARTING) {
+        if (mActivityRecord != null && mAttrs.type == TYPE_APPLICATION_STARTING) {
             mWmService.mAtmService.mTaskSupervisor.getActivityMetricsLogger()
                     .notifyStartingWindowDrawn(mActivityRecord);
         }
 
-        if (postDrawTransaction != null) {
+        final boolean hasSyncHandlers = executeDrawHandlers(postDrawTransaction);
+
+        boolean skipLayout = false;
+        // Control the timing to switch the appearance of window with different rotations.
+        final FadeRotationAnimationController fadeRotationController =
+                mDisplayContent.getFadeRotationAnimationController();
+        if (fadeRotationController != null
+                && fadeRotationController.handleFinishDrawing(this, postDrawTransaction)) {
+            // Consume the transaction because the controller will apply it with fade animation.
+            // Layout is not needed because the window will be hidden by the fade leash. Clear
+            // sync state because its sync transaction doesn't need to be merged to sync group.
+            postDrawTransaction = null;
+            skipLayout = true;
+            clearSyncState();
+        } else if (onSyncFinishedDrawing() && postDrawTransaction != null) {
             mSyncTransaction.merge(postDrawTransaction);
+            // Consume the transaction because the sync group will merge it.
+            postDrawTransaction = null;
         }
 
-        mWinAnimator.finishDrawingLocked(null, false /* forceApplyNow */);
+        final boolean layoutNeeded =
+                mWinAnimator.finishDrawingLocked(postDrawTransaction, mClientWasDrawingForSync);
+        mClientWasDrawingForSync = false;
         // We always want to force a traversal after a finish draw for blast sync.
-        return true;
+        return !skipLayout && (hasSyncHandlers || layoutNeeded);
     }
 
     void immediatelyNotifyBlastSync() {

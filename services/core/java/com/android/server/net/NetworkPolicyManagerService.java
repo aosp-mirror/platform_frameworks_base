@@ -2005,7 +2005,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (final NetworkStateSnapshot snapshot : snapshots) {
             mNetIdToSubId.put(snapshot.getNetwork().getNetId(), parseSubId(snapshot));
 
-            // Policies matched by NPMS only match by subscriber ID or by ssid. Thus subtype
+            // Policies matched by NPMS only match by subscriber ID or by network ID. Thus subtype
             // in the object created here is never used and its value doesn't matter, so use
             // NETWORK_TYPE_UNKNOWN.
             final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, snapshot,
@@ -2435,13 +2435,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         }
                         final NetworkTemplate.Builder builder =
                                 new NetworkTemplate.Builder(templateType)
-                                        .setWifiNetworkKey(networkId)
                                         .setMeteredness(templateMeteredness);
                         if (subscriberIdMatchRule
                                 == NetworkStatsUtils.SUBSCRIBER_ID_MATCH_RULE_EXACT) {
                             final ArraySet<String> ids = new ArraySet<>();
                             ids.add(subscriberId);
                             builder.setSubscriberIds(ids);
+                        }
+                        if (networkId != null) {
+                            builder.setWifiNetworkKeys(Set.of(networkId));
                         }
                         final NetworkTemplate template = builder.build();
                         if (NetworkPolicy.isTemplatePersistable(template)) {
@@ -2593,35 +2595,39 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * into {@link WifiConfiguration}.
      */
     private void upgradeWifiMeteredOverride() {
-        final ArrayMap<String, Boolean> wifiNetworkIds = new ArrayMap<>();
+        final ArrayMap<String, Boolean> wifiNetworkKeys = new ArrayMap<>();
         synchronized (mNetworkPoliciesSecondLock) {
             for (int i = 0; i < mNetworkPolicy.size();) {
                 final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
                 if (policy.template.getMatchRule() == NetworkTemplate.MATCH_WIFI
                         && !policy.inferred) {
                     mNetworkPolicy.removeAt(i);
-                    wifiNetworkIds.put(policy.template.getNetworkId(), policy.metered);
+                    final Set<String> keys = policy.template.getWifiNetworkKeys();
+                    wifiNetworkKeys.put(keys.isEmpty() ? null : keys.iterator().next(),
+                            policy.metered);
                 } else {
                     i++;
                 }
             }
         }
 
-        if (wifiNetworkIds.isEmpty()) {
+        if (wifiNetworkKeys.isEmpty()) {
             return;
         }
         final WifiManager wm = mContext.getSystemService(WifiManager.class);
         final List<WifiConfiguration> configs = wm.getConfiguredNetworks();
         for (int i = 0; i < configs.size(); ++i) {
             final WifiConfiguration config = configs.get(i);
-            final String networkId = resolveNetworkId(config);
-            final Boolean metered = wifiNetworkIds.get(networkId);
-            if (metered != null) {
-                Slog.d(TAG, "Found network " + networkId + "; upgrading metered hint");
-                config.meteredOverride = metered
-                        ? WifiConfiguration.METERED_OVERRIDE_METERED
-                        : WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
-                wm.updateNetwork(config);
+            for (String key : config.getAllPersistableNetworkKeys()) {
+                final Boolean metered = wifiNetworkKeys.get(key);
+                if (metered != null) {
+                    Slog.d(TAG, "Found network " + key + "; upgrading metered hint");
+                    config.meteredOverride = metered
+                            ? WifiConfiguration.METERED_OVERRIDE_METERED
+                            : WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
+                    wm.updateNetwork(config);
+                    break;
+                }
             }
         }
 
@@ -2663,9 +2669,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         ? NetworkStatsUtils.SUBSCRIBER_ID_MATCH_RULE_ALL
                         : NetworkStatsUtils.SUBSCRIBER_ID_MATCH_RULE_EXACT;
                 writeIntAttribute(out, ATTR_SUBSCRIBER_ID_MATCH_RULE, subscriberIdMatchRule);
-                final String networkId = template.getNetworkId();
-                if (networkId != null) {
-                    out.attribute(null, ATTR_NETWORK_ID, networkId);
+                if (!template.getWifiNetworkKeys().isEmpty()) {
+                    out.attribute(null, ATTR_NETWORK_ID,
+                            template.getWifiNetworkKeys().iterator().next());
                 }
                 writeIntAttribute(out, ATTR_TEMPLATE_METERED,
                         template.getMeteredness());
