@@ -18,8 +18,6 @@ package com.android.server.net;
 
 import static android.app.usage.NetworkStatsManager.MIN_THRESHOLD_BYTES;
 
-import static com.android.internal.util.Preconditions.checkArgument;
-
 import android.app.usage.NetworkStatsManager;
 import android.net.DataUsageRequest;
 import android.net.NetworkIdentitySet;
@@ -216,7 +214,10 @@ class NetworkStatsObservers {
                     accessLevel);
         } else {
             // Safety check in case a new access level is added and we forgot to update this
-            checkArgument(accessLevel >= NetworkStatsAccess.Level.DEVICESUMMARY);
+            if (accessLevel < NetworkStatsAccess.Level.DEVICESUMMARY) {
+                throw new IllegalArgumentException(
+                        "accessLevel " + accessLevel + " is less than DEVICESUMMARY.");
+            }
             return new NetworkUsageRequestInfo(this, request, messenger, binder, callingUid,
                     accessLevel);
         }
