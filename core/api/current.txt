@@ -7355,6 +7355,7 @@ package android.app.admin {
     method @NonNull public java.util.List<java.lang.String> getUserControlDisabledPackages(@NonNull android.content.ComponentName);
     method @NonNull public android.os.Bundle getUserRestrictions(@NonNull android.content.ComponentName);
     method @Nullable public String getWifiMacAddress(@NonNull android.content.ComponentName);
+    method @Nullable public android.app.admin.WifiSsidPolicy getWifiSsidPolicy();
     method public boolean grantKeyPairToApp(@Nullable android.content.ComponentName, @NonNull String, @NonNull String);
     method public boolean grantKeyPairToWifiAuth(@NonNull String);
     method public boolean hasCaCertInstalled(@Nullable android.content.ComponentName, byte[]);
@@ -7508,6 +7509,7 @@ package android.app.admin {
     method public void setUsbDataSignalingEnabled(boolean);
     method public void setUserControlDisabledPackages(@NonNull android.content.ComponentName, @NonNull java.util.List<java.lang.String>);
     method public void setUserIcon(@NonNull android.content.ComponentName, android.graphics.Bitmap);
+    method public void setWifiSsidPolicy(@Nullable android.app.admin.WifiSsidPolicy);
     method public int startUserInBackground(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
     method public int stopUser(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
     method public boolean switchUser(@NonNull android.content.ComponentName, @Nullable android.os.UserHandle);
@@ -7867,6 +7869,18 @@ package android.app.admin {
     method @NonNull public java.util.List<java.lang.Integer> getReasons();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.UnsafeStateException> CREATOR;
+  }
+
+  public final class WifiSsidPolicy implements android.os.Parcelable {
+    method @NonNull public static android.app.admin.WifiSsidPolicy createAllowlistPolicy(@NonNull java.util.Set<java.lang.String>);
+    method @NonNull public static android.app.admin.WifiSsidPolicy createDenylistPolicy(@NonNull java.util.Set<java.lang.String>);
+    method public int describeContents();
+    method public int getPolicyType();
+    method @NonNull public java.util.Set<java.lang.String> getSsids();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.WifiSsidPolicy> CREATOR;
+    field public static final int WIFI_SSID_POLICY_TYPE_ALLOWLIST = 0; // 0x0
+    field public static final int WIFI_SSID_POLICY_TYPE_DENYLIST = 1; // 0x1
   }
 
 }
