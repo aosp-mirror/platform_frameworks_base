@@ -171,6 +171,7 @@ java_library_with_nonpublic_deps {
         "framework-supplementalprocess.stubs.module_lib",
         "framework-tethering.stubs.module_lib",
         "framework-uwb.stubs.module_lib",
+        "framework-nearby.stubs.module_lib",
         "framework-wifi.stubs.module_lib",
     ],
     soong_config_variables: {
@@ -201,6 +202,7 @@ java_library_with_nonpublic_deps {
         "framework-statsd.impl",
         "framework-supplementalprocess.impl",
         "framework-tethering.impl",
+        "framework-nearby.impl",
         "framework-uwb.impl",
         "framework-wifi.impl",
         "updatable-media",
