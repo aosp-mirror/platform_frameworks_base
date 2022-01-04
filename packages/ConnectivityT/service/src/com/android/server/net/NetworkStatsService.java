@@ -25,7 +25,6 @@ import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.NetworkIdentity.SUBTYPE_COMBINED;
-import static android.net.NetworkStack.checkNetworkStackPermission;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.IFACE_VT;
@@ -158,6 +157,7 @@ import com.android.server.LocalServices;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.Clock;
@@ -981,7 +981,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @NonNull NetworkStateSnapshot[] networkStates,
             @Nullable String activeIface,
             @NonNull UnderlyingNetworkInfo[] underlyingNetworkInfos) {
-        checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -1197,13 +1197,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // On background handler thread, and USER_REMOVED is protected
             // broadcast.
 
-            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-            if (userId == -1) return;
+            final UserHandle userHandle = intent.getParcelableExtra(Intent.EXTRA_USER);
+            if (userHandle == null) return;
 
             synchronized (mStatsLock) {
                 mWakeLock.acquire();
                 try {
-                    removeUserLocked(userId);
+                    removeUserLocked(userHandle);
                 } finally {
                     mWakeLock.release();
                 }
@@ -1228,7 +1228,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         @Override
         public void limitReached(String limitName, String iface) {
             // only someone like NMS should be calling us
-            NetworkStack.checkNetworkStackPermission(mContext);
+            PermissionUtils.enforceNetworkStackPermission(mContext);
 
             if (LIMIT_GLOBAL_ALERT.equals(limitName)) {
                 // kick off background poll to collect network stats unless there is already
@@ -1648,8 +1648,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Clean up {@link #mUidRecorder} after user is removed.
      */
     @GuardedBy("mStatsLock")
-    private void removeUserLocked(int userId) {
-        if (LOGV) Log.v(TAG, "removeUserLocked() for userId=" + userId);
+    private void removeUserLocked(@NonNull UserHandle userHandle) {
+        if (LOGV) Log.v(TAG, "removeUserLocked() for UserHandle=" + userHandle);
 
         // Build list of UIDs that we should clean up
         final ArrayList<Integer> uids = new ArrayList<>();
@@ -1657,7 +1657,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 PackageManager.MATCH_ANY_USER
                 | PackageManager.MATCH_DISABLED_COMPONENTS);
         for (ApplicationInfo app : apps) {
-            final int uid = UserHandle.getUid(userId, app.uid);
+            final int uid = userHandle.getUid(app.uid);
             uids.add(uid);
         }
 
@@ -1865,7 +1865,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @GuardedBy("mStatsLock")
     private void dumpProtoLocked(FileDescriptor fd) {
-        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+        final ProtoOutputStream proto = new ProtoOutputStream(new FileOutputStream(fd));
 
         // TODO Right now it writes all history.  Should it limit to the "since-boot" log?
 
