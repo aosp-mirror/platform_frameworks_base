@@ -505,13 +505,13 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * block. If this function returns null, the result of the cache query is null. There is no
      * "negative cache" in the query: we don't cache null results at all.
      */
-    protected abstract Result recompute(Query query);
+    public abstract Result recompute(Query query);
 
     /**
      * Return true if the query should bypass the cache.  The default behavior is to
      * always use the cache but the method can be overridden for a specific class.
      */
-    protected boolean bypass(Query query) {
+    public boolean bypass(Query query) {
         return false;
     }
 
@@ -519,7 +519,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * Determines if a pair of responses are considered equal. Used to determine whether
      * a cache is inadvertently returning stale results when VERIFY is set to true.
      */
-    protected boolean debugCompareQueryResults(Result cachedResult, Result fetchedResult) {
+    protected boolean resultEquals(Result cachedResult, Result fetchedResult) {
         // If a service crashes and returns a null result, the cached value remains valid.
         if (fetchedResult != null) {
             return Objects.equals(cachedResult, fetchedResult);
@@ -990,11 +990,11 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         }
     }
 
-    protected Result maybeCheckConsistency(Query query, Result proposedResult) {
+    private Result maybeCheckConsistency(Query query, Result proposedResult) {
         if (VERIFY) {
             Result resultToCompare = recompute(query);
             boolean nonceChanged = (getCurrentNonce() != mLastSeenNonce);
-            if (!nonceChanged && !debugCompareQueryResults(proposedResult, resultToCompare)) {
+            if (!nonceChanged && !resultEquals(proposedResult, resultToCompare)) {
                 Log.e(TAG, TextUtils.formatSimple(
                         "cache %s inconsistent for %s is %s should be %s",
                         cacheName(), queryToString(query),

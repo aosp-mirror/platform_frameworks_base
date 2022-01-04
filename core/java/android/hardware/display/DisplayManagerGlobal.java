@@ -128,7 +128,7 @@ public final class DisplayManagerGlobal {
                 8, // size of display cache
                 CACHE_KEY_DISPLAY_INFO_PROPERTY) {
                 @Override
-                protected DisplayInfo recompute(Integer id) {
+                public DisplayInfo recompute(Integer id) {
                     try {
                         return mDm.getDisplayInfo(id);
                     } catch (RemoteException ex) {
