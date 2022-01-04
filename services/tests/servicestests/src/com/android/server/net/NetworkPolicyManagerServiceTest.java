@@ -266,7 +266,6 @@ public class NetworkPolicyManagerServiceTest {
             ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
 
     private ActivityManagerInternal mActivityManagerInternal;
-    private NetworkStatsManagerInternal mStatsService;
 
     private IUidObserver mUidObserver;
     private INetworkManagementEventObserver mNetworkObserver;
@@ -333,8 +332,6 @@ public class NetworkPolicyManagerServiceTest {
                 .setBatterySaverEnabled(false).build();
         final PowerManagerInternal pmInternal = addLocalServiceMock(PowerManagerInternal.class);
         when(pmInternal.getLowPowerState(anyInt())).thenReturn(state);
-
-        mStatsService = addLocalServiceMock(NetworkStatsManagerInternal.class);
     }
 
     private class TestDependencies extends NetworkPolicyManagerService.Dependencies {
@@ -524,7 +521,6 @@ public class NetworkPolicyManagerServiceTest {
         LocalServices.removeServiceForTest(DeviceIdleInternal.class);
         LocalServices.removeServiceForTest(AppStandbyInternal.class);
         LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
-        LocalServices.removeServiceForTest(NetworkStatsManagerInternal.class);
     }
 
     @After
@@ -1755,7 +1751,7 @@ public class NetworkPolicyManagerServiceTest {
         npmi.onStatsProviderWarningOrLimitReached("TEST");
         // Wait for processing of MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED.
         postMsgAndWaitForCompletion();
-        verify(mStatsService).forceUpdate();
+        verify(mStatsManager).forceUpdate();
         // Wait for processing of MSG_*_INTERFACE_QUOTAS.
         postMsgAndWaitForCompletion();
     }
@@ -1773,7 +1769,7 @@ public class NetworkPolicyManagerServiceTest {
         // Get active mobile network in place
         expectMobileDefaults();
         mService.updateNetworks();
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE,
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE,
                 Long.MAX_VALUE);
 
         // Set warning to 7KB and limit to 10KB.
@@ -1783,32 +1779,32 @@ public class NetworkPolicyManagerServiceTest {
         postMsgAndWaitForCompletion();
 
         // Verifies that remaining quotas are set to providers.
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2001L, 5001L);
-        reset(mStatsService);
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2001L, 5001L);
+        reset(mStatsManager);
 
         // Increase the usage and simulates that limit reached fires earlier by provider,
         // but actually the quota is not yet reached. Verifies that the limit reached leads to
         // a force update and new quotas should be set.
         mDeps.increaseMockedTotalBytes(UID_A, 1000, 999);
         triggerOnStatsProviderWarningOrLimitReached();
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2L, 3002L);
-        reset(mStatsService);
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2L, 3002L);
+        reset(mStatsManager);
 
         // Increase the usage and simulate warning reached, the new warning should be unlimited
         // since service will disable warning quota to stop lower layer from keep triggering
         // warning reached event.
         mDeps.increaseMockedTotalBytes(UID_A, 1000L, 1000);
         triggerOnStatsProviderWarningOrLimitReached();
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(
                 TEST_IFACE, Long.MAX_VALUE, 1002L);
-        reset(mStatsService);
+        reset(mStatsManager);
 
         // Increase the usage that over the warning and limit, the new limit should set to 1 to
         // block the network traffic.
         mDeps.increaseMockedTotalBytes(UID_A, 1000L, 1000);
         triggerOnStatsProviderWarningOrLimitReached();
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE, 1L);
-        reset(mStatsService);
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE, 1L);
+        reset(mStatsManager);
     }
 
     private void enableRestrictedMode(boolean enable) throws Exception {
@@ -2098,7 +2094,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private void verifyAdvisePersistThreshold() throws Exception {
-        verify(mStatsService).advisePersistThreshold(anyLong());
+        verify(mStatsManager).advisePersistThreshold(anyLong());
     }
 
     private static class TestAbstractFuture<T> extends AbstractFuture<T> {
