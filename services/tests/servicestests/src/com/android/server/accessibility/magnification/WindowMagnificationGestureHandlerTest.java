@@ -85,7 +85,7 @@ public class WindowMagnificationGestureHandlerTest {
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        mWindowMagnificationManager = new WindowMagnificationManager(mContext, 0,
+        mWindowMagnificationManager = new WindowMagnificationManager(mContext, new Object(),
                 mock(WindowMagnificationManager.Callback.class), mMockTrace,
                 new MagnificationScaleProvider(mContext));
         mMockConnection = new MockWindowMagnificationConnection();

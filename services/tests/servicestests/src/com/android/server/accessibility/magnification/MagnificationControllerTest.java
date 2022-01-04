@@ -125,6 +125,7 @@ public class MagnificationControllerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         FakeSettingsProvider.clearSettingsProvider();
+        final Object globalLock = new Object();
 
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mMockWindowManagerInternal);
@@ -139,14 +140,14 @@ public class MagnificationControllerTest {
                 CURRENT_USER_ID);
         mScaleProvider = spy(new MagnificationScaleProvider(mContext));
         mWindowMagnificationManager = Mockito.spy(
-                new WindowMagnificationManager(mContext, CURRENT_USER_ID,
+                new WindowMagnificationManager(mContext, globalLock,
                         mock(WindowMagnificationManager.Callback.class), mTraceManager,
                         mScaleProvider));
         mMockConnection = new MockWindowMagnificationConnection(true);
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mScreenMagnificationControllerStubber = new FullScreenMagnificationControllerStubber(
                 mScreenMagnificationController);
-        mMagnificationController = new MagnificationController(mService, new Object(), mContext,
+        mMagnificationController = new MagnificationController(mService, globalLock, mContext,
                 mScreenMagnificationController, mWindowMagnificationManager, mScaleProvider);
 
         mMagnificationController.setMagnificationCapabilities(

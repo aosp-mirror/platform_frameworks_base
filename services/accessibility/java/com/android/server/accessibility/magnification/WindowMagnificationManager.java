@@ -87,7 +87,7 @@ public class WindowMagnificationManager implements
     })
     public @interface WindowPosition {}
 
-    private final Object mLock = new Object();
+    private final Object mLock;
     private final Context mContext;
     @VisibleForTesting
     @GuardedBy("mLock")
@@ -152,9 +152,10 @@ public class WindowMagnificationManager implements
     private final AccessibilityTraceManager mTrace;
     private final MagnificationScaleProvider mScaleProvider;
 
-    public WindowMagnificationManager(Context context, int userId, @NonNull Callback callback,
+    public WindowMagnificationManager(Context context, Object lock, @NonNull Callback callback,
             AccessibilityTraceManager trace, MagnificationScaleProvider scaleProvider) {
         mContext = context;
+        mLock = lock;
         mCallback = callback;
         mTrace = trace;
         mScaleProvider = scaleProvider;
