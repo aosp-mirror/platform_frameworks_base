@@ -5580,13 +5580,6 @@
     <permission android:name="android.permission.WRITE_COMMUNAL_STATE"
                 android:protectionLevel="signature" />
 
-    <!-- Allows an application to view information from the currently active
-         {@link com.android.server.communal.CommunalManagerService}.
-         @hide
-         @SystemApi -->
-    <permission android:name="android.permission.READ_COMMUNAL_STATE"
-                android:protectionLevel="signature|privileged"/>
-
     <!-- Allows the holder to manage whether the system can bind to services
          provided by instant apps. This permission is intended to protect
          test/development fucntionality and should be used only in such cases.
