@@ -3592,7 +3592,7 @@ public class StatusBar extends CoreStartable implements
 
     final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
         @Override
-        public void onScreenTurningOn() {
+        public void onScreenTurningOn(Runnable onDrawn) {
             mFalsingCollector.onScreenTurningOn();
             mNotificationPanelViewController.onScreenTurningOn();
         }
