@@ -24,6 +24,8 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
+import android.os.BatteryManagerInternal;
+import android.os.BatteryStatsInternal;
 import android.os.Handler;
 import android.util.Slog;
 
@@ -144,6 +146,8 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
         T mAppStatePolicy;
 
         ActivityManagerInternal mActivityManagerInternal;
+        BatteryManagerInternal mBatteryManagerInternal;
+        BatteryStatsInternal mBatteryStatsInternal;
         DeviceIdleInternal mDeviceIdleInternal;
         UserManagerInternal mUserManagerInternal;
 
@@ -153,6 +157,8 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
 
         void onSystemReady() {
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+            mBatteryManagerInternal = LocalServices.getService(BatteryManagerInternal.class);
+            mBatteryStatsInternal = LocalServices.getService(BatteryStatsInternal.class);
             mDeviceIdleInternal = LocalServices.getService(DeviceIdleInternal.class);
             mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
 
@@ -161,6 +167,14 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
 
         ActivityManagerInternal getActivityManagerInternal() {
             return mActivityManagerInternal;
+        }
+
+        BatteryManagerInternal getBatteryManagerInternal() {
+            return mBatteryManagerInternal;
+        }
+
+        BatteryStatsInternal getBatteryStatsInternal() {
+            return mBatteryStatsInternal;
         }
 
         T getPolicy() {
@@ -173,6 +187,13 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
 
         UserManagerInternal getUserManagerInternal() {
             return mUserManagerInternal;
+        }
+
+        /**
+         * Equivalent to {@link java.lang.System#currentTimeMillis}.
+         */
+        long currentTimeMillis() {
+            return System.currentTimeMillis();
         }
     }
 }

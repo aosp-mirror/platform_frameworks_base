@@ -817,6 +817,11 @@ public final class AppRestrictionController {
         return mLock;
     }
 
+    @VisibleForTesting
+    void addAppStateTracker(@NonNull BaseAppStateTracker tracker) {
+        mAppStateTrackers.add(tracker);
+    }
+
     static class BgHandler extends Handler {
         static final int MSG_BACKGROUND_RESTRICTION_CHANGED = 0;
         static final int MSG_APP_RESTRICTION_LEVEL_CHANGED = 1;
@@ -884,6 +889,7 @@ public final class AppRestrictionController {
 
         void initAppStateTrackers(AppRestrictionController controller) {
             mAppRestrictionController = controller;
+            controller.mAppStateTrackers.add(new AppBatteryTracker(mContext, controller));
         }
 
         AppRestrictionController getAppRestrictionController() {
