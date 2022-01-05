@@ -17,11 +17,7 @@
 package android.inputmethodservice;
 
 import static android.inputmethodservice.SoftInputWindowProto.BOUNDS;
-import static android.inputmethodservice.SoftInputWindowProto.GRAVITY;
-import static android.inputmethodservice.SoftInputWindowProto.NAME;
-import static android.inputmethodservice.SoftInputWindowProto.TAKES_FOCUS;
 import static android.inputmethodservice.SoftInputWindowProto.WINDOW_STATE;
-import static android.inputmethodservice.SoftInputWindowProto.WINDOW_TYPE;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -33,7 +29,6 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -268,11 +263,6 @@ final class SoftInputWindow extends Dialog {
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        // TODO(b/192412909): Deprecate the following 4 entries, as they are all constant.
-        proto.write(NAME, "InputMethod");
-        proto.write(WINDOW_TYPE, WindowManager.LayoutParams.TYPE_INPUT_METHOD);
-        proto.write(GRAVITY, Gravity.BOTTOM);
-        proto.write(TAKES_FOCUS, false);
         mBounds.dumpDebug(proto, BOUNDS);
         proto.write(WINDOW_STATE, mWindowState);
         proto.end(token);
