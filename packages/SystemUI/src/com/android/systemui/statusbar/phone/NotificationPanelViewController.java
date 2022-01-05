@@ -1303,8 +1303,11 @@ public class NotificationPanelViewController extends PanelViewController {
             mKeyguardStatusViewController.displayClock(LARGE);
         }
         updateKeyguardStatusViewAlignment(true /* animate */);
-        int userIconHeight = mKeyguardQsUserSwitchController != null
+        int userSwitcherHeight = mKeyguardQsUserSwitchController != null
                 ? mKeyguardQsUserSwitchController.getUserIconHeight() : 0;
+        if (mKeyguardUserSwitcherController != null) {
+            userSwitcherHeight = mKeyguardUserSwitcherController.getHeight();
+        }
         float expandedFraction =
                 mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
                         ? 1.0f : getExpandedFraction();
@@ -1324,7 +1327,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 mStatusBarHeaderHeightKeyguard,
                 expandedFraction,
                 mKeyguardStatusViewController.getLockscreenHeight(),
-                userIconHeight,
+                userSwitcherHeight,
                 userSwitcherPreferredY,
                 darkamount, mOverStretchAmount,
                 bypassEnabled, getUnlockedStackScrollerPadding(),
