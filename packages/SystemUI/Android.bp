@@ -234,15 +234,23 @@ android_library {
     plugins: ["dagger2-compiler"],
 }
 
-soong_config_module_type_import {
-    from: "frameworks/base/services/Android.bp",
-    module_types: ["system_optimized_java_defaults"],
+// Opt-in config for optimizing the SystemUI target using R8.
+// Enabled via `export SYSTEMUI_OPTIMIZE_JAVA=true`, or explicitly in Make via
+// the `SOONG_CONFIG_ANDROID_SYSTEMUI_OPTIMIZE_JAVA` variable.
+// TODO(b/203472868): Enable optimizations by default after stabilizing and
+// building out retrace infrastructure.
+soong_config_module_type {
+    name: "systemui_optimized_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: ["SYSTEMUI_OPTIMIZE_JAVA"],
+    properties: ["optimize"],
 }
 
-system_optimized_java_defaults {
+systemui_optimized_java_defaults {
     name: "SystemUI_app_defaults",
     soong_config_variables: {
-        SYSTEM_OPTIMIZE_JAVA: {
+        SYSTEMUI_OPTIMIZE_JAVA: {
             optimize: {
                 enabled: true,
                 optimize: true,
