@@ -355,6 +355,7 @@ public final class Settings implements Watchable, Snappable {
     private static final String ATTR_SDK_VERSION = "sdkVersion";
     private static final String ATTR_DATABASE_VERSION = "databaseVersion";
     private static final String ATTR_VALUE = "value";
+    private static final String ATTR_FIRST_INSTALL_TIME = "first-install-time";
 
     private final PackageManagerTracedLock mLock;
 
@@ -1007,8 +1008,9 @@ public final class Settings implements Watchable, Snappable {
                                 null /*disabledComponents*/,
                                 PackageManager.INSTALL_REASON_UNKNOWN,
                                 PackageManager.UNINSTALL_REASON_UNKNOWN,
-                                null, /*harmfulAppWarning*/
-                                null /*splashscreenTheme*/
+                                null /*harmfulAppWarning*/,
+                                null /*splashscreenTheme*/,
+                                0 /*firstInstallTime*/
                         );
                     }
                 }
@@ -1611,7 +1613,8 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    void readPackageRestrictionsLPr(int userId) {
+    void readPackageRestrictionsLPr(int userId,
+            @NonNull ArrayMap<String, Long> origFirstInstallTimes) {
         if (DEBUG_MU) {
             Log.i(TAG, "Reading package restrictions for user=" + userId);
         }
@@ -1664,7 +1667,9 @@ public final class Settings implements Watchable, Snappable {
                                 PackageManager.INSTALL_REASON_UNKNOWN,
                                 PackageManager.UNINSTALL_REASON_UNKNOWN,
                                 null /*harmfulAppWarning*/,
-                                null /* splashScreenTheme*/);
+                                null /* splashScreenTheme*/,
+                                0 /*firstInstallTime*/
+                        );
                     }
                     return;
                 }
@@ -1754,6 +1759,8 @@ public final class Settings implements Watchable, Snappable {
                             PackageManager.UNINSTALL_REASON_UNKNOWN);
                     final String splashScreenTheme = parser.getAttributeValue(null,
                             ATTR_SPLASH_SCREEN_THEME);
+                    final long firstInstallTime = parser.getAttributeLongHex(null,
+                            ATTR_FIRST_INSTALL_TIME, 0);
 
                     ArraySet<String> enabledComponents = null;
                     ArraySet<String> disabledComponents = null;
@@ -1826,7 +1833,9 @@ public final class Settings implements Watchable, Snappable {
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
                             hidden, distractionFlags, suspendParamsMap, instantApp, virtualPreload,
                             enabledCaller, enabledComponents, disabledComponents, installReason,
-                            uninstallReason, harmfulAppWarning, splashScreenTheme);
+                            uninstallReason, harmfulAppWarning, splashScreenTheme,
+                            firstInstallTime != 0 ? firstInstallTime :
+                                    origFirstInstallTimes.getOrDefault(name, 0L));
 
                     mDomainVerificationManager.setLegacyUserState(name, userId, verifState);
                 } else if (tagName.equals("preferred-activities")) {
@@ -2079,6 +2088,8 @@ public final class Settings implements Watchable, Snappable {
                     serializer.attributeInt(null, ATTR_INSTALL_REASON,
                             ustate.getInstallReason());
                 }
+                serializer.attributeLongHex(null, ATTR_FIRST_INSTALL_TIME,
+                        ustate.getFirstInstallTime());
                 if (ustate.getUninstallReason() != PackageManager.UNINSTALL_REASON_UNKNOWN) {
                     serializer.attributeInt(null, ATTR_UNINSTALL_REASON,
                             ustate.getUninstallReason());
@@ -2746,7 +2757,6 @@ public final class Settings implements Watchable, Snappable {
         }
         serializer.attribute(null, "codePath", pkg.getPathString());
         serializer.attributeLongHex(null, "ft", pkg.getLastModifiedTime());
-        serializer.attributeLongHex(null, "it", pkg.getFirstInstallTime());
         serializer.attributeLongHex(null, "ut", pkg.getLastUpdateTime());
         serializer.attributeLong(null, "version", pkg.getVersionCode());
         if (pkg.getLegacyNativeLibraryPath() != null) {
@@ -2803,7 +2813,6 @@ public final class Settings implements Watchable, Snappable {
         serializer.attributeInt(null, "publicFlags", pkg.getFlags());
         serializer.attributeInt(null, "privateFlags", pkg.getPrivateFlags());
         serializer.attributeLongHex(null, "ft", pkg.getLastModifiedTime());
-        serializer.attributeLongHex(null, "it", pkg.getFirstInstallTime());
         serializer.attributeLongHex(null, "ut", pkg.getLastUpdateTime());
         serializer.attributeLong(null, "version", pkg.getVersionCode());
         if (pkg.getSharedUser() == null) {
@@ -2925,6 +2934,11 @@ public final class Settings implements Watchable, Snappable {
         mKeySetRefs.clear();
         mInstallerPackages.clear();
 
+        // If any user state doesn't have a first install time, e.g., after an OTA,
+        // use the pre OTA firstInstallTime timestamp. This is because we migrated from per package
+        // firstInstallTime to per user-state. Without this, OTA can cause this info to be lost.
+        final ArrayMap<String, Long> originalFirstInstallTimes = new ArrayMap<>();
+
         try {
             if (str == null) {
                 if (!mSettingsFilename.exists()) {
@@ -2965,7 +2979,7 @@ public final class Settings implements Watchable, Snappable {
 
                 String tagName = parser.getName();
                 if (tagName.equals("package")) {
-                    readPackageLPw(parser, users);
+                    readPackageLPw(parser, users, originalFirstInstallTimes);
                 } else if (tagName.equals("permissions")) {
                     mPermissions.readPermissions(parser);
                 } else if (tagName.equals("permission-trees")) {
@@ -3102,7 +3116,7 @@ public final class Settings implements Watchable, Snappable {
             writePackageRestrictionsLPr(UserHandle.USER_SYSTEM);
         } else {
             for (UserInfo user : users) {
-                readPackageRestrictionsLPr(user.id);
+                readPackageRestrictionsLPr(user.id, originalFirstInstallTimes);
             }
         }
 
@@ -3532,7 +3546,6 @@ public final class Settings implements Watchable, Snappable {
             timeStamp = parser.getAttributeLong(null, "ts", 0);
         }
         ps.setLastModifiedTime(timeStamp);
-        ps.setFirstInstallTime(parser.getAttributeLongHex(null, "it", 0));
         ps.setLastUpdateTime(parser.getAttributeLongHex(null, "ut", 0));
         ps.setAppId(parser.getAttributeInt(null, "userId", 0));
         if (ps.getAppId() <= 0) {
@@ -3570,7 +3583,8 @@ public final class Settings implements Watchable, Snappable {
     private static int PRE_M_APP_INFO_FLAG_CANT_SAVE_STATE = 1<<28;
     private static int PRE_M_APP_INFO_FLAG_PRIVILEGED = 1<<30;
 
-    private void readPackageLPw(TypedXmlPullParser parser, List<UserInfo> users)
+    private void readPackageLPw(TypedXmlPullParser parser, List<UserInfo> users,
+            ArrayMap<String, Long> originalFirstInstallTimes)
             throws XmlPullParserException, IOException {
         String name = null;
         String realName = null;
@@ -3726,7 +3740,6 @@ public final class Settings implements Watchable, Snappable {
                             + parser.getPositionDescription());
                 } else {
                     packageSetting.setLastModifiedTime(timeStamp);
-                    packageSetting.setFirstInstallTime(firstInstallTime);
                     packageSetting.setLastUpdateTime(lastUpdateTime);
                 }
             } else if (sharedUserId != 0) {
@@ -3741,7 +3754,6 @@ public final class Settings implements Watchable, Snappable {
                             null /* usesStaticLibraryVersions */,
                             null /* mimeGroups */, domainSetId);
                     packageSetting.setLastModifiedTime(timeStamp);
-                    packageSetting.setFirstInstallTime(firstInstallTime);
                     packageSetting.setLastUpdateTime(lastUpdateTime);
                     mPendingPackages.add(packageSetting);
                     if (PackageManagerService.DEBUG_SETTINGS)
@@ -3875,6 +3887,9 @@ public final class Settings implements Watchable, Snappable {
                             "Unknown element under <package>: " + parser.getName());
                     XmlUtils.skipCurrentTag(parser);
                 }
+            }
+            if (firstInstallTime != 0) {
+                originalFirstInstallTimes.put(packageSetting.getPackageName(), firstInstallTime);
             }
         } else {
             XmlUtils.skipCurrentTag(parser);
@@ -4471,8 +4486,6 @@ public final class Settings implements Watchable, Snappable {
             pw.print(",");
             pw.print(ps.getVersionCode());
             pw.print(",");
-            pw.print(ps.getFirstInstallTime());
-            pw.print(",");
             pw.print(ps.getLastUpdateTime());
             pw.print(",");
             pw.print(ps.getInstallSource().installerPackageName != null
@@ -4515,6 +4528,8 @@ public final class Settings implements Watchable, Snappable {
                 String lastDisabledAppCaller = userState.getLastDisableAppCaller();
                 pw.print(",");
                 pw.print(lastDisabledAppCaller != null ? lastDisabledAppCaller : "?");
+                pw.print(",");
+                pw.print(ps.readUserState(user.id).getFirstInstallTime());
                 pw.print(",");
                 pw.println();
             }
@@ -4746,9 +4761,6 @@ public final class Settings implements Watchable, Snappable {
         pw.print(prefix); pw.print("  timeStamp=");
             date.setTime(ps.getLastModifiedTime());
             pw.println(sdf.format(date));
-        pw.print(prefix); pw.print("  firstInstallTime=");
-            date.setTime(ps.getFirstInstallTime());
-            pw.println(sdf.format(date));
         pw.print(prefix); pw.print("  lastUpdateTime=");
             date.setTime(ps.getLastUpdateTime());
             pw.println(sdf.format(date));
@@ -4853,6 +4865,11 @@ public final class Settings implements Watchable, Snappable {
             pw.println(userState.isVirtualPreload());
             pw.print(" installReason=");
             pw.println(userState.getInstallReason());
+
+            final PackageUserStateInternal pus = ps.readUserState(user.id);
+            pw.print(" firstInstallTime=");
+            date.setTime(pus.getFirstInstallTime());
+            pw.println(sdf.format(date));
 
             if (userState.isSuspended()) {
                 pw.print(prefix);

@@ -48,6 +48,7 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -108,6 +109,8 @@ public class PackageManagerSettingsTests {
     LegacyPermissionDataProvider mPermissionDataProvider;
     @Mock
     DomainVerificationManagerInternal mDomainVerificationManager;
+
+    final ArrayMap<String, Long> mOrigFirstInstallTimes = new ArrayMap<>();
 
     @Before
     public void initializeMocks() {
@@ -208,14 +211,14 @@ public class PackageManagerSettingsTests {
                 new WatchableTester(settingsUnderTest, "noSuspendingPackage");
         watcher.register();
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
-        settingsUnderTest.readPackageRestrictionsLPr(0);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
         watcher.verifyChangeReported("put package 1");
         // Collect a snapshot at the midway point (package 2 has not been added)
         final Settings snapshot = settingsUnderTest.snapshot();
         watcher.verifyNoChangeReported("snapshot");
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
         watcher.verifyChangeReported("put package 2");
-        settingsUnderTest.readPackageRestrictionsLPr(0);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
 
         PackageSetting ps1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1);
         PackageUserStateInternal packageUserState1 = ps1.readUserState(0);
@@ -251,7 +254,7 @@ public class PackageManagerSettingsTests {
         watcher.register();
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
         watcher.verifyChangeReported("put package 1");
-        settingsUnderTest.readPackageRestrictionsLPr(0);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
         watcher.verifyChangeReported("readPackageRestrictions");
 
         final PackageSetting ps1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1);
@@ -338,7 +341,7 @@ public class PackageManagerSettingsTests {
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, createPackageSetting(PACKAGE_NAME_3));
         watcher.verifyChangeReported("put package 3");
         // now read and verify
-        settingsUnderTest.readPackageRestrictionsLPr(0);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
         watcher.verifyChangeReported("readPackageRestrictions");
         final PackageUserStateInternal readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
                 .readUserState(0);
@@ -418,7 +421,7 @@ public class PackageManagerSettingsTests {
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, createPackageSetting(PACKAGE_NAME_3));
         // now read and verify
-        settingsUnderTest.readPackageRestrictionsLPr(0);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
         final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
                 .readUserState(0);
         assertThat(readPus1.getDistractionFlags(), is(distractionFlags1));
@@ -1127,7 +1130,6 @@ public class PackageManagerSettingsTests {
         assertSame(origPkgSetting.getCpuAbiOverride(), testPkgSetting.getCpuAbiOverride());
         assertThat(origPkgSetting.getCpuAbiOverride(), is(testPkgSetting.getCpuAbiOverride()));
         assertThat(origPkgSetting.getDomainSetId(), is(testPkgSetting.getDomainSetId()));
-        assertThat(origPkgSetting.getFirstInstallTime(), is(testPkgSetting.getFirstInstallTime()));
         assertSame(origPkgSetting.getInstallSource(), testPkgSetting.getInstallSource());
         assertThat(origPkgSetting.isInstallPermissionsFixed(),
                 is(testPkgSetting.isInstallPermissionsFixed()));
