@@ -10853,9 +10853,11 @@ package android.service.games {
 
   public class GameService extends android.app.Service {
     ctor public GameService();
+    method public final void createGameSession(@IntRange(from=0) int);
     method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method public void onConnected();
     method public void onDisconnected();
+    method public void onGameStarted(@NonNull android.service.games.GameStartedEvent);
     field public static final String ACTION_GAME_SERVICE = "android.service.games.action.GAME_SERVICE";
     field public static final String SERVICE_META_DATA = "android.game_service";
   }
@@ -10871,6 +10873,15 @@ package android.service.games {
     method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method @NonNull public abstract android.service.games.GameSession onNewSession(@NonNull android.service.games.CreateGameSessionRequest);
     field public static final String ACTION_GAME_SESSION_SERVICE = "android.service.games.action.GAME_SESSION_SERVICE";
+  }
+
+  public final class GameStartedEvent implements android.os.Parcelable {
+    ctor public GameStartedEvent(@IntRange(from=0) int, @NonNull String);
+    method public int describeContents();
+    method @NonNull public String getPackageName();
+    method @IntRange(from=0) public int getTaskId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.games.GameStartedEvent> CREATOR;
   }
 
 }
