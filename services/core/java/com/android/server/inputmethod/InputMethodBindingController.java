@@ -72,16 +72,16 @@ final class InputMethodBindingController {
     @NonNull private final WindowManagerInternal mWindowManagerInternal;
     @NonNull private final Resources mRes;
 
-    @GuardedBy("mMethodMap") private long mLastBindTime;
-    @GuardedBy("mMethodMap") private boolean mHasConnection;
-    @GuardedBy("mMethodMap") @Nullable private String mCurId;
-    @GuardedBy("mMethodMap") @Nullable private String mSelectedMethodId;
-    @GuardedBy("mMethodMap") @Nullable private Intent mCurIntent;
-    @GuardedBy("mMethodMap") @Nullable private IInputMethod mCurMethod;
-    @GuardedBy("mMethodMap") private int mCurMethodUid = Process.INVALID_UID;
-    @GuardedBy("mMethodMap") private IBinder mCurToken;
-    @GuardedBy("mMethodMap") private int mCurSeq;
-    @GuardedBy("mMethodMap") private boolean mVisibleBound;
+    @GuardedBy("ImfLock.class") private long mLastBindTime;
+    @GuardedBy("ImfLock.class") private boolean mHasConnection;
+    @GuardedBy("ImfLock.class") @Nullable private String mCurId;
+    @GuardedBy("ImfLock.class") @Nullable private String mSelectedMethodId;
+    @GuardedBy("ImfLock.class") @Nullable private Intent mCurIntent;
+    @GuardedBy("ImfLock.class") @Nullable private IInputMethod mCurMethod;
+    @GuardedBy("ImfLock.class") private int mCurMethodUid = Process.INVALID_UID;
+    @GuardedBy("ImfLock.class") private IBinder mCurToken;
+    @GuardedBy("ImfLock.class") private int mCurSeq;
+    @GuardedBy("ImfLock.class") private boolean mVisibleBound;
     private boolean mSupportsStylusHw;
 
     /**
@@ -146,7 +146,7 @@ final class InputMethodBindingController {
      * Time that we last initiated a bind to the input method, to determine
      * if we should try to disconnect and reconnect to it.
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     long getLastBindTime() {
         return mLastBindTime;
     }
@@ -155,7 +155,7 @@ final class InputMethodBindingController {
      * Set to true if our ServiceConnection is currently actively bound to
      * a service (whether or not we have gotten its IBinder back yet).
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     boolean hasConnection() {
         return mHasConnection;
     }
@@ -168,7 +168,7 @@ final class InputMethodBindingController {
      *
      * @see #getSelectedMethodId()
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     @Nullable
     String getCurId() {
         return mCurId;
@@ -187,13 +187,13 @@ final class InputMethodBindingController {
      *
      * @see #getCurId()
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     @Nullable
     String getSelectedMethodId() {
         return mSelectedMethodId;
     }
 
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     void setSelectedMethodId(@Nullable String selectedMethodId) {
         mSelectedMethodId = selectedMethodId;
     }
@@ -202,7 +202,7 @@ final class InputMethodBindingController {
      * The token we have made for the currently active input method, to
      * identify it in the future.
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     IBinder getCurToken() {
         return mCurToken;
     }
@@ -210,7 +210,7 @@ final class InputMethodBindingController {
     /**
      * The Intent used to connect to the current input method.
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     @Nullable
     Intent getCurIntent() {
         return mCurIntent;
@@ -220,7 +220,7 @@ final class InputMethodBindingController {
      * The current binding sequence number, incremented every time there is
      * a new bind performed.
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     int getSequenceNumber() {
         return mCurSeq;
     }
@@ -229,7 +229,7 @@ final class InputMethodBindingController {
      * Increase the current binding sequence number by one.
      * Reset to 1 on overflow.
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     void advanceSequenceNumber() {
         mCurSeq += 1;
         if (mCurSeq <= 0) {
@@ -241,7 +241,7 @@ final class InputMethodBindingController {
      * If non-null, this is the input method service we are currently connected
      * to.
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     @Nullable
     IInputMethod getCurMethod() {
         return mCurMethod;
@@ -250,7 +250,7 @@ final class InputMethodBindingController {
     /**
      * If not {@link Process#INVALID_UID}, then the UID of {@link #getCurIntent()}.
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     int getCurMethodUid() {
         return mCurMethodUid;
     }
@@ -258,7 +258,7 @@ final class InputMethodBindingController {
     /**
      * Indicates whether {@link #mVisibleConnection} is currently in use.
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     boolean isVisibleBound() {
         return mVisibleBound;
     }
@@ -266,10 +266,10 @@ final class InputMethodBindingController {
     /**
      * Used to bring IME service up to visible adjustment while it is being shown.
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     private final ServiceConnection mVisibleConnection = new ServiceConnection() {
         @Override public void onBindingDied(ComponentName name) {
-            synchronized (mMethodMap) {
+            synchronized (ImfLock.class) {
                 if (mVisibleBound) {
                     unbindVisibleConnection();
                 }
@@ -286,12 +286,12 @@ final class InputMethodBindingController {
     /**
      * Used to bind the IME while it is not currently being shown.
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     private final ServiceConnection mMainConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.onServiceConnected");
-            synchronized (mMethodMap) {
+            synchronized (ImfLock.class) {
                 if (mCurIntent != null && name.equals(mCurIntent.getComponent())) {
                     mCurMethod = IInputMethod.Stub.asInterface(service);
                     updateCurrentMethodUid();
@@ -318,7 +318,7 @@ final class InputMethodBindingController {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
-        @GuardedBy("mMethodMap")
+        @GuardedBy("ImfLock.class")
         private void updateCurrentMethodUid() {
             final String curMethodPackage = mCurIntent.getComponent().getPackageName();
             final int curMethodUid = mPackageManagerInternal.getPackageUid(
@@ -344,7 +344,7 @@ final class InputMethodBindingController {
             // refreshed when this method is called back.  Running
             //    adb install -r <APK that implements the current IME>
             // would be a good way to trigger such a situation.
-            synchronized (mMethodMap) {
+            synchronized (ImfLock.class) {
                 if (DEBUG) {
                     Slog.v(TAG, "Service disconnected: " + name + " mCurIntent=" + mCurIntent);
                 }
@@ -361,7 +361,7 @@ final class InputMethodBindingController {
         }
     };
 
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     void unbindCurrentMethod() {
         if (mVisibleBound) {
             unbindVisibleConnection();
@@ -380,14 +380,14 @@ final class InputMethodBindingController {
         clearCurMethodAndSessions();
     }
 
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     private void clearCurMethodAndSessions() {
         mService.clearClientSessionsLocked();
         mCurMethod = null;
         mCurMethodUid = Process.INVALID_UID;
     }
 
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     private void removeCurrentToken() {
         int curTokenDisplayId = mService.getCurTokenDisplayIdLocked();
 
@@ -400,7 +400,7 @@ final class InputMethodBindingController {
         mCurToken = null;
     }
 
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     @NonNull
     InputBindResult bindCurrentMethod() {
         InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
@@ -438,7 +438,7 @@ final class InputMethodBindingController {
         return intent;
     }
 
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     private void addFreshWindowToken() {
         int displayIdToShowIme = mService.getDisplayIdToShowImeLocked();
         mCurToken = new Binder();
@@ -458,19 +458,19 @@ final class InputMethodBindingController {
         }
     }
 
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     private void unbindMainConnection() {
         mContext.unbindService(mMainConnection);
         mHasConnection = false;
     }
 
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     void unbindVisibleConnection() {
         mContext.unbindService(mVisibleConnection);
         mVisibleBound = false;
     }
 
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     private boolean bindCurrentInputMethodService(ServiceConnection conn, int flags) {
         if (mCurIntent == null || conn == null) {
             Slog.e(TAG, "--- bind failed: service = " + mCurIntent + ", conn = " + conn);
@@ -480,14 +480,14 @@ final class InputMethodBindingController {
                 new UserHandle(mSettings.getCurrentUserId()));
     }
 
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     private boolean bindCurrentInputMethodServiceVisibleConnection() {
         mVisibleBound = bindCurrentInputMethodService(mVisibleConnection,
                 IME_VISIBLE_BIND_FLAGS);
         return mVisibleBound;
     }
 
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     private boolean bindCurrentInputMethodServiceMainConnection() {
         mHasConnection = bindCurrentInputMethodService(mMainConnection,
                 mImeConnectionBindFlags);
@@ -500,7 +500,7 @@ final class InputMethodBindingController {
      * <p>
      * Performs a rebind if no binding is achieved in {@link #TIME_TO_RECONNECT} milliseconds.
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     void setCurrentMethodVisible() {
         if (mCurMethod != null) {
             if (DEBUG) Slog.d(TAG, "setCurrentMethodVisible: mCurToken=" + mCurToken);
@@ -541,7 +541,7 @@ final class InputMethodBindingController {
     /**
      * Remove the binding needed for the IME to be shown.
      */
-    @GuardedBy("mMethodMap")
+    @GuardedBy("ImfLock.class")
     void setCurrentMethodNotVisible() {
         if (mVisibleBound) {
             unbindVisibleConnection();
