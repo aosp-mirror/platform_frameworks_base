@@ -245,38 +245,19 @@ public class LocationProviderManager extends
                 intent.putExtra(KEY_LOCATIONS, locationResult.asList().toArray(new Location[0]));
             }
 
-            PendingIntent.OnFinished onFinished = null;
-
-            // send() SHOULD only run the completion callback if it completes successfully. however,
-            // b/201299281 (which could not be fixed in the S timeframe) means that it's possible
-            // for send() to throw an exception AND run the completion callback. if this happens, we
-            // would over-release the wakelock... we take matters into our own hands to ensure that
-            // the completion callback can only be run if send() completes successfully. this means
-            // the completion callback may be run inline - but as we've never specified what thread
-            // the callback is run on, this is fine.
-            GatedCallback gatedCallback;
+            Runnable callback = null;
             if (onCompleteCallback != null) {
-                gatedCallback = new GatedCallback(() -> {
+                callback = () -> {
                     try {
                         onCompleteCallback.sendResult(null);
                     } catch (RemoteException e) {
                         throw e.rethrowFromSystemServer();
                     }
-                });
-                onFinished = (pI, i, rC, rD, rE) -> gatedCallback.run();
-            } else {
-                gatedCallback = new GatedCallback(null);
+                };
             }
 
-            mPendingIntent.send(
-                    mContext,
-                    0,
-                    intent,
-                    onFinished,
-                    null,
-                    null,
+            PendingIntentSender.send(mPendingIntent, mContext, intent, callback,
                     options.toBundle());
-            gatedCallback.allow();
         }
 
         @Override
@@ -1783,12 +1764,26 @@ public class LocationProviderManager extends
 
         ICancellationSignal cancelTransport = CancellationSignal.createTransport();
         CancellationSignal.fromTransport(cancelTransport)
-                .setOnCancelListener(SingleUseCallback.wrap(
+                .setOnCancelListener(
                         () -> {
-                            synchronized (mLock) {
-                                removeRegistration(callback.asBinder(), registration);
+                            final long ident = Binder.clearCallingIdentity();
+                            try {
+                                synchronized (mLock) {
+                                    removeRegistration(callback.asBinder(), registration);
+                                }
+                            } catch (RuntimeException e) {
+                                // since this is within a oneway binder transaction there is nowhere
+                                // for exceptions to go - move onto another thread to crash system
+                                // server so we find out about it
+                                FgThread.getExecutor().execute(() -> {
+                                    throw new AssertionError(e);
+                                });
+                                throw e;
+                            } finally {
+                                Binder.restoreCallingIdentity(ident);
                             }
-                        }));
+
+                        });
         return cancelTransport;
     }
 
@@ -2733,103 +2728,84 @@ public class LocationProviderManager extends
         }
     }
 
-    private static class SingleUseCallback extends IRemoteCallback.Stub implements Runnable,
-            CancellationSignal.OnCancelListener {
+    private static class PendingIntentSender {
 
-        public static @Nullable SingleUseCallback wrap(@Nullable Runnable callback) {
-            return callback == null ? null : new SingleUseCallback(callback);
-        }
-
-        @GuardedBy("this")
-        private @Nullable Runnable mCallback;
-
-        private SingleUseCallback(Runnable callback) {
-            mCallback = Objects.requireNonNull(callback);
-        }
-
-        @Override
-        public void sendResult(Bundle data) {
-            run();
-        }
-
-        @Override
-        public void onCancel() {
-            run();
-        }
-
-        @Override
-        public void run() {
-            Runnable callback;
-            synchronized (this) {
-                callback = mCallback;
-                mCallback = null;
+        // send() SHOULD only run the OnFinished callback if it completes successfully. however,
+        // b/201299281 (which could not be fixed in the S timeframe) means that it's possible
+        // for send() to throw an exception AND run the completion callback which breaks the
+        // guarantee we rely on. we take matters into our own hands to ensure that the OnFinished
+        // callback can only be run if send() completes successfully. this means the OnFinished
+        // callback may be run inline, so there is no longer any guarantee about what thread the
+        // callback will be run on.
+        public static void send(PendingIntent pendingIntent, Context context, Intent intent,
+                @Nullable final Runnable callback, Bundle options)
+                throws PendingIntent.CanceledException {
+            GatedCallback gatedCallback;
+            PendingIntent.OnFinished onFinished;
+            if (callback != null) {
+                gatedCallback = new GatedCallback(callback);
+                onFinished = (pI, i, rC, rD, rE) -> gatedCallback.run();
+            } else {
+                gatedCallback = null;
+                onFinished = null;
             }
 
-            // prevent this callback from being run more than once - otherwise this could provide an
-            // attack vector for a malicious app to break assumptions on how many times a callback
-            // may be invoked, and thus crash system server.
-            if (callback == null) {
-                return;
-            }
-
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                callback.run();
-            } catch (RuntimeException e) {
-                // since this is within a oneway binder transaction there is nowhere
-                // for exceptions to go - move onto another thread to crash system
-                // server so we find out about it
-                FgThread.getExecutor().execute(() -> {
-                    throw new AssertionError(e);
-                });
-                throw e;
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+            pendingIntent.send(
+                    context,
+                    0,
+                    intent,
+                    onFinished,
+                    null,
+                    null,
+                    options);
+            if (gatedCallback != null) {
+                gatedCallback.allow();
             }
         }
-    }
 
-    private static class GatedCallback implements Runnable {
+        private static class GatedCallback implements Runnable {
 
-        private @Nullable Runnable mCallback;
+            @GuardedBy("this")
+            private @Nullable Runnable mCallback;
 
-        @GuardedBy("this")
-        private boolean mGate;
-        @GuardedBy("this")
-        private boolean mRun;
+            @GuardedBy("this")
+            private boolean mGate;
+            @GuardedBy("this")
+            private boolean mRun;
 
-        GatedCallback(@Nullable Runnable callback) {
-            mCallback = callback;
-        }
+            private GatedCallback(@Nullable Runnable callback) {
+                mCallback = callback;
+            }
 
-        public void allow() {
-            Runnable callback = null;
-            synchronized (this) {
-                mGate = true;
-                if (mRun && mCallback != null) {
-                    callback = mCallback;
-                    mCallback = null;
+            public void allow() {
+                Runnable callback = null;
+                synchronized (this) {
+                    mGate = true;
+                    if (mRun && mCallback != null) {
+                        callback = mCallback;
+                        mCallback = null;
+                    }
+                }
+
+                if (callback != null) {
+                    callback.run();
                 }
             }
 
-            if (callback != null) {
-                callback.run();
-            }
-        }
-
-        @Override
-        public void run() {
-            Runnable callback = null;
-            synchronized (this) {
-                mRun = true;
-                if (mGate && mCallback != null) {
-                    callback = mCallback;
-                    mCallback = null;
+            @Override
+            public void run() {
+                Runnable callback = null;
+                synchronized (this) {
+                    mRun = true;
+                    if (mGate && mCallback != null) {
+                        callback = mCallback;
+                        mCallback = null;
+                    }
                 }
-            }
 
-            if (callback != null) {
-                callback.run();
+                if (callback != null) {
+                    callback.run();
+                }
             }
         }
     }
@@ -2850,7 +2826,19 @@ public class LocationProviderManager extends
             try {
                 mWakeLock.release();
             } catch (RuntimeException e) {
-                Log.e(TAG, "wakelock over-released by " + mIdentity, e);
+                // wakelock throws a RuntimeException instead of some more specific exception, so
+                // attempt to capture only actual RuntimeExceptions
+                if (e.getClass() == RuntimeException.class) {
+                    Log.e(TAG, "wakelock over-released by " + mIdentity, e);
+                } else {
+                    // since this is within a oneway binder transaction there is nowhere for
+                    // exceptions to go - move onto another thread to crash system server so we find
+                    // out about it
+                    FgThread.getExecutor().execute(() -> {
+                        throw new AssertionError(e);
+                    });
+                    throw e;
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
