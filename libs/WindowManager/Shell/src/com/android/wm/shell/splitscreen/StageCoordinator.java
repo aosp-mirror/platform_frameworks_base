@@ -367,6 +367,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             float splitRatio, RemoteAnimationAdapter adapter) {
         // Init divider first to make divider leash for remote animation target.
         setDividerVisibility(true /* visible */);
+        // Set false to avoid record new bounds with old task still on top;
+        mShouldUpdateRecents = false;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         prepareEvictChildTasks(SPLIT_POSITION_TOP_OR_LEFT, evictWct);
@@ -393,6 +395,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             @Override
                             public void onAnimationFinished() throws RemoteException {
                                 mIsDividerRemoteAnimating = false;
+                                mShouldUpdateRecents = true;
                                 mSyncQueue.queue(evictWct);
                                 mSyncQueue.runInSync(t -> applyDividerVisibility(t));
                                 finishedCallback.onAnimationFinished();
@@ -416,6 +419,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Override
             public void onAnimationCancelled() {
                 mIsDividerRemoteAnimating = false;
+                mShouldUpdateRecents = true;
                 mSyncQueue.queue(evictWct);
                 mSyncQueue.runInSync(t -> applyDividerVisibility(t));
                 try {
@@ -782,7 +786,9 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mLogger.logSideStageAppChange(getSideStagePosition(), mSideStage.getTopChildTaskUid(),
                     mSplitLayout.isLandscape());
         }
-        updateRecentTasksSplitPair();
+        if (present && visible) {
+            updateRecentTasksSplitPair();
+        }
 
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onTaskStageChanged(taskId, stage, visible);
@@ -798,7 +804,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (!mShouldUpdateRecents) {
             return;
         }
-
         mRecentTasks.ifPresent(recentTasks -> {
             Rect topLeftBounds = mSplitLayout.getBounds1();
             Rect bottomRightBounds = mSplitLayout.getBounds2();
