@@ -284,17 +284,21 @@ public class BubbleController {
         mSyncQueue = syncQueue;
     }
 
-    private static void registerOneHandedState(OneHandedController oneHanded) {
+    private void registerOneHandedState(OneHandedController oneHanded) {
         oneHanded.registerTransitionCallback(
                 new OneHandedTransitionCallback() {
                     @Override
                     public void onStartFinished(Rect bounds) {
-                        // TODO(b/198403767) mStackView.offSetY(int bounds.top)
+                        if (mStackView != null) {
+                            mStackView.onVerticalOffsetChanged(bounds.top);
+                        }
                     }
 
                     @Override
                     public void onStopFinished(Rect bounds) {
-                        // TODO(b/198403767) mStackView.offSetY(int bounds.top)
+                        if (mStackView != null) {
+                            mStackView.onVerticalOffsetChanged(bounds.top);
+                        }
                     }
                 });
     }
@@ -423,7 +427,7 @@ public class BubbleController {
                     }
                 });
 
-        mOneHandedOptional.ifPresent(BubbleController::registerOneHandedState);
+        mOneHandedOptional.ifPresent(this::registerOneHandedState);
     }
 
     @VisibleForTesting
