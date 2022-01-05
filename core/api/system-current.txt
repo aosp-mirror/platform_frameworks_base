@@ -2592,6 +2592,7 @@ package android.content {
     field public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final String MEDIA_TRANSCODING_SERVICE = "media_transcoding";
     field public static final String MUSIC_RECOGNITION_SERVICE = "music_recognition";
+    field public static final String NEARBY_SERVICE = "nearby";
     field public static final String NETD_SERVICE = "netd";
     field @Deprecated public static final String NETWORK_SCORE_SERVICE = "network_score";
     field public static final String OEM_LOCK_SERVICE = "oem_lock";
