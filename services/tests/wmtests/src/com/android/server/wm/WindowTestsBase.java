@@ -132,6 +132,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
     // Default base activity name
     private static final String DEFAULT_COMPONENT_CLASS_NAME = ".BarActivity";
 
+    // An id appended to the end of the component name to make it unique
+    static int sCurrentActivityId = 0;
+
     ActivityTaskManagerService mAtm;
     RootWindowContainer mRootWindowContainer;
     ActivityTaskSupervisor mSupervisor;
@@ -895,13 +898,16 @@ class WindowTestsBase extends SystemServiceTestsBase {
         doReturn(100).when(hardwareBuffer).getHeight();
     }
 
+    private static ComponentName getUniqueComponentName() {
+        return ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
+                DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
+    }
+
     /**
      * Builder for creating new activities.
      */
     protected static class ActivityBuilder {
         static final int DEFAULT_FAKE_UID = 12345;
-        // An id appended to the end of the component name to make it unique
-        private static int sCurrentActivityId = 0;
 
         private final ActivityTaskManagerService mService;
 
@@ -1077,9 +1083,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
         ActivityRecord buildInner() {
             if (mComponent == null) {
-                final int id = sCurrentActivityId++;
-                mComponent = ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
-                        DEFAULT_COMPONENT_CLASS_NAME + id);
+                mComponent = getUniqueComponentName();
             }
 
             Intent intent = new Intent();
@@ -1388,8 +1392,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             if (mIntent == null) {
                 mIntent = new Intent();
                 if (mComponent == null) {
-                    mComponent = ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
-                            DEFAULT_COMPONENT_CLASS_NAME);
+                    mComponent = getUniqueComponentName();
                 }
                 mIntent.setComponent(mComponent);
                 mIntent.setFlags(mFlags);
@@ -1422,10 +1425,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             doNothing().when(rootTask).startActivityLocked(
                     any(), any(), anyBoolean(), anyBoolean(), any(), any());
 
-            // Create child task with activity.
+            // Create child activity.
             if (mCreateActivity) {
                 new ActivityBuilder(mSupervisor.mService)
                         .setTask(task)
+                        .setComponent(mComponent)
                         .build();
                 if (mOnTop) {
                     // We move the task to front again in order to regain focus after activity
