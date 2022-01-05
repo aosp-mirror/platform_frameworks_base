@@ -38,6 +38,7 @@ import android.view.LayoutInflater;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -135,6 +136,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private ShadeController mShadeController;
+    @Mock private InteractionJankMonitor mJankMonitor;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -188,7 +190,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mLayoutInflater,
                 mRemoteInputManager,
                 mVisualStabilityManager,
-                mShadeController
+                mShadeController,
+                mJankMonitor
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);

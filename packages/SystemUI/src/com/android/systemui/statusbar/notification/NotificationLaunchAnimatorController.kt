@@ -16,7 +16,8 @@ import kotlin.math.max
 class NotificationLaunchAnimatorControllerProvider(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
     private val notificationListContainer: NotificationListContainer,
-    private val headsUpManager: HeadsUpManagerPhone
+    private val headsUpManager: HeadsUpManagerPhone,
+    private val jankMonitor: InteractionJankMonitor
 ) {
     fun getAnimatorController(
         notification: ExpandableNotificationRow
@@ -25,7 +26,8 @@ class NotificationLaunchAnimatorControllerProvider(
             notificationShadeWindowViewController,
             notificationListContainer,
             headsUpManager,
-            notification
+            notification,
+            jankMonitor
         )
     }
 }
@@ -39,7 +41,8 @@ class NotificationLaunchAnimatorController(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
     private val notificationListContainer: NotificationListContainer,
     private val headsUpManager: HeadsUpManagerPhone,
-    private val notification: ExpandableNotificationRow
+    private val notification: ExpandableNotificationRow,
+    private val jankMonitor: InteractionJankMonitor
 ) : ActivityLaunchAnimator.Controller {
 
     companion object {
@@ -137,12 +140,12 @@ class NotificationLaunchAnimatorController(
         notification.isExpandAnimationRunning = true
         notificationListContainer.setExpandingNotification(notification)
 
-        InteractionJankMonitor.getInstance().begin(notification,
+        jankMonitor.begin(notification,
             InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
     }
 
     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-        InteractionJankMonitor.getInstance().end(InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
+        jankMonitor.end(InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
 
         notification.isExpandAnimationRunning = false
         notificationShadeWindowViewController.setExpandAnimationRunning(false)

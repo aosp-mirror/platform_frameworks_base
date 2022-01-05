@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
@@ -227,7 +228,8 @@ public interface StatusBarPhoneModule {
             WallpaperManager wallpaperManager,
             Optional<StartingSurface> startingSurfaceOptional,
             ActivityLaunchAnimator activityLaunchAnimator,
-            NotifPipelineFlags notifPipelineFlags) {
+            NotifPipelineFlags notifPipelineFlags,
+            InteractionJankMonitor jankMonitor) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -321,7 +323,8 @@ public interface StatusBarPhoneModule {
                 wallpaperManager,
                 startingSurfaceOptional,
                 activityLaunchAnimator,
-                notifPipelineFlags
+                notifPipelineFlags,
+                jankMonitor
         );
     }
 }

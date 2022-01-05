@@ -69,6 +69,7 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -276,6 +277,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ActivityLaunchAnimator mActivityLaunchAnimator;
     @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private NotifLiveDataStore mNotifLiveDataStore;
+    @Mock private InteractionJankMonitor mJankMonitor;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
@@ -459,7 +461,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mWallpaperManager,
                 Optional.of(mStartingSurface),
                 mActivityLaunchAnimator,
-                mNotifPipelineFlags);
+                mNotifPipelineFlags,
+                mJankMonitor);
         when(mKeyguardViewMediator.registerStatusBar(
                 any(StatusBar.class),
                 any(NotificationPanelViewController.class),
