@@ -37,7 +37,6 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.os.SystemClock;
 import android.view.KeyEvent;
-import android.view.ViewConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -75,18 +74,17 @@ public class SingleKeyGestureTests {
     @Before
     public void setUp() {
         mInstrumentation.runOnMainSync(() -> {
-            mDetector = new SingleKeyGestureDetector();
+            mDetector = SingleKeyGestureDetector.get(mContext);
             initSingleKeyGestureRules();
         });
 
-        mWaitTimeout = ViewConfiguration.getMultiPressTimeout() + 50;
-        mLongPressTime = ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout() + 50;
-        mVeryLongPressTime = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_veryLongPressTimeout) + 50;
+        mWaitTimeout = SingleKeyGestureDetector.MULTI_PRESS_TIMEOUT + 50;
+        mLongPressTime = SingleKeyGestureDetector.sDefaultLongPressTimeout + 50;
+        mVeryLongPressTime = SingleKeyGestureDetector.sDefaultVeryLongPressTimeout + 50;
     }
 
     private void initSingleKeyGestureRules() {
-        mDetector.addRule(new SingleKeyGestureDetector.SingleKeyRule(mContext, KEYCODE_POWER,
+        mDetector.addRule(new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_POWER,
                 KEY_LONGPRESS | KEY_VERYLONGPRESS) {
             @Override
             int getMaxMultiPressCount() {
@@ -124,7 +122,7 @@ public class SingleKeyGestureTests {
             }
         });
 
-        mDetector.addRule(new SingleKeyGestureDetector.SingleKeyRule(mContext, KEYCODE_BACK, 0) {
+        mDetector.addRule(new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_BACK, 0) {
             @Override
             int getMaxMultiPressCount() {
                 return mMaxMultiPressCount;
