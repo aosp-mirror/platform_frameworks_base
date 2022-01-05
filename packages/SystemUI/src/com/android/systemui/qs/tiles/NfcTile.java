@@ -147,15 +147,6 @@ public class NfcTile extends QSTileImpl<BooleanState> {
         return MetricsEvent.QS_NFC;
     }
 
-    @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.quick_settings_nfc_on);
-        } else {
-            return mContext.getString(R.string.quick_settings_nfc_off);
-        }
-    }
-
     private NfcAdapter getAdapter() {
         if (mAdapter == null) {
             try {

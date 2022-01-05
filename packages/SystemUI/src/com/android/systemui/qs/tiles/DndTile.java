@@ -307,15 +307,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.accessibility_quick_settings_dnd_changed_on);
-        } else {
-            return mContext.getString(R.string.accessibility_quick_settings_dnd_changed_off);
-        }
-    }
-
-    @Override
     public void handleSetListening(boolean listening) {
         super.handleSetListening(listening);
         if (mListening == listening) return;
