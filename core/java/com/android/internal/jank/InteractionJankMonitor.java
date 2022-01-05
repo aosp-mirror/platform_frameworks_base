@@ -65,6 +65,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_AVD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_EXIT_ANIM;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__UNFOLD_ANIM;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
 
@@ -185,6 +186,7 @@ public class InteractionJankMonitor {
     public static final int CUJ_SCREEN_OFF_SHOW_AOD = 41;
     public static final int CUJ_ONE_HANDED_ENTER_TRANSITION = 42;
     public static final int CUJ_ONE_HANDED_EXIT_TRANSITION = 43;
+    public static final int CUJ_UNFOLD_ANIM = 44;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -237,6 +239,7 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF_SHOW_AOD,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_ENTER_TRANSITION,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_EXIT_TRANSITION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__UNFOLD_ANIM,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -301,6 +304,7 @@ public class InteractionJankMonitor {
             CUJ_SCREEN_OFF_SHOW_AOD,
             CUJ_ONE_HANDED_ENTER_TRANSITION,
             CUJ_ONE_HANDED_EXIT_TRANSITION,
+            CUJ_UNFOLD_ANIM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -724,6 +728,8 @@ public class InteractionJankMonitor {
                 return "ONE_HANDED_ENTER_TRANSITION";
             case CUJ_ONE_HANDED_EXIT_TRANSITION:
                 return "ONE_HANDED_EXIT_TRANSITION";
+            case CUJ_UNFOLD_ANIM:
+                return "UNFOLD_ANIM";
         }
         return "UNKNOWN";
     }
