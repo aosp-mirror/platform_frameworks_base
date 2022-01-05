@@ -434,7 +434,8 @@ final class DefaultPermissionGrantPolicy {
                     || !pm.isGranted(Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
                             pkg, UserHandle.of(userId))
                     || !pm.isGranted(Manifest.permission.READ_PHONE_STATE, pkg,
-                            UserHandle.of(userId))) {
+                            UserHandle.of(userId))
+                    || pm.isSysComponentOrPersistentPlatformSignedPrivApp(pkg)) {
                 continue;
             }
 
