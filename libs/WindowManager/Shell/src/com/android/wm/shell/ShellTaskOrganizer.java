@@ -607,19 +607,6 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         restartTaskTopActivityProcessIfVisible(info.getTaskInfo().token);
     }
 
-    @Override
-    public void onCameraControlStateUpdated(
-            int taskId, @TaskInfo.CameraCompatControlState int state) {
-        final TaskAppearedInfo info;
-        synchronized (mLock) {
-            info = mTasks.get(taskId);
-        }
-        if (info == null) {
-            return;
-        }
-        updateCameraCompatControlState(info.getTaskInfo().token, state);
-    }
-
     private void logSizeCompatRestartButtonEventReported(@NonNull TaskAppearedInfo info,
             int event) {
         ActivityInfo topActivityInfo = info.getTaskInfo().topActivityInfo;
@@ -647,10 +634,13 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         // on this Task if there is any.
         if (taskListener == null || !taskListener.supportCompatUI()
                 || !taskInfo.hasCompatUI() || !taskInfo.isVisible) {
-            mCompatUI.onCompatInfoChanged(taskInfo, null /* taskListener */);
+            mCompatUI.onCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
+                    null /* taskConfig */, null /* taskListener */);
             return;
         }
-        mCompatUI.onCompatInfoChanged(taskInfo, taskListener);
+
+        mCompatUI.onCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
+                taskInfo.configuration, taskListener);
     }
 
     private TaskListener getTaskListener(RunningTaskInfo runningTaskInfo) {
