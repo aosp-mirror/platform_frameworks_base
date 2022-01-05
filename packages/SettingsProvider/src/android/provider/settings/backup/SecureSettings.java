@@ -188,6 +188,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY,
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
+        Settings.Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED,
         Settings.Secure.NOTIFICATION_BUBBLES,
         Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
         Settings.Secure.LOCKSCREEN_SHOW_CONTROLS,
