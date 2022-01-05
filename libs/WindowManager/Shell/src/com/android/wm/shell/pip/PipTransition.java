@@ -175,14 +175,25 @@ public class PipTransition extends PipTransitionController {
             return true;
         }
 
+        // The previous PIP Task is no longer in PIP, but this is not an exit transition (This can
+        // happen when a new activity requests enter PIP). In this case, we just show this Task in
+        // its end state, and play other animation as normal.
+        final TransitionInfo.Change currentPipChange = findCurrentPipChange(info);
+        if (currentPipChange != null
+                && currentPipChange.getTaskInfo().getWindowingMode() != WINDOWING_MODE_PINNED) {
+            resetPrevPip(currentPipChange, startTransaction);
+        }
+
         // Entering PIP.
         if (isEnteringPip(info, mCurrentPipTaskToken)) {
             return startEnterAnimation(info, startTransaction, finishTransaction, finishCallback);
         }
 
-        // For transition that we don't animate, we may need to update the PIP surface, otherwise it
-        // will be reset after the transition.
-        updatePipForUnhandledTransition(info, startTransaction, finishTransaction);
+        // For transition that we don't animate, but contains the PIP leash, we need to update the
+        // PIP surface, otherwise it will be reset after the transition.
+        if (currentPipChange != null) {
+            updatePipForUnhandledTransition(currentPipChange, startTransaction, finishTransaction);
+        }
         return false;
     }
 
@@ -597,30 +608,36 @@ public class PipTransition extends PipTransitionController {
         finishCallback.onTransitionFinished(null, null);
     }
 
-    private void updatePipForUnhandledTransition(@NonNull TransitionInfo info,
+    private void resetPrevPip(@NonNull TransitionInfo.Change prevPipChange,
+            @NonNull SurfaceControl.Transaction startTransaction) {
+        final SurfaceControl leash = prevPipChange.getLeash();
+        final Rect bounds = prevPipChange.getEndAbsBounds();
+        final Point offset = prevPipChange.getEndRelOffset();
+        bounds.offset(-offset.x, -offset.y);
+
+        startTransaction.setWindowCrop(leash, null);
+        startTransaction.setMatrix(leash, 1, 0, 0, 1);
+        startTransaction.setCornerRadius(leash, 0);
+        startTransaction.setPosition(leash, bounds.left, bounds.top);
+
+        mCurrentPipTaskToken = null;
+        mPipOrganizer.onExitPipFinished(prevPipChange.getTaskInfo());
+    }
+
+    private void updatePipForUnhandledTransition(@NonNull TransitionInfo.Change pipChange,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction) {
-        if (mCurrentPipTaskToken == null) {
-            return;
-        }
-        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-            final TransitionInfo.Change change = info.getChanges().get(i);
-            if (!mCurrentPipTaskToken.equals(change.getContainer())) {
-                continue;
-            }
-            // When the PIP window is visible and being a part of the transition, such as display
-            // rotation, we need to update its bounds and rounded corner.
-            final SurfaceControl leash = change.getLeash();
-            final Rect destBounds = mPipBoundsState.getBounds();
-            final boolean isInPip = mPipTransitionState.isInPip();
-            mSurfaceTransactionHelper
-                    .crop(startTransaction, leash, destBounds)
-                    .round(startTransaction, leash, isInPip);
-            mSurfaceTransactionHelper
-                    .crop(finishTransaction, leash, destBounds)
-                    .round(finishTransaction, leash, isInPip);
-            break;
-        }
+        // When the PIP window is visible and being a part of the transition, such as display
+        // rotation, we need to update its bounds and rounded corner.
+        final SurfaceControl leash = pipChange.getLeash();
+        final Rect destBounds = mPipBoundsState.getBounds();
+        final boolean isInPip = mPipTransitionState.isInPip();
+        mSurfaceTransactionHelper
+                .crop(startTransaction, leash, destBounds)
+                .round(startTransaction, leash, isInPip);
+        mSurfaceTransactionHelper
+                .crop(finishTransaction, leash, destBounds)
+                .round(finishTransaction, leash, isInPip);
     }
 
     private void finishResizeForMenu(Rect destinationBounds) {
