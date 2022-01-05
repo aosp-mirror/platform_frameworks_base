@@ -431,6 +431,7 @@ java_library {
     static_libs: [
         "android-non-updatable.stubs.module_lib",
         "art.module.public.api.stubs.module_lib",
+        "i18n.module.public.api.stubs",
     ],
     dist: {
         dir: "apistubs/android/module-lib",
