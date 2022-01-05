@@ -2662,6 +2662,7 @@ package android.content {
     field public static final String ACTION_PENDING_INCIDENT_REPORTS_CHANGED = "android.intent.action.PENDING_INCIDENT_REPORTS_CHANGED";
     field public static final String ACTION_PRE_BOOT_COMPLETED = "android.intent.action.PRE_BOOT_COMPLETED";
     field public static final String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
+    field public static final String ACTION_REFRESH_SAFETY_SOURCES = "android.intent.action.REFRESH_SAFETY_SOURCES";
     field public static final String ACTION_RESOLVE_INSTANT_APP_PACKAGE = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
     field @RequiresPermission(android.Manifest.permission.REVIEW_ACCESSIBILITY_SERVICES) public static final String ACTION_REVIEW_ACCESSIBILITY_SERVICES = "android.intent.action.REVIEW_ACCESSIBILITY_SERVICES";
     field @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public static final String ACTION_REVIEW_ONGOING_PERMISSION_USAGE = "android.intent.action.REVIEW_ONGOING_PERMISSION_USAGE";
@@ -2692,6 +2693,10 @@ package android.content {
     field public static final String EXTRA_PACKAGES = "android.intent.extra.PACKAGES";
     field public static final String EXTRA_PERMISSION_NAME = "android.intent.extra.PERMISSION_NAME";
     field public static final String EXTRA_REASON = "android.intent.extra.REASON";
+    field public static final int EXTRA_REFRESH_REQUEST_TYPE_FETCH_FRESH_DATA = 0; // 0x0
+    field public static final int EXTRA_REFRESH_REQUEST_TYPE_GET_DATA = 1; // 0x1
+    field public static final String EXTRA_REFRESH_SAFETY_SOURCES_REQUEST_TYPE = "android.intent.extra.REFRESH_SAFETY_SOURCES_REQUEST_TYPE";
+    field public static final String EXTRA_REFRESH_SAFETY_SOURCE_IDS = "android.intent.extra.REFRESH_SAFETY_SOURCE_IDS";
     field public static final String EXTRA_REMOTE_CALLBACK = "android.intent.extra.REMOTE_CALLBACK";
     field public static final String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
     field public static final String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";

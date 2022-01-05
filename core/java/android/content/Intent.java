@@ -3794,6 +3794,47 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.ACTION_IDLE_MAINTENANCE_END";
 
     /**
+     * Broadcast Action: A broadcast sent by the system to indicate that
+     * {@link android.safetycenter.SafetyCenterManager} is requesting data from safety sources
+     * regarding their safety state.
+     *
+     * This broadcast is sent when a user triggers a data refresh from the Safety Center UI or when
+     * Safety Center detects that its stored safety information is stale and needs to be updated.
+     *
+     * This broadcast is sent explicitly to safety sources by targeting intents to a specified set
+     * of components provided by the safety sources in the safety source configuration.
+     * The receiving components should be manifest-declared receivers so that safety sources can be
+     * requested to send data even if they are not running.
+     *
+     * On receiving this broadcast, safety sources should determine their safety state
+     * according to the parameters specified in the intent extras (see below) and send Safety Center
+     * data about their safety state using
+     * {@link android.safetycenter.SafetyCenterManager#sendSafetyCenterUpdate(android.safetycenter.SafetySourceData)}.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     *
+     * <p>Includes the following extras:
+     * <ul>
+     * <li>{@link #EXTRA_REFRESH_SAFETY_SOURCES_REQUEST_TYPE}: An int representing the type of data
+     * being requested. Possible values are all values in {@link RefreshRequestType}.
+     * <li>{@link #EXTRA_REFRESH_SAFETY_SOURCE_IDS}: A {@code String[]} of ids
+     * representing the safety sources being requested for data. This extra exists for
+     * disambiguation in the case that a single component is responsible for receiving refresh
+     * requests for multiple safety sources.
+     * </ul>
+     *
+     * @hide
+     */
+    // TODO(b/210805082): Define the term "safety sources" more concretely here once safety sources
+    //  are configured in xml config.
+    // TODO(b/210979035): Determine recommendation for sources if they are requested for fresh data
+    //  but cannot provide it.
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_REFRESH_SAFETY_SOURCES =
+            "android.intent.action.REFRESH_SAFETY_SOURCES";
+
+    /**
      * Broadcast Action: a remote intent is to be broadcasted.
      *
      * A remote intent is used for remote RPC between devices. The remote intent
@@ -6385,6 +6426,77 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_VISIBILITY_ALLOW_LIST =
             "android.intent.extra.VISIBILITY_ALLOW_LIST";
+
+
+    /**
+     * Used as a {@code String[]} extra field in
+     * {@link android.content.Intent#ACTION_REFRESH_SAFETY_SOURCES} intents to specify the safety
+     * source ids of the safety sources being requested for data by Safety Center.
+     *
+     * When this extra field is not specified in the intent, it is assumed that Safety Center is
+     * requesting data from all safety sources supported by the component receiving the broadcast.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_REFRESH_SAFETY_SOURCE_IDS =
+            "android.intent.extra.REFRESH_SAFETY_SOURCE_IDS";
+
+    /**
+     * Used as an {@code int} extra field in
+     * {@link android.content.Intent#ACTION_REFRESH_SAFETY_SOURCES} intents to specify the type of
+     * data request from Safety Center.
+     *
+     * Possible values are all values in {@link RefreshRequestType}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_REFRESH_SAFETY_SOURCES_REQUEST_TYPE =
+            "android.intent.extra.REFRESH_SAFETY_SOURCES_REQUEST_TYPE";
+
+    /**
+     * All possible types of data refresh requests in broadcasts with intent action
+     * {@link android.content.Intent#ACTION_REFRESH_SAFETY_SOURCES}.
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "EXTRA_REFRESH_REQUEST_TYPE_" }, value = {
+            EXTRA_REFRESH_REQUEST_TYPE_FETCH_FRESH_DATA,
+            EXTRA_REFRESH_REQUEST_TYPE_GET_DATA,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RefreshRequestType {}
+
+    /**
+     * Used as an int value for
+     * {@link android.content.Intent#EXTRA_REFRESH_SAFETY_SOURCES_REQUEST_TYPE}
+     * to indicate that the safety source should fetch fresh data relating to their safety state
+     * upon receiving a broadcast with intent action
+     * {@link android.content.Intent#ACTION_REFRESH_SAFETY_SOURCES} and provide it to Safety Center.
+     *
+     * The term "fresh" here means that the sources should ensure that the safety data is accurate
+     * as possible at the time of providing it to Safety Center, even if it involves performing an
+     * expensive and/or slow process.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXTRA_REFRESH_REQUEST_TYPE_FETCH_FRESH_DATA = 0;
+
+    /**
+     * Used as an int value for
+     * {@link android.content.Intent#EXTRA_REFRESH_SAFETY_SOURCES_REQUEST_TYPE}
+     * to indicate that upon receiving a broadcasts with intent action
+     * {@link android.content.Intent#ACTION_REFRESH_SAFETY_SOURCES}, the safety source should
+     * provide data relating to their safety state to Safety Center.
+     *
+     * If the source already has its safety data cached, it may provide it without triggering a
+     * process to fetch state which may be expensive and/or slow.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXTRA_REFRESH_REQUEST_TYPE_GET_DATA = 1;
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
