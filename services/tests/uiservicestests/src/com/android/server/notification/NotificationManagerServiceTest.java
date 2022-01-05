@@ -182,7 +182,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
@@ -7170,6 +7169,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(),
                 mUid + UserHandle.PER_USER_RANGE);
 
+        verify(mPermissionHelper, never()).hasPermission(anyInt());
+    }
+
+    @Test
+    public void testAreNotificationsEnabledForPackage_viaInternalService() throws Exception {
+        assertEquals(mInternalService.areNotificationsEnabledForPackage(
+                mContext.getPackageName(), mUid),
+                mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(), mUid));
         verify(mPermissionHelper, never()).hasPermission(anyInt());
     }
 

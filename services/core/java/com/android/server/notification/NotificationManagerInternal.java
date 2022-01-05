@@ -39,4 +39,7 @@ public interface NotificationManagerInternal {
 
     /** Get the number of notification channels for a given package */
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
+
+    /** Does the specified package/uid have permission to post notifications? */
+    boolean areNotificationsEnabledForPackage(String pkg, int uid);
 }
