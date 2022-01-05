@@ -620,6 +620,13 @@
     <!-- Permission required for CTS test - Notification test suite -->
     <uses-permission android:name="android.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL" />
 
+    <!-- Permission required for CTS test - CommunalManagerTest -->
+    <uses-permission android:name="android.permission.WRITE_COMMUNAL_STATE" />
+    <uses-permission android:name="android.permission.READ_COMMUNAL_STATE" />
+
+    <!-- Permission required for CTS test - CaptioningManagerTest -->
+    <uses-permission android:name="android.permission.SET_SYSTEM_AUDIO_CAPTION" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

@@ -16,8 +16,11 @@
 
 package android.view.accessibility;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
@@ -44,6 +47,7 @@ import java.util.Locale;
 public class CaptioningManager {
     /** Default captioning enabled value. */
     private static final int DEFAULT_ENABLED = 0;
+    private static final boolean SYSTEM_AUDIO_CAPTIONING_DEFAULT_ENABLED = false;
 
     /** Default style preset as an index into {@link CaptionStyle#PRESETS}. */
     private static final int DEFAULT_PRESET = 0;
@@ -55,6 +59,8 @@ public class CaptioningManager {
     private final ContentResolver mContentResolver;
     private final ContentObserver mContentObserver;
     private final Resources mResources;
+    private final Context mContext;
+    private final AccessibilityManager mAccessibilityManager;
 
     /**
      * Creates a new captioning manager for the specified context.
@@ -62,7 +68,9 @@ public class CaptioningManager {
      * @hide
      */
     public CaptioningManager(Context context) {
+        mContext = context;
         mContentResolver = context.getContentResolver();
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
 
         final Handler handler = new Handler(context.getMainLooper());
         mContentObserver = new MyContentObserver(handler);
@@ -142,6 +150,60 @@ public class CaptioningManager {
     }
 
     /**
+     * @return the system audio caption enabled state.
+     */
+    public final boolean isSystemAudioCaptioningRequested() {
+        return Secure.getIntForUser(mContentResolver, Secure.ODI_CAPTIONS_ENABLED,
+                SYSTEM_AUDIO_CAPTIONING_DEFAULT_ENABLED ? 1 : 0, mContext.getUserId()) == 1;
+    }
+
+    /**
+     * Sets the system audio caption enabled state.
+     *
+     * @param isEnabled The system audio captioning enabled state.
+     *
+     * @throws SecurityException if the caller does not have permission
+     * {@link Manifest.permission#SET_SYSTEM_AUDIO_CAPTION}
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
+    public final void setSystemAudioCaptioningRequested(boolean isEnabled) {
+        if (mAccessibilityManager != null) {
+            mAccessibilityManager.setSystemAudioCaptioningRequested(isEnabled,
+                    mContext.getUserId());
+        }
+    }
+
+    /**
+     * @return the system audio caption UI enabled state.
+     */
+    public final boolean isSystemAudioCaptioningUiRequested() {
+        return mAccessibilityManager != null
+                && mAccessibilityManager.isSystemAudioCaptioningUiRequested(mContext.getUserId());
+    }
+
+    /**
+     * Sets the system audio caption UI enabled state.
+     *
+     * @param isEnabled The system audio captioning UI enabled state.
+     *
+     * @throws SecurityException if the caller does not have permission
+     * {@link Manifest.permission#SET_SYSTEM_AUDIO_CAPTION}
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
+    public final void setSystemAudioCaptioningUiRequested(boolean isEnabled) {
+        if (mAccessibilityManager != null) {
+            mAccessibilityManager.setSystemAudioCaptioningUiRequested(isEnabled,
+                    mContext.getUserId());
+        }
+    }
+
+    /**
      * Adds a listener for changes in the user's preferred captioning enabled
      * state and visual properties.
      *
@@ -160,6 +222,8 @@ public class CaptioningManager {
                 registerObserver(Secure.ACCESSIBILITY_CAPTIONING_FONT_SCALE);
                 registerObserver(Secure.ACCESSIBILITY_CAPTIONING_LOCALE);
                 registerObserver(Secure.ACCESSIBILITY_CAPTIONING_PRESET);
+                registerObserver(Secure.ODI_CAPTIONS_ENABLED);
+                registerObserver(Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED);
             }
 
             mListeners.add(listener);
@@ -229,6 +293,24 @@ public class CaptioningManager {
         }
     }
 
+    private void notifySystemAudioCaptionChanged() {
+        final boolean enabled = isSystemAudioCaptioningRequested();
+        synchronized (mListeners) {
+            for (CaptioningChangeListener listener : mListeners) {
+                listener.onSystemAudioCaptioningChanged(enabled);
+            }
+        }
+    }
+
+    private void notifySystemAudioCaptionUiChanged() {
+        final boolean enabled = isSystemAudioCaptioningUiRequested();
+        synchronized (mListeners) {
+            for (CaptioningChangeListener listener : mListeners) {
+                listener.onSystemAudioCaptioningUiChanged(enabled);
+            }
+        }
+    }
+
     private class MyContentObserver extends ContentObserver {
         private final Handler mHandler;
 
@@ -248,6 +330,10 @@ public class CaptioningManager {
                 notifyLocaleChanged();
             } else if (Secure.ACCESSIBILITY_CAPTIONING_FONT_SCALE.equals(name)) {
                 notifyFontScaleChanged();
+            } else if (Secure.ODI_CAPTIONS_ENABLED.equals(name)) {
+                notifySystemAudioCaptionChanged();
+            } else if (Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED.equals(name)) {
+                notifySystemAudioCaptionUiChanged();
             } else {
                 // We only need a single callback when multiple style properties
                 // change in rapid succession.
@@ -565,5 +651,51 @@ public class CaptioningManager {
          * @see CaptioningManager#getFontScale()
          */
         public void onFontScaleChanged(float fontScale) {}
+
+
+        /**
+         * Called when the system audio caption enabled state changes.
+         *
+         * @param enabled the system audio caption enabled state
+         */
+        public void onSystemAudioCaptioningChanged(boolean enabled) {}
+
+        /**
+         * Called when the system audio caption UI enabled state changes.
+         *
+         * @param enabled the system audio caption UI enabled state
+         */
+        public void onSystemAudioCaptioningUiChanged(boolean enabled) {}
+    }
+
+    /**
+     * Interface for accessing the system audio captioning related secure setting keys.
+     *
+     * @hide
+     */
+    public interface SystemAudioCaptioningAccessing {
+        /**
+         * Sets the system audio caption enabled state.
+         *
+         * @param isEnabled The system audio captioning enabled state.
+         * @param userId The user Id.
+         */
+        void setSystemAudioCaptioningRequested(boolean isEnabled, int userId);
+
+        /**
+         * Gets the system audio caption UI enabled state.
+         *
+         * @param userId The user Id.
+         * @return the system audio caption UI enabled state.
+         */
+        boolean isSystemAudioCaptioningUiRequested(int userId);
+
+        /**
+         * Sets the system audio caption UI enabled state.
+         *
+         * @param isEnabled The system audio captioning UI enabled state.
+         * @param userId The user Id.
+         */
+        void setSystemAudioCaptioningUiRequested(boolean isEnabled, int userId);
     }
 }

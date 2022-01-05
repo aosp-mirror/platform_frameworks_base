@@ -52371,6 +52371,8 @@ package android.view.accessibility {
     method @NonNull public android.view.accessibility.CaptioningManager.CaptionStyle getUserStyle();
     method public boolean isCallCaptioningEnabled();
     method public final boolean isEnabled();
+    method public final boolean isSystemAudioCaptioningRequested();
+    method public final boolean isSystemAudioCaptioningUiRequested();
     method public void removeCaptioningChangeListener(@NonNull android.view.accessibility.CaptioningManager.CaptioningChangeListener);
   }
 
@@ -52399,6 +52401,8 @@ package android.view.accessibility {
     method public void onEnabledChanged(boolean);
     method public void onFontScaleChanged(float);
     method public void onLocaleChanged(@Nullable java.util.Locale);
+    method public void onSystemAudioCaptioningChanged(boolean);
+    method public void onSystemAudioCaptioningUiChanged(boolean);
     method public void onUserStyleChanged(@NonNull android.view.accessibility.CaptioningManager.CaptionStyle);
   }
 

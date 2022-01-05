@@ -293,6 +293,7 @@ package android {
     field public static final String SET_ORIENTATION = "android.permission.SET_ORIENTATION";
     field public static final String SET_POINTER_SPEED = "android.permission.SET_POINTER_SPEED";
     field public static final String SET_SCREEN_COMPATIBILITY = "android.permission.SET_SCREEN_COMPATIBILITY";
+    field public static final String SET_SYSTEM_AUDIO_CAPTION = "android.permission.SET_SYSTEM_AUDIO_CAPTION";
     field public static final String SET_VOLUME_KEY_LONG_PRESS_LISTENER = "android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER";
     field public static final String SET_WALLPAPER_COMPONENT = "android.permission.SET_WALLPAPER_COMPONENT";
     field public static final String SHOW_KEYGUARD_MESSAGE = "android.permission.SHOW_KEYGUARD_MESSAGE";
@@ -15170,6 +15171,11 @@ package android.view.accessibility {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void performAccessibilityShortcut();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void registerSystemAction(@NonNull android.app.RemoteAction, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void unregisterSystemAction(int);
+  }
+
+  public class CaptioningManager {
+    method @RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION) public final void setSystemAudioCaptioningRequested(boolean);
+    method @RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION) public final void setSystemAudioCaptioningUiRequested(boolean);
   }
 
 }
