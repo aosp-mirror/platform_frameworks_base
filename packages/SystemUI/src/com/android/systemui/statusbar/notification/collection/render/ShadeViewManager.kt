@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.render
 
 import android.content.Context
 import android.view.View
+import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -33,13 +34,15 @@ class ShadeViewManager constructor(
     context: Context,
     listContainer: NotificationListContainer,
     private val stackController: NotifStackController,
+    mediaContainerController: MediaContainerController,
+    featureManager: NotificationSectionsFeatureManager,
     logger: ShadeViewDifferLogger,
     private val viewBarn: NotifViewBarn
 ) {
     // We pass a shim view here because the listContainer may not actually have a view associated
     // with it and the differ never actually cares about the root node's view.
     private val rootController = RootNodeController(listContainer, View(context))
-    private val specBuilder = NodeSpecBuilder(viewBarn)
+    private val specBuilder = NodeSpecBuilder(mediaContainerController, featureManager, viewBarn)
     private val viewDiffer = ShadeViewDiffer(rootController, logger)
 
     /** Method for attaching this manager to the pipeline. */
@@ -68,6 +71,8 @@ class ShadeViewManager constructor(
 class ShadeViewManagerFactory @Inject constructor(
     private val context: Context,
     private val logger: ShadeViewDifferLogger,
+    private val mediaContainerController: MediaContainerController,
+    private val sectionsFeatureManager: NotificationSectionsFeatureManager,
     private val viewBarn: NotifViewBarn
 ) {
     fun create(listContainer: NotificationListContainer, stackController: NotifStackController) =
@@ -75,6 +80,8 @@ class ShadeViewManagerFactory @Inject constructor(
             context,
             listContainer,
             stackController,
+            mediaContainerController,
+            sectionsFeatureManager,
             logger,
             viewBarn)
 }

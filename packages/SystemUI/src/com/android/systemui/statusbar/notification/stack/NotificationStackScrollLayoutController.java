@@ -1503,7 +1503,7 @@ public class NotificationStackScrollLayoutController {
      *         from the keyguard host to the quick settings one.
      */
     public int getFullShadeTransitionInset() {
-        MediaHeaderView view = mKeyguardMediaController.getSinglePaneContainer();
+        MediaContainerView view = mKeyguardMediaController.getSinglePaneContainer();
         if (view == null || view.getHeight() == 0
                 || mStatusBarStateController.getState() != KEYGUARD) {
             return 0;

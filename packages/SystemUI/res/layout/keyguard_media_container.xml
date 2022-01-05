@@ -16,7 +16,7 @@
   -->
 
 <!-- Layout for media controls on the lockscreen -->
-<com.android.systemui.statusbar.notification.stack.MediaHeaderView
+<com.android.systemui.statusbar.notification.stack.MediaContainerView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
