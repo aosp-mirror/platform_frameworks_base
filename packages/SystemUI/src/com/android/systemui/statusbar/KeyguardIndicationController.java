@@ -131,7 +131,7 @@ public class KeyguardIndicationController {
     private final DockManager mDockManager;
     private final DevicePolicyManager mDevicePolicyManager;
     private final UserManager mUserManager;
-    private final @Main DelayableExecutor mExecutor;
+    protected final @Main DelayableExecutor mExecutor;
     private final LockPatternUtils mLockPatternUtils;
     private final IActivityManager mIActivityManager;
     private final FalsingManager mFalsingManager;
