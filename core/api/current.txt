@@ -32074,6 +32074,7 @@ package android.os {
 
   public final class SystemClock {
     method @NonNull public static java.time.Clock currentGnssTimeClock();
+    method @NonNull public static java.time.Clock currentNetworkTimeClock();
     method public static long currentThreadTimeMillis();
     method public static long elapsedRealtime();
     method public static long elapsedRealtimeNanos();
