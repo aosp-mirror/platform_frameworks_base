@@ -199,22 +199,24 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
         // if any link in the chain is finished, remove the chain. Then, find any other chains that
         // contain this op/package/uid/tag combination, and remove them, as well.
         // TODO ntmyren: be smarter about this
-        mAttributionChains.remove(attributionChainId);
-        int numChains = mAttributionChains.size();
-        ArrayList<Integer> toRemove = new ArrayList<>();
-        for (int i = 0; i < numChains; i++) {
-            int chainId = mAttributionChains.keyAt(i);
-            ArrayList<AccessChainLink> chain = mAttributionChains.valueAt(i);
-            int chainSize = chain.size();
-            for (int j = 0; j < chainSize; j++) {
-                AccessChainLink link = chain.get(j);
-                if (link.packageAndOpEquals(op, packageName, attributionTag, uid)) {
-                    toRemove.add(chainId);
-                    break;
+        synchronized(mAttributionChains) {
+            mAttributionChains.remove(attributionChainId);
+            int numChains = mAttributionChains.size();
+            ArrayList<Integer> toRemove = new ArrayList<>();
+            for (int i = 0; i < numChains; i++) {
+                int chainId = mAttributionChains.keyAt(i);
+                ArrayList<AccessChainLink> chain = mAttributionChains.valueAt(i);
+                int chainSize = chain.size();
+                for (int j = 0; j < chainSize; j++) {
+                    AccessChainLink link = chain.get(j);
+                    if (link.packageAndOpEquals(op, packageName, attributionTag, uid)) {
+                        toRemove.add(chainId);
+                        break;
+                    }
                 }
             }
+            mAttributionChains.removeAll(toRemove);
         }
-        mAttributionChains.removeAll(toRemove);
     }
 
     @Override
@@ -234,8 +236,10 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
             // If this is not a successful start, or it is not a chain, or it is untrusted, return
             return;
         }
-        addLinkToChainIfNotPresent(AppOpsManager.opToPublicName(op), packageName, uid,
-                attributionTag, attributionFlags, attributionChainId);
+        synchronized(mAttributionChains) {
+            addLinkToChainIfNotPresent(AppOpsManager.opToPublicName(op), packageName, uid,
+                    attributionTag, attributionFlags, attributionChainId);
+        }
     }
 
     private void addLinkToChainIfNotPresent(String op, String packageName, int uid,
@@ -310,7 +314,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
             String permGroup = usedPermGroups.get(permGroupNum);
 
             ArrayMap<OpUsage, CharSequence> usagesWithLabels =
-                    getUniqueUsagesWithLabels(rawUsages.get(permGroup));
+                    getUniqueUsagesWithLabels(permGroup, rawUsages.get(permGroup));
 
             if (permGroup.equals(OPSTR_PHONE_CALL_MICROPHONE)) {
                 isPhone = true;
@@ -431,7 +435,8 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
         return ListFormatter.getInstance().format(labels);
     }
 
-    private ArrayMap<OpUsage, CharSequence> getUniqueUsagesWithLabels(List<OpUsage> usages) {
+    private ArrayMap<OpUsage, CharSequence> getUniqueUsagesWithLabels(String permGroup,
+            List<OpUsage> usages) {
         ArrayMap<OpUsage, CharSequence> usagesAndLabels = new ArrayMap<>();
 
         if (usages == null || usages.isEmpty()) {
@@ -466,7 +471,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
             // If this usage has a proxy, but is not a proxy, it is the end of a chain.
             // TODO remove once camera converted
             if (!proxies.containsKey(usageAttr) && usage.proxy != null
-                    && !usage.op.equals(OPSTR_RECORD_AUDIO)) {
+                    && !MICROPHONE.equals(permGroup)) {
                 proxyLabels.put(usage, new ArrayList<>());
                 proxyPackages.add(usage.getPackageIdHash());
             }
@@ -538,48 +543,51 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
 
             // TODO ntmyren: remove this proxy logic once camera is converted to AttributionSource
             // For now: don't add mic proxy usages
-            if (!start.op.equals(OPSTR_RECORD_AUDIO)) {
+            if (!MICROPHONE.equals(permGroup)) {
                 usagesAndLabels.put(start,
                         proxyLabelList.isEmpty() ? null : formatLabelList(proxyLabelList));
             }
         }
 
-        for (int i = 0; i < mAttributionChains.size(); i++) {
-            List<AccessChainLink> usageList = mAttributionChains.valueAt(i);
-            int lastVisible = usageList.size() - 1;
-            // TODO ntmyren: remove this mic code once camera is converted to AttributionSource
-            // if the list is empty or incomplete, do not show it.
-            if (usageList.isEmpty() || !usageList.get(lastVisible).isEnd()
-                    || !usageList.get(0).isStart()
-                    || !usageList.get(lastVisible).usage.op.equals(OPSTR_RECORD_AUDIO)) {
-                continue;
-            }
-
-            //TODO ntmyren: remove once camera etc. etc.
-            for (AccessChainLink link: usageList) {
-                proxyPackages.add(link.usage.getPackageIdHash());
-            }
-
-            AccessChainLink start = usageList.get(0);
-            AccessChainLink lastVisibleLink = usageList.get(lastVisible);
-            while (lastVisible > 0 && !shouldShowPackage(lastVisibleLink.usage.packageName)) {
-                lastVisible--;
-                lastVisibleLink = usageList.get(lastVisible);
-            }
-            String proxyLabel = null;
-            if (!lastVisibleLink.usage.packageName.equals(start.usage.packageName)) {
-                try {
-                    PackageManager userPkgManager =
-                            getUserContext(lastVisibleLink.usage.getUser()).getPackageManager();
-                    ApplicationInfo appInfo = userPkgManager.getApplicationInfo(
-                            lastVisibleLink.usage.packageName, 0);
-                    proxyLabel = appInfo.loadLabel(userPkgManager).toString();
-                } catch (PackageManager.NameNotFoundException e) {
-                    // do nothing
+        synchronized (mAttributionChains) {
+            for (int i = 0; i < mAttributionChains.size(); i++) {
+                List<AccessChainLink> usageList = mAttributionChains.valueAt(i);
+                int lastVisible = usageList.size() - 1;
+                // TODO ntmyren: remove this mic code once camera is converted to AttributionSource
+                // if the list is empty or incomplete, do not show it.
+                if (usageList.isEmpty() || !usageList.get(lastVisible).isEnd()
+                        || !usageList.get(0).isStart()
+                        || !permGroup.equals(getGroupForOp(usageList.get(0).usage.op))
+                        || !MICROPHONE.equals(permGroup)) {
+                    continue;
                 }
 
+                //TODO ntmyren: remove once camera etc. etc.
+                for (AccessChainLink link : usageList) {
+                    proxyPackages.add(link.usage.getPackageIdHash());
+                }
+
+                AccessChainLink start = usageList.get(0);
+                AccessChainLink lastVisibleLink = usageList.get(lastVisible);
+                while (lastVisible > 0 && !shouldShowPackage(lastVisibleLink.usage.packageName)) {
+                    lastVisible--;
+                    lastVisibleLink = usageList.get(lastVisible);
+                }
+                String proxyLabel = null;
+                if (!lastVisibleLink.usage.packageName.equals(start.usage.packageName)) {
+                    try {
+                        PackageManager userPkgManager =
+                                getUserContext(lastVisibleLink.usage.getUser()).getPackageManager();
+                        ApplicationInfo appInfo = userPkgManager.getApplicationInfo(
+                                lastVisibleLink.usage.packageName, 0);
+                        proxyLabel = appInfo.loadLabel(userPkgManager).toString();
+                    } catch (PackageManager.NameNotFoundException e) {
+                        // do nothing
+                    }
+
+                }
+                usagesAndLabels.put(start.usage, proxyLabel);
             }
-            usagesAndLabels.put(start.usage, proxyLabel);
         }
 
         for (int packageHash : mostRecentUsages.keySet()) {
