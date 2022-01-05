@@ -201,22 +201,6 @@ public class KeyguardUpdateMonitorCallback {
     public void onFinishedGoingToSleep(int why) { }
 
     /**
-     * Called when the screen has been turned on.
-     *
-     * @deprecated use {@link com.android.systemui.keyguard.ScreenLifecycle}.
-     */
-    @Deprecated
-    public void onScreenTurnedOn() { }
-
-    /**
-     * Called when the screen has been turned off.
-     *
-     * @deprecated use {@link com.android.systemui.keyguard.ScreenLifecycle}.
-     */
-    @Deprecated
-    public void onScreenTurnedOff() { }
-
-    /**
      * Called when trust changes for a user.
      */
     public void onTrustChanged(int userId) { }
