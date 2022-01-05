@@ -434,6 +434,42 @@ public class NetworkStatsManager {
     }
 
     /**
+     * Query usage statistics details for networks matching a given {@link NetworkTemplate}.
+     *
+     * Result is not aggregated over time. This means buckets' start and
+     * end timestamps will be between 'startTime' and 'endTime' parameters.
+     * <p>Only includes buckets whose entire time period is included between
+     * startTime and endTime. Doesn't interpolate or return partial buckets.
+     * Since bucket length is in the order of hours, this
+     * method cannot be used to measure data usage on a fine grained time scale.
+     * This may take a long time, and apps should avoid calling this on their main thread.
+     *
+     * @param template Template used to match networks. See {@link NetworkTemplate}.
+     * @param startTime Start of period, in milliseconds since the Unix epoch, see
+     *                  {@link java.lang.System#currentTimeMillis}.
+     * @param endTime End of period, in milliseconds since the Unix epoch, see
+     *                {@link java.lang.System#currentTimeMillis}.
+     * @return Statistics which is described above.
+     * @hide
+     */
+    @NonNull
+    // @SystemApi(client = MODULE_LIBRARIES)
+    @WorkerThread
+    public NetworkStats queryDetailsForDevice(@NonNull NetworkTemplate template,
+            long startTime, long endTime) {
+        try {
+            final NetworkStats result =
+                    new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
+            result.startHistoryDeviceEnumeration();
+            return result;
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        return null; // To make the compiler happy.
+    }
+
+    /**
      * Query network usage statistics details for a given uid.
      * This may take a long time, and apps should avoid calling this on their main thread.
      *
@@ -499,7 +535,8 @@ public class NetworkStatsManager {
      * @param endTime End of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param uid UID of app
-     * @param tag TAG of interest. Use {@link NetworkStats.Bucket#TAG_NONE} for no tags.
+     * @param tag TAG of interest. Use {@link NetworkStats.Bucket#TAG_NONE} for aggregated data
+     *            across all the tags.
      * @param state state of interest. Use {@link NetworkStats.Bucket#STATE_ALL} to aggregate
      *            traffic from all states.
      * @return Statistics object or null if an error happened during statistics collection.
@@ -514,21 +551,51 @@ public class NetworkStatsManager {
         return queryDetailsForUidTagState(template, startTime, endTime, uid, tag, state);
     }
 
-    /** @hide */
-    public NetworkStats queryDetailsForUidTagState(NetworkTemplate template,
+    /**
+     * Query network usage statistics details for a given template, uid, tag, and state.
+     *
+     * Only usable for uids belonging to calling user. Result is not aggregated over time.
+     * This means buckets' start and end timestamps are going to be between 'startTime' and
+     * 'endTime' parameters. The uid is going to be the same as the 'uid' parameter, the tag
+     * the same as the 'tag' parameter, and the state the same as the 'state' parameter.
+     * defaultNetwork is going to be {@link NetworkStats.Bucket#DEFAULT_NETWORK_ALL},
+     * metered is going to be {@link NetworkStats.Bucket#METERED_ALL}, and
+     * roaming is going to be {@link NetworkStats.Bucket#ROAMING_ALL}.
+     * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
+     * interpolate across partial buckets. Since bucket length is in the order of hours, this
+     * method cannot be used to measure data usage on a fine grained time scale.
+     * This may take a long time, and apps should avoid calling this on their main thread.
+     *
+     * @param template Template used to match networks. See {@link NetworkTemplate}.
+     * @param startTime Start of period, in milliseconds since the Unix epoch, see
+     *                  {@link java.lang.System#currentTimeMillis}.
+     * @param endTime End of period, in milliseconds since the Unix epoch, see
+     *                {@link java.lang.System#currentTimeMillis}.
+     * @param uid UID of app
+     * @param tag TAG of interest. Use {@link NetworkStats.Bucket#TAG_NONE} for aggregated data
+     *            across all the tags.
+     * @param state state of interest. Use {@link NetworkStats.Bucket#STATE_ALL} to aggregate
+     *            traffic from all states.
+     * @return Statistics which is described above.
+     * @hide
+     */
+    @NonNull
+    // @SystemApi(client = MODULE_LIBRARIES)
+    @WorkerThread
+    public NetworkStats queryDetailsForUidTagState(@NonNull NetworkTemplate template,
             long startTime, long endTime, int uid, int tag, int state) throws SecurityException {
-
-        NetworkStats result;
         try {
-            result = new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
-            result.startHistoryEnumeration(uid, tag, state);
+            final NetworkStats result = new NetworkStats(
+                    mContext, template, mFlags, startTime, endTime, mService);
+            result.startHistoryUidEnumeration(uid, tag, state);
+            return result;
         } catch (RemoteException e) {
             Log.e(TAG, "Error while querying stats for uid=" + uid + " tag=" + tag
                     + " state=" + state, e);
-            return null;
+            e.rethrowFromSystemServer();
         }
 
-        return result;
+        return null; // To make the compiler happy.
     }
 
     /**
