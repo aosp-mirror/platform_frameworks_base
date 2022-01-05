@@ -26,6 +26,8 @@ import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
+
 /**
  * A container with measurement corrections for a single visible satellite
  *
@@ -119,15 +121,17 @@ public final class GnssSingleSatCorrection implements Parcelable {
     @Nullable
     private final GnssReflectingPlane mReflectingPlane;
 
-    private GnssSingleSatCorrection(Builder builder) {
-        mSingleSatCorrectionFlags = builder.mSingleSatCorrectionFlags;
-        mSatId = builder.mSatId;
-        mConstellationType = builder.mConstellationType;
-        mCarrierFrequencyHz = builder.mCarrierFrequencyHz;
-        mProbSatIsLos = builder.mProbSatIsLos;
-        mExcessPathLengthMeters = builder.mExcessPathLengthMeters;
-        mExcessPathLengthUncertaintyMeters = builder.mExcessPathLengthUncertaintyMeters;
-        mReflectingPlane = builder.mReflectingPlane;
+    private GnssSingleSatCorrection(int singleSatCorrectionFlags, int constellationType, int satId,
+            float carrierFrequencyHz, float probSatIsLos, float excessPathLengthMeters,
+            float excessPathLengthUncertaintyMeters, GnssReflectingPlane reflectingPlane) {
+        mSingleSatCorrectionFlags = singleSatCorrectionFlags;
+        mConstellationType = constellationType;
+        mSatId = satId;
+        mCarrierFrequencyHz = carrierFrequencyHz;
+        mProbSatIsLos = probSatIsLos;
+        mExcessPathLengthMeters = excessPathLengthMeters;
+        mExcessPathLengthUncertaintyMeters = excessPathLengthUncertaintyMeters;
+        mReflectingPlane = reflectingPlane;
     }
 
     /**
@@ -239,27 +243,49 @@ public final class GnssSingleSatCorrection implements Parcelable {
         return 0;
     }
 
+    @Override
+    public void writeToParcel(@NonNull Parcel parcel, int flags) {
+        parcel.writeInt(mSingleSatCorrectionFlags);
+        parcel.writeInt(mConstellationType);
+        parcel.writeInt(mSatId);
+        parcel.writeFloat(mCarrierFrequencyHz);
+        if (hasValidSatelliteLineOfSight()) {
+            parcel.writeFloat(mProbSatIsLos);
+        }
+        if (hasExcessPathLength()) {
+            parcel.writeFloat(mExcessPathLengthMeters);
+        }
+        if (hasExcessPathLengthUncertainty()) {
+            parcel.writeFloat(mExcessPathLengthUncertaintyMeters);
+        }
+        if (hasReflectingPlane()) {
+            mReflectingPlane.writeToParcel(parcel, flags);
+        }
+    }
+
     public static final Creator<GnssSingleSatCorrection> CREATOR =
             new Creator<GnssSingleSatCorrection>() {
                 @Override
                 @NonNull
                 public GnssSingleSatCorrection createFromParcel(@NonNull Parcel parcel) {
-                    int mSingleSatCorrectionFlags = parcel.readInt();
-                    boolean hasReflectingPlane =
-                            (mSingleSatCorrectionFlags & HAS_REFLECTING_PLANE_MASK) != 0;
-                    final GnssSingleSatCorrection.Builder singleSatCorrectionBuilder =
-                            new Builder()
-                                    .setConstellationType(parcel.readInt())
-                                    .setSatelliteId(parcel.readInt())
-                                    .setCarrierFrequencyHz(parcel.readFloat())
-                                    .setProbabilityLineOfSight(parcel.readFloat())
-                                    .setExcessPathLengthMeters(parcel.readFloat())
-                                    .setExcessPathLengthUncertaintyMeters(parcel.readFloat());
-                    if (hasReflectingPlane) {
-                        singleSatCorrectionBuilder.setReflectingPlane(
-                                GnssReflectingPlane.CREATOR.createFromParcel(parcel));
-                    }
-                    return singleSatCorrectionBuilder.build();
+                    int singleSatCorrectionFlags = parcel.readInt();
+                    int constellationType = parcel.readInt();
+                    int satId = parcel.readInt();
+                    float carrierFrequencyHz = parcel.readFloat();
+                    float probSatIsLos = (singleSatCorrectionFlags & HAS_PROB_SAT_IS_LOS_MASK) != 0
+                            ? parcel.readFloat() : 0;
+                    float excessPathLengthMeters =
+                            (singleSatCorrectionFlags & HAS_EXCESS_PATH_LENGTH_MASK) != 0
+                                    ? parcel.readFloat() : 0;
+                    float excessPathLengthUncertaintyMeters =
+                            (singleSatCorrectionFlags & HAS_EXCESS_PATH_LENGTH_UNC_MASK) != 0
+                                    ? parcel.readFloat() : 0;
+                    GnssReflectingPlane reflectingPlane =
+                            (singleSatCorrectionFlags & HAS_REFLECTING_PLANE_MASK) != 0
+                                    ? GnssReflectingPlane.CREATOR.createFromParcel(parcel) : null;
+                    return new GnssSingleSatCorrection(singleSatCorrectionFlags, constellationType,
+                            satId, carrierFrequencyHz, probSatIsLos, excessPathLengthMeters,
+                            excessPathLengthUncertaintyMeters, reflectingPlane);
                 }
 
                 @Override
@@ -268,41 +294,94 @@ public final class GnssSingleSatCorrection implements Parcelable {
                 }
             };
 
-    @NonNull
     @Override
-    public String toString() {
-        final String format = "   %-29s = %s\n";
-        StringBuilder builder = new StringBuilder("GnssSingleSatCorrection:\n");
-        builder.append(
-                String.format(format, "SingleSatCorrectionFlags = ", mSingleSatCorrectionFlags));
-        builder.append(String.format(format, "ConstellationType = ", mConstellationType));
-        builder.append(String.format(format, "SatId = ", mSatId));
-        builder.append(String.format(format, "CarrierFrequencyHz = ", mCarrierFrequencyHz));
-        builder.append(String.format(format, "ProbSatIsLos = ", mProbSatIsLos));
-        builder.append(String.format(format, "ExcessPathLengthMeters = ", mExcessPathLengthMeters));
-        builder.append(
-                String.format(
-                        format,
-                        "ExcessPathLengthUncertaintyMeters = ",
-                        mExcessPathLengthUncertaintyMeters));
-        if (hasReflectingPlane()) {
-            builder.append(String.format(format, "ReflectingPlane = ", mReflectingPlane));
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
         }
-        return builder.toString();
+        if (!(obj instanceof GnssSingleSatCorrection)) {
+            return false;
+        }
+
+        GnssSingleSatCorrection other = (GnssSingleSatCorrection) obj;
+        if (mConstellationType != other.mConstellationType) {
+            return false;
+        }
+        if (mSatId != other.mSatId) {
+            return false;
+        }
+        if (Float.compare(mCarrierFrequencyHz, other.mCarrierFrequencyHz) != 0) {
+            return false;
+        }
+
+        if (hasValidSatelliteLineOfSight() != other.hasValidSatelliteLineOfSight()) {
+            return false;
+        }
+        if (hasValidSatelliteLineOfSight()
+                && Float.compare(mProbSatIsLos, other.mProbSatIsLos) != 0) {
+            return false;
+        }
+
+        if (hasExcessPathLength() != other.hasExcessPathLength()) {
+            return false;
+        }
+        if (hasExcessPathLength()
+                && Float.compare(mExcessPathLengthMeters, other.mExcessPathLengthMeters) != 0) {
+            return false;
+        }
+
+        if (hasExcessPathLengthUncertainty() != other.hasExcessPathLengthUncertainty()) {
+            return false;
+        }
+        if (hasExcessPathLengthUncertainty() && Float.compare(mExcessPathLengthUncertaintyMeters,
+                other.mExcessPathLengthUncertaintyMeters) != 0) {
+            return false;
+        }
+
+        if (hasReflectingPlane() != other.hasReflectingPlane()) {
+            return false;
+        }
+        if (hasReflectingPlane()
+                && !mReflectingPlane.equals(other.mReflectingPlane)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
-    public void writeToParcel(@NonNull Parcel parcel, int flags) {
-        parcel.writeInt(mSingleSatCorrectionFlags);
-        parcel.writeInt(mConstellationType);
-        parcel.writeInt(mSatId);
-        parcel.writeFloat(mCarrierFrequencyHz);
-        parcel.writeFloat(mProbSatIsLos);
-        parcel.writeFloat(mExcessPathLengthMeters);
-        parcel.writeFloat(mExcessPathLengthUncertaintyMeters);
-        if (hasReflectingPlane()) {
-            mReflectingPlane.writeToParcel(parcel, flags);
+    public int hashCode() {
+        return Objects.hash(mSingleSatCorrectionFlags,
+                mConstellationType,
+                mSatId,
+                mCarrierFrequencyHz,
+                mProbSatIsLos,
+                mExcessPathLengthMeters,
+                mExcessPathLengthUncertaintyMeters,
+                mReflectingPlane);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("GnssSingleSatCorrection:[");
+        builder.append(" ConstellationType=").append(mConstellationType);
+        builder.append(" SatId=").append(mSatId);
+        builder.append(" CarrierFrequencyHz=").append(mCarrierFrequencyHz);
+        if (hasValidSatelliteLineOfSight()) {
+            builder.append(" ProbSatIsLos=").append(mProbSatIsLos);
         }
+        if (hasExcessPathLength()) {
+            builder.append(" ExcessPathLengthMeters=").append(mExcessPathLengthMeters);
+        }
+        if (hasExcessPathLengthUncertainty()) {
+            builder.append(" ExcessPathLengthUncertaintyMeters=").append(
+                    mExcessPathLengthUncertaintyMeters);
+        }
+        if (hasReflectingPlane()) {
+            builder.append(" ReflectingPlane=").append(mReflectingPlane);
+        }
+        builder.append(']');
+        return builder.toString();
     }
 
     /** Builder for {@link GnssSingleSatCorrection} */
@@ -332,6 +411,7 @@ public final class GnssSingleSatCorrection implements Parcelable {
 
         /** Sets the Satellite ID defined in the ICD of the given constellation. */
         @NonNull public Builder setSatelliteId(@IntRange(from = 0) int satId) {
+            Preconditions.checkArgumentNonnegative(satId, "satId should be non-negative.");
             mSatId = satId;
             return this;
         }
@@ -339,6 +419,8 @@ public final class GnssSingleSatCorrection implements Parcelable {
         /** Sets the Carrier frequency in Hz. */
         @NonNull public Builder setCarrierFrequencyHz(
                 @FloatRange(from = 0.0f,  fromInclusive = false) float carrierFrequencyHz) {
+            Preconditions.checkArgument(
+                    carrierFrequencyHz >= 0, "carrierFrequencyHz should be non-negative.");
             mCarrierFrequencyHz = carrierFrequencyHz;
             return this;
         }
@@ -352,8 +434,18 @@ public final class GnssSingleSatCorrection implements Parcelable {
             Preconditions.checkArgumentInRange(
                     probSatIsLos, 0, 1, "probSatIsLos should be between 0 and 1.");
             mProbSatIsLos = probSatIsLos;
-            mSingleSatCorrectionFlags =
-                    (byte) (mSingleSatCorrectionFlags | HAS_PROB_SAT_IS_LOS_MASK);
+            mSingleSatCorrectionFlags |= HAS_PROB_SAT_IS_LOS_MASK;
+            return this;
+        }
+
+        /**
+         * Clears the line-of-sight probability of the satellite at the given location.
+         *
+         * <p>This is to negate {@link #setProbabilityLineOfSight} call.
+         */
+        @NonNull public Builder clearProbabilityLineOfSight() {
+            mProbSatIsLos = 0;
+            mSingleSatCorrectionFlags &= ~HAS_PROB_SAT_IS_LOS_MASK;
             return this;
         }
 
@@ -363,18 +455,42 @@ public final class GnssSingleSatCorrection implements Parcelable {
          */
         @NonNull public Builder setExcessPathLengthMeters(
                 @FloatRange(from = 0.0f) float excessPathLengthMeters) {
+            Preconditions.checkArgument(excessPathLengthMeters >= 0,
+                    "excessPathLengthMeters should be non-negative.");
             mExcessPathLengthMeters = excessPathLengthMeters;
-            mSingleSatCorrectionFlags =
-                    (byte) (mSingleSatCorrectionFlags | HAS_EXCESS_PATH_LENGTH_MASK);
+            mSingleSatCorrectionFlags |= HAS_EXCESS_PATH_LENGTH_MASK;
+            return this;
+        }
+
+        /**
+         * Clears the Excess path length.
+         *
+         * <p>This is to negate {@link #setExcessPathLengthMeters} call.
+         */
+        @NonNull public Builder clearExcessPathLengthMeters() {
+            mExcessPathLengthMeters = 0;
+            mSingleSatCorrectionFlags &= ~HAS_EXCESS_PATH_LENGTH_MASK;
             return this;
         }
 
         /** Sets the error estimate (1-sigma) for the Excess path length estimate */
         @NonNull public Builder setExcessPathLengthUncertaintyMeters(
                 @FloatRange(from = 0.0f) float excessPathLengthUncertaintyMeters) {
+            Preconditions.checkArgument(excessPathLengthUncertaintyMeters >= 0,
+                    "excessPathLengthUncertaintyMeters should be non-negative.");
             mExcessPathLengthUncertaintyMeters = excessPathLengthUncertaintyMeters;
-            mSingleSatCorrectionFlags =
-                    (byte) (mSingleSatCorrectionFlags | HAS_EXCESS_PATH_LENGTH_UNC_MASK);
+            mSingleSatCorrectionFlags |= HAS_EXCESS_PATH_LENGTH_UNC_MASK;
+            return this;
+        }
+
+        /**
+         * Clears the error estimate (1-sigma) for the Excess path length estimate
+         *
+         * <p>This is to negate {@link #setExcessPathLengthUncertaintyMeters} call.
+         */
+        @NonNull public Builder clearExcessPathLengthUncertaintyMeters() {
+            mExcessPathLengthUncertaintyMeters = 0;
+            mSingleSatCorrectionFlags &= ~HAS_EXCESS_PATH_LENGTH_UNC_MASK;
             return this;
         }
 
@@ -382,18 +498,23 @@ public final class GnssSingleSatCorrection implements Parcelable {
         @NonNull public Builder setReflectingPlane(@Nullable GnssReflectingPlane reflectingPlane) {
             mReflectingPlane = reflectingPlane;
             if (reflectingPlane != null) {
-                mSingleSatCorrectionFlags =
-                        (byte) (mSingleSatCorrectionFlags | HAS_REFLECTING_PLANE_MASK);
+                mSingleSatCorrectionFlags |= HAS_REFLECTING_PLANE_MASK;
             } else {
-                mSingleSatCorrectionFlags =
-                        (byte) (mSingleSatCorrectionFlags & ~HAS_REFLECTING_PLANE_MASK);
+                mSingleSatCorrectionFlags &= ~HAS_REFLECTING_PLANE_MASK;
             }
             return this;
         }
 
         /** Builds a {@link GnssSingleSatCorrection} instance as specified by this builder. */
         @NonNull public GnssSingleSatCorrection build() {
-            return new GnssSingleSatCorrection(this);
+            return new GnssSingleSatCorrection(mSingleSatCorrectionFlags,
+                    mConstellationType,
+                    mSatId,
+                    mCarrierFrequencyHz,
+                    mProbSatIsLos,
+                    mExcessPathLengthMeters,
+                    mExcessPathLengthUncertaintyMeters,
+                    mReflectingPlane);
         }
     }
 }

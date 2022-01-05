@@ -5139,6 +5139,9 @@ package android.location {
   public static final class GnssSingleSatCorrection.Builder {
     ctor public GnssSingleSatCorrection.Builder();
     method @NonNull public android.location.GnssSingleSatCorrection build();
+    method @NonNull public android.location.GnssSingleSatCorrection.Builder clearExcessPathLengthMeters();
+    method @NonNull public android.location.GnssSingleSatCorrection.Builder clearExcessPathLengthUncertaintyMeters();
+    method @NonNull public android.location.GnssSingleSatCorrection.Builder clearProbabilityLineOfSight();
     method @NonNull public android.location.GnssSingleSatCorrection.Builder setCarrierFrequencyHz(@FloatRange(from=0.0f, fromInclusive=false) float);
     method @NonNull public android.location.GnssSingleSatCorrection.Builder setConstellationType(int);
     method @NonNull public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthMeters(@FloatRange(from=0.0f) float);
