@@ -36,7 +36,6 @@ import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DisableFlagsLogger;
@@ -46,8 +45,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
-import com.android.systemui.util.concurrency.FakeExecutor;
-import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import org.junit.Before;
@@ -84,6 +81,7 @@ public class StatusBarCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private VibratorHelper mVibratorHelper;
     @Mock private Vibrator mVibrator;
     @Mock private LightBarController mLightBarController;
+    @Mock private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
 
     StatusBarCommandQueueCallbacks mSbcqCallbacks;
 
@@ -112,8 +110,7 @@ public class StatusBarCommandQueueCallbacksTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mNotificationShadeWindowView,
                 mNotificationStackScrollLayoutController,
-                new StatusBarHideIconsForBouncerManager(
-                        mCommandQueue, new FakeExecutor(new FakeSystemClock()), new DumpManager()),
+                mStatusBarHideIconsForBouncerManager,
                 mPowerManager,
                 mVibratorHelper,
                 Optional.of(mVibrator),

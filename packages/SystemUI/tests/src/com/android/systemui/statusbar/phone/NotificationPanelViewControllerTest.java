@@ -141,6 +141,7 @@ import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
@@ -359,6 +360,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private NotificationsQSContainerController mNotificationsQSContainerController;
     @Mock
     private QsFrameTranslateController mQsFrameTranslateController;
+    @Mock
+    private StatusBarWindowStateController mStatusBarWindowStateController;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -495,7 +498,9 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
                 mFalsingManager, new FalsingCollectorFake(),
                 mNotificationLockscreenUserManager, mNotificationEntryManager,
-                mCommunalStateController, mKeyguardStateController, mStatusBarStateController,
+                mCommunalStateController, mKeyguardStateController,
+                mStatusBarStateController,
+                mStatusBarWindowStateController,
                 mDozeLog, mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
                 mCommunalSourceMonitor, mMetricsLogger, mActivityManager, mConfigurationController,
