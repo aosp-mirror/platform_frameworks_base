@@ -16,6 +16,13 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
+import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
+import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
+import static android.app.ActivityManagerInternal.ALLOW_PROFILES_OR_NON_FULL;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareClassLoader;
 
@@ -64,6 +71,7 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
 import android.os.Binder;
@@ -617,6 +625,100 @@ public class UserControllerTest {
         assertProfileLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* expectLocking= */ true);
     }
 
+    /** Tests handleIncomingUser() for a variety of permissions and situations. */
+    @Test
+    public void testHandleIncomingUser() throws Exception {
+        final UserInfo user1a = new UserInfo(111, "user1a", 0);
+        final UserInfo user1b = new UserInfo(112, "user1b", 0);
+        final UserInfo user2 = new UserInfo(113, "user2", 0);
+        // user1a and user2b are in the same profile group; user2 is in a different one.
+        user1a.profileGroupId = 5;
+        user1b.profileGroupId = 5;
+        user2.profileGroupId = 6;
+
+        final List<UserInfo> users = Arrays.asList(user1a, user1b, user2);
+        when(mInjector.mUserManagerMock.getUsers(false)).thenReturn(users);
+        mUserController.onSystemReady(); // To set the profileGroupIds in UserController.
+
+
+        // Has INTERACT_ACROSS_USERS_FULL.
+        when(mInjector.checkComponentPermission(
+                eq(INTERACT_ACROSS_USERS_FULL), anyInt(), anyInt(), anyInt(), anyBoolean()))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        when(mInjector.checkComponentPermission(
+                eq(INTERACT_ACROSS_USERS), anyInt(), anyInt(), anyInt(), anyBoolean()))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+        when(mInjector.checkPermissionForPreflight(
+                eq(INTERACT_ACROSS_PROFILES), anyInt(), anyInt(), any())).thenReturn(false);
+
+        checkHandleIncomingUser(user1a.id, user2.id, ALLOW_NON_FULL, true);
+        checkHandleIncomingUser(user1a.id, user2.id, ALLOW_NON_FULL_IN_PROFILE, true);
+        checkHandleIncomingUser(user1a.id, user2.id, ALLOW_FULL_ONLY, true);
+        checkHandleIncomingUser(user1a.id, user2.id, ALLOW_PROFILES_OR_NON_FULL, true);
+
+        checkHandleIncomingUser(user1a.id, user1b.id, ALLOW_NON_FULL, true);
+        checkHandleIncomingUser(user1a.id, user1b.id, ALLOW_NON_FULL_IN_PROFILE, true);
+        checkHandleIncomingUser(user1a.id, user1b.id, ALLOW_FULL_ONLY, true);
+        checkHandleIncomingUser(user1a.id, user1b.id, ALLOW_PROFILES_OR_NON_FULL, true);
+
+
+        // Has INTERACT_ACROSS_USERS.
+        when(mInjector.checkComponentPermission(
+                eq(INTERACT_ACROSS_USERS_FULL), anyInt(), anyInt(), anyInt(), anyBoolean()))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+        when(mInjector.checkComponentPermission(
+                eq(INTERACT_ACROSS_USERS), anyInt(), anyInt(), anyInt(), anyBoolean()))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        when(mInjector.checkPermissionForPreflight(
+                eq(INTERACT_ACROSS_PROFILES), anyInt(), anyInt(), any())).thenReturn(false);
+
+        checkHandleIncomingUser(user1a.id, user2.id, ALLOW_NON_FULL, true);
+        checkHandleIncomingUser(user1a.id, user2.id,  ALLOW_NON_FULL_IN_PROFILE, false);
+        checkHandleIncomingUser(user1a.id, user2.id, ALLOW_FULL_ONLY, false);
+        checkHandleIncomingUser(user1a.id, user2.id, ALLOW_PROFILES_OR_NON_FULL, true);
+
+        checkHandleIncomingUser(user1a.id, user1b.id, ALLOW_NON_FULL, true);
+        checkHandleIncomingUser(user1a.id, user1b.id, ALLOW_NON_FULL_IN_PROFILE, true);
+        checkHandleIncomingUser(user1a.id, user1b.id, ALLOW_FULL_ONLY, false);
+        checkHandleIncomingUser(user1a.id, user1b.id, ALLOW_PROFILES_OR_NON_FULL, true);
+
+
+        // Has INTERACT_ACROSS_PROFILES.
+        when(mInjector.checkComponentPermission(
+                eq(INTERACT_ACROSS_USERS_FULL), anyInt(), anyInt(), anyInt(), anyBoolean()))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+        when(mInjector.checkComponentPermission(
+                eq(INTERACT_ACROSS_USERS), anyInt(), anyInt(), anyInt(), anyBoolean()))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+        when(mInjector.checkPermissionForPreflight(
+                eq(INTERACT_ACROSS_PROFILES), anyInt(), anyInt(), any())).thenReturn(true);
+
+        checkHandleIncomingUser(user1a.id, user2.id, ALLOW_NON_FULL, false);
+        checkHandleIncomingUser(user1a.id, user2.id, ALLOW_NON_FULL_IN_PROFILE, false);
+        checkHandleIncomingUser(user1a.id, user2.id, ALLOW_FULL_ONLY, false);
+        checkHandleIncomingUser(user1a.id, user2.id, ALLOW_PROFILES_OR_NON_FULL, false);
+
+        checkHandleIncomingUser(user1a.id, user1b.id, ALLOW_NON_FULL, false);
+        checkHandleIncomingUser(user1a.id, user1b.id, ALLOW_NON_FULL_IN_PROFILE, false);
+        checkHandleIncomingUser(user1a.id, user1b.id, ALLOW_FULL_ONLY, false);
+        checkHandleIncomingUser(user1a.id, user1b.id, ALLOW_PROFILES_OR_NON_FULL, true);
+    }
+
+    private void checkHandleIncomingUser(int fromUser, int toUser, int allowMode, boolean pass) {
+        final int pid = 100;
+        final int uid = fromUser * UserHandle.PER_USER_RANGE + 34567 + fromUser;
+        final String name = "whatever";
+        final String pkg = "some.package";
+        final boolean allowAll = false;
+
+        if (pass) {
+            mUserController.handleIncomingUser(pid, uid, toUser, allowAll, allowMode, name, pkg);
+        } else {
+            assertThrows(SecurityException.class, () -> mUserController.handleIncomingUser(
+                    pid, uid, toUser, allowAll, allowMode, name, pkg));
+        }
+    }
+
     private void setUpAndStartUserInBackground(int userId) throws Exception {
         setUpUser(userId, 0);
         mUserController.startUser(userId, /* foreground= */ false);
@@ -781,6 +883,23 @@ public class UserControllerTest {
         int checkCallingPermission(String permission) {
             Log.i(TAG, "checkCallingPermission " + permission);
             return PERMISSION_GRANTED;
+        }
+
+        @Override
+        int checkComponentPermission(String permission, int pid, int uid, int owner, boolean exp) {
+            Log.i(TAG, "checkComponentPermission " + permission);
+            return PERMISSION_GRANTED;
+        }
+
+        @Override
+        boolean checkPermissionForPreflight(String permission, int pid, int uid, String pkg) {
+            Log.i(TAG, "checkPermissionForPreflight " + permission);
+            return true;
+        }
+
+        @Override
+        boolean isCallerRecents(int uid) {
+            return false;
         }
 
         @Override

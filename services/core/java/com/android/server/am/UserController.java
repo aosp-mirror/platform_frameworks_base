@@ -26,10 +26,10 @@ import static android.app.ActivityManager.USER_OP_ERROR_IS_SYSTEM;
 import static android.app.ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
 import static android.app.ActivityManager.USER_OP_IS_CURRENT;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
-import static android.app.ActivityManagerInternal.ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
+import static android.app.ActivityManagerInternal.ALLOW_PROFILES_OR_NON_FULL;
 import static android.os.PowerWhitelistManager.REASON_BOOT_COMPLETED;
 import static android.os.PowerWhitelistManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
@@ -2143,11 +2143,10 @@ class UserController implements Handler.Callback {
                     callingUid, -1, true) != PackageManager.PERMISSION_GRANTED) {
                 // If the caller does not have either permission, they are always doomed.
                 allow = false;
-            } else if (allowMode == ALLOW_NON_FULL) {
+            } else if (allowMode == ALLOW_NON_FULL || allowMode == ALLOW_PROFILES_OR_NON_FULL) {
                 // We are blanket allowing non-full access, you lucky caller!
                 allow = true;
-            } else if (allowMode == ALLOW_NON_FULL_IN_PROFILE
-                        || allowMode == ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE) {
+            } else if (allowMode == ALLOW_NON_FULL_IN_PROFILE) {
                 // We may or may not allow this depending on whether the two users are
                 // in the same profile.
                 allow = isSameProfileGroup;
@@ -2174,12 +2173,13 @@ class UserController implements Handler.Callback {
                     builder.append("; this requires ");
                     builder.append(INTERACT_ACROSS_USERS_FULL);
                     if (allowMode != ALLOW_FULL_ONLY) {
-                        if (allowMode == ALLOW_NON_FULL || isSameProfileGroup) {
+                        if (allowMode == ALLOW_NON_FULL
+                                || allowMode == ALLOW_PROFILES_OR_NON_FULL
+                                || (allowMode == ALLOW_NON_FULL_IN_PROFILE && isSameProfileGroup)) {
                             builder.append(" or ");
                             builder.append(INTERACT_ACROSS_USERS);
                         }
-                        if (isSameProfileGroup
-                                && allowMode == ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE) {
+                        if (isSameProfileGroup && allowMode == ALLOW_PROFILES_OR_NON_FULL) {
                             builder.append(" or ");
                             builder.append(INTERACT_ACROSS_PROFILES);
                         }
@@ -2206,19 +2206,14 @@ class UserController implements Handler.Callback {
     private boolean canInteractWithAcrossProfilesPermission(
             int allowMode, boolean isSameProfileGroup, int callingPid, int callingUid,
             String callingPackage) {
-        if (allowMode != ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE) {
+        if (allowMode != ALLOW_PROFILES_OR_NON_FULL) {
             return false;
         }
         if (!isSameProfileGroup) {
             return false;
         }
-        return  PermissionChecker.PERMISSION_GRANTED
-                == PermissionChecker.checkPermissionForPreflight(
-                        mInjector.getContext(),
-                        INTERACT_ACROSS_PROFILES,
-                        callingPid,
-                        callingUid,
-                        callingPackage);
+        return mInjector.checkPermissionForPreflight(INTERACT_ACROSS_PROFILES, callingPid,
+                callingUid, callingPackage);
     }
 
     int unsafeConvertIncomingUser(@UserIdInt int userId) {
@@ -3147,6 +3142,12 @@ class UserController implements Handler.Callback {
             return mService.checkComponentPermission(permission, pid, uid, owningUid, exported);
         }
 
+        boolean checkPermissionForPreflight(String permission, int pid, int uid, String pkg) {
+            return  PermissionChecker.PERMISSION_GRANTED
+                    == PermissionChecker.checkPermissionForPreflight(
+                            getContext(), permission, pid, uid, pkg);
+        }
+
         protected void startHomeActivity(@UserIdInt int userId, String reason) {
             mService.mAtmInternal.startHomeActivity(userId, reason);
         }
@@ -3224,7 +3225,7 @@ class UserController implements Handler.Callback {
             mService.mAtmInternal.clearLockedTasks(reason);
         }
 
-        protected boolean isCallerRecents(int callingUid) {
+        boolean isCallerRecents(int callingUid) {
             return mService.mAtmInternal.isCallerRecents(callingUid);
         }
 

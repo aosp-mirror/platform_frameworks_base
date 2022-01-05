@@ -10662,7 +10662,7 @@ package android.content {
     method public boolean bindIsolatedService(@NonNull @RequiresPermission android.content.Intent, int, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.content.ServiceConnection);
     method public abstract boolean bindService(@RequiresPermission android.content.Intent, @NonNull android.content.ServiceConnection, int);
     method public boolean bindService(@NonNull @RequiresPermission android.content.Intent, int, @NonNull java.util.concurrent.Executor, @NonNull android.content.ServiceConnection);
-    method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", android.Manifest.permission.INTERACT_ACROSS_PROFILES}) public boolean bindServiceAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL", android.Manifest.permission.INTERACT_ACROSS_PROFILES}, conditional=true) public boolean bindServiceAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull android.os.UserHandle);
     method @CheckResult(suggest="#enforceCallingOrSelfPermission(String,String)") public abstract int checkCallingOrSelfPermission(@NonNull String);
     method @CheckResult(suggest="#enforceCallingOrSelfUriPermission(Uri,int,String)") public abstract int checkCallingOrSelfUriPermission(android.net.Uri, int);
     method @NonNull public int[] checkCallingOrSelfUriPermissions(@NonNull java.util.List<android.net.Uri>, int);

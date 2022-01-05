@@ -3589,10 +3589,18 @@ public abstract class Context {
      * Binds to a service in the given {@code user} in the same manner as
      * {@link #bindService(Intent, ServiceConnection, int)}.
      *
-     * <p>If the given {@code user} is in the same profile group and the target package is the
-     * same as the caller, {@code android.Manifest.permission.INTERACT_ACROSS_PROFILES} is
-     * sufficient. Otherwise, requires {@code android.Manifest.permission.INTERACT_ACROSS_USERS}
-     * for interacting with other users.
+     * <p>Requires that one of the following conditions are met:
+     * <ul>
+     *  <li>caller has {@code android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}</li>
+     *  <li>caller has {@code android.Manifest.permission.INTERACT_ACROSS_USERS} and is the same
+     *      package as the {@code service} (determined by its component's package) and the Android
+     *      version is at least {@link android.os.Build.VERSION_CODES#S}</li>
+     *  <li>caller has {@code android.Manifest.permission.INTERACT_ACROSS_USERS} and is in same
+     *      profile group as the given {@code user}</li>
+     *  <li>caller has {@code android.Manifest.permission.INTERACT_ACROSS_PROFILES} and is in same
+     *      profile group as the given {@code user} and is the same package as the {@code service}
+     *      </li>
+     * </ul>
      *
      * @param service Identifies the service to connect to.  The Intent must
      *      specify an explicit component name.
@@ -3615,8 +3623,9 @@ public abstract class Context {
     @SuppressWarnings("unused")
     @RequiresPermission(anyOf = {
             android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
             android.Manifest.permission.INTERACT_ACROSS_PROFILES
-    })
+            }, conditional = true)
     public boolean bindServiceAsUser(
             @NonNull @RequiresPermission Intent service, @NonNull ServiceConnection conn, int flags,
             @NonNull UserHandle user) {
@@ -3629,7 +3638,11 @@ public abstract class Context {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES
+            }, conditional = true)
     @UnsupportedAppUsage(trackingBug = 136728678)
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
