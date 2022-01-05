@@ -89,6 +89,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.DataUsageRequest;
+import android.net.INetd;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
@@ -410,10 +411,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wakeLock =
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-
+        final INetd netd = INetd.Stub.asInterface(
+                (IBinder) context.getSystemService(Context.NETD_SERVICE));
         final NetworkStatsService service = new NetworkStatsService(context, networkManager,
                 alarmManager, wakeLock, getDefaultClock(),
-                new DefaultNetworkStatsSettings(context), new NetworkStatsFactory(),
+                new DefaultNetworkStatsSettings(context), new NetworkStatsFactory(netd),
                 new NetworkStatsObservers(), getDefaultSystemDir(), getDefaultBaseDir(),
                 new Dependencies());
         service.registerLocalService();
