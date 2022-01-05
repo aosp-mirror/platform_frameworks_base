@@ -206,7 +206,7 @@ final class PackageSessionVerifier {
     }
 
     private void onVerificationFailure(StagingManager.StagedSession session, Callback callback,
-            @SessionInfo.StagedSessionErrorCode int errorCode, String errorMessage) {
+            @SessionInfo.SessionErrorCode int errorCode, String errorMessage) {
         if (!ensureActiveApexSessionIsAborted(session)) {
             Slog.e(TAG, "Failed to abort apex session " + session.sessionId());
             // Safe to ignore active apex session abortion failure since session will be marked
