@@ -71,20 +71,32 @@ class MediaTttCommandLineHelper @Inject constructor(
             when (args[1]) {
                 MOVE_CLOSER_TO_TRANSFER_COMMAND_NAME -> {
                     mediaTttChipControllerSender.displayChip(
-                        MoveCloserToTransfer(appIconDrawable, otherDeviceName)
+                        MoveCloserToTransfer(
+                            appIconDrawable, APP_ICON_CONTENT_DESCRIPTION, otherDeviceName
+                        )
                     )
                 }
                 TRANSFER_INITIATED_COMMAND_NAME -> {
                     val futureTask = FutureTask { fakeUndoRunnable }
                     mediaTttChipControllerSender.displayChip(
-                        TransferInitiated(appIconDrawable, otherDeviceName, futureTask)
+                        TransferInitiated(
+                            appIconDrawable,
+                            APP_ICON_CONTENT_DESCRIPTION,
+                            otherDeviceName,
+                            futureTask
+                        )
                     )
                     mainExecutor.executeDelayed({ futureTask.run() }, FUTURE_WAIT_TIME)
 
                 }
                 TRANSFER_SUCCEEDED_COMMAND_NAME -> {
                     mediaTttChipControllerSender.displayChip(
-                        TransferSucceeded(appIconDrawable, otherDeviceName, fakeUndoRunnable)
+                        TransferSucceeded(
+                            appIconDrawable,
+                            APP_ICON_CONTENT_DESCRIPTION,
+                            otherDeviceName,
+                            fakeUndoRunnable
+                        )
                     )
                 }
                 else -> {
@@ -118,7 +130,9 @@ class MediaTttCommandLineHelper @Inject constructor(
     /** A command to DISPLAY the media ttt chip on the RECEIVER device. */
     inner class AddChipCommandReceiver : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
-            mediaTttChipControllerReceiver.displayChip(ChipStateReceiver(appIconDrawable))
+            mediaTttChipControllerReceiver.displayChip(
+                ChipStateReceiver(appIconDrawable, APP_ICON_CONTENT_DESCRIPTION)
+            )
         }
         override fun help(pw: PrintWriter) {
             pw.println("Usage: adb shell cmd statusbar $ADD_CHIP_COMMAND_RECEIVER_TAG")
@@ -156,4 +170,5 @@ val TRANSFER_INITIATED_COMMAND_NAME = TransferInitiated::class.simpleName!!
 val TRANSFER_SUCCEEDED_COMMAND_NAME = TransferSucceeded::class.simpleName!!
 
 private const val FUTURE_WAIT_TIME = 2000L
+private const val APP_ICON_CONTENT_DESCRIPTION = "Fake media app icon"
 private const val TAG = "MediaTapToTransferCli"

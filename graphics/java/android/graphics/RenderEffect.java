@@ -290,6 +290,22 @@ public final class RenderEffect {
         return new RenderEffect(nativeCreateShaderEffect(shader.getNativeInstance()));
     }
 
+    /**
+     * Create a {@link RenderEffect} that executes the provided {@link RuntimeShader} and passes
+     * the contents of the {@link android.graphics.RenderNode} that this RenderEffect is installed
+     * on as an input to the shader.
+     * @param shader the runtime shader that will bind the inputShaderName to the RenderEffect input
+     * @param uniformShaderName the uniform name defined in the RuntimeShader's program to which
+     *                         the contents of the RenderNode will be bound
+     */
+    @NonNull
+    public static RenderEffect createRuntimeShaderEffect(
+            @NonNull RuntimeShader shader, @NonNull String uniformShaderName) {
+        return new RenderEffect(
+                nativeCreateRuntimeShaderEffect(shader.getNativeShaderBuilder(),
+                        uniformShaderName));
+    }
+
     private final long mNativeRenderEffect;
 
     /* only constructed from static factory methods */
@@ -318,5 +334,7 @@ public final class RenderEffect {
     private static native long nativeCreateBlendModeEffect(long dst, long src, int blendmode);
     private static native long nativeCreateChainEffect(long outer, long inner);
     private static native long nativeCreateShaderEffect(long shader);
+    private static native long nativeCreateRuntimeShaderEffect(
+            long shaderBuilder, String inputShaderName);
     private static native long nativeGetFinalizer();
 }

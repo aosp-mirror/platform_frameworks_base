@@ -341,7 +341,8 @@ public final class CommunalManagerService extends SystemService {
                     UserHandle.SYSTEM,
                     mIntentFilter,
                     /* broadcastPermission= */null,
-                    /* scheduler= */ null);
+                    /* scheduler= */ null,
+                    Context.RECEIVER_EXPORTED_UNAUDITED);
         }
 
         private void unregister() {

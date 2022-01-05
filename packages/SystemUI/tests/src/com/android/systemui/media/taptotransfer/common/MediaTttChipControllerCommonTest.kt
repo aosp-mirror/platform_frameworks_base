@@ -19,14 +19,18 @@ package com.android.systemui.media.taptotransfer.common
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
+import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
@@ -50,24 +54,24 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
     @Test
     fun displayChip_chipAdded() {
-        controllerCommon.displayChip(MediaTttChipState(appIconDrawable))
+        controllerCommon.displayChip(getState())
 
         verify(windowManager).addView(any(), any())
     }
 
     @Test
     fun displayChip_twice_chipNotAddedTwice() {
-        controllerCommon.displayChip(MediaTttChipState(appIconDrawable))
+        controllerCommon.displayChip(getState())
         reset(windowManager)
 
-        controllerCommon.displayChip(MediaTttChipState(appIconDrawable))
+        controllerCommon.displayChip(getState())
         verify(windowManager, never()).addView(any(), any())
     }
 
     @Test
     fun removeChip_chipRemoved() {
         // First, add the chip
-        controllerCommon.displayChip(MediaTttChipState(appIconDrawable))
+        controllerCommon.displayChip(getState())
 
         // Then, remove it
         controllerCommon.removeChip()
@@ -82,6 +86,29 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         verify(windowManager, never()).removeView(any())
     }
 
+    @Test
+    fun setIcon_viewHasIconAndContentDescription() {
+        controllerCommon.displayChip(getState())
+        val chipView = getChipView()
+        val drawable = Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
+        val contentDescription = "test description"
+
+        controllerCommon.setIcon(MediaTttChipState(drawable, contentDescription), chipView)
+
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(drawable)
+        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(contentDescription)
+    }
+
+    private fun getState() = MediaTttChipState(appIconDrawable, APP_ICON_CONTENT_DESCRIPTION)
+
+    private fun getChipView(): ViewGroup {
+        val viewCaptor = ArgumentCaptor.forClass(View::class.java)
+        verify(windowManager).addView(viewCaptor.capture(), any())
+        return viewCaptor.value as ViewGroup
+    }
+
+    private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
+
     inner class TestControllerCommon(
         context: Context,
         windowManager: WindowManager
@@ -92,3 +119,5 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         }
     }
 }
+
+private const val APP_ICON_CONTENT_DESCRIPTION = "Content description"

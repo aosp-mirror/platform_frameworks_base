@@ -180,6 +180,16 @@ public class ChooserActivityTest {
         return clientIntent;
     }
 
+    /**
+     * Whether {@code #testIsAppPredictionServiceAvailable} should verify the behavior after
+     * changing the availability conditions at runtime. In the unbundled chooser, the availability
+     * is cached at start and will never be re-evaluated.
+     * TODO: remove when we no longer want to test the system's on-the-fly evaluation.
+     */
+    protected boolean shouldTestTogglingAppPredictionServiceAvailabilityAtRuntime() {
+        return true;
+    }
+
     /* --------
      * The code in this section is unorthodox and can be simplified/reverted when we no longer need
      * to support the parallel chooser implementations.
@@ -784,7 +794,8 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is("text/plain"));
-        assertThat(logger.get(1).packageName, is("com.android.frameworks.coretests"));
+        assertThat(logger.get(1).packageName, is(
+                InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName()));
         assertThat(logger.get(1).appProvidedApp, is(0));
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));
@@ -802,7 +813,7 @@ public class ChooserActivityTest {
         assertThat(logger.event(4).getId(),
                 is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_EXPANDED.getId()));
 
-        // SHARESHEET_EDIT_TARGET_SELECTED:
+        // SHARESHEET_NEARBY_TARGET_SELECTED:
         assertThat(logger.get(5).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
         assertThat(logger.get(5).targetType,
                 is(ChooserActivityLogger
@@ -814,7 +825,7 @@ public class ChooserActivityTest {
 
 
 
-    @Test
+    @Test @Ignore
     public void testEditImageLogs() throws Exception {
         Intent sendIntent = createSendImageIntent(
                 Uri.parse("android.resource://com.android.frameworks.coretests/"
@@ -853,7 +864,8 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is("image/png"));
-        assertThat(logger.get(1).packageName, is("com.android.frameworks.coretests"));
+        assertThat(logger.get(1).packageName, is(
+                InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName()));
         assertThat(logger.get(1).appProvidedApp, is(0));
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));
@@ -1320,6 +1332,10 @@ public class ChooserActivityTest {
             assertThat(activity.isAppPredictionServiceAvailable(), is(false));
         } else {
             assertThat(activity.isAppPredictionServiceAvailable(), is(true));
+
+            if (!shouldTestTogglingAppPredictionServiceAvailabilityAtRuntime()) {
+                return;
+            }
 
             ChooserActivityOverrideData.getInstance().resources =
                     Mockito.spy(activity.getResources());
@@ -2101,7 +2117,8 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is("text/plain"));
-        assertThat(logger.get(1).packageName, is("com.android.frameworks.coretests"));
+        assertThat(logger.get(1).packageName, is(
+                InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName()));
         assertThat(logger.get(1).appProvidedApp, is(0));
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));
@@ -2119,7 +2136,7 @@ public class ChooserActivityTest {
         assertThat(logger.event(4).getId(),
                 is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_EXPANDED.getId()));
 
-        // SHARESHEET_EDIT_TARGET_SELECTED:
+        // SHARESHEET_APP_TARGET_SELECTED:
         assertThat(logger.get(5).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
         assertThat(logger.get(5).targetType,
                 is(ChooserActivityLogger
@@ -2197,7 +2214,8 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is("text/plain"));
-        assertThat(logger.get(1).packageName, is("com.android.frameworks.coretests"));
+        assertThat(logger.get(1).packageName, is(
+                InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName()));
         assertThat(logger.get(1).appProvidedApp, is(0));
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));
@@ -2215,7 +2233,7 @@ public class ChooserActivityTest {
                         .SharesheetTargetSelectedEvent.SHARESHEET_SERVICE_TARGET_SELECTED.getId()));
     }
 
-    @Test
+    @Test @Ignore
     public void testEmptyDirectRowLogging() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         // We need app targets for direct targets to get displayed
@@ -2259,7 +2277,8 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is("text/plain"));
-        assertThat(logger.get(1).packageName, is("com.android.frameworks.coretests"));
+        assertThat(logger.get(1).packageName, is(
+                InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName()));
         assertThat(logger.get(1).appProvidedApp, is(0));
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));
@@ -2320,7 +2339,8 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is("text/plain"));
-        assertThat(logger.get(1).packageName, is("com.android.frameworks.coretests"));
+        assertThat(logger.get(1).packageName, is(
+                InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName()));
         assertThat(logger.get(1).appProvidedApp, is(0));
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));
@@ -2338,7 +2358,7 @@ public class ChooserActivityTest {
         assertThat(logger.event(4).getId(),
                 is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_EXPANDED.getId()));
 
-        // SHARESHEET_EDIT_TARGET_SELECTED:
+        // SHARESHEET_COPY_TARGET_SELECTED:
         assertThat(logger.get(5).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
         assertThat(logger.get(5).targetType,
                 is(ChooserActivityLogger
@@ -2386,7 +2406,8 @@ public class ChooserActivityTest {
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
         assertThat(logger.get(1).mimeType, is(TEST_MIME_TYPE));
-        assertThat(logger.get(1).packageName, is("com.android.frameworks.coretests"));
+        assertThat(logger.get(1).packageName, is(
+                InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName()));
         assertThat(logger.get(1).appProvidedApp, is(0));
         assertThat(logger.get(1).appProvidedDirect, is(0));
         assertThat(logger.get(1).isWorkprofile, is(false));

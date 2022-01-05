@@ -59,6 +59,7 @@ package android {
   public static final class R.bool {
     field public static final int config_assistantOnTopOfDream = 17891333; // 0x1110005
     field public static final int config_perDisplayFocusEnabled = 17891332; // 0x1110004
+    field public static final int config_preventImeStartupUnlessTextEditor;
     field public static final int config_remoteInsetsControllerControlsSystemBars = 17891334; // 0x1110006
   }
 
@@ -2837,7 +2838,6 @@ package android.view.accessibility {
     method public void addChild(@NonNull android.os.IBinder);
     method public long getSourceNodeId();
     method public void setLeashedParent(@Nullable android.os.IBinder, int);
-    method public static void setNumInstancesInUseCounter(java.util.concurrent.atomic.AtomicInteger);
     method public void writeToParcelNoRecycle(android.os.Parcel, int);
   }
 

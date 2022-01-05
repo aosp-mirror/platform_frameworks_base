@@ -88,9 +88,9 @@ class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     @Presubmit
     @Test
     fun pipInVisibleBounds() {
-        testSpec.assertWm {
+        testSpec.assertWmVisibleRegion(pipApp.component) {
             val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
-            coversAtMost(displayBounds, pipApp.component)
+            coversAtMost(displayBounds)
         }
     }
 

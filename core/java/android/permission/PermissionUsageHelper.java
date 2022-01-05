@@ -318,7 +318,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
             String permGroup = usedPermGroups.get(permGroupNum);
 
             ArrayMap<OpUsage, CharSequence> usagesWithLabels =
-                    getUniqueUsagesWithLabels(rawUsages.get(permGroup));
+                    getUniqueUsagesWithLabels(permGroup, rawUsages.get(permGroup));
 
             if (permGroup.equals(OPSTR_PHONE_CALL_MICROPHONE)) {
                 isPhone = true;
@@ -439,7 +439,8 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
         return ListFormatter.getInstance().format(labels);
     }
 
-    private ArrayMap<OpUsage, CharSequence> getUniqueUsagesWithLabels(List<OpUsage> usages) {
+    private ArrayMap<OpUsage, CharSequence> getUniqueUsagesWithLabels(String permGroup,
+            List<OpUsage> usages) {
         ArrayMap<OpUsage, CharSequence> usagesAndLabels = new ArrayMap<>();
 
         if (usages == null || usages.isEmpty()) {
@@ -474,7 +475,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
             // If this usage has a proxy, but is not a proxy, it is the end of a chain.
             // TODO remove once camera converted
             if (!proxies.containsKey(usageAttr) && usage.proxy != null
-                    && !usage.op.equals(OPSTR_RECORD_AUDIO)) {
+                    && !MICROPHONE.equals(permGroup)) {
                 proxyLabels.put(usage, new ArrayList<>());
                 proxyPackages.add(usage.getPackageIdHash());
             }
@@ -546,7 +547,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
 
             // TODO ntmyren: remove this proxy logic once camera is converted to AttributionSource
             // For now: don't add mic proxy usages
-            if (!start.op.equals(OPSTR_RECORD_AUDIO)) {
+            if (!MICROPHONE.equals(permGroup)) {
                 usagesAndLabels.put(start,
                         proxyLabelList.isEmpty() ? null : formatLabelList(proxyLabelList));
             }
@@ -560,7 +561,8 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
                 // if the list is empty or incomplete, do not show it.
                 if (usageList.isEmpty() || !usageList.get(lastVisible).isEnd()
                         || !usageList.get(0).isStart()
-                        || !usageList.get(lastVisible).usage.op.equals(OPSTR_RECORD_AUDIO)) {
+                        || !permGroup.equals(getGroupForOp(usageList.get(0).usage.op))
+                        || !MICROPHONE.equals(permGroup)) {
                     continue;
                 }
 

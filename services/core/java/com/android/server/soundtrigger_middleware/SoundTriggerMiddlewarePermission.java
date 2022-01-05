@@ -21,9 +21,11 @@ import static android.Manifest.permission.RECORD_AUDIO;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.PermissionChecker;
+import android.media.permission.Identity;
+import android.media.permission.IdentityContext;
+import android.media.permission.PermissionUtil;
 import android.media.soundtrigger.ModelParameterRange;
 import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
@@ -31,9 +33,6 @@ import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.Status;
-import android.media.permission.Identity;
-import android.media.permission.IdentityContext;
-import android.media.permission.PermissionUtil;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
@@ -144,7 +143,7 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         if (status != PermissionChecker.PERMISSION_GRANTED) {
             throw new SecurityException(
                     String.format("Failed to obtain permission %s for identity %s", permission,
-                            ObjectPrinter.print(identity, true, 16)));
+                            ObjectPrinter.print(identity, 16)));
         }
     }
 
@@ -168,7 +167,7 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
             case PermissionChecker.PERMISSION_HARD_DENIED:
                 throw new SecurityException(
                         String.format("Failed to obtain permission %s for identity %s", permission,
-                                ObjectPrinter.print(identity, true, 16)));
+                                ObjectPrinter.print(identity, 16)));
             default:
                 throw new RuntimeException("Unexpected perimission check result.");
         }

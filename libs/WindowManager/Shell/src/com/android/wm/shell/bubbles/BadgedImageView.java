@@ -19,7 +19,6 @@ import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Path;
@@ -27,14 +26,16 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.PathParser;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewOutlineProvider;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.icons.IconNormalizer;
+import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
 
 import java.util.EnumSet;
@@ -46,14 +47,12 @@ import java.util.EnumSet;
  * Badge = the icon associated with the app that created this bubble, this will show work profile
  * badge if appropriate.
  */
-public class BadgedImageView extends FrameLayout {
+public class BadgedImageView extends ConstraintLayout {
 
     /** Same value as Launcher3 dot code */
     public static final float WHITE_SCRIM_ALPHA = 0.54f;
     /** Same as value in Launcher3 IconShape */
     public static final int DEFAULT_PATH_SIZE = 100;
-    /** Same as value in Launcher3 BaseIconFactory */
-    private static final float ICON_BADGE_SCALE = 0.444f;
 
     /**
      * Flags that suppress the visibility of the 'new' dot, for one reason or another. If any of
@@ -105,11 +104,13 @@ public class BadgedImageView extends FrameLayout {
     public BadgedImageView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        // We manage positioning the badge ourselves
+        setLayoutDirection(LAYOUT_DIRECTION_LTR);
 
-        mBubbleIcon = new ImageView(context);
-        addView(mBubbleIcon);
-        mAppIcon = new ImageView(context);
-        addView(mAppIcon);
+        LayoutInflater.from(context).inflate(R.layout.badged_image_view, this);
+
+        mBubbleIcon = findViewById(R.id.icon_view);
+        mAppIcon = findViewById(R.id.app_icon_view);
 
         final TypedArray ta = mContext.obtainStyledAttributes(attrs, new int[]{android.R.attr.src},
                 defStyleAttr, defStyleRes);
@@ -161,6 +162,7 @@ public class BadgedImageView extends FrameLayout {
     public void setRenderedBubble(BubbleViewProvider bubble) {
         mBubble = bubble;
         mBubbleIcon.setImageBitmap(bubble.getBubbleIcon());
+        mAppIcon.setImageBitmap(bubble.getAppBadge());
         if (mDotSuppressionFlags.contains(SuppressionFlag.BEHIND_STACK)) {
             hideBadge();
         } else {
@@ -348,26 +350,17 @@ public class BadgedImageView extends FrameLayout {
     }
 
     void showBadge() {
-        Bitmap badge = mBubble.getAppBadge();
-        if (badge == null) {
+        if (mBubble.getAppBadge() == null) {
             mAppIcon.setVisibility(GONE);
             return;
         }
-
-        final int bubbleSize = mBubble.getBubbleIcon().getWidth();
-        final int badgeSize = (int) (ICON_BADGE_SCALE * bubbleSize);
-
-        FrameLayout.LayoutParams appIconParams = (LayoutParams) mAppIcon.getLayoutParams();
-        appIconParams.height = badgeSize;
-        appIconParams.width = badgeSize;
+        int translationX;
         if (mOnLeft) {
-            appIconParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
+            translationX = -(mBubbleIcon.getWidth() - mAppIcon.getWidth());
         } else {
-            appIconParams.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+            translationX = 0;
         }
-        mAppIcon.setLayoutParams(appIconParams);
-
-        mAppIcon.setImageBitmap(badge);
+        mAppIcon.setTranslationX(translationX);
         mAppIcon.setVisibility(VISIBLE);
     }
 

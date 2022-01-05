@@ -585,8 +585,10 @@ public final class DisplayCutout {
      * Returns a list of {@code Rect}s, each of which is the bounding rectangle for a non-functional
      * area on the display.
      *
-     * There will be at most one non-functional area per short edge of the device, and none on
-     * the long edges.
+     * There will be at most one non-functional area per edge of the device.
+     *
+     * <p>Note that there is no bounding rectangle for waterfall cutout since it just represents the
+     * curved areas of the display but not the non-functional areas.</p>
      *
      * @return a list of bounding {@code Rect}s, one for each display cutout area. No empty Rect is
      * returned.
@@ -607,8 +609,10 @@ public final class DisplayCutout {
      * functional area on the display. Ordinal value of BoundPosition is used as an index of
      * the array.
      *
-     * There will be at most one non-functional area per short edge of the device, and none on
-     * the long edges.
+     * There will be at most one non-functional area per edge of the device.
+     *
+     * <p>Note that there is no bounding rectangle for waterfall cutout since it just represents the
+     * curved areas of the display but not the non-functional areas.</p>
      *
      * @return an array of bounding {@code Rect}s, one for each display cutout area. This might
      * contain ZERO_RECT, which means there is no cutout area at the position.
