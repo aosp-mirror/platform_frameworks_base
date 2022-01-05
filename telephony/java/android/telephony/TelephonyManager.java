@@ -132,6 +132,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -144,6 +146,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 
 /**
  * Provides access to information about the telephony services on
@@ -3941,8 +3944,8 @@ public class TelephonyManager {
      * <p>
      * If the caller has carrier priviliges on any active subscription, then they have permission to
      * get simple information like the card ID ({@link UiccCardInfo#getCardId()}), whether the card
-     * is an eUICC ({@link UiccCardInfo#isEuicc()}), and the slot index where the card is inserted
-     * ({@link UiccCardInfo#getSlotIndex()}).
+     * is an eUICC ({@link UiccCardInfo#isEuicc()}), and the physical slot index where the card is
+     * inserted ({@link UiccCardInfo#getPhysicalSlotIndex()}.
      * <p>
      * To get private information such as the EID ({@link UiccCardInfo#getEid()}) or ICCID
      * ({@link UiccCardInfo#getIccId()}), the caller must have carrier priviliges on that specific
@@ -3986,7 +3989,7 @@ public class TelephonyManager {
             if (telephony == null) {
                 return null;
             }
-            return telephony.getUiccSlotsInfo();
+            return telephony.getUiccSlotsInfo(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return null;
         }
@@ -4019,8 +4022,13 @@ public class TelephonyManager {
      *        size should be same as {@link #getUiccSlotsInfo()}.
      * @return boolean Return true if the switch succeeds, false if the switch fails.
      * @hide
+     * @deprecated {@link #setSimSlotMapping(Collection, Executor, Consumer)}
      */
+     // TODO: once integrating the HAL changes we can  convert int[] to List<UiccSlotMapping> and
+     // converge API's in ITelephony.aidl and PhoneInterfaceManager
+
     @SystemApi
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean switchSlots(int[] physicalSlots) {
         try {
@@ -4031,6 +4039,109 @@ public class TelephonyManager {
             return telephony.switchSlots(physicalSlots);
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+    /**
+     * @param slotMapping Logical to physical slot and port mapping.
+     * @return {@code true} if slotMapping is valid.
+     * @return {@code false} if slotMapping is invalid.
+     *
+     * slotMapping is invalid if there are different entries (physical slot + port) mapping to the
+     * same logical slot or if there are same {physical slot + port} mapping to the different
+     * logical slot
+     * @hide
+     */
+    private static boolean isSlotMappingValid(@NonNull Collection<UiccSlotMapping> slotMapping) {
+        // Grouping the collection by logicalSlotIndex, finding different entries mapping to the
+        // same logical slot
+        Map<Integer, List<UiccSlotMapping>> slotMappingInfo = slotMapping.stream().collect(
+                Collectors.groupingBy(UiccSlotMapping::getLogicalSlotIndex));
+        for (Map.Entry<Integer, List<UiccSlotMapping>> entry : slotMappingInfo.entrySet()) {
+            List<UiccSlotMapping> logicalSlotMap = entry.getValue();
+            if (logicalSlotMap.size() > 1) {
+                // duplicate logicalSlotIndex found
+                return false;
+            }
+        }
+
+        // Grouping the collection by physical slot and port, finding same entries mapping to the
+        // different logical slot
+        Map<List<Integer>, List<UiccSlotMapping>> slotMapInfos = slotMapping.stream().collect(
+                Collectors.groupingBy(
+                        slot -> Arrays.asList(slot.getPhysicalSlotIndex(), slot.getPortIndex())));
+        for (Map.Entry<List<Integer>, List<UiccSlotMapping>> entry : slotMapInfos.entrySet()) {
+            List<UiccSlotMapping> portAndPhysicalSlotList = entry.getValue();
+            if (portAndPhysicalSlotList.size() > 1) {
+                // duplicate pair of portIndex and physicalSlotIndex found
+                return false;
+            }
+        }
+        return true;
+    }
+    /**
+     * Maps the logical slots to physical slots and ports. Mapping is specified from
+     * {@link UiccSlotMapping} which consist of both physical slot index and port index.
+     * Logical slot is the slot that is seen by modem. Physical slot is the actual physical slot.
+     * Port index is the index (enumerated value) for the associated port available on the SIM.
+     * Each physical slot can have multiple ports if multi-enabled profile(MEP) is supported.
+     *
+     * Example: no. of logical slots 1 and physical slots 2 do not support MEP, each physical slot
+     * has one port:
+     * The only logical slot (index 0) can be mapped to first physical slot (value 0), port(index
+     * 0) or
+     * second physical slot(value 1), port (index 0), while the other physical slot remains unmapped
+     * and inactive.
+     * slotMapping[0] = UiccSlotMapping{0 //logical slot, 0 //physical slot//, 0 //port//}
+     * slotMapping[0] = UiccSlotMapping{1 // logical slot, 1 //physical slot//, 0 //port//}
+     *
+     * Example no. of logical slots 2 and physical slots 2 supports MEP with 2 ports available:
+     * Each logical slot must be mapped to a port (physical slot and port combination).
+     * First logical slot (index 0) can be mapped to physical slot 1 and the second logical slot
+     * can be mapped to either port from physical slot 2.
+     *
+     * slotMapping[0] = UiccSlotMapping{0, 0, 0} and slotMapping[1] = UiccSlotMapping{1, 0, 0} or
+     * slotMapping[0] = UiccSlotMapping{0, 0, 0} and slotMapping[1] = UiccSlotMapping{1, 1, 1}
+     *
+     * or the other way around, the second logical slot(index 1) can be mapped to physical slot 1
+     * and the first logical slot can be mapped to either port from physical slot 2.
+     *
+     * slotMapping[1] = UiccSlotMapping{0, 0, 0} and slotMapping[0] = UiccSlotMapping{1, 0, 0} or
+     * slotMapping[1] = UiccSlotMapping{0, 0, 0} and slotMapping[0] = UiccSlotMapping{1, 1, 1}
+     *
+     * another possible mapping is each logical slot maps to each port of physical slot 2 and there
+     * is no active logical modem mapped to physical slot 1.
+     *
+     * slotMapping[0] = UiccSlotMapping{1, 0, 0} and slotMapping[1] = UiccSlotMapping{1, 1, 1} or
+     * slotMapping[0] = UiccSlotMapping{1, 1, 1} and slotMapping[1] = UiccSlotMapping{1, 0, 0}
+     *
+     * @param slotMapping Logical to physical slot and port mapping.
+     * @throws IllegalStateException if telephony service is null or slot mapping was sent when the
+     *         radio in middle of a silent restart or other invalid states to handle the command
+     * @throws IllegalArgumentException if the caller passes in an invalid collection of
+     *         UiccSlotMapping like duplicate data, etc
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setSimSlotMapping(@NonNull Collection<UiccSlotMapping> slotMapping) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                if (isSlotMappingValid(slotMapping)) {
+                    boolean result = telephony.setSimSlotMapping(new ArrayList(slotMapping));
+                    if (!result) {
+                        throw new IllegalStateException("setSimSlotMapping has failed");
+                    }
+                } else {
+                    throw new IllegalArgumentException("Duplicate UiccSlotMapping data found");
+                }
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 
@@ -4051,7 +4162,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                int[] slotMappingArray = telephony.getSlotsMapping();
+                int[] slotMappingArray = telephony.getSlotsMapping(mContext.getOpPackageName());
                 for (int i = 0; i < slotMappingArray.length; i++) {
                     slotMapping.put(i, slotMappingArray[i]);
                 }

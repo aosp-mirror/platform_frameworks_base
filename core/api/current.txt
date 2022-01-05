@@ -42658,6 +42658,7 @@ package android.telephony {
     method @Deprecated public int getMnc();
     method @Nullable public String getMncString();
     method public String getNumber();
+    method public int getPortIndex();
     method public int getSimSlotIndex();
     method public int getSubscriptionId();
     method public int getSubscriptionType();
@@ -43204,12 +43205,26 @@ package android.telephony {
     method public int describeContents();
     method public int getCardId();
     method @Nullable public String getEid();
-    method @Nullable public String getIccId();
-    method public int getSlotIndex();
+    method @Deprecated @Nullable public String getIccId();
+    method public int getPhysicalSlotIndex();
+    method @NonNull public java.util.Collection<android.telephony.UiccPortInfo> getPorts();
+    method @Deprecated public int getSlotIndex();
     method public boolean isEuicc();
+    method public boolean isMultipleEnabledProfilesSupported();
     method public boolean isRemovable();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.UiccCardInfo> CREATOR;
+  }
+
+  public final class UiccPortInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getIccId();
+    method @IntRange(from=0) public int getLogicalSlotIndex();
+    method @IntRange(from=0) public int getPortIndex();
+    method public boolean isActive();
+    method public void writeToParcel(@Nullable android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.UiccPortInfo> CREATOR;
+    field public static final String ICCID_REDACTED = "FFFFFFFFFFFFFFFFFFFF";
   }
 
   public abstract class VisualVoicemailService extends android.app.Service {
@@ -43512,6 +43527,7 @@ package android.telephony.euicc {
     method @Nullable public String getEid();
     method @Nullable public android.telephony.euicc.EuiccInfo getEuiccInfo();
     method public boolean isEnabled();
+    method public boolean isSimPortAvailable(int);
     method public void startResolutionActivity(android.app.Activity, int, android.content.Intent, android.app.PendingIntent) throws android.content.IntentSender.SendIntentException;
     method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, android.app.PendingIntent);
     method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void updateSubscriptionNickname(int, @Nullable String, @NonNull android.app.PendingIntent);
