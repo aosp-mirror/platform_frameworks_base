@@ -35,8 +35,8 @@ import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ProcFileReader;
+import com.android.net.module.util.CollectionUtils;
 
 import libcore.io.IoUtils;
 
@@ -434,7 +434,7 @@ public class NetworkStatsFactory {
                 entry.txBytes = reader.nextLong();
                 entry.txPackets = reader.nextLong();
 
-                if ((limitIfaces == null || ArrayUtils.contains(limitIfaces, entry.iface))
+                if ((limitIfaces == null || CollectionUtils.contains(limitIfaces, entry.iface))
                         && (limitUid == UID_ALL || limitUid == entry.uid)
                         && (limitTag == TAG_ALL || limitTag == entry.tag)) {
                     stats.insertEntry(entry);

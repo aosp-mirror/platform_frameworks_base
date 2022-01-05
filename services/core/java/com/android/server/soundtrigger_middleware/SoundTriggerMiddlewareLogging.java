@@ -18,14 +18,14 @@ package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.media.permission.Identity;
+import android.media.permission.IdentityContext;
 import android.media.soundtrigger.ModelParameterRange;
 import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.SoundModel;
-import android.media.permission.Identity;
-import android.media.permission.IdentityContext;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
@@ -387,7 +387,7 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
     }
 
     private static void printObject(@NonNull StringBuilder builder, @Nullable Object obj) {
-        ObjectPrinter.print(builder, obj, true, 16);
+        ObjectPrinter.print(builder, obj, 16);
     }
 
     private static String printObject(@Nullable Object obj) {

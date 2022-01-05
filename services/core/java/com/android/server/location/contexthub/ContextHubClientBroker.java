@@ -331,15 +331,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
 
         startMonitoringOpChanges();
-
-        HostEndpointInfo info = new HostEndpointInfo();
-        info.hostEndpointId = (char) mHostEndPointId;
-        info.packageName = mPackage;
-        info.attributionTag = mAttributionTag;
-        info.type = (mUid == Process.SYSTEM_UID)
-             ? HostEndpointInfo.Type.TYPE_FRAMEWORK
-             : HostEndpointInfo.Type.TYPE_APP;
-        mContextHubProxy.onHostEndpointConnected(info);
+        sendHostEndpointConnectedEvent();
     }
 
     /* package */ ContextHubClientBroker(
@@ -556,6 +548,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     /* package */ void onHubReset() {
         invokeCallback(callback -> callback.onHubReset());
         sendPendingIntent(() -> createIntent(ContextHubManager.EVENT_HUB_RESET));
+
+        // Re-send the host endpoint connected event as the Context Hub restarted.
+        sendHostEndpointConnectedEvent();
     }
 
     /**
@@ -893,6 +888,17 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             default:
                 return "UNKNOWN";
         }
+    }
+
+    private void sendHostEndpointConnectedEvent() {
+        HostEndpointInfo info = new HostEndpointInfo();
+        info.hostEndpointId = (char) mHostEndPointId;
+        info.packageName = mPackage;
+        info.attributionTag = mAttributionTag;
+        info.type = (mUid == Process.SYSTEM_UID)
+             ? HostEndpointInfo.Type.TYPE_FRAMEWORK
+             : HostEndpointInfo.Type.TYPE_APP;
+        mContextHubProxy.onHostEndpointConnected(info);
     }
 
     /**

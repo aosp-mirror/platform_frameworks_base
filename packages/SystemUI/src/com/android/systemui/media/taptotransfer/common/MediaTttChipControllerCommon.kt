@@ -99,6 +99,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
     internal fun setIcon(chipState: T, currentChipView: ViewGroup) {
         currentChipView.findViewById<CachingIconView>(R.id.app_icon).apply {
             this.setImageDrawable(chipState.appIconDrawable)
+            this.contentDescription = chipState.appIconContentDescription
         }
     }
 }

@@ -190,7 +190,7 @@ public class ChooserActivity extends ResolverActivity implements
      * the handover intent.
      * TODO: investigate whether the privileged query is necessary to determine the availability.
      */
-    protected static final String EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE =
+    public static final String EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE =
             "com.android.internal.app.ChooserActivity.EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE";
 
     /**

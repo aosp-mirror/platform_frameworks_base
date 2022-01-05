@@ -34,9 +34,10 @@ import java.util.concurrent.Future
  */
 sealed class ChipStateSender(
     appIconDrawable: Drawable,
+    appIconContentDescription: String,
     @StringRes internal val chipText: Int,
     internal val otherDeviceName: String,
-) : MediaTttChipState(appIconDrawable)
+) : MediaTttChipState(appIconDrawable, appIconContentDescription)
 
 /**
  * A state representing that the two devices are close but not close enough to initiate a transfer.
@@ -44,8 +45,14 @@ sealed class ChipStateSender(
  */
 class MoveCloserToTransfer(
     appIconDrawable: Drawable,
+    appIconContentDescription: String,
     otherDeviceName: String,
-) : ChipStateSender(appIconDrawable, R.string.media_move_closer_to_transfer, otherDeviceName)
+) : ChipStateSender(
+    appIconDrawable,
+    appIconContentDescription,
+    R.string.media_move_closer_to_transfer,
+    otherDeviceName
+)
 
 /**
  * A state representing that a transfer has been initiated (but not completed).
@@ -57,9 +64,15 @@ class MoveCloserToTransfer(
  */
 class TransferInitiated(
     appIconDrawable: Drawable,
+    appIconContentDescription: String,
     otherDeviceName: String,
     val future: Future<Runnable?>
-) : ChipStateSender(appIconDrawable, R.string.media_transfer_playing, otherDeviceName)
+) : ChipStateSender(
+    appIconDrawable,
+    appIconContentDescription,
+    R.string.media_transfer_playing,
+    otherDeviceName
+)
 
 /**
  * A state representing that a transfer has been successfully completed.
@@ -69,6 +82,11 @@ class TransferInitiated(
  */
 class TransferSucceeded(
     appIconDrawable: Drawable,
+    appIconContentDescription: String,
     otherDeviceName: String,
     val undoRunnable: Runnable? = null
-) : ChipStateSender(appIconDrawable, R.string.media_transfer_playing, otherDeviceName)
+) : ChipStateSender(appIconDrawable,
+    appIconContentDescription,
+    R.string.media_transfer_playing,
+    otherDeviceName
+)

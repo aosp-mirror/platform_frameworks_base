@@ -17,11 +17,11 @@
 @file:JvmName("CommonAssertions")
 package com.android.wm.shell.flicker
 
-import android.graphics.Region
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.region.Region
 
 fun FlickerTestParameter.appPairsDividerIsVisibleAtEnd() {
     assertLayersEnd {

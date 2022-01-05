@@ -145,10 +145,8 @@ public class AudioMixingRule {
             final int match_rule = mRule & ~RULE_EXCLUSION_MASK;
             switch (match_rule) {
                 case RULE_MATCH_ATTRIBUTE_USAGE:
-                    dest.writeInt(mAttr.getSystemUsage());
-                    break;
                 case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
-                    dest.writeInt(mAttr.getCapturePreset());
+                    mAttr.writeToParcel(dest, AudioAttributes.FLATTEN_TAGS/*flags*/);
                     break;
                 case RULE_MATCH_UID:
                 case RULE_MATCH_USERID:
@@ -266,12 +264,14 @@ public class AudioMixingRule {
     public boolean isForCallRedirection() {
         for (AudioMixMatchCriterion criterion : mCriteria) {
             if (criterion.mAttr != null
-                    && (criterion.mRule == RULE_MATCH_ATTRIBUTE_USAGE
-                        && criterion.mAttr.getUsage() == AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                    && criterion.mAttr.isForCallRedirection()
+                    && ((criterion.mRule == RULE_MATCH_ATTRIBUTE_USAGE
+                        && (criterion.mAttr.getUsage() == AudioAttributes.USAGE_VOICE_COMMUNICATION
+                            || criterion.mAttr.getUsage()
+                                == AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING))
                     || (criterion.mRule == RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET
-                        && criterion.mAttr.getCapturePreset()
-                            == MediaRecorder.AudioSource.VOICE_COMMUNICATION)
-                    && criterion.mAttr.isForCallRedirection()) {
+                        && (criterion.mAttr.getCapturePreset()
+                            == MediaRecorder.AudioSource.VOICE_COMMUNICATION)))) {
                 return true;
             }
         }
@@ -713,19 +713,8 @@ public class AudioMixingRule {
             Integer intProp = null;
             switch (match_rule) {
                 case RULE_MATCH_ATTRIBUTE_USAGE:
-                    int usage = in.readInt();
-                    if (AudioAttributes.isSystemUsage(usage)) {
-                        attr = new AudioAttributes.Builder()
-                                .setSystemUsage(usage).build();
-                    } else {
-                        attr = new AudioAttributes.Builder()
-                                .setUsage(usage).build();
-                    }
-                    break;
                 case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
-                    int preset = in.readInt();
-                    attr = new AudioAttributes.Builder()
-                            .setInternalCapturePreset(preset).build();
+                    attr =  AudioAttributes.CREATOR.createFromParcel(in);
                     break;
                 case RULE_MATCH_UID:
                 case RULE_MATCH_USERID:

@@ -38,13 +38,13 @@ import android.net.MacAddress;
 import android.os.Environment;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
-import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
+import com.android.internal.util.FunctionalUtils.ThrowingConsumer;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -53,6 +53,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -307,26 +308,23 @@ final class PersistentDataStore {
     private void persistStateToFileLocked(@NonNull AtomicFile file,
             @Nullable Collection<AssociationInfo> associations,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackage) {
-        file.write(out -> {
-            try {
-                final TypedXmlSerializer serializer = Xml.resolveSerializer(out);
-                serializer.setFeature(
-                        "http://xmlpull.org/v1/doc/features.html#indent-output", true);
+        // Writing to file could fail, for example, if the user has been recently removed and so was
+        // their DE (/data/system_de/<user-id>/) directory.
+        writeToFileSafely(file, out -> {
+            final TypedXmlSerializer serializer = Xml.resolveSerializer(out);
+            serializer.setFeature(
+                    "http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
-                serializer.startDocument(null, true);
-                serializer.startTag(null, XML_TAG_STATE);
-                writeIntAttribute(serializer,
-                        XML_ATTR_PERSISTENCE_VERSION, CURRENT_PERSISTENCE_VERSION);
+            serializer.startDocument(null, true);
+            serializer.startTag(null, XML_TAG_STATE);
+            writeIntAttribute(serializer,
+                    XML_ATTR_PERSISTENCE_VERSION, CURRENT_PERSISTENCE_VERSION);
 
-                writeAssociations(serializer, associations);
-                writePreviouslyUsedIds(serializer, previouslyUsedIdsPerPackage);
+            writeAssociations(serializer, associations);
+            writePreviouslyUsedIds(serializer, previouslyUsedIdsPerPackage);
 
-                serializer.endTag(null, XML_TAG_STATE);
-                serializer.endDocument();
-            } catch (Exception e) {
-                Slog.e(LOG_TAG, "Error while writing associations file", e);
-                throw ExceptionUtils.propagate(e);
-            }
+            serializer.endTag(null, XML_TAG_STATE);
+            serializer.endDocument();
         });
     }
 
@@ -523,5 +521,14 @@ final class PersistentDataStore {
             if (DEBUG) Slog.w(LOG_TAG, "Could not create AssociationInfo", e);
         }
         return associationInfo;
+    }
+
+    private static void writeToFileSafely(@NonNull AtomicFile file,
+            @NonNull ThrowingConsumer<FileOutputStream> consumer) {
+        try {
+            file.write(consumer);
+        } catch (Exception e) {
+            Slog.e(LOG_TAG, "Error while writing to file " + file, e);
+        }
     }
 }

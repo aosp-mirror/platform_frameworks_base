@@ -16,7 +16,6 @@
 
 package com.android.systemui.media.taptotransfer.receiver
 
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.view.View
 import android.view.ViewGroup
@@ -50,10 +49,12 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Test
     fun displayChip_chipContainsIcon() {
         val drawable = Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
+        val contentDescription = "Test description"
 
-        controllerReceiver.displayChip(ChipStateReceiver(drawable))
+        controllerReceiver.displayChip(ChipStateReceiver(drawable, contentDescription))
 
-        assertThat(getChipView().getAppIconDrawable()).isEqualTo(drawable)
+        assertThat(getChipView().getAppIconView().drawable).isEqualTo(drawable)
+        assertThat(getChipView().getAppIconView().contentDescription).isEqualTo(contentDescription)
     }
 
     private fun getChipView(): ViewGroup {
@@ -62,6 +63,5 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         return viewCaptor.value as ViewGroup
     }
 
-    private fun ViewGroup.getAppIconDrawable(): Drawable =
-        (this.requireViewById<ImageView>(R.id.app_icon)).drawable
+    private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
 }
