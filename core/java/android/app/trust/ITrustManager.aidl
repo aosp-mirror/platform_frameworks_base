@@ -36,5 +36,5 @@ interface ITrustManager {
     boolean isDeviceSecure(int userId);
     boolean isTrustUsuallyManaged(int userId);
     void unlockedByBiometricForUser(int userId, in BiometricSourceType source);
-    void clearAllBiometricRecognized(in BiometricSourceType target);
+    void clearAllBiometricRecognized(in BiometricSourceType target, int unlockedUser);
 }

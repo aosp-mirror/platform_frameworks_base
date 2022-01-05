@@ -3171,11 +3171,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     public void clearBiometricRecognized() {
+        clearBiometricRecognized(UserHandle.USER_NULL);
+    }
+
+    public void clearBiometricRecognizedWhenKeyguardDone(int unlockedUser) {
+        clearBiometricRecognized(unlockedUser);
+    }
+
+    private void clearBiometricRecognized(int unlockedUser) {
         Assert.isMainThread();
         mUserFingerprintAuthenticated.clear();
         mUserFaceAuthenticated.clear();
-        mTrustManager.clearAllBiometricRecognized(BiometricSourceType.FINGERPRINT);
-        mTrustManager.clearAllBiometricRecognized(BiometricSourceType.FACE);
+        mTrustManager.clearAllBiometricRecognized(BiometricSourceType.FINGERPRINT, unlockedUser);
+        mTrustManager.clearAllBiometricRecognized(BiometricSourceType.FACE, unlockedUser);
 
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
