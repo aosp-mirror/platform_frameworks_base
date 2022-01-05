@@ -752,6 +752,17 @@ public final class ViewRootImpl implements ViewParent,
         int localChanges;
     }
 
+    private final HandwritingInitiator mHandwritingInitiator;
+
+    /**
+     * Used by InputMethodManager.
+     * @hide
+     */
+    @NonNull
+    public HandwritingInitiator getHandwritingInitiator() {
+        return mHandwritingInitiator;
+    }
+
     /**
      * This is only used on the RenderThread when handling a blast sync. Specifically, it's only
      * used when calling {@link BLASTBufferQueue#setSyncTransaction(Transaction)} and then merged
@@ -826,6 +837,8 @@ public final class ViewRootImpl implements ViewParent,
                 ? Choreographer.getSfInstance() : Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         mInsetsController = new InsetsController(new ViewRootInsetsControllerHost(this));
+        mHandwritingInitiator = new HandwritingInitiator(mViewConfiguration,
+                mContext.getSystemService(InputMethodManager.class));
 
         String processorOverrideName = context.getResources().getString(
                                     R.string.config_inputEventCompatProcessorOverrideClassName);
@@ -6418,6 +6431,7 @@ public final class ViewRootImpl implements ViewParent,
 
         private int processPointerEvent(QueuedInputEvent q) {
             final MotionEvent event = (MotionEvent)q.mEvent;
+            mHandwritingInitiator.onTouchEvent(event);
 
             mAttachInfo.mUnbufferedDispatchRequested = false;
             mAttachInfo.mHandlingPointerEvent = true;
