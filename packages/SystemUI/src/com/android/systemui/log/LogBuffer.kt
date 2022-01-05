@@ -66,11 +66,12 @@ import java.util.Locale
  * @param poolSize The maximum amount that the size of the buffer is allowed to flex in response to
  * sequential calls to [document] that aren't immediately followed by a matching call to [push].
  */
-class LogBuffer(
+class LogBuffer @JvmOverloads constructor(
     private val name: String,
     private val maxLogs: Int,
     private val poolSize: Int,
-    private val logcatEchoTracker: LogcatEchoTracker
+    private val logcatEchoTracker: LogcatEchoTracker,
+    private val systrace: Boolean = true
 ) {
     init {
         if (maxLogs < poolSize) {
@@ -175,6 +176,10 @@ class LogBuffer(
             buffer.removeFirst()
         }
         buffer.add(message as LogMessageImpl)
+        if (systrace) {
+            val messageStr = message.printer(message)
+            Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events", "$name - $messageStr")
+        }
         if (logcatEchoTracker.isBufferLoggable(name, message.level) ||
                 logcatEchoTracker.isTagLoggable(message.tag, message.level)) {
             echo(message)
@@ -237,7 +242,6 @@ class LogBuffer(
             LogLevel.ERROR -> Log.e(message.tag, strMessage)
             LogLevel.WTF -> Log.wtf(message.tag, strMessage)
         }
-        Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events", strMessage)
     }
 }
 
