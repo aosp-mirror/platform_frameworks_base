@@ -59,19 +59,13 @@ droidstubs {
     },
     dists: [
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/public/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/public/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
@@ -115,19 +109,13 @@ droidstubs {
     },
     dists: [
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/system/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/system/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
@@ -151,37 +139,25 @@ droidstubs {
     },
     dists: [
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/test/api",
             dest: "android.txt",
             tag: ".api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/test/api",
             dest: "removed.txt",
             tag: ".removed-api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/test/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/test/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
@@ -210,19 +186,13 @@ droidstubs {
     },
     dists: [
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/module-lib/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/module-lib/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
@@ -282,10 +252,7 @@ java_defaults {
     java_version: "1.8",
     compile_dex: true,
     dist: {
-        targets: [
-            "sdk",
-            "win_sdk",
-        ],
+        targets: ["sdk"],
         tag: ".jar",
         dest: "android-non-updatable.jar",
     },
@@ -341,10 +308,7 @@ java_library {
 java_defaults {
     name: "android_stubs_dists_default",
     dist: {
-        targets: [
-            "sdk",
-            "win_sdk",
-        ],
+        targets: ["sdk"],
         tag: ".jar",
         dest: "android.jar",
     },
@@ -376,10 +340,7 @@ java_library {
     dists: [
         {
             // Legacy dist path
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             tag: ".jar",
             dest: "android_system.jar",
         },
