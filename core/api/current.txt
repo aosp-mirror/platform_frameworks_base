@@ -3014,6 +3014,8 @@ package android.accessibilityservice {
 
   public abstract class AccessibilityService extends android.app.Service {
     ctor public AccessibilityService();
+    method public boolean clearCache();
+    method public boolean clearCachedSubtree(@NonNull android.view.accessibility.AccessibilityNodeInfo);
     method public final void disableSelf();
     method public final boolean dispatchGesture(@NonNull android.accessibilityservice.GestureDescription, @Nullable android.accessibilityservice.AccessibilityService.GestureResultCallback, @Nullable android.os.Handler);
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
@@ -3028,6 +3030,8 @@ package android.accessibilityservice {
     method @NonNull public final android.accessibilityservice.TouchInteractionController getTouchInteractionController(int);
     method public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();
     method @NonNull public final android.util.SparseArray<java.util.List<android.view.accessibility.AccessibilityWindowInfo>> getWindowsOnAllDisplays();
+    method public boolean isCacheEnabled();
+    method public boolean isNodeInCache(@NonNull android.view.accessibility.AccessibilityNodeInfo);
     method public abstract void onAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method public final android.os.IBinder onBind(android.content.Intent);
     method @Deprecated protected boolean onGesture(int);
@@ -3038,6 +3042,7 @@ package android.accessibilityservice {
     method public void onSystemActionsChanged();
     method public final boolean performGlobalAction(int);
     method public void setAccessibilityFocusAppearance(int, @ColorInt int);
+    method public boolean setCacheEnabled(boolean);
     method public void setGestureDetectionPassthroughRegion(int, @NonNull android.graphics.Region);
     method public final void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);
     method public void setTouchExplorationPassthroughRegion(int, @NonNull android.graphics.Region);
