@@ -479,8 +479,7 @@ public class StagedInstallInternalTest {
         // Query proper module name
         result = getPackageManagerNative().getStagedApexInfo(TEST_APEX_PACKAGE_NAME);
         assertThat(result.moduleName).isEqualTo(TEST_APEX_PACKAGE_NAME);
-        assertThat(result.hasBootClassPathJars).isTrue();
-        assertThat(result.hasSystemServerClassPathJars).isTrue();
+        assertThat(result.hasClassPathJars).isTrue();
         InstallUtils.openPackageInstallerSession(sessionId).abandon();
     }
 
