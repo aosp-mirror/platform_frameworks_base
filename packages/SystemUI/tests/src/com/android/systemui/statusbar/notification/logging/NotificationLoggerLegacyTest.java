@@ -60,6 +60,7 @@ import com.android.systemui.util.time.FakeSystemClock;
 
 import com.google.android.collect.Lists;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -129,6 +130,11 @@ public class NotificationLoggerLegacyTest extends SysuiTestCase {
         mLogger.setUpWithContainer(mListContainer);
         verify(mEntryManager).addNotificationEntryListener(any());
         verify(mNotifPipeline, never()).addCollectionListener(any());
+    }
+
+    @After
+    public void tearDown() {
+        mLogger.mHandler.removeCallbacksAndMessages(null);
     }
 
     @Test
@@ -281,6 +287,7 @@ public class NotificationLoggerLegacyTest extends SysuiTestCase {
                     mNotificationPanelLoggerFake
             );
             mBarService = barService;
+            mHandler.removeCallbacksAndMessages(null);
             // Make this on the current thread so we can wait for it during tests.
             mHandler = Handler.createAsync(Looper.myLooper());
         }

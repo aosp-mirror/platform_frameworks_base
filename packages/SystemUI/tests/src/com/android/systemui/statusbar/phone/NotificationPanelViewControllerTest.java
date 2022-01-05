@@ -148,6 +148,7 @@ import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -366,6 +367,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private List<View.OnAttachStateChangeListener> mOnAttachStateChangeListeners;
     private FalsingManagerFake mFalsingManager = new FalsingManagerFake();
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+    private Handler mMainHandler;
 
     @Before
     public void setup() {
@@ -483,9 +485,11 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 .thenReturn(true);
         reset(mView);
 
+        mMainHandler = new Handler(Looper.getMainLooper());
+
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mResources,
-                new Handler(Looper.getMainLooper()),
+                mMainHandler,
                 mLayoutInflater,
                 mFeatureFlags,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
@@ -558,6 +562,12 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 .addCallback(mNotificationPanelViewController.mStatusBarStateListener);
         mNotificationPanelViewController
                 .setHeadsUpAppearanceController(mock(HeadsUpAppearanceController.class));
+    }
+
+    @After
+    public void tearDown() {
+        mNotificationPanelViewController.cancelHeightAnimator();
+        mMainHandler.removeCallbacksAndMessages(null);
     }
 
     @Test
