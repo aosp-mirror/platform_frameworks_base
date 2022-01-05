@@ -843,6 +843,12 @@
             android:singleUser="true"
             android:permission="android.permission.BIND_DREAM_SERVICE" />
 
+        <!-- Service for external clients to do media transfer -->
+        <!-- TODO(b/203800643): Export and guard with a permission. -->
+        <service
+            android:name=".media.taptotransfer.sender.MediaTttSenderService"
+           />
+
         <receiver
             android:name=".tuner.TunerService$ClearReceiver"
             android:exported="false">

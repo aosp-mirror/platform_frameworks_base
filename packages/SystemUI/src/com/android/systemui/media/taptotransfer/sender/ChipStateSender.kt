@@ -40,17 +40,18 @@ sealed class ChipStateSender(
 ) : MediaTttChipState(appIconDrawable, appIconContentDescription)
 
 /**
- * A state representing that the two devices are close but not close enough to initiate a transfer.
- * The chip will instruct the user to move closer in order to initiate the transfer.
+ * A state representing that the two devices are close but not close enough to *start* a cast to
+ * the receiver device. The chip will instruct the user to move closer in order to initiate the
+ * transfer to the receiver.
  */
-class MoveCloserToTransfer(
+class MoveCloserToStartCast(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
     otherDeviceName: String,
 ) : ChipStateSender(
     appIconDrawable,
     appIconContentDescription,
-    R.string.media_move_closer_to_transfer,
+    R.string.media_move_closer_to_start_cast,
     otherDeviceName
 )
 
