@@ -37,24 +37,14 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.doze.DozeLog;
-import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.tuner.TunerService;
 
 import org.junit.Before;
@@ -73,26 +63,15 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     private NotificationShadeWindowView mView;
     private NotificationShadeWindowViewController mController;
 
-    @Mock private NotificationWakeUpCoordinator mCoordinator;
-    @Mock private PulseExpansionHandler mPulseExpansionHandler;
-    @Mock private DynamicPrivacyController mDynamicPrivacyController;
-    @Mock private KeyguardBypassController mBypassController;
-    @Mock private PluginManager mPluginManager;
     @Mock private TunerService mTunerService;
     @Mock private DragDownHelper mDragDownHelper;
-    @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private ShadeController mShadeController;
-    @Mock private NotificationLockscreenUserManager mNotificationLockScreenUserManager;
-    @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private StatusBar mStatusBar;
-    @Mock private DozeLog mDozeLog;
-    @Mock private DozeParameters mDozeParameters;
     @Mock private DockManager mDockManager;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private NotificationStackScrollLayout mNotificationStackScrollLayout;
     @Mock private NotificationShadeDepthController mNotificationShadeDepthController;
-    @Mock private StatusBarWindowController mStatusBarWindowController;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -117,28 +96,15 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
         when(mDockManager.isDocked()).thenReturn(false);
 
         mController = new NotificationShadeWindowViewController(
-                mCoordinator,
-                mPulseExpansionHandler,
-                mDynamicPrivacyController,
-                mBypassController,
                 mLockscreenShadeTransitionController,
                 new FalsingCollectorFake(),
-                mPluginManager,
                 mTunerService,
-                mNotificationLockScreenUserManager,
-                mNotificationEntryManager,
-                mKeyguardStateController,
                 mStatusBarStateController,
-                mDozeLog,
-                mDozeParameters,
-                new CommandQueue(mContext),
-                mShadeController,
                 mDockManager,
                 mNotificationShadeDepthController,
                 mView,
                 mNotificationPanelViewController,
                 new PanelExpansionStateManager(),
-                mStatusBarWindowController,
                 mNotificationStackScrollLayoutController,
                 mStatusBarKeyguardViewManager,
                 mLockIconViewController);
