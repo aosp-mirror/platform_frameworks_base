@@ -1204,7 +1204,8 @@ public class AudioManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @RequiresPermission("android.permission.QUERY_AUDIO_STATE")
     public int getLastAudibleStreamVolume(int streamType) {
         final IAudioService service = getService();
         try {
