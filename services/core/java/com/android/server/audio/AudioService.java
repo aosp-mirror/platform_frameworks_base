@@ -3233,6 +3233,13 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    private void enforceQueryStatePermission() {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.QUERY_AUDIO_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing QUERY_AUDIO_STATE permissions");
+        }
+    }
+
     private void enforceQueryStateOrModifyRoutingPermission() {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
                 != PackageManager.PERMISSION_GRANTED
@@ -4134,6 +4141,7 @@ public class AudioService extends IAudioService.Stub
 
     /** Get last audible volume before stream was muted. */
     public int getLastAudibleStreamVolume(int streamType) {
+        enforceQueryStatePermission();
         ensureValidStreamType(streamType);
         int device = getDeviceForStream(streamType);
         return (mStreamStates[streamType].getIndex(device) + 5) / 10;
