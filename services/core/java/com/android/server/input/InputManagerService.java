@@ -317,6 +317,7 @@ public class InputManagerService extends IInputManager.Stub
             IBinder fromChannelToken, IBinder toChannelToken, boolean isDragDrop);
     private static native boolean nativeTransferTouch(long ptr, IBinder destChannelToken);
     private static native void nativeSetPointerSpeed(long ptr, int speed);
+    private static native void nativeSetPointerAcceleration(long ptr, float acceleration);
     private static native void nativeSetShowTouches(long ptr, boolean enabled);
     private static native void nativeSetInteractive(long ptr, boolean interactive);
     private static native void nativeReloadCalibration(long ptr);
@@ -1795,6 +1796,10 @@ public class InputManagerService extends IInputManager.Stub
         speed = Math.min(Math.max(speed, InputManager.MIN_POINTER_SPEED),
                 InputManager.MAX_POINTER_SPEED);
         nativeSetPointerSpeed(mPtr, speed);
+    }
+
+    private void setPointerAcceleration(float acceleration) {
+        nativeSetPointerAcceleration(mPtr, acceleration);
     }
 
     private void registerPointerSpeedSettingObserver() {
@@ -3484,6 +3489,11 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public PointF getCursorPosition() {
             return mWindowManagerCallbacks.getCursorPosition();
+        }
+
+        @Override
+        public void setPointerAcceleration(float acceleration) {
+            InputManagerService.this.setPointerAcceleration(acceleration);
         }
 
         @Override
