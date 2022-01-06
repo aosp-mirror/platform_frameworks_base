@@ -429,11 +429,15 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     }
 
     @Override
-    protected void injectLocation(double latitude, double longitude, float accuracy) {
+    protected void injectLocation(@GnssLocationFlags int gnssLocationFlags, double latitude,
+            double longitude, double altitude, float speed, float bearing, float horizontalAccuracy,
+            float verticalAccuracy, float speedAccuracy, float bearingAccuracy, long timestamp,
+            @GnssRealtimeFlags int elapsedRealtimeFlags, long elapsedRealtimeNanos,
+            double elapsedRealtimeUncertaintyNanos) {
         mState.mInjectedLocation = new Location("injected");
         mState.mInjectedLocation.setLatitude(latitude);
         mState.mInjectedLocation.setLongitude(longitude);
-        mState.mInjectedLocation.setAccuracy(accuracy);
+        mState.mInjectedLocation.setAccuracy(horizontalAccuracy);
     }
 
     @Override
