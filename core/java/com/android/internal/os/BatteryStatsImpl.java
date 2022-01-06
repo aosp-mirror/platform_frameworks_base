@@ -60,6 +60,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.WakeLockStats;
 import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
 import android.os.connectivity.CellularBatteryStats;
@@ -1141,6 +1142,37 @@ public class BatteryStatsImpl extends BatteryStats {
     @UnsupportedAppUsage
     public Map<String, ? extends Timer> getKernelWakelockStats() {
         return mKernelWakelockStats;
+    }
+
+    @Override
+    public WakeLockStats getWakeLockStats() {
+        final long realtimeMs = mClock.elapsedRealtime();
+        final long realtimeUs = realtimeMs * 1000;
+        List<WakeLockStats.WakeLock> uidWakeLockStats = new ArrayList<>();
+        for (int i = mUidStats.size() - 1; i >= 0; i--) {
+            final Uid uid = mUidStats.valueAt(i);
+            final ArrayMap<String, ? extends BatteryStats.Uid.Wakelock> wakelockStats =
+                    uid.mWakelockStats.getMap();
+            for (int j = wakelockStats.size() - 1; j >= 0; j--) {
+                final String name = wakelockStats.keyAt(j);
+                final Uid.Wakelock wakelock = (Uid.Wakelock) wakelockStats.valueAt(j);
+                final DualTimer timer = wakelock.mTimerPartial;
+                if (timer != null) {
+                    final long totalTimeLockHeldMs =
+                            timer.getTotalTimeLocked(realtimeUs, STATS_SINCE_CHARGED) / 1000;
+                    if (totalTimeLockHeldMs != 0) {
+                        uidWakeLockStats.add(
+                                new WakeLockStats.WakeLock(uid.getUid(), name,
+                                        timer.getCountLocked(STATS_SINCE_CHARGED),
+                                        totalTimeLockHeldMs,
+                                        timer.isRunningLocked()
+                                                ? timer.getCurrentDurationMsLocked(realtimeMs)
+                                                : 0));
+                    }
+                }
+            }
+        }
+        return new WakeLockStats(uidWakeLockStats);
     }
 
     String mLastWakeupReason = null;

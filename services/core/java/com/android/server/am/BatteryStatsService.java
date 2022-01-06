@@ -56,6 +56,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.WakeLockStats;
 import android.os.WorkSource;
 import android.os.connectivity.CellularBatteryStats;
 import android.os.connectivity.GpsBatteryStats;
@@ -2592,6 +2593,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         awaitCompletion();
         synchronized (mStats) {
             return mStats.getGpsBatteryStats();
+        }
+    }
+
+    /**
+     * Gets a snapshot of wake lock stats
+     * @hide
+     */
+    public WakeLockStats getWakeLockStats() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BATTERY_STATS, null);
+
+        // Wait for the completion of pending works if there is any
+        awaitCompletion();
+        synchronized (mStats) {
+            return mStats.getWakeLockStats();
         }
     }
 
