@@ -4073,6 +4073,14 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_DREAM_OVERLAY = "android.software.dream_overlay";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports window magnification.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_WINDOW_MAGNIFICATION =
+            "android.software.window_magnification";
+
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 
