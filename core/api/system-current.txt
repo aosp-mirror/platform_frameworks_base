@@ -6934,12 +6934,14 @@ package android.media.tv.tuner.filter {
   }
 
   public abstract class SectionSettings extends android.media.tv.tuner.filter.Settings {
+    method public int getBitWidthOfLengthField();
     method public boolean isCrcEnabled();
     method public boolean isRaw();
     method public boolean isRepeat();
   }
 
   public abstract static class SectionSettings.Builder<T extends android.media.tv.tuner.filter.SectionSettings.Builder<T>> {
+    method @NonNull public T setBitWidthOfLengthField(@IntRange(from=0) int);
     method @NonNull public T setCrcEnabled(boolean);
     method @NonNull public T setRaw(boolean);
     method @NonNull public T setRepeat(boolean);
