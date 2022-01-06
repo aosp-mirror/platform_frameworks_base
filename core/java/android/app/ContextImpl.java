@@ -1786,7 +1786,6 @@ class ContextImpl extends Context {
                     && ((flags & Context.RECEIVER_NOT_EXPORTED) == 0)) {
                 flags = flags | Context.RECEIVER_EXPORTED;
             }
-
             final Intent intent = ActivityManager.getService().registerReceiverWithFeature(
                     mMainThread.getApplicationThread(), mBasePackageName, getAttributionTag(),
                     AppOpsManager.toReceiverId(receiver), rd, filter, broadcastPermission, userId,
@@ -1801,9 +1800,6 @@ class ContextImpl extends Context {
             return intent;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        } catch (WtfException e) {
-            Log.wtf(TAG, e.getMessage());
-            return null;
         }
     }
 
