@@ -15,18 +15,18 @@
  */
 
 #define LOG_TAG "NMST_QTagUidNative"
-#include <utils/Log.h>
 
-#include <nativehelper/JNIPlatformHelp.h>
-
-#include "jni.h"
-#include <utils/misc.h>
+#include <android/multinetwork.h>
 #include <cutils/qtaguid.h>
-
 #include <errno.h>
 #include <fcntl.h>
-#include <sys/types.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <utils/Log.h>
+#include <utils/misc.h>
+
+#include "jni.h"
 
 namespace android {
 
@@ -40,7 +40,7 @@ static jint QTagUid_tagSocketFd(JNIEnv* env, jclass,
     return (jint)-1;
   }
 
-  int res = qtaguid_tagSocket(userFd, tagNum, uid);
+  int res = android_tag_socket_with_uid(userFd, tagNum, uid);
   if (res < 0) {
     return (jint)-errno;
   }
@@ -56,7 +56,7 @@ static jint QTagUid_untagSocketFd(JNIEnv* env, jclass,
     return (jint)-1;
   }
 
-  int res = qtaguid_untagSocket(userFd);
+  int res = android_untag_socket(userFd);
   if (res < 0) {
     return (jint)-errno;
   }
