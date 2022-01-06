@@ -33870,6 +33870,7 @@ package android.provider {
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
+    field public static final int PRESENTATION_UNAVAILABLE = 5; // 0x5
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
     field public static final String PRIORITY = "priority";
     field public static final int PRIORITY_NORMAL = 0; // 0x0
@@ -40594,6 +40595,7 @@ package android.telecom {
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
+    field public static final int PRESENTATION_UNAVAILABLE = 5; // 0x5
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
     field public static final int PRIORITY_NORMAL = 0; // 0x0
     field public static final int PRIORITY_URGENT = 1; // 0x1
