@@ -226,6 +226,66 @@ public final class BluetoothStatusCodes {
     public static final int ERROR_DISCONNECT_REASON_BAD_PARAMETERS = 1109;
 
     /**
+     * Indicates that setting the LE Audio Broadcast mode failed.
+     * <p>
+     * Example solution: Change parameters and try again. If error persists, the app can report
+     * telemetry and/or log the error in a bugreport.
+     *
+     * @hide
+     */
+    public static final int ERROR_LE_AUDIO_BROADCAST_SOURCE_SET_BROADCAST_MODE_FAILED = 1110;
+
+    /**
+     * Indicates that setting a new encryption key for Bluetooth LE Audio Broadcast Source failed.
+     * <p>
+     * Example solution: Change parameters and try again. If error persists, the app can report
+     * telemetry and/or log the error in a bugreport.
+     *
+     * @hide
+     */
+    public static final int ERROR_LE_AUDIO_BROADCAST_SOURCE_SET_ENCRYPTION_KEY_FAILED = 1111;
+
+    /**
+     * Indicates that connecting to a remote Broadcast Audio Scan Service failed.
+     * <p>
+     * Example solution: Change parameters and try again. If error persists, the app can report
+     * telemetry and/or log the error in a bugreport.
+     *
+     * @hide
+     */
+    public static final int ERROR_LE_AUDIO_BROADCAST_AUDIO_SCAN_SERVICE_CONNECT_FAILED = 1112;
+
+    /**
+     * Indicates that disconnecting from a remote Broadcast Audio Scan Service failed.
+     * <p>
+     * Example solution: Change parameters and try again. If error persists, the app can report
+     * telemetry and/or log the error in a bugreport.
+     *
+     * @hide
+     */
+    public static final int ERROR_LE_AUDIO_BROADCAST_AUDIO_SCAN_SERVICE_DISCONNECT_FAILED = 1113;
+
+    /**
+     * Indicates that enabling LE Audio Broadcast encryption failed
+     * <p>
+     * Example solution: Change parameters and try again. If error persists, the app can report
+     * telemetry and/or log the error in a bugreport.
+     *
+     * @hide
+     */
+    public static final int ERROR_LE_AUDIO_BROADCAST_SOURCE_ENABLE_ENCRYPTION_FAILED = 1114;
+
+    /**
+     * Indicates that disabling LE Audio Broadcast encryption failed
+     * <p>
+     * Example solution: Change parameters and try again. If error persists, the app can report
+     * telemetry and/or log the error in a bugreport.
+     *
+     * @hide
+     */
+    public static final int ERROR_LE_AUDIO_BROADCAST_SOURCE_DISABLE_ENCRYPTION_FAILED = 1115;
+
+    /**
      * Indicates that an unknown error has occurred has occurred.
      */
     public static final int ERROR_UNKNOWN = Integer.MAX_VALUE;

@@ -163,6 +163,14 @@ public abstract class Image implements AutoCloseable {
      *      {@link android.graphics.BitmapFactory#decodeByteArray BitmapFactory#decodeByteArray}.
      *   </td>
      * </tr>
+     * <tr>
+     *   <td>{@link android.graphics.ImageFormat#YCBCR_P010 YCBCR_P010}</td>
+     *   <td>1</td>
+     *   <td>P010 is a 4:2:0 YCbCr semiplanar format comprised of a WxH Y plane
+     *     followed by a Wx(H/2) CbCr plane. Each sample is represented by a 16-bit
+     *     little-endian value, with the lower 6 bits set to zero.
+     *   </td>
+     * </tr>
      * </table>
      *
      * @see android.graphics.ImageFormat

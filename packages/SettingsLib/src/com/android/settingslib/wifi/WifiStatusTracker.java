@@ -157,7 +157,6 @@ public class WifiStatusTracker {
     private Network mDefaultNetwork = null;
     private NetworkCapabilities mDefaultNetworkCapabilities = null;
     private final Runnable mCallback;
-    private final boolean mSupportMergedUi;
 
     private WifiInfo mWifiInfo;
     public boolean enabled;
@@ -181,7 +180,6 @@ public class WifiStatusTracker {
         mNetworkScoreManager = networkScoreManager;
         mConnectivityManager = connectivityManager;
         mCallback = callback;
-        mSupportMergedUi = false;
     }
 
     public void setListening(boolean listening) {
@@ -223,10 +221,8 @@ public class WifiStatusTracker {
                 } else {
                     ssid = getValidSsid(mWifiInfo);
                 }
-                if (mSupportMergedUi) {
-                    isCarrierMerged = mWifiInfo.isCarrierMerged();
-                    subId = mWifiInfo.getSubscriptionId();
-                }
+                isCarrierMerged = mWifiInfo.isCarrierMerged();
+                subId = mWifiInfo.getSubscriptionId();
                 updateRssi(mWifiInfo.getRssi());
                 maybeRequestNetworkScore();
             }
@@ -255,10 +251,8 @@ public class WifiStatusTracker {
             } else {
                 ssid = getValidSsid(mWifiInfo);
             }
-            if (mSupportMergedUi) {
-                isCarrierMerged = mWifiInfo.isCarrierMerged();
-                subId = mWifiInfo.getSubscriptionId();
-            }
+            isCarrierMerged = mWifiInfo.isCarrierMerged();
+            subId = mWifiInfo.getSubscriptionId();
             updateRssi(mWifiInfo.getRssi());
             maybeRequestNetworkScore();
         }

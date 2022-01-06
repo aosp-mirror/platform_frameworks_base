@@ -1536,7 +1536,7 @@ abstract public class ManagedServices {
                 @Override
                 public void onNullBinding(ComponentName name) {
                     Slog.v(TAG, "onNullBinding() called with: name = [" + name + "]");
-                    mServicesBound.remove(servicesBindingTag);
+                    mContext.unbindService(this);
                 }
             };
             if (!mContext.bindServiceAsUser(intent,

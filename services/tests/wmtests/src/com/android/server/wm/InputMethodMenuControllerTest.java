@@ -82,7 +82,7 @@ public class InputMethodMenuControllerTest extends WindowTestsBase {
             mWm.mWindowContextListenerController.registerWindowContainerListener(clientToken,
                     dc.getImeContainer(), 1000 /* ownerUid */, TYPE_INPUT_METHOD_DIALOG,
                     null /* options */);
-            return true;
+            return dc.getImeContainer().getConfiguration();
         }).when(wms).attachWindowContextToDisplayArea(any(), eq(TYPE_INPUT_METHOD_DIALOG),
                 anyInt(), any());
 

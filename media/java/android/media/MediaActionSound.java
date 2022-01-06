@@ -16,8 +16,11 @@
 
 package android.media;
 
-import android.media.AudioManager;
+import android.content.Context;
 import android.media.SoundPool;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 
 /**
@@ -103,6 +106,26 @@ public class MediaActionSound {
     private static final int STATE_LOADING                = 1;
     private static final int STATE_LOADING_PLAY_REQUESTED = 2;
     private static final int STATE_LOADED                 = 3;
+
+    /**
+     * <p>Returns true if the application must play the shutter sound in accordance
+     * to certain regional restrictions. </p>
+     *
+     * <p>If this method returns true, applications are strongly recommended to use
+     * MediaActionSound.play(SHUTTER_CLICK) or START_VIDEO_RECORDING whenever it captures
+     * images or video to storage or sends them over the network.</p>
+     */
+    public static boolean mustPlayShutterSound() {
+        boolean result = false;
+        IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+        IAudioService audioService = IAudioService.Stub.asInterface(b);
+        try {
+            result = audioService.isCameraSoundForced();
+        } catch (RemoteException e) {
+            Log.e(TAG, "audio service is unavailable for queries, defaulting to false");
+        }
+        return result;
+    }
 
     private class SoundState {
         public final int name;

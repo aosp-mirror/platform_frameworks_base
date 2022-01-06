@@ -17,6 +17,8 @@
 package android.net.vcn;
 
 import static android.net.ipsec.ike.IkeSessionParams.IKE_OPTION_MOBIKE;
+import static android.net.vcn.VcnGatewayConnectionConfig.DEFAULT_UNDERLYING_NETWORK_PRIORITIES;
+import static android.net.vcn.VcnGatewayConnectionConfig.UNDERLYING_NETWORK_PRIORITIES_KEY;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -30,6 +32,7 @@ import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.net.vcn.persistablebundleutils.IkeSessionParamsUtilsTest;
 import android.net.vcn.persistablebundleutils.TunnelConnectionParamsUtilsTest;
+import android.os.PersistableBundle;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -38,6 +41,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
@@ -50,9 +54,17 @@ public class VcnGatewayConnectionConfigTest {
             };
     public static final int[] UNDERLYING_CAPS = new int[] {NetworkCapabilities.NET_CAPABILITY_DUN};
 
+    private static final LinkedHashSet<VcnUnderlyingNetworkPriority> UNDERLYING_NETWORK_PRIORITIES =
+            new LinkedHashSet();
+
     static {
         Arrays.sort(EXPOSED_CAPS);
         Arrays.sort(UNDERLYING_CAPS);
+
+        UNDERLYING_NETWORK_PRIORITIES.add(
+                VcnCellUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+        UNDERLYING_NETWORK_PRIORITIES.add(
+                VcnWifiUnderlyingNetworkPriorityTest.getTestNetworkPriority());
     }
 
     public static final long[] RETRY_INTERVALS_MS =
@@ -82,7 +94,10 @@ public class VcnGatewayConnectionConfigTest {
 
     // Public for use in VcnGatewayConnectionTest
     public static VcnGatewayConnectionConfig buildTestConfig() {
-        return buildTestConfigWithExposedCaps(EXPOSED_CAPS);
+        final VcnGatewayConnectionConfig.Builder builder =
+                newBuilder().setVcnUnderlyingNetworkPriorities(UNDERLYING_NETWORK_PRIORITIES);
+
+        return buildTestConfigWithExposedCaps(builder, EXPOSED_CAPS);
     }
 
     private static VcnGatewayConnectionConfig.Builder newBuilder() {
@@ -159,6 +174,15 @@ public class VcnGatewayConnectionConfigTest {
     }
 
     @Test
+    public void testBuilderRequiresNonNullNetworkPriorities() {
+        try {
+            newBuilder().setVcnUnderlyingNetworkPriorities(null);
+            fail("Expected exception due to invalid underlyingNetworkPriorities");
+        } catch (NullPointerException e) {
+        }
+    }
+
+    @Test
     public void testBuilderRequiresNonNullRetryInterval() {
         try {
             newBuilder().setRetryIntervalsMillis(null);
@@ -195,6 +219,7 @@ public class VcnGatewayConnectionConfigTest {
         Arrays.sort(exposedCaps);
         assertArrayEquals(EXPOSED_CAPS, exposedCaps);
 
+        assertEquals(UNDERLYING_NETWORK_PRIORITIES, config.getVcnUnderlyingNetworkPriorities());
         assertEquals(TUNNEL_CONNECTION_PARAMS, config.getTunnelConnectionParams());
 
         assertArrayEquals(RETRY_INTERVALS_MS, config.getRetryIntervalsMillis());
@@ -206,6 +231,16 @@ public class VcnGatewayConnectionConfigTest {
         final VcnGatewayConnectionConfig config = buildTestConfig();
 
         assertEquals(config, new VcnGatewayConnectionConfig(config.toPersistableBundle()));
+    }
+
+    @Test
+    public void testParsePersistableBundleWithoutVcnUnderlyingNetworkPriorities() {
+        PersistableBundle configBundle = buildTestConfig().toPersistableBundle();
+        configBundle.putPersistableBundle(UNDERLYING_NETWORK_PRIORITIES_KEY, null);
+
+        final VcnGatewayConnectionConfig config = new VcnGatewayConnectionConfig(configBundle);
+        assertEquals(
+                DEFAULT_UNDERLYING_NETWORK_PRIORITIES, config.getVcnUnderlyingNetworkPriorities());
     }
 
     private static IkeTunnelConnectionParams buildTunnelConnectionParams(String ikePsk) {
@@ -248,5 +283,41 @@ public class VcnGatewayConnectionConfigTest {
 
         assertNotEquals(tunnelParams, anotherTunnelParams);
         assertNotEquals(config, anotherConfig);
+    }
+
+    private static VcnGatewayConnectionConfig buildTestConfigWithVcnUnderlyingNetworkPriorities(
+            LinkedHashSet<VcnUnderlyingNetworkPriority> networkPriorities) {
+        return buildTestConfigWithExposedCaps(
+                new VcnGatewayConnectionConfig.Builder(
+                                "buildTestConfigWithVcnUnderlyingNetworkPriorities",
+                                TUNNEL_CONNECTION_PARAMS)
+                        .setVcnUnderlyingNetworkPriorities(networkPriorities),
+                EXPOSED_CAPS);
+    }
+
+    @Test
+    public void testVcnUnderlyingNetworkPrioritiesEquality() throws Exception {
+        final VcnGatewayConnectionConfig config =
+                buildTestConfigWithVcnUnderlyingNetworkPriorities(UNDERLYING_NETWORK_PRIORITIES);
+
+        final LinkedHashSet<VcnUnderlyingNetworkPriority> networkPrioritiesEqual =
+                new LinkedHashSet();
+        networkPrioritiesEqual.add(VcnCellUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+        networkPrioritiesEqual.add(VcnWifiUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+        final VcnGatewayConnectionConfig configEqual =
+                buildTestConfigWithVcnUnderlyingNetworkPriorities(networkPrioritiesEqual);
+
+        final LinkedHashSet<VcnUnderlyingNetworkPriority> networkPrioritiesNotEqual =
+                new LinkedHashSet();
+        networkPrioritiesNotEqual.add(
+                VcnWifiUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+        final VcnGatewayConnectionConfig configNotEqual =
+                buildTestConfigWithVcnUnderlyingNetworkPriorities(networkPrioritiesNotEqual);
+
+        assertEquals(UNDERLYING_NETWORK_PRIORITIES, networkPrioritiesEqual);
+        assertEquals(config, configEqual);
+
+        assertNotEquals(UNDERLYING_NETWORK_PRIORITIES, networkPrioritiesNotEqual);
+        assertNotEquals(config, configNotEqual);
     }
 }

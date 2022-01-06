@@ -43,6 +43,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 
+import java.util.Arrays;
+import java.util.List;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowBluetoothAdapter.class})
 public class A2dpProfileTest {
@@ -179,7 +182,7 @@ public class A2dpProfileTest {
                 BluetoothProfile.STATE_CONNECTED);
         BluetoothCodecStatus status = mock(BluetoothCodecStatus.class);
         BluetoothCodecConfig config = mock(BluetoothCodecConfig.class);
-        BluetoothCodecConfig[] configs = {config};
+        List<BluetoothCodecConfig> configs = Arrays.asList(config);
         when(mBluetoothA2dp.getCodecStatus(mDevice)).thenReturn(status);
         when(status.getCodecsSelectableCapabilities()).thenReturn(configs);
 
@@ -194,7 +197,7 @@ public class A2dpProfileTest {
                 BluetoothProfile.STATE_CONNECTED);
         BluetoothCodecStatus status = mock(BluetoothCodecStatus.class);
         BluetoothCodecConfig config = mock(BluetoothCodecConfig.class);
-        BluetoothCodecConfig[] configs = {config};
+        List<BluetoothCodecConfig> configs = Arrays.asList(config);
         when(mBluetoothA2dp.getCodecStatus(mDevice)).thenReturn(status);
         when(status.getCodecsSelectableCapabilities()).thenReturn(configs);
 

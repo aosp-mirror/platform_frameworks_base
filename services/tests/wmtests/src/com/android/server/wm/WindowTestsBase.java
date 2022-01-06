@@ -801,6 +801,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private int mConfigChanges;
         private int mLaunchedFromPid;
         private int mLaunchedFromUid;
+        private String mLaunchedFromPackage;
         private WindowProcessController mWpc;
         private Bundle mIntentExtras;
         private boolean mOnTop = false;
@@ -911,6 +912,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        ActivityBuilder setLaunchedFromPackage(String packageName) {
+            mLaunchedFromPackage = packageName;
+            return this;
+        }
+
         ActivityBuilder setUseProcess(WindowProcessController wpc) {
             mWpc = wpc;
             return this;
@@ -1000,6 +1006,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             final ActivityRecord activity = new ActivityRecord.Builder(mService)
                     .setLaunchedFromPid(mLaunchedFromPid)
                     .setLaunchedFromUid(mLaunchedFromUid)
+                    .setLaunchedFromPackage(mLaunchedFromPackage)
                     .setIntent(intent)
                     .setActivityInfo(aInfo)
                     .setActivityOptions(options)

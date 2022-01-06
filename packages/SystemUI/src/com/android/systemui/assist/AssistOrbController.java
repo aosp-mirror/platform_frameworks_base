@@ -57,7 +57,9 @@ public class AssistOrbController {
         public void run() {
             mView.removeCallbacks(this);
             mView.show(false /* show */, true /* animate */, () -> {
-                mWindowManager.removeView(mView);
+                if (mView.isAttachedToWindow()) {
+                    mWindowManager.removeView(mView);
+                }
             });
         }
     };

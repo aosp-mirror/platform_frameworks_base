@@ -455,7 +455,7 @@ public abstract class PackageSettingBase extends SettingBase {
         return state.suspendParams != null && state.suspendParams.containsKey(suspendingPackage);
     }
 
-    void addOrUpdateSuspension(String suspendingPackage, SuspendDialogInfo dialogInfo,
+    boolean addOrUpdateSuspension(String suspendingPackage, SuspendDialogInfo dialogInfo,
             PersistableBundle appExtras, PersistableBundle launcherExtras, int userId) {
         final PackageUserState existingUserState = modifyUserState(userId);
         final PackageUserState.SuspendParams newSuspendParams =
@@ -464,21 +464,27 @@ public abstract class PackageSettingBase extends SettingBase {
         if (existingUserState.suspendParams == null) {
             existingUserState.suspendParams = new ArrayMap<>();
         }
-        existingUserState.suspendParams.put(suspendingPackage, newSuspendParams);
+        final PackageUserState.SuspendParams oldSuspendParams =
+                existingUserState.suspendParams.put(suspendingPackage, newSuspendParams);
         existingUserState.suspended = true;
         onChanged();
+        return !Objects.equals(oldSuspendParams, newSuspendParams);
     }
 
-    void removeSuspension(String suspendingPackage, int userId) {
+    boolean removeSuspension(String suspendingPackage, int userId) {
+        boolean wasModified = false;
         final PackageUserState existingUserState = modifyUserState(userId);
         if (existingUserState.suspendParams != null) {
-            existingUserState.suspendParams.remove(suspendingPackage);
+            if (existingUserState.suspendParams.remove(suspendingPackage) != null) {
+                wasModified = true;
+            }
             if (existingUserState.suspendParams.size() == 0) {
                 existingUserState.suspendParams = null;
             }
         }
         existingUserState.suspended = (existingUserState.suspendParams != null);
         onChanged();
+        return wasModified;
     }
 
     void removeSuspension(Predicate<String> suspendingPackagePredicate, int userId) {

@@ -260,8 +260,8 @@ public class DataServiceCallback {
 
     /**
      * Unthrottles the APN on the current transport.  There is no matching "APN throttle" method.
-     * Instead, the APN is throttled for the time specified in
-     * {@link DataCallResponse#getRetryDurationMillis}.
+     * Instead, the APN is throttled when {@link IDataService#setupDataCall} fails within
+     * the time specified by {@link DataCallResponse#getRetryDurationMillis}.
      * <p/>
      * see: {@link DataCallResponse#getRetryDurationMillis}
      *
@@ -277,6 +277,29 @@ public class DataServiceCallback {
             }
         } else {
             Rlog.e(TAG, "onApnUnthrottled: callback is null!");
+        }
+    }
+
+    /**
+     * Unthrottles the DataProfile on the current transport.
+     * There is no matching "DataProfile throttle" method.
+     * Instead, the DataProfile is throttled when {@link IDataService#setupDataCall} fails within
+     * the time specified by {@link DataCallResponse#getRetryDurationMillis}.
+     * <p/>
+     * see: {@link DataCallResponse#getRetryDurationMillis}
+     *
+     * @param dataProfile DataProfile containing the APN to be throttled
+     */
+    public void onDataProfileUnthrottled(final @NonNull DataProfile dataProfile) {
+        if (mCallback != null) {
+            try {
+                if (DBG) Rlog.d(TAG, "onDataProfileUnthrottled");
+                mCallback.onDataProfileUnthrottled(dataProfile);
+            } catch (RemoteException e) {
+                Rlog.e(TAG, "onDataProfileUnthrottled: remote exception", e);
+            }
+        } else {
+            Rlog.e(TAG, "onDataProfileUnthrottled: callback is null!");
         }
     }
 }

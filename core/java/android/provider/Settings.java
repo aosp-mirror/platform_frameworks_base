@@ -2242,6 +2242,21 @@ public final class Settings {
     public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
 
     /**
+     * Activity Action: Show screen that lets user configure wifi tethering.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * Input: Nothing
+     * <p>
+     * Output: Nothing
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_WIFI_TETHER_SETTING =
+            "com.android.settings.WIFI_TETHER_SETTINGS";
+
+    /**
      * Broadcast to trigger notification of asking user to enable MMS.
      * Need to specify {@link #EXTRA_ENABLE_MMS_DATA_REQUEST_REASON} and {@link #EXTRA_SUB_ID}.
      *
@@ -5741,7 +5756,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.CONNECTIVITY_CHANGE_DELAY);
             MOVED_TO_GLOBAL.add(Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.CAPTIVE_PORTAL_SERVER);
-            MOVED_TO_GLOBAL.add(Settings.Global.NSD_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.SET_INSTALL_LOCATION);
             MOVED_TO_GLOBAL.add(Settings.Global.DEFAULT_INSTALL_LOCATION);
             MOVED_TO_GLOBAL.add(Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY);
@@ -11218,21 +11232,37 @@ public final class Settings {
                 "night_display_forced_auto_mode_available";
 
         /**
-        * If the NITZ_UPDATE_DIFF time is exceeded then an automatic adjustment
-        * to SystemClock will be allowed even if NITZ_UPDATE_SPACING has not been
-        * exceeded.
-        * @hide
-        */
+         * If UTC time between two NITZ signals is greater than this value then the second signal
+         * cannot be ignored.
+         *
+         * <p>This value is in milliseconds. It is used for telephony-based time and time zone
+         * detection.
+         * @hide
+         */
         @Readable
         public static final String NITZ_UPDATE_DIFF = "nitz_update_diff";
 
         /**
-        * The length of time in milli-seconds that automatic small adjustments to
-        * SystemClock are ignored if NITZ_UPDATE_DIFF is not exceeded.
-        * @hide
-        */
+         * If the elapsed realtime between two NITZ signals is greater than this value then the
+         * second signal cannot be ignored.
+         *
+         * <p>This value is in milliseconds. It is used for telephony-based time and time zone
+         * detection.
+         * @hide
+         */
         @Readable
         public static final String NITZ_UPDATE_SPACING = "nitz_update_spacing";
+
+        /**
+         * If the device connects to a telephony network and was disconnected from a telephony
+         * network for less than this time, a previously received NITZ signal can be restored.
+         *
+         * <p>This value is in milliseconds. It is used for telephony-based time and time zone
+         * detection.
+         * @hide
+         */
+        public static final String NITZ_NETWORK_DISCONNECT_RETENTION =
+                "nitz_network_disconnect_retention";
 
         /** Preferred NTP server. {@hide} */
         @Readable
@@ -11843,6 +11873,12 @@ public final class Settings {
          */
         @Readable
         public static final String WIFI_MIGRATION_COMPLETED = "wifi_migration_completed";
+
+        /**
+         * Whether UWB should be enabled.
+         * @hide
+         */
+        public static final String UWB_ENABLED = "uwb_enabled";
 
         /**
          * Value to specify whether network quality scores and badging should be shown in the UI.
@@ -12594,13 +12630,6 @@ public final class Settings {
         @Readable
         public static final String MIN_DURATION_BETWEEN_RECOVERY_STEPS_IN_MS =
                 "min_duration_between_recovery_steps";
-        /**
-         * Whether network service discovery is enabled.
-         *
-         * @hide
-         */
-        @Readable
-        public static final String NSD_ON = "nsd_on";
 
         /**
          * Let user pick default install location.
@@ -13668,13 +13697,6 @@ public final class Settings {
         @Readable
         public static final String ANGLE_GL_DRIVER_SELECTION_VALUES =
                 "angle_gl_driver_selection_values";
-
-        /**
-         * List of package names that should check ANGLE rules
-         * @hide
-         */
-        @Readable
-        public static final String ANGLE_ALLOWLIST = "angle_allowlist";
 
         /**
          * Lists of ANGLE EGL features for debugging.
@@ -14913,6 +14935,16 @@ public final class Settings {
         @Readable
         public static final String POWER_BUTTON_LONG_PRESS =
                 "power_button_long_press";
+
+        /**
+         * Override internal R.integer.config_longPressOnPowerDurationMs. It determines the length
+         * of power button press to be considered a long press in milliseconds.
+         * Used by PhoneWindowManager.
+         * @hide
+         */
+        @Readable
+        public static final String POWER_BUTTON_LONG_PRESS_DURATION_MS =
+                "power_button_long_press_duration_ms";
 
         /**
          * Overrides internal R.integer.config_veryLongPressOnPowerBehavior.

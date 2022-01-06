@@ -436,7 +436,7 @@ public class StatusBarNotification implements Parcelable {
             try {
                 ApplicationInfo ai = context.getPackageManager()
                         .getApplicationInfoAsUser(pkg, PackageManager.MATCH_UNINSTALLED_PACKAGES,
-                                getUserId());
+                                getNormalizedUserId());
                 mContext = context.createApplicationContext(ai,
                         Context.CONTEXT_RESTRICTED);
             } catch (PackageManager.NameNotFoundException e) {

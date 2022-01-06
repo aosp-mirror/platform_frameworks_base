@@ -35,6 +35,7 @@ import android.app.BroadcastOptions;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHearingAid;
+import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProtoEnums;
 import android.bluetooth.IBluetooth;
@@ -45,6 +46,7 @@ import android.bluetooth.IBluetoothManager;
 import android.bluetooth.IBluetoothManagerCallback;
 import android.bluetooth.IBluetoothProfileServiceConnection;
 import android.bluetooth.IBluetoothStateChangeCallback;
+import android.bluetooth.IBluetoothLeCallControl;
 import android.content.ActivityNotFoundException;
 import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
@@ -456,12 +458,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     }
                 }
             } else if (BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED.equals(action)
-                    || BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
+                    || BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED.equals(action)
+                    || BluetoothLeAudio.ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED.equals(action)) {
                 final int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                         BluetoothProfile.STATE_CONNECTED);
                 if (mHandler.hasMessages(MESSAGE_INIT_FLAGS_CHANGED)
                         && state == BluetoothProfile.STATE_DISCONNECTED
-                        && !mBluetoothModeChangeHelper.isA2dpOrHearingAidConnected()) {
+                        && !mBluetoothModeChangeHelper.isMediaProfileConnected()) {
                     Slog.i(TAG, "Device disconnected, reactivating pending flag changes");
                     onInitFlagsChanged();
                 }
@@ -1326,11 +1329,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             + bluetoothProfile);
                 }
 
-                if (bluetoothProfile != BluetoothProfile.HEADSET) {
+                Intent intent;
+                if (bluetoothProfile == BluetoothProfile.HEADSET) {
+                    intent = new Intent(IBluetoothHeadset.class.getName());
+                } else if (bluetoothProfile== BluetoothProfile.LE_CALL_CONTROL) {
+                    intent = new Intent(IBluetoothLeCallControl.class.getName());
+                } else {
                     return false;
                 }
 
-                Intent intent = new Intent(IBluetoothHeadset.class.getName());
                 psc = new ProfileServiceConnections(intent);
                 if (!psc.bindService()) {
                     return false;
@@ -1848,6 +1855,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     mHandler.removeMessages(MESSAGE_RESTART_BLUETOOTH_SERVICE);
                     mEnable = true;
 
+                    if (isBle == 0) {
+                        persistBluetoothSetting(BLUETOOTH_ON_BLUETOOTH);
+                    }
+
                     // Use service interface to get the exact state
                     try {
                         mBluetoothLock.readLock().lock();
@@ -1861,7 +1872,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                     } else {
                                         Slog.w(TAG, "BT Enable in BLE_ON State, going to ON");
                                         mBluetooth.onLeServiceUp(mContext.getAttributionSource());
-                                        persistBluetoothSetting(BLUETOOTH_ON_BLUETOOTH);
                                     }
                                     break;
                                 case BluetoothAdapter.STATE_BLE_TURNING_ON:
@@ -2291,7 +2301,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         Slog.d(TAG, "MESSAGE_INIT_FLAGS_CHANGED");
                     }
                     mHandler.removeMessages(MESSAGE_INIT_FLAGS_CHANGED);
-                    if (mBluetoothModeChangeHelper.isA2dpOrHearingAidConnected()) {
+                    if (mBluetoothModeChangeHelper.isMediaProfileConnected()) {
                         Slog.i(TAG, "Delaying MESSAGE_INIT_FLAGS_CHANGED by "
                                 + DELAY_FOR_RETRY_INIT_FLAG_CHECK_MS
                                 + " ms due to existing connections");

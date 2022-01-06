@@ -46,6 +46,7 @@ import android.system.OsConstants;
 import android.system.StructCapUserData;
 import android.system.StructCapUserHeader;
 import android.text.Hyphenator;
+import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -560,9 +561,8 @@ public class ZygoteInit {
 
     /**
      * Create the classloader for the system server and store it in
-     * {@link sCachedSystemServerClassLoader}. This function may be called through JNI in
-     * system server startup, when the runtime is in a critically low state. Do not do
-     * extended computation etc here.
+     * {@link sCachedSystemServerClassLoader}. This function is called through JNI in the forked
+     * system server process in the zygote SELinux domain.
      */
     private static ClassLoader getOrCreateSystemServerClassLoader() {
         if (sCachedSystemServerClassLoader == null) {
@@ -573,6 +573,29 @@ public class ZygoteInit {
             }
         }
         return sCachedSystemServerClassLoader;
+    }
+
+    /**
+     * Creates class loaders for standalone system server jars. This function is called through JNI
+     * in the forked system server process in the zygote SELinux domain.
+     */
+    private static void prefetchStandaloneSystemServerJars() {
+        String envStr = Os.getenv("STANDALONE_SYSTEMSERVER_JARS");
+        if (TextUtils.isEmpty(envStr)) {
+            return;
+        }
+        for (String jar : envStr.split(":")) {
+            try {
+                SystemServerClassLoaderFactory.getOrCreateClassLoader(
+                        jar, getOrCreateSystemServerClassLoader());
+            } catch (Error e) {
+                // We don't want the process to crash for this error because prefetching is just an
+                // optimization.
+                Log.e(TAG,
+                        String.format("Failed to prefetch standalone system server jar \"%s\": %s",
+                                jar, e.toString()));
+            }
+        }
     }
 
     /**
@@ -690,7 +713,7 @@ public class ZygoteInit {
                 "--setuid=1000",
                 "--setgid=1000",
                 "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1023,"
-                        + "1024,1032,1065,3001,3002,3003,3006,3007,3009,3010,3011",
+                        + "1024,1032,1065,3001,3002,3003,3006,3007,3009,3010,3011,3012",
                 "--capabilities=" + capabilities + "," + capabilities,
                 "--nice-name=system_server",
                 "--runtime-args",

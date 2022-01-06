@@ -154,6 +154,7 @@ public class LongScreenshotActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
+        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_ACTIVITY_STARTED);
 
         if (mPreview.getDrawable() != null) {
             // We already have an image, so no need to try to load again.
@@ -245,6 +246,8 @@ public class LongScreenshotActivity extends Activity {
     }
 
     private void onCachedImageLoaded(ImageLoader.Result imageResult) {
+        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_ACTIVITY_CACHED_IMAGE_LOADED);
+
         BitmapDrawable drawable = new BitmapDrawable(getResources(), imageResult.bitmap);
         mPreview.setImageDrawable(drawable);
         mPreview.setAlpha(1f);
@@ -282,6 +285,8 @@ public class LongScreenshotActivity extends Activity {
             finish();
         }
         if (isFinishing()) {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_ACTIVITY_FINISHED);
+
             if (mScrollCaptureResponse != null) {
                 mScrollCaptureResponse.close();
             }

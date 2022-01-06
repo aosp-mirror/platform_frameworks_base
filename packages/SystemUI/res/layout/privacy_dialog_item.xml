@@ -24,8 +24,6 @@
     android:layout_marginTop="4dp"
     android:importantForAccessibility="yes"
     android:background="?android:attr/selectableItemBackground"
-    android:paddingLeft="@dimen/ongoing_appops_dialog_side_padding"
-    android:paddingRight="@dimen/ongoing_appops_dialog_side_padding"
     android:focusable="true"
     >
     <!-- 4dp marginTop makes 20dp minimum between icons -->

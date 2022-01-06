@@ -409,7 +409,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     /**
      * Value for {@link #flags}: {@code true} if the application may use cleartext network traffic
-     * (e.g., HTTP rather than HTTPS; WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP
+     * (e.g., HTTP rather than HTTPS; WebSockets rather than WebSockets Secure; XMPP, IMAP, SMTP
      * without STARTTLS or TLS). If {@code false}, the app declares that it does not intend to use
      * cleartext network traffic, in which case platform components (e.g., HTTP stacks,
      * {@code DownloadManager}, {@code MediaPlayer}) will refuse app's requests to use cleartext

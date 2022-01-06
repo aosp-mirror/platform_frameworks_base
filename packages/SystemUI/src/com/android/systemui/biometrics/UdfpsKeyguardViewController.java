@@ -26,19 +26,19 @@ import android.view.MotionEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.time.SystemClock;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-
 
 /**
  * Class that coordinates non-HBM animations during keyguard authentication.
@@ -46,11 +46,13 @@ import java.io.PrintWriter;
 public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<UdfpsKeyguardView> {
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @NonNull private final DelayableExecutor mExecutor;
-    @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
     @NonNull private final LockscreenShadeTransitionController mLockScreenShadeTransitionController;
     @NonNull private final ConfigurationController mConfigurationController;
+    @NonNull private final SystemClock mSystemClock;
+    @NonNull private final KeyguardStateController mKeyguardStateController;
     @NonNull private final UdfpsController mUdfpsController;
+    @NonNull private final UnlockedScreenOffAnimationController
+            mUnlockedScreenOffAnimationController;
 
     private boolean mShowingUdfpsBouncer;
     private boolean mUdfpsRequested;
@@ -59,6 +61,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     private int mStatusBarState;
     private float mTransitionToFullShadeProgress;
     private float mLastDozeAmount;
+    private long mLastUdfpsBouncerShowTime = -1;
+    private float mStatusBarExpansion;
+    private boolean mLaunchTransitionFadingAway;
 
     /**
      * hidden amount of pin/pattern/password bouncer
@@ -74,25 +79,33 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             @NonNull StatusBar statusBar,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
-            @NonNull DelayableExecutor mainDelayableExecutor,
             @NonNull DumpManager dumpManager,
-            @NonNull KeyguardViewMediator keyguardViewMediator,
             @NonNull LockscreenShadeTransitionController transitionController,
             @NonNull ConfigurationController configurationController,
+            @NonNull SystemClock systemClock,
+            @NonNull KeyguardStateController keyguardStateController,
+            @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             @NonNull UdfpsController udfpsController) {
         super(view, statusBarStateController, statusBar, dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mExecutor = mainDelayableExecutor;
-        mKeyguardViewMediator = keyguardViewMediator;
         mLockScreenShadeTransitionController = transitionController;
         mConfigurationController = configurationController;
+        mSystemClock = systemClock;
+        mKeyguardStateController = keyguardStateController;
         mUdfpsController = udfpsController;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
     }
 
     @Override
     @NonNull String getTag() {
         return "UdfpsKeyguardViewController";
+    }
+
+    @Override
+    public void onInit() {
+        super.onInit();
+        mKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
     }
 
     @Override
@@ -105,16 +118,20 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
         mUdfpsRequested = false;
 
+        mLaunchTransitionFadingAway = mKeyguardStateController.isLaunchTransitionFadingAway();
+        mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
         mStatusBarState = mStatusBarStateController.getState();
         mQsExpanded = mKeyguardViewManager.isQsExpanded();
         mInputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN;
         mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
         mConfigurationController.addCallback(mConfigurationListener);
+        mStatusBar.addExpansionChangedListener(mStatusBarExpansionChangedListener);
         updateAlpha();
         updatePauseAuth();
 
         mKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
         mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(this);
+        mUnlockedScreenOffAnimationController.addCallback(mUnlockedScreenOffCallback);
     }
 
     @Override
@@ -122,13 +139,16 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         super.onViewDetached();
         mFaceDetectRunning = false;
 
+        mKeyguardStateController.removeCallback(mKeyguardStateControllerCallback);
         mStatusBarStateController.removeCallback(mStateListener);
         mKeyguardViewManager.removeAlternateAuthInterceptor(mAlternateAuthInterceptor);
         mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
         mConfigurationController.removeCallback(mConfigurationListener);
+        mStatusBar.removeExpansionChangedListener(mStatusBarExpansionChangedListener);
         if (mLockScreenShadeTransitionController.getUdfpsKeyguardViewController() == this) {
             mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(null);
         }
+        mUnlockedScreenOffAnimationController.removeCallback(mUnlockedScreenOffCallback);
     }
 
     @Override
@@ -140,9 +160,11 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         pw.println("mQsExpanded=" + mQsExpanded);
         pw.println("mIsBouncerVisible=" + mIsBouncerVisible);
         pw.println("mInputBouncerHiddenAmount=" + mInputBouncerHiddenAmount);
-        pw.println("mAlpha=" + mView.getAlpha());
+        pw.println("mStatusBarExpansion=" + mStatusBarExpansion);
+        pw.println("unpausedAlpha=" + mView.getUnpausedAlpha());
         pw.println("mUdfpsRequested=" + mUdfpsRequested);
         pw.println("mView.mUdfpsRequested=" + mView.mUdfpsRequested);
+        pw.println("mLaunchTransitionFadingAway=" + mLaunchTransitionFadingAway);
     }
 
     /**
@@ -154,10 +176,13 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             return false;
         }
 
+        boolean udfpsAffordanceWasNotShowing = shouldPauseAuth();
         mShowingUdfpsBouncer = show;
-        updatePauseAuth();
         if (mShowingUdfpsBouncer) {
-            if (mStatusBarState == StatusBarState.SHADE_LOCKED) {
+            mLastUdfpsBouncerShowTime = mSystemClock.uptimeMillis();
+        }
+        if (mShowingUdfpsBouncer) {
+            if (udfpsAffordanceWasNotShowing) {
                 mView.animateInUdfpsBouncer(null);
             }
 
@@ -170,6 +195,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         } else {
             mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
         }
+        updateAlpha();
+        updatePauseAuth();
         return true;
     }
 
@@ -187,6 +214,10 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 && (!mIsBouncerVisible
                 || mInputBouncerHiddenAmount != KeyguardBouncer.EXPANSION_VISIBLE)) {
             return false;
+        }
+
+        if (mLaunchTransitionFadingAway) {
+            return true;
         }
 
         if (mStatusBarState != KEYGUARD) {
@@ -218,13 +249,22 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
      * If we were previously showing the udfps bouncer, hide it and instead show the regular
      * (pin/pattern/password) bouncer.
      *
-     * Does nothing if we weren't previously showing the udfps bouncer.
+     * Does nothing if we weren't previously showing the UDFPS bouncer.
      */
     private void maybeShowInputBouncer() {
-        if (mShowingUdfpsBouncer) {
+        if (mShowingUdfpsBouncer && hasUdfpsBouncerShownWithMinTime()) {
             mKeyguardViewManager.showBouncer(true);
             mKeyguardViewManager.resetAlternateAuth(false);
         }
+    }
+
+    /**
+     * Whether the udfps bouncer has shown for at least 200ms before allowing touches outside
+     * of the udfps icon area to dismiss the udfps bouncer and show the pin/pattern/password
+     * bouncer.
+     */
+    private boolean hasUdfpsBouncerShownWithMinTime() {
+        return (mSystemClock.uptimeMillis() - mLastUdfpsBouncerShowTime) > 200;
     }
 
     /**
@@ -237,12 +277,17 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     }
 
     private void updateAlpha() {
-        // fade icon on transition to showing bouncer
+        // fade icon on transitions to showing the status bar, but if mUdfpsRequested, then
+        // the keyguard is occluded by some application - so instead use the input bouncer
+        // hidden amount to determine the fade
+        float expansion = mUdfpsRequested ? mInputBouncerHiddenAmount : mStatusBarExpansion;
         int alpha = mShowingUdfpsBouncer ? 255
                 : (int) MathUtils.constrain(
-                    MathUtils.map(.5f, .9f, 0f, 255f, mInputBouncerHiddenAmount),
+                    MathUtils.map(.5f, .9f, 0f, 255f, expansion),
                     0f, 255f);
-        alpha *= (1.0f - mTransitionToFullShadeProgress);
+        if (!mShowingUdfpsBouncer) {
+            alpha *= (1.0f - mTransitionToFullShadeProgress);
+        }
         mView.setUnpausedAlpha(alpha);
     }
 
@@ -287,6 +332,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 public void requestUdfps(boolean request, int color) {
                     mUdfpsRequested = request;
                     mView.requestUdfps(request, color);
+                    updateAlpha();
                     updatePauseAuth();
                 }
 
@@ -356,4 +402,26 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                     mView.updateColor();
                 }
             };
+
+    private final StatusBar.ExpansionChangedListener mStatusBarExpansionChangedListener =
+            new StatusBar.ExpansionChangedListener() {
+                @Override
+                public void onExpansionChanged(float expansion, boolean expanded) {
+                    mStatusBarExpansion = expansion;
+                    updateAlpha();
+                }
+            };
+
+    private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
+            new KeyguardStateController.Callback() {
+                @Override
+                public void onLaunchTransitionFadingAwayChanged() {
+                    mLaunchTransitionFadingAway =
+                            mKeyguardStateController.isLaunchTransitionFadingAway();
+                    updatePauseAuth();
+                }
+            };
+
+    private final UnlockedScreenOffAnimationController.Callback mUnlockedScreenOffCallback =
+            (linear, eased) -> mStateListener.onDozeAmountChanged(linear, eased);
 }

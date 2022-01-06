@@ -40,6 +40,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
+import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
 import com.android.wifitrackerlib.WifiPickerTracker;
 
@@ -68,6 +69,7 @@ public class AccessPointControllerImpl
 
     private final ArrayList<AccessPointCallback> mCallbacks = new ArrayList<AccessPointCallback>();
     private final UserManager mUserManager;
+    private final UserTracker mUserTracker;
     private final Executor mMainExecutor;
 
     private @Nullable WifiPickerTracker mWifiPickerTracker;
@@ -84,6 +86,7 @@ public class AccessPointControllerImpl
             WifiPickerTrackerFactory wifiPickerTrackerFactory
     ) {
         mUserManager = userManager;
+        mUserTracker = userTracker;
         mCurrentUser = userTracker.getUserId();
         mMainExecutor = mainExecutor;
         mWifiPickerTrackerFactory = wifiPickerTrackerFactory;
@@ -116,6 +119,11 @@ public class AccessPointControllerImpl
     public boolean canConfigWifi() {
         return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_WIFI,
                 new UserHandle(mCurrentUser));
+    }
+
+    public boolean canConfigMobileData() {
+        return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
+                UserHandle.of(mCurrentUser)) && mUserTracker.getUserInfo().isAdmin();
     }
 
     public void onUserSwitched(int newUserId) {
@@ -154,6 +162,15 @@ public class AccessPointControllerImpl
             entries.add(0, connectedEntry);
         }
         fireAcccessPointsCallback(entries);
+    }
+
+    @Override
+    public MergedCarrierEntry getMergedCarrierEntry() {
+        if (mWifiPickerTracker == null) {
+            fireAcccessPointsCallback(Collections.emptyList());
+            return null;
+        }
+        return mWifiPickerTracker.getMergedCarrierEntry();
     }
 
     @Override

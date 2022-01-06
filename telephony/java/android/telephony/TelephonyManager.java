@@ -70,6 +70,7 @@ import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.carrier.CarrierIdentifier;
+import android.service.carrier.CarrierService;
 import android.sysprop.TelephonyProperties;
 import android.telecom.CallScreeningService;
 import android.telecom.InCallService;
@@ -131,6 +132,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -143,6 +146,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 
 /**
  * Provides access to information about the telephony services on
@@ -1895,9 +1899,10 @@ public class TelephonyManager {
      * the IMEI/SV for GSM phones. Return null if the software version is
      * not available.
      * <p>
-     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}.
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE})
     @Nullable
     public String getDeviceSoftwareVersion() {
         return getDeviceSoftwareVersion(getSlotIndex());
@@ -2959,7 +2964,9 @@ public class TelephonyManager {
      * when opportunistic network is providing cellular internet connection to the user.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * or {@link android.Manifest.permission#READ_BASIC_PHONE_STATE
+     * READ_BASIC_PHONE_STATE} or that the calling app has carrier privileges
+     * (see {@link #hasCarrierPrivileges}).
      *
      * @return the network type
      *
@@ -2982,7 +2989,9 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_NR
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE})
     public @NetworkType int getDataNetworkType() {
         return getDataNetworkType(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
@@ -3020,10 +3029,14 @@ public class TelephonyManager {
      * Returns the NETWORK_TYPE_xxxx for voice
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * or {@link android.Manifest.permission#READ_BASIC_PHONE_STATE
+     * READ_BASIC_PHONE_STATE} or that the calling app has carrier privileges
+     * (see {@link #hasCarrierPrivileges}).
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE})
     public @NetworkType int getVoiceNetworkType() {
         return getVoiceNetworkType(getSubId());
     }
@@ -3494,7 +3507,8 @@ public class TelephonyManager {
      */
     private int getLogicalSlotIndex(int physicalSlotIndex) {
         UiccSlotInfo[] slotInfos = getUiccSlotsInfo();
-        if (slotInfos != null && physicalSlotIndex >= 0 && physicalSlotIndex < slotInfos.length) {
+        if (slotInfos != null && physicalSlotIndex >= 0 && physicalSlotIndex < slotInfos.length
+                && slotInfos[physicalSlotIndex] != null) {
             return slotInfos[physicalSlotIndex].getLogicalSlotIdx();
         }
 
@@ -3930,8 +3944,8 @@ public class TelephonyManager {
      * <p>
      * If the caller has carrier priviliges on any active subscription, then they have permission to
      * get simple information like the card ID ({@link UiccCardInfo#getCardId()}), whether the card
-     * is an eUICC ({@link UiccCardInfo#isEuicc()}), and the slot index where the card is inserted
-     * ({@link UiccCardInfo#getSlotIndex()}).
+     * is an eUICC ({@link UiccCardInfo#isEuicc()}), and the physical slot index where the card is
+     * inserted ({@link UiccCardInfo#getPhysicalSlotIndex()}.
      * <p>
      * To get private information such as the EID ({@link UiccCardInfo#getEid()}) or ICCID
      * ({@link UiccCardInfo#getIccId()}), the caller must have carrier priviliges on that specific
@@ -3975,7 +3989,7 @@ public class TelephonyManager {
             if (telephony == null) {
                 return null;
             }
-            return telephony.getUiccSlotsInfo();
+            return telephony.getUiccSlotsInfo(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return null;
         }
@@ -4008,8 +4022,13 @@ public class TelephonyManager {
      *        size should be same as {@link #getUiccSlotsInfo()}.
      * @return boolean Return true if the switch succeeds, false if the switch fails.
      * @hide
+     * @deprecated {@link #setSimSlotMapping(Collection, Executor, Consumer)}
      */
+     // TODO: once integrating the HAL changes we can  convert int[] to List<UiccSlotMapping> and
+     // converge API's in ITelephony.aidl and PhoneInterfaceManager
+
     @SystemApi
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean switchSlots(int[] physicalSlots) {
         try {
@@ -4020,6 +4039,109 @@ public class TelephonyManager {
             return telephony.switchSlots(physicalSlots);
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+    /**
+     * @param slotMapping Logical to physical slot and port mapping.
+     * @return {@code true} if slotMapping is valid.
+     * @return {@code false} if slotMapping is invalid.
+     *
+     * slotMapping is invalid if there are different entries (physical slot + port) mapping to the
+     * same logical slot or if there are same {physical slot + port} mapping to the different
+     * logical slot
+     * @hide
+     */
+    private static boolean isSlotMappingValid(@NonNull Collection<UiccSlotMapping> slotMapping) {
+        // Grouping the collection by logicalSlotIndex, finding different entries mapping to the
+        // same logical slot
+        Map<Integer, List<UiccSlotMapping>> slotMappingInfo = slotMapping.stream().collect(
+                Collectors.groupingBy(UiccSlotMapping::getLogicalSlotIndex));
+        for (Map.Entry<Integer, List<UiccSlotMapping>> entry : slotMappingInfo.entrySet()) {
+            List<UiccSlotMapping> logicalSlotMap = entry.getValue();
+            if (logicalSlotMap.size() > 1) {
+                // duplicate logicalSlotIndex found
+                return false;
+            }
+        }
+
+        // Grouping the collection by physical slot and port, finding same entries mapping to the
+        // different logical slot
+        Map<List<Integer>, List<UiccSlotMapping>> slotMapInfos = slotMapping.stream().collect(
+                Collectors.groupingBy(
+                        slot -> Arrays.asList(slot.getPhysicalSlotIndex(), slot.getPortIndex())));
+        for (Map.Entry<List<Integer>, List<UiccSlotMapping>> entry : slotMapInfos.entrySet()) {
+            List<UiccSlotMapping> portAndPhysicalSlotList = entry.getValue();
+            if (portAndPhysicalSlotList.size() > 1) {
+                // duplicate pair of portIndex and physicalSlotIndex found
+                return false;
+            }
+        }
+        return true;
+    }
+    /**
+     * Maps the logical slots to physical slots and ports. Mapping is specified from
+     * {@link UiccSlotMapping} which consist of both physical slot index and port index.
+     * Logical slot is the slot that is seen by modem. Physical slot is the actual physical slot.
+     * Port index is the index (enumerated value) for the associated port available on the SIM.
+     * Each physical slot can have multiple ports if multi-enabled profile(MEP) is supported.
+     *
+     * Example: no. of logical slots 1 and physical slots 2 do not support MEP, each physical slot
+     * has one port:
+     * The only logical slot (index 0) can be mapped to first physical slot (value 0), port(index
+     * 0) or
+     * second physical slot(value 1), port (index 0), while the other physical slot remains unmapped
+     * and inactive.
+     * slotMapping[0] = UiccSlotMapping{0 //logical slot, 0 //physical slot//, 0 //port//}
+     * slotMapping[0] = UiccSlotMapping{1 // logical slot, 1 //physical slot//, 0 //port//}
+     *
+     * Example no. of logical slots 2 and physical slots 2 supports MEP with 2 ports available:
+     * Each logical slot must be mapped to a port (physical slot and port combination).
+     * First logical slot (index 0) can be mapped to physical slot 1 and the second logical slot
+     * can be mapped to either port from physical slot 2.
+     *
+     * slotMapping[0] = UiccSlotMapping{0, 0, 0} and slotMapping[1] = UiccSlotMapping{1, 0, 0} or
+     * slotMapping[0] = UiccSlotMapping{0, 0, 0} and slotMapping[1] = UiccSlotMapping{1, 1, 1}
+     *
+     * or the other way around, the second logical slot(index 1) can be mapped to physical slot 1
+     * and the first logical slot can be mapped to either port from physical slot 2.
+     *
+     * slotMapping[1] = UiccSlotMapping{0, 0, 0} and slotMapping[0] = UiccSlotMapping{1, 0, 0} or
+     * slotMapping[1] = UiccSlotMapping{0, 0, 0} and slotMapping[0] = UiccSlotMapping{1, 1, 1}
+     *
+     * another possible mapping is each logical slot maps to each port of physical slot 2 and there
+     * is no active logical modem mapped to physical slot 1.
+     *
+     * slotMapping[0] = UiccSlotMapping{1, 0, 0} and slotMapping[1] = UiccSlotMapping{1, 1, 1} or
+     * slotMapping[0] = UiccSlotMapping{1, 1, 1} and slotMapping[1] = UiccSlotMapping{1, 0, 0}
+     *
+     * @param slotMapping Logical to physical slot and port mapping.
+     * @throws IllegalStateException if telephony service is null or slot mapping was sent when the
+     *         radio in middle of a silent restart or other invalid states to handle the command
+     * @throws IllegalArgumentException if the caller passes in an invalid collection of
+     *         UiccSlotMapping like duplicate data, etc
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setSimSlotMapping(@NonNull Collection<UiccSlotMapping> slotMapping) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                if (isSlotMappingValid(slotMapping)) {
+                    boolean result = telephony.setSimSlotMapping(new ArrayList(slotMapping));
+                    if (!result) {
+                        throw new IllegalStateException("setSimSlotMapping has failed");
+                    }
+                } else {
+                    throw new IllegalArgumentException("Duplicate UiccSlotMapping data found");
+                }
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 
@@ -4040,7 +4162,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                int[] slotMappingArray = telephony.getSlotsMapping();
+                int[] slotMappingArray = telephony.getSlotsMapping(mContext.getOpPackageName());
                 for (int i = 0; i < slotMappingArray.length; i++) {
                     slotMapping.put(i, slotMappingArray[i]);
                 }
@@ -6587,12 +6709,7 @@ public class TelephonyManager {
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openLogicalChannel(byte[], byte)}.
      */
-    @Deprecated
     public IccOpenLogicalChannelResponse iccOpenLogicalChannel(String AID, int p2) {
         return iccOpenLogicalChannel(getSubId(), AID, p2);
     }
@@ -6623,12 +6740,7 @@ public class TelephonyManager {
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openLogicalChannel(byte[], byte)}.
      */
-    @Deprecated
     public IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID, int p2) {
         try {
             ITelephony telephony = getITelephony();
@@ -6656,10 +6768,7 @@ public class TelephonyManager {
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.Channel#close()}.
      */
-    @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     public boolean iccCloseLogicalChannelBySlot(int slotIndex, int channel) {
@@ -6686,10 +6795,7 @@ public class TelephonyManager {
      * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.Channel#close()}.
      */
-    @Deprecated
     public boolean iccCloseLogicalChannel(int channel) {
         return iccCloseLogicalChannel(getSubId(), channel);
     }
@@ -6708,10 +6814,7 @@ public class TelephonyManager {
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.Channel#close()}.
      */
-    @Deprecated
     public boolean iccCloseLogicalChannel(int subId, int channel) {
         try {
             ITelephony telephony = getITelephony();
@@ -6747,10 +6850,7 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at the end, or null if
      * there is an issue connecting to the Telephony service.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     @Nullable
@@ -6788,10 +6888,7 @@ public class TelephonyManager {
      * @param data Data to be sent with the APDU.
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public String iccTransmitApduLogicalChannel(int channel, int cla,
             int instruction, int p1, int p2, int p3, String data) {
         return iccTransmitApduLogicalChannel(getSubId(), channel, cla,
@@ -6820,10 +6917,7 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public String iccTransmitApduLogicalChannel(int subId, int channel, int cla,
             int instruction, int p1, int p2, int p3, String data) {
         try {
@@ -6859,13 +6953,7 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     @NonNull
@@ -6901,13 +6989,7 @@ public class TelephonyManager {
      * @param data Data to be sent with the APDU.
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public String iccTransmitApduBasicChannel(int cla,
             int instruction, int p1, int p2, int p3, String data) {
         return iccTransmitApduBasicChannel(getSubId(), cla,
@@ -6934,13 +7016,7 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public String iccTransmitApduBasicChannel(int subId, int cla,
             int instruction, int p1, int p2, int p3, String data) {
         try {
@@ -6968,13 +7044,7 @@ public class TelephonyManager {
      * @param p3 P3 value of the APDU command.
      * @param filePath
      * @return The APDU response.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public byte[] iccExchangeSimIO(int fileID, int command, int p1, int p2, int p3,
             String filePath) {
         return iccExchangeSimIO(getSubId(), fileID, command, p1, p2, p3, filePath);
@@ -6996,13 +7066,7 @@ public class TelephonyManager {
      * @param filePath
      * @return The APDU response.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public byte[] iccExchangeSimIO(int subId, int fileID, int command, int p1, int p2,
             int p3, String filePath) {
         try {
@@ -7028,13 +7092,7 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card in hexadecimal format
      *         with the last 4 bytes being the status word. If the command fails,
      *         returns an empty string.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public String sendEnvelopeWithStatus(String content) {
         return sendEnvelopeWithStatus(getSubId(), content);
     }
@@ -7054,13 +7112,7 @@ public class TelephonyManager {
      *         with the last 4 bytes being the status word. If the command fails,
      *         returns an empty string.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public String sendEnvelopeWithStatus(int subId, String content) {
         try {
             ITelephony telephony = getITelephony();
@@ -8381,12 +8433,58 @@ public class TelephonyManager {
     public NetworkScan requestNetworkScan(
             NetworkScanRequest request, Executor executor,
             TelephonyScanManager.NetworkScanCallback callback) {
-        synchronized (this) {
+        return requestNetworkScan(false, request, executor, callback);
+    }
+
+    /**
+     * Request a network scan.
+     *
+     * This method is asynchronous, so the network scan results will be returned by callback.
+     * The returned NetworkScan will contain a callback method which can be used to stop the scan.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges})
+     * and {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
+     *
+     * If the system-wide location switch is off, apps may still call this API, with the
+     * following constraints:
+     * <ol>
+     *     <li>The app must hold the {@code android.permission.NETWORK_SCAN} permission.</li>
+     *     <li>The app must not supply any specific bands or channels to scan.</li>
+     *     <li>The app must only specify MCC/MNC pairs that are
+     *     associated to a SIM in the device.</li>
+     *     <li>Returned results will have no meaningful info other than signal strength
+     *     and MCC/MNC info.</li>
+     * </ol>
+     *
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
+     * @param request Contains all the RAT with bands/channels that need to be scanned.
+     * @param executor The executor through which the callback should be invoked. Since the scan
+     *        request may trigger multiple callbacks and they must be invoked in the same order as
+     *        they are received by the platform, the user should provide an executor which executes
+     *        tasks one at a time in serial order. For example AsyncTask.SERIAL_EXECUTOR.
+     * @param callback Returns network scan results or errors.
+     * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION
+    })
+    public @Nullable NetworkScan requestNetworkScan(
+            boolean renounceFineLocationAccess, @NonNull NetworkScanRequest request,
+            @NonNull Executor executor,
+            @NonNull TelephonyScanManager.NetworkScanCallback callback) {
+        synchronized (sCacheLock) {
             if (mTelephonyScanManager == null) {
                 mTelephonyScanManager = new TelephonyScanManager();
             }
         }
-        return mTelephonyScanManager.requestNetworkScan(getSubId(), request, executor, callback,
+        return mTelephonyScanManager.requestNetworkScan(getSubId(), renounceFineLocationAccess,
+                request, executor, callback,
                 getOpPackageName(), getAttributionTag());
     }
 
@@ -8864,7 +8962,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
+     * Set the preferred network type to global mode which includes NR, LTE, CDMA, EvDo
+     * and GSM/WCDMA.
      *
      * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
@@ -8875,7 +8974,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
+     * Set the preferred network type to global mode which includes NR, LTE, CDMA, EvDo
+     * and GSM/WCDMA.
      *
      * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
@@ -8883,7 +8983,7 @@ public class TelephonyManager {
      * @hide
      */
     public boolean setPreferredNetworkTypeToGlobal(int subId) {
-        return setPreferredNetworkType(subId, RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA);
+        return setPreferredNetworkType(subId, RILConstants.NETWORK_MODE_NR_LTE_CDMA_EVDO_GSM_WCDMA);
     }
 
     /**
@@ -9186,6 +9286,57 @@ public class TelephonyManager {
             Rlog.e(TAG, "getCarrierPackageNamesForIntentAndPhone RemoteException", ex);
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "getCarrierPackageNamesForIntentAndPhone NPE", ex);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the package name that provides the {@link CarrierService} implementation for the
+     * current subscription, or {@code null} if no package with carrier privileges declares one.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, then the provided
+     * subscription ID is used. Otherwise, the default subscription ID will be used.
+     *
+     * @return The system-selected package that provides the {@link CarrierService} implementation
+     * for the current subscription, or {@code null} if none is resolved
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable String getCarrierServicePackageName() {
+        // TODO(b/205736323) plumb this through to CarrierPrivilegesTracker, which will cache the
+        // value instead of re-querying every time.
+        List<String> carrierServicePackages =
+                getCarrierPackageNamesForIntent(
+                        new Intent(CarrierService.CARRIER_SERVICE_INTERFACE));
+        if (carrierServicePackages != null && !carrierServicePackages.isEmpty()) {
+            return carrierServicePackages.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the package name that provides the {@link CarrierService} implementation for the
+     * specified {@code logicalSlotIndex}, or {@code null} if no package with carrier privileges
+     * declares one.
+     *
+     * @param logicalSlotIndex The slot index to fetch the {@link CarrierService} package for
+     * @return The system-selected package that provides the {@link CarrierService} implementation
+     * for the slot, or {@code null} if none is resolved
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable String getCarrierServicePackageNameForLogicalSlot(int logicalSlotIndex) {
+        // TODO(b/205736323) plumb this through to CarrierPrivilegesTracker, which will cache the
+        // value instead of re-querying every time.
+        List<String> carrierServicePackages =
+                getCarrierPackageNamesForIntentAndPhone(
+                        new Intent(CarrierService.CARRIER_SERVICE_INTERFACE), logicalSlotIndex);
+        if (carrierServicePackages != null && !carrierServicePackages.isEmpty()) {
+            return carrierServicePackages.get(0);
         }
         return null;
     }
@@ -9975,7 +10126,9 @@ public class TelephonyManager {
      *
      * <p>Requires one of the following permissions:
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE},
-     * {@link android.Manifest.permission#MODIFY_PHONE_STATE}, or that the calling app has carrier
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE}, or
+     * {@link android.Manifest.permission#READ_BASIC_PHONE_STATE
+     * READ_BASIC_PHONE_STATE} or that the calling app has carrier
      * privileges (see {@link #hasCarrierPrivileges}).
      *
      * <p>Note that this does not take into account any data restrictions that may be present on the
@@ -9986,7 +10139,8 @@ public class TelephonyManager {
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
             android.Manifest.permission.MODIFY_PHONE_STATE,
-            android.Manifest.permission.READ_PHONE_STATE})
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE})
     public boolean isDataEnabled() {
         try {
             return isDataEnabledForReason(DATA_ENABLED_REASON_USER);
@@ -10005,14 +10159,17 @@ public class TelephonyManager {
      *
      * <p>Requires one of the following permissions:
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE},
-     * {@link android.Manifest.permission#READ_PHONE_STATE} or that the calling app
+     * {@link android.Manifest.permission#READ_PHONE_STATE} or
+     * {@link android.Manifest.permission#READ_BASIC_PHONE_STATE
+     * READ_BASIC_PHONE_STATE} or that the calling app
      * has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @return {@code true} if the data roaming is enabled on the subscription, otherwise return
      * {@code false}.
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
-            android.Manifest.permission.READ_PHONE_STATE})
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE})
     public boolean isDataRoamingEnabled() {
         boolean isDataRoamingEnabled = false;
         try {
@@ -11439,7 +11596,6 @@ public class TelephonyManager {
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
      * and {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     *
      * May return {@code null} when the subscription is inactive or when there was an error
      * communicating with the phone process.
      */
@@ -11449,7 +11605,72 @@ public class TelephonyManager {
             Manifest.permission.ACCESS_COARSE_LOCATION
     })
     public @Nullable ServiceState getServiceState() {
-        return getServiceStateForSubscriber(getSubId());
+        return getServiceState(false, false);
+    }
+
+    /**
+     * Returns the current {@link ServiceState} information.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     *
+     * If you want continuous updates of service state info, register a {@link PhoneStateListener}
+     * via {@link #listen} with the {@link PhoneStateListener#LISTEN_SERVICE_STATE} event.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
+     * and {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
+     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
+     * receive location related information which will be sent if the caller already possess
+     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     * May return {@code null} when the subscription is inactive or when there was an error
+     * communicating with the phone process.
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(allOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+    })
+    public @Nullable ServiceState getServiceState(boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess) {
+        return getServiceStateForSubscriber(getSubId(), renounceFineLocationAccess,
+                renounceCoarseLocationAccess);
+    }
+
+    /**
+     * Returns the service state information on specified subscription. Callers require
+     * either READ_PRIVILEGED_PHONE_STATE or READ_PHONE_STATE to retrieve the information.
+     *
+     * May return {@code null} when the subscription is inactive or when there was an error
+     * communicating with the phone process.
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
+     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
+     * receive location related information which will be sent if the caller already possess
+     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     */
+    private ServiceState getServiceStateForSubscriber(int subId,
+            boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getServiceStateForSubscriber(subId, renounceFineLocationAccess,
+                        renounceCoarseLocationAccess,
+                        getOpPackageName(), getAttributionTag());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
+        } catch (NullPointerException e) {
+            AnomalyReporter.reportAnomaly(
+                    UUID.fromString("a3ab0b9d-f2aa-4baf-911d-7096c0d4645a"),
+                    "getServiceStateForSubscriber " + subId + " NPE");
+        }
+        return null;
     }
 
     /**
@@ -11462,20 +11683,7 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public ServiceState getServiceStateForSubscriber(int subId) {
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                return service.getServiceStateForSubscriber(subId, getOpPackageName(),
-                        getAttributionTag());
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
-        } catch (NullPointerException e) {
-            AnomalyReporter.reportAnomaly(
-                    UUID.fromString("a3ab0b9d-f2aa-4baf-911d-7096c0d4645a"),
-                    "getServiceStateForSubscriber " + subId + " NPE");
-        }
-        return null;
+        return getServiceStateForSubscriber(getSubId(), false, false);
     }
 
     /**
@@ -12411,16 +12619,21 @@ public class TelephonyManager {
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies
      *      to the given subId. Otherwise, applies to
      * {@link SubscriptionManager#getDefaultDataSubscriptionId()}
-     *
      * @param reason the reason the data enable change is taking place
      * @return whether data is enabled for a reason.
      * <p>Requires Permission:
+     * The calling app has carrier privileges (see {@link #hasCarrierPrivileges}) or
      * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} or
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * {@link android.Manifest.permission#READ_BASIC_PHONE_STATE}
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
-            android.Manifest.permission.READ_PHONE_STATE})
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE
+    })
     public boolean isDataEnabledForReason(@DataEnabledReason int reason) {
         return isDataEnabledForReason(getSubId(), reason);
     }
@@ -12555,14 +12768,11 @@ public class TelephonyManager {
      *   <LI>And possibly others.</LI>
      * </UL>
      * @return {@code true} if the overall data connection is allowed; {@code false} if not.
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} or
-     * android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
             android.Manifest.permission.READ_PHONE_STATE,
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE})
     public boolean isDataConnectionAllowed() {
         boolean retVal = false;
         try {
@@ -14295,7 +14505,8 @@ public class TelephonyManager {
             if (callForwardingInfo.getNumber() == null) {
                 throw new IllegalArgumentException("callForwarding number is null");
             }
-            if (callForwardingInfo.getTimeoutSeconds() <= 0) {
+            if (callForwardingReason == CallForwardingInfo.REASON_NO_REPLY
+                        && callForwardingInfo.getTimeoutSeconds() <= 0) {
                 throw new IllegalArgumentException("callForwarding timeout isn't positive");
             }
         }
@@ -15323,7 +15534,49 @@ public class TelephonyManager {
      */
     public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
+        registerTelephonyCallback(false, false, executor, callback);
+    }
 
+    /**
+     * Registers a callback object to receive notification of changes in specified telephony states.
+     * <p>
+     * To register a callback, pass a {@link TelephonyCallback} which implements
+     * interfaces of events. For example,
+     * FakeServiceStateCallback extends {@link TelephonyCallback} implements
+     * {@link TelephonyCallback.ServiceStateListener}.
+     *
+     * At registration, and when a specified telephony state changes, the telephony manager invokes
+     * the appropriate callback method on the callback object and passes the current (updated)
+     * values.
+     * <p>
+     *
+     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
+     * applies to the given subId. Otherwise, applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}. To register events for multiple
+     * subIds, pass a separate callback object to each TelephonyManager object created with
+     * {@link #createForSubscriptionId}.
+     *
+     * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
+     * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
+     * {@link SecurityException} will be thrown otherwise.
+     *
+     * This API should be used sparingly -- large numbers of callbacks will cause system
+     * instability. If a process has registered too many callbacks without unregistering them, it
+     * may encounter an {@link IllegalStateException} when trying to register more callbacks.
+     *
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permissions.
+     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
+     * receive location related information which will be sent if the caller already possess
+     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     * @param executor The executor of where the callback will execute.
+     * @param callback The {@link TelephonyCallback} object to register.
+     */
+    public void registerTelephonyCallback(boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull TelephonyCallback callback) {
         if (mContext == null) {
             throw new IllegalStateException("telephony service is null.");
         }
@@ -15334,7 +15587,8 @@ public class TelephonyManager {
         mTelephonyRegistryMgr = (TelephonyRegistryManager)
                 mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
         if (mTelephonyRegistryMgr != null) {
-            mTelephonyRegistryMgr.registerTelephonyCallback(executor, mSubId, getOpPackageName(),
+            mTelephonyRegistryMgr.registerTelephonyCallback(renounceFineLocationAccess,
+                    renounceCoarseLocationAccess, executor, mSubId, getOpPackageName(),
                     getAttributionTag(), callback, getITelephony() != null);
         } else {
             throw new IllegalStateException("telephony service is null.");
@@ -15857,5 +16111,104 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             ex.rethrowAsRuntimeException();
         }
+    }
+
+    /**
+     * Get last known cell identity.
+     * Require {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and
+     * com.android.phone.permission.ACCESS_LAST_KNOWN_CELL_ID, otherwise throws SecurityException.
+     * If there is current registered network this value will be same as the registered cell
+     * identity. If the device goes out of service the previous cell identity is cached and
+     * will be returned. If the cache age of the Cell identity is more than 24 hours
+     * it will be cleared and null will be returned.
+     * @return last known cell identity {@CellIdentity}.
+     * @hide
+     */
+    @RequiresPermission(allOf = {Manifest.permission.ACCESS_FINE_LOCATION,
+            "com.android.phone.permission.ACCESS_LAST_KNOWN_CELL_ID"})
+    public @Nullable CellIdentity getLastKnownCellIdentity() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                throw new IllegalStateException("telephony service is null.");
+            }
+            return telephony.getLastKnownCellIdentity(getSubId(), getOpPackageName(),
+                    getAttributionTag());
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+        return null;
+    }
+
+    /**
+     * Callback to listen for when the set of packages with carrier privileges for a SIM changes.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface CarrierPrivilegesListener {
+        /**
+         * Called when the set of packages with carrier privileges has changed.
+         *
+         * <p>Of note, this callback will <b>not</b> be fired if a carrier triggers a SIM profile
+         * switch and the same set of packages remains privileged after the switch.
+         *
+         * <p>At registration, the callback will receive the current set of privileged packages.
+         *
+         * @param privilegedPackageNames The updated set of package names that have carrier
+         *     privileges
+         * @param privilegedUids The updated set of UIDs that have carrier privileges
+         */
+        void onCarrierPrivilegesChanged(
+                @NonNull List<String> privilegedPackageNames, @NonNull int[] privilegedUids);
+    }
+
+    /**
+     * Registers a {@link CarrierPrivilegesListener} on the given {@code logicalSlotIndex} to
+     * receive callbacks when the set of packages with carrier privileges changes. The callback will
+     * immediately be called with the latest state.
+     *
+     * @param logicalSlotIndex The SIM slot to listen on
+     * @param executor The executor where {@code listener} will be invoked
+     * @param listener The callback to register
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void addCarrierPrivilegesListener(
+            int logicalSlotIndex,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CarrierPrivilegesListener listener) {
+        if (mContext == null) {
+            throw new IllegalStateException("Telephony service is null");
+        } else if (executor == null || listener == null) {
+            throw new IllegalArgumentException(
+                    "CarrierPrivilegesListener and executor must be non-null");
+        }
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        mTelephonyRegistryMgr.addCarrierPrivilegesListener(logicalSlotIndex, executor, listener);
+    }
+
+    /**
+     * Unregisters an existing {@link CarrierPrivilegesListener}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void removeCarrierPrivilegesListener(@NonNull CarrierPrivilegesListener listener) {
+        if (mContext == null) {
+            throw new IllegalStateException("Telephony service is null");
+        } else if (listener == null) {
+            throw new IllegalArgumentException("CarrierPrivilegesListener must be non-null");
+        }
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        mTelephonyRegistryMgr.removeCarrierPrivilegesListener(listener);
     }
 }

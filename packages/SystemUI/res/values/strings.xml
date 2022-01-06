@@ -211,6 +211,8 @@
 
     <!-- Power menu item for taking a screenshot [CHAR LIMIT=20]-->
     <string name="global_action_screenshot">Screenshot</string>
+    <!-- Message shown in power menu when smart lock has been disabled [CHAR_LIMIT=NONE] -->
+    <string name="global_action_smart_lock_disabled">Smart Lock disabled</string>
 
     <!-- text to show in place of RemoteInput images when they cannot be shown.
          [CHAR LIMIT=50] -->
@@ -1006,7 +1008,7 @@
     <string name="sensor_privacy_start_use_mic_camera_dialog_content">This unblocks access for all apps and services allowed to use your camera or microphone.</string>
 
     <!-- Default name for the media device shown in the output switcher when the name is not available [CHAR LIMIT=30] -->
-    <string name="media_seamless_remote_device">Device</string>
+    <string name="media_seamless_other_device">Other device</string>
 
     <!-- QuickStep: Accessibility to toggle overview [CHAR LIMIT=40] -->
     <string name="quick_step_accessibility_toggle_overview">Toggle Overview</string>
@@ -1777,6 +1779,8 @@
     <string name="tuner_full_importance_settings">Power notification controls</string>
     <string name="tuner_full_importance_settings_on">On</string>
     <string name="tuner_full_importance_settings_off">Off</string>
+    <!-- [CHAR LIMIT=NONE] Notification camera based rotation enabled description -->
+    <string name="rotation_lock_camera_rotation_on">On - Face-based</string>
     <string name="power_notification_controls_description">With power notification controls, you can set an importance level from 0 to 5 for an app\'s notifications.
         \n\n<b>Level 5</b>
         \n- Show at the top of the notification list
@@ -2992,4 +2996,43 @@
     <string name="global_actions_change_description" translatable="false"><xliff:g>%1$s</xliff:g></string>
     <!-- URL for more information about changes in global actions -->
     <string name="global_actions_change_url" translatable="false"></string>
+
+    <!-- Provider Model: Default title of the mobile network in the mobile layout. [CHAR LIMIT=50] -->
+    <string name="mobile_data_settings_title">Mobile data</string>
+    <!-- Provider Model: Summary text separator for preferences including a short description
+         (eg. "Connected / 5G"). [CHAR LIMIT=50] -->
+    <string name="preference_summary_default_combination"><xliff:g id="state" example="Connected">%1$s</xliff:g> / <xliff:g id="networkMode" example="LTE">%2$s</xliff:g></string>
+    <!-- Provider Model:
+         Summary indicating that a SIM has an active mobile data connection [CHAR LIMIT=50] -->
+    <string name="mobile_data_connection_active">Connected</string>
+    <!-- Provider Model:
+     Summary indicating that a SIM has no mobile data connection [CHAR LIMIT=50] -->
+    <string name="mobile_data_off_summary">Mobile data won\u0027t auto\u2011connect</string>
+    <!-- Provider Model:
+     Summary indicating that a active SIM and no network available [CHAR LIMIT=50] -->
+    <string name="mobile_data_no_connection">No connection</string>
+    <!-- Provider Model: Summary indicating that no other networks available [CHAR LIMIT=50] -->
+    <string name="non_carrier_network_unavailable">No other networks available</string>
+    <!-- Provider Model: Summary indicating that no networks available [CHAR LIMIT=50] -->
+    <string name="all_network_unavailable">No networks available</string>
+    <!-- Provider Model: Panel title text for turning on the Wi-Fi networks. [CHAR LIMIT=40] -->
+    <string name="turn_on_wifi">Wi\u2011Fi</string>
+    <!-- Provider Model: Title for detail page of wifi network [CHAR LIMIT=30] -->
+    <string name="pref_title_network_details" msgid="7329759534269363308">"Network details"</string>
+    <!-- Provider Model: Panel subtitle for tapping a network to connect to internet. [CHAR LIMIT=60] -->
+    <string name="tap_a_network_to_connect">Tap a network to connect</string>
+    <!-- Provider Model: Panel subtitle for unlocking screen to view networks. [CHAR LIMIT=60] -->
+    <string name="unlock_to_view_networks">Unlock to view networks</string>
+    <!-- Provider Model: Wi-Fi settings. text displayed when Wi-Fi is on and network list is empty [CHAR LIMIT=50]-->
+    <string name="wifi_empty_list_wifi_on">Searching for networks\u2026</string>
+    <!-- Provider Model: Failure notification for connect -->
+    <string name="wifi_failed_connect_message">Failed to connect to network</string>
+    <!-- Provider Model: Toast message for when the user selects cellular as the internet provider and Wi-Fi auto-connect is temporarily disabled [CHAR LIMIT=60]-->
+    <string name="wifi_wont_autoconnect_for_now">Wi\u2011Fi won\u2019t auto-connect for now</string>
+    <!-- Provider Model: Title to see all the networks [CHAR LIMIT=50] -->
+    <string name="see_all_networks">See all</string>
+    <!-- Summary for warning to disconnect ethernet first then switch to other networks. [CHAR LIMIT=60] -->
+    <string name="to_switch_networks_disconnect_ethernet">To switch networks, disconnect ethernet</string>
+    <!-- Message to describe "Wi-Fi scan always available feature" when Wi-Fi is off and Wi-Fi scanning is on. [CHAR LIMIT=NONE] -->
+    <string name="wifi_scan_notify_message">To improve device experience, apps and services can still scan for Wi\u2011Fi networks at any time, even when Wi\u2011Fi is off. You can change this in Wi\u2011Fi scanning settings. <annotation id="link">Change</annotation></string>
 </resources>

@@ -763,9 +763,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES,
                 GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_SELECTION_VALUES);
         dumpSetting(s, p,
-                Settings.Global.ANGLE_ALLOWLIST,
-                GlobalSettingsProto.Gpu.ANGLE_ALLOWLIST);
-        dumpSetting(s, p,
                 Settings.Global.ANGLE_EGL_FEATURES,
                 GlobalSettingsProto.Gpu.ANGLE_EGL_FEATURES);
         dumpSetting(s, p,
@@ -1085,14 +1082,17 @@ class SettingsProtoDumpUtil {
                 Settings.Global.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE,
                 GlobalSettingsProto.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE);
 
-        final long nitzUpdateToken = p.start(GlobalSettingsProto.NITZ_UPDATE);
+        final long nitzToken = p.start(GlobalSettingsProto.NITZ);
         dumpSetting(s, p,
                 Settings.Global.NITZ_UPDATE_DIFF,
-                GlobalSettingsProto.NitzUpdate.DIFF);
+                GlobalSettingsProto.Nitz.UPDATE_DIFF);
         dumpSetting(s, p,
                 Settings.Global.NITZ_UPDATE_SPACING,
-                GlobalSettingsProto.NitzUpdate.SPACING);
-        p.end(nitzUpdateToken);
+                GlobalSettingsProto.Nitz.UPDATE_SPACING);
+        dumpSetting(s, p,
+                Settings.Global.NITZ_NETWORK_DISCONNECT_RETENTION,
+                GlobalSettingsProto.Nitz.NETWORK_DISCONNECT_RETENTION);
+        p.end(nitzToken);
 
         final long notificationToken = p.start(GlobalSettingsProto.NOTIFICATION);
         dumpSetting(s, p,
@@ -1113,10 +1113,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
                 GlobalSettingsProto.Notification.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS);
         p.end(notificationToken);
-
-        dumpSetting(s, p,
-                Settings.Global.NSD_ON,
-                GlobalSettingsProto.NSD_ON);
 
         dumpSetting(s, p,
                 Settings.Global.NR_NSA_TRACKING_SCREEN_OFF_MODE,
@@ -1195,6 +1191,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.POWER_MANAGER_CONSTANTS,
                 GlobalSettingsProto.POWER_MANAGER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.POWER_BUTTON_LONG_PRESS_DURATION_MS,
+                GlobalSettingsProto.POWER_BUTTON_LONG_PRESS_DURATION_MS);
 
         final long prepaidSetupToken = p.start(GlobalSettingsProto.PREPAID_SETUP);
         dumpSetting(s, p,
@@ -1475,6 +1474,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.USE_OPEN_WIFI_PACKAGE,
                 GlobalSettingsProto.USE_OPEN_WIFI_PACKAGE);
+        dumpSetting(s, p,
+                Settings.Global.UWB_ENABLED,
+                GlobalSettingsProto.UWB_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.VT_IMS_ENABLED,
                 GlobalSettingsProto.VT_IMS_ENABLED);

@@ -22,11 +22,13 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.UserInfo
+import android.os.Process.SYSTEM_UID
 import android.os.UserHandle
 import android.permission.PermGroupUsage
 import android.permission.PermissionManager
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.plugins.ActivityStarter
@@ -53,6 +55,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -96,6 +99,8 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
     private lateinit var activityStartedCaptor: ArgumentCaptor<ActivityStarter.Callback>
     @Captor
     private lateinit var intentCaptor: ArgumentCaptor<Intent>
+    @Mock
+    private lateinit var uiEventLogger: UiEventLogger
 
     private val backgroundExecutor = FakeExecutor(FakeSystemClock())
     private val uiExecutor = FakeExecutor(FakeSystemClock())
@@ -136,6 +141,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
                 privacyLogger,
                 keyguardStateController,
                 appOpsController,
+                uiEventLogger,
                 dialogProvider
         )
     }
@@ -548,6 +554,49 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         activityStartedCaptor.value.onActivityStarted(ActivityManager.START_ABORTED)
 
         verify(dialog, never()).dismiss()
+    }
+
+    @Test
+    fun testCallOnSecondaryUser() {
+        // Calls happen in
+        val usage = createMockPermGroupUsage(uid = SYSTEM_UID, isPhoneCall = true)
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        `when`(userTracker.userProfiles).thenReturn(listOf(
+                UserInfo(ENT_USER_ID, "", 0)
+        ))
+
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        verify(dialog).show()
+    }
+
+    @Test
+    fun testStartActivityLogs() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID)
+        verify(uiEventLogger).log(PrivacyDialogEvent.PRIVACY_DIALOG_ITEM_CLICKED_TO_APP_SETTINGS,
+                USER_ID, TEST_PACKAGE_NAME)
+    }
+
+    @Test
+    fun testDismissedDialogLogs() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        verify(dialog).addOnDismissListener(capture(dialogDismissedCaptor))
+
+        dialogDismissedCaptor.value.onDialogDismissed()
+
+        controller.dismissDialog()
+
+        verify(uiEventLogger, times(1)).log(PrivacyDialogEvent.PRIVACY_DIALOG_DISMISSED)
     }
 
     private fun exhaustExecutors() {

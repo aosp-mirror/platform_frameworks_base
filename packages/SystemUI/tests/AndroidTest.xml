@@ -18,12 +18,17 @@
         <option name="test-file-name" value="SystemUITests.apk" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer">
+        <option name="force-root" value="true" />
+    </target_preparer>
+
     <option name="test-suite-tag" value="apct" />
     <option name="test-suite-tag" value="framework-base-presubmit" />
     <option name="test-tag" value="SystemUITests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.systemui.tests" />
         <option name="runner" value="android.testing.TestableInstrumentation" />
+        <option name="test-filter-dir" value="/data/data/com.android.systemui.tests" />
         <option name="hidden-api-checks" value="false"/>
     </test>
 </configuration>

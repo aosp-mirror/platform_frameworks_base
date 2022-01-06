@@ -238,7 +238,7 @@ public class UpdateEngine {
         public static final int DISABLED = 9;
     }
 
-    private IUpdateEngine mUpdateEngine;
+    private final IUpdateEngine mUpdateEngine;
     private IUpdateEngineCallback mUpdateEngineCallback = null;
     private final Object mUpdateEngineCallbackLock = new Object();
 
@@ -248,6 +248,9 @@ public class UpdateEngine {
     public UpdateEngine() {
         mUpdateEngine = IUpdateEngine.Stub.asInterface(
                 ServiceManager.getService(UPDATE_ENGINE_SERVICE));
+        if (mUpdateEngine == null) {
+            throw new IllegalStateException("Failed to find update_engine");
+        }
     }
 
     /**
