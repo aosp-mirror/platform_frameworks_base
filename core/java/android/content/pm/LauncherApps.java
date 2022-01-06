@@ -69,6 +69,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileNotFoundException;
@@ -84,6 +85,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 /**
@@ -440,6 +442,17 @@ public class LauncherApps {
         public static final int FLAG_GET_KEY_FIELDS_ONLY = 1 << 2;
 
         /**
+         * Includes shortcuts from persistence layer in the search result.
+         *
+         * <p>The caller should make the query on a worker thread since accessing persistence layer
+         * is considered asynchronous.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final int FLAG_GET_PERSISTED_DATA = 1 << 12;
+
+        /**
          * Populate the persons field in the result. See {@link ShortcutInfo#getPersons()}.
          *
          * <p>The caller must have the system {@code ACCESS_SHORTCUTS} permission.
@@ -459,6 +472,7 @@ public class LauncherApps {
                 FLAG_MATCH_PINNED_BY_ANY_LAUNCHER,
                 FLAG_GET_KEY_FIELDS_ONLY,
                 FLAG_GET_PERSONS_DATA,
+                FLAG_GET_PERSISTED_DATA
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface QueryFlags {}
@@ -1137,6 +1151,9 @@ public class LauncherApps {
             @NonNull UserHandle user) {
         logErrorForInvalidProfileAccess(user);
         try {
+            if ((query.mQueryFlags & ShortcutQuery.FLAG_GET_PERSISTED_DATA) != 0) {
+                return getShortcutsBlocked(query, user);
+            }
             // Note this is the only case we need to update the disabled message for shortcuts
             // that weren't restored.
             // The restore problem messages are only shown by the user, and publishers will never
@@ -1144,10 +1161,26 @@ public class LauncherApps {
             // changed callback, but that only returns shortcuts with the "key" information, so
             // that won't return disabled message.
             return maybeUpdateDisabledMessage(mService.getShortcuts(mContext.getPackageName(),
-                    new ShortcutQueryWrapper(query), user)
-                    .getList());
+                                new ShortcutQueryWrapper(query), user)
+                        .getList());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private List<ShortcutInfo> getShortcutsBlocked(@NonNull ShortcutQuery query,
+            @NonNull UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
+        final AndroidFuture<List<ShortcutInfo>> future = new AndroidFuture<>();
+        future.thenApply(this::maybeUpdateDisabledMessage);
+        try {
+            mService.getShortcutsAsync(mContext.getPackageName(),
+                            new ShortcutQueryWrapper(query), user, future);
+            return future.get();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
         }
     }
 

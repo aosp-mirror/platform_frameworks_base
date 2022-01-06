@@ -2918,6 +2918,7 @@ package android.content.pm {
   }
 
   public static class LauncherApps.ShortcutQuery {
+    field public static final int FLAG_GET_PERSISTED_DATA = 4096; // 0x1000
     field @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS) public static final int FLAG_GET_PERSONS_DATA = 2048; // 0x800
   }
 
