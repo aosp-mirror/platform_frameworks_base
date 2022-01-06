@@ -123,9 +123,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             OneHandedBackgroundPanelOrganizer oneHandedBackgroundGradientOrganizer,
             ShellExecutor mainExecutor) {
         super(mainExecutor);
-        mDisplayLayout.set(displayLayout);
+        setDisplayLayout(displayLayout);
         mOneHandedSettingsUtil = oneHandedSettingsUtil;
-        updateDisplayBounds();
         mAnimationController = animationController;
         final int animationDurationConfig = context.getResources().getInteger(
                 R.integer.config_one_handed_translate_animation_duration);
@@ -282,6 +281,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     @VisibleForTesting
     void setDisplayLayout(@NonNull DisplayLayout displayLayout) {
         mDisplayLayout.set(displayLayout);
+        updateDisplayBounds();
     }
 
     @VisibleForTesting
@@ -289,6 +289,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         return mDisplayAreaTokenMap;
     }
 
+    @VisibleForTesting
     void updateDisplayBounds() {
         mDefaultDisplayBounds.set(0, 0, mDisplayLayout.width(), mDisplayLayout.height());
         mLastVisualDisplayBounds.set(mDefaultDisplayBounds);

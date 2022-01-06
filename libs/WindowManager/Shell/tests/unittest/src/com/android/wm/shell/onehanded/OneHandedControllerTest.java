@@ -109,6 +109,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         mSpiedTransitionState = spy(new OneHandedState());
 
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
+        when(mMockDisplayController.getDisplayLayout(anyInt())).thenReturn(null);
         when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
         when(mMockDisplayAreaOrganizer.isReady()).thenReturn(true);
         when(mMockBackgroundOrganizer.isRegistered()).thenReturn(true);
@@ -150,6 +151,13 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     public void testDefaultShouldNotInOneHanded() {
         // Assert default transition state is STATE_NONE
         assertThat(mSpiedTransitionState.getState()).isEqualTo(STATE_NONE);
+    }
+
+    @Test
+    public void testNullDisplayLayout() {
+        mSpiedOneHandedController.updateDisplayLayout(0);
+
+        verify(mMockDisplayAreaOrganizer, never()).setDisplayLayout(any());
     }
 
     @Test

@@ -67,19 +67,13 @@ droidstubs {
     },
     dists: [
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/public/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/public/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
@@ -123,19 +117,13 @@ droidstubs {
     },
     dists: [
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/system/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/system/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
@@ -159,37 +147,25 @@ droidstubs {
     },
     dists: [
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/test/api",
             dest: "android.txt",
             tag: ".api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/test/api",
             dest: "removed.txt",
             tag: ".removed-api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/test/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/test/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
@@ -218,19 +194,13 @@ droidstubs {
     },
     dists: [
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/module-lib/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/module-lib/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
@@ -298,10 +268,7 @@ java_defaults {
     java_version: "1.8",
     compile_dex: true,
     dist: {
-        targets: [
-            "sdk",
-            "win_sdk",
-        ],
+        targets: ["sdk"],
         tag: ".jar",
         dest: "android-non-updatable.jar",
     },
@@ -378,10 +345,7 @@ java_library_with_nonpublic_deps {
 java_defaults {
     name: "android_stubs_dists_default",
     dist: {
-        targets: [
-            "sdk",
-            "win_sdk",
-        ],
+        targets: ["sdk"],
         tag: ".jar",
         dest: "android.jar",
     },
@@ -427,10 +391,7 @@ java_library_with_nonpublic_deps {
     dists: [
         {
             // Legacy dist path
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             tag: ".jar",
             dest: "android_system.jar",
         },
@@ -470,6 +431,7 @@ java_library {
     static_libs: [
         "android-non-updatable.stubs.module_lib",
         "art.module.public.api.stubs.module_lib",
+        "i18n.module.public.api.stubs",
     ],
     dist: {
         dir: "apistubs/android/module-lib",

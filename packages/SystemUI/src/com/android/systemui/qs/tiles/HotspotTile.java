@@ -195,15 +195,6 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
         return MetricsEvent.QS_HOTSPOT;
     }
 
-    @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.accessibility_quick_settings_hotspot_changed_on);
-        } else {
-            return mContext.getString(R.string.accessibility_quick_settings_hotspot_changed_off);
-        }
-    }
-
     /**
      * Listens to changes made to hotspot and data saver states (to toggle tile availability).
      */

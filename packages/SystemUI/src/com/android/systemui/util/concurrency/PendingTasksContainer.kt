@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard
+package com.android.systemui.util.concurrency
 
 import android.os.Trace
 import java.util.concurrent.atomic.AtomicInteger
@@ -23,9 +23,9 @@ import java.util.concurrent.atomic.AtomicReference
 /**
  * Allows to wait for multiple callbacks and notify when the last one is executed
  */
-class PendingDrawnTasksContainer {
+class PendingTasksContainer {
 
-    private var pendingDrawnTasksCount: AtomicInteger = AtomicInteger(0)
+    private var pendingTasksCount: AtomicInteger = AtomicInteger(0)
     private var completionCallback: AtomicReference<Runnable> = AtomicReference()
 
     /**
@@ -33,19 +33,19 @@ class PendingDrawnTasksContainer {
      * @return a runnable that should be invoked when the task is finished
      */
     fun registerTask(name: String): Runnable {
-        pendingDrawnTasksCount.incrementAndGet()
+        pendingTasksCount.incrementAndGet()
 
         if (ENABLE_TRACE) {
-            Trace.beginAsyncSection("PendingDrawnTasksContainer#$name", 0)
+            Trace.beginAsyncSection("PendingTasksContainer#$name", 0)
         }
 
         return Runnable {
-            if (pendingDrawnTasksCount.decrementAndGet() == 0) {
+            if (pendingTasksCount.decrementAndGet() == 0) {
                 val onComplete = completionCallback.getAndSet(null)
                 onComplete?.run()
 
                 if (ENABLE_TRACE) {
-                    Trace.endAsyncSection("PendingDrawnTasksContainer#$name", 0)
+                    Trace.endAsyncSection("PendingTasksContainer#$name", 0)
                 }
             }
         }
@@ -57,7 +57,7 @@ class PendingDrawnTasksContainer {
     fun reset() {
         // Create new objects in case if there are pending callbacks from the previous invocations
         completionCallback = AtomicReference()
-        pendingDrawnTasksCount = AtomicInteger(0)
+        pendingTasksCount = AtomicInteger(0)
     }
 
     /**
@@ -67,7 +67,7 @@ class PendingDrawnTasksContainer {
     fun onTasksComplete(onComplete: Runnable) {
         completionCallback.set(onComplete)
 
-        if (pendingDrawnTasksCount.get() == 0) {
+        if (pendingTasksCount.get() == 0) {
             val currentOnComplete = completionCallback.getAndSet(null)
             currentOnComplete?.run()
         }
@@ -76,7 +76,7 @@ class PendingDrawnTasksContainer {
     /**
      * Returns current pending tasks count
      */
-    fun getPendingCount(): Int = pendingDrawnTasksCount.get()
+    fun getPendingCount(): Int = pendingTasksCount.get()
 }
 
 private const val ENABLE_TRACE = false

@@ -20,7 +20,6 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.android.keyguard.KeyguardHostView;
-import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardSecurityContainer;
 import com.android.keyguard.KeyguardSecurityViewFlipper;
 import com.android.systemui.R;
@@ -35,26 +34,16 @@ import dagger.Provides;
  */
 @Module
 public interface KeyguardBouncerModule {
-    /** */
-    @Provides
-    @KeyguardBouncerScope
-    @RootView
-    static ViewGroup providesRootView(LayoutInflater layoutInflater) {
-        return (ViewGroup) layoutInflater.inflate(R.layout.keyguard_bouncer, null);
-    }
 
     /** */
     @Provides
     @KeyguardBouncerScope
-    static KeyguardMessageArea providesKeyguardMessageArea(@RootView ViewGroup viewGroup) {
-        return viewGroup.findViewById(R.id.keyguard_message_area);
-    }
-
-    /** */
-    @Provides
-    @KeyguardBouncerScope
-    static KeyguardHostView providesKeyguardHostView(@RootView ViewGroup rootView) {
-        return rootView.findViewById(R.id.keyguard_host_view);
+    static KeyguardHostView providesKeyguardHostView(@RootView ViewGroup rootView,
+            LayoutInflater layoutInflater) {
+        KeyguardHostView hostView = (KeyguardHostView) layoutInflater.inflate(
+                R.layout.keyguard_host_view, rootView, false);
+        rootView.addView(hostView);
+        return hostView;
     }
 
     /** */

@@ -714,6 +714,9 @@
     <protected-broadcast android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
     <protected-broadcast android:name="android.app.action.SHOW_NEW_USER_DISCLAIMER" />
 
+    <!-- Added in T -->
+    <protected-broadcast android:name="android.intent.action.REFRESH_SAFETY_SOURCES" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
@@ -5476,6 +5479,16 @@
     <permission android:name="android.permission.START_VIEW_PERMISSION_USAGE"
         android:label="@string/permlab_startViewPermissionUsage"
         android:description="@string/permdesc_startViewPermissionUsage"
+        android:protectionLevel="signature|installer" />
+
+    <!--
+        @SystemApi
+        Allows the holder to start the screen to review permission decisions.
+        <p>Protection level: signature|installer
+        @hide -->
+    <permission android:name="android.permission.START_REVIEW_PERMISSION_DECISIONS"
+        android:label="@string/permlab_startReviewPermissionDecisions"
+        android:description="@string/permdesc_startReviewPermissionDecisions"
         android:protectionLevel="signature|installer" />
 
     <!--

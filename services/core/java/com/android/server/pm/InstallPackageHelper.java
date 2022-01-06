@@ -561,6 +561,7 @@ final class InstallPackageHelper {
                     pkgSetting.setHidden(false, userId);
                     pkgSetting.setInstallReason(installReason, userId);
                     pkgSetting.setUninstallReason(PackageManager.UNINSTALL_REASON_UNKNOWN, userId);
+                    pkgSetting.setFirstInstallTime(System.currentTimeMillis(), userId);
                     mPm.mSettings.writePackageRestrictionsLPr(userId);
                     mPm.mSettings.writeKernelMappingLPr(pkgSetting);
                     installed = true;
@@ -1902,7 +1903,7 @@ final class InstallPackageHelper {
                 PackageStateInternal deletedPkgSetting = mPm.getPackageStateInternal(
                         oldPackage.getPackageName());
                 reconciledPkg.mPkgSetting
-                        .setFirstInstallTime(deletedPkgSetting.getFirstInstallTime())
+                        .setFirstInstallTimeFromReplaced(deletedPkgSetting, request.mAllUsers)
                         .setLastUpdateTime(System.currentTimeMillis());
 
                 res.mRemovedInfo.mBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(

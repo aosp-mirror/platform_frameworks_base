@@ -58,7 +58,8 @@ class UnfoldTransitionModule {
                     deviceStateManager,
                     sensorManager,
                     handler,
-                    executor
+                    executor,
+                    tracingTagPrefix = "systemui"
                 )
             )
         } else {

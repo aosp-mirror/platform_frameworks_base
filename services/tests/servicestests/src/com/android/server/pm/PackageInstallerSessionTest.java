@@ -306,12 +306,12 @@ public class PackageInstallerSessionTest {
         assertEquals(expected.stageCid, actual.stageCid);
         assertEquals(expected.isPrepared(), actual.isPrepared());
         assertEquals(expected.isStaged(), actual.isStaged());
-        assertEquals(expected.isStagedSessionApplied(), actual.isStagedSessionApplied());
-        assertEquals(expected.isStagedSessionFailed(), actual.isStagedSessionFailed());
-        assertEquals(expected.isStagedSessionReady(), actual.isStagedSessionReady());
-        assertEquals(expected.getStagedSessionErrorCode(), actual.getStagedSessionErrorCode());
-        assertEquals(expected.getStagedSessionErrorMessage(),
-                actual.getStagedSessionErrorMessage());
+        assertEquals(expected.isSessionApplied(), actual.isSessionApplied());
+        assertEquals(expected.isSessionFailed(), actual.isSessionFailed());
+        assertEquals(expected.isSessionReady(), actual.isSessionReady());
+        assertEquals(expected.getSessionErrorCode(), actual.getSessionErrorCode());
+        assertEquals(expected.getSessionErrorMessage(),
+                actual.getSessionErrorMessage());
         assertEquals(expected.isPrepared(), actual.isPrepared());
         assertEquals(expected.isCommitted(), actual.isCommitted());
         assertEquals(expected.createdMillis, actual.createdMillis);

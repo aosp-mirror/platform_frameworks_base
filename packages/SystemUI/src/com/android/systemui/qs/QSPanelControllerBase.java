@@ -45,6 +45,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -252,6 +253,15 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     QSTileView getTileView(QSTile tile) {
         for (QSPanelControllerBase.TileRecord r : mRecords) {
             if (r.tile == tile) {
+                return r.tileView;
+            }
+        }
+        return null;
+    }
+
+    QSTileView getTileView(String spec) {
+        for (QSPanelControllerBase.TileRecord r : mRecords) {
+            if (Objects.equals(r.tile.getTileSpec(), spec)) {
                 return r.tileView;
             }
         }

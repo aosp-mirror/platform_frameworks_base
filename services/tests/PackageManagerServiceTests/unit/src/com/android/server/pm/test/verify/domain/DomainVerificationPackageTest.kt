@@ -896,7 +896,6 @@ class DomainVerificationPackageTest {
         whenever(this.pkg) { pkg }
         whenever(packageName) { pkgName }
         whenever(this.domainSetId) { domainSetId }
-        whenever(firstInstallTime) { 0L }
         whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
         whenever(getUserStateOrDefault(10)) { PackageUserStateInternal.DEFAULT }
         whenever(userStates) {

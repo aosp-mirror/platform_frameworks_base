@@ -243,15 +243,6 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.accessibility_quick_settings_bluetooth_changed_on);
-        } else {
-            return mContext.getString(R.string.accessibility_quick_settings_bluetooth_changed_off);
-        }
-    }
-
-    @Override
     public boolean isAvailable() {
         return mController.isBluetoothSupported();
     }

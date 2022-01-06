@@ -59,6 +59,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
+import android.view.accessibility.AccessibilityCache;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -747,7 +748,6 @@ public abstract class AccessibilityService extends Service {
     private final Object mLock = new Object();
 
     private FingerprintGestureController mFingerprintGestureController;
-
 
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
@@ -2076,6 +2076,85 @@ public abstract class AccessibilityService extends Service {
                 available);
     }
 
+    /** Sets the cache status.
+     *
+     * <p>If {@code enabled}, enable the cache and prefetching. Otherwise, disable the cache
+     * and prefetching.
+     * Note: By default the cache is enabled.
+     * @param enabled whether to enable or disable the cache.
+     * @return {@code true} if the cache and connection are not null, so the cache status is set.
+     */
+    public boolean setCacheEnabled(boolean enabled) {
+        AccessibilityCache cache =
+                AccessibilityInteractionClient.getCache(mConnectionId);
+        if (cache == null) {
+            return false;
+        }
+        final IAccessibilityServiceConnection connection =
+                AccessibilityInteractionClient.getConnection(mConnectionId);
+        if (connection == null) {
+            return false;
+        }
+        try {
+            connection.setCacheEnabled(enabled);
+            cache.setEnabled(enabled);
+            return true;
+        } catch (RemoteException re) {
+            Log.w(LOG_TAG, "Error while setting status of cache", re);
+            re.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /** Invalidates {@code node} and its subtree in the cache.
+     * @param node the node to invalidate.
+     * @return {@code true} if the subtree rooted at {@code node} was invalidated.
+     */
+    public boolean clearCachedSubtree(@NonNull AccessibilityNodeInfo node) {
+        AccessibilityCache cache =
+                AccessibilityInteractionClient.getCache(mConnectionId);
+        if (cache == null) {
+            return false;
+        }
+        return cache.clearSubTree(node);
+    }
+
+    /** Clears the cache.
+     * @return {@code true} if the cache was cleared
+     */
+    public boolean clearCache() {
+        AccessibilityCache cache =
+                AccessibilityInteractionClient.getCache(mConnectionId);
+        if (cache == null) {
+            return false;
+        }
+        cache.clear();
+        return true;
+    }
+
+    /** Checks if {@code node} is in the cache.
+     * @param node the node to check.
+     * @return {@code true} if {@code node} is in the cache.
+     */
+    public boolean isNodeInCache(@NonNull AccessibilityNodeInfo node) {
+        AccessibilityCache cache =
+                AccessibilityInteractionClient.getCache(mConnectionId);
+        if (cache == null) {
+            return false;
+        }
+        return cache.isNodeInCache(node);
+    }
+
+    /** Returns {@code true} if the cache is enabled. */
+    public boolean isCacheEnabled() {
+        AccessibilityCache cache =
+                AccessibilityInteractionClient.getCache(mConnectionId);
+        if (cache == null) {
+            return false;
+        }
+        return cache.isEnabled();
+    }
+
     /** This is called when the system action list is changed. */
     public void onSystemActionsChanged() {
     }
@@ -2613,11 +2692,11 @@ public abstract class AccessibilityService extends Service {
                         mCallback.init(mConnectionId, windowToken);
                         mCallback.onServiceConnected();
                     } else {
+                        AccessibilityInteractionClient.getInstance(mContext)
+                                .clearCache(mConnectionId);
                         AccessibilityInteractionClient.getInstance(mContext).removeConnection(
                                 mConnectionId);
                         mConnectionId = AccessibilityInteractionClient.NO_ID;
-                        AccessibilityInteractionClient.getInstance(mContext)
-                                .clearCache(mConnectionId);
                         mCallback.init(AccessibilityInteractionClient.NO_ID, null);
                     }
                     return;

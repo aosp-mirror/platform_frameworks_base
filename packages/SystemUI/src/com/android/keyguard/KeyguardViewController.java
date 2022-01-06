@@ -70,16 +70,6 @@ public interface KeyguardViewController {
     default void onStartedWakingUp() {};
 
     /**
-     * Called when the device started turning on.
-     */
-    default void onScreenTurningOn() {};
-
-    /**
-     * Called when the device has finished turning on.
-     */
-    default void onScreenTurnedOn() {};
-
-    /**
      * Sets whether the Keyguard needs input.
      * @param needsInput
      */

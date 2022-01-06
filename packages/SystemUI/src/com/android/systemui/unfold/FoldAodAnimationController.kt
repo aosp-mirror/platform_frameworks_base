@@ -19,7 +19,6 @@ package com.android.systemui.unfold
 import android.os.PowerManager
 import android.provider.Settings
 import com.android.systemui.keyguard.KeyguardViewMediator
-import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.ScreenOffAnimation
@@ -36,12 +35,10 @@ import javax.inject.Inject
  */
 @SysUIUnfoldScope
 class FoldAodAnimationController @Inject constructor(
-    private val screenLifecycle: ScreenLifecycle,
     private val keyguardViewMediatorLazy: Lazy<KeyguardViewMediator>,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
     private val globalSettings: GlobalSettings
-) : ScreenLifecycle.Observer,
-    CallbackController<FoldAodAnimationStatus>,
+) : CallbackController<FoldAodAnimationStatus>,
     ScreenOffAnimation,
     WakefulnessLifecycle.Observer {
 
@@ -58,7 +55,6 @@ class FoldAodAnimationController @Inject constructor(
     override fun initialize(statusBar: StatusBar, lightRevealScrim: LightRevealScrim) {
         this.statusBar = statusBar
 
-        screenLifecycle.addObserver(this)
         wakefulnessLifecycle.addObserver(this)
     }
 
@@ -123,7 +119,7 @@ class FoldAodAnimationController @Inject constructor(
         }
     }
 
-    override fun onScreenTurnedOn() {
+    fun onScreenTurnedOn() {
         if (shouldPlayAnimation) {
             statusBar.notificationPanelViewController.startFoldToAodAnimation {
                 // End action

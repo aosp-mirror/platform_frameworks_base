@@ -254,20 +254,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
     }
 
     @Override
-    protected boolean shouldAnnouncementBeDelayed() {
-        return mStateBeforeClick.value == mState.value;
-    }
-
-    @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.accessibility_quick_settings_wifi_changed_on);
-        } else {
-            return mContext.getString(R.string.accessibility_quick_settings_wifi_changed_off);
-        }
-    }
-
-    @Override
     public boolean isAvailable() {
         return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI);
     }

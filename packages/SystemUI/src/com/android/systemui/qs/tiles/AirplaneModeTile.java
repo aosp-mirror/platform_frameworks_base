@@ -144,15 +144,6 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
         return MetricsEvent.QS_AIRPLANEMODE;
     }
 
-    @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.accessibility_quick_settings_airplane_changed_on);
-        } else {
-            return mContext.getString(R.string.accessibility_quick_settings_airplane_changed_off);
-        }
-    }
-
     public void handleSetListening(boolean listening) {
         super.handleSetListening(listening);
         if (mListening == listening) return;

@@ -30,6 +30,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -200,7 +201,13 @@ public class BatteryUsageStatsProvider {
             Parcel historyBuffer = Parcel.obtain();
             historyBuffer.appendFrom(batteryStatsImpl.mHistoryBuffer, 0,
                     batteryStatsImpl.mHistoryBuffer.dataSize());
-            batteryUsageStatsBuilder.setBatteryHistory(historyBuffer);
+
+            final File systemDir =
+                    batteryStatsImpl.mBatteryStatsHistory.getHistoryDirectory().getParentFile();
+            final BatteryStatsHistory batteryStatsHistory =
+                    new BatteryStatsHistory(batteryStatsImpl, systemDir, historyBuffer);
+
+            batteryUsageStatsBuilder.setBatteryHistory(batteryStatsHistory);
         }
 
         return batteryUsageStatsBuilder.build();

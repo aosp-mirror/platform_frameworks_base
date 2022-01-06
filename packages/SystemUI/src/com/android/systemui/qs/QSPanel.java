@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -106,6 +107,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected QSTileLayout mTileLayout;
     private float mSquishinessFraction = 1f;
     private final ArrayMap<View, Integer> mChildrenLayoutTop = new ArrayMap<>();
+    private final Rect mClippingRect = new Rect();
 
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -133,8 +135,7 @@ public class QSPanel extends LinearLayout implements Tunable {
 
             mHorizontalContentContainer = new RemeasuringLinearLayout(mContext);
             mHorizontalContentContainer.setOrientation(LinearLayout.VERTICAL);
-            mHorizontalContentContainer.setClipChildren(true);
-            mHorizontalContentContainer.setClipToPadding(false);
+            setHorizontalContentContainerClipping();
 
             LayoutParams lp = new LayoutParams(0, LayoutParams.WRAP_CONTENT, 1);
             int marginSize = (int) mContext.getResources().getDimension(R.dimen.qs_media_padding);
@@ -146,6 +147,23 @@ public class QSPanel extends LinearLayout implements Tunable {
             lp = new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1);
             addView(mHorizontalLinearLayout, lp);
         }
+    }
+
+    protected void setHorizontalContentContainerClipping() {
+        mHorizontalContentContainer.setClipChildren(true);
+        mHorizontalContentContainer.setClipToPadding(false);
+        // Don't clip on the top, that way, secondary pages tiles can animate up
+        mHorizontalContentContainer.addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    if (left != oldLeft || right != oldRight || bottom != oldBottom) {
+                        mClippingRect.left = left;
+                        mClippingRect.right = right;
+                        mClippingRect.bottom = bottom;
+                        mHorizontalContentContainer.setClipBounds(mClippingRect);
+                    }
+                });
+        mClippingRect.top = -1000;
+        mHorizontalContentContainer.setClipBounds(mClippingRect);
     }
 
     /**
@@ -556,14 +574,6 @@ public class QSPanel extends LinearLayout implements Tunable {
                 tileRecord.scanState = state;
                 if (mDetailRecord == tileRecord) {
                     fireScanStateChanged(tileRecord.scanState);
-                }
-            }
-
-            @Override
-            public void onAnnouncementRequested(CharSequence announcement) {
-                if (announcement != null) {
-                    mHandler.obtainMessage(H.ANNOUNCE_FOR_ACCESSIBILITY, announcement)
-                            .sendToTarget();
                 }
             }
         };

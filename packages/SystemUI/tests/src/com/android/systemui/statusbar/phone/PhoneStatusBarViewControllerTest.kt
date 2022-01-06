@@ -77,9 +77,10 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             val parent = FrameLayout(mContext) // add parent to keep layout params
             view = LayoutInflater.from(mContext)
                 .inflate(R.layout.status_bar, parent, false) as PhoneStatusBarView
+            view.setLeftTopRightBottom(VIEW_LEFT, VIEW_TOP, VIEW_RIGHT, VIEW_BOTTOM)
         }
 
-        controller = createController(view)
+        controller = createAndInitController(view)
     }
 
     @Test
@@ -99,13 +100,70 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         val view = createViewMock()
         val argumentCaptor = ArgumentCaptor.forClass(OnPreDrawListener::class.java)
         unfoldConfig.isEnabled = true
-        controller = createController(view)
-        controller.init()
+        controller = createAndInitController(view)
 
         verify(view.viewTreeObserver).addOnPreDrawListener(argumentCaptor.capture())
         argumentCaptor.value.onPreDraw()
 
         verify(moveFromCenterAnimation).onViewsReady(any())
+    }
+
+    @Test
+    fun touchIsWithinView_inBounds_returnsTrue() {
+        val view = createViewMockWithScreenLocation()
+        controller = createAndInitController(view)
+
+        assertThat(controller.touchIsWithinView(VIEW_LEFT + 1f, VIEW_TOP + 1f)).isTrue()
+    }
+
+    @Test
+    fun touchIsWithinView_onTopLeftCorner_returnsTrue() {
+        val view = createViewMockWithScreenLocation()
+        controller = createAndInitController(view)
+
+        assertThat(controller.touchIsWithinView(VIEW_LEFT.toFloat(), VIEW_TOP.toFloat())).isTrue()
+    }
+
+    @Test
+    fun touchIsWithinView_onBottomRightCorner_returnsTrue() {
+        val view = createViewMockWithScreenLocation()
+        controller = createAndInitController(view)
+
+        assertThat(controller.touchIsWithinView(
+            VIEW_RIGHT.toFloat(), VIEW_BOTTOM.toFloat())
+        ).isTrue()
+    }
+
+    @Test
+    fun touchIsWithinView_xTooSmall_returnsFalse() {
+        val view = createViewMockWithScreenLocation()
+        controller = createAndInitController(view)
+
+        assertThat(controller.touchIsWithinView(VIEW_LEFT - 1f, VIEW_TOP + 1f)).isFalse()
+    }
+
+    @Test
+    fun touchIsWithinView_xTooLarge_returnsFalse() {
+        val view = createViewMockWithScreenLocation()
+        controller = createAndInitController(view)
+
+        assertThat(controller.touchIsWithinView(VIEW_RIGHT + 1f, VIEW_TOP + 1f)).isFalse()
+    }
+
+    @Test
+    fun touchIsWithinView_yTooSmall_returnsFalse() {
+        val view = createViewMockWithScreenLocation()
+        controller = createAndInitController(view)
+
+        assertThat(controller.touchIsWithinView(VIEW_LEFT + 1f, VIEW_TOP - 1f)).isFalse()
+    }
+
+    @Test
+    fun touchIsWithinView_yTooLarge_returnsFalse() {
+        val view = createViewMockWithScreenLocation()
+        controller = createAndInitController(view)
+
+        assertThat(controller.touchIsWithinView(VIEW_LEFT + 1f, VIEW_BOTTOM + 1f)).isFalse()
     }
 
     private fun createViewMock(): PhoneStatusBarView {
@@ -116,12 +174,23 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         return view
     }
 
-    private fun createController(view: PhoneStatusBarView): PhoneStatusBarViewController {
+    private fun createViewMockWithScreenLocation(): PhoneStatusBarView {
+        val view = spy(view)
+        val location = IntArray(2)
+        location[0] = VIEW_LEFT
+        location[1] = VIEW_TOP
+        `when`(view.locationOnScreen).thenReturn(location)
+        return view
+    }
+
+    private fun createAndInitController(view: PhoneStatusBarView): PhoneStatusBarViewController {
         return PhoneStatusBarViewController.Factory(
             Optional.of(sysuiUnfoldComponent),
             Optional.of(progressProvider),
             configurationController
-        ).create(view, touchEventHandler)
+        ).create(view, touchEventHandler).also {
+            it.init()
+        }
     }
 
     private class UnfoldConfig : UnfoldTransitionConfig {
@@ -142,3 +211,8 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         }
     }
 }
+
+private const val VIEW_LEFT = 30
+private const val VIEW_RIGHT = 100
+private const val VIEW_TOP = 40
+private const val VIEW_BOTTOM = 100

@@ -100,12 +100,6 @@ public interface PackageState {
     String getCpuAbiOverride();
 
     /**
-     * In epoch milliseconds. The timestamp of the first install of the particular app on the
-     * device, surviving past app updates. This does not survive full uninstalls + reinstalls.
-     */
-    long getFirstInstallTime();
-
-    /**
      * In epoch milliseconds. The last modified time of the file directory which houses the app
      * APKs. Only updated on package update; does not track realtime modifications.
      */

@@ -69,6 +69,7 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -147,6 +148,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.MessageRouterImpl;
@@ -228,6 +230,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DynamicPrivacyController mDynamicPrivacyController;
     @Mock private AutoHideController mAutoHideController;
     @Mock private StatusBarWindowController mStatusBarWindowController;
+    @Mock private StatusBarWindowStateController mStatusBarWindowStateController;
     @Mock private NotificationViewHierarchyManager mNotificationViewHierarchyManager;
     @Mock private UserSwitcherController mUserSwitcherController;
     @Mock private NetworkController mNetworkController;
@@ -263,6 +266,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private BrightnessSliderController.Factory mBrightnessSliderFactory;
     @Mock private WallpaperController mWallpaperController;
     @Mock private OngoingCallController mOngoingCallController;
+    @Mock private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock private LockscreenShadeTransitionController mLockscreenTransitionController;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
@@ -276,6 +280,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ActivityLaunchAnimator mActivityLaunchAnimator;
     @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private NotifLiveDataStore mNotifLiveDataStore;
+    @Mock private InteractionJankMonitor mJankMonitor;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
@@ -374,6 +379,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mLightBarController,
                 mAutoHideController,
                 mStatusBarWindowController,
+                mStatusBarWindowStateController,
                 mKeyguardUpdateMonitor,
                 mStatusBarSignalPolicy,
                 mPulseExpansionHandler,
@@ -449,7 +455,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mScreenOffAnimationController,
                 mWallpaperController,
                 mOngoingCallController,
-                new StatusBarHideIconsForBouncerManager(mCommandQueue, mMainExecutor, mDumpManager),
+                mStatusBarHideIconsForBouncerManager,
                 mLockscreenTransitionController,
                 mFeatureFlags,
                 mKeyguardUnlockAnimationController,
@@ -459,7 +465,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mWallpaperManager,
                 Optional.of(mStartingSurface),
                 mActivityLaunchAnimator,
-                mNotifPipelineFlags);
+                mNotifPipelineFlags,
+                mJankMonitor);
         when(mKeyguardViewMediator.registerStatusBar(
                 any(StatusBar.class),
                 any(NotificationPanelViewController.class),

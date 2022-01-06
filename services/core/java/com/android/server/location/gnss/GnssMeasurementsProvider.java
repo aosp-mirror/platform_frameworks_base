@@ -114,7 +114,8 @@ public final class GnssMeasurementsProvider extends
     protected boolean registerWithService(GnssMeasurementRequest request,
             Collection<GnssListenerRegistration> registrations) {
         if (mGnssNative.startMeasurementCollection(request.isFullTracking(),
-                request.isCorrelationVectorOutputsEnabled())) {
+                request.isCorrelationVectorOutputsEnabled(),
+                request.getIntervalMillis())) {
             if (D) {
                 Log.d(TAG, "starting gnss measurements (" + request + ")");
             }

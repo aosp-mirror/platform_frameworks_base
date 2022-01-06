@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.view.View.GONE;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -197,6 +198,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.SecureSettings;
@@ -732,7 +734,9 @@ public class NotificationPanelViewController extends PanelViewController {
             NotificationEntryManager notificationEntryManager,
             CommunalStateController communalStateController,
             KeyguardStateController keyguardStateController,
-            StatusBarStateController statusBarStateController, DozeLog dozeLog,
+            StatusBarStateController statusBarStateController,
+            StatusBarWindowStateController statusBarWindowStateController,
+            DozeLog dozeLog,
             DozeParameters dozeParameters, CommandQueue commandQueue, VibratorHelper vibratorHelper,
             LatencyTracker latencyTracker, PowerManager powerManager,
             AccessibilityManager accessibilityManager, @DisplayId int displayId,
@@ -862,6 +866,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 mQs.animateHeaderSlidingOut();
             }
         });
+        statusBarWindowStateController.addListener(this::onStatusBarWindowStateChanged);
         mThemeResId = mView.getContext().getThemeResId();
         mKeyguardBypassController = bypassController;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -5008,5 +5013,15 @@ public class NotificationPanelViewController extends PanelViewController {
     /** Returns the handler that the status bar should forward touches to. */
     public PhoneStatusBarView.TouchEventHandler getStatusBarTouchEventHandler() {
         return mStatusBarViewTouchEventHandler;
+    }
+
+    private void onStatusBarWindowStateChanged(@StatusBarManager.WindowVisibleState int state) {
+        if (state != WINDOW_STATE_SHOWING
+                && mStatusBarStateController.getState() == StatusBarState.SHADE) {
+            collapsePanel(
+                    false /* animate */,
+                    false /* delayed */,
+                    1.0f /* speedUpFactor */);
+        }
     }
 }

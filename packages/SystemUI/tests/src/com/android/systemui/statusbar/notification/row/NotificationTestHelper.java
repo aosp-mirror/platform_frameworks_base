@@ -36,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.graphics.drawable.Icon;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.TestableLooper;
@@ -139,6 +140,8 @@ public class NotificationTestHelper {
                 mock(NotificationGroupManagerLegacy.class),
                 mock(ConfigurationControllerImpl.class)
         );
+        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
+        mHeadsUpManager.mHandler = new Handler(mTestLooper.getLooper());
         mGroupMembershipManager.setHeadsUpManager(mHeadsUpManager);
         mIconManager = new IconManager(
                 mock(CommonNotifCollection.class),
