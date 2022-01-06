@@ -102,6 +102,15 @@ class UnfoldTransitionModule {
 
     @Provides
     @Singleton
+    fun providesFoldStateLogger(
+        optionalFoldStateLoggingProvider: Optional<FoldStateLoggingProvider>
+    ): Optional<FoldStateLogger> =
+        optionalFoldStateLoggingProvider.map { FoldStateLoggingProvider ->
+            FoldStateLogger(FoldStateLoggingProvider)
+        }
+
+    @Provides
+    @Singleton
     fun provideUnfoldTransitionConfig(context: Context): UnfoldTransitionConfig =
         createConfig(context)
 

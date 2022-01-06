@@ -28,6 +28,8 @@ import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerR
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
 import com.android.systemui.people.PeopleProvider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.unfold.FoldStateLogger;
+import com.android.systemui.unfold.FoldStateLoggingProvider;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.unfold.UnfoldLatencyTracker;
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
@@ -139,6 +141,8 @@ public interface SysUIComponent {
         getMediaTttChipControllerReceiver();
         getMediaTttCommandLineHelper();
         getUnfoldLatencyTracker().init();
+        getFoldStateLoggingProvider().ifPresent(FoldStateLoggingProvider::init);
+        getFoldStateLogger().ifPresent(FoldStateLogger::init);
     }
 
     /**
@@ -164,6 +168,18 @@ public interface SysUIComponent {
      */
     @SysUISingleton
     UnfoldLatencyTracker getUnfoldLatencyTracker();
+
+    /**
+     * Creates a FoldStateLoggingProvider.
+     */
+    @SysUISingleton
+    Optional<FoldStateLoggingProvider> getFoldStateLoggingProvider();
+
+    /**
+     * Creates a FoldStateLogger.
+     */
+    @SysUISingleton
+    Optional<FoldStateLogger> getFoldStateLogger();
 
     /**
      * Main dependency providing module.
