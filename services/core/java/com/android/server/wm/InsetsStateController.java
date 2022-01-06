@@ -187,7 +187,6 @@ class InsetsStateController {
 
             // Navigation bar doesn't get influenced by anything else
             if (type == ITYPE_NAVIGATION_BAR || type == ITYPE_EXTRA_NAVIGATION_BAR) {
-                state.removeSource(ITYPE_IME);
                 state.removeSource(ITYPE_STATUS_BAR);
                 state.removeSource(ITYPE_CLIMATE_BAR);
                 state.removeSource(ITYPE_CAPTION_BAR);
