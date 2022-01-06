@@ -134,7 +134,6 @@ public class SettingsBackupTest {
                     Settings.Global.ART_VERIFIER_VERIFY_DEBUGGABLE,
                     Settings.Global.ASSISTED_GPS_ENABLED,
                     Settings.Global.AUDIO_SAFE_VOLUME_STATE,
-                    Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
                     Settings.Global.AUTOFILL_LOGGING_LEVEL,
                     Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE,
                     Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,

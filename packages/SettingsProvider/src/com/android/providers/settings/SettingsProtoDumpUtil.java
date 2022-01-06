@@ -244,9 +244,6 @@ class SettingsProtoDumpUtil {
 
         final long autofillToken = p.start(GlobalSettingsProto.AUTOFILL);
         dumpSetting(s, p,
-                Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
-                GlobalSettingsProto.Autofill.COMPAT_MODE_ALLOWED_PACKAGES);
-        dumpSetting(s, p,
                 Settings.Global.AUTOFILL_LOGGING_LEVEL,
                 GlobalSettingsProto.Autofill.LOGGING_LEVEL);
         dumpSetting(s, p,
