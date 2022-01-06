@@ -11369,15 +11369,6 @@ public final class Settings {
                 "use_blast_adapter_vr";
 
         /**
-         * If true, submit buffers using blast in SurfaceView.
-         * (0 = false, 1 = true)
-         * @hide
-         */
-        @Readable
-        public static final String DEVELOPMENT_USE_BLAST_ADAPTER_SV =
-                "use_blast_adapter_sv";
-
-        /**
          * Path to the WindowManager display settings file. If unset, the default file path will
          * be used.
          *
