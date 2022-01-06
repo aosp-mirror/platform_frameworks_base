@@ -183,8 +183,8 @@ public class RemoteAnimationAdapterCompat {
                     }
                     // Make wallpaper visible immediately since launcher apparently won't do this.
                     for (int i = wallpapersCompat.length - 1; i >= 0; --i) {
-                        t.show(wallpapersCompat[i].leash.getSurfaceControl());
-                        t.setAlpha(wallpapersCompat[i].leash.getSurfaceControl(), 1.f);
+                        t.show(wallpapersCompat[i].leash);
+                        t.setAlpha(wallpapersCompat[i].leash, 1.f);
                     }
                 } else {
                     if (launcherTask != null) {

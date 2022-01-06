@@ -57,7 +57,7 @@ public class RemoteAnimationTargetCompat {
     public final int activityType;
 
     public final int taskId;
-    public final SurfaceControlCompat leash;
+    public final SurfaceControl leash;
     public final boolean isTranslucent;
     public final Rect clipRect;
     public final int prefixOrderIndex;
@@ -82,7 +82,7 @@ public class RemoteAnimationTargetCompat {
     public RemoteAnimationTargetCompat(RemoteAnimationTarget app) {
         taskId = app.taskId;
         mode = app.mode;
-        leash = new SurfaceControlCompat(app.leash);
+        leash = app.leash;
         isTranslucent = app.isTranslucent;
         clipRect = app.clipRect;
         position = app.position;
@@ -119,7 +119,7 @@ public class RemoteAnimationTargetCompat {
 
     public RemoteAnimationTarget unwrap() {
         return new RemoteAnimationTarget(
-                taskId, mode, leash.getSurfaceControl(), isTranslucent, clipRect, contentInsets,
+                taskId, mode, leash, isTranslucent, clipRect, contentInsets,
                 prefixOrderIndex, position, localBounds, screenSpaceBounds, windowConfiguration,
                 isNotInRecents, mStartLeash, startBounds, taskInfo, allowEnterPip, windowType
         );
@@ -211,7 +211,7 @@ public class RemoteAnimationTargetCompat {
         mode = newModeToLegacyMode(change.getMode());
 
         // TODO: once we can properly sync transactions across process, then get rid of this leash.
-        leash = new SurfaceControlCompat(createLeash(info, change, order, t));
+        leash = createLeash(info, change, order, t);
 
         isTranslucent = (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0
                 || (change.getFlags() & TransitionInfo.FLAG_SHOW_WALLPAPER) != 0;
@@ -273,7 +273,7 @@ public class RemoteAnimationTargetCompat {
                     info.getChanges().size() - i, info, t));
             if (leashMap == null) continue;
             leashMap.put(info.getChanges().get(i).getLeash(),
-                    out.get(out.size() - 1).leash.mSurfaceControl);
+                    out.get(out.size() - 1).leash);
         }
         return out.toArray(new RemoteAnimationTargetCompat[out.size()]);
     }
@@ -282,8 +282,8 @@ public class RemoteAnimationTargetCompat {
      * @see SurfaceControl#release()
      */
     public void release() {
-        if (leash.mSurfaceControl != null) {
-            leash.mSurfaceControl.release();
+        if (leash != null) {
+            leash.release();
         }
         if (mStartLeash != null) {
             mStartLeash.release();
