@@ -16,6 +16,7 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
@@ -39,7 +40,9 @@ import static android.net.NetworkStats.ROAMING_YES;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -70,7 +73,7 @@ import java.util.TreeSet;
  *
  * @hide
  */
-// @SystemApi(client = MODULE_LIBRARIES)
+@SystemApi(client = MODULE_LIBRARIES)
 public final class NetworkTemplate implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -572,6 +575,7 @@ public final class NetworkTemplate implements Parcelable {
 
     /**
      * Get subscriber Id of the template.
+     * @hide
      */
     @Nullable
     @UnsupportedAppUsage
@@ -588,26 +592,19 @@ public final class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Get Wifi Network Key of the template. See {@link WifiInfo#getCurrentNetworkKey()}.
+     * Get the set of Wifi Network Keys of the template.
+     * See {@link WifiInfo#getCurrentNetworkKey()}.
      */
-    @Nullable
-    public String getWifiNetworkKey() {
-        return CollectionUtils.isEmpty(mMatchWifiNetworkKeys) ? null : mMatchWifiNetworkKeys[0];
-    }
-
-    /**
-     * Get set of Wifi Network Keys of the template.
-     */
-    @Nullable
+    @NonNull
     public Set<String> getWifiNetworkKeys() {
         return new ArraySet<>(Arrays.asList(mMatchWifiNetworkKeys));
     }
 
     /** @hide */
-    // TODO: Remove this and replace all callers with {@link #getWifiNetworkKey()}.
+    // TODO: Remove this and replace all callers with {@link #getWifiNetworkKeys()}.
     @Nullable
     public String getNetworkId() {
-        return getWifiNetworkKey();
+        return getWifiNetworkKeys().isEmpty() ? null : getWifiNetworkKeys().iterator().next();
     }
 
     /**

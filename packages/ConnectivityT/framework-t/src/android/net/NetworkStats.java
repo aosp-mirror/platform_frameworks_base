@@ -83,10 +83,7 @@ public final class NetworkStats implements Parcelable {
      */
     // TODO: Rename TAG_ALL to TAG_ANY.
     public static final int TAG_ALL = -1;
-    /**
-     * {@link #set} value for all sets combined, not including debug sets.
-     * @hide
-     */
+    /** {@link #set} value for all sets combined, not including debug sets. */
     public static final int SET_ALL = -1;
     /** {@link #set} value where background data is accounted. */
     public static final int SET_DEFAULT = 0;
@@ -114,9 +111,6 @@ public final class NetworkStats implements Parcelable {
             SET_ALL,
             SET_DEFAULT,
             SET_FOREGROUND,
-            SET_DEBUG_START,
-            SET_DBG_VPN_IN,
-            SET_DBG_VPN_OUT
     })
     public @interface State {
     }
@@ -131,10 +125,7 @@ public final class NetworkStats implements Parcelable {
     // TODO: Rename TAG_NONE to TAG_ALL.
     public static final int TAG_NONE = 0;
 
-    /**
-     * {@link #metered} value to account for all metered states.
-     * @hide
-     */
+    /** {@link #metered} value to account for all metered states. */
     public static final int METERED_ALL = -1;
     /** {@link #metered} value where native, unmetered data is accounted. */
     public static final int METERED_NO = 0;
@@ -152,10 +143,7 @@ public final class NetworkStats implements Parcelable {
     }
 
 
-    /**
-     * {@link #roaming} value to account for all roaming states.
-     * @hide
-     */
+    /** {@link #roaming} value to account for all roaming states. */
     public static final int ROAMING_ALL = -1;
     /** {@link #roaming} value where native, non-roaming data is accounted. */
     public static final int ROAMING_NO = 0;
@@ -172,10 +160,7 @@ public final class NetworkStats implements Parcelable {
     public @interface Roaming {
     }
 
-    /**
-     * {@link #onDefaultNetwork} value to account for all default network states.
-     * @hide
-     */
+    /** {@link #onDefaultNetwork} value to account for all default network states. */
     public static final int DEFAULT_NETWORK_ALL = -1;
     /** {@link #onDefaultNetwork} value to account for usage while not the default network. */
     public static final int DEFAULT_NETWORK_NO = 0;
