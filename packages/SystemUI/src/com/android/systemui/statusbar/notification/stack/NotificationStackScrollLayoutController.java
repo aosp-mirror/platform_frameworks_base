@@ -455,10 +455,7 @@ public class NotificationStackScrollLayoutController {
                     if (!row.isDismissed()) {
                         handleChildViewDismissed(view);
                     }
-                    ViewGroup transientContainer = row.getTransientContainer();
-                    if (transientContainer != null) {
-                        transientContainer.removeTransientView(view);
-                    }
+                    row.removeFromTransientContainer();
                 }
 
                 /**

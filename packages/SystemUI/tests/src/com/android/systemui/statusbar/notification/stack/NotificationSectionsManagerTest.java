@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -46,9 +47,7 @@ import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -56,7 +55,6 @@ import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
-import com.android.systemui.statusbar.notification.people.PeopleHubViewAdapter;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
@@ -66,6 +64,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -266,8 +265,9 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
 
         // THEN the header is first removed from the transient parent before being added to the
         // NSSL.
-        verify(transientParent).removeTransientView(silentHeaderView);
-        verify(mNssl).addView(silentHeaderView, 1);
+        final InOrder inOrder = inOrder(silentHeaderView, mNssl);
+        inOrder.verify(silentHeaderView).removeFromTransientContainer();
+        inOrder.verify(mNssl).addView(eq(silentHeaderView), eq(1));
     }
 
     @Test
