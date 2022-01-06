@@ -125,7 +125,7 @@ public abstract class JobService extends Service {
      * will not be invoked.
      *
      * @param params Parameters specifying info about this job, including the optional
-     *     extras configured with {@link JobInfo.Builder#setExtras(android.os.PersistableBundle).
+     *     extras configured with {@link JobInfo.Builder#setExtras(android.os.PersistableBundle)}.
      *     This object serves to identify this specific running job instance when calling
      *     {@link #jobFinished(JobParameters, boolean)}.
      * @return {@code true} if your service will continue running, using a separate thread
