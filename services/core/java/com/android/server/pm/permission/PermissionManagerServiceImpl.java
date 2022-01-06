@@ -1591,6 +1591,25 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
     }
 
+    @Override
+    public void selfRevokePermissions(String packageName, List<String> permissions) {
+        final int callingUid = Binder.getCallingUid();
+        int callingUserId = UserHandle.getUserId(callingUid);
+        int targetPackageUid = mPackageManagerInt.getPackageUid(packageName, 0, callingUserId);
+        if (targetPackageUid != callingUid) {
+            throw new SecurityException("uid " + callingUid
+                    + " cannot revoke permissions for package " + packageName + " with uid "
+                    + targetPackageUid);
+        }
+        for (String permName : permissions) {
+            if (!checkCallingOrSelfPermission(permName)) {
+                throw new SecurityException("uid " + callingUid + " cannot revoke permission "
+                        + permName + " because it does not hold that permission");
+            }
+        }
+        mPermissionControllerManager.selfRevokePermissions(packageName, permissions);
+    }
+
     private boolean mayManageRolePermission(int uid) {
         final PackageManager packageManager = mContext.getPackageManager();
         final String[] packageNames = packageManager.getPackagesForUid(uid);
