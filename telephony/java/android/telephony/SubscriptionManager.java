@@ -1128,6 +1128,52 @@ public class SubscriptionManager {
      */
     public static final String EXTRA_SLOT_INDEX = "android.telephony.extra.SLOT_INDEX";
 
+    /**
+     * A source of phone number: the EF-MSISDN (see 3GPP TS 31.102),
+     * or EF-MDN for CDMA (see 3GPP2 C.P0065-B), from UICC application.
+     *
+     * <p>The availability and a of the number depends on the carrier.
+     * The number may be updated by over-the-air update to UICC applications
+     * from the carrier, or by other means with physical access to the SIM.
+     */
+    public static final int PHONE_NUMBER_SOURCE_UICC = 1;
+
+    /**
+     * A source of phone number: provided by an app that has carrier privilege.
+     *
+     * <p>The number is intended to be set by a carrier app knowing the correct number
+     * which is, for example, different from the number in {@link #PHONE_NUMBER_SOURCE_UICC UICC}
+     * for some reason.
+     * The number is not available until a carrier app sets one via
+     * {@link #setCarrierPhoneNumber(int, String)}.
+     * The app can update the number with the same API should the number change.
+     */
+    public static final int PHONE_NUMBER_SOURCE_CARRIER = 2;
+
+    /**
+     * A source of phone number: provided by IMS (IP Multimedia Subsystem) implementation.
+     * When IMS service is registered (as indicated by
+     * {@link android.telephony.ims.RegistrationManager.RegistrationCallback#onRegistered(int)})
+     * the IMS implementation may return P-Associated-Uri SIP headers (RFC 3455). The URIs
+     * are the user’s public user identities known to the network (see 3GPP TS 24.229 5.4.1.2),
+     * and the phone number is typically one of them (see “global number” in 3GPP TS 23.003 13.4).
+     *
+     * <p>This source provides the phone number from the last IMS registration.
+     * IMS registration may happen on every device reboot or other network condition changes.
+     * The number will be updated should the associated URI change after an IMS registration.
+     */
+    public static final int PHONE_NUMBER_SOURCE_IMS = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"PHONE_NUMBER_SOURCE"},
+            value = {
+                    PHONE_NUMBER_SOURCE_UICC,
+                    PHONE_NUMBER_SOURCE_CARRIER,
+                    PHONE_NUMBER_SOURCE_IMS,
+            })
+    public @interface PhoneNumberSource {}
+
     private final Context mContext;
 
     // Cache of Resource that has been created in getResourcesForSubId. Key is a Pair containing
@@ -3762,5 +3808,133 @@ public class SubscriptionManager {
                 SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI,
                 RESTORE_SIM_SPECIFIC_SETTINGS_METHOD_NAME,
                 null, bundle);
+    }
+
+    /**
+     * Returns the phone number for the given {@code subId} and {@code source},
+     * or an empty string if not available.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS}, or
+     * READ_PRIVILEGED_PHONE_STATE permission (can only be granted to apps preloaded on device),
+     * or that the calling app has carrier privileges
+     * (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
+     *                       for the default one.
+     * @param source the source of the phone number, one of the PHONE_NUMBER_SOURCE_* constants.
+     * @return the phone number, or an empty string if not available.
+     * @throws IllegalArgumentException if {@code source} is invalid.
+     * @throws IllegalStateException if the telephony process is not currently available.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     * @see #PHONE_NUMBER_SOURCE_UICC
+     * @see #PHONE_NUMBER_SOURCE_CARRIER
+     * @see #PHONE_NUMBER_SOURCE_IMS
+     */
+    @SuppressAutoDoc // No support for carrier privileges (b/72967236)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_NUMBERS,
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+    })
+    @NonNull
+    public String getPhoneNumber(int subscriptionId, @PhoneNumberSource int source) {
+        if (subscriptionId == DEFAULT_SUBSCRIPTION_ID) {
+            subscriptionId = getDefaultSubscriptionId();
+        }
+        if (source != PHONE_NUMBER_SOURCE_UICC
+                && source != PHONE_NUMBER_SOURCE_CARRIER
+                && source != PHONE_NUMBER_SOURCE_IMS) {
+            throw new IllegalArgumentException("invalid source " + source);
+        }
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                return iSub.getPhoneNumber(subscriptionId, source,
+                        mContext.getOpPackageName(), mContext.getAttributionTag());
+            } else {
+                throw new IllegalStateException("subscription service unavailable.");
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Returns the phone number for the given {@code subId}, or an empty string if
+     * not available.
+     *
+     * <p>This API is built up on {@link #getPhoneNumber(int, int)}, but picks
+     * from available sources in the following order: {@link #PHONE_NUMBER_SOURCE_CARRIER}
+     * > {@link #PHONE_NUMBER_SOURCE_UICC} > {@link #PHONE_NUMBER_SOURCE_IMS}.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS}, or
+     * READ_PRIVILEGED_PHONE_STATE permission (can only be granted to apps preloaded on device),
+     * or that the calling app has carrier privileges
+     * (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
+     *                       for the default one.
+     * @return the phone number, or an empty string if not available.
+     * @throws IllegalStateException if the telephony process is not currently available.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     * @see #getPhoneNumber(int, int)
+     */
+    @SuppressAutoDoc // No support for carrier privileges (b/72967236)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_NUMBERS,
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+    })
+    @NonNull
+    public String getPhoneNumber(int subscriptionId) {
+        if (subscriptionId == DEFAULT_SUBSCRIPTION_ID) {
+            subscriptionId = getDefaultSubscriptionId();
+        }
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                return iSub.getPhoneNumberFromFirstAvailableSource(subscriptionId,
+                        mContext.getOpPackageName(), mContext.getAttributionTag());
+            } else {
+                throw new IllegalStateException("subscription service unavailable.");
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Sets the phone number for the given {@code subId} for source
+     * {@link #PHONE_NUMBER_SOURCE_CARRIER carrier}.
+     * Sets an empty string to remove the previously set phone number.
+     *
+     * <p>Requires Permission: the calling app has carrier privileges
+     * (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
+     *                       for the default one.
+     * @param number the phone number, or an empty string to remove the previously set number.
+     * @throws IllegalStateException if the telephony process is not currently available.
+     * @throws NullPointerException if {@code number} is {@code null}.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     */
+    public void setCarrierPhoneNumber(int subscriptionId, @NonNull String number) {
+        if (subscriptionId == DEFAULT_SUBSCRIPTION_ID) {
+            subscriptionId = getDefaultSubscriptionId();
+        }
+        if (number == null) {
+            throw new NullPointerException("invalid number null");
+        }
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                iSub.setPhoneNumber(subscriptionId, PHONE_NUMBER_SOURCE_CARRIER, number,
+                        mContext.getOpPackageName(), mContext.getAttributionTag());
+            } else {
+                throw new IllegalStateException("subscription service unavailable.");
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowAsRuntimeException();
+        }
     }
 }
