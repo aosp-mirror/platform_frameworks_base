@@ -3263,6 +3263,7 @@
   </staging-public-group>
 
   <staging-public-group type="style" first-id="0x01dd0000">
+    <public name="TextAppearance.DeviceDefault.Headline" />
   </staging-public-group>
 
   <staging-public-group type="string" first-id="0x01dc0000">

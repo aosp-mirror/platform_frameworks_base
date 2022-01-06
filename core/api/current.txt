@@ -2258,6 +2258,7 @@ package android {
     field public static final int TextAppearance = 16973886; // 0x103003e
     field public static final int TextAppearance_DeviceDefault = 16974253; // 0x10301ad
     field public static final int TextAppearance_DeviceDefault_DialogWindowTitle = 16974264; // 0x10301b8
+    field public static final int TextAppearance_DeviceDefault_Headline;
     field public static final int TextAppearance_DeviceDefault_Inverse = 16974254; // 0x10301ae
     field public static final int TextAppearance_DeviceDefault_Large = 16974255; // 0x10301af
     field public static final int TextAppearance_DeviceDefault_Large_Inverse = 16974256; // 0x10301b0
