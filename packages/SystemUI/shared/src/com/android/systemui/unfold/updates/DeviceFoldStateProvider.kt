@@ -138,7 +138,7 @@ class DeviceFoldStateProvider(
         if (isTransitionInProgess) {
             cancelTimeout()
         }
-        handler.postDelayed(timeoutRunnable, ABORT_CLOSING_MILLIS)
+        handler.postDelayed(timeoutRunnable, HALF_OPENED_TIMEOUT_MILLIS)
     }
 
     private fun cancelTimeout() {
@@ -163,16 +163,14 @@ class DeviceFoldStateProvider(
     }
 
     private inner class HingeAngleListener : Consumer<Float> {
-
         override fun accept(angle: Float) {
             onHingeAngle(angle)
         }
     }
 
     private inner class TimeoutRunnable : Runnable {
-
         override fun run() {
-            notifyFoldUpdate(FOLD_UPDATE_ABORTED)
+            notifyFoldUpdate(FOLD_UPDATE_FINISH_HALF_OPEN)
         }
     }
 }
@@ -180,9 +178,7 @@ class DeviceFoldStateProvider(
 private fun stateToString(@FoldUpdate update: Int): String {
     return when (update) {
         FOLD_UPDATE_START_OPENING -> "START_OPENING"
-        FOLD_UPDATE_HALF_OPEN -> "HALF_OPEN"
         FOLD_UPDATE_START_CLOSING -> "START_CLOSING"
-        FOLD_UPDATE_ABORTED -> "ABORTED"
         FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE -> "UNFOLDED_SCREEN_AVAILABLE"
         FOLD_UPDATE_FINISH_HALF_OPEN -> "FINISH_HALF_OPEN"
         FOLD_UPDATE_FINISH_FULL_OPEN -> "FINISH_FULL_OPEN"
@@ -195,11 +191,11 @@ private const val TAG = "DeviceFoldProvider"
 private const val DEBUG = false
 
 /**
- * Time after which [FOLD_UPDATE_ABORTED] is emitted following a [FOLD_UPDATE_START_CLOSING] or
- * [FOLD_UPDATE_START_OPENING] event, if an end state is not reached.
+ * Time after which [FOLD_UPDATE_FINISH_HALF_OPEN] is emitted following a
+ * [FOLD_UPDATE_START_CLOSING] or [FOLD_UPDATE_START_OPENING] event, if an end state is not reached.
  */
 @VisibleForTesting
-const val ABORT_CLOSING_MILLIS = 1000L
+const val HALF_OPENED_TIMEOUT_MILLIS = 1000L
 
 /** Threshold after which we consider the device fully unfolded. */
 @VisibleForTesting

@@ -37,9 +37,7 @@ interface FoldStateProvider : CallbackController<FoldUpdatesListener> {
 
     @IntDef(prefix = ["FOLD_UPDATE_"], value = [
         FOLD_UPDATE_START_OPENING,
-        FOLD_UPDATE_HALF_OPEN,
         FOLD_UPDATE_START_CLOSING,
-        FOLD_UPDATE_ABORTED,
         FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE,
         FOLD_UPDATE_FINISH_HALF_OPEN,
         FOLD_UPDATE_FINISH_FULL_OPEN,
@@ -50,10 +48,8 @@ interface FoldStateProvider : CallbackController<FoldUpdatesListener> {
 }
 
 const val FOLD_UPDATE_START_OPENING = 0
-const val FOLD_UPDATE_HALF_OPEN = 1
-const val FOLD_UPDATE_START_CLOSING = 2
-const val FOLD_UPDATE_ABORTED = 3
-const val FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE = 4
-const val FOLD_UPDATE_FINISH_HALF_OPEN = 5
-const val FOLD_UPDATE_FINISH_FULL_OPEN = 6
-const val FOLD_UPDATE_FINISH_CLOSED = 7
+const val FOLD_UPDATE_START_CLOSING = 1
+const val FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE = 2
+const val FOLD_UPDATE_FINISH_HALF_OPEN = 3
+const val FOLD_UPDATE_FINISH_FULL_OPEN = 4
+const val FOLD_UPDATE_FINISH_CLOSED = 5
