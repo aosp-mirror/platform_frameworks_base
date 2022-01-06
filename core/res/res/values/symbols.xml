@@ -3650,6 +3650,8 @@
   <java-symbol type="string" name="config_retailDemoPackage" />
   <java-symbol type="string" name="config_retailDemoPackageSignature" />
 
+  <java-symbol type="bool" name="config_systemCaptionsServiceCallsEnabled" />
+
   <java-symbol type="string" name="notification_channel_foreground_service" />
   <java-symbol type="string" name="foreground_service_app_in_background" />
   <java-symbol type="string" name="foreground_service_apps_in_background" />
