@@ -13143,6 +13143,7 @@ package android.telephony.ims {
     field public static final int OIR_PRESENTATION_NOT_RESTRICTED = 2; // 0x2
     field public static final int OIR_PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int OIR_PRESENTATION_RESTRICTED = 1; // 0x1
+    field public static final int OIR_PRESENTATION_UNAVAILABLE = 5; // 0x5
     field public static final int OIR_PRESENTATION_UNKNOWN = 3; // 0x3
     field public static final int PRIORITY_NORMAL = 0; // 0x0
     field public static final int PRIORITY_URGENT = 1; // 0x1
