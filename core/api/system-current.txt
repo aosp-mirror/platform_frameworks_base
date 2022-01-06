@@ -342,6 +342,7 @@ package android {
 
   public static final class R.array {
     field public static final int config_keySystemUuidMapping = 17235973; // 0x1070005
+    field public static final int config_optionalIpSecAlgorithms;
   }
 
   public static final class R.attr {
