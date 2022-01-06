@@ -915,30 +915,19 @@ public class LocationProviderManager extends
                 return null;
             }
 
+            // acquire a wakelock for non-passive requests
+            boolean useWakeLock =
+                    getRequest().getIntervalMillis() != LocationRequest.PASSIVE_INTERVAL;
+
             // deliver location
             return new ListenerOperation<LocationTransport>() {
 
-                private boolean mUseWakeLock;
-
                 @Override
                 public void onPreExecute() {
-                    mUseWakeLock = false;
-
-                    // don't acquire a wakelock for passive requests or for mock locations
-                    if (getRequest().getIntervalMillis() != LocationRequest.PASSIVE_INTERVAL) {
-                        final int size = locationResult.size();
-                        for (int i = 0; i < size; ++i) {
-                            if (!locationResult.get(i).isMock()) {
-                                mUseWakeLock = true;
-                                break;
-                            }
-                        }
-                    }
-
                     // update last delivered location
                     setLastDeliveredLocation(locationResult.getLastLocation());
 
-                    if (mUseWakeLock) {
+                    if (useWakeLock) {
                         mWakeLock.acquire(WAKELOCK_TIMEOUT_MS);
                     }
                 }
@@ -955,14 +944,14 @@ public class LocationProviderManager extends
                     }
 
                     listener.deliverOnLocationChanged(deliverLocationResult,
-                            mUseWakeLock ? mWakeLockReleaser : null);
+                            useWakeLock ? mWakeLockReleaser : null);
                     EVENT_LOG.logProviderDeliveredLocations(mName, locationResult.size(),
                             getIdentity());
                 }
 
                 @Override
                 public void onPostExecute(boolean success) {
-                    if (!success && mUseWakeLock) {
+                    if (!success && useWakeLock) {
                         mWakeLock.release();
                     }
 
