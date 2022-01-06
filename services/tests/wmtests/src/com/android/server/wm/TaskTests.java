@@ -44,6 +44,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -66,6 +67,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -1422,6 +1424,29 @@ public class TaskTests extends WindowTestsBase {
         task1.setAdjacentTaskFragment(task2, true /* moveTogether */);
         task1.moveToFront("" /* reason */);
         verify(task2).moveToFrontInner(anyString(), isNull());
+    }
+
+    @Test
+    public void testResumeTask_doNotResumeTaskFragmentBehindTranslucent() {
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment tfBehind = createTaskFragmentWithParentTask(
+                task, false /* createEmbeddedTask */);
+        final TaskFragment tfFront = createTaskFragmentWithParentTask(
+                task, false /* createEmbeddedTask */);
+        spyOn(tfFront);
+        doReturn(true).when(tfFront).isTranslucent(any());
+
+        // TaskFragment behind another translucent TaskFragment should not be resumed.
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+                tfBehind.getVisibility(null /* starting */));
+        assertTrue(tfBehind.isFocusable());
+        assertFalse(tfBehind.canBeResumed(null /* starting */));
+
+        spyOn(tfBehind);
+        task.resumeTopActivityUncheckedLocked(null /* prev */, ActivityOptions.makeBasic(),
+                false /* deferPause */);
+
+        verify(tfBehind, never()).resumeTopActivity(any(), any(), anyBoolean());
     }
 
     private Task getTestTask() {

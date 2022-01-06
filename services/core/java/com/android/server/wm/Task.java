@@ -5041,8 +5041,7 @@ class Task extends TaskFragment {
             if (topFragment == f) {
                 return;
             }
-            if (!f.isFocusableAndVisible()) {
-                // No need to resume activity in TaskFragment that is not visible.
+            if (!f.canBeResumed(null /* starting */)) {
                 return;
             }
             resumed[0] |= f.resumeTopActivity(prev, options, deferPause);
