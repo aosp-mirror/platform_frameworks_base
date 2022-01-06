@@ -34,9 +34,10 @@ import java.util.Objects;
 
 /**
  * This class provides information for a shared library. There are
- * three types of shared libraries: builtin - non-updatable part of
+ * four types of shared libraries: builtin - non-updatable part of
  * the OS; dynamic - updatable backwards-compatible dynamically linked;
- * static - non backwards-compatible emulating static linking.
+ * static - non backwards-compatible emulating static linking;
+ * SDK - updatable backwards-incompatible dynamically loaded.
  */
 public final class SharedLibraryInfo implements Parcelable {
 
@@ -45,6 +46,7 @@ public final class SharedLibraryInfo implements Parcelable {
             TYPE_BUILTIN,
             TYPE_DYNAMIC,
             TYPE_STATIC,
+            TYPE_SDK,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Type{}
