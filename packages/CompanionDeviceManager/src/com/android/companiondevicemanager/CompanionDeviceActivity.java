@@ -22,8 +22,8 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
-import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.SCAN_RESULTS_OBSERVABLE;
-import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.TIMEOUT_OBSERVABLE;
+import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState;
+import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState.FINISHED_TIMEOUT;
 import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 import static com.android.companiondevicemanager.Utils.prepareResultReceiverForIpc;
@@ -32,7 +32,6 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Activity;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
@@ -50,7 +49,13 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class CompanionDeviceActivity extends Activity {
+import androidx.appcompat.app.AppCompatActivity;
+
+/**
+ *  A CompanionDevice activity response for showing the available
+ *  nearby devices to be associated with.
+ */
+public class CompanionDeviceActivity extends AppCompatActivity {
     private static final boolean DEBUG = false;
     private static final String TAG = CompanionDeviceActivity.class.getSimpleName();
 
@@ -126,7 +131,9 @@ public class CompanionDeviceActivity extends Activity {
         // Start discovery services if needed.
         if (!mRequest.isSelfManaged()) {
             CompanionDeviceDiscoveryService.startForRequest(this, mRequest);
-            TIMEOUT_OBSERVABLE.addObserver((o, arg) -> cancel(true));
+            // TODO(b/217749191): Create the ViewModel for the LiveData
+            CompanionDeviceDiscoveryService.getDiscoveryState().observe(
+                    /* LifeCycleOwner */ this, this::onDiscoveryStateChanged);
         }
         // Init UI.
         initUI();
@@ -158,10 +165,6 @@ public class CompanionDeviceActivity extends Activity {
         if (!isDone()) {
             cancel(false); // will finish()
         }
-
-        TIMEOUT_OBSERVABLE.deleteObservers();
-        // mAdapter may also be observing - need to remove it.
-        SCAN_RESULTS_OBSERVABLE.deleteObservers();
     }
 
     @Override
@@ -207,6 +210,13 @@ public class CompanionDeviceActivity extends Activity {
             initUiForMultipleDevices(appLabel);
         } else {
             initUiForMultipleDevices(appLabel);
+        }
+    }
+
+    private void onDiscoveryStateChanged(DiscoveryState newState) {
+        if (newState == FINISHED_TIMEOUT
+                && CompanionDeviceDiscoveryService.getScanResult().getValue().isEmpty()) {
+            cancel(true);
         }
     }
 
@@ -380,9 +390,12 @@ public class CompanionDeviceActivity extends Activity {
         mSummary.setText(summary);
 
         mAdapter = new DeviceListAdapter(this);
-        SCAN_RESULTS_OBSERVABLE.addObserver(mAdapter);
+
         // TODO: hide the list and show a spinner until a first device matching device is found.
         mListView.setAdapter(mAdapter);
+        CompanionDeviceDiscoveryService.getScanResult().observe(
+                /* lifecycleOwner */ this,
+                /* observer */ mAdapter);
 
         // "Remove" consent button: users would need to click on the list item.
         mButtonAllow.setVisibility(View.GONE);
