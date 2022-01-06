@@ -47,8 +47,6 @@ import android.util.SparseArray;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.utils.WatchedArrayMap;
-import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -698,14 +696,6 @@ public final class ComputerTracker implements Computer {
     public String getRenamedPackage(@NonNull String packageName) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getRenamedPackage(packageName);
-        }
-    }
-
-    @NonNull
-    @Override
-    public WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries() {
-        try (ThreadComputer current = snapshot()) {
-            return current.mComputer.getSharedLibraries();
         }
     }
 

@@ -46,8 +46,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.utils.WatchedArrayMap;
-import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -264,14 +262,6 @@ public final class ComputerLocked extends ComputerEngine {
     public String getRenamedPackage(@NonNull String packageName) {
         synchronized (mLock) {
             return super.getRenamedPackage(packageName);
-        }
-    }
-
-    @NonNull
-    @Override
-    public WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries() {
-        synchronized (mLock) {
-            return super.getSharedLibraries();
         }
     }
 
