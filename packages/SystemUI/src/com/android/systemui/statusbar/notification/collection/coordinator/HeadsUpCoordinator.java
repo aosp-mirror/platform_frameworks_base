@@ -179,23 +179,26 @@ public class HeadsUpCoordinator implements Coordinator {
 
         @Override
         public boolean shouldExtendLifetime(@NonNull NotificationEntry entry, int reason) {
-            boolean isShowingHun = isCurrentlyShowingHun(entry);
-            if (isShowingHun) {
+            boolean extend = !mHeadsUpManager.canRemoveImmediately(entry.getKey());
+            if (extend) {
                 if (isSticky(entry)) {
                     long removeAfterMillis = mHeadsUpManager.getEarliestRemovalTime(entry.getKey());
-                    if (removeAfterMillis <= 0) return false;
                     mExecutor.executeDelayed(() -> {
-                        // make sure that the entry was not updated
-                        long removeAfterMillis2 =
-                                mHeadsUpManager.getEarliestRemovalTime(entry.getKey());
-                        if (mNotifsExtendingLifetime.contains(entry) && removeAfterMillis2 <= 0) {
-                            mHeadsUpManager.removeNotification(entry.getKey(), true);
+                        if (mNotifsExtendingLifetime.contains(entry)
+                                && mHeadsUpManager.canRemoveImmediately(entry.getKey())) {
+                            mHeadsUpManager.removeNotification(
+                                    entry.getKey(), /* releaseImmediately */  true);
                         }
                     }, removeAfterMillis);
+                } else {
+                    // remove as early as possible
+                    mExecutor.execute(
+                            () -> mHeadsUpManager.removeNotification(
+                                    entry.getKey(), /* releaseImmediately */  false));
                 }
                 mNotifsExtendingLifetime.add(entry);
             }
-            return isShowingHun;
+            return extend;
         }
 
         @Override

@@ -238,7 +238,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * @param key the key to check if removable
      * @return true if the alert entry can be removed
      */
-    protected boolean canRemoveImmediately(String key) {
+    public boolean canRemoveImmediately(String key) {
         AlertEntry alertEntry = mAlertEntries.get(key);
         return alertEntry == null || alertEntry.wasShownLongEnough()
                 || alertEntry.mEntry.isRowDismissed();

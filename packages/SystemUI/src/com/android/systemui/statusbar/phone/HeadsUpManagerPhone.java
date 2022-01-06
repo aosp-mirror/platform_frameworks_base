@@ -412,7 +412,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     }
 
     @Override
-    protected boolean canRemoveImmediately(@NonNull String key) {
+    public boolean canRemoveImmediately(@NonNull String key) {
         if (mSwipedOutKeys.contains(key)) {
             // We always instantly dismiss views being manually swiped out.
             mSwipedOutKeys.remove(key);
