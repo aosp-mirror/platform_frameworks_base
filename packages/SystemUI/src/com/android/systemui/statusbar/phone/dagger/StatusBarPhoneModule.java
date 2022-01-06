@@ -20,6 +20,7 @@ import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
 import android.app.WallpaperManager;
 import android.content.Context;
+import android.hardware.devicestate.DeviceStateManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
@@ -231,7 +232,8 @@ public interface StatusBarPhoneModule {
             Optional<StartingSurface> startingSurfaceOptional,
             ActivityLaunchAnimator activityLaunchAnimator,
             NotifPipelineFlags notifPipelineFlags,
-            InteractionJankMonitor jankMonitor) {
+            InteractionJankMonitor jankMonitor,
+            DeviceStateManager deviceStateManager) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -327,7 +329,8 @@ public interface StatusBarPhoneModule {
                 startingSurfaceOptional,
                 activityLaunchAnimator,
                 notifPipelineFlags,
-                jankMonitor
+                jankMonitor,
+                deviceStateManager
         );
     }
 }
