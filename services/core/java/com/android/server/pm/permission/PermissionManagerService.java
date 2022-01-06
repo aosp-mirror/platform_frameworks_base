@@ -549,6 +549,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
+    public void revokePostNotificationPermissionWithoutKillForTest(String packageName, int userId) {
+        mPermissionManagerServiceImpl.revokePostNotificationPermissionWithoutKillForTest(
+                packageName, userId);
+    }
+
+    @Override
     public boolean shouldShowRequestPermissionRationale(String packageName, String permissionName,
             int userId) {
         return mPermissionManagerServiceImpl.shouldShowRequestPermissionRationale(packageName,

@@ -36,6 +36,7 @@ package android {
     field public static final String RECORD_BACKGROUND_AUDIO = "android.permission.RECORD_BACKGROUND_AUDIO";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String RESET_APP_ERRORS = "android.permission.RESET_APP_ERRORS";
+    field public static final String REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL = "android.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL";
     field public static final String SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS = "android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS";
     field public static final String START_TASKS_FROM_RECENTS = "android.permission.START_TASKS_FROM_RECENTS";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
@@ -2036,6 +2037,7 @@ package android.permission {
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData();
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData(boolean);
     method @NonNull public android.content.AttributionSource registerAttributionSource(@NonNull android.content.AttributionSource);
+    method public void revokePostNotificationPermissionWithoutKillForTest(@NonNull String, int);
   }
 
 }
