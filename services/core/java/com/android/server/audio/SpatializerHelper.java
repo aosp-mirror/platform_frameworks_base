@@ -43,6 +43,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * A helper class to manage Spatializer related functionality
@@ -168,6 +169,7 @@ public class SpatializerHelper {
             return;
         }
         mState = STATE_DISABLED_UNAVAILABLE;
+        mASA.getDevicesForAttributes(DEFAULT_ATTRIBUTES).toArray(ROUTING_DEVICES);
         // note at this point mSpat is still not instantiated
     }
 
@@ -204,6 +206,11 @@ public class SpatializerHelper {
         logd("onRoutingUpdated: can spatialize media 5.1:" + able
                 + " on device:" + ROUTING_DEVICES[0]);
         setDispatchAvailableState(able);
+
+        if (mDesiredHeadTrackingMode != Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED
+                && mDesiredHeadTrackingMode != Spatializer.HEAD_TRACKING_MODE_DISABLED) {
+            postInitSensors();
+        }
     }
 
     //------------------------------------------------------
@@ -909,12 +916,21 @@ public class SpatializerHelper {
                 }
             }
             // initialize sensor handles
-            // TODO-HT update to non-private sensor once head tracker sensor is defined
-            for (Sensor sensor : mSensorManager.getDynamicSensorList(
-                    Sensor.TYPE_DEVICE_PRIVATE_BASE)) {
-                if (sensor.getStringType().equals(HEADTRACKER_SENSOR)) {
-                    headHandle = sensor.getHandle();
-                    break;
+            UUID routingDeviceUuid = mAudioService.getDeviceSensorUuid(ROUTING_DEVICES[0]);
+            List<Sensor> sensors = new ArrayList<Sensor>(0);
+            sensors.addAll(mSensorManager.getDynamicSensorList(Sensor.TYPE_HEAD_TRACKER));
+            sensors.addAll(mSensorManager.getDynamicSensorList(Sensor.TYPE_DEVICE_PRIVATE_BASE));
+            for (Sensor sensor : sensors) {
+                if (sensor.getType() == Sensor.TYPE_HEAD_TRACKER
+                        || sensor.getStringType().equals(HEADTRACKER_SENSOR)) {
+                    UUID uuid = sensor.getUuid();
+                    if (uuid.equals(routingDeviceUuid)) {
+                        headHandle = sensor.getHandle();
+                        break;
+                    }
+                    if (uuid.equals(UuidUtils.STANDALONE_UUID)) {
+                        headHandle = sensor.getHandle();
+                    }
                 }
             }
             Sensor screenSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
