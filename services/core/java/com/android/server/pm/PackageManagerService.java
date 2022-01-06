@@ -4794,7 +4794,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     try {
                         mDomainVerificationManager.printState(writer, packageName,
                                 UserHandle.USER_ALL, mSettings::getPackageLPr);
-                    } catch (PackageManager.NameNotFoundException e) {
+                    } catch (Exception e) {
                         pw.println("Failure printing domain verification information");
                         Slog.e(TAG, "Failure printing domain verification information", e);
                     }
