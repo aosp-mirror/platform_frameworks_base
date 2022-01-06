@@ -212,9 +212,6 @@ public class TileQueryHelper {
 
         @Override
         public void onScanStateChanged(boolean state) {}
-
-        @Override
-        public void onAnnouncementRequested(CharSequence announcement) {}
     }
 
     private void addPackageTiles(final QSTileHost host) {

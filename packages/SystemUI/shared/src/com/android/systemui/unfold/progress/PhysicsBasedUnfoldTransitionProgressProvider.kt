@@ -32,12 +32,7 @@ import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 
-/**
- * Maps fold updates to unfold transition progress using DynamicAnimation.
- *
- * TODO(b/193793338) Current limitations:
- *  - doesn't handle postures
- */
+/** Maps fold updates to unfold transition progress using DynamicAnimation. */
 internal class PhysicsBasedUnfoldTransitionProgressProvider(
     private val foldStateProvider: FoldStateProvider
 ) :

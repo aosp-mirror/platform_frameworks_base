@@ -26,6 +26,8 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
@@ -995,6 +997,60 @@ public class AccessibilityCacheTest {
         } else {
             info.setFocused(true);
         }
+    }
+
+    @Test
+    public void enable_cacheEnabled() {
+        mAccessibilityCache.setEnabled(false);
+        assertFalse(mAccessibilityCache.isEnabled());
+
+        mAccessibilityCache.setEnabled(true);
+        assertTrue(mAccessibilityCache.isEnabled());
+    }
+
+    @Test
+    public void disable_cacheDisabled() {
+        mAccessibilityCache.setEnabled(false);
+        assertFalse(mAccessibilityCache.isEnabled());
+    }
+
+    @Test
+    public void queryNode_nodeIsInCache() {
+        AccessibilityNodeInfo info = new AccessibilityNodeInfo();
+        mAccessibilityCache.add(info);
+
+        assertTrue(mAccessibilityCache.isNodeInCache(info));
+    }
+
+    @Test
+    public void clearSubtreeWithNode_nodeInCacheInvalidated() {
+        AccessibilityNodeInfo info = new AccessibilityNodeInfo();
+        info.setSource(getMockViewWithA11yAndWindowIds(1, 1));
+        mAccessibilityCache.add(info);
+
+        mAccessibilityCache.clearSubTree(info);
+        assertFalse(mAccessibilityCache.isNodeInCache(info));
+    }
+
+    @Test
+    public void clearSubtreeWithNode_subtreeInCacheInvalidated() {
+        AccessibilityNodeInfo info = new AccessibilityNodeInfo();
+        View parentView = getMockViewWithA11yAndWindowIds(1, 1);
+        info.setSource(parentView);
+
+        AccessibilityNodeInfo childInfo = new AccessibilityNodeInfo();
+        View childView = getMockViewWithA11yAndWindowIds(2, 1);
+        childInfo.setSource(childView);
+
+        childInfo.setParent(parentView);
+        info.addChild(childView);
+        mAccessibilityCache.add(info);
+        mAccessibilityCache.add(childInfo);
+
+        mAccessibilityCache.clearSubTree(info);
+
+        assertFalse(mAccessibilityCache.isNodeInCache(info));
+        assertFalse(mAccessibilityCache.isNodeInCache(childInfo));
     }
 
     private AccessibilityWindowInfo obtainAccessibilityWindowInfo(int windowId, int layer) {

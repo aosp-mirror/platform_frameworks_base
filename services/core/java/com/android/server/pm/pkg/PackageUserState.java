@@ -150,4 +150,13 @@ public interface PackageUserState extends FrameworkPackageUserState {
      */
     @Nullable
     String getSplashScreenTheme();
+
+    /**
+     * In epoch milliseconds. The timestamp of the first install of the app of the particular user
+     * on the device, surviving past app updates. Different users might have a different first
+     * install time.
+     *
+     * This does not survive full removal of the app (i.e., uninstalls for all users).
+     */
+    long getFirstInstallTime();
 }

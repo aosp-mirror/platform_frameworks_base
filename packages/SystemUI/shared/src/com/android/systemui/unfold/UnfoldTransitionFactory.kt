@@ -30,6 +30,7 @@ import com.android.systemui.unfold.util.ScaleAwareTransitionProgressProvider
 import com.android.systemui.unfold.updates.DeviceFoldStateProvider
 import com.android.systemui.unfold.updates.hinge.EmptyHingeAngleProvider
 import com.android.systemui.unfold.updates.hinge.HingeSensorAngleProvider
+import com.android.systemui.unfold.util.ATraceLoggerTransitionProgressListener
 import java.lang.IllegalStateException
 import java.util.concurrent.Executor
 
@@ -46,7 +47,8 @@ fun createUnfoldTransitionProgressProvider(
     deviceStateManager: DeviceStateManager,
     sensorManager: SensorManager,
     mainHandler: Handler,
-    mainExecutor: Executor
+    mainExecutor: Executor,
+    tracingTagPrefix: String
 ): UnfoldTransitionProgressProvider {
 
     if (!config.isEnabled) {
@@ -76,9 +78,12 @@ fun createUnfoldTransitionProgressProvider(
         FixedTimingTransitionProgressProvider(foldStateProvider)
     }
     return ScaleAwareTransitionProgressProvider(
-            unfoldTransitionProgressProvider,
-            context.contentResolver
-    )
+        unfoldTransitionProgressProvider,
+        context.contentResolver
+    ).apply {
+        // Always present callback that logs animation beginning and end.
+        addCallback(ATraceLoggerTransitionProgressListener(tracingTagPrefix))
+    }
 }
 
 fun createConfig(context: Context): UnfoldTransitionConfig =

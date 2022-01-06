@@ -277,6 +277,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         registerSettingObservers(mUserId);
         setupTimeoutListener();
         updateSettings();
+        updateDisplayLayout(mContext.getDisplayId());
 
         mAccessibilityManager = AccessibilityManager.getInstance(context);
         mAccessibilityManager.addAccessibilityStateChangeListener(
@@ -448,8 +449,13 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         onShortcutEnabledChanged();
     }
 
-    private void updateDisplayLayout(int displayId) {
+    @VisibleForTesting
+    void updateDisplayLayout(int displayId) {
         final DisplayLayout newDisplayLayout = mDisplayController.getDisplayLayout(displayId);
+        if (newDisplayLayout == null) {
+            Slog.w(TAG, "Failed to get new DisplayLayout.");
+            return;
+        }
         mDisplayAreaOrganizer.setDisplayLayout(newDisplayLayout);
         mTutorialHandler.onDisplayChanged(newDisplayLayout);
         mBackgroundPanelOrganizer.onDisplayChanged(newDisplayLayout);

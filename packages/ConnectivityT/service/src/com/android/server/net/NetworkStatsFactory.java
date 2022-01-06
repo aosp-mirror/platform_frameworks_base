@@ -24,11 +24,11 @@ import static android.net.NetworkStats.UID_ALL;
 
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.INetd;
 import android.net.NetworkStats;
 import android.net.UnderlyingNetworkInfo;
-import android.net.util.NetdService;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -70,7 +70,7 @@ public class NetworkStatsFactory {
 
     private final boolean mUseBpfStats;
 
-    private INetd mNetdService;
+    private final INetd mNetd;
 
     /**
      * Guards persistent data access in this class
@@ -158,12 +158,12 @@ public class NetworkStatsFactory {
         NetworkStats.apply464xlatAdjustments(baseTraffic, stackedTraffic, mStackedIfaces);
     }
 
-    public NetworkStatsFactory() {
-        this(new File("/proc/"), true);
+    public NetworkStatsFactory(@NonNull INetd netd) {
+        this(new File("/proc/"), true, netd);
     }
 
     @VisibleForTesting
-    public NetworkStatsFactory(File procRoot, boolean useBpfStats) {
+    public NetworkStatsFactory(File procRoot, boolean useBpfStats, @NonNull INetd netd) {
         mStatsXtIfaceAll = new File(procRoot, "net/xt_qtaguid/iface_stat_all");
         mStatsXtIfaceFmt = new File(procRoot, "net/xt_qtaguid/iface_stat_fmt");
         mStatsXtUid = new File(procRoot, "net/xt_qtaguid/stats");
@@ -172,6 +172,7 @@ public class NetworkStatsFactory {
             mPersistSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), -1);
             mTunAnd464xlatAdjustedStats = new NetworkStats(SystemClock.elapsedRealtime(), -1);
         }
+        mNetd = netd;
     }
 
     public NetworkStats readBpfNetworkStatsDev() throws IOException {
@@ -298,10 +299,7 @@ public class NetworkStatsFactory {
         // Ask netd to do a active map stats swap. When the binder call successfully returns,
         // the system server should be able to safely read and clean the inactive map
         // without race problem.
-        if (mNetdService == null) {
-            mNetdService = NetdService.getInstance();
-        }
-        mNetdService.trafficSwapActiveStatsMap();
+        mNetd.trafficSwapActiveStatsMap();
     }
 
     /**

@@ -94,7 +94,7 @@ public class WindowMagnificationManagerTest {
         LocalServices.addService(StatusBarManagerInternal.class, mMockStatusBarManagerInternal);
         mResolver = new MockContentResolver();
         mMockConnection = new MockWindowMagnificationConnection();
-        mWindowMagnificationManager = new WindowMagnificationManager(mContext, CURRENT_USER_ID,
+        mWindowMagnificationManager = new WindowMagnificationManager(mContext, new Object(),
                 mMockCallback, mMockTrace, new MagnificationScaleProvider(mContext));
 
         when(mContext.getContentResolver()).thenReturn(mResolver);

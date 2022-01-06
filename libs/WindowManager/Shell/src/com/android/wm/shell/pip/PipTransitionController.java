@@ -19,6 +19,7 @@ package com.android.wm.shell.pip;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_REMOVE_STACK;
+import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 
 import android.annotation.Nullable;
 import android.app.PictureInPictureParams;
@@ -69,6 +70,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
                     if (direction == TRANSITION_DIRECTION_REMOVE_STACK) {
                         return;
                     }
+                    if (isInPipDirection(direction) && animator.getContentOverlay() != null) {
+                        mPipOrganizer.fadeOutAndRemoveOverlay(animator.getContentOverlay(),
+                                animator::clearContentOverlay, true /* withStartDelay*/);
+                    }
                     onFinishResize(taskInfo, animator.getDestinationBounds(), direction, tx);
                     sendOnPipTransitionFinished(direction);
                 }
@@ -76,6 +81,11 @@ public abstract class PipTransitionController implements Transitions.TransitionH
                 @Override
                 public void onPipAnimationCancel(TaskInfo taskInfo,
                         PipAnimationController.PipTransitionAnimator animator) {
+                    final int direction = animator.getTransitionDirection();
+                    if (isInPipDirection(direction) && animator.getContentOverlay() != null) {
+                        mPipOrganizer.fadeOutAndRemoveOverlay(animator.getContentOverlay(),
+                                animator::clearContentOverlay, true /* withStartDelay */);
+                    }
                     sendOnPipTransitionCancelled(animator.getTransitionDirection());
                 }
             };

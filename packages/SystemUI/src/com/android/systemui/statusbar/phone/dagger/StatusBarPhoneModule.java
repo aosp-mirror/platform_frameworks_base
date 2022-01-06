@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
@@ -105,6 +106,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
@@ -140,6 +142,7 @@ public interface StatusBarPhoneModule {
             LightBarController lightBarController,
             AutoHideController autoHideController,
             StatusBarWindowController statusBarWindowController,
+            StatusBarWindowStateController statusBarWindowStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarSignalPolicy statusBarSignalPolicy,
             PulseExpansionHandler pulseExpansionHandler,
@@ -227,7 +230,8 @@ public interface StatusBarPhoneModule {
             WallpaperManager wallpaperManager,
             Optional<StartingSurface> startingSurfaceOptional,
             ActivityLaunchAnimator activityLaunchAnimator,
-            NotifPipelineFlags notifPipelineFlags) {
+            NotifPipelineFlags notifPipelineFlags,
+            InteractionJankMonitor jankMonitor) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -235,6 +239,7 @@ public interface StatusBarPhoneModule {
                 lightBarController,
                 autoHideController,
                 statusBarWindowController,
+                statusBarWindowStateController,
                 keyguardUpdateMonitor,
                 statusBarSignalPolicy,
                 pulseExpansionHandler,
@@ -321,7 +326,8 @@ public interface StatusBarPhoneModule {
                 wallpaperManager,
                 startingSurfaceOptional,
                 activityLaunchAnimator,
-                notifPipelineFlags
+                notifPipelineFlags,
+                jankMonitor
         );
     }
 }

@@ -30,6 +30,7 @@ import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class PagedTileLayout extends ViewPager implements QSTileLayout {
@@ -332,6 +333,18 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mPageListener = listener;
     }
 
+    public List<String> getSpecsForPage(int page) {
+        ArrayList<String> out = new ArrayList<>();
+        if (page < 0) return out;
+        int perPage = mPages.get(0).maxTiles();
+        int startOfPage = page * perPage;
+        int endOfPage = (page + 1) * perPage;
+        for (int i = startOfPage; i < endOfPage && i < mTiles.size(); i++) {
+            out.add(mTiles.get(i).tile.getTileSpec());
+        }
+        return out;
+    }
+
     private void distributeTiles() {
         emptyAndInflateOrRemovePages();
 
@@ -491,6 +504,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         return currentPage.mRecords.size();
     }
 
+    public int getNumTilesFirstPage() {
+        if (mPages.size() == 0) return 0;
+        return mPages.get(0).mRecords.size();
+    }
+
     public void startTileReveal(Set<String> tileSpecs, final Runnable postAnimation) {
         if (tileSpecs.isEmpty() || mPages.size() < 2 || getScrollX() != 0 || !beginFakeDrag()) {
             // Do not start the reveal animation unless there are tiles to animate, multiple
@@ -556,8 +574,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                     updateSelected();
                     if (mPageIndicator == null) return;
                     if (mPageListener != null) {
+                        int pageNumber = isLayoutRtl() ? mPages.size() - 1 - position : position;
                         mPageListener.onPageChanged(isLayoutRtl() ? position == mPages.size() - 1
-                                : position == 0);
+                                : position == 0, pageNumber);
                     }
                 }
 
@@ -575,8 +594,12 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                     mPageIndicatorPosition = position + positionOffset;
                     mPageIndicator.setLocation(mPageIndicatorPosition);
                     if (mPageListener != null) {
+                        int pageNumber = isLayoutRtl() ? mPages.size() - 1 - position : position;
                         mPageListener.onPageChanged(positionOffsetPixels == 0 &&
-                                (isLayoutRtl() ? position == mPages.size() - 1 : position == 0));
+                                (isLayoutRtl() ? position == mPages.size() - 1 : position == 0),
+                                // Send only valid page number on integer pages
+                                positionOffsetPixels == 0 ? pageNumber : PageListener.INVALID_PAGE
+                        );
                     }
                 }
 
@@ -626,6 +649,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     };
 
     public interface PageListener {
-        void onPageChanged(boolean isFirst);
+        int INVALID_PAGE = -1;
+        void onPageChanged(boolean isFirst, int pageNumber);
     }
 }

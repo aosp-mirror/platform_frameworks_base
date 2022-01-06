@@ -34,7 +34,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 12;
+    int VERSION = 13;
 
     String TAG = "QS";
 
@@ -69,6 +69,11 @@ public interface QS extends FragmentBase {
     void notifyCustomizeChanged();
     void setContainerController(QSContainerController controller);
     void setExpandClickListener(OnClickListener onClickListener);
+
+    /**
+     * Returns the height difference between the QSPanel container and the QuickQSPanel container
+     */
+    int getHeightDiff();
 
     View getHeader();
 

@@ -3907,14 +3907,20 @@ public class UserBackupManagerService {
         }
 
         int operationType;
+        TransportConnection transportConnection = null;
         try {
-            operationType = getOperationTypeFromTransport(
-                    mTransportManager.getTransportClientOrThrow(transport, /* caller */
-                            "BMS.beginRestoreSession"));
+            transportConnection = mTransportManager.getTransportClientOrThrow(
+                    transport, /* caller */"BMS.beginRestoreSession");
+            operationType = getOperationTypeFromTransport(transportConnection);
         } catch (TransportNotAvailableException | TransportNotRegisteredException
                 | RemoteException e) {
             Slog.w(TAG, "Failed to get operation type from transport: " + e);
             return null;
+        } finally {
+            if (transportConnection != null) {
+                mTransportManager.disposeOfTransportClient(transportConnection,
+                        /* caller */"BMS.beginRestoreSession");
+            }
         }
 
         synchronized (this) {

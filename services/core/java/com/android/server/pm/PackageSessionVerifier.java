@@ -45,6 +45,7 @@ import android.util.apk.ApkSignatureVerifier;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageHelper;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.rollback.RollbackManagerInternal;
@@ -99,9 +100,11 @@ final class PackageSessionVerifier {
                 storeSession(session.mStagedSession);
                 if (session.isMultiPackage()) {
                     for (PackageInstallerSession child : session.getChildSessions()) {
+                        checkApexUpdateAllowed(child);
                         checkRebootlessApex(child);
                     }
                 } else {
+                    checkApexUpdateAllowed(session);
                     checkRebootlessApex(session);
                 }
                 verifyAPK(session, callback);
@@ -203,7 +206,7 @@ final class PackageSessionVerifier {
     }
 
     private void onVerificationFailure(StagingManager.StagedSession session, Callback callback,
-            @SessionInfo.StagedSessionErrorCode int errorCode, String errorMessage) {
+            @SessionInfo.SessionErrorCode int errorCode, String errorMessage) {
         if (!ensureActiveApexSessionIsAborted(session)) {
             Slog.e(TAG, "Failed to abort apex session " + session.sessionId());
             // Safe to ignore active apex session abortion failure since session will be marked
@@ -459,6 +462,51 @@ final class PackageSessionVerifier {
             return true;
         }
         return mApexManager.abortStagedSession(sessionId);
+    }
+
+    private boolean isApexUpdateAllowed(String apexPackageName, String installerPackageName) {
+        if (mPm.getModuleInfo(apexPackageName, 0) != null) {
+            final String modulesInstaller =
+                    SystemConfig.getInstance().getModulesInstallerPackageName();
+            if (modulesInstaller == null) {
+                Slog.w(TAG, "No modules installer defined");
+                return false;
+            }
+            return modulesInstaller.equals(installerPackageName);
+        }
+        final String vendorApexInstaller =
+                SystemConfig.getInstance().getAllowedVendorApexes().get(apexPackageName);
+        if (vendorApexInstaller == null) {
+            Slog.w(TAG, apexPackageName + " is not allowed to be updated");
+            return false;
+        }
+        return vendorApexInstaller.equals(installerPackageName);
+    }
+
+    /**
+     * Checks if APEX update is allowed.
+     *
+     * This phase is shared between staged and non-staged sessions and should be called after
+     * boot is completed since this check depends on the ModuleInfoProvider, which is only populated
+     * after device has booted.
+     */
+    private void checkApexUpdateAllowed(PackageInstallerSession session)
+            throws PackageManagerException {
+        if (!session.isApexSession()) {
+            return;
+        }
+        final int installFlags = session.params.installFlags;
+        if ((installFlags & PackageManager.INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK) != 0) {
+            return;
+        }
+        final String packageName = session.getPackageName();
+        final String installerPackageName = session.getInstallSource().installerPackageName;
+        if (!isApexUpdateAllowed(packageName, installerPackageName)) {
+            throw new PackageManagerException(
+                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                    "Update of APEX package " + packageName + " is not allowed for "
+                            + installerPackageName);
+        }
     }
 
     /**

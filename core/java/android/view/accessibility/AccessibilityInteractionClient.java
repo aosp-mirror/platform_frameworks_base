@@ -18,6 +18,7 @@ package android.view.accessibility;
 
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_INTERACTION_CLIENT;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION_CALLBACK;
+import static android.os.Build.VERSION_CODES.S;
 
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
@@ -225,6 +226,9 @@ public final class AccessibilityInteractionClient
      */
     public static void addConnection(int connectionId, IAccessibilityServiceConnection connection,
             boolean initializeCache) {
+        if (connectionId == NO_ID) {
+            return;
+        }
         synchronized (sConnectionCache) {
             sConnectionCache.put(connectionId, connection);
             if (!initializeCache) {
@@ -553,6 +557,10 @@ public final class AccessibilityInteractionClient
                                                 + ";arguments=" + arguments);
                             }
                             return cachedInfo;
+                        }
+                        if (!cache.isEnabled()) {
+                            // Skip prefetching if cache is disabled.
+                            prefetchFlags &= ~AccessibilityNodeInfo.FLAG_PREFETCH_MASK;
                         }
                         if (DEBUG) {
                             Log.i(LOG_TAG, "Node cache miss for "
@@ -970,9 +978,9 @@ public final class AccessibilityInteractionClient
     /**
      * Clears the cache associated with {@code connectionId}
      * @param connectionId the connection id
-     * TODO(207417185): Modify UnsupportedAppUsage
      */
-    @UnsupportedAppUsage()
+    @UnsupportedAppUsage(maxTargetSdk = S, publicAlternatives =
+            "{@link android.accessibilityservice.AccessibilityService#clearCache()}")
     public void clearCache(int connectionId) {
         AccessibilityCache cache = getCache(connectionId);
         if (cache == null) {

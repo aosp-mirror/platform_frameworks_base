@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
-import static android.app.StatusBarManager.windowStateToString;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.containsType;
 
@@ -58,7 +56,6 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DisableFlagsLogger;
-import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -512,30 +509,6 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
     public void setTopAppHidesStatusBar(boolean topAppHidesStatusBar) {
         mStatusBarHideIconsForBouncerManager
                 .setTopAppHidesStatusBarAndTriggerUpdate(topAppHidesStatusBar);
-    }
-
-    @Override
-    public void setWindowState(
-            int displayId, @StatusBarManager.WindowType int window,
-            @StatusBarManager.WindowVisibleState int state) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        boolean showing = state == WINDOW_STATE_SHOWING;
-        if (mNotificationShadeWindowView != null
-                && window == StatusBarManager.WINDOW_STATUS_BAR
-                && !mStatusBar.isSameStatusBarState(state)) {
-            mStatusBar.setWindowState(state);
-            if (StatusBar.DEBUG_WINDOW_STATE) {
-                Log.d(StatusBar.TAG, "Status bar " + windowStateToString(state));
-            }
-            if (!showing && mStatusBarStateController.getState() == StatusBarState.SHADE) {
-                mNotificationPanelViewController.collapsePanel(
-                            false /* animate */, false /* delayed */, 1.0f /* speedUpFactor */);
-            }
-        }
-
-        mStatusBar.updateBubblesVisibility();
     }
 
     @Override

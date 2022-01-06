@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.phone
 
 import android.content.res.Configuration
 import android.graphics.Point
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -90,6 +91,30 @@ class PhoneStatusBarViewController private constructor(
 
     fun setImportantForAccessibility(mode: Int) {
         mView.importantForAccessibility = mode
+    }
+
+    /**
+     * Sends a touch event to the status bar view.
+     *
+     * This is required in certain cases because the status bar view is in a separate window from
+     * the rest of SystemUI, and other windows may decide that their touch should instead be treated
+     * as a status bar window touch.
+     */
+    fun sendTouchToView(ev: MotionEvent): Boolean {
+        return mView.dispatchTouchEvent(ev)
+    }
+
+    /**
+     * Returns true if the given (x, y) point (in screen coordinates) is within the status bar
+     * view's range and false otherwise.
+     */
+    fun touchIsWithinView(x: Float, y: Float): Boolean {
+        val left = mView.locationOnScreen[0]
+        val top = mView.locationOnScreen[1]
+        return left <= x &&
+                x <= left + mView.width &&
+                top <= y &&
+                y <= top + mView.height
     }
 
     class StatusBarViewsCenterProvider : UnfoldMoveFromCenterAnimator.ViewCenterProvider {

@@ -18,7 +18,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="test_com.android.server">
     <!-- APEX does not have classes.dex -->
-    <application android:hasCode="false">
+    <application android:hasCode="false" android:testOnly="true">
         <apex-system-service
             android:name="com.android.server.testing.FakeApexSystemService"
             android:path="/apex/test_com.android.server/javalib/FakeApexSystemService.jar"

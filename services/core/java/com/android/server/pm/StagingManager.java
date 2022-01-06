@@ -32,7 +32,7 @@ import android.content.pm.ApexStagedEvent;
 import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
-import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
+import android.content.pm.PackageInstaller.SessionInfo.SessionErrorCode;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.StagedApexInfo;
@@ -129,7 +129,7 @@ public class StagingManager {
         boolean containsApkSession();
         boolean containsApexSession();
         void setSessionReady();
-        void setSessionFailed(@StagedSessionErrorCode int errorCode, String errorMessage);
+        void setSessionFailed(@SessionErrorCode int errorCode, String errorMessage);
         void setSessionApplied();
         void installSession(IntentSender statusReceiver);
         boolean hasParentSessionId();
@@ -932,9 +932,7 @@ public class StagingManager {
                     info.diskImagePath = ai.modulePath;
                     info.versionCode = ai.versionCode;
                     info.versionName = ai.versionName;
-                    info.hasBootClassPathJars = ai.hasBootClassPathJars;
-                    info.hasDex2OatBootClassPathJars = ai.hasDex2OatBootClassPathJars;
-                    info.hasSystemServerClassPathJars = ai.hasSystemServerClassPathJars;
+                    info.hasClassPathJars = ai.hasClassPathJars;
                     return info;
                 }
             }

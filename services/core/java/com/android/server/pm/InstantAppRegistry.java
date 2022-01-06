@@ -59,6 +59,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
@@ -854,7 +855,10 @@ class InstantAppRegistry implements Watchable, Snappable {
                         } else if (lhsPs.getTransientState().getLatestPackageUseTimeInMills() <
                                 rhsPs.getTransientState().getLatestPackageUseTimeInMills()) {
                             return -1;
-                        } else if (lhsPs.getFirstInstallTime() > rhsPs.getFirstInstallTime()) {
+                        } else if (
+                                PackageStateUtils.getEarliestFirstInstallTime(lhsPs.getUserStates())
+                                > PackageStateUtils.getEarliestFirstInstallTime(
+                                        rhsPs.getUserStates())) {
                             return 1;
                         } else {
                             return -1;

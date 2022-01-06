@@ -156,8 +156,14 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      *
      * Categories are defined in {@link com.android.internal.logging.nano.MetricsProto.MetricsEvent}
      * by editing frameworks/base/proto/src/metrics_constants.proto.
+     *
+     * @deprecated Not needed as this logging is deprecated. Logging tiles is done using
+     * {@link QSTile#getMetricsSpec}
      */
-    abstract public int getMetricsCategory();
+    @Deprecated
+    public int getMetricsCategory() {
+        return 0;
+    }
 
     /**
      * Performs initialization of the tile
@@ -445,27 +451,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     }
 
     private void handleStateChanged() {
-        boolean delayAnnouncement = shouldAnnouncementBeDelayed();
         if (mCallbacks.size() != 0) {
             for (int i = 0; i < mCallbacks.size(); i++) {
                 mCallbacks.get(i).onStateChanged(mState);
             }
-            if (mAnnounceNextStateChange && !delayAnnouncement) {
-                String announcement = composeChangeAnnouncement();
-                if (announcement != null) {
-                    mCallbacks.get(0).onAnnouncementRequested(announcement);
-                }
-            }
         }
-        mAnnounceNextStateChange = mAnnounceNextStateChange && delayAnnouncement;
-    }
-
-    protected boolean shouldAnnouncementBeDelayed() {
-        return false;
-    }
-
-    protected String composeChangeAnnouncement() {
-        return null;
     }
 
     private void handleShowDetail(boolean show) {

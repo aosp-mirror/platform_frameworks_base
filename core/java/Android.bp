@@ -301,6 +301,17 @@ cc_library {
     ],
 }
 
+cc_library {
+    name: "libactivity_manager_procstate_aidl-cpp",
+    host_supported: true,
+    srcs: [
+        ":activity_manager_procstate_aidl",
+    ],
+    aidl: {
+        export_aidl_headers: true,
+    },
+}
+
 // Build Rust bindings for PermissionController. Needed by keystore2.
 aidl_interface {
     name: "android.os.permissions_aidl",

@@ -183,6 +183,7 @@ public class NotificationStackScrollLayoutController {
     private final NotificationGroupManagerLegacy mLegacyGroupManager;
     private final SectionHeaderController mSilentHeaderController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    private final InteractionJankMonitor mJankMonitor;
 
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
@@ -661,7 +662,8 @@ public class NotificationStackScrollLayoutController {
             LayoutInflater layoutInflater,
             NotificationRemoteInputManager remoteInputManager,
             VisualStabilityManager visualStabilityManager,
-            ShadeController shadeController) {
+            ShadeController shadeController,
+            InteractionJankMonitor jankMonitor) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mVisibilityProvider = visibilityProvider;
@@ -684,6 +686,7 @@ public class NotificationStackScrollLayoutController {
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
         mStatusBar = statusBar;
         mScrimController = scrimController;
+        mJankMonitor = jankMonitor;
         groupManager.registerGroupExpansionChangeListener(
                 (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
         legacyGroupManager.registerGroupChangeListener(new OnGroupChangeListener() {
@@ -1784,9 +1787,9 @@ public class NotificationStackScrollLayoutController {
             // We log any touches other than down, which will be captured by onTouchEvent.
             // In the intercept we only start tracing when it's not a down (otherwise that down
             // would be duplicated when intercepted).
-            if (scrollWantsIt && ev.getActionMasked() != MotionEvent.ACTION_DOWN) {
-                InteractionJankMonitor.getInstance().begin(mView,
-                        CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+            if (mJankMonitor != null && scrollWantsIt
+                    && ev.getActionMasked() != MotionEvent.ACTION_DOWN) {
+                mJankMonitor.begin(mView, CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
             }
             return swipeWantsIt || scrollWantsIt || expandWantsIt || longPressWantsIt;
         }
@@ -1854,24 +1857,25 @@ public class NotificationStackScrollLayoutController {
         }
 
         private void traceJankOnTouchEvent(int action, boolean scrollerWantsIt) {
+            if (mJankMonitor == null) {
+                Log.w(TAG, "traceJankOnTouchEvent, mJankMonitor is null");
+                return;
+            }
             // Handle interaction jank monitor cases.
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
                     if (scrollerWantsIt) {
-                        InteractionJankMonitor.getInstance()
-                                .begin(mView, CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+                        mJankMonitor.begin(mView, CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
                     }
                     break;
                 case MotionEvent.ACTION_UP:
                     if (scrollerWantsIt && !mView.isFlingAfterUpEvent()) {
-                        InteractionJankMonitor.getInstance()
-                                .end(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+                        mJankMonitor.end(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
                     }
                     break;
                 case MotionEvent.ACTION_CANCEL:
                     if (scrollerWantsIt) {
-                        InteractionJankMonitor.getInstance()
-                                .cancel(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+                        mJankMonitor.cancel(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
                     }
                     break;
             }

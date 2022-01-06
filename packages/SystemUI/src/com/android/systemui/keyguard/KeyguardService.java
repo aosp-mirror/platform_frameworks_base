@@ -500,8 +500,8 @@ public class KeyguardService extends Service {
         public void onScreenTurningOn(IKeyguardDrawnCallback callback) {
             Trace.beginSection("KeyguardService.mBinder#onScreenTurningOn");
             checkPermission();
-            mKeyguardViewMediator.onScreenTurningOn(callback);
-            mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_ON);
+            mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_ON,
+                    callback);
             Trace.endSection();
         }
 
@@ -509,7 +509,6 @@ public class KeyguardService extends Service {
         public void onScreenTurnedOn() {
             Trace.beginSection("KeyguardService.mBinder#onScreenTurnedOn");
             checkPermission();
-            mKeyguardViewMediator.onScreenTurnedOn();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_ON);
             Trace.endSection();
         }

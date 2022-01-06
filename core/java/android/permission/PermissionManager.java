@@ -24,6 +24,8 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -100,6 +102,26 @@ public final class PermissionManager {
      * The app should receive a {@code SecurityException}, or an error through a relevant callback.
      */
     public static final int PERMISSION_HARD_DENIED = 2;
+
+    /**
+     * Activity action: Launch UI to review permission decisions.
+     * <p>
+     * <strong>Important:</strong>You must protect the activity that handles this action with the
+     * {@link android.Manifest.permission#START_REVIEW_PERMISSION_DECISIONS} permission to ensure
+     * that only the system can launch this activity. The system will not launch activities that are
+     * not properly protected.
+     * <p>
+     * Input: Nothing.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @RequiresPermission(android.Manifest.permission.START_REVIEW_PERMISSION_DECISIONS)
+    public static final String ACTION_REVIEW_PERMISSION_DECISIONS =
+            "android.permission.action.REVIEW_PERMISSION_DECISIONS";
+
 
     /** @hide */
     public static final String LOG_TAG_TRACE_GRANTS = "PermissionGrantTrace";

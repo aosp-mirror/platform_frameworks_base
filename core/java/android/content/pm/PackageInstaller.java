@@ -2374,7 +2374,7 @@ public class PackageInstaller {
                 STAGED_SESSION_UNKNOWN,
                 STAGED_SESSION_CONFLICT})
         @Retention(RetentionPolicy.SOURCE)
-        public @interface StagedSessionErrorCode{}
+        public @interface SessionErrorCode {}
         /**
          * Constant indicating that no error occurred during the preparation or the activation of
          * this staged session.
@@ -2486,13 +2486,13 @@ public class PackageInstaller {
         public int[] childSessionIds = NO_SESSIONS;
 
         /** {@hide} */
-        public boolean isStagedSessionApplied;
+        public boolean isSessionApplied;
         /** {@hide} */
-        public boolean isStagedSessionReady;
+        public boolean isSessionReady;
         /** {@hide} */
-        public boolean isStagedSessionFailed;
-        private int mStagedSessionErrorCode;
-        private String mStagedSessionErrorMessage;
+        public boolean isSessionFailed;
+        private int mSessionErrorCode;
+        private String mSessionErrorMessage;
 
         /** {@hide} */
         public boolean isCommitted;
@@ -2553,11 +2553,11 @@ public class PackageInstaller {
             if (childSessionIds == null) {
                 childSessionIds = NO_SESSIONS;
             }
-            isStagedSessionApplied = source.readBoolean();
-            isStagedSessionReady = source.readBoolean();
-            isStagedSessionFailed = source.readBoolean();
-            mStagedSessionErrorCode = source.readInt();
-            mStagedSessionErrorMessage = source.readString();
+            isSessionApplied = source.readBoolean();
+            isSessionReady = source.readBoolean();
+            isSessionFailed = source.readBoolean();
+            mSessionErrorCode = source.readInt();
+            mSessionErrorMessage = source.readString();
             isCommitted = source.readBoolean();
             rollbackDataPolicy = source.readInt();
             createdMillis = source.readLong();
@@ -2951,7 +2951,7 @@ public class PackageInstaller {
          * since that is the one that should have been {@link Session#commit committed}.
          */
         public boolean isStagedSessionActive() {
-            return isStaged && isCommitted && !isStagedSessionApplied && !isStagedSessionFailed
+            return isStaged && isCommitted && !isSessionApplied && !isSessionFailed
                     && !hasParentSessionId();
         }
 
@@ -2992,7 +2992,7 @@ public class PackageInstaller {
          */
         public boolean isStagedSessionApplied() {
             checkSessionIsStaged();
-            return isStagedSessionApplied;
+            return isSessionApplied;
         }
 
         /**
@@ -3001,7 +3001,7 @@ public class PackageInstaller {
          */
         public boolean isStagedSessionReady() {
             checkSessionIsStaged();
-            return isStagedSessionReady;
+            return isSessionReady;
         }
 
         /**
@@ -3010,16 +3010,16 @@ public class PackageInstaller {
          */
         public boolean isStagedSessionFailed() {
             checkSessionIsStaged();
-            return isStagedSessionFailed;
+            return isSessionFailed;
         }
 
         /**
          * If something went wrong with a staged session, clients can check this error code to
          * understand which kind of failure happened. Only meaningful if {@code isStaged} is true.
          */
-        public @StagedSessionErrorCode int getStagedSessionErrorCode() {
+        public @SessionErrorCode int getStagedSessionErrorCode() {
             checkSessionIsStaged();
-            return mStagedSessionErrorCode;
+            return mSessionErrorCode;
         }
 
         /**
@@ -3028,14 +3028,13 @@ public class PackageInstaller {
          */
         public @NonNull String getStagedSessionErrorMessage() {
             checkSessionIsStaged();
-            return mStagedSessionErrorMessage;
+            return mSessionErrorMessage;
         }
 
         /** {@hide} */
-        public void setStagedSessionErrorCode(@StagedSessionErrorCode int errorCode,
-                                              String errorMessage) {
-            mStagedSessionErrorCode = errorCode;
-            mStagedSessionErrorMessage = errorMessage;
+        public void setSessionErrorCode(@SessionErrorCode int errorCode, String errorMessage) {
+            mSessionErrorCode = errorCode;
+            mSessionErrorMessage = errorMessage;
         }
 
         /**
@@ -3124,11 +3123,11 @@ public class PackageInstaller {
             dest.writeBoolean(forceQueryable);
             dest.writeInt(parentSessionId);
             dest.writeIntArray(childSessionIds);
-            dest.writeBoolean(isStagedSessionApplied);
-            dest.writeBoolean(isStagedSessionReady);
-            dest.writeBoolean(isStagedSessionFailed);
-            dest.writeInt(mStagedSessionErrorCode);
-            dest.writeString(mStagedSessionErrorMessage);
+            dest.writeBoolean(isSessionApplied);
+            dest.writeBoolean(isSessionReady);
+            dest.writeBoolean(isSessionFailed);
+            dest.writeInt(mSessionErrorCode);
+            dest.writeString(mSessionErrorMessage);
             dest.writeBoolean(isCommitted);
             dest.writeInt(rollbackDataPolicy);
             dest.writeLong(createdMillis);

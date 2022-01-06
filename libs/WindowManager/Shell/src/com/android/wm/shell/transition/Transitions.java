@@ -359,6 +359,28 @@ public class Transitions implements RemoteCallable<Transitions> {
             return;
         }
 
+        // apply transfer starting window directly if there is no other task change.
+        final int changeSize = info.getChanges().size();
+        if (changeSize == 2) {
+            boolean nonTaskChange = true;
+            boolean transferStartingWindow = false;
+            for (int i = changeSize - 1; i >= 0; --i) {
+                final TransitionInfo.Change change = info.getChanges().get(i);
+                if (change.getTaskInfo() != null) {
+                    nonTaskChange = false;
+                    break;
+                }
+                if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
+                    transferStartingWindow = true;
+                }
+            }
+            if (nonTaskChange && transferStartingWindow) {
+                t.apply();
+                onFinish(transitionToken, null /* wct */, null /* wctCB */);
+                return;
+            }
+        }
+
         final ActiveTransition active = mActiveTransitions.get(activeIdx);
         active.mInfo = info;
         active.mStartT = t;

@@ -224,19 +224,13 @@ droidstubs {
     },
     dists: [
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/system-server/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk"],
             dir: "apistubs/android/system-server/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",

@@ -65,6 +65,7 @@ public class PipTransition extends PipTransitionController {
 
     private static final String TAG = PipTransition.class.getSimpleName();
 
+    private final Context mContext;
     private final PipTransitionState mPipTransitionState;
     private final int mEnterExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
@@ -86,6 +87,7 @@ public class PipTransition extends PipTransitionController {
             Optional<SplitScreenController> splitScreenOptional) {
         super(pipBoundsState, pipMenuController, pipBoundsAlgorithm,
                 pipAnimationController, transitions, shellTaskOrganizer);
+        mContext = context;
         mPipTransitionState = pipTransitionState;
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
@@ -359,6 +361,11 @@ public class PipTransition extends PipTransitionController {
             animator = mPipAnimationController.getAnimator(taskInfo, leash, currentBounds,
                     currentBounds, destinationBounds, sourceHintRect, TRANSITION_DIRECTION_TO_PIP,
                     0 /* startingAngle */, rotationDelta);
+            if (sourceHintRect == null) {
+                // We use content overlay when there is no source rect hint to enter PiP use bounds
+                // animation.
+                animator.setUseContentOverlay(mContext);
+            }
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
             startTransaction.setAlpha(leash, 0f);
             // PiP menu is attached late in the process here to avoid any artifacts on the leash

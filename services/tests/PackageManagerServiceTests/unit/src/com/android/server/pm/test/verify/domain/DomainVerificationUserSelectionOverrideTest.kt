@@ -147,7 +147,6 @@ class DomainVerificationUserStateOverrideTest {
             whenever(this.pkg) { pkg }
             whenever(packageName) { pkgName }
             whenever(this.domainSetId) { domainSetId }
-            whenever(firstInstallTime) { 0L }
             whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
             whenever(getUserStateOrDefault(1)) { PackageUserStateInternal.DEFAULT }
             whenever(userStates) {

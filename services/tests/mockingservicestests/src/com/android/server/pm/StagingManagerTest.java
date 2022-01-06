@@ -41,7 +41,7 @@ import android.content.pm.ApexStagedEvent;
 import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
-import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
+import android.content.pm.PackageInstaller.SessionInfo.SessionErrorCode;
 import android.content.pm.StagedApexInfo;
 import android.os.SystemProperties;
 import android.os.storage.IStorageManager;
@@ -774,7 +774,7 @@ public class StagingManagerTest {
         private boolean mIsReady = false;
         private boolean mIsApplied = false;
         private boolean mIsFailed = false;
-        private @StagedSessionErrorCode int mErrorCode = -1;
+        private @SessionErrorCode int mErrorCode = -1;
         private String mErrorMessage;
         private boolean mIsDestroyed = false;
         private int mParentSessionId = -1;
@@ -827,7 +827,7 @@ public class StagingManagerTest {
             return this;
         }
 
-        private @StagedSessionErrorCode int getErrorCode() {
+        private @SessionErrorCode int getErrorCode() {
             return mErrorCode;
         }
 
@@ -939,7 +939,7 @@ public class StagingManagerTest {
         }
 
         @Override
-        public void setSessionFailed(@StagedSessionErrorCode int errorCode, String errorMessage) {
+        public void setSessionFailed(@SessionErrorCode int errorCode, String errorMessage) {
             Preconditions.checkState(!mIsApplied, "Already marked as applied");
             mIsFailed = true;
             mErrorCode = errorCode;

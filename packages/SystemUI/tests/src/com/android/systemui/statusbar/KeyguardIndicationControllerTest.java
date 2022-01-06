@@ -81,6 +81,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
+import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -154,6 +155,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private IActivityManager mIActivityManager;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
+    @Mock
+    private ScreenLifecycle mScreenLifecycle;
     @Captor
     private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
     @Captor
@@ -195,7 +198,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 R.string.do_financed_disclosure_with_name, ORGANIZATION_NAME);
 
         when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isScreenOn()).thenReturn(true);
+        when(mScreenLifecycle.getScreenState()).thenReturn(ScreenLifecycle.SCREEN_ON);
         when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
 
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text_bottom))
@@ -225,8 +228,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController = new KeyguardIndicationController(mContext, mWakeLockBuilder,
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
                 mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
-                mUserManager, mExecutor, mFalsingManager, mLockPatternUtils, mIActivityManager,
-                mKeyguardBypassController);
+                mUserManager, mExecutor, mFalsingManager, mLockPatternUtils, mScreenLifecycle,
+                mIActivityManager, mKeyguardBypassController);
         mController.init();
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
@@ -702,7 +705,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         // GIVEN state of showing message when keyguard screen is on
         when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.isScreenOn()).thenReturn(true);
 
         // GIVEN fingerprint is also running (not udfps)
         when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);

@@ -301,6 +301,7 @@ class DomainVerificationManagerApiTest {
                 whenever(isInstalled) { true }
                 whenever(isSuspended) { false }
                 whenever(isInstantApp) { false }
+                whenever(firstInstallTime) {0L}
             }
         })
         val pkg2 = mockPkgState(PKG_TWO, UUID_TWO, listOf(DOMAIN_1, DOMAIN_2))
@@ -548,7 +549,6 @@ class DomainVerificationManagerApiTest {
         whenever(getPkg()) { pkg }
         whenever(packageName) { pkgName }
         whenever(this.domainSetId) { domainSetId }
-        whenever(firstInstallTime) { 0L }
         whenever(getUserStateOrDefault(0)) { pkgUserState0() }
         whenever(getUserStateOrDefault(1)) { pkgUserState1() }
         whenever(userStates) {
