@@ -3844,7 +3844,7 @@ class StorageManagerService extends IStorageManager.Stub
             final boolean primary = false;
             final boolean removable = false;
             final boolean emulated = true;
-            final boolean stub = false;
+            final boolean externallyManaged = false;
             final boolean allowMassStorage = false;
             final long maxFileSize = 0;
             final UserHandle user = new UserHandle(userId);
@@ -3852,7 +3852,8 @@ class StorageManagerService extends IStorageManager.Stub
             final String description = mContext.getString(android.R.string.unknownName);
 
             res.add(new StorageVolume(id, path, path, description, primary, removable, emulated,
-                    stub, allowMassStorage, maxFileSize, user, null /*uuid */, id, envState));
+                    externallyManaged, allowMassStorage, maxFileSize, user, null /*uuid */, id,
+                    envState));
         }
 
         if (!foundPrimary) {
@@ -3867,7 +3868,7 @@ class StorageManagerService extends IStorageManager.Stub
             final boolean primary = true;
             final boolean removable = primaryPhysical;
             final boolean emulated = !primaryPhysical;
-            final boolean stub = false;
+            final boolean externallyManaged = false;
             final boolean allowMassStorage = false;
             final long maxFileSize = 0L;
             final UserHandle owner = new UserHandle(userId);
@@ -3876,7 +3877,7 @@ class StorageManagerService extends IStorageManager.Stub
             final String state = Environment.MEDIA_REMOVED;
 
             res.add(0, new StorageVolume(id, path, path,
-                    description, primary, removable, emulated, stub,
+                    description, primary, removable, emulated, externallyManaged,
                     allowMassStorage, maxFileSize, owner, uuid, fsUuid, state));
         }
 

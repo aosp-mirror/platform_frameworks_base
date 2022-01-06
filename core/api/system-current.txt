@@ -9507,7 +9507,7 @@ package android.os.storage {
 
   public final class StorageVolume implements android.os.Parcelable {
     method @NonNull public String getId();
-    method public boolean isStub();
+    method public boolean isExternallyManaged();
   }
 
 }

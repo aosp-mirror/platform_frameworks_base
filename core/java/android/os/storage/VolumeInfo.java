@@ -404,7 +404,7 @@ public class VolumeInfo implements Parcelable {
 
         final boolean removable;
         final boolean emulated;
-        final boolean stub = type == TYPE_STUB;
+        final boolean externallyManaged = type == TYPE_STUB;
         final boolean allowMassStorage = false;
         final String envState = reportUnmounted
                 ? Environment.MEDIA_UNMOUNTED : getEnvironmentForState(state);
@@ -460,8 +460,8 @@ public class VolumeInfo implements Parcelable {
         }
 
         return new StorageVolume(id, userPath, internalPath, description, isPrimary(), removable,
-                emulated, stub, allowMassStorage, maxFileSize, new UserHandle(userId), uuid,
-                derivedFsUuid, envState);
+                emulated, externallyManaged, allowMassStorage, maxFileSize, new UserHandle(userId),
+                uuid, derivedFsUuid, envState);
     }
 
     @UnsupportedAppUsage
