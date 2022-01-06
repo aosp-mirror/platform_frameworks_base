@@ -19,12 +19,16 @@ package com.android.wm.shell.pip;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.util.RotationUtils.deltaRotation;
+import static android.util.RotationUtils.rotateBounds;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.isIndependent;
 
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
@@ -44,10 +48,12 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.util.ArrayMap;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
@@ -57,6 +63,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.CounterRotator;
 
 import java.util.Optional;
 
@@ -325,7 +332,9 @@ public class PipTransition extends PipTransitionController {
 
         if (displayRotationChange != null) {
             // Exiting PIP to fullscreen with orientation change.
-            // TODO(b/210965919): actual rotation animation
+            startExpandAndRotationAnimation(info, startTransaction, finishCallback,
+                    displayRotationChange, pipChange);
+            return;
         }
 
         // When there is no rotation, we can simply expand the PIP window.
@@ -343,6 +352,88 @@ public class PipTransition extends PipTransitionController {
                 destinationBounds, mPipBoundsState.getBounds());
         startTransaction.apply();
         startExpandAnimation(pipChange.getTaskInfo(), pipChange.getLeash(), destinationBounds);
+    }
+
+    private void startExpandAndRotationAnimation(@NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback,
+            @NonNull TransitionInfo.Change displayRotationChange,
+            @NonNull TransitionInfo.Change pipChange) {
+        final int rotateDelta = deltaRotation(displayRotationChange.getStartRotation(),
+                displayRotationChange.getEndRotation());
+        final int displayW = displayRotationChange.getEndAbsBounds().width();
+        final int displayH = displayRotationChange.getEndAbsBounds().height();
+
+        // Counter-rotate all "going-away" things since they are still in the old orientation.
+        final ArrayMap<WindowContainerToken, CounterRotator> counterRotators = new ArrayMap<>();
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (!Transitions.isClosingType(change.getMode())
+                    || !isIndependent(change, info)
+                    || change.getParent() == null) {
+                continue;
+            }
+            CounterRotator crot = counterRotators.get(change.getParent());
+            if (crot == null) {
+                crot = new CounterRotator();
+                crot.setup(startTransaction,
+                        info.getChange(change.getParent()).getLeash(),
+                        rotateDelta, displayW, displayH);
+                if (crot.getSurface() != null) {
+                    // Wallpaper should be placed at the bottom.
+                    final int layer = (change.getFlags() & FLAG_IS_WALLPAPER) == 0
+                            ? info.getChanges().size() - i
+                            : -1;
+                    startTransaction.setLayer(crot.getSurface(), layer);
+                }
+                counterRotators.put(change.getParent(), crot);
+            }
+            crot.addChild(startTransaction, change.getLeash());
+        }
+        mFinishCallback = (wct, wctCB) -> {
+            for (int i = 0; i < counterRotators.size(); ++i) {
+                counterRotators.valueAt(i).cleanUp(info.getRootLeash());
+            }
+            mPipOrganizer.onExitPipFinished(pipChange.getTaskInfo());
+            finishCallback.onTransitionFinished(wct, wctCB);
+        };
+
+        // Get the start bounds in new orientation.
+        final Rect startBounds = new Rect(pipChange.getStartAbsBounds());
+        rotateBounds(startBounds, displayRotationChange.getStartAbsBounds(), rotateDelta);
+        final Rect endBounds = new Rect(pipChange.getEndAbsBounds());
+        final Point offset = pipChange.getEndRelOffset();
+        startBounds.offset(-offset.x, -offset.y);
+        endBounds.offset(-offset.x, -offset.y);
+
+        // Reverse the rotation direction for expansion.
+        final int pipRotateDelta = deltaRotation(rotateDelta, 0);
+
+        // Set the start frame.
+        final int degree, x, y;
+        if (pipRotateDelta == ROTATION_90) {
+            degree = 90;
+            x = startBounds.right;
+            y = startBounds.top;
+        } else {
+            degree = -90;
+            x = startBounds.left;
+            y = startBounds.bottom;
+        }
+        mSurfaceTransactionHelper.rotateAndScaleWithCrop(startTransaction, pipChange.getLeash(),
+                endBounds, startBounds, new Rect(), degree, x, y, true /* isExpanding */,
+                pipRotateDelta == ROTATION_270 /* clockwise */);
+        startTransaction.apply();
+
+        // Expand and rotate the pip window to fullscreen.
+        final PipAnimationController.PipTransitionAnimator animator =
+                mPipAnimationController.getAnimator(pipChange.getTaskInfo(), pipChange.getLeash(),
+                        startBounds, startBounds, endBounds, null, TRANSITION_DIRECTION_LEAVE_PIP,
+                        0 /* startingAngle */, pipRotateDelta);
+        animator.setTransitionDirection(TRANSITION_DIRECTION_LEAVE_PIP)
+                .setPipAnimationCallback(mPipAnimationCallback)
+                .setDuration(mEnterExitAnimationDuration)
+                .start();
     }
 
     private void startExpandAnimation(final TaskInfo taskInfo, final SurfaceControl leash,
