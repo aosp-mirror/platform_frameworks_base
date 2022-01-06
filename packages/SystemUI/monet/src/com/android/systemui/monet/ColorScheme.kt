@@ -31,15 +31,15 @@ const val ACCENT1_CHROMA = 48.0f
 const val GOOGLE_BLUE = 0xFF1b6ef3.toInt()
 const val MIN_CHROMA = 5
 
-enum class ChromaStrategy {
+internal enum class ChromaStrategy {
     EQ, GTE
 }
 
-enum class HueStrategy {
+internal enum class HueStrategy {
     SOURCE, ADD, SUBTRACT
 }
 
-class Chroma(val strategy: ChromaStrategy, val value: Double) {
+internal class Chroma(val strategy: ChromaStrategy, val value: Double) {
     fun get(sourceChroma: Double): Double {
         return when (strategy) {
             ChromaStrategy.EQ -> value
@@ -48,7 +48,7 @@ class Chroma(val strategy: ChromaStrategy, val value: Double) {
     }
 }
 
-class Hue(val strategy: HueStrategy = HueStrategy.SOURCE, val value: Double = 0.0) {
+internal class Hue(val strategy: HueStrategy = HueStrategy.SOURCE, val value: Double = 0.0) {
     fun get(sourceHue: Double): Double {
         return when (strategy) {
             HueStrategy.SOURCE -> sourceHue
@@ -58,7 +58,7 @@ class Hue(val strategy: HueStrategy = HueStrategy.SOURCE, val value: Double = 0.
     }
 }
 
-class TonalSpec(val hue: Hue = Hue(), val chroma: Chroma) {
+internal class TonalSpec(val hue: Hue = Hue(), val chroma: Chroma) {
     fun shades(sourceColor: Cam): List<Int> {
         val hue = hue.get(sourceColor.hue.toDouble())
         val chroma = chroma.get(sourceColor.chroma.toDouble())
@@ -66,7 +66,7 @@ class TonalSpec(val hue: Hue = Hue(), val chroma: Chroma) {
     }
 }
 
-class CoreSpec(
+internal class CoreSpec(
     val a1: TonalSpec,
     val a2: TonalSpec,
     val a3: TonalSpec,
@@ -74,7 +74,7 @@ class CoreSpec(
     val n2: TonalSpec
 )
 
-enum class Style(val coreSpec: CoreSpec) {
+enum class Style(internal val coreSpec: CoreSpec) {
     SPRITZ(CoreSpec(
             a1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
             a2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
@@ -105,7 +105,7 @@ enum class Style(val coreSpec: CoreSpec) {
     )),
 }
 
-public class ColorScheme(
+class ColorScheme(
     @ColorInt seed: Int,
     val darkTheme: Boolean,
     val style: Style = Style.TONAL_SPOT
@@ -170,6 +170,7 @@ public class ColorScheme(
                 "  accent1: ${humanReadable(accent1)}\n" +
                 "  accent2: ${humanReadable(accent2)}\n" +
                 "  accent3: ${humanReadable(accent3)}\n" +
+                "  style: $style\n" +
                 "}"
     }
 
