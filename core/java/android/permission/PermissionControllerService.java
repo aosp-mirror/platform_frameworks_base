@@ -375,6 +375,22 @@ public abstract class PermissionControllerService extends Service {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 
+    /**
+     * Get the hibernation eligibility of the app. See
+     * {@link android.permission.PermissionControllerManager.HibernationEligibilityFlag}.
+     *
+     * @param packageName package to check eligibility
+     * @param callback callback after eligibility is returned
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_APP_HIBERNATION)
+    public void onGetHibernationEligibility(@NonNull String packageName,
+            @NonNull IntConsumer callback) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
+
     @Override
     public final @NonNull IBinder onBind(Intent intent) {
         return new IPermissionController.Stub() {
@@ -663,6 +679,22 @@ public abstract class PermissionControllerService extends Service {
                             Manifest.permission.MANAGE_APP_HIBERNATION);
 
                     PermissionControllerService.this.onGetUnusedAppCount(callback::complete);
+                } catch (Throwable t) {
+                    callback.completeExceptionally(t);
+                }
+            }
+
+            @Override
+            public void getHibernationEligibility(@NonNull String packageName,
+                    @NonNull AndroidFuture callback) {
+                try {
+                    Objects.requireNonNull(callback);
+
+                    enforceSomePermissionsGrantedToCaller(
+                            Manifest.permission.MANAGE_APP_HIBERNATION);
+
+                    PermissionControllerService.this.onGetHibernationEligibility(packageName,
+                            callback::complete);
                 } catch (Throwable t) {
                     callback.completeExceptionally(t);
                 }
