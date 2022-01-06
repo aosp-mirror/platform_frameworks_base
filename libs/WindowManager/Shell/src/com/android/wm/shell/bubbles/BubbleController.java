@@ -151,6 +151,7 @@ public class BubbleController {
     private BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
     private BubbleIconFactory mBubbleIconFactory;
+    private BubbleBadgeIconFactory mBubbleBadgeIconFactory;
     private BubblePositioner mBubblePositioner;
     private Bubbles.SysuiProxy mSysuiProxy;
 
@@ -278,6 +279,7 @@ public class BubbleController {
         mBubbleData = data;
         mSavedBubbleKeysPerUser = new SparseSetArray<>();
         mBubbleIconFactory = new BubbleIconFactory(context);
+        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(context);
         mDisplayController = displayController;
         mTaskViewTransitions = taskViewTransitions;
         mOneHandedOptional = oneHandedOptional;
@@ -500,6 +502,7 @@ public class BubbleController {
             }
             mStackView.updateStackPosition();
             mBubbleIconFactory = new BubbleIconFactory(mContext);
+            mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext);
             mStackView.onDisplaySizeChanged();
         }
         if (b.getBoolean(EXTRA_BUBBLE_OVERFLOW_OPENED, false)) {
@@ -778,13 +781,17 @@ public class BubbleController {
             mStackView.onThemeChanged();
         }
         mBubbleIconFactory = new BubbleIconFactory(mContext);
+        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext);
+
         // Reload each bubble
-        for (Bubble b: mBubbleData.getBubbles()) {
+        for (Bubble b : mBubbleData.getBubbles()) {
             b.inflate(null /* callback */, mContext, this, mStackView, mBubbleIconFactory,
+                    mBubbleBadgeIconFactory,
                     false /* skipInflation */);
         }
-        for (Bubble b: mBubbleData.getOverflowBubbles()) {
+        for (Bubble b : mBubbleData.getOverflowBubbles()) {
             b.inflate(null /* callback */, mContext, this, mStackView, mBubbleIconFactory,
+                    mBubbleBadgeIconFactory,
                     false /* skipInflation */);
         }
     }
@@ -800,6 +807,7 @@ public class BubbleController {
                 mScreenBounds.set(newConfig.windowConfiguration.getBounds());
                 mBubbleData.onMaxBubblesChanged();
                 mBubbleIconFactory = new BubbleIconFactory(mContext);
+                mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext);
                 mStackView.onDisplaySizeChanged();
             }
             if (newConfig.fontScale != mFontScale) {
@@ -961,7 +969,8 @@ public class BubbleController {
                 }
                 bubble.inflate(
                         (b) -> mBubbleData.overflowBubble(Bubbles.DISMISS_RELOAD_FROM_DISK, bubble),
-                        mContext, this, mStackView, mBubbleIconFactory, true /* skipInflation */);
+                        mContext, this, mStackView, mBubbleIconFactory, mBubbleBadgeIconFactory,
+                        true /* skipInflation */);
             });
             return null;
         });
@@ -996,7 +1005,8 @@ public class BubbleController {
         ensureStackViewCreated();
         bubble.setInflateSynchronously(mInflateSynchronously);
         bubble.inflate(b -> mBubbleData.notificationEntryUpdated(b, suppressFlyout, showInShade),
-                mContext, this, mStackView, mBubbleIconFactory, false /* skipInflation */);
+                mContext, this, mStackView, mBubbleIconFactory, mBubbleBadgeIconFactory,
+                false /* skipInflation */);
     }
 
     /**
