@@ -7557,13 +7557,17 @@ package android.net {
     method @NonNull public android.net.NetworkStats subtract(@NonNull android.net.NetworkStats);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStats> CREATOR;
+    field public static final int DEFAULT_NETWORK_ALL = -1; // 0xffffffff
     field public static final int DEFAULT_NETWORK_NO = 0; // 0x0
     field public static final int DEFAULT_NETWORK_YES = 1; // 0x1
     field public static final String IFACE_VT = "vt_data0";
+    field public static final int METERED_ALL = -1; // 0xffffffff
     field public static final int METERED_NO = 0; // 0x0
     field public static final int METERED_YES = 1; // 0x1
+    field public static final int ROAMING_ALL = -1; // 0xffffffff
     field public static final int ROAMING_NO = 0; // 0x0
     field public static final int ROAMING_YES = 1; // 0x1
+    field public static final int SET_ALL = -1; // 0xffffffff
     field public static final int SET_DEFAULT = 0; // 0x0
     field public static final int SET_FOREGROUND = 1; // 0x1
     field public static final int TAG_NONE = 0; // 0x0
