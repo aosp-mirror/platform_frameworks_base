@@ -39,6 +39,7 @@ android_app {
     static_libs: [
         "androidx.lifecycle_lifecycle-livedata",
         "androidx.lifecycle_lifecycle-extensions",
+        "androidx.recyclerview_recyclerview",
         "androidx.appcompat_appcompat",
     ],
 

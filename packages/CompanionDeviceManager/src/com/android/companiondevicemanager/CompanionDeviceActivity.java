@@ -46,10 +46,11 @@ import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
@@ -94,9 +95,9 @@ public class CompanionDeviceActivity extends AppCompatActivity {
     // regular.
     private Button mButtonAllow;
 
-    // The list is only shown for multiple-device regular association request, after at least one
-    // matching device is found.
-    private @Nullable ListView mListView;
+    // The recycler view is only shown for multiple-device regular association request, after
+    // at least one matching device is found.
+    private @Nullable RecyclerView mRecyclerView;
     private @Nullable DeviceListAdapter mAdapter;
 
     // The flag used to prevent double taps, that may lead to sending several requests for creating
@@ -195,14 +196,15 @@ public class CompanionDeviceActivity extends AppCompatActivity {
         mTitle = findViewById(R.id.title);
         mSummary = findViewById(R.id.summary);
 
-        mListView = findViewById(R.id.device_list);
-        mListView.setOnItemClickListener((av, iv, position, id) -> onListItemClick(position));
+        mRecyclerView = findViewById(R.id.device_list);
+        mAdapter = new DeviceListAdapter(this, this::onListItemClick);
 
         mButtonAllow = findViewById(R.id.btn_positive);
         mButtonAllow.setOnClickListener(this::onPositiveButtonClick);
         findViewById(R.id.btn_negative).setOnClickListener(this::onNegativeButtonClick);
 
         final CharSequence appLabel = getApplicationLabel(this, mRequest.getPackageName());
+
         if (mRequest.isSelfManaged()) {
             initUiForSelfManagedAssociation(appLabel);
         } else if (mRequest.isSingleDevice()) {
@@ -333,7 +335,7 @@ public class CompanionDeviceActivity extends AppCompatActivity {
         mTitle.setText(title);
         mSummary.setText(summary);
 
-        mListView.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.GONE);
     }
 
     private void initUiForSingleDevice(CharSequence appLabel) {
@@ -345,12 +347,12 @@ public class CompanionDeviceActivity extends AppCompatActivity {
                 deviceFilterPairs -> updateSingleDeviceUi(
                         deviceFilterPairs, deviceProfile, appLabel));
 
-        mListView.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.GONE);
     }
 
     private void updateSingleDeviceUi(List<DeviceFilterPair<?>> deviceFilterPairs,
             String deviceProfile, CharSequence appLabel) {
-        // Ignore "empty" scan repots.
+        // Ignore "empty" scan reports.
         if (deviceFilterPairs.isEmpty()) return;
         mSelectedDevice = requireNonNull(deviceFilterPairs.get(0));
 
@@ -393,10 +395,12 @@ public class CompanionDeviceActivity extends AppCompatActivity {
         mTitle.setText(title);
         mSummary.setText(summary);
 
-        mAdapter = new DeviceListAdapter(this);
+        mAdapter = new DeviceListAdapter(this, this::onListItemClick);
 
         // TODO: hide the list and show a spinner until a first device matching device is found.
-        mListView.setAdapter(mAdapter);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
         CompanionDeviceDiscoveryService.getScanResult().observe(
                 /* lifecycleOwner */ this,
                 /* observer */ mAdapter);
@@ -414,6 +418,8 @@ public class CompanionDeviceActivity extends AppCompatActivity {
             if (DEBUG) Log.w(TAG, "Already selected.");
             return;
         }
+        // Notify the adapter to highlight the selected item.
+        mAdapter.setSelectedPosition(position);
 
         mSelectedDevice = requireNonNull(selectedDevice);
 
