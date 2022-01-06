@@ -1595,7 +1595,7 @@ static jobject nativeCreateInputChannel(JNIEnv* env, jclass /* clazz */, jlong p
 
     if (!inputChannel.ok()) {
         std::string message = inputChannel.error().message();
-        message += StringPrintf(" Status=%d", inputChannel.error().code());
+        message += StringPrintf(" Status=%d", static_cast<int>(inputChannel.error().code()));
         jniThrowRuntimeException(env, message.c_str());
         return nullptr;
     }
@@ -1629,7 +1629,7 @@ static jobject nativeCreateInputMonitor(JNIEnv* env, jclass /* clazz */, jlong p
 
     if (!inputChannel.ok()) {
         std::string message = inputChannel.error().message();
-        message += StringPrintf(" Status=%d", inputChannel.error().code());
+        message += StringPrintf(" Status=%d", static_cast<int>(inputChannel.error().code()));
         jniThrowRuntimeException(env, message.c_str());
         return nullptr;
     }
