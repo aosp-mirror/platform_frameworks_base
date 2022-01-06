@@ -42,7 +42,6 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
-import static android.net.TetheringManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.net.TrafficStats.UNSUPPORTED;
@@ -107,6 +106,7 @@ import android.net.NetworkStatsCollection;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
+import android.net.TetheringManager;
 import android.net.TrafficStats;
 import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
@@ -531,8 +531,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // watch for tethering changes
-        final IntentFilter tetherFilter = new IntentFilter(ACTION_TETHER_STATE_CHANGED);
-        mContext.registerReceiver(mTetherReceiver, tetherFilter, null, mHandler);
+        final TetheringManager tetheringManager = mContext.getSystemService(TetheringManager.class);
+        tetheringManager.registerTetheringEventCallback(
+                new HandlerExecutor(mHandler), mTetherListener);
 
         // listen for periodic polling events
         final IntentFilter pollFilter = new IntentFilter(ACTION_NETWORK_STATS_POLL);
@@ -588,7 +589,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @GuardedBy("mStatsLock")
     private void shutdownLocked() {
-        mContext.unregisterReceiver(mTetherReceiver);
+        final TetheringManager tetheringManager = mContext.getSystemService(TetheringManager.class);
+        tetheringManager.unregisterTetheringEventCallback(mTetherListener);
         mContext.unregisterReceiver(mPollReceiver);
         mContext.unregisterReceiver(mRemovedReceiver);
         mContext.unregisterReceiver(mUserReceiver);
@@ -1152,14 +1154,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     /**
-     * Receiver that watches for {@link Tethering} to claim interface pairs.
+     * Listener that watches for {@link TetheringManager} to claim interface pairs.
      */
-    private BroadcastReceiver mTetherReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            performPoll(FLAG_PERSIST_NETWORK);
-        }
-    };
+    private final TetheringManager.TetheringEventCallback mTetherListener =
+            new TetheringManager.TetheringEventCallback() {
+                @Override
+                public void onUpstreamChanged(@Nullable Network network) {
+                    performPoll(FLAG_PERSIST_NETWORK);
+                }
+            };
 
     private BroadcastReceiver mPollReceiver = new BroadcastReceiver() {
         @Override
