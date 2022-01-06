@@ -178,7 +178,7 @@ public class ScreenshotHelper {
     public ScreenshotHelper(Context context) {
         mContext = context;
         IntentFilter filter = new IntentFilter(ACTION_USER_SWITCHED);
-        mContext.registerReceiver(mBroadcastReceiver, filter);
+        mContext.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED);
     }
 
     /**

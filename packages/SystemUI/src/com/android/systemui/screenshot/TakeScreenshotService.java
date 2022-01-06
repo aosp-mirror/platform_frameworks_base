@@ -113,7 +113,8 @@ public class TakeScreenshotService extends Service {
 
     @Override
     public IBinder onBind(@NonNull Intent intent) {
-        registerReceiver(mCloseSystemDialogs, new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS));
+        registerReceiver(mCloseSystemDialogs, new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS),
+                Context.RECEIVER_EXPORTED);
         final Messenger m = new Messenger(mHandler);
         if (DEBUG_SERVICE) {
             Log.d(TAG, "onBind: returning connection: " + m);
