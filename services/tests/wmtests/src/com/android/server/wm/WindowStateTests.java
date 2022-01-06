@@ -252,6 +252,11 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(appWindow.canBeImeTarget());
         appWindow.mActivityRecord.setWindowingMode(initialMode);
 
+        // Verify that app window can still be IME target as long as it is visible (even if
+        // it is going to become invisible).
+        appWindow.mActivityRecord.mVisibleRequested = false;
+        assertTrue(appWindow.canBeImeTarget());
+
         // Make windows invisible
         appWindow.hide(false /* doAnimation */, false /* requestAnim */);
         imeWindow.hide(false /* doAnimation */, false /* requestAnim */);
