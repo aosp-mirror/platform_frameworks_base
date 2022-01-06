@@ -975,9 +975,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             mParentSurfaceSequenceId = viewRoot.getSurfaceSequenceId();
 
             if (mViewVisibility) {
-                mTmpTransaction.show(mSurfaceControl);
+                geometryTransaction.show(mSurfaceControl);
             } else {
-                mTmpTransaction.hide(mSurfaceControl);
+                geometryTransaction.hide(mSurfaceControl);
             }
 
             if (mSurfacePackage != null) {
