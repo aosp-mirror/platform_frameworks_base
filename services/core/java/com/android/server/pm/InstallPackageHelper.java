@@ -955,14 +955,13 @@ final class InstallPackageHelper {
                     createdAppId.put(packageName, optimisticallyRegisterAppId(result));
                     versionInfos.put(result.mPkgSetting.getPkg().getPackageName(),
                             mPm.getSettingsVersionForPackage(result.mPkgSetting.getPkg()));
-                    if (result.mStaticSharedLibraryInfo != null
-                            || result.mSdkSharedLibraryInfo != null) {
-                        final PackageSetting sharedLibLatestVersionSetting =
-                                mSharedLibraries.getSharedLibLatestVersionSetting(result);
-                        if (sharedLibLatestVersionSetting != null) {
+                    if (result.mStaticSharedLibraryInfo != null) {
+                        final PackageSetting staticSharedLibLatestVersionSetting =
+                                mSharedLibraries.getStaticSharedLibLatestVersionSetting(result);
+                        if (staticSharedLibLatestVersionSetting != null) {
                             lastStaticSharedLibSettings.put(
                                     result.mPkgSetting.getPkg().getPackageName(),
-                                    sharedLibLatestVersionSetting);
+                                    staticSharedLibLatestVersionSetting);
                         }
                     }
                 } catch (PackageManagerException e) {
@@ -3585,22 +3584,20 @@ final class InstallPackageHelper {
                 boolean appIdCreated = false;
                 try {
                     final String pkgName = scanResult.mPkgSetting.getPackageName();
+                    final ReconcileRequest reconcileRequest = new ReconcileRequest(
+                            Collections.singletonMap(pkgName, scanResult),
+                            mSharedLibraries.getAll(), mPm.mPackages,
+                            Collections.singletonMap(pkgName,
+                                    mPm.getSettingsVersionForPackage(parsedPackage)),
+                            Collections.singletonMap(pkgName,
+                                    mSharedLibraries.getStaticSharedLibLatestVersionSetting(
+                                            scanResult)));
                     final Map<String, ReconciledPackage> reconcileResult =
-                            ReconcilePackageUtils.reconcilePackages(
-                                    new ReconcileRequest(
-                                            Collections.singletonMap(pkgName, scanResult),
-                                            mSharedLibraries.getAll(),
-                                            mPm.mPackages,
-                                            Collections.singletonMap(
-                                                    pkgName,
-                                                    mPm.getSettingsVersionForPackage(
-                                                            parsedPackage)),
-                                            Collections.singletonMap(pkgName, mSharedLibraries
-                                                    .getSharedLibLatestVersionSetting(scanResult))),
+                            ReconcilePackageUtils.reconcilePackages(reconcileRequest,
                                     mPm.mSettings.getKeySetManagerService(), mPm.mInjector);
                     appIdCreated = optimisticallyRegisterAppId(scanResult);
-                    commitReconciledScanResultLocked(
-                            reconcileResult.get(pkgName), mPm.mUserManager.getUserIds());
+                    commitReconciledScanResultLocked(reconcileResult.get(pkgName),
+                            mPm.mUserManager.getUserIds());
                 } catch (PackageManagerException e) {
                     if (appIdCreated) {
                         cleanUpAppIdCreation(scanResult);
