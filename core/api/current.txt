@@ -4469,6 +4469,7 @@ package android.app {
     method public android.app.ActivityOptions setLaunchDisplayId(int);
     method public android.app.ActivityOptions setLockTaskEnabled(boolean);
     method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
+    method @NonNull public android.app.ActivityOptions setSplashScreenStyle(int);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
     field public static final String EXTRA_USAGE_TIME_REPORT = "android.activity.usage_time";
@@ -57677,6 +57678,8 @@ package android.window {
     method public void clearOnExitAnimationListener();
     method public void setOnExitAnimationListener(@NonNull android.window.SplashScreen.OnExitAnimationListener);
     method public void setSplashScreenTheme(@StyleRes int);
+    field public static final int SPLASH_SCREEN_STYLE_EMPTY = 0; // 0x0
+    field public static final int SPLASH_SCREEN_STYLE_ICON = 1; // 0x1
   }
 
   public static interface SplashScreen.OnExitAnimationListener {
