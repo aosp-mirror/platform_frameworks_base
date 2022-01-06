@@ -162,4 +162,20 @@ interface IStatusBarService
 
     void requestAddTile(in ComponentName componentName, in CharSequence label, in Icon icon, int userId, in IAddTileResultCallback callback);
     void cancelRequestAddTile(in String packageName);
+
+    /**
+    * Overrides the navigation bar mode.
+    *
+    * @param navBarModeOverride the mode of the navigation bar override to be set.
+    *
+    * @hide
+    */
+    void setNavBarModeOverride(int navBarModeOverride);
+
+    /**
+    * Gets the navigation bar mode override.
+    *
+    * @hide
+    */
+    int getNavBarModeOverride();
 }

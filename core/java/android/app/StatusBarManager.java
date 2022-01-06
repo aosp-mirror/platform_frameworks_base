@@ -282,6 +282,33 @@ public class StatusBarManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface RequestResult {}
 
+    /**
+     * Constant for {@link #setNavBarModeOverride(int)} indicating the default navbar mode.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int NAV_BAR_MODE_OVERRIDE_NONE = 0;
+
+    /**
+     * Constant for {@link #setNavBarModeOverride(int)} indicating kids navbar mode.
+     *
+     * <p>When used, back and home icons will change drawables and layout, recents will be hidden,
+     * and the navbar will remain visible when apps are in immersive mode.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int NAV_BAR_MODE_OVERRIDE_KIDS = 1;
+
+    /** @hide */
+    @IntDef(prefix = {"NAV_BAR_MODE_OVERRIDE_"}, value = {
+            NAV_BAR_MODE_OVERRIDE_NONE,
+            NAV_BAR_MODE_OVERRIDE_KIDS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NavBarModeOverride {}
+
     @UnsupportedAppUsage
     private Context mContext;
     private IStatusBarService mService;
@@ -685,6 +712,52 @@ public class StatusBarManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Sets or removes the navigation bar mode override.
+     *
+     * @param navBarModeOverride the mode of the navigation bar override to be set.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR)
+    public void setNavBarModeOverride(@NavBarModeOverride int navBarModeOverride) {
+        if (navBarModeOverride != NAV_BAR_MODE_OVERRIDE_NONE
+                && navBarModeOverride != NAV_BAR_MODE_OVERRIDE_KIDS) {
+            throw new UnsupportedOperationException(
+                    "Supplied navBarModeOverride not supported: " + navBarModeOverride);
+        }
+
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.setNavBarModeOverride(navBarModeOverride);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the navigation bar mode override. Returns default value if no override is set.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR)
+    public @NavBarModeOverride int getNavBarModeOverride() {
+        int navBarModeOverride = NAV_BAR_MODE_OVERRIDE_NONE;
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                navBarModeOverride = svc.getNavBarModeOverride();
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return navBarModeOverride;
     }
 
     /** @hide */

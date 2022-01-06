@@ -10119,6 +10119,14 @@ public final class Settings {
                 "theme_customization_overlay_packages";
 
         /**
+         * Indicates whether the device is in kids nav mode.
+         * <p>Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String NAV_BAR_KIDS_MODE = "nav_bar_kids_mode";
+
+        /**
          * Navigation bar mode.
          *  0 = 3 button
          *  1 = 2 button

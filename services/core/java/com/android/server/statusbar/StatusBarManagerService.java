@@ -18,6 +18,9 @@ package com.android.server.statusbar;
 
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
 import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
+import static android.app.StatusBarManager.NAV_BAR_MODE_OVERRIDE_KIDS;
+import static android.app.StatusBarManager.NAV_BAR_MODE_OVERRIDE_NONE;
+import static android.app.StatusBarManager.NavBarModeOverride;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.Manifest;
@@ -59,6 +62,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.NotificationStats;
 import android.service.quicksettings.TileService;
 import android.text.TextUtils;
@@ -1844,6 +1848,51 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     public String[] getStatusBarIcons() {
         return mContext.getResources().getStringArray(R.array.config_statusBarIcons);
+    }
+
+    /**
+     * Sets or removes the navigation bar mode override.
+     *
+     * @param navBarModeOverride the mode of the navigation bar override to be set.
+     */
+    public void setNavBarModeOverride(@NavBarModeOverride int navBarModeOverride) {
+        enforceStatusBar();
+        if (navBarModeOverride != NAV_BAR_MODE_OVERRIDE_NONE
+                && navBarModeOverride != NAV_BAR_MODE_OVERRIDE_KIDS) {
+            throw new UnsupportedOperationException(
+                    "Supplied navBarModeOverride not supported: " + navBarModeOverride);
+        }
+
+        final int userId = mCurrentUserId;
+        final long userIdentity = Binder.clearCallingIdentity();
+        try {
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.NAV_BAR_KIDS_MODE, navBarModeOverride, userId);
+        } finally {
+            Binder.restoreCallingIdentity(userIdentity);
+        }
+    }
+
+    /**
+     * Gets the navigation bar mode override. Returns default value if no override is set.
+     *
+     * @hide
+     */
+    public @NavBarModeOverride int getNavBarModeOverride() {
+        enforceStatusBar();
+
+        int navBarKidsMode = NAV_BAR_MODE_OVERRIDE_NONE;
+        final int userId = mCurrentUserId;
+        final long userIdentity = Binder.clearCallingIdentity();
+        try {
+            navBarKidsMode = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.NAV_BAR_KIDS_MODE, userId);
+        } catch (Settings.SettingNotFoundException ex) {
+            return navBarKidsMode;
+        } finally {
+            Binder.restoreCallingIdentity(userIdentity);
+        }
+        return navBarKidsMode;
     }
 
     /** @hide */
