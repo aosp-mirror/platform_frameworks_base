@@ -28,24 +28,97 @@ import kotlin.math.roundToInt
 const val TAG = "ColorScheme"
 
 const val ACCENT1_CHROMA = 48.0f
-const val ACCENT2_CHROMA = 16.0f
-const val ACCENT3_CHROMA = 32.0f
-const val ACCENT3_HUE_SHIFT = 60.0f
-
-const val NEUTRAL1_CHROMA = 4.0f
-const val NEUTRAL2_CHROMA = 8.0f
-
 const val GOOGLE_BLUE = 0xFF1b6ef3.toInt()
-
 const val MIN_CHROMA = 5
 
-public class ColorScheme(@ColorInt seed: Int, val darkTheme: Boolean) {
+enum class ChromaStrategy {
+    EQ, GTE
+}
+
+enum class HueStrategy {
+    SOURCE, ADD, SUBTRACT
+}
+
+class Chroma(val strategy: ChromaStrategy, val value: Double) {
+    fun get(sourceChroma: Double): Double {
+        return when (strategy) {
+            ChromaStrategy.EQ -> value
+            ChromaStrategy.GTE -> sourceChroma.coerceAtLeast(value)
+        }
+    }
+}
+
+class Hue(val strategy: HueStrategy = HueStrategy.SOURCE, val value: Double = 0.0) {
+    fun get(sourceHue: Double): Double {
+        return when (strategy) {
+            HueStrategy.SOURCE -> sourceHue
+            HueStrategy.ADD -> ColorScheme.wrapDegreesDouble(sourceHue + value)
+            HueStrategy.SUBTRACT -> ColorScheme.wrapDegreesDouble(sourceHue - value)
+        }
+    }
+}
+
+class TonalSpec(val hue: Hue = Hue(), val chroma: Chroma) {
+    fun shades(sourceColor: Cam): List<Int> {
+        val hue = hue.get(sourceColor.hue.toDouble())
+        val chroma = chroma.get(sourceColor.chroma.toDouble())
+        return Shades.of(hue.toFloat(), chroma.toFloat()).toList()
+    }
+}
+
+class CoreSpec(
+    val a1: TonalSpec,
+    val a2: TonalSpec,
+    val a3: TonalSpec,
+    val n1: TonalSpec,
+    val n2: TonalSpec
+)
+
+enum class Style(val coreSpec: CoreSpec) {
+    SPRITZ(CoreSpec(
+            a1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
+            a2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
+            a3 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
+            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
+            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0))
+    )),
+    TONAL_SPOT(CoreSpec(
+            a1 = TonalSpec(chroma = Chroma(ChromaStrategy.GTE, 48.0)),
+            a2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0)),
+            a3 = TonalSpec(Hue(HueStrategy.ADD, 60.0), Chroma(ChromaStrategy.EQ, 24.0)),
+            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
+            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 8.0))
+    )),
+    VIBRANT(CoreSpec(
+            a1 = TonalSpec(chroma = Chroma(ChromaStrategy.GTE, 48.0)),
+            a2 = TonalSpec(Hue(HueStrategy.ADD, 10.0), Chroma(ChromaStrategy.EQ, 24.0)),
+            a3 = TonalSpec(Hue(HueStrategy.ADD, 20.0), Chroma(ChromaStrategy.GTE, 32.0)),
+            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 8.0)),
+            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0))
+    )),
+    EXPRESSIVE(CoreSpec(
+            a1 = TonalSpec(Hue(HueStrategy.SUBTRACT, 40.0), Chroma(ChromaStrategy.GTE, 64.0)),
+            a2 = TonalSpec(Hue(HueStrategy.ADD, 20.0), Chroma(ChromaStrategy.EQ, 24.0)),
+            a3 = TonalSpec(Hue(HueStrategy.SUBTRACT, 80.0), Chroma(ChromaStrategy.GTE, 64.0)),
+            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0)),
+            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 32.0))
+    )),
+}
+
+public class ColorScheme(
+    @ColorInt seed: Int,
+    val darkTheme: Boolean,
+    val style: Style = Style.TONAL_SPOT
+) {
 
     val accent1: List<Int>
     val accent2: List<Int>
     val accent3: List<Int>
     val neutral1: List<Int>
     val neutral2: List<Int>
+
+    constructor(@ColorInt seed: Int, darkTheme: Boolean):
+            this(seed, darkTheme, Style.TONAL_SPOT)
 
     constructor(wallpaperColors: WallpaperColors, darkTheme: Boolean):
             this(getSeedColor(wallpaperColors), darkTheme)
@@ -83,14 +156,11 @@ public class ColorScheme(@ColorInt seed: Int, val darkTheme: Boolean) {
             seed
         }
         val camSeed = Cam.fromInt(seedArgb)
-        val hue = camSeed.hue
-        val chroma = camSeed.chroma.coerceAtLeast(ACCENT1_CHROMA)
-        val tertiaryHue = wrapDegrees((hue + ACCENT3_HUE_SHIFT).toInt())
-        accent1 = Shades.of(hue, chroma).toList()
-        accent2 = Shades.of(hue, ACCENT2_CHROMA).toList()
-        accent3 = Shades.of(tertiaryHue.toFloat(), ACCENT3_CHROMA).toList()
-        neutral1 = Shades.of(hue, NEUTRAL1_CHROMA).toList()
-        neutral2 = Shades.of(hue, NEUTRAL2_CHROMA).toList()
+        accent1 = style.coreSpec.a1.shades(camSeed)
+        accent2 = style.coreSpec.a2.shades(camSeed)
+        accent3 = style.coreSpec.a3.shades(camSeed)
+        neutral1 = style.coreSpec.n1.shades(camSeed)
+        neutral2 = style.coreSpec.n2.shades(camSeed)
     }
 
     override fun toString(): String {
@@ -212,6 +282,20 @@ public class ColorScheme(@ColorInt seed: Int, val darkTheme: Boolean) {
         }
 
         private fun wrapDegrees(degrees: Int): Int {
+            return when {
+                degrees < 0 -> {
+                    (degrees % 360) + 360
+                }
+                degrees >= 360 -> {
+                    degrees % 360
+                }
+                else -> {
+                    degrees
+                }
+            }
+        }
+
+        public fun wrapDegreesDouble(degrees: Double): Double {
             return when {
                 degrees < 0 -> {
                     (degrees % 360) + 360
