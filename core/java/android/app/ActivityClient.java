@@ -428,11 +428,11 @@ public class ActivityClient {
         }
     }
 
-    void overridePendingTransition(IBinder token, String packageName,
-            int enterAnim, int exitAnim) {
+    void overridePendingTransition(IBinder token, String packageName, int enterAnim, int exitAnim,
+            int backgroundColor) {
         try {
             getActivityClientController().overridePendingTransition(token, packageName,
-                    enterAnim, exitAnim);
+                    enterAnim, exitAnim, backgroundColor);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
