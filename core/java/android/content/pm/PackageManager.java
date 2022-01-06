@@ -10187,16 +10187,15 @@ public abstract class PackageManager {
                     16, PermissionManager.CACHE_KEY_PACKAGE_INFO,
                     "getApplicationInfo") {
                 @Override
-                protected ApplicationInfo recompute(ApplicationInfoQuery query) {
+                public ApplicationInfo recompute(ApplicationInfoQuery query) {
                     return getApplicationInfoAsUserUncached(
                             query.packageName, query.flags, query.userId);
                 }
                 @Override
-                protected ApplicationInfo maybeCheckConsistency(
-                        ApplicationInfoQuery query, ApplicationInfo proposedResult) {
+                public boolean resultEquals(ApplicationInfo cached, ApplicationInfo fetched) {
                     // Implementing this debug check for ApplicationInfo would require a
                     // complicated deep comparison, so just bypass it for now.
-                    return proposedResult;
+                    return true;
                 }
             };
 
@@ -10289,16 +10288,15 @@ public abstract class PackageManager {
                     32, PermissionManager.CACHE_KEY_PACKAGE_INFO,
                     "getPackageInfo") {
                 @Override
-                protected PackageInfo recompute(PackageInfoQuery query) {
+                public PackageInfo recompute(PackageInfoQuery query) {
                     return getPackageInfoAsUserUncached(
                             query.packageName, query.flags, query.userId);
                 }
                 @Override
-                protected PackageInfo maybeCheckConsistency(
-                        PackageInfoQuery query, PackageInfo proposedResult) {
+                public boolean resultEquals(PackageInfo cached, PackageInfo fetched) {
                     // Implementing this debug check for PackageInfo would require a
                     // complicated deep comparison, so just bypass it for now.
-                    return proposedResult;
+                    return true;
                 }
             };
 

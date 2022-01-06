@@ -802,7 +802,7 @@ public class ApplicationPackageManager extends PackageManager {
             new PropertyInvalidatedCache<HasSystemFeatureQuery, Boolean>(
                 256, "cache_key.has_system_feature") {
                 @Override
-                protected Boolean recompute(HasSystemFeatureQuery query) {
+                public Boolean recompute(HasSystemFeatureQuery query) {
                     try {
                         return ActivityThread.currentActivityThread().getPackageManager().
                             hasSystemFeature(query.name, query.version);
@@ -1098,7 +1098,7 @@ public class ApplicationPackageManager extends PackageManager {
             new PropertyInvalidatedCache<Integer, GetPackagesForUidResult>(
                 32, CACHE_KEY_PACKAGES_FOR_UID_PROPERTY) {
                 @Override
-                protected GetPackagesForUidResult recompute(Integer uid) {
+                public GetPackagesForUidResult recompute(Integer uid) {
                     try {
                         return new GetPackagesForUidResult(
                             ActivityThread.currentActivityThread().

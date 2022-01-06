@@ -84,7 +84,7 @@ public final class ChangeIdStateCache
     }
 
     @Override
-    protected Boolean recompute(ChangeIdStateQuery query) {
+    public Boolean recompute(ChangeIdStateQuery query) {
         final long token = Binder.clearCallingIdentity();
         try {
             if (query.type == ChangeIdStateQuery.QUERY_BY_PACKAGE_NAME) {

@@ -35,7 +35,7 @@ public class PropertyInvalidatedCacheTest extends TestCase {
         }
 
         @Override
-        protected String recompute(Integer qv) {
+        public String recompute(Integer qv) {
             mRecomputeCount += 1;
             return "foo" + qv.toString();
         }

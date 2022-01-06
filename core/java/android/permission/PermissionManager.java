@@ -1447,7 +1447,7 @@ public final class PermissionManager {
             new PropertyInvalidatedCache<PermissionQuery, Integer>(
                     2048, CACHE_KEY_PACKAGE_INFO, "checkPermission") {
                 @Override
-                protected Integer recompute(PermissionQuery query) {
+                public Integer recompute(PermissionQuery query) {
                     return checkPermissionUncached(query.permission, query.pid, query.uid);
                 }
             };
@@ -1530,12 +1530,12 @@ public final class PermissionManager {
             new PropertyInvalidatedCache<PackageNamePermissionQuery, Integer>(
                     16, CACHE_KEY_PACKAGE_INFO, "checkPackageNamePermission") {
                 @Override
-                protected Integer recompute(PackageNamePermissionQuery query) {
+                public Integer recompute(PackageNamePermissionQuery query) {
                     return checkPackageNamePermissionUncached(
                             query.permName, query.pkgName, query.userId);
                 }
                 @Override
-                protected boolean bypass(PackageNamePermissionQuery query) {
+                public boolean bypass(PackageNamePermissionQuery query) {
                     return query.userId < 0;
                 }
             };

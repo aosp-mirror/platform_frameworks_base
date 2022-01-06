@@ -3640,7 +3640,7 @@ public class LocationManager {
         }
 
         @Override
-        protected Boolean recompute(Integer userId) {
+        public Boolean recompute(Integer userId) {
             Preconditions.checkArgument(userId >= 0);
 
             if (mManager == null) {
