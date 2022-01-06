@@ -1236,37 +1236,53 @@ public class IpSecService extends IIpSecService.Stub {
         int callingUid = Binder.getCallingUid();
         UserRecord userRecord = mUserResourceTracker.getUserRecord(callingUid);
         final int resourceId = mNextResourceId++;
-        FileDescriptor sockFd = null;
+
+        ParcelFileDescriptor pFd = null;
         try {
             if (!userRecord.mSocketQuotaTracker.isAvailable()) {
                 return new IpSecUdpEncapResponse(IpSecManager.Status.RESOURCE_UNAVAILABLE);
             }
 
-            sockFd = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-            mUidFdTagger.tag(sockFd, callingUid);
+            FileDescriptor sockFd = null;
+            try {
+                sockFd = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+                pFd = ParcelFileDescriptor.dup(sockFd);
+            } finally {
+                IoUtils.closeQuietly(sockFd);
+            }
 
+            mUidFdTagger.tag(pFd.getFileDescriptor(), callingUid);
             // This code is common to both the unspecified and specified port cases
             Os.setsockoptInt(
-                    sockFd,
+                    pFd.getFileDescriptor(),
                     OsConstants.IPPROTO_UDP,
                     OsConstants.UDP_ENCAP,
                     OsConstants.UDP_ENCAP_ESPINUDP);
 
-            mNetd.ipSecSetEncapSocketOwner(new ParcelFileDescriptor(sockFd), callingUid);
+            mNetd.ipSecSetEncapSocketOwner(pFd, callingUid);
             if (port != 0) {
                 Log.v(TAG, "Binding to port " + port);
-                Os.bind(sockFd, INADDR_ANY, port);
+                Os.bind(pFd.getFileDescriptor(), INADDR_ANY, port);
             } else {
-                port = bindToRandomPort(sockFd);
+                port = bindToRandomPort(pFd.getFileDescriptor());
             }
 
             userRecord.mEncapSocketRecords.put(
                     resourceId,
                     new RefcountedResource<EncapSocketRecord>(
-                            new EncapSocketRecord(resourceId, sockFd, port), binder));
-            return new IpSecUdpEncapResponse(IpSecManager.Status.OK, resourceId, port, sockFd);
+                            new EncapSocketRecord(resourceId, pFd.getFileDescriptor(), port),
+                            binder));
+            return new IpSecUdpEncapResponse(IpSecManager.Status.OK, resourceId, port,
+                    pFd.getFileDescriptor());
         } catch (IOException | ErrnoException e) {
-            IoUtils.closeQuietly(sockFd);
+            try {
+                if (pFd != null) {
+                    pFd.close();
+                }
+            } catch (IOException ex) {
+                // Nothing can be done at this point
+                Log.e(TAG, "Failed to close pFd.");
+            }
         }
         // If we make it to here, then something has gone wrong and we couldn't open a socket.
         // The only reasonable condition that would cause that is resource unavailable.
