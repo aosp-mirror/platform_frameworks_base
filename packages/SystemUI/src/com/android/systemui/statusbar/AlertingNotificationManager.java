@@ -257,6 +257,30 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
         return !canRemoveImmediately(entry.getKey());
     }
 
+    /**
+     * @param key
+     * @return true if the entry is pinned
+     */
+    public boolean isSticky(String key) {
+        AlertEntry alerting = mAlertEntries.get(key);
+        if (alerting != null) {
+            return alerting.isSticky();
+        }
+        return false;
+    }
+
+    /**
+     * @param key
+     * @return When a HUN entry should be removed in milliseconds from now
+     */
+    public long getEarliestRemovalTime(String key) {
+        AlertEntry alerting = mAlertEntries.get(key);
+        if (alerting != null) {
+            return Math.max(0, alerting.mEarliestRemovaltime - mClock.currentTimeMillis());
+        }
+        return 0;
+    }
+
     @Override
     public void setShouldManageLifetime(NotificationEntry entry, boolean shouldExtend) {
         if (shouldExtend) {
