@@ -101,7 +101,8 @@ public class NetworkStatsSubscriptionsMonitor extends
         // with empty IMSI. So filter the subs w/o a valid IMSI to prevent such registration.
         final List<Pair<Integer, String>> filteredNewSubs = new ArrayList<>();
         for (final int subId : newSubs) {
-            final String subscriberId = mTeleManager.getSubscriberId(subId);
+            final String subscriberId =
+                    mTeleManager.createForSubscriptionId(subId).getSubscriberId();
             if (!TextUtils.isEmpty(subscriberId)) {
                 filteredNewSubs.add(new Pair(subId, subscriberId));
             }
