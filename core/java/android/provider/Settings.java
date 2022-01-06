@@ -2242,6 +2242,21 @@ public final class Settings {
     public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
 
     /**
+     * Activity Action: Show screen that lets user configure wifi tethering.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * Input: Nothing
+     * <p>
+     * Output: Nothing
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_WIFI_TETHER_SETTING =
+            "com.android.settings.WIFI_TETHER_SETTINGS";
+
+    /**
      * Broadcast to trigger notification of asking user to enable MMS.
      * Need to specify {@link #EXTRA_ENABLE_MMS_DATA_REQUEST_REASON} and {@link #EXTRA_SUB_ID}.
      *
@@ -11845,6 +11860,12 @@ public final class Settings {
         public static final String WIFI_MIGRATION_COMPLETED = "wifi_migration_completed";
 
         /**
+         * Whether UWB should be enabled.
+         * @hide
+         */
+        public static final String UWB_ENABLED = "uwb_enabled";
+
+        /**
          * Value to specify whether network quality scores and badging should be shown in the UI.
          *
          * Type: int (0 for false, 1 for true)
@@ -13670,13 +13691,6 @@ public final class Settings {
                 "angle_gl_driver_selection_values";
 
         /**
-         * List of package names that should check ANGLE rules
-         * @hide
-         */
-        @Readable
-        public static final String ANGLE_ALLOWLIST = "angle_allowlist";
-
-        /**
          * Lists of ANGLE EGL features for debugging.
          * Each list of features is separated by a comma, each feature in each list is separated by
          * a colon.
@@ -14913,6 +14927,16 @@ public final class Settings {
         @Readable
         public static final String POWER_BUTTON_LONG_PRESS =
                 "power_button_long_press";
+
+        /**
+         * Override internal R.integer.config_longPressOnPowerDurationMs. It determines the length
+         * of power button press to be considered a long press in milliseconds.
+         * Used by PhoneWindowManager.
+         * @hide
+         */
+        @Readable
+        public static final String POWER_BUTTON_LONG_PRESS_DURATION_MS =
+                "power_button_long_press_duration_ms";
 
         /**
          * Overrides internal R.integer.config_veryLongPressOnPowerBehavior.

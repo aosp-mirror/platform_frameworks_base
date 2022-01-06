@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom p/ preencher a tela"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Ampliar p/ preencher tela"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Capturar tela"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"O Smart Lock foi desativado"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"enviou uma imagem"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Salvando captura de tela..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Salvando captura de tela..."</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Essa ação desbloqueia o acesso para todos os apps e serviços com autorização para usar seu microfone."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Essa ação desbloqueia o acesso para todos os apps e serviços com autorização para usar sua câmera."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Essa ação desbloqueia o acesso para todos os apps e serviços com autorização para usar sua câmera ou seu microfone."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Dispositivo"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Outro dispositivo"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Alternar Visão geral"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Carregado"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Carregando"</string>
@@ -591,12 +592,12 @@
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Receba notificações mais rápido"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Veja-as antes de desbloquear"</string>
-    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Não, obrigado"</string>
+    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Agora não"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"Configurar"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="5901885672973736563">"Desativar agora"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Configurações de som"</string>
-    <string name="accessibility_volume_expand" msgid="7653070939304433603">"Expandir"</string>
+    <string name="accessibility_volume_expand" msgid="7653070939304433603">"Abrir"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Recolher"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Transcrição automática"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Dica de legenda"</string>
@@ -616,7 +617,7 @@
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Para liberar o app, toque nos botões \"Voltar\" e home e os mantenha pressionados"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Para liberar o app, deslize para cima e mantenha a tela pressionada"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Entendi"</string>
-    <string name="screen_pinning_negative" msgid="6882816864569211666">"Não, obrigado"</string>
+    <string name="screen_pinning_negative" msgid="6882816864569211666">"Agora não"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"App fixado"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App liberado"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Esconder <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controles de ativação/desativação de notificações"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Ativada"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Desativado"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Ativada (reconhecimento facial)"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Com controles de ativação de notificações, é possível definir o nível de importância de 0 a 5 para as notificações de um app. \n\n"<b>"Nível 5"</b>" \n- Exibir na parte superior da lista de notificações \n- Permitir interrupção em tela cheia \n- Sempre exibir \n\n"<b>"Nível 4"</b>" \n- Impedir interrupções em tela cheia \n- Sempre exibir \n\n"<b>"Nível 3"</b>" \n- Impedir interrupções em tela cheia \n- Nunca exibir \n\n"<b>"Nível 2"</b>" \n- Impedir interrupções em tela cheia \n- Nunca exibir \n- Nunca emitir som ou vibrar \n\n"<b>"Nível 1"</b>" \n- Impedir interrupções em tela cheia \n- Nunca exibir \n- Nunca emitir som ou vibrar \n- Ocultar da tela de bloqueio e barra de status \n- Exibir na parte inferior da lista de notificações \n\n"<b>"Nível 0"</b>" \n- Bloquear todas as notificações do app"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notificações"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Você deixará de ver essas notificações"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Use a impressão digital para abrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autenticação obrigatória. Toque no sensor de impressão digital para autenticar."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Chamada em andamento"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dados móveis"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Conectado"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Sem conexão automática com dados móveis"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Sem conexão"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nenhuma outra rede disponível"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"Nenhuma rede disponível"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Detalhes da rede"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Toque em uma rede para se conectar"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Desbloqueie para ver as redes"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Procurando redes…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Falha ao conectar à rede"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"A conexão automática ao Wi-Fi ficará indisponível"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Ver tudo"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para mudar de rede, desconecte o cabo Ethernet"</string>
 </resources>

@@ -439,6 +439,8 @@
   <java-symbol type="integer" name="config_extraFreeKbytesAbsolute" />
   <java-symbol type="integer" name="config_immersive_mode_confirmation_panic" />
   <java-symbol type="integer" name="config_longPressOnPowerBehavior" />
+  <java-symbol type="integer" name="config_longPressOnPowerDurationMs" />
+  <java-symbol type="array" name="config_longPressOnPowerDurationSettings" />
   <java-symbol type="bool" name="config_longPressOnPowerForAssistantSettingAvailable" />
   <java-symbol type="integer" name="config_veryLongPressOnPowerBehavior" />
   <java-symbol type="integer" name="config_veryLongPressTimeout" />
@@ -1741,6 +1743,7 @@
   <java-symbol type="dimen" name="navigation_bar_width_car_mode" />
   <java-symbol type="dimen" name="status_bar_height" />
   <java-symbol type="dimen" name="display_cutout_touchable_region_size" />
+  <java-symbol type="dimen" name="system_gestures_start_threshold" />
   <java-symbol type="dimen" name="quick_qs_offset_height" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
@@ -2523,6 +2526,7 @@
   <java-symbol type="string" name="fingerprint_error_no_space" />
   <java-symbol type="string" name="fingerprint_error_timeout" />
   <java-symbol type="array" name="fingerprint_error_vendor" />
+  <java-symbol type="string" name="fingerprint_error_vendor_unknown" />
   <java-symbol type="string" name="fingerprint_acquired_partial" />
   <java-symbol type="string" name="fingerprint_acquired_insufficient" />
   <java-symbol type="string" name="fingerprint_acquired_imager_dirty" />
@@ -2562,6 +2566,7 @@
   <java-symbol type="string" name="face_error_no_space" />
   <java-symbol type="string" name="face_error_timeout" />
   <java-symbol type="array" name="face_error_vendor" />
+  <java-symbol type="string" name="face_error_vendor_unknown" />
   <java-symbol type="string" name="face_error_canceled" />
   <java-symbol type="string" name="face_error_user_canceled" />
   <java-symbol type="string" name="face_error_lockout" />
@@ -2604,6 +2609,7 @@
   <java-symbol type="array" name="config_udfps_sensor_props" />
   <java-symbol type="integer" name="config_udfps_illumination_transition_ms" />
   <java-symbol type="bool" name="config_is_powerbutton_fps" />
+  <java-symbol type="array" name="config_udfps_enroll_stage_thresholds" />
 
   <java-symbol type="array" name="config_face_acquire_enroll_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_vendor_enroll_ignorelist" />
@@ -3183,6 +3189,7 @@
 
   <java-symbol type="id" name="notification_action_list_margin_target" />
   <java-symbol type="dimen" name="notification_actions_padding_start"/>
+  <java-symbol type="dimen" name="notification_actions_collapsed_priority_width"/>
   <java-symbol type="dimen" name="notification_action_disabled_alpha" />
   <java-symbol type="id" name="tag_margin_end_when_icon_visible" />
   <java-symbol type="id" name="tag_margin_end_when_icon_gone" />
@@ -3948,6 +3955,8 @@
   <java-symbol type="integer" name="config_defaultRefreshRateInZone" />
   <java-symbol type="array" name="config_brightnessThresholdsOfPeakRefreshRate" />
   <java-symbol type="array" name="config_ambientThresholdsOfPeakRefreshRate" />
+  <java-symbol type="integer" name="config_defaultRefreshRateInHbmSunlight" />
+  <java-symbol type="integer" name="config_defaultRefreshRateInHbmHdr" />
 
   <!-- For fixed refresh rate displays in high brightness-->
   <java-symbol type="integer" name="config_fixedRefreshRateInHighZone" />
@@ -4402,7 +4411,7 @@
   <java-symbol type="string" name="view_and_control_notification_title" />
   <java-symbol type="string" name="view_and_control_notification_content" />
   <java-symbol type="array" name="config_accessibility_allowed_install_source" />
-  
+
   <!-- Translation -->
   <java-symbol type="string" name="ui_translation_accessibility_translated_text" />
   <java-symbol type="string" name="ui_translation_accessibility_translation_finished" />
@@ -4425,4 +4434,6 @@
   <java-symbol type="bool" name="config_volumeShowRemoteSessions" />
 
   <java-symbol type="integer" name="config_customizedMaxCachedProcesses" />
+
+  <java-symbol type="color" name="overview_background"/>
 </resources>

@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -101,9 +103,11 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
             }
 
             mSignalThresholdInfos = new ArrayList<>(signalThresholdInfos);
-            // Sort the collection with RAN ascending order, make the ordering not matter for equals
+            // Sort the collection with RAN and then SignalMeasurementType ascending order, make the
+            // ordering not matter for equals
             mSignalThresholdInfos.sort(
-                    Comparator.comparingInt(SignalThresholdInfo::getRadioAccessNetworkType));
+                    Comparator.comparingInt(SignalThresholdInfo::getRadioAccessNetworkType)
+                            .thenComparing(SignalThresholdInfo::getSignalMeasurementType));
             return this;
         }
 
@@ -144,7 +148,7 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
          * @return the SignalStrengthUpdateRequest object
          *
          * @throws IllegalArgumentException if the SignalThresholdInfo collection is empty size, the
-         * radio access network type in the collection is not unique
+         * signal measurement type for the same RAN in the collection is not unique
          */
         public @NonNull SignalStrengthUpdateRequest build() {
             return new SignalStrengthUpdateRequest(mSignalThresholdInfos,
@@ -258,14 +262,23 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
     }
 
     /**
-     * Throw IAE when the RAN in the collection is not unique.
+     * Throw IAE if SignalThresholdInfo collection is null or empty,
+     * or the SignalMeasurementType for the same RAN in the collection is not unique.
      */
     private static void validate(Collection<SignalThresholdInfo> infos) {
-        Set<Integer> uniqueRan = new HashSet<>(infos.size());
+        if (infos == null || infos.isEmpty()) {
+            throw new IllegalArgumentException("SignalThresholdInfo collection is null or empty");
+        }
+
+        // Map from RAN to set of SignalMeasurementTypes
+        Map<Integer, Set<Integer>> ranToTypes = new HashMap<>(infos.size());
         for (SignalThresholdInfo info : infos) {
             final int ran = info.getRadioAccessNetworkType();
-            if (!uniqueRan.add(ran)) {
-                throw new IllegalArgumentException("RAN: " + ran + " is not unique");
+            final int type = info.getSignalMeasurementType();
+            ranToTypes.putIfAbsent(ran, new HashSet<>());
+            if (!ranToTypes.get(ran).add(type)) {
+                throw new IllegalArgumentException(
+                        "SignalMeasurementType " + type + " for RAN " + ran + " is not unique");
             }
         }
     }

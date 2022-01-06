@@ -322,7 +322,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nahrávanie zvuku"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fyzická aktivita"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"prístup k vašej fyzickej aktivite"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotoaparát"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotenie a natáčanie videí"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Zariadenia v okolí"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"objavovať a pripájať zariadenia v okolí"</string>
@@ -615,6 +615,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Pokračujte použitím odtlačku prsta alebo zámky obrazovky"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Vyskytla sa chyba. Skúste to znova."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona odtlačku prsta"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Odomknutie tvárou"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problém s odomknutím tvárou"</string>
@@ -667,6 +668,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Pokračujte použitím tváre alebo zámky obrazovky"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Vyskytla sa chyba. Skúste to znova."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikona tváre"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"čítať nastavenia synchronizácie"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Umožňuje aplikácii čítať nastavenia synchronizácie v účte. Môže napríklad určiť, či je s účtom synchronizovaná aplikácia Ľudia."</string>

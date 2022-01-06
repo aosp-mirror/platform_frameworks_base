@@ -1719,11 +1719,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
         if (client == null) {
             return;
         }
-        Log.w(TAG, "Speaker client died");
-        if (removeCommunicationRouteClient(client.getBinder(), false)
-                != null) {
-            onUpdateCommunicationRoute("onCommunicationRouteClientDied");
-        }
+        Log.w(TAG, "Communication client died");
+        setCommunicationRouteForClient(
+                client.getBinder(), client.getPid(), null, BtHelper.SCO_MODE_UNDEFINED,
+                "onCommunicationRouteClientDied");
     }
 
     /**

@@ -17,6 +17,7 @@ package com.android.systemui.qs.tiles;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -326,5 +327,78 @@ public class CastTileTest extends SysuiTestCase {
         // Tile should be connected and always prefer the connected device.
         assertEquals(Tile.STATE_ACTIVE, mCastTile.getState().state);
         assertTrue(mCastTile.getState().secondaryLabel.toString().startsWith(connected.name));
+    }
+
+    @Test
+    public void testExpandView_wifiNotConnected() {
+        mCastTile.refreshState();
+        mTestableLooper.processAllMessages();
+
+        assertFalse(mCastTile.getState().forceExpandIcon);
+    }
+
+    @Test
+    public void testExpandView_wifiEnabledNotCasting() {
+        enableWifiAndProcessMessages();
+
+        assertTrue(mCastTile.getState().forceExpandIcon);
+    }
+
+    @Test
+    public void testExpandView_casting_projection() {
+        CastController.CastDevice device = new CastController.CastDevice();
+        device.state = CastController.CastDevice.STATE_CONNECTED;
+        List<CastDevice> devices = new ArrayList<>();
+        devices.add(device);
+        when(mController.getCastDevices()).thenReturn(devices);
+
+        enableWifiAndProcessMessages();
+
+        assertFalse(mCastTile.getState().forceExpandIcon);
+    }
+
+    @Test
+    public void testExpandView_connecting_projection() {
+        CastController.CastDevice connecting = new CastController.CastDevice();
+        connecting.state = CastDevice.STATE_CONNECTING;
+        connecting.name = "Test Casting Device";
+
+        List<CastDevice> devices = new ArrayList<>();
+        devices.add(connecting);
+        when(mController.getCastDevices()).thenReturn(devices);
+
+        enableWifiAndProcessMessages();
+
+        assertFalse(mCastTile.getState().forceExpandIcon);
+    }
+
+    @Test
+    public void testExpandView_casting_mediaRoute() {
+        CastController.CastDevice device = new CastController.CastDevice();
+        device.state = CastDevice.STATE_CONNECTED;
+        device.tag = mock(MediaRouter.RouteInfo.class);
+        List<CastDevice> devices = new ArrayList<>();
+        devices.add(device);
+        when(mController.getCastDevices()).thenReturn(devices);
+
+        enableWifiAndProcessMessages();
+
+        assertTrue(mCastTile.getState().forceExpandIcon);
+    }
+
+    @Test
+    public void testExpandView_connecting_mediaRoute() {
+        CastController.CastDevice connecting = new CastController.CastDevice();
+        connecting.state = CastDevice.STATE_CONNECTING;
+        connecting.tag = mock(RouteInfo.class);
+        connecting.name = "Test Casting Device";
+
+        List<CastDevice> devices = new ArrayList<>();
+        devices.add(connecting);
+        when(mController.getCastDevices()).thenReturn(devices);
+
+        enableWifiAndProcessMessages();
+
+        assertTrue(mCastTile.getState().forceExpandIcon);
     }
 }

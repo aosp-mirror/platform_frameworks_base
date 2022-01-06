@@ -28,6 +28,7 @@ import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.concurrent.futures.CallbackToFutureAdapter.Completer;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.screenshot.ScrollCaptureClient.CaptureResult;
 import com.android.systemui.screenshot.ScrollCaptureClient.Session;
@@ -61,6 +62,7 @@ public class ScrollCaptureController {
     private final Context mContext;
     private final Executor mBgExecutor;
     private final ImageTileSet mImageTileSet;
+    private final UiEventLogger mEventLogger;
     private final ScrollCaptureClient mClient;
 
     private Completer<LongScreenshot> mCaptureCompleter;
@@ -69,6 +71,7 @@ public class ScrollCaptureController {
     private Session mSession;
     private ListenableFuture<CaptureResult> mTileFuture;
     private ListenableFuture<Void> mEndFuture;
+    private String mWindowOwner;
 
     static class LongScreenshot {
         private final ImageTileSet mImageTileSet;
@@ -135,11 +138,12 @@ public class ScrollCaptureController {
 
     @Inject
     ScrollCaptureController(Context context, @Background Executor bgExecutor,
-            ScrollCaptureClient client, ImageTileSet imageTileSet) {
+            ScrollCaptureClient client, ImageTileSet imageTileSet, UiEventLogger logger) {
         mContext = context;
         mBgExecutor = bgExecutor;
         mClient = client;
         mImageTileSet = imageTileSet;
+        mEventLogger = logger;
     }
 
     @VisibleForTesting
@@ -157,6 +161,7 @@ public class ScrollCaptureController {
     ListenableFuture<LongScreenshot> run(ScrollCaptureResponse response) {
         return CallbackToFutureAdapter.getFuture(completer -> {
             mCaptureCompleter = completer;
+            mWindowOwner = response.getPackageName();
             mBgExecutor.execute(() -> {
                 float maxPages = Settings.Secure.getFloat(mContext.getContentResolver(),
                         SETTING_KEY_MAX_PAGES, MAX_PAGES_DEFAULT);
@@ -173,11 +178,13 @@ public class ScrollCaptureController {
             if (LogConfig.DEBUG_SCROLL) {
                 Log.d(TAG, "got session " + mSession);
             }
+            mEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_STARTED, 0, mWindowOwner);
             requestNextTile(0);
         } catch (InterruptedException | ExecutionException e) {
             // Failure to start, propagate to caller
             Log.e(TAG, "session start failed!");
             mCaptureCompleter.setException(e);
+            mEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_FAILURE, 0, mWindowOwner);
         }
     }
 
@@ -296,6 +303,11 @@ public class ScrollCaptureController {
     private void finishCapture() {
         if (LogConfig.DEBUG_SCROLL) {
             Log.d(TAG, "finishCapture()");
+        }
+        if (mImageTileSet.getHeight() > 0) {
+            mEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_COMPLETED, 0, mWindowOwner);
+        } else {
+            mEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_FAILURE, 0, mWindowOwner);
         }
         mEndFuture = mSession.end();
         mEndFuture.addListener(() -> {

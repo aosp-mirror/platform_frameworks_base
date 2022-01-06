@@ -87,6 +87,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Supports a single instance of the {@link android.hardware.biometrics.face.V1_0} or its extended
@@ -115,6 +116,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
     @Nullable private IBiometricsFace mDaemon;
     @NonNull private final HalResultController mHalResultController;
+    // for requests that do not use biometric prompt
+    @NonNull private final AtomicLong mRequestCounter = new AtomicLong(0);
     private int mCurrentUserId = UserHandle.USER_NULL;
     private final int mSensorId;
     private final List<Long> mGeneratedChallengeCount = new ArrayList<>();
@@ -605,7 +608,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public void scheduleFaceDetect(int sensorId, @NonNull IBinder token,
+    public long scheduleFaceDetect(int sensorId, @NonNull IBinder token,
             int userId, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, int statsClient) {
         throw new IllegalStateException("Face detect not supported by IBiometricsFace@1.0. Did you"
@@ -613,7 +616,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public void cancelFaceDetect(int sensorId, @NonNull IBinder token) {
+    public void cancelFaceDetect(int sensorId, @NonNull IBinder token, long requestId) {
         throw new IllegalStateException("Face detect not supported by IBiometricsFace@1.0. Did you"
                 + "forget to check the supportsFaceDetection flag?");
     }
@@ -621,26 +624,38 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     @Override
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter receiver,
-            @NonNull String opPackageName, boolean restricted, int statsClient,
+            @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
             final boolean isStrongBiometric = Utils.isStrongBiometric(mSensorId);
             final FaceAuthenticationClient client = new FaceAuthenticationClient(mContext,
-                    mLazyDaemon, token, receiver, userId, operationId, restricted, opPackageName,
-                    cookie, false /* requireConfirmation */, mSensorId, isStrongBiometric,
-                    statsClient, mLockoutTracker, mUsageStats, allowBackgroundAuthentication,
-                    isKeyguardBypassEnabled);
+                    mLazyDaemon, token, requestId, receiver, userId, operationId, restricted,
+                    opPackageName, cookie, false /* requireConfirmation */, mSensorId,
+                    isStrongBiometric, statsClient, mLockoutTracker, mUsageStats,
+                    allowBackgroundAuthentication, isKeyguardBypassEnabled);
             mScheduler.scheduleClientMonitor(client);
         });
     }
 
     @Override
-    public void cancelAuthentication(int sensorId, @NonNull IBinder token) {
-        mHandler.post(() -> {
-            mScheduler.cancelAuthenticationOrDetection(token);
-        });
+    public long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
+            int userId, int cookie, @NonNull ClientMonitorCallbackConverter receiver,
+            @NonNull String opPackageName, boolean restricted, int statsClient,
+            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled) {
+        final long id = mRequestCounter.incrementAndGet();
+
+        scheduleAuthenticate(sensorId, token, operationId, userId, cookie, receiver,
+                opPackageName, id, restricted, statsClient,
+                allowBackgroundAuthentication, isKeyguardBypassEnabled);
+
+        return id;
+    }
+
+    @Override
+    public void cancelAuthentication(int sensorId, @NonNull IBinder token, long requestId) {
+        mHandler.post(() -> mScheduler.cancelAuthenticationOrDetection(token, requestId));
     }
 
     @Override

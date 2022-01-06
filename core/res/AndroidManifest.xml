@@ -55,6 +55,7 @@
     <protected-broadcast android:name="android.intent.action.PACKAGE_VERIFIED" />
     <protected-broadcast android:name="android.intent.action.PACKAGES_SUSPENDED" />
     <protected-broadcast android:name="android.intent.action.PACKAGES_UNSUSPENDED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGES_SUSPENSION_CHANGED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_UNSUSPENDED_MANUALLY" />
     <protected-broadcast android:name="android.intent.action.DISTRACTING_PACKAGES_CHANGED" />
     <protected-broadcast android:name="android.intent.action.ACTION_PREFERRED_ACTIVITY_CHANGED" />
@@ -247,6 +248,8 @@
         android:name="com.android.bluetooth.BluetoothMapContentObserver.action.MESSAGE_DELIVERY" />
     <protected-broadcast
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_ACTIVE_DEVICE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.action.TETHERING_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED" />

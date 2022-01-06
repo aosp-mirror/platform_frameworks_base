@@ -55,6 +55,7 @@ using android::base::unique_fd;
 
 #define SYNC_RECEIVED_WHILE_FROZEN (1)
 #define ASYNC_RECEIVED_WHILE_FROZEN (2)
+#define TXNS_PENDING_WHILE_FROZEN (4)
 
 namespace android {
 
@@ -232,17 +233,20 @@ static void com_android_server_am_CachedAppOptimizer_compactProcess(JNIEnv*, job
     compactProcessOrFallback(pid, compactionFlags);
 }
 
-static void com_android_server_am_CachedAppOptimizer_freezeBinder(
+static jint com_android_server_am_CachedAppOptimizer_freezeBinder(
         JNIEnv *env, jobject clazz, jint pid, jboolean freeze) {
 
-    if (IPCThreadState::freeze(pid, freeze, 100 /* timeout [ms] */) != 0) {
+    jint retVal = IPCThreadState::freeze(pid, freeze, 100 /* timeout [ms] */);
+    if (retVal != 0 && retVal != -EAGAIN) {
         jniThrowException(env, "java/lang/RuntimeException", "Unable to freeze/unfreeze binder");
     }
+
+    return retVal;
 }
 
 static jint com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo(JNIEnv *env,
         jobject clazz, jint pid) {
-    bool syncReceived = false, asyncReceived = false;
+    uint32_t syncReceived = 0, asyncReceived = 0;
 
     int error = IPCThreadState::getProcessFreezeInfo(pid, &syncReceived, &asyncReceived);
 
@@ -252,13 +256,12 @@ static jint com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo(JNIEnv 
 
     jint retVal = 0;
 
-    if(syncReceived) {
-        retVal |= SYNC_RECEIVED_WHILE_FROZEN;;
-    }
-
-    if(asyncReceived) {
-        retVal |= ASYNC_RECEIVED_WHILE_FROZEN;
-    }
+    // bit 0 of sync_recv goes to bit 0 of retVal
+    retVal |= syncReceived & SYNC_RECEIVED_WHILE_FROZEN;
+    // bit 0 of async_recv goes to bit 1 of retVal
+    retVal |= (asyncReceived << 1) & ASYNC_RECEIVED_WHILE_FROZEN;
+    // bit 1 of sync_recv goes to bit 2 of retVal
+    retVal |= (syncReceived << 1) & TXNS_PENDING_WHILE_FROZEN;
 
     return retVal;
 }
@@ -278,7 +281,7 @@ static const JNINativeMethod sMethods[] = {
         /* name, signature, funcPtr */
         {"compactSystem", "()V", (void*)com_android_server_am_CachedAppOptimizer_compactSystem},
         {"compactProcess", "(II)V", (void*)com_android_server_am_CachedAppOptimizer_compactProcess},
-        {"freezeBinder", "(IZ)V", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
+        {"freezeBinder", "(IZ)I", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
         {"getBinderFreezeInfo", "(I)I",
          (void*)com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo},
         {"getFreezerCheckPath", "()Ljava/lang/String;",

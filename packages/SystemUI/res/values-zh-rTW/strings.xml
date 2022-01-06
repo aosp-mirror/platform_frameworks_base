@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"放大為全螢幕"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"螢幕截圖"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock 已停用"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"傳送了一張圖片"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"正在儲存螢幕截圖…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"正在儲存螢幕截圖…"</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"這麼做可允許所有應用程式和服務使用麥克風。"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"這麼做可允許所有應用程式和服務使用相機。"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"這麼做可允許所有應用程式和服務使用相機或麥克風。"</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"裝置"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"其他裝置"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"切換總覽"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"已充飽"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"充電中"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"電源通知控制項"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"開啟"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"關閉"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"已開啟 - 依臉部方向旋轉"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"只要使用電源通知控制項，你就能為應用程式通知設定從 0 到 5 的重要性等級。\n\n"<b>"等級 5"</b>" \n- 顯示在通知清單頂端 \n- 允許全螢幕通知 \n- 一律允許短暫顯示通知 \n\n"<b>"等級 4"</b>" \n- 禁止全螢幕通知 \n- 一律允許短暫顯示通知 \n\n"<b>"等級 3"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n\n"<b>"等級 2"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n- 一律不發出音效或震動 \n\n"<b>"等級 1"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n- 一律不發出音效或震動 \n- 在鎖定畫面和狀態列中隱藏 \n- 顯示在通知清單底端 \n\n"<b>"等級 0"</b>" \n- 封鎖應用程式的所有通知"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"通知"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"你不會再看到這些通知"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"使用指紋即可開啟"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"需要驗證。輕觸指紋感應器即可進行驗證。"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"通話中"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"行動數據"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"已連線"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"系統將不會自動使用行動數據連線"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"沒有網路連線"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"沒有可用的其他網路"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"沒有可用的網路"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi‑Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"網路詳細資料"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"輕觸要連線的網路"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"解鎖螢幕即可查看網路"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"正在搜尋網路…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"無法連上網路"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"目前不會自動連上 Wi-Fi"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"查看全部"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"如要切換網路，請中斷乙太網路連線"</string>
 </resources>

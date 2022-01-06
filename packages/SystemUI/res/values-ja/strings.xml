@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"画面サイズに合わせて拡大"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"画面サイズに合わせて拡大"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"スクリーンショット"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock は無効です"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"画像を送信しました"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"スクリーンショットを保存中..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"スクリーンショットを保存しています..."</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"マイクの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"カメラの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"カメラやマイクの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"デバイス"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"その他のデバイス"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"概要を切り替え"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"充電が完了しました"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"充電しています"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"電源通知管理"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ON"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"OFF"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ON - 顔ベース"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"電源通知管理では、アプリの通知の重要度をレベル 0～5 で設定できます。\n\n"<b>"レベル 5"</b>" \n- 通知リストの一番上に表示する \n- 全画面表示を許可する \n- 常にポップアップする \n\n"<b>"レベル 4"</b>" \n- 全画面表示しない \n- 常にポップアップする \n\n"<b>"レベル 3"</b>" \n- 全画面表示しない \n- ポップアップしない \n\n"<b>"レベル 2"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n\n"<b>"レベル 1"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n- ロック画面やステータスバーに表示しない \n- 通知リストの一番下に表示する \n\n"<b>"レベル 0"</b>" \n- アプリからのすべての通知をブロックする"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"通知"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"今後、この通知は表示されません"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"指紋を使って開いてください"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"認証が必要です。指紋認証センサーをタッチして認証してください。"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"通話中"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"モバイルデータ"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"接続済み"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"モバイルデータには自動接続しません"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"接続なし"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"利用できるネットワークはありません"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"ネットワークを利用できません"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"ネットワークの詳細"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"ネットワークをタップして接続"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"ネットワークを表示するにはロック解除してください"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ネットワークを検索しています…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ネットワークに接続できませんでした"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi に自動接続しません"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"すべて表示"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ネットワークを変更するにはイーサネット接続を解除してください"</string>
 </resources>

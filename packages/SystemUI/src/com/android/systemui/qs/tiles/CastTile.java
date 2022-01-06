@@ -150,17 +150,22 @@ public class CastTile extends QSTileImpl<BooleanState> {
         }
 
         List<CastDevice> activeDevices = getActiveDevices();
-        // We want to pop up the media route selection dialog if we either have no active devices
-        // (neither routes nor projection), or if we have an active route. In other cases, we assume
-        // that a projection is active. This is messy, but this tile never correctly handled the
-        // case where multiple devices were active :-/.
-        if (activeDevices.isEmpty() || (activeDevices.get(0).tag instanceof RouteInfo)) {
+        if (willPopDetail()) {
             mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                 showDetail(true);
             });
         } else {
             mController.stopCasting(activeDevices.get(0));
         }
+    }
+
+    // We want to pop up the media route selection dialog if we either have no active devices
+    // (neither routes nor projection), or if we have an active route. In other cases, we assume
+    // that a projection is active. This is messy, but this tile never correctly handled the
+    // case where multiple devices were active :-/.
+    private boolean willPopDetail() {
+        List<CastDevice> activeDevices = getActiveDevices();
+        return activeDevices.isEmpty() || (activeDevices.get(0).tag instanceof RouteInfo);
     }
 
     private List<CastDevice> getActiveDevices() {
@@ -234,10 +239,12 @@ public class CastTile extends QSTileImpl<BooleanState> {
             state.contentDescription = state.contentDescription + ","
                     + mContext.getString(R.string.accessibility_quick_settings_open_details);
             state.expandedAccessibilityClassName = Button.class.getName();
+            state.forceExpandIcon = willPopDetail();
         } else {
             state.state = Tile.STATE_UNAVAILABLE;
             String noWifi = mContext.getString(R.string.quick_settings_cast_no_wifi);
             state.secondaryLabel = noWifi;
+            state.forceExpandIcon = false;
         }
         state.stateDescription = state.stateDescription + ", " + state.secondaryLabel;
         mDetailAdapter.updateItems(devices);

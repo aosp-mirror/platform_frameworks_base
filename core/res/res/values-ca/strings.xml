@@ -325,7 +325,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telèfon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"fer i gestionar trucades telefòniques"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensors corporals"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"accedir a les dades del sensor sobre els signes vitals"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"accedir a les dades del sensor sobre les constants vitals"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperar el contingut de la finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspecciona el contingut d\'una finestra amb què estàs interaccionant."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activar Exploració tàctil"</string>
@@ -609,6 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Utilitza l\'empremta digital o el bloqueig de pantalla per continuar"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"S\'ha produït un error. Torna-ho a provar."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona d\'empremta digital"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueig facial"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema amb Desbloqueig facial"</string>
@@ -661,6 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Utilitza la cara o el bloqueig de pantalla per continuar"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"S\'ha produït un error. Torna-ho a provar."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Icona facial"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"llegir la configuració de sincronització"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Permet que l\'aplicació llegeixi la configuració de sincronització d\'un compte. Per exemple, això pot determinar que l\'aplicació Contactes estigui sincronitzada amb un compte."</string>
@@ -907,7 +909,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"Només trucades d\'emergència"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Xarxa bloquejada"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"La targeta SIM està bloquejada pel PUK."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta la guia de l\'usuari o posa\'t en contacte amb el servei d\'atenció al client."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta la guia d\'usuari o posa\'t en contacte amb el servei d\'atenció al client."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"La targeta SIM està bloquejada."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"S\'està desbloquejant la targeta SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Has dibuixat el patró de desbloqueig de manera incorrecta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>

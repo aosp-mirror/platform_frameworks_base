@@ -957,6 +957,20 @@
     -->
     <integer name="config_longPressOnPowerBehavior">5</integer>
 
+    <!-- The time in milliseconds after which a press on power button is considered "long". -->
+    <integer name="config_longPressOnPowerDurationMs">500</integer>
+
+    <!-- The possible UI options to be surfaced for configuring long press power on duration
+         action. Value set in config_longPressOnPowerDurationMs should be one of the available
+         options to allow users to restore default. -->
+    <integer-array name="config_longPressOnPowerDurationSettings">
+        <item>250</item>
+        <item>350</item>
+        <item>500</item>
+        <item>650</item>
+        <item>750</item>
+    </integer-array>
+
     <!-- Whether the setting to change long press on power behaviour from default to assistant (5)
          is available in Settings.
      -->
@@ -4492,6 +4506,13 @@
          If non-positive, then the refresh rate is unchanged even if thresholds are configured. -->
     <integer name="config_fixedRefreshRateInHighZone">0</integer>
 
+    <!-- Default refresh rate while the device has high brightness mode enabled for Sunlight.
+         This value overrides values from DisplayDeviceConfig -->
+    <integer name="config_defaultRefreshRateInHbmSunlight">0</integer>
+
+    <!-- Default refresh rate while the device has high brightness mode enabled for HDR. -->
+    <integer name="config_defaultRefreshRateInHbmHdr">0</integer>
+
     <!-- The type of the light sensor to be used by the display framework for things like
          auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->
     <string name="config_displayLightSensorType" translatable="false" />
@@ -4550,6 +4571,13 @@
 
     <!-- Indicates whether device has a power button fingerprint sensor. -->
     <bool name="config_is_powerbutton_fps" translatable="false" >false</bool>
+
+    <!-- When each intermediate UDFPS enroll stage ends, as a fraction of total progress. -->
+    <string-array name="config_udfps_enroll_stage_thresholds" translatable="false">
+        <item>0.25</item>
+        <item>0.5</item>
+        <item>0.75</item>
+    </string-array>
 
     <!-- Messages that should not be shown to the user during face auth enrollment. This should be
          used to hide messages that may be too chatty or messages that the user can't do much about.

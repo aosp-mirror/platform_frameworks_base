@@ -336,7 +336,7 @@
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Legt die Zoom-Stufe und -Position auf dem Display fest."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Touch-Gesten möglich"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Tippen, Wischen, Zusammenziehen und andere Touch-Gesten möglich."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gesten auf dem Fingerabdrucksensor"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gesten auf dem Fin­gerabdrucksensor"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Erfasst Touch-Gesten auf dem Fingerabdrucksensor des Geräts."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Screenshot erstellen"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Es kann ein Screenshot des Displays erstellt werden."</string>
@@ -609,6 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Verwende deinen Fingerabdruck oder deine Display-Entsperrmethode, um fortzufahren"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Ein Problem ist aufgetreten. Versuch es noch einmal."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Fingerabdruck-Symbol"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Entsperrung per Gesichtserkennung"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem bei der Entsperrung per Gesichtserkennung"</string>
@@ -661,6 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Verwende die Gesichtserkennung oder deine Display-Entsperrmethode, um fortzufahren"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Ein Problem ist aufgetreten. Versuch es noch einmal."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Gesichtssymbol"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"Synchronisierungseinstellungen lesen"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Ermöglicht der App, die Synchronisierungseinstellungen eines Kontos zu lesen. Beispielsweise kann damit festgestellt werden, ob Kontakte mit einem Konto synchronisiert werden."</string>

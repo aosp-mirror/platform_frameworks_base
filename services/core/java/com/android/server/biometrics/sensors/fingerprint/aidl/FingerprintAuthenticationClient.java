@@ -61,7 +61,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     private boolean mIsPointerDown;
 
     FingerprintAuthenticationClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
+            @NonNull LazyDaemon<ISession> lazyDaemon,
+            @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,
             int sensorId, boolean isStrongBiometric, int statsClient,
@@ -74,6 +75,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
                 lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */,
                 false /* isKeyguardBypassEnabled */);
+        setRequestId(requestId);
         mLockoutCache = lockoutCache;
         mUdfpsOverlayController = udfpsOverlayController;
         mSensorProps = sensorProps;
@@ -164,13 +166,17 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     @Override
     protected void stopHalOperation() {
         UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
-        try {
-            mCancellationSignal.cancel();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-            onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                    0 /* vendorCode */);
-            mCallback.onClientFinished(this, false /* success */);
+        if (mCancellationSignal != null) {
+            try {
+                mCancellationSignal.cancel();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+                onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
+                mCallback.onClientFinished(this, false /* success */);
+            }
+        } else {
+            Slog.e(TAG, "cancellation signal was null");
         }
     }
 

@@ -747,7 +747,11 @@ public final class PlaybackActivityMonitor
 
     @Override
     public void forgetUid(int uid) {
-        mFadingManager.forgetUid(uid);
+        final HashMap<Integer, AudioPlaybackConfiguration> players;
+        synchronized (mPlayerLock) {
+            players = (HashMap<Integer, AudioPlaybackConfiguration>) mPlayers.clone();
+        }
+        mFadingManager.unfadeOutUid(uid, players);
     }
 
     //=================================================================

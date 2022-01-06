@@ -1677,10 +1677,8 @@ public class VcnGatewayConnection extends StateMachine {
             mFailedAttempts = 0;
             cancelSafeModeAlarm();
 
-            if (mIsInSafeMode) {
-                mIsInSafeMode = false;
-                mGatewayStatusCallback.onSafeModeStatusChanged();
-            }
+            mIsInSafeMode = false;
+            mGatewayStatusCallback.onSafeModeStatusChanged();
         }
 
         protected void applyTransform(

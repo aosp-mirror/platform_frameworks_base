@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"திரையை நிரப்ப அளவை மாற்று"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"திரையை நிரப்ப இழு"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ஸ்கிரீன்ஷாட்"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock முடக்கப்பட்டது"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"படம் அனுப்பப்பட்டது"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
@@ -122,10 +123,10 @@
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"திரை ரெக்கார்டிங்கை நீக்குவதில் பிழை"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"அனுமதிகளைப் பெற இயலவில்லை"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ஸ்கிரீன் ரெக்கார்டிங்கைத் தொடங்குவதில் பிழை"</string>
-    <string name="usb_preference_title" msgid="1439924437558480718">"USB கோப்பு இடமாற்ற விருப்பங்கள்"</string>
+    <string name="usb_preference_title" msgid="1439924437558480718">"USB ஃபைல் இடமாற்ற விருப்பங்கள்"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"(MTP) மீடியா பிளேயராக ஏற்று"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"(PTP) கேமராவாக ஏற்று"</string>
-    <string name="installer_cd_button_title" msgid="5499998592841984743">"Mac க்கான Android கோப்பு இடமாற்ற ஆப்ஸை நிறுவு"</string>
+    <string name="installer_cd_button_title" msgid="5499998592841984743">"Mac க்கான Android ஃபைல் இடமாற்ற ஆப்ஸை நிறுவு"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"பின்செல்"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"முகப்பு"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"மெனு"</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"உங்கள் மைக்ரோஃபோனைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"உங்கள் கேமராவைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"உங்கள் கேமராவையோ மைக்ரோஃபோனையோ பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"சாதனம்"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"பிற சாதனம்"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"மேலோட்டப் பார்வையை நிலைமாற்று"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"சார்ஜ் செய்யப்பட்டது"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"சார்ஜ் ஆகிறது"</string>
@@ -451,7 +452,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"இது அலாரங்கள், இசை, வீடியோக்கள் மற்றும் கேம்ஸ் உட்பட எல்லா ஒலிகளையும் அதிர்வுகளையும் தடுக்கும்."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"அவசர நிலைக் குறைவான அறிவிப்புகள் கீழே உள்ளன"</string>
-    <string name="notification_tap_again" msgid="4477318164947497249">"திறக்க, மீண்டும் தட்டவும்"</string>
+    <string name="notification_tap_again" msgid="4477318164947497249">"அன்லாக் செய்ய, மீண்டும் தட்டவும்"</string>
     <string name="tap_again" msgid="1315420114387908655">"மீண்டும் தட்டவும்"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"திறப்பதற்கு மேல் நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="keyguard_unlock_press" msgid="8488350566398524740">"திறப்பதற்கு அழுத்தவும்"</string>
@@ -512,7 +513,7 @@
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> மூலம் ரெக்கார்டிங் செய்யவோ அனுப்புவதற்கோ தொடங்கிவீட்டீர்களா?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"மீண்டும் காட்டாதே"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"எல்லாவற்றையும் அழி"</string>
-    <string name="manage_notifications_text" msgid="6885645344647733116">"அறிவிப்புகளை நிர்வகி"</string>
+    <string name="manage_notifications_text" msgid="6885645344647733116">"நிர்வகி"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"இதுவரை வந்த அறிவிப்புகள்"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"புதிது"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"சைலன்ட்"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள்"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ஆன்"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ஆஃப்"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ஆன் - முகம் அடிப்படையிலானது"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள் மூலம், ஆப்ஸின் அறிவிப்புகளுக்கு முக்கியத்துவ நிலையை (0-5) அமைக்கலாம். \n\n"<b>"நிலை 5"</b>" \n- அறிவிப்புப் பட்டியலின் மேலே காட்டும் \n- முழுத் திரைக் குறுக்கீட்டை அனுமதிக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 4"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 3"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n\n"<b>"நிலை 2"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது, அதிர்வுறாது \n\n"<b>"நிலை 1"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது அல்லது அதிர்வுறாது \n- லாக் ஸ்கிரீன் மற்றும் நிலைப்பட்டியிலிருந்து மறைக்கும் \n- அறிவிப்புகள் பட்டியலின் கீழே காட்டும் \n\n"<b>"நிலை 0"</b>" \n- ஆப்ஸின் எல்லா அறிவிப்புகளையும் தடுக்கும்"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"அறிவிப்புகள்"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"இந்த அறிவிப்புகளை இனி பார்க்கமாட்டீர்கள்"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"கைரேகையைப் பயன்படுத்தி திறந்திடுங்கள்"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"அங்கீகாரம் தேவை. கைரேகை சென்சாரைத் தொட்டு அங்கீகரியுங்கள்."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"செயலில் உள்ள மொபைல் அழைப்பு"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"மொபைல் டேட்டா"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"இணைக்கப்பட்டது"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"மொபைல் டேட்டாவுடன் தானாக இணைக்காது"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"இணைப்பு இல்லை"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"வேறு நெட்வொர்க்குகள் எதுவும் கிடைக்கவில்லை"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"நெட்வொர்க்குகள் எதுவும் கிடைக்கவில்லை"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"வைஃபை"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"நெட்வொர்க் விவரங்கள்"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"இணையத்துடன் இணைய நெட்வொர்க்கைத் தட்டுங்கள்"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"நெட்வொர்க்குகளைப் பார்க்க அன்லாக் செய்யுங்கள்"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"நெட்வொர்க்குகளைத் தேடுகிறது…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"தற்போதைக்கு வைஃபை தானாக இணைக்கப்படாது"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"அனைத்தையும் காட்டு"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"நெட்வொர்க்குகளை மாற்ற ஈதர்நெட் இணைப்பைத் துண்டிக்கவும்"</string>
 </resources>
