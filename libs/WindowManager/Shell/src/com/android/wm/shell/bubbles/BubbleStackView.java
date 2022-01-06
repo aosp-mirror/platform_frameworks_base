@@ -3015,6 +3015,16 @@ public class BubbleStackView extends FrameLayout
     }
 
     /**
+     * Handles vertical offset changes, e.g. when one handed mode is switched on/off.
+     *
+     * @param offset new vertical offset.
+     */
+    void onVerticalOffsetChanged(int offset) {
+        // adjust dismiss view vertical position, so that it is still visible to the user
+        mDismissView.setPadding(/* left = */ 0, /* top = */ 0, /* right = */ 0, offset);
+    }
+
+    /**
      * Holds some commonly queried information about the stack.
      */
     public static class StackViewState {
