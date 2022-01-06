@@ -33,18 +33,18 @@
     <style name="Banner.Title.SettingsLib"
         parent="@android:style/TextAppearance.Material.Subhead">
         <item name="android:textSize">20sp</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:fontFamily">@string/settingslib_config_headlineFontFamily</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="Banner.Subtitle.SettingsLib"
-        parent="@*android:style/TextAppearance.DeviceDefault.Body1">
+        parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:textSize">14sp</item>
     </style>
 
     <style name="Banner.Summary.SettingsLib"
-        parent="@*android:style/TextAppearance.DeviceDefault.Body1">
+        parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:textSize">14sp</item>
     </style>

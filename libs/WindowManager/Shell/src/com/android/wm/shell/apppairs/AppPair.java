@@ -272,8 +272,10 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
         final String innerPrefix = prefix + "  ";
         final String childPrefix = innerPrefix + "  ";
         pw.println(prefix + this);
-        pw.println(innerPrefix + "Root taskId=" + getRootTaskId()
-                + " winMode=" + mRootTaskInfo.getWindowingMode());
+        if (mRootTaskInfo != null) {
+            pw.println(innerPrefix + "Root taskId=" + mRootTaskInfo.taskId
+                    + " winMode=" + mRootTaskInfo.getWindowingMode());
+        }
         if (mTaskInfo1 != null) {
             pw.println(innerPrefix + "1 taskId=" + mTaskInfo1.taskId
                     + " winMode=" + mTaskInfo1.getWindowingMode());

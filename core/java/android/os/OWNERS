@@ -1,18 +1,6 @@
 # Haptics
-per-file CombinedVibrationEffect.aidl = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file CombinedVibrationEffect.java = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file ExternalVibration.aidl = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file ExternalVibration.java = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file IExternalVibrationController.aidl = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file IExternalVibratorService.aidl = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file IVibratorManagerService.aidl = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file NullVibrator.java = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file SystemVibrator.java = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file SystemVibratorManager.java = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file VibrationEffect.aidl = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file VibrationEffect.java = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file Vibrator.java = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file VibratorManager.java = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file *Vibration* = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file *Vibrator* = file:/services/core/java/com/android/server/vibrator/OWNERS
 
 # PowerManager
 per-file IPowerManager.aidl = michaelwr@google.com, santoscordon@google.com
@@ -22,9 +10,8 @@ per-file PowerManagerInternal.java = michaelwr@google.com, santoscordon@google.c
 # BatteryStats
 per-file *BatteryConsumer* = file:/BATTERY_STATS_OWNERS
 per-file BatteryManager* = file:/BATTERY_STATS_OWNERS
-per-file BatteryStats* = file:/BATTERY_STATS_OWNERS
-per-file BatteryUsageStats* = file:/BATTERY_STATS_OWNERS
 per-file PowerComponents.java = file:/BATTERY_STATS_OWNERS
+per-file *Stats* = file:/BATTERY_STATS_OWNERS
 
 # Multiuser
 per-file IUser* = file:/MULTIUSER_OWNERS

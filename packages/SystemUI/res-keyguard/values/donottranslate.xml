@@ -21,6 +21,9 @@
     <!-- Skeleton string format for displaying the date when an alarm is set. -->
     <string name="abbrev_wday_month_day_no_year_alarm">EEEMMMd</string>
 
+    <!-- Skeleton string format for displaying the date shorter. -->
+    <string name="abbrev_month_day_no_year">MMMd</string>
+
     <!-- Skeleton string format for displaying the time in 12-hour format. -->
     <string name="clock_12hr_format">hm</string>
 

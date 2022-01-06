@@ -54,8 +54,7 @@
     <com.android.keyguard.LockIconView
         android:id="@+id/lock_icon_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center">
+        android:layout_height="wrap_content">
         <!-- Background protection -->
         <ImageView
             android:id="@+id/lock_icon_bg"
@@ -71,6 +70,19 @@
             android:padding="@dimen/lock_icon_padding"
             android:layout_gravity="center"
             android:scaleType="centerCrop"/>
+
+        <!-- Fingerprint -->
+        <!-- AOD dashed fingerprint icon with moving dashes -->
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lock_udfps_aod_fp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/lock_icon_padding"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            systemui:lottie_autoPlay="false"
+            systemui:lottie_loop="true"
+            systemui:lottie_rawRes="@raw/udfps_aod_fp"/>
     </com.android.keyguard.LockIconView>
 
     <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
@@ -114,6 +126,7 @@
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="match_parent"
             android:layout_marginBottom="@dimen/close_handle_underlap"
+            android:importantForAccessibility="no"
             systemui:layout_constraintStart_toStartOf="parent"
             systemui:layout_constraintEnd_toEndOf="parent"
         />

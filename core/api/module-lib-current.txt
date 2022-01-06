@@ -113,6 +113,8 @@ package android.media {
   public class AudioManager {
     method public void adjustStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
     method public void adjustSuggestedStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
+    method @NonNull public java.util.List<android.bluetooth.BluetoothCodecConfig> getHwOffloadFormatsSupportedForA2dp();
+    method @NonNull public java.util.List<android.bluetooth.BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio();
     method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void handleBluetoothActiveDeviceChanged(@Nullable android.bluetooth.BluetoothDevice, @Nullable android.bluetooth.BluetoothDevice, @NonNull android.media.BtProfileConnectionInfo);
     method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setA2dpSuspended(boolean);
     method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setBluetoothHeadsetProperties(@NonNull String, boolean, boolean);
@@ -190,12 +192,20 @@ package android.media.session {
 
 package android.net {
 
+  public final class ConnectivityFrameworkInitializerTiramisu {
+    method public static void registerServiceWrappers();
+  }
+
   public final class EthernetNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
     ctor public EthernetNetworkSpecifier(@NonNull String);
     method public int describeContents();
     method @Nullable public String getInterfaceName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkSpecifier> CREATOR;
+  }
+
+  public final class IpSecManager {
+    field public static final int DIRECTION_FWD = 2; // 0x2
   }
 
   public static final class IpSecManager.UdpEncapsulationSocket implements java.lang.AutoCloseable {
@@ -225,6 +235,43 @@ package android.net {
     method @Nullable public String getSubscriberId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStateSnapshot> CREATOR;
+  }
+
+  public final class NetworkTemplate implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getDefaultNetworkStatus();
+    method public int getMatchRule();
+    method public int getMeteredness();
+    method public int getOemManaged();
+    method public int getRatType();
+    method public int getRoaming();
+    method @NonNull public java.util.Set<java.lang.String> getSubscriberIds();
+    method @NonNull public java.util.Set<java.lang.String> getWifiNetworkKeys();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkTemplate> CREATOR;
+    field public static final int MATCH_BLUETOOTH = 8; // 0x8
+    field public static final int MATCH_CARRIER = 10; // 0xa
+    field public static final int MATCH_ETHERNET = 5; // 0x5
+    field public static final int MATCH_MOBILE = 1; // 0x1
+    field public static final int MATCH_WIFI = 4; // 0x4
+    field public static final int NETWORK_TYPE_ALL = -1; // 0xffffffff
+    field public static final int OEM_MANAGED_ALL = -1; // 0xffffffff
+    field public static final int OEM_MANAGED_NO = 0; // 0x0
+    field public static final int OEM_MANAGED_PAID = 1; // 0x1
+    field public static final int OEM_MANAGED_PRIVATE = 2; // 0x2
+    field public static final int OEM_MANAGED_YES = -2; // 0xfffffffe
+  }
+
+  public static final class NetworkTemplate.Builder {
+    ctor public NetworkTemplate.Builder(int);
+    method @NonNull public android.net.NetworkTemplate build();
+    method @NonNull public android.net.NetworkTemplate.Builder setDefaultNetworkStatus(int);
+    method @NonNull public android.net.NetworkTemplate.Builder setMeteredness(int);
+    method @NonNull public android.net.NetworkTemplate.Builder setOemManaged(int);
+    method @NonNull public android.net.NetworkTemplate.Builder setRatType(int);
+    method @NonNull public android.net.NetworkTemplate.Builder setRoaming(int);
+    method @NonNull public android.net.NetworkTemplate.Builder setSubscriberIds(@NonNull java.util.Set<java.lang.String>);
+    method @NonNull public android.net.NetworkTemplate.Builder setWifiNetworkKeys(@NonNull java.util.Set<java.lang.String>);
   }
 
   public class NetworkWatchlistManager {
@@ -309,6 +356,10 @@ package android.os {
   public static final class StatsServiceManager.ServiceRegisterer {
     method @Nullable public android.os.IBinder get();
     method @Nullable public android.os.IBinder getOrThrow() throws android.os.StatsServiceManager.ServiceNotFoundException;
+  }
+
+  public final class StrictMode {
+    method public static void noteUntaggedSocket();
   }
 
   public class SystemConfigManager {

@@ -32,6 +32,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothCodecConfig;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothLeAudioCodecConfig;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1171,7 +1172,8 @@ public class AudioManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @RequiresPermission("android.permission.QUERY_AUDIO_STATE")
     public int getLastAudibleStreamVolume(int streamType) {
         final IAudioService service = getService();
         try {
@@ -6796,11 +6798,13 @@ public class AudioManager {
      * supported for offload A2DP playback
      * @hide
      */
-    public List<BluetoothCodecConfig> getHwOffloadEncodingFormatsSupportedForA2DP() {
-        ArrayList<Integer> formatsList = new ArrayList<Integer>();
-        ArrayList<BluetoothCodecConfig> codecConfigList = new ArrayList<BluetoothCodecConfig>();
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public @NonNull List<BluetoothCodecConfig> getHwOffloadFormatsSupportedForA2dp() {
+        ArrayList<Integer> formatsList = new ArrayList<>();
+        ArrayList<BluetoothCodecConfig> codecConfigList = new ArrayList<>();
 
-        int status = AudioSystem.getHwOffloadEncodingFormatsSupportedForA2DP(formatsList);
+        int status = AudioSystem.getHwOffloadFormatsSupportedForBluetoothMedia(
+                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, formatsList);
         if (status != AudioManager.SUCCESS) {
             Log.e(TAG, "getHwOffloadEncodingFormatsSupportedForA2DP failed:" + status);
             return codecConfigList;
@@ -6808,12 +6812,43 @@ public class AudioManager {
 
         for (Integer format : formatsList) {
             int btSourceCodec = AudioSystem.audioFormatToBluetoothSourceCodec(format);
-            if (btSourceCodec
-                    != BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
+            if (btSourceCodec != BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
                 codecConfigList.add(new BluetoothCodecConfig(btSourceCodec));
             }
         }
         return codecConfigList;
+    }
+
+    /**
+     * Returns a list of audio formats that corresponds to encoding formats
+     * supported on offload path for Le audio playback.
+     *
+     * @return a list of {@link BluetoothLeAudioCodecConfig} objects containing encoding formats
+     * supported for offload Le Audio playback
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
+    public List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio() {
+        ArrayList<Integer> formatsList = new ArrayList<>();
+        ArrayList<BluetoothLeAudioCodecConfig> leAudioCodecConfigList = new ArrayList<>();
+
+        int status = AudioSystem.getHwOffloadFormatsSupportedForBluetoothMedia(
+                AudioSystem.DEVICE_OUT_BLE_HEADSET, formatsList);
+        if (status != AudioManager.SUCCESS) {
+            Log.e(TAG, "getHwOffloadEncodingFormatsSupportedForLeAudio failed:" + status);
+            return leAudioCodecConfigList;
+        }
+
+        for (Integer format : formatsList) {
+            int btLeAudioCodec = AudioSystem.audioFormatToBluetoothLeAudioSourceCodec(format);
+            if (btLeAudioCodec != BluetoothLeAudioCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
+                leAudioCodecConfigList.add(new BluetoothLeAudioCodecConfig.Builder()
+                                            .setCodecType(btLeAudioCodec)
+                                            .build());
+            }
+        }
+        return leAudioCodecConfigList;
     }
 
     // Since we need to calculate the changes since THE LAST NOTIFICATION, and not since the

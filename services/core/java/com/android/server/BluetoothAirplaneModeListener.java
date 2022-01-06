@@ -35,6 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * when Bluetooth is on and Bluetooth is in one of the following situations:
  *   1. Bluetooth A2DP is connected.
  *   2. Bluetooth Hearing Aid profile is connected.
+ *   3. Bluetooth LE Audio is connected
  */
 class BluetoothAirplaneModeListener {
     private static final String TAG = "BluetoothAirplaneModeListener";
@@ -111,9 +112,9 @@ class BluetoothAirplaneModeListener {
     void handleAirplaneModeChange() {
         if (shouldSkipAirplaneModeChange()) {
             Log.i(TAG, "Ignore airplane mode change");
-            // We have to store Bluetooth state here, so if user turns off Bluetooth
-            // after airplane mode is turned on, we don't forget to turn on Bluetooth
-            // when airplane mode turns off.
+            // Airplane mode enabled when Bluetooth is being used for audio/headering aid.
+            // Bluetooth is not disabled in such case, only state is changed to
+            // BLUETOOTH_ON_AIRPLANE mode.
             mAirplaneHelper.setSettingsInt(Settings.Global.BLUETOOTH_ON,
                     BluetoothManagerService.BLUETOOTH_ON_AIRPLANE);
             if (shouldPopToast()) {
@@ -132,7 +133,7 @@ class BluetoothAirplaneModeListener {
             return false;
         }
         if (!mAirplaneHelper.isBluetoothOn() || !mAirplaneHelper.isAirplaneModeOn()
-                || !mAirplaneHelper.isA2dpOrHearingAidConnected()) {
+                || !mAirplaneHelper.isMediaProfileConnected()) {
             return false;
         }
         return true;

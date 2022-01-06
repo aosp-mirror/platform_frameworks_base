@@ -37,6 +37,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.plugins.ActivityStarter
@@ -101,7 +102,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var seamless: ViewGroup
     private lateinit var seamlessIcon: ImageView
     private lateinit var seamlessText: TextView
-    private lateinit var seamlessFallback: ImageView
     private lateinit var seekBar: SeekBar
     private lateinit var elapsedTimeView: TextView
     private lateinit var totalTimeView: TextView
@@ -154,8 +154,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(holder.seamlessIcon).thenReturn(seamlessIcon)
         seamlessText = TextView(context)
         whenever(holder.seamlessText).thenReturn(seamlessText)
-        seamlessFallback = ImageView(context)
-        whenever(holder.seamlessFallback).thenReturn(seamlessFallback)
         seekBar = SeekBar(context)
         whenever(holder.seekBar).thenReturn(seekBar)
         elapsedTimeView = TextView(context)
@@ -239,21 +237,19 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindDisabledDevice() {
         seamless.id = 1
-        seamlessFallback.id = 2
+        val fallbackString = context.getString(R.string.media_seamless_other_device)
         player.attachPlayer(holder)
         val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
                 emptyList(), PACKAGE, session.getSessionToken(), null, disabledDevice, true, null)
         player.bindPlayer(state, PACKAGE)
-        verify(expandedSet).setVisibility(seamless.id, View.GONE)
-        verify(expandedSet).setVisibility(seamlessFallback.id, View.VISIBLE)
-        verify(collapsedSet).setVisibility(seamless.id, View.GONE)
-        verify(collapsedSet).setVisibility(seamlessFallback.id, View.VISIBLE)
+        assertThat(seamless.isEnabled()).isFalse()
+        assertThat(seamlessText.getText()).isEqualTo(fallbackString)
+        assertThat(seamless.contentDescription).isEqualTo(fallbackString)
     }
 
     @Test
     fun bindNullDevice() {
-        val fallbackString = context.getResources().getString(
-                com.android.internal.R.string.ext_media_seamless_action)
+        val fallbackString = context.getResources().getString(R.string.media_seamless_other_device)
         player.attachPlayer(holder)
         val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
                 emptyList(), PACKAGE, session.getSessionToken(), null, null, true, null)

@@ -27,9 +27,8 @@ package {
 
 java_sdk_library {
     name: "android.test.mock",
-
-    srcs: [
-        ":android-test-mock-sources",
+    srcs: [":android-test-mock-sources"],
+    api_srcs: [
         // Note: Below are NOT APIs of this library. We only take APIs under
         // the android.test.mock package. They however provide private APIs that
         // android.test.mock APIs references to. We need to have the classes in
@@ -44,15 +43,9 @@ java_sdk_library {
         "app-compat-annotations",
         "unsupportedappusage",
     ],
-
     api_packages: [
         "android.test.mock",
     ],
-    // Only include android.test.mock.* classes. Jarjar rules below removes
-    // classes in other packages like android.content. In order to keep the
-    // list up-to-date, permitted_packages ensures that the library contains
-    // clases under android.test.mock after the jarjar rules are applied.
-    jarjar_rules: "jarjar-rules.txt",
     permitted_packages: [
         "android.test.mock",
     ],

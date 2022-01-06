@@ -57,7 +57,8 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
     private int mLastAcquire;
 
     FaceAuthenticationClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, @NonNull IBinder token,
+            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
+            @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
             boolean isStrongBiometric, int statsClient, @NonNull LockoutTracker lockoutTracker,
@@ -68,6 +69,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, null /* taskStackListener */,
                 lockoutTracker, allowBackgroundAuthentication, true /* shouldVibrate */,
                 isKeyguardBypassEnabled);
+        setRequestId(requestId);
         mUsageStats = usageStats;
 
         final Resources resources = getContext().getResources();

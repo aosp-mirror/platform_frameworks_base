@@ -17,12 +17,12 @@
 package android.bluetooth;
 
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
-
-import java.util.Arrays;
-import java.util.Objects;
 
 import junit.framework.TestCase;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Unit test cases for {@link BluetoothCodecStatus}.
@@ -34,7 +34,7 @@ public class BluetoothCodecStatusTest extends TestCase {
 
     // Codec configs: A and B are same; C is different
     private static final BluetoothCodecConfig config_A =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -42,7 +42,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig config_B =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -50,7 +50,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig config_C =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -59,7 +59,7 @@ public class BluetoothCodecStatusTest extends TestCase {
 
     // Local capabilities: A and B are same; C is different
     private static final BluetoothCodecConfig local_capability1_A =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000,
@@ -69,7 +69,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability1_B =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000,
@@ -79,7 +79,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability1_C =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000,
@@ -89,7 +89,7 @@ public class BluetoothCodecStatusTest extends TestCase {
 
 
     private static final BluetoothCodecConfig local_capability2_A =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000,
@@ -99,7 +99,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability2_B =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000,
@@ -109,7 +109,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability2_C =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000,
@@ -118,7 +118,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability3_A =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000,
@@ -128,7 +128,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability3_B =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000,
@@ -138,7 +138,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability3_C =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000,
@@ -147,7 +147,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability4_A =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000,
@@ -157,7 +157,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability4_B =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000,
@@ -167,7 +167,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability4_C =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000,
@@ -176,7 +176,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability5_A =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000 |
@@ -190,7 +190,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability5_B =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000 |
@@ -204,7 +204,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig local_capability5_C =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000 |
@@ -219,7 +219,7 @@ public class BluetoothCodecStatusTest extends TestCase {
 
     // Selectable capabilities: A and B are same; C is different
     private static final BluetoothCodecConfig selectable_capability1_A =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -228,7 +228,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability1_B =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -237,7 +237,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability1_C =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -245,7 +245,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability2_A =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -254,7 +254,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability2_B =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -263,7 +263,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability2_C =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -271,7 +271,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability3_A =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -280,7 +280,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability3_B =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -289,7 +289,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability3_C =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -297,7 +297,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability4_A =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_24,
@@ -306,7 +306,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability4_B =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_24,
@@ -315,7 +315,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability4_C =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100,
                                  BluetoothCodecConfig.BITS_PER_SAMPLE_24,
@@ -323,7 +323,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability5_A =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000 |
@@ -337,7 +337,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability5_B =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000 |
@@ -351,7 +351,7 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  1000, 2000, 3000, 4000);
 
     private static final BluetoothCodecConfig selectable_capability5_C =
-        new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
+            buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
                                  BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                  BluetoothCodecConfig.SAMPLE_RATE_44100 |
                                  BluetoothCodecConfig.SAMPLE_RATE_48000 |
@@ -363,79 +363,87 @@ public class BluetoothCodecStatusTest extends TestCase {
                                  BluetoothCodecConfig.CHANNEL_MODE_STEREO,
                                  1000, 2000, 3000, 4000);
 
-    private static final BluetoothCodecConfig[] local_capability_A = {
-        local_capability1_A,
-        local_capability2_A,
-        local_capability3_A,
-        local_capability4_A,
-        local_capability5_A,
-    };
+    private static final List<BluetoothCodecConfig> LOCAL_CAPABILITY_A =
+            new ArrayList() {{
+                    add(local_capability1_A);
+                    add(local_capability2_A);
+                    add(local_capability3_A);
+                    add(local_capability4_A);
+                    add(local_capability5_A);
+            }};
 
-    private static final BluetoothCodecConfig[] local_capability_B = {
-        local_capability1_B,
-        local_capability2_B,
-        local_capability3_B,
-        local_capability4_B,
-        local_capability5_B,
-    };
+    private static final List<BluetoothCodecConfig> LOCAL_CAPABILITY_B =
+            new ArrayList() {{
+                    add(local_capability1_B);
+                    add(local_capability2_B);
+                    add(local_capability3_B);
+                    add(local_capability4_B);
+                    add(local_capability5_B);
+            }};
 
-    private static final BluetoothCodecConfig[] local_capability_B_reordered = {
-        local_capability5_B,
-        local_capability4_B,
-        local_capability2_B,
-        local_capability3_B,
-        local_capability1_B,
-    };
+    private static final List<BluetoothCodecConfig> LOCAL_CAPABILITY_B_REORDERED =
+            new ArrayList() {{
+                    add(local_capability5_B);
+                    add(local_capability4_B);
+                    add(local_capability2_B);
+                    add(local_capability3_B);
+                    add(local_capability1_B);
+            }};
 
-    private static final BluetoothCodecConfig[] local_capability_C = {
-        local_capability1_C,
-        local_capability2_C,
-        local_capability3_C,
-        local_capability4_C,
-        local_capability5_C,
-    };
+    private static final List<BluetoothCodecConfig> LOCAL_CAPABILITY_C =
+            new ArrayList() {{
+                    add(local_capability1_C);
+                    add(local_capability2_C);
+                    add(local_capability3_C);
+                    add(local_capability4_C);
+                    add(local_capability5_C);
+            }};
 
-    private static final BluetoothCodecConfig[] selectable_capability_A = {
-        selectable_capability1_A,
-        selectable_capability2_A,
-        selectable_capability3_A,
-        selectable_capability4_A,
-        selectable_capability5_A,
-    };
+    private static final List<BluetoothCodecConfig> SELECTABLE_CAPABILITY_A =
+            new ArrayList() {{
+                    add(selectable_capability1_A);
+                    add(selectable_capability2_A);
+                    add(selectable_capability3_A);
+                    add(selectable_capability4_A);
+                    add(selectable_capability5_A);
+            }};
 
-    private static final BluetoothCodecConfig[] selectable_capability_B = {
-        selectable_capability1_B,
-        selectable_capability2_B,
-        selectable_capability3_B,
-        selectable_capability4_B,
-        selectable_capability5_B,
-    };
+    private static final List<BluetoothCodecConfig> SELECTABLE_CAPABILITY_B =
+            new ArrayList() {{
+                    add(selectable_capability1_B);
+                    add(selectable_capability2_B);
+                    add(selectable_capability3_B);
+                    add(selectable_capability4_B);
+                    add(selectable_capability5_B);
+            }};
 
-    private static final BluetoothCodecConfig[] selectable_capability_B_reordered = {
-        selectable_capability5_B,
-        selectable_capability4_B,
-        selectable_capability2_B,
-        selectable_capability3_B,
-        selectable_capability1_B,
-    };
+    private static final List<BluetoothCodecConfig> SELECTABLE_CAPABILITY_B_REORDERED =
+            new ArrayList() {{
+                    add(selectable_capability5_B);
+                    add(selectable_capability4_B);
+                    add(selectable_capability2_B);
+                    add(selectable_capability3_B);
+                    add(selectable_capability1_B);
+            }};
 
-    private static final BluetoothCodecConfig[] selectable_capability_C = {
-        selectable_capability1_C,
-        selectable_capability2_C,
-        selectable_capability3_C,
-        selectable_capability4_C,
-        selectable_capability5_C,
-    };
+    private static final List<BluetoothCodecConfig> SELECTABLE_CAPABILITY_C =
+            new ArrayList() {{
+                    add(selectable_capability1_C);
+                    add(selectable_capability2_C);
+                    add(selectable_capability3_C);
+                    add(selectable_capability4_C);
+                    add(selectable_capability5_C);
+            }};
 
     private static final BluetoothCodecStatus bcs_A =
-        new BluetoothCodecStatus(config_A, local_capability_A, selectable_capability_A);
+            new BluetoothCodecStatus(config_A, LOCAL_CAPABILITY_A, SELECTABLE_CAPABILITY_A);
     private static final BluetoothCodecStatus bcs_B =
-        new BluetoothCodecStatus(config_B, local_capability_B, selectable_capability_B);
+            new BluetoothCodecStatus(config_B, LOCAL_CAPABILITY_B, SELECTABLE_CAPABILITY_B);
     private static final BluetoothCodecStatus bcs_B_reordered =
-        new BluetoothCodecStatus(config_B, local_capability_B_reordered,
-                                 selectable_capability_B_reordered);
+            new BluetoothCodecStatus(config_B, LOCAL_CAPABILITY_B_REORDERED,
+                                 SELECTABLE_CAPABILITY_B_REORDERED);
     private static final BluetoothCodecStatus bcs_C =
-        new BluetoothCodecStatus(config_C, local_capability_C, selectable_capability_C);
+            new BluetoothCodecStatus(config_C, LOCAL_CAPABILITY_C, SELECTABLE_CAPABILITY_C);
 
     @SmallTest
     public void testBluetoothCodecStatus_get_methods() {
@@ -444,16 +452,16 @@ public class BluetoothCodecStatusTest extends TestCase {
         assertTrue(Objects.equals(bcs_A.getCodecConfig(), config_B));
         assertFalse(Objects.equals(bcs_A.getCodecConfig(), config_C));
 
-        assertTrue(Arrays.equals(bcs_A.getCodecsLocalCapabilities(), local_capability_A));
-        assertTrue(Arrays.equals(bcs_A.getCodecsLocalCapabilities(), local_capability_B));
-        assertFalse(Arrays.equals(bcs_A.getCodecsLocalCapabilities(), local_capability_C));
+        assertTrue(bcs_A.getCodecsLocalCapabilities().equals(LOCAL_CAPABILITY_A));
+        assertTrue(bcs_A.getCodecsLocalCapabilities().equals(LOCAL_CAPABILITY_B));
+        assertFalse(bcs_A.getCodecsLocalCapabilities().equals(LOCAL_CAPABILITY_C));
 
-        assertTrue(Arrays.equals(bcs_A.getCodecsSelectableCapabilities(),
-                                 selectable_capability_A));
-        assertTrue(Arrays.equals(bcs_A.getCodecsSelectableCapabilities(),
-                                  selectable_capability_B));
-        assertFalse(Arrays.equals(bcs_A.getCodecsSelectableCapabilities(),
-                                  selectable_capability_C));
+        assertTrue(bcs_A.getCodecsSelectableCapabilities()
+                                 .equals(SELECTABLE_CAPABILITY_A));
+        assertTrue(bcs_A.getCodecsSelectableCapabilities()
+                                  .equals(SELECTABLE_CAPABILITY_B));
+        assertFalse(bcs_A.getCodecsSelectableCapabilities()
+                                  .equals(SELECTABLE_CAPABILITY_C));
     }
 
     @SmallTest
@@ -464,5 +472,22 @@ public class BluetoothCodecStatusTest extends TestCase {
         assertTrue(bcs_B_reordered.equals(bcs_A));
         assertFalse(bcs_A.equals(bcs_C));
         assertFalse(bcs_C.equals(bcs_A));
+    }
+
+    private static BluetoothCodecConfig buildBluetoothCodecConfig(int sourceCodecType,
+            int codecPriority, int sampleRate, int bitsPerSample, int channelMode,
+            long codecSpecific1, long codecSpecific2, long codecSpecific3, long codecSpecific4) {
+        return new BluetoothCodecConfig.Builder()
+                    .setCodecType(sourceCodecType)
+                    .setCodecPriority(codecPriority)
+                    .setSampleRate(sampleRate)
+                    .setBitsPerSample(bitsPerSample)
+                    .setChannelMode(channelMode)
+                    .setCodecSpecific1(codecSpecific1)
+                    .setCodecSpecific2(codecSpecific2)
+                    .setCodecSpecific3(codecSpecific3)
+                    .setCodecSpecific4(codecSpecific4)
+                    .build();
+
     }
 }

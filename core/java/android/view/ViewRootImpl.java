@@ -2836,8 +2836,13 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
 
+                final boolean surfaceControlChanged =
+                        (relayoutResult & RELAYOUT_RES_SURFACE_CHANGED)
+                                == RELAYOUT_RES_SURFACE_CHANGED;
+
                 if (mSurfaceControl.isValid()) {
-                    updateOpacity(mWindowAttributes, dragResizing);
+                    updateOpacity(mWindowAttributes, dragResizing,
+                            surfaceControlChanged /*forceUpdate */);
                 }
 
                 if (DEBUG_LAYOUT) Log.v(mTag, "relayout: frame=" + frame.toShortString()
@@ -2872,9 +2877,7 @@ public final class ViewRootImpl implements ViewParent,
                 // RELAYOUT_RES_SURFACE_CHANGED since it should indicate that WMS created a new
                 // SurfaceControl.
                 surfaceReplaced = (surfaceGenerationId != mSurface.getGenerationId()
-                        || (relayoutResult & RELAYOUT_RES_SURFACE_CHANGED)
-                        == RELAYOUT_RES_SURFACE_CHANGED)
-                        && mSurface.isValid();
+                        || surfaceControlChanged) && mSurface.isValid();
                 if (surfaceReplaced) {
                     mSurfaceSequenceId++;
                 }
@@ -7824,7 +7827,8 @@ public final class ViewRootImpl implements ViewParent,
         return relayoutResult;
     }
 
-    private void updateOpacity(WindowManager.LayoutParams params, boolean dragResizing) {
+    private void updateOpacity(WindowManager.LayoutParams params, boolean dragResizing,
+            boolean forceUpdate) {
         boolean opaque = false;
 
         if (!PixelFormat.formatHasAlpha(params.format)
@@ -7840,7 +7844,7 @@ public final class ViewRootImpl implements ViewParent,
             opaque = true;
         }
 
-        if (mIsSurfaceOpaque == opaque) {
+        if (!forceUpdate && mIsSurfaceOpaque == opaque) {
             return;
         }
 
@@ -8448,13 +8452,13 @@ public final class ViewRootImpl implements ViewParent,
             MotionEvent me = (MotionEvent) event;
             if (me.getAction() == MotionEvent.ACTION_CANCEL) {
                 EventLog.writeEvent(EventLogTags.VIEW_ENQUEUE_INPUT_EVENT, "Motion - Cancel",
-                        getTitle());
+                        getTitle().toString());
             }
         } else if (event instanceof KeyEvent) {
             KeyEvent ke = (KeyEvent) event;
             if (ke.isCanceled()) {
                 EventLog.writeEvent(EventLogTags.VIEW_ENQUEUE_INPUT_EVENT, "Key - Cancel",
-                        getTitle());
+                        getTitle().toString());
             }
         }
         // Always enqueue the input event in order, regardless of its time stamp.
@@ -9493,6 +9497,7 @@ public final class ViewRootImpl implements ViewParent,
 
         ScrollCaptureResponse.Builder response = new ScrollCaptureResponse.Builder();
         response.setWindowTitle(getTitle().toString());
+        response.setPackageName(mContext.getPackageName());
 
         StringWriter writer =  new StringWriter();
         IndentingPrintWriter pw = new IndentingPrintWriter(writer);

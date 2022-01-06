@@ -141,7 +141,7 @@ import java.util.concurrent.TimeUnit;
  *                      |                     or its properties
  *                      v                              |
  * +-----------------------------------------------------------------------+
- * |                       UnderlyingNetworkTracker                        |
+ * |                       UnderlyingNetworkController                     |
  * |                                                                       |
  * | Manages lifecycle of underlying physical networks, filing requests to |
  * | bring them up, and releasing them as they become no longer necessary  |

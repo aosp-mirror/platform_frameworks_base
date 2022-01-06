@@ -24,6 +24,7 @@ import android.hardware.SensorPrivacyManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -57,6 +58,8 @@ public class TvUnblockSensorActivity extends TvBottomSheetActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addSystemFlags(
+                WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
         boolean allSensors = getIntent().getBooleanExtra(SensorPrivacyManager.EXTRA_ALL_SENSORS,
                 false);

@@ -24,6 +24,8 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.lang.ref.WeakReference;
 
 /**
@@ -33,7 +35,7 @@ import java.lang.ref.WeakReference;
  * {@link Context#getWindowContextToken() the token of non-Activity UI Contexts}.
  *
  * @see WindowContext
- * @see android.view.IWindowManager#registerWindowContextListener(IBinder, int, int, Bundle)
+ * @see android.view.IWindowManager#attachWindowContextToDisplayArea(IBinder, int, int, Bundle)
  *
  * @hide
  */
@@ -50,8 +52,8 @@ public class WindowTokenClient extends IWindowToken.Stub {
      * Attaches {@code context} to this {@link WindowTokenClient}. Each {@link WindowTokenClient}
      * can only attach one {@link Context}.
      * <p>This method must be called before invoking
-     * {@link android.view.IWindowManager#registerWindowContextListener(IBinder, int, int,
-     * Bundle, boolean)}.<p/>
+     * {@link android.view.IWindowManager#attachWindowContextToDisplayArea(IBinder, int, int,
+     * Bundle)}.<p/>
      *
      * @param context context to be attached
      * @throws IllegalStateException if attached context has already existed.
@@ -63,6 +65,13 @@ public class WindowTokenClient extends IWindowToken.Stub {
         mContextRef = new WeakReference<>(context);
     }
 
+    /**
+     * Called when {@link Configuration} updates from the server side receive.
+     *
+     * @param newConfig the updated {@link Configuration}
+     * @param newDisplayId the updated {@link android.view.Display} ID
+     */
+    @VisibleForTesting
     @Override
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId) {
         final Context context = mContextRef.get();

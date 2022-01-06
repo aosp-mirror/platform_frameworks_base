@@ -16,7 +16,6 @@
 
 package com.android.server.vcn;
 
-import static com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
 import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 import static com.android.server.vcn.VcnTestUtils.setupIpSecManager;
@@ -62,6 +61,8 @@ import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscription
 import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
 import com.android.server.vcn.VcnGatewayConnection.VcnChildSessionCallback;
 import com.android.server.vcn.VcnGatewayConnection.VcnWakeLock;
+import com.android.server.vcn.routeselection.UnderlyingNetworkController;
+import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
 
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
@@ -137,7 +138,7 @@ public class VcnGatewayConnectionTestBase {
     @NonNull protected final VcnGatewayConnectionConfig mConfig;
     @NonNull protected final VcnGatewayStatusCallback mGatewayStatusCallback;
     @NonNull protected final VcnGatewayConnection.Dependencies mDeps;
-    @NonNull protected final UnderlyingNetworkTracker mUnderlyingNetworkTracker;
+    @NonNull protected final UnderlyingNetworkController mUnderlyingNetworkController;
     @NonNull protected final VcnWakeLock mWakeLock;
     @NonNull protected final WakeupMessage mTeardownTimeoutAlarm;
     @NonNull protected final WakeupMessage mDisconnectRequestAlarm;
@@ -158,7 +159,7 @@ public class VcnGatewayConnectionTestBase {
         mConfig = VcnGatewayConnectionConfigTest.buildTestConfig();
         mGatewayStatusCallback = mock(VcnGatewayStatusCallback.class);
         mDeps = mock(VcnGatewayConnection.Dependencies.class);
-        mUnderlyingNetworkTracker = mock(UnderlyingNetworkTracker.class);
+        mUnderlyingNetworkController = mock(UnderlyingNetworkController.class);
         mWakeLock = mock(VcnWakeLock.class);
         mTeardownTimeoutAlarm = mock(WakeupMessage.class);
         mDisconnectRequestAlarm = mock(WakeupMessage.class);
@@ -176,9 +177,9 @@ public class VcnGatewayConnectionTestBase {
         doReturn(mTestLooper.getLooper()).when(mVcnContext).getLooper();
         doReturn(mVcnNetworkProvider).when(mVcnContext).getVcnNetworkProvider();
 
-        doReturn(mUnderlyingNetworkTracker)
+        doReturn(mUnderlyingNetworkController)
                 .when(mDeps)
-                .newUnderlyingNetworkTracker(any(), any(), any(), any());
+                .newUnderlyingNetworkController(any(), any(), any(), any(), any());
         doReturn(mWakeLock)
                 .when(mDeps)
                 .newWakeLock(eq(mContext), eq(PowerManager.PARTIAL_WAKE_LOCK), any());

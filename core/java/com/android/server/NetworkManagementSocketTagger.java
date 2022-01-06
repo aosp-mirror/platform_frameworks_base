@@ -70,8 +70,8 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
             Log.d(TAG, "tagSocket(" + fd.getInt$() + ") with statsTag=0x"
                     + Integer.toHexString(options.statsTag) + ", statsUid=" + options.statsUid);
         }
-        if (options.statsTag == -1 && StrictMode.vmUntaggedSocketEnabled()) {
-            StrictMode.onUntaggedSocket();
+        if (options.statsTag == -1) {
+            StrictMode.noteUntaggedSocket();
         }
         // TODO: skip tagging when options would be no-op
         tagSocketFd(fd, options.statsTag, options.statsUid);

@@ -423,17 +423,18 @@ public class CommandQueueTest extends SysuiTestCase {
         final boolean credentialAllowed = true;
         final boolean requireConfirmation = true;
         final int userId = 10;
-        final String packageName = "test";
         final long operationId = 1;
+        final String packageName = "test";
+        final long requestId = 10;
         final int multiSensorConfig = BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
 
         mCommandQueue.showAuthenticationDialog(promptInfo, receiver, sensorIds,
-                credentialAllowed, requireConfirmation , userId, packageName, operationId,
+                credentialAllowed, requireConfirmation, userId, operationId, packageName, requestId,
                 multiSensorConfig);
         waitForIdleSync();
         verify(mCallbacks).showAuthenticationDialog(eq(promptInfo), eq(receiver), eq(sensorIds),
-                eq(credentialAllowed), eq(requireConfirmation), eq(userId), eq(packageName),
-                eq(operationId), eq(multiSensorConfig));
+                eq(credentialAllowed), eq(requireConfirmation), eq(userId), eq(operationId),
+                eq(packageName), eq(requestId), eq(multiSensorConfig));
     }
 
     @Test

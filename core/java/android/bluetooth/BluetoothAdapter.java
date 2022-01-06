@@ -29,7 +29,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.app.ActivityThread;
 import android.app.PropertyInvalidatedCache;
 import android.bluetooth.BluetoothDevice.Transport;
 import android.bluetooth.BluetoothProfile.ConnectionPolicy;
@@ -48,10 +47,8 @@ import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.Attributable;
 import android.content.AttributionSource;
 import android.content.Context;
-import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -59,8 +56,7 @@ import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.SynchronousResultReceiver;
-import android.os.SystemProperties;
+import android.sysprop.BluetoothProperties;
 import android.util.Log;
 import android.util.Pair;
 
@@ -82,7 +78,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -791,7 +786,7 @@ public final class BluetoothAdapter {
     @RequiresNoPermission
     public static synchronized BluetoothAdapter getDefaultAdapter() {
         if (sAdapter == null) {
-            sAdapter = createAdapter(BluetoothManager.resolveAttributionSource(null));
+            sAdapter = createAdapter(AttributionSource.myAttributionSource());
         }
         return sAdapter;
     }
@@ -994,7 +989,6 @@ public final class BluetoothAdapter {
         if (!isBleScanAlwaysAvailable()) {
             return false;
         }
-        String packageName = ActivityThread.currentPackageName();
         try {
             return mManagerService.disableBle(mAttributionSource, mToken);
         } catch (RemoteException e) {
@@ -1041,7 +1035,6 @@ public final class BluetoothAdapter {
         if (!isBleScanAlwaysAvailable()) {
             return false;
         }
-        String packageName = ActivityThread.currentPackageName();
         try {
             return mManagerService.enableBle(mAttributionSource, mToken);
         } catch (RemoteException e) {
@@ -1344,7 +1337,7 @@ public final class BluetoothAdapter {
                 return true;
             }
             Log.e(TAG, "factoryReset(): Setting persist.bluetooth.factoryreset to retry later");
-            SystemProperties.set("persist.bluetooth.factoryreset", "true");
+            BluetoothProperties.factory_reset(true);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         } finally {
@@ -2286,21 +2279,21 @@ public final class BluetoothAdapter {
     public @interface LeFeatureReturnValues {}
 
     /**
-     * Returns {@link BluetoothStatusCodes#SUCCESS} if LE Connected Isochronous Stream Central
-     * feature is supported, returns {@link BluetoothStatusCodes#ERROR_FEATURE_NOT_SUPPORTED} if
+     * Returns {@link BluetoothStatusCodes#SUCCESS} if the LE audio feature is
+     * supported, returns {@link BluetoothStatusCodes#ERROR_FEATURE_NOT_SUPPORTED} if
      * the feature is not supported or an error code.
      *
-     * @return whether the chipset supports the LE Connected Isochronous Stream Central feature
+     * @return whether the LE audio is supported
      */
     @RequiresNoPermission
-    public @LeFeatureReturnValues int isCisCentralSupported() {
+    public @LeFeatureReturnValues int isLeAudioSupported() {
         if (!getLeAccess()) {
             return BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED;
         }
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.isCisCentralSupported();
+                return mService.isLeAudioSupported();
             }
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -2421,38 +2414,6 @@ public final class BluetoothAdapter {
             Log.e(TAG, "", e);
         }
         return false;
-    }
-
-    /**
-     * Return the record of {@link BluetoothActivityEnergyInfo} object that
-     * has the activity and energy info. This can be used to ascertain what
-     * the controller has been up to, since the last sample.
-     *
-     * @param updateType Type of info, cached vs refreshed.
-     * @return a record with {@link BluetoothActivityEnergyInfo} or null if report is unavailable or
-     * unsupported
-     * @hide
-     * @deprecated use the asynchronous {@link #requestControllerActivityEnergyInfo(ResultReceiver)}
-     * instead.
-     */
-    @Deprecated
-    @RequiresBluetoothConnectPermission
-    @RequiresPermission(allOf = {
-            android.Manifest.permission.BLUETOOTH_CONNECT,
-            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
-    })
-    public BluetoothActivityEnergyInfo getControllerActivityEnergyInfo(int updateType) {
-        SynchronousResultReceiver receiver = new SynchronousResultReceiver();
-        requestControllerActivityEnergyInfo(receiver);
-        try {
-            SynchronousResultReceiver.Result result = receiver.awaitResult(1000);
-            if (result.bundle != null) {
-                return result.bundle.getParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY);
-            }
-        } catch (TimeoutException e) {
-            Log.e(TAG, "getControllerActivityEnergyInfo timed out");
-        }
-        return null;
     }
 
     /**
@@ -3125,6 +3086,9 @@ public final class BluetoothAdapter {
             BluetoothCsipSetCoordinator csipSetCoordinator =
                     new BluetoothCsipSetCoordinator(context, listener, this);
             return true;
+        } else if (profile == BluetoothProfile.LE_CALL_CONTROL) {
+            BluetoothLeCallControl tbs = new BluetoothLeCallControl(context, listener);
+            return true;
         } else {
             return false;
         }
@@ -3226,6 +3190,10 @@ public final class BluetoothAdapter {
                 BluetoothCsipSetCoordinator csipSetCoordinator =
                         (BluetoothCsipSetCoordinator) proxy;
                 csipSetCoordinator.close();
+                break;
+            case BluetoothProfile.LE_CALL_CONTROL:
+                BluetoothLeCallControl tbs = (BluetoothLeCallControl) proxy;
+                tbs.close();
                 break;
         }
     }

@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.Process.FIRST_APPLICATION_UID;
+import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
@@ -77,6 +78,7 @@ import android.provider.DeviceConfig.Properties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
+import android.util.FeatureFlagUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -1792,6 +1794,8 @@ public class AppProfiler {
     }
 
     void updateCpuStatsNow() {
+        final boolean monitorPhantomProcs = mService.mSystemReady && FeatureFlagUtils.isEnabled(
+                mService.mContext, SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);
         synchronized (mProcessCpuTracker) {
             mProcessCpuMutexFree.set(false);
             final long now = SystemClock.uptimeMillis();
@@ -1830,7 +1834,7 @@ public class AppProfiler {
                 }
             }
 
-            if (haveNewCpuStats) {
+            if (monitorPhantomProcs && haveNewCpuStats) {
                 mService.mPhantomProcessList.updateProcessCpuStatesLocked(mProcessCpuTracker);
             }
 

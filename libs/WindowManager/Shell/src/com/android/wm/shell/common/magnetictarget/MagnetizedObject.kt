@@ -303,6 +303,13 @@ abstract class MagnetizedObject<T : Any>(
     }
 
     /**
+     * Removes all associated targets from this object.
+     */
+    fun clearAllTargets() {
+        associatedTargets.clear()
+    }
+
+    /**
      * Provide this method with all motion events that move the magnetized object. If the
      * location of the motion events moves within the magnetic field of a target, or indicate a
      * fling-to-target gesture, this method will return true and you should not move the object

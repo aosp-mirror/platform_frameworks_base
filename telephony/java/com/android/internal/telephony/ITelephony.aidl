@@ -77,6 +77,7 @@ import java.util.Map;
 
 import android.telephony.UiccCardInfo;
 import android.telephony.UiccSlotInfo;
+import android.telephony.UiccSlotMapping;
 
 /**
  * Interface used to interact with the phone.  Mostly this is used by the
@@ -900,6 +901,8 @@ interface ITelephony {
      * Perform a radio network scan and return the id of this scan.
      *
      * @param subId the id of the subscription.
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to
+     * receive fine location related information
      * @param request Defines all the configs for network scan.
      * @param messenger Callback messages will be sent using this messenger.
      * @param binder the binder object instantiated in TelephonyManager.
@@ -907,8 +910,9 @@ interface ITelephony {
      * @param callingFeatureId The feature in the package
      * @return An id for this scan.
      */
-    int requestNetworkScan(int subId, in NetworkScanRequest request, in Messenger messenger,
-            in IBinder binder, in String callingPackage, String callingFeatureId);
+    int requestNetworkScan(int subId, in boolean renounceFineLocationAccess,
+            in NetworkScanRequest request, in Messenger messenger, in IBinder binder,
+	    in String callingPackage, String callingFeatureId);
 
     /**
      * Stop an existing radio network scan.
@@ -1387,12 +1391,17 @@ interface ITelephony {
     /**
      * Get the service state on specified subscription
      * @param subId Subscription id
+     * @param renounceFineLocationAccess Set this to true if the caller would not like to
+     * receive fine location related information
+     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
+     * receive coarse location related information
      * @param callingPackage The package making the call
      * @param callingFeatureId The feature in the package
      * @return Service state on specified subscription.
      */
-    ServiceState getServiceStateForSubscriber(int subId, String callingPackage,
-            String callingFeatureId);
+    ServiceState getServiceStateForSubscriber(int subId, boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess,
+            String callingPackage, String callingFeatureId);
 
     /**
      * Returns the URI for the per-account voicemail ringtone set in Phone settings.
@@ -1734,15 +1743,33 @@ interface ITelephony {
      * @return UiccSlotInfo array.
      * @hide
      */
-    UiccSlotInfo[] getUiccSlotsInfo();
+    UiccSlotInfo[] getUiccSlotsInfo(String callingPackage);
 
     /**
      * Map logicalSlot to physicalSlot, and activate the physicalSlot if it is inactive.
      * @param physicalSlots Index i in the array representing physical slot for phone i. The array
      *        size should be same as getPhoneCount().
+     * @deprecated Use {@link #setSimSlotMapping(in List<UiccSlotMapping> slotMapping)} instead.
      * @return boolean Return true if the switch succeeds, false if the switch fails.
      */
     boolean switchSlots(in int[] physicalSlots);
+
+    /**
+     * Maps the logical slots to the SlotPortMapping which consist of both physical slot index and
+     * port index. Logical slot is the slot that is seen by modem. Physical slot is the actual
+     * physical slot. Port index is the index (enumerated value) for the associated port available
+     * on the SIM. Each physical slot can have multiple ports which enables multi-enabled profile
+     * (MEP). If eUICC physical slot supports 2 ports, then the port index is numbered 0,1 and if
+     * eUICC2 supports 4 ports then the port index is numbered 0,1,2,3. Each portId is unique within
+     * a UICC physical slot but not necessarily unique across UICC’s. SEP(Single enabled profile)
+     * eUICC and non-eUICC will only have port Index 0.
+     *
+     * Logical slots that are already mapped to the requested SlotPortMapping are not impacted.
+     * @param slotMapping Index i in the list representing slot mapping for phone i.
+     *
+     * @return {@code true} if the switch succeeds, {@code false} if the switch fails.
+     */
+    boolean setSimSlotMapping(in List<UiccSlotMapping> slotMapping);
 
     /**
      * Returns whether mobile data roaming is enabled on the subscription with id {@code subId}.
@@ -2122,7 +2149,7 @@ interface ITelephony {
     /**
      * Get the mapping from logical slots to physical slots.
      */
-    int[] getSlotsMapping();
+    int[] getSlotsMapping(String callingPackage);
 
     /**
      * Get the IRadio HAL Version encoded as 100 * MAJOR_VERSION + MINOR_VERSION or -1 if unknown
@@ -2509,4 +2536,23 @@ interface ITelephony {
      * Unregister an IMS connection state callback
      */
     void unregisterImsStateCallback(in IImsStateCallback cb);
+
+    /**
+     * return last known cell identity
+     * @param subId user preferred subId.
+     * @param callingPackage the name of the package making the call.
+     * @param callingFeatureId The feature in the package.
+     */
+    CellIdentity getLastKnownCellIdentity(int subId, String callingPackage,
+            String callingFeatureId);
+
+    /**
+     *  @return true if the modem service is set successfully, false otherwise.
+     */
+    boolean setModemService(in String serviceName);
+
+    /**
+     * @return the service name of the modem service which bind to.
+     */
+    String getModemService();
 }

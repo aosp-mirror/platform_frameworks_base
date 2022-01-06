@@ -125,10 +125,12 @@ import android.media.tv.TvInputManager;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.net.ConnectivityFrameworkInitializer;
+import android.net.ConnectivityFrameworkInitializerTiramisu;
 import android.net.EthernetManager;
 import android.net.IEthernetManager;
 import android.net.IIpSecService;
 import android.net.INetworkPolicyManager;
+import android.net.INetworkStatsService;
 import android.net.IPacProxyManager;
 import android.net.IVpnManager;
 import android.net.IpSecManager;
@@ -140,8 +142,6 @@ import android.net.TetheringManager;
 import android.net.VpnManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
-import android.net.nsd.INsdManager;
-import android.net.nsd.NsdManager;
 import android.net.vcn.IVcnManagementService;
 import android.net.vcn.VcnManager;
 import android.net.wifi.WifiFrameworkInitializer;
@@ -566,15 +566,6 @@ public final class SystemServiceRegistry {
                     ctx.mMainThread.getHandler());
             }});
 
-        registerService(Context.NSD_SERVICE, NsdManager.class,
-                new CachedServiceFetcher<NsdManager>() {
-            @Override
-            public NsdManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.NSD_SERVICE);
-                INsdManager service = INsdManager.Stub.asInterface(b);
-                return new NsdManager(ctx.getOuterContext(), service);
-            }});
-
         registerService(Context.PEOPLE_SERVICE, PeopleManager.class,
                 new CachedServiceFetcher<PeopleManager>() {
             @Override
@@ -991,7 +982,11 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<NetworkStatsManager>() {
             @Override
             public NetworkStatsManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                return new NetworkStatsManager(ctx.getOuterContext());
+                // TODO: Replace with an initializer in the module, see
+                //  {@code ConnectivityFrameworkInitializer}.
+                final INetworkStatsService service = INetworkStatsService.Stub.asInterface(
+                        ServiceManager.getServiceOrThrow(Context.NETWORK_STATS_SERVICE));
+                return new NetworkStatsManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.PERSISTENT_DATA_BLOCK_SERVICE, PersistentDataBlockManager.class,
@@ -1486,6 +1481,7 @@ public final class SystemServiceRegistry {
             MediaFrameworkInitializer.registerServiceWrappers();
             RoleFrameworkInitializer.registerServiceWrappers();
             SchedulingFrameworkInitializer.registerServiceWrappers();
+            ConnectivityFrameworkInitializerTiramisu.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...

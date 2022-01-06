@@ -724,9 +724,6 @@ public final class Zygote {
         DataOutputStream usapOutputStream = null;
         ZygoteArguments args = null;
 
-        // Block SIGTERM so we won't be killed if the Zygote flushes the USAP pool.
-        blockSigTerm();
-
         LocalSocket sessionSocket = null;
         if (argBuffer == null) {
             // Read arguments from usapPoolSocket instead.
@@ -742,6 +739,10 @@ public final class Zygote {
                 ZygoteCommandBuffer tmpArgBuffer = null;
                 try {
                     sessionSocket = usapPoolSocket.accept();
+                    // Block SIGTERM so we won't be killed if the Zygote flushes the USAP pool.
+                    // This is safe from a race condition because the pool is only flushed after
+                    // the SystemServer changes its internal state to stop using the USAP pool.
+                    blockSigTerm();
 
                     usapOutputStream =
                             new DataOutputStream(sessionSocket.getOutputStream());
@@ -759,9 +760,10 @@ public final class Zygote {
                 unblockSigTerm();
                 IoUtils.closeQuietly(sessionSocket);
                 IoUtils.closeQuietly(tmpArgBuffer);
-                blockSigTerm();
             }
         } else {
+            // Block SIGTERM so we won't be killed if the Zygote flushes the USAP pool.
+            blockSigTerm();
             try {
                 args = ZygoteArguments.getInstance(argBuffer);
             } catch (Exception ex) {

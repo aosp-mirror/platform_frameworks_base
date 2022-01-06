@@ -39,6 +39,7 @@ import static android.hardware.SensorPrivacyManager.Sources.OTHER;
 import static android.hardware.SensorPrivacyManager.Sources.QS_TILE;
 import static android.hardware.SensorPrivacyManager.Sources.SETTINGS;
 import static android.hardware.SensorPrivacyManager.Sources.SHELL;
+import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.UNKNOWN;
 
@@ -195,7 +196,7 @@ public final class SensorPrivacyService extends SystemService {
     private EmergencyCallHelper mEmergencyCallHelper;
     private KeyguardManager mKeyguardManager;
 
-    private int mCurrentUser = -1;
+    private int mCurrentUser = USER_NULL;
 
     public SensorPrivacyService(Context context) {
         super(context);
@@ -228,9 +229,9 @@ public final class SensorPrivacyService extends SystemService {
 
     @Override
     public void onUserStarting(TargetUser user) {
-        if (mCurrentUser == -1) {
+        if (mCurrentUser == USER_NULL) {
             mCurrentUser = user.getUserIdentifier();
-            mSensorPrivacyServiceImpl.userSwitching(-1, user.getUserIdentifier());
+            mSensorPrivacyServiceImpl.userSwitching(USER_NULL, user.getUserIdentifier());
         }
     }
 
@@ -420,9 +421,12 @@ public final class SensorPrivacyService extends SystemService {
             }
 
             synchronized (mLock) {
-                if (mSuppressReminders.containsKey(new Pair<>(sensor, user))) {
+                UserHandle parentUser = UserHandle.of(mUserManagerInternal
+                        .getProfileParentId(user.getIdentifier()));
+                if (mSuppressReminders.containsKey(new Pair<>(sensor, parentUser))) {
                     Log.d(TAG,
-                            "Suppressed sensor privacy reminder for " + packageName + "/" + user);
+                            "Suppressed sensor privacy reminder for " + packageName + "/"
+                                    + parentUser);
                     return;
                 }
             }
@@ -708,6 +712,16 @@ public final class SensorPrivacyService extends SystemService {
         @Override
         public void setIndividualSensorPrivacy(@UserIdInt int userId,
                 @SensorPrivacyManager.Sources.Source int source, int sensor, boolean enable) {
+            if (DEBUG) {
+                Log.d(TAG, "callingUid=" + Binder.getCallingUid()
+                        + " callingPid=" + Binder.getCallingPid()
+                        + " setIndividualSensorPrivacy("
+                        + "userId=" + userId
+                        + " source=" + source
+                        + " sensor=" + sensor
+                        + " enable=" + enable
+                        + ")");
+            }
             enforceManageSensorPrivacyPermission();
             if (userId == UserHandle.USER_CURRENT) {
                 userId = mCurrentUser;
@@ -892,6 +906,14 @@ public final class SensorPrivacyService extends SystemService {
 
         @Override
         public boolean isIndividualSensorPrivacyEnabled(@UserIdInt int userId, int sensor) {
+            if (DEBUG) {
+                Log.d(TAG, "callingUid=" + Binder.getCallingUid()
+                        + " callingPid=" + Binder.getCallingPid()
+                        + " isIndividualSensorPrivacyEnabled("
+                        + "userId=" + userId
+                        + " sensor=" + sensor
+                        + ")");
+            }
             enforceObserveSensorPrivacyPermission();
             if (userId == UserHandle.USER_CURRENT) {
                 userId = mCurrentUser;
@@ -1273,13 +1295,13 @@ public final class SensorPrivacyService extends SystemService {
                 micState = isIndividualSensorPrivacyEnabledLocked(to, MICROPHONE);
                 camState = isIndividualSensorPrivacyEnabledLocked(to, CAMERA);
             }
-            if (prevMicState != micState) {
+            if (from == USER_NULL || prevMicState != micState) {
                 mHandler.onUserGlobalSensorPrivacyChanged(MICROPHONE, micState);
                 setGlobalRestriction(MICROPHONE, micState);
             }
-            if (prevCamState != camState) {
+            if (from == USER_NULL || prevCamState != camState) {
                 mHandler.onUserGlobalSensorPrivacyChanged(CAMERA, camState);
-                setGlobalRestriction(CAMERA, micState);
+                setGlobalRestriction(CAMERA, camState);
             }
         }
 

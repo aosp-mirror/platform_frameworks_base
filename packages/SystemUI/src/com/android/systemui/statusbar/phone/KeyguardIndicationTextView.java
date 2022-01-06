@@ -28,7 +28,10 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.StyleRes;
+
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.keyguard.KeyguardIndication;
 
@@ -39,6 +42,12 @@ import java.util.LinkedList;
  */
 public class KeyguardIndicationTextView extends TextView {
     private static final long MSG_MIN_DURATION_MILLIS_DEFAULT = 1500;
+
+    @StyleRes
+    private static int sStyleId = R.style.TextAppearance_Keyguard_BottomArea;
+    @StyleRes
+    private static int sButtonStyleId = R.style.TextAppearance_Keyguard_BottomArea_Button;
+
     private long mNextAnimationTime = 0;
     private boolean mAnimationsEnabled = true;
     private LinkedList<CharSequence> mMessages = new LinkedList<>();
@@ -136,6 +145,14 @@ public class KeyguardIndicationTextView extends TextView {
             public void onAnimationEnd(Animator animator) {
                 KeyguardIndication info = mKeyguardIndicationInfo.poll();
                 if (info != null) {
+                    // First, update the style.
+                    // If a background is set on the text, we don't want shadow on the text
+                    if (info.getBackground() != null) {
+                        setTextAppearance(sButtonStyleId);
+                    } else {
+                        setTextAppearance(sStyleId);
+                    }
+                    setBackground(info.getBackground());
                     setTextColor(info.getTextColor());
                     setOnClickListener(info.getClickListener());
                     setClickable(info.getClickListener() != null);

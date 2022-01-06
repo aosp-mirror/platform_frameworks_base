@@ -104,7 +104,16 @@ class OngoingCallController @Inject constructor(
             }
         }
 
+        // Fix for b/199600334
+        override fun onEntryCleanUp(entry: NotificationEntry) {
+            removeChipIfNeeded(entry)
+        }
+
         override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
+            removeChipIfNeeded(entry)
+        }
+
+        private fun removeChipIfNeeded(entry: NotificationEntry) {
             if (entry.sbn.key == callNotificationInfo?.key) {
                 removeChip()
             }

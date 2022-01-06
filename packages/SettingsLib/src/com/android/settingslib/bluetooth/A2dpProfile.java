@@ -28,13 +28,16 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
+import android.os.Build;
 import android.os.ParcelUuid;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import com.android.settingslib.R;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class A2dpProfile implements LocalBluetoothProfile {
@@ -226,6 +229,10 @@ public class A2dpProfile implements LocalBluetoothProfile {
         return support == BluetoothA2dp.OPTIONAL_CODECS_SUPPORTED;
     }
 
+    /**
+     * @return whether high quality audio is enabled or not
+     */
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     public boolean isHighQualityAudioEnabled(BluetoothDevice device) {
         BluetoothDevice bluetoothDevice = (device != null) ? device : mService.getActiveDevice();
         if (bluetoothDevice == null) {
@@ -271,6 +278,13 @@ public class A2dpProfile implements LocalBluetoothProfile {
         }
     }
 
+    /**
+     * Gets the label associated with the codec of a Bluetooth device.
+     *
+     * @param device to get codec label from
+     * @return the label associated with the device codec
+     */
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     public String getHighQualityAudioOptionLabel(BluetoothDevice device) {
         BluetoothDevice bluetoothDevice = (device != null) ? device : mService.getActiveDevice();
         int unknownCodecId = R.string.bluetooth_profile_a2dp_high_quality_unknown_codec;
@@ -280,18 +294,18 @@ public class A2dpProfile implements LocalBluetoothProfile {
         }
         // We want to get the highest priority codec, since that's the one that will be used with
         // this device, and see if it is high-quality (ie non-mandatory).
-        BluetoothCodecConfig[] selectable = null;
+        List<BluetoothCodecConfig> selectable = null;
         if (mService.getCodecStatus(device) != null) {
             selectable = mService.getCodecStatus(device).getCodecsSelectableCapabilities();
             // To get the highest priority, we sort in reverse.
-            Arrays.sort(selectable,
+            Collections.sort(selectable,
                     (a, b) -> {
                         return b.getCodecPriority() - a.getCodecPriority();
                     });
         }
 
-        final BluetoothCodecConfig codecConfig = (selectable == null || selectable.length < 1)
-                ? null : selectable[0];
+        final BluetoothCodecConfig codecConfig = (selectable == null || selectable.size() < 1)
+                ? null : selectable.get(0);
         final int codecType = (codecConfig == null || codecConfig.isMandatoryCodec())
                 ? BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID : codecConfig.getCodecType();
 

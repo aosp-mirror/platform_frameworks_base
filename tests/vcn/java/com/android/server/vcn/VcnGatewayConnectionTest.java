@@ -59,7 +59,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
-import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
+import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -238,14 +238,14 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
     }
 
     @Test
-    public void testSubscriptionSnapshotUpdateNotifiesUnderlyingNetworkTracker() {
+    public void testSubscriptionSnapshotUpdateNotifiesUnderlyingNetworkController() {
         verifyWakeLockSetUp();
 
         final TelephonySubscriptionSnapshot updatedSnapshot =
                 mock(TelephonySubscriptionSnapshot.class);
         mGatewayConnection.updateSubscriptionSnapshot(updatedSnapshot);
 
-        verify(mUnderlyingNetworkTracker).updateSubscriptionSnapshot(eq(updatedSnapshot));
+        verify(mUnderlyingNetworkController).updateSubscriptionSnapshot(eq(updatedSnapshot));
         verifyWakeLockAcquired();
 
         mTestLooper.dispatchAll();
@@ -256,13 +256,13 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
     @Test
     public void testNonNullUnderlyingNetworkRecordUpdateCancelsAlarm() {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(null);
 
         verifyDisconnectRequestAlarmAndGetCallback(false /* expectCanceled */);
 
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_1);
 
         verify(mDisconnectRequestAlarm).cancel();

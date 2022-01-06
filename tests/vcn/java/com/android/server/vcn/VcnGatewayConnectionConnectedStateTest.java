@@ -118,8 +118,10 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
     @Test
     public void testNullNetworkDoesNotTriggerDisconnect() throws Exception {
+        doReturn(false).when(mDeps).isAirplaneModeOn(any());
+
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(null);
         mTestLooper.dispatchAll();
 
@@ -129,9 +131,22 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     }
 
     @Test
+    public void testNullNetworkAirplaneModeDisconnects() throws Exception {
+        doReturn(true).when(mDeps).isAirplaneModeOn(any());
+
+        mGatewayConnection
+                .getUnderlyingNetworkControllerCallback()
+                .onSelectedUnderlyingNetworkChanged(null);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+        verify(mIkeSession).kill();
+    }
+
+    @Test
     public void testNewNetworkTriggersMigration() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_2);
         mTestLooper.dispatchAll();
 
@@ -143,7 +158,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     @Test
     public void testSameNetworkDoesNotTriggerMigration() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_1);
         mTestLooper.dispatchAll();
 
@@ -203,7 +218,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         triggerChildOpened();
 
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_2);
         getChildSessionCallback()
                 .onIpSecTransformsMigrated(makeDummyIpSecTransform(), makeDummyIpSecTransform());

@@ -29,5 +29,5 @@ import android.service.carrier.CarrierIdentifier;
 interface ICarrierService {
 
     /** @see android.service.carrier.CarrierService#onLoadConfig */
-    oneway void getCarrierConfig(in CarrierIdentifier id, in ResultReceiver result);
+    oneway void getCarrierConfig(in int phoneId, in CarrierIdentifier id, in ResultReceiver result);
 }

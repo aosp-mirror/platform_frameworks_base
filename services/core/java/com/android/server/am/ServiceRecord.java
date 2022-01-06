@@ -927,9 +927,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     }
 
     public void postNotification() {
-        final int appUid = appInfo.uid;
-        final int appPid = app.getPid();
-        if (isForeground && foregroundNoti != null) {
+        if (isForeground && foregroundNoti != null && app != null) {
+            final int appUid = appInfo.uid;
+            final int appPid = app.getPid();
             // Do asynchronous communication with notification manager to
             // avoid deadlocks.
             final String localPackageName = packageName;

@@ -399,6 +399,21 @@ filegroup {
     ],
 }
 
+aidl_interface {
+    name: "android.os.statsbootstrap_aidl",
+    unstable: true,
+    srcs: [
+        "android/os/IStatsBootstrapAtomService.aidl",
+        "android/os/StatsBootstrapAtom.aidl",
+        "android/os/StatsBootstrapAtomValue.aidl",
+    ],
+    backend: {
+        cpp: {
+            enabled: true,
+        },
+    },
+}
+
 // utility classes statically linked into wifi-service
 filegroup {
     name: "framework-wifi-service-shared-srcs",
