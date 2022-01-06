@@ -1679,6 +1679,10 @@ package android.os {
     method public void removeSyncBarrier(int);
   }
 
+  public final class NewUserResponse {
+    ctor public NewUserResponse(@Nullable android.os.UserHandle, int);
+  }
+
   public final class PackageTagsList implements android.os.Parcelable {
     method public boolean contains(@NonNull String, @Nullable String);
     method public boolean contains(@NonNull android.os.PackageTagsList);
