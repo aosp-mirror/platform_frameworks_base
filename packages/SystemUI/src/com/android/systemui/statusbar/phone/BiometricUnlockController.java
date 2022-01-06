@@ -645,7 +645,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         if (biometricSourceType.equals(BiometricSourceType.FINGERPRINT)
                 && mUpdateMonitor.isUdfpsSupported()
                 && mNumConsecutiveFpFailures >= FP_ATTEMPTS_BEFORE_SHOW_BOUNCER) {
-            mKeyguardViewController.showBouncer(true);
+            startWakeAndUnlock(MODE_SHOW_BOUNCER);
             UI_EVENT_LOGGER.log(BiometricUiEvent.BIOMETRIC_BOUNCER_SHOWN);
             mNumConsecutiveFpFailures = 0;
         }
@@ -668,7 +668,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 && mUpdateMonitor.isUdfpsSupported()
                 && (mStatusBarStateController.getState() == StatusBarState.SHADE
                     || mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED)) {
-            mKeyguardViewController.showBouncer(true);
+            startWakeAndUnlock(MODE_SHOW_BOUNCER);
+            UI_EVENT_LOGGER.log(BiometricUiEvent.BIOMETRIC_BOUNCER_SHOWN);
         }
         cleanup();
     }

@@ -100,6 +100,9 @@ public class StageTaskUnfoldController implements UnfoldListener, OnInsetsChange
      * @param leash surface leash for the appeared task
      */
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
+        // Only handle child task surface here.
+        if (!taskInfo.hasParentTask()) return;
+
         AnimationContext context = new AnimationContext(leash);
         mAnimationContextByTaskId.put(taskInfo.taskId, context);
     }
@@ -109,6 +112,8 @@ public class StageTaskUnfoldController implements UnfoldListener, OnInsetsChange
      * @param taskInfo info for the vanished task
      */
     public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
+        if (!taskInfo.hasParentTask()) return;
+
         AnimationContext context = mAnimationContextByTaskId.get(taskInfo.taskId);
         if (context != null) {
             final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
