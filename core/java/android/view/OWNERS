@@ -29,6 +29,13 @@ per-file KeyEvent.java = file:/services/core/java/com/android/server/input/OWNER
 per-file MotionEvent.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file PointerIcon.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file SimulatedDpad.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file BatchedInputEventReceiver.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file DragEvent.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file DragEvent.aidl = file:/services/core/java/com/android/server/input/OWNERS
+per-file GestureDetector.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file ScaleGestureDetector.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file KeyboardShortcut*.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file KeyCharacterMap.java = file:/services/core/java/com/android/server/input/OWNERS
 
 # InputWindowHandle
 per-file InputWindowHandle.java  = file:/services/core/java/com/android/server/input/OWNERS
