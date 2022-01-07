@@ -21,7 +21,7 @@
     android:orientation="vertical"
     android:clipToPadding="false"
     android:paddingEnd="@dimen/compat_hint_padding_end"
-    android:paddingBottom="5dp"
+    android:paddingBottom="8dp"
     android:clickable="true">
 
     <TextView
