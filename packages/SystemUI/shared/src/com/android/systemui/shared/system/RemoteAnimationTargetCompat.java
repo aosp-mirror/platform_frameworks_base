@@ -278,7 +278,9 @@ public class RemoteAnimationTargetCompat {
      * @see SurfaceControl#release()
      */
     public void release() {
-        leash.mSurfaceControl.release();
+        if (leash.mSurfaceControl != null) {
+            leash.mSurfaceControl.release();
+        }
         if (mStartLeash != null) {
             mStartLeash.release();
         }
