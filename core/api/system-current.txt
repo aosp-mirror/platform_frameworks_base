@@ -342,6 +342,7 @@ package android {
 
   public static final class R.array {
     field public static final int config_keySystemUuidMapping = 17235973; // 0x1070005
+    field public static final int config_optionalIpSecAlgorithms;
   }
 
   public static final class R.attr {
@@ -858,7 +859,11 @@ package android.app {
 
   public class StatusBarManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.STATUS_BAR) public android.app.StatusBarManager.DisableInfo getDisableInfo();
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public int getNavBarModeOverride();
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setDisabledForSetup(boolean);
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setNavBarModeOverride(int);
+    field public static final int NAV_BAR_MODE_OVERRIDE_KIDS = 1; // 0x1
+    field public static final int NAV_BAR_MODE_OVERRIDE_NONE = 0; // 0x0
   }
 
   public static final class StatusBarManager.DisableInfo {
@@ -2917,6 +2922,7 @@ package android.content.pm {
   }
 
   public static class LauncherApps.ShortcutQuery {
+    field public static final int FLAG_GET_PERSISTED_DATA = 4096; // 0x1000
     field @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS) public static final int FLAG_GET_PERSONS_DATA = 2048; // 0x800
   }
 
@@ -6480,7 +6486,7 @@ package android.media.tv.tuner {
     method public int getAvSyncHwId(@NonNull android.media.tv.tuner.filter.Filter);
     method public long getAvSyncTime(int);
     method @Nullable public java.util.List<android.media.tv.tuner.frontend.FrontendInfo> getAvailableFrontendInfos();
-    method @Nullable public String getCurrentFrontendHardwardInfo();
+    method @Nullable public String getCurrentFrontendHardwareInfo();
     method @Nullable public android.media.tv.tuner.DemuxCapabilities getDemuxCapabilities();
     method @Nullable public android.media.tv.tuner.frontend.FrontendInfo getFrontendInfo();
     method @Nullable public android.media.tv.tuner.frontend.FrontendStatus getFrontendStatus(@NonNull int[]);
@@ -7930,7 +7936,7 @@ package android.media.tv.tuner.frontend {
     method public void onScanStopped();
     method public void onSignalTypeReported(int);
     method public void onSymbolRatesReported(@NonNull int[]);
-    method public default void onUnLocked();
+    method public default void onUnlocked();
   }
 
 }
@@ -8090,13 +8096,17 @@ package android.net {
     method @NonNull public android.net.NetworkStats subtract(@NonNull android.net.NetworkStats);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStats> CREATOR;
+    field public static final int DEFAULT_NETWORK_ALL = -1; // 0xffffffff
     field public static final int DEFAULT_NETWORK_NO = 0; // 0x0
     field public static final int DEFAULT_NETWORK_YES = 1; // 0x1
     field public static final String IFACE_VT = "vt_data0";
+    field public static final int METERED_ALL = -1; // 0xffffffff
     field public static final int METERED_NO = 0; // 0x0
     field public static final int METERED_YES = 1; // 0x1
+    field public static final int ROAMING_ALL = -1; // 0xffffffff
     field public static final int ROAMING_NO = 0; // 0x0
     field public static final int ROAMING_YES = 1; // 0x1
+    field public static final int SET_ALL = -1; // 0xffffffff
     field public static final int SET_DEFAULT = 0; // 0x0
     field public static final int SET_FOREGROUND = 1; // 0x1
     field public static final int TAG_NONE = 0; // 0x0
@@ -9540,6 +9550,7 @@ package android.permission {
   public final class PermissionControllerManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.RESTORE_RUNTIME_PERMISSIONS}) public void applyStagedRuntimePermissionBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public void getRuntimePermissionBackup(@NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<byte[]>);
+    method public void getUnusedAppCount(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public void revokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull java.util.concurrent.Executor, @NonNull android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback);
     method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.RESTORE_RUNTIME_PERMISSIONS}) public void stageAndApplyRuntimePermissionsBackup(@NonNull byte[], @NonNull android.os.UserHandle);
     field public static final int COUNT_ONLY_WHEN_GRANTED = 1; // 0x1
@@ -9564,6 +9575,7 @@ package android.permission {
     method @BinderThread public abstract void onGetPermissionUsages(boolean, long, @NonNull java.util.function.Consumer<java.util.List<android.permission.RuntimePermissionUsageInfo>>);
     method @BinderThread public void onGetPlatformPermissionsForGroup(@NonNull String, @NonNull java.util.function.Consumer<java.util.List<java.lang.String>>);
     method @BinderThread public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream, @NonNull Runnable);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void onGetUnusedAppCount(@NonNull java.util.function.IntConsumer);
     method @BinderThread public abstract void onGrantOrUpgradeDefaultRuntimePermissions(@NonNull Runnable);
     method @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String);
     method @Deprecated @BinderThread public void onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.function.Consumer<java.lang.Boolean>);
@@ -10012,7 +10024,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void resetToDefaults(@NonNull android.content.ContentResolver, @Nullable String);
     field public static final String AIRPLANE_MODE_TOGGLEABLE_RADIOS = "airplane_mode_toggleable_radios";
     field public static final String APP_STANDBY_ENABLED = "app_standby_enabled";
-    field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
+    field @Deprecated public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
     field public static final String CARRIER_APP_NAMES = "carrier_app_names";
     field public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
     field public static final String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
@@ -10726,6 +10738,7 @@ package android.service.euicc {
     field public static final String EXTRA_RESOLUTION_CONFIRMATION_CODE_RETRIED = "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE_RETRIED";
     field public static final String EXTRA_RESOLUTION_CONSENT = "android.service.euicc.extra.RESOLUTION_CONSENT";
     field public static final String EXTRA_RESOLUTION_PORT_INDEX = "android.service.euicc.extra.RESOLUTION_PORT_INDEX";
+    field public static final String EXTRA_RESOLUTION_USE_PORT_INDEX = "android.service.euicc.extra.RESOLUTION_USE_PORT_INDEX";
     field public static final String EXTRA_RESOLVABLE_ERRORS = "android.service.euicc.extra.RESOLVABLE_ERRORS";
     field public static final int RESOLVABLE_ERROR_CONFIRMATION_CODE = 1; // 0x1
     field public static final int RESOLVABLE_ERROR_POLICY_RULES = 2; // 0x2
@@ -13772,6 +13785,7 @@ package android.telephony.ims {
     field public static final int OIR_PRESENTATION_NOT_RESTRICTED = 2; // 0x2
     field public static final int OIR_PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int OIR_PRESENTATION_RESTRICTED = 1; // 0x1
+    field public static final int OIR_PRESENTATION_UNAVAILABLE = 5; // 0x5
     field public static final int OIR_PRESENTATION_UNKNOWN = 3; // 0x3
     field public static final int PRIORITY_NORMAL = 0; // 0x0
     field public static final int PRIORITY_URGENT = 1; // 0x1

@@ -30,6 +30,7 @@ import com.android.systemui.unfold.util.FoldableDeviceStates
 import com.android.systemui.unfold.util.FoldableTestUtils
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
+import java.lang.Exception
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,32 +40,24 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
-import java.lang.Exception
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class DeviceFoldStateProviderTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var hingeAngleProvider: HingeAngleProvider
+    @Mock private lateinit var hingeAngleProvider: HingeAngleProvider
 
-    @Mock
-    private lateinit var screenStatusProvider: ScreenStatusProvider
+    @Mock private lateinit var screenStatusProvider: ScreenStatusProvider
 
-    @Mock
-    private lateinit var deviceStateManager: DeviceStateManager
+    @Mock private lateinit var deviceStateManager: DeviceStateManager
 
-    @Mock
-    private lateinit var handler: Handler
+    @Mock private lateinit var handler: Handler
 
-    @Captor
-    private lateinit var foldStateListenerCaptor: ArgumentCaptor<FoldStateListener>
+    @Captor private lateinit var foldStateListenerCaptor: ArgumentCaptor<FoldStateListener>
 
-    @Captor
-    private lateinit var screenOnListenerCaptor: ArgumentCaptor<ScreenListener>
+    @Captor private lateinit var screenOnListenerCaptor: ArgumentCaptor<ScreenListener>
 
-    @Captor
-    private lateinit var hingeAngleCaptor: ArgumentCaptor<Consumer<Float>>
+    @Captor private lateinit var hingeAngleCaptor: ArgumentCaptor<Consumer<Float>>
 
     private lateinit var foldStateProvider: DeviceFoldStateProvider
 
@@ -81,24 +74,25 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         deviceStates = FoldableTestUtils.findDeviceStates(context)
 
-        foldStateProvider = DeviceFoldStateProvider(
-            context,
-            hingeAngleProvider,
-            screenStatusProvider,
-            deviceStateManager,
-            context.mainExecutor,
-            handler
-        )
+        foldStateProvider =
+            DeviceFoldStateProvider(
+                context,
+                hingeAngleProvider,
+                screenStatusProvider,
+                deviceStateManager,
+                context.mainExecutor,
+                handler)
 
-        foldStateProvider.addCallback(object : FoldStateProvider.FoldUpdatesListener {
-            override fun onHingeAngleUpdate(angle: Float) {
-                hingeAngleUpdates.add(angle)
-            }
+        foldStateProvider.addCallback(
+            object : FoldStateProvider.FoldUpdatesListener {
+                override fun onHingeAngleUpdate(angle: Float) {
+                    hingeAngleUpdates.add(angle)
+                }
 
-            override fun onFoldUpdate(update: Int) {
-                foldUpdates.add(update)
-            }
-        })
+                override fun onFoldUpdate(update: Int) {
+                    foldUpdates.add(update)
+                }
+            })
         foldStateProvider.start()
 
         verify(deviceStateManager).registerCallback(any(), foldStateListenerCaptor.capture())
@@ -200,9 +194,10 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         sendHingeAngleEvent(90)
         sendHingeAngleEvent(80)
 
-        simulateTimeout(ABORT_CLOSING_MILLIS)
+        simulateTimeout(HALF_OPENED_TIMEOUT_MILLIS)
 
-        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING, FOLD_UPDATE_ABORTED)
+        assertThat(foldUpdates)
+            .containsExactly(FOLD_UPDATE_START_CLOSING, FOLD_UPDATE_FINISH_HALF_OPEN)
     }
 
     @Test
@@ -210,7 +205,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         sendHingeAngleEvent(90)
         sendHingeAngleEvent(80)
 
-        simulateTimeout(ABORT_CLOSING_MILLIS - 1)
+        simulateTimeout(HALF_OPENED_TIMEOUT_MILLIS - 1)
 
         assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
     }
@@ -220,7 +215,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         sendHingeAngleEvent(180)
         sendHingeAngleEvent(90)
 
-        simulateTimeout(ABORT_CLOSING_MILLIS - 1)
+        simulateTimeout(HALF_OPENED_TIMEOUT_MILLIS - 1)
         sendHingeAngleEvent(80)
 
         assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
@@ -231,11 +226,13 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         sendHingeAngleEvent(180)
         sendHingeAngleEvent(90)
 
-        simulateTimeout(ABORT_CLOSING_MILLIS - 1) // The timeout should not trigger here.
+        // The timeout should not trigger here.
+        simulateTimeout(HALF_OPENED_TIMEOUT_MILLIS - 1)
         sendHingeAngleEvent(80)
-        simulateTimeout(ABORT_CLOSING_MILLIS) // The timeout should trigger here.
+        simulateTimeout(HALF_OPENED_TIMEOUT_MILLIS) // The timeout should trigger here.
 
-        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING, FOLD_UPDATE_ABORTED)
+        assertThat(foldUpdates)
+            .containsExactly(FOLD_UPDATE_START_CLOSING, FOLD_UPDATE_FINISH_HALF_OPEN)
     }
 
     @Test
@@ -261,7 +258,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         }
     }
 
-    private fun simulateTimeout(waitTime: Long = ABORT_CLOSING_MILLIS) {
+    private fun simulateTimeout(waitTime: Long = HALF_OPENED_TIMEOUT_MILLIS) {
         val runnableDelay = scheduledRunnableDelay ?: throw Exception("No runnable scheduled.")
         if (waitTime >= runnableDelay) {
             scheduledRunnable?.run()

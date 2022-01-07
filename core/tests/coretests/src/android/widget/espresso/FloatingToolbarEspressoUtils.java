@@ -28,7 +28,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withTagValue;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static com.android.internal.widget.FloatingToolbarPopup.MenuItemRepr;
+import static com.android.internal.widget.floatingtoolbar.LocalFloatingToolbarPopup.MenuItemRepr;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
@@ -42,7 +42,7 @@ import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.ViewInteraction;
 
-import com.android.internal.widget.FloatingToolbar;
+import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;

@@ -21,6 +21,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_RESOURCES_ARSC_COMPRESSED;
@@ -931,6 +932,13 @@ public class ParsingPackageUtils {
             return input.error(
                     INSTALL_PARSE_FAILED_BAD_MANIFEST,
                     "Combination <attribution> tags are not valid"
+            );
+        }
+
+        if (ParsedPermissionUtils.declareDuplicatePermission(pkg)) {
+            return input.error(
+                    INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                    "Declare duplicate permissions with different protection levels."
             );
         }
 

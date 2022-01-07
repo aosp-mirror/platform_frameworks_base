@@ -1294,7 +1294,7 @@ public class Tuner implements AutoCloseable  {
      * @throws IllegalStateException if there is no active frontend currently.
      */
     @Nullable
-    public String getCurrentFrontendHardwardInfo() {
+    public String getCurrentFrontendHardwareInfo() {
         mFrontendLock.lock();
         try {
             if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
@@ -1434,7 +1434,7 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
-    private void onUnLocked() {
+    private void onUnlocked() {
         Log.d(TAG, "Wrote Stats Log for unlocked event from scanning.");
         FrameworkStatsLog.write(FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
                 FrameworkStatsLog.TV_TUNER_STATE_CHANGED__STATE__LOCKED);
@@ -1444,7 +1444,7 @@ public class Tuner implements AutoCloseable  {
                 mScanCallbackExecutor.execute(() -> {
                     synchronized (mScanCallbackLock) {
                         if (mScanCallback != null) {
-                            mScanCallback.onUnLocked();
+                            mScanCallback.onUnlocked();
                         }
                     }
                 });

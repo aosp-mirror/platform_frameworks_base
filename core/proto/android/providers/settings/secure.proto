@@ -383,6 +383,7 @@ message SecureSettingsProto {
 
     optional SettingProto multi_press_timeout = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    optional SettingProto nav_bar_kids_mode = 91 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto navigation_mode = 76 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message NfcPayment {
@@ -665,5 +666,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 91;
+    // Next tag = 92;
 }

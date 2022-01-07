@@ -799,6 +799,22 @@ public class AppTransitionController {
     }
 
     /**
+     * Returns {@code true} if a given {@link WindowContainer} is an embedded Task.
+     *
+     * Note that this is a short term workaround to support Android Auto until it migrate to
+     * ShellTransition. This should only be used by {@link #getAnimationTargets}.
+     *
+     * TODO(b/213312721): Remove this predicate and its callers once ShellTransition is enabled.
+     */
+    private static boolean isEmbeddedTask(WindowContainer wc) {
+        // We use Task#mRemoveWithTaskOrganizer to identify an embedded Task, but this is a hack and
+        // it is not guaranteed to work this logic in the future version.
+        return !WindowManagerService.sEnableShellTransitions
+                && wc instanceof Task
+                && ((Task) wc).mRemoveWithTaskOrganizer;
+    }
+
+    /**
      * Find WindowContainers to be animated from a set of opening and closing apps. We will promote
      * animation targets to higher level in the window hierarchy if possible.
      *
@@ -844,7 +860,13 @@ public class AppTransitionController {
             siblings.add(current);
             boolean canPromote = true;
 
-            if (parent == null || !parent.canCreateRemoteAnimationTarget()
+            if (isEmbeddedTask(current)) {
+                // Don't animate an embedded Task in app transition. This is a short term workaround
+                // to prevent conflict of surface hierarchy changes between legacy app transition
+                // and TaskView (b/205189147).
+                // TODO(b/213312721): Remove this once ShellTransition is enabled.
+                continue;
+            } else if (parent == null || !parent.canCreateRemoteAnimationTarget()
                     || !parent.canBeAnimationTarget()
                     // We cannot promote the animation on Task's parent when the task is in
                     // clearing task in case the animating get stuck when performing the opening
@@ -887,7 +909,13 @@ public class AppTransitionController {
                 for (int j = 0; j < parent.getChildCount(); ++j) {
                     final WindowContainer sibling = parent.getChildAt(j);
                     if (candidates.remove(sibling)) {
-                        siblings.add(sibling);
+                        if (!isEmbeddedTask(sibling)) {
+                            // Don't animate an embedded Task in app transition. This is a short
+                            // term workaround to prevent conflict of surface hierarchy changes
+                            // between legacy app transition and TaskView (b/205189147).
+                            // TODO(b/213312721): Remove this once ShellTransition is enabled.
+                            siblings.add(sibling);
+                        }
                     } else if (sibling != current && sibling.isVisible()) {
                         canPromote = false;
                     }

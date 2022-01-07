@@ -70,6 +70,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.hardware.devicestate.DeviceStateManager;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Bundle;
@@ -779,7 +780,8 @@ public class StatusBar extends CoreStartable implements
             Optional<StartingSurface> startingSurfaceOptional,
             ActivityLaunchAnimator activityLaunchAnimator,
             NotifPipelineFlags notifPipelineFlags,
-            InteractionJankMonitor jankMonitor) {
+            InteractionJankMonitor jankMonitor,
+            DeviceStateManager deviceStateManager) {
         super(context);
         mNotificationsController = notificationsController;
         mFragmentService = fragmentService;
@@ -902,6 +904,9 @@ public class StatusBar extends CoreStartable implements
                 data -> mCommandQueueCallbacks.animateExpandSettingsPanel(data.mSubpanel));
         mMessageRouter.subscribeTo(MSG_LAUNCH_TRANSITION_TIMEOUT,
                 id -> onLaunchTransitionTimeout());
+
+        deviceStateManager.registerCallback(mMainExecutor,
+                new FoldStateListener(mContext, this::onFoldedStateChanged));
     }
 
     @Override
@@ -1098,6 +1103,27 @@ public class StatusBar extends CoreStartable implements
                 (requestTopUi, componentTag) -> mMainExecutor.execute(() ->
                         mNotificationShadeWindowController.setRequestTopUi(
                                 requestTopUi, componentTag))));
+    }
+
+    private void onFoldedStateChanged(boolean isFolded, boolean willGoToSleep) {
+        // Folded state changes are followed by a screen off event.
+        // By default turning off the screen also closes the shade.
+        // We want to make sure that the shade status is kept after
+        // folding/unfolding.
+        boolean isShadeOpen = mShadeController.isShadeOpen();
+        boolean leaveOpen = isShadeOpen && !willGoToSleep;
+        if (DEBUG) {
+            Log.d(TAG, String.format(
+                    "#onFoldedStateChanged(): "
+                            + "isFolded=%s, "
+                            + "willGoToSleep=%s, "
+                            + "isShadeOpen=%s, "
+                            + "leaveOpen=%s",
+                    isFolded, willGoToSleep, isShadeOpen, leaveOpen));
+        }
+        if (leaveOpen) {
+            mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
+        }
     }
 
     // ================================================================================

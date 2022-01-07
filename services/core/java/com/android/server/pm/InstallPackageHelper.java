@@ -942,17 +942,26 @@ final class InstallPackageHelper {
                     if (result.needsNewAppId()) {
                         request.mInstallResult.mRemovedInfo.mAppIdChanging = true;
                     }
+                    if (!checkNoAppStorageIsConsistent(
+                            result.mRequest.mOldPkg, result.mPkgSetting.getPkg())) {
+                        // TODO: INSTALL_FAILED_UPDATE_INCOMPATIBLE is about incomptabible
+                        //  signatures. Is there a better error code?
+                        request.mInstallResult.setError(
+                                INSTALL_FAILED_UPDATE_INCOMPATIBLE,
+                                "Update attempted to change value of "
+                                        + PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
+                        return;
+                    }
                     createdAppId.put(packageName, optimisticallyRegisterAppId(result));
                     versionInfos.put(result.mPkgSetting.getPkg().getPackageName(),
                             mPm.getSettingsVersionForPackage(result.mPkgSetting.getPkg()));
-                    if (result.mStaticSharedLibraryInfo != null
-                            || result.mSdkSharedLibraryInfo != null) {
-                        final PackageSetting sharedLibLatestVersionSetting =
-                                mSharedLibraries.getSharedLibLatestVersionSetting(result);
-                        if (sharedLibLatestVersionSetting != null) {
+                    if (result.mStaticSharedLibraryInfo != null) {
+                        final PackageSetting staticSharedLibLatestVersionSetting =
+                                mSharedLibraries.getStaticSharedLibLatestVersionSetting(result);
+                        if (staticSharedLibLatestVersionSetting != null) {
                             lastStaticSharedLibSettings.put(
                                     result.mPkgSetting.getPkg().getPackageName(),
-                                    sharedLibLatestVersionSetting);
+                                    staticSharedLibLatestVersionSetting);
                         }
                     }
                 } catch (PackageManagerException e) {
@@ -1037,6 +1046,22 @@ final class InstallPackageHelper {
             }
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
+    }
+
+    @GuardedBy("mPm.mInstallLock")
+    private boolean checkNoAppStorageIsConsistent(AndroidPackage oldPkg, AndroidPackage newPkg) {
+        if (oldPkg == null) {
+            // New install, nothing to check against.
+            return true;
+        }
+        final PackageManager.Property curProp =
+                oldPkg.getProperties().get(PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
+        final PackageManager.Property newProp =
+                newPkg.getProperties().get(PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
+        if (curProp == null || !curProp.getBoolean()) {
+            return newProp == null || !newProp.getBoolean();
+        }
+        return newProp != null && newProp.getBoolean();
     }
 
     @GuardedBy("mPm.mInstallLock")
@@ -3559,22 +3584,20 @@ final class InstallPackageHelper {
                 boolean appIdCreated = false;
                 try {
                     final String pkgName = scanResult.mPkgSetting.getPackageName();
+                    final ReconcileRequest reconcileRequest = new ReconcileRequest(
+                            Collections.singletonMap(pkgName, scanResult),
+                            mSharedLibraries.getAll(), mPm.mPackages,
+                            Collections.singletonMap(pkgName,
+                                    mPm.getSettingsVersionForPackage(parsedPackage)),
+                            Collections.singletonMap(pkgName,
+                                    mSharedLibraries.getStaticSharedLibLatestVersionSetting(
+                                            scanResult)));
                     final Map<String, ReconciledPackage> reconcileResult =
-                            ReconcilePackageUtils.reconcilePackages(
-                                    new ReconcileRequest(
-                                            Collections.singletonMap(pkgName, scanResult),
-                                            mSharedLibraries.getAll(),
-                                            mPm.mPackages,
-                                            Collections.singletonMap(
-                                                    pkgName,
-                                                    mPm.getSettingsVersionForPackage(
-                                                            parsedPackage)),
-                                            Collections.singletonMap(pkgName, mSharedLibraries
-                                                    .getSharedLibLatestVersionSetting(scanResult))),
+                            ReconcilePackageUtils.reconcilePackages(reconcileRequest,
                                     mPm.mSettings.getKeySetManagerService(), mPm.mInjector);
                     appIdCreated = optimisticallyRegisterAppId(scanResult);
-                    commitReconciledScanResultLocked(
-                            reconcileResult.get(pkgName), mPm.mUserManager.getUserIds());
+                    commitReconciledScanResultLocked(reconcileResult.get(pkgName),
+                            mPm.mUserManager.getUserIds());
                 } catch (PackageManagerException e) {
                     if (appIdCreated) {
                         cleanUpAppIdCreation(scanResult);

@@ -25,6 +25,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
 import androidx.test.filters.LargeTest;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Presubmit
 @LargeTest
 public class ApplicationPackageManagerTest extends TestCase {
     private static final String sInternalVolPath = "/data";

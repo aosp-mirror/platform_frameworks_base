@@ -161,7 +161,7 @@ private:
         void                addTimeDirWatch();
 
         int mInotifyFd;
-        int mSystemWd;
+        int mBootAnimWd;
         int mTimeWd;
         BootAnimation* mBootAnimation;
     };

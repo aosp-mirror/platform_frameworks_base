@@ -101,6 +101,12 @@ final class AppDataHelper {
             mPm.mSettings.writeKernelMappingLPr(ps);
         }
 
+        // TODO(b/211761016): should we still create the profile dirs?
+        if (!shouldHaveAppStorage(pkg)) {
+            Slog.w(TAG, "Skipping preparing app data for " + pkg.getPackageName());
+            return;
+        }
+
         Installer.Batch batch = new Installer.Batch();
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
         StorageManagerInternal smInternal = mInjector.getLocalService(
@@ -159,6 +165,10 @@ final class AppDataHelper {
             @StorageManager.StorageFlags int flags) {
         if (pkg == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
+            return CompletableFuture.completedFuture(null);
+        }
+        if (!shouldHaveAppStorage(pkg)) {
+            Slog.w(TAG, "Skipping preparing app data for " + pkg.getPackageName());
             return CompletableFuture.completedFuture(null);
         }
         return prepareAppDataLeaf(batch, pkg, previousAppId, userId, flags);
@@ -381,7 +391,7 @@ final class AppDataHelper {
             for (File file : files) {
                 final String packageName = file.getName();
                 try {
-                    assertPackageKnownAndInstalled(volumeUuid, packageName, userId);
+                    assertPackageStorageValid(volumeUuid, packageName, userId);
                 } catch (PackageManagerException e) {
                     logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
                     try {
@@ -398,7 +408,7 @@ final class AppDataHelper {
             for (File file : files) {
                 final String packageName = file.getName();
                 try {
-                    assertPackageKnownAndInstalled(volumeUuid, packageName, userId);
+                    assertPackageStorageValid(volumeUuid, packageName, userId);
                 } catch (PackageManagerException e) {
                     logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
                     try {
@@ -446,7 +456,11 @@ final class AppDataHelper {
         return result;
     }
 
-    private void assertPackageKnownAndInstalled(String volumeUuid, String packageName, int userId)
+    /**
+     * Asserts that storage path is valid by checking that {@code packageName} is present,
+     * installed for the given {@code userId} and can have app data.
+     */
+    private void assertPackageStorageValid(String volumeUuid, String packageName, int userId)
             throws PackageManagerException {
         synchronized (mPm.mLock) {
             // Normalize package name to handle renamed packages
@@ -462,6 +476,13 @@ final class AppDataHelper {
             } else if (!ps.getInstalled(userId)) {
                 throw new PackageManagerException(
                         "Package " + packageName + " not installed for user " + userId);
+            } else if (ps.getPkg() == null) {
+                throw new PackageManagerException("Package " + packageName + " is not parsed yet");
+            } else {
+                if (!shouldHaveAppStorage(ps.getPkg())) {
+                    throw new PackageManagerException(
+                            "Package " + packageName + " shouldn't have storage");
+                }
             }
         }
     }
@@ -602,5 +623,14 @@ final class AppDataHelper {
         } catch (Installer.InstallerException e) {
             Slog.w(TAG, String.valueOf(e));
         }
+    }
+
+    /**
+     * Returns {@code true} if app's internal storage should be created for this {@code pkg}.
+     */
+    private boolean shouldHaveAppStorage(AndroidPackage pkg) {
+        PackageManager.Property noAppDataProp =
+                pkg.getProperties().get(PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
+        return noAppDataProp == null || !noAppDataProp.getBoolean();
     }
 }

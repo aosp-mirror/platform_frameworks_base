@@ -32,6 +32,7 @@ import com.android.systemui.qs.tiles.BluetoothTile;
 import com.android.systemui.qs.tiles.CameraToggleTile;
 import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
+import com.android.systemui.qs.tiles.ColorCorrectionTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
 import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DeviceControlsTile;
@@ -71,6 +72,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<BluetoothTile> mBluetoothTileProvider;
     private final Provider<CellularTile> mCellularTileProvider;
     private final Provider<DndTile> mDndTileProvider;
+    private final Provider<ColorCorrectionTile> mColorCorrectionTileProvider;
     private final Provider<ColorInversionTile> mColorInversionTileProvider;
     private final Provider<AirplaneModeTile> mAirplaneModeTileProvider;
     private final Provider<WorkModeTile> mWorkModeTileProvider;
@@ -133,7 +135,8 @@ public class QSFactoryImpl implements QSFactory {
             Provider<QuickAccessWalletTile> quickAccessWalletTileProvider,
             Provider<QRCodeScannerTile> qrCodeScannerTileProvider,
             Provider<OneHandedModeTile> oneHandedModeTileProvider,
-            Provider<FgsManagerTile> fgsManagerTileProvider) {
+            Provider<FgsManagerTile> fgsManagerTileProvider,
+            Provider<ColorCorrectionTile> colorCorrectionTileProvider) {
         mQsHostLazy = qsHostLazy;
         mCustomTileBuilderProvider = customTileBuilderProvider;
 
@@ -167,6 +170,7 @@ public class QSFactoryImpl implements QSFactory {
         mQRCodeScannerTileProvider = qrCodeScannerTileProvider;
         mOneHandedModeTileProvider = oneHandedModeTileProvider;
         mFgsManagerTileProvider = fgsManagerTileProvider;
+        mColorCorrectionTileProvider = colorCorrectionTileProvider;
     }
 
     public final QSTile createTile(String tileSpec) {
@@ -239,6 +243,8 @@ public class QSFactoryImpl implements QSFactory {
                 return mOneHandedModeTileProvider.get();
             case "fgsmanager":
                 return mFgsManagerTileProvider.get();
+            case "color_correction":
+                return mColorCorrectionTileProvider.get();
         }
 
         // Custom tiles

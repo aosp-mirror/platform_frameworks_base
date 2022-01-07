@@ -1604,7 +1604,7 @@ public final class BluetoothDevice implements Parcelable, Attributable {
                 8, BLUETOOTH_BONDING_CACHE_PROPERTY) {
                 @Override
                 @SuppressLint("AndroidFrameworkRequiresPermission")
-                protected Integer recompute(BluetoothDevice query) {
+                public Integer recompute(BluetoothDevice query) {
                     try {
                         return sService.getBondState(query, mAttributionSource);
                     } catch (RemoteException e) {

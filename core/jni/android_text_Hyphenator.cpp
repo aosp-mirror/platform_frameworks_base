@@ -83,17 +83,20 @@ static void init() {
     constexpr int INDIC_MIN_PREFIX = 2;
     constexpr int INDIC_MIN_SUFFIX = 2;
 
+    addHyphenator("af", 1, 1);  // Afrikaans
     addHyphenator("am", 1, 1);  // Amharic
     addHyphenator("as", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Assamese
     addHyphenator("be", 2, 2);  // Belarusian
     addHyphenator("bg", 2, 2);  // Bulgarian
     addHyphenator("bn", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Bengali
+    addHyphenator("cs", 2, 2);  // Czech
     addHyphenator("cu", 1, 2);  // Church Slavonic
     addHyphenator("cy", 2, 3);  // Welsh
     addHyphenator("da", 2, 2);  // Danish
     addHyphenator("de-1901", 2, 2);  // German 1901 orthography
     addHyphenator("de-1996", 2, 2);  // German 1996 orthography
     addHyphenator("de-CH-1901", 2, 2);  // Swiss High German 1901 orthography
+    addHyphenator("el", 1, 1);  // Greek
     addHyphenator("en-GB", 2, 3);  // British English
     addHyphenator("en-US", 2, 3);  // American English
     addHyphenator("es", 2, 2);  // Spanish
@@ -110,18 +113,23 @@ static void init() {
     // Going with a more conservative value of (2, 2) for now.
     addHyphenator("hy", 2, 2);  // Armenian
     addHyphenator("it", 2, 2);  // Italian
+    addHyphenator("ka", 1, 2);  // Georgian
     addHyphenator("kn", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Kannada
     addHyphenator("la", 2, 2);  // Latin
     addHyphenator("lt", 2, 2);  // Lithuanian
+    addHyphenator("lv", 2, 2);  // Latvian
     addHyphenator("ml", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Malayalam
     addHyphenator("mn-Cyrl", 2, 2);  // Mongolian in Cyrillic script
     addHyphenator("mr", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Marathi
     addHyphenator("nb", 2, 2);  // Norwegian Bokmål
+    addHyphenator("nl", 2, 2);  // Dutch
     addHyphenator("nn", 2, 2);  // Norwegian Nynorsk
     addHyphenator("or", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Oriya
     addHyphenator("pa", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Punjabi
     addHyphenator("pt", 2, 3);  // Portuguese
+    addHyphenator("sk", 2, 2);  // Slovak
     addHyphenator("sl", 2, 2);  // Slovenian
+    addHyphenator("sq", 2, 2);  // Albanian
     addHyphenator("ta", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Tamil
     addHyphenator("te", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Telugu
     addHyphenator("tk", 2, 2);  // Turkmen

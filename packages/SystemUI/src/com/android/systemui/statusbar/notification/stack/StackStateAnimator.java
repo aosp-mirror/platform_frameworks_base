@@ -322,9 +322,8 @@ public class StackStateAnimator {
     private void onAnimationFinished() {
         mHostLayout.onChildAnimationFinished();
 
-        for (ExpandableView transientViewsToRemove : mTransientViewsToRemove) {
-            transientViewsToRemove.getTransientContainer()
-                    .removeTransientView(transientViewsToRemove);
+        for (ExpandableView transientViewToRemove : mTransientViewsToRemove) {
+            transientViewToRemove.removeFromTransientContainer();
         }
         mTransientViewsToRemove.clear();
     }
@@ -353,7 +352,7 @@ public class StackStateAnimator {
             } else if (event.animationType ==
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE) {
                 if (changingView.getVisibility() != View.VISIBLE) {
-                    removeTransientView(changingView);
+                    changingView.removeFromTransientContainer();
                     continue;
                 }
 
@@ -390,12 +389,11 @@ public class StackStateAnimator {
                 }
                 changingView.performRemoveAnimation(ANIMATION_DURATION_APPEAR_DISAPPEAR,
                         0 /* delay */, translationDirection, false /* isHeadsUpAppear */,
-                        0, () -> removeTransientView(changingView), null);
+                        0, changingView::removeFromTransientContainer, null);
             } else if (event.animationType ==
                 NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT) {
-                if (mHostLayout.isFullySwipedOut(changingView)
-                        && changingView.getTransientContainer() != null) {
-                    changingView.getTransientContainer().removeTransientView(changingView);
+                if (mHostLayout.isFullySwipedOut(changingView)) {
+                    changingView.removeFromTransientContainer();
                 }
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_GROUP_EXPANSION_CHANGED) {
@@ -425,7 +423,7 @@ public class StackStateAnimator {
                     mHostLayout.addTransientView(changingView, 0);
                     changingView.setTransientContainer(mHostLayout);
                     mTmpState.initFrom(changingView);
-                    endRunnable = () -> removeTransientView(changingView);
+                    endRunnable = changingView::removeFromTransientContainer;
                 }
                 float targetLocation = 0;
                 boolean needsAnimation = true;
@@ -465,12 +463,6 @@ public class StackStateAnimator {
                 }
             }
             mNewEvents.add(event);
-        }
-    }
-
-    public static void removeTransientView(ExpandableView viewToRemove) {
-        if (viewToRemove.getTransientContainer() != null) {
-            viewToRemove.getTransientContainer().removeTransientView(viewToRemove);
         }
     }
 

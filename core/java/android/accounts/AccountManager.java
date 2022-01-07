@@ -384,7 +384,7 @@ public class AccountManager {
                 new PropertyInvalidatedCache<UserIdPackage, Account[]>(
                 CACHE_ACCOUNTS_DATA_SIZE, CACHE_KEY_ACCOUNTS_DATA_PROPERTY) {
         @Override
-        protected Account[] recompute(UserIdPackage userAndPackage) {
+        public Account[] recompute(UserIdPackage userAndPackage) {
             try {
                 return mService.getAccountsAsUser(null, userAndPackage.userId, userAndPackage.packageName);
             } catch (RemoteException e) {
@@ -392,11 +392,11 @@ public class AccountManager {
             }
         }
         @Override
-        protected boolean bypass(UserIdPackage query) {
+        public boolean bypass(UserIdPackage query) {
             return query.userId < 0;
         }
         @Override
-        protected boolean debugCompareQueryResults(Account[] l, Account[] r) {
+        public boolean resultEquals(Account[] l, Account[] r) {
             if (l == r) {
                 return true;
             } else if (l == null || r == null) {
@@ -455,7 +455,7 @@ public class AccountManager {
             new PropertyInvalidatedCache<AccountKeyData, String>(CACHE_USER_DATA_SIZE,
                     CACHE_KEY_USER_DATA_PROPERTY) {
             @Override
-            protected String recompute(AccountKeyData accountKeyData) {
+            public String recompute(AccountKeyData accountKeyData) {
                 Account account = accountKeyData.account;
                 String key = accountKeyData.key;
 

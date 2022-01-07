@@ -135,6 +135,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ProcessChangeItem;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
@@ -2379,6 +2380,8 @@ public final class ProcessList {
             final String[] targetPackagesList = sharedPackages.length == 0
                     ? new String[]{app.info.packageName} : sharedPackages;
 
+            final boolean hasAppStorage = hasAppStorage(pmInt, app.info.packageName);
+
             pkgDataInfoMap = getPackageAppDataInfoMap(pmInt, targetPackagesList, uid);
             if (pkgDataInfoMap == null) {
                 // TODO(b/152760674): Handle inode == 0 case properly, now we just give it a
@@ -2399,6 +2402,12 @@ public final class ProcessList {
                 // TODO(b/152760674): Handle inode == 0 case properly, now we just give it a
                 // tmp free pass.
                 bindMountAppsData = false;
+            }
+
+            if (!hasAppStorage) {
+                bindMountAppsData = false;
+                pkgDataInfoMap = null;
+                allowlistedAppDataInfoMap = null;
             }
 
             int userId = UserHandle.getUserId(uid);
@@ -2486,6 +2495,17 @@ public final class ProcessList {
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
+    }
+
+    private boolean hasAppStorage(PackageManagerInternal pmInt, String packageName) {
+        final AndroidPackage pkg = pmInt.getPackage(packageName);
+        if (pkg == null) {
+            Slog.w(TAG, "Unknown package " + packageName);
+            return false;
+        }
+        final PackageManager.Property noAppStorageProp =
+                    pkg.getProperties().get(PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
+        return noAppStorageProp == null || !noAppStorageProp.getBoolean();
     }
 
     @GuardedBy("mService")

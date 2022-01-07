@@ -61,6 +61,7 @@ public class FooterPreference extends Preference {
         title.setMovementMethod(new LinkMovementMethod());
         title.setClickable(false);
         title.setLongClickable(false);
+        title.setFocusable(false);
         if (!TextUtils.isEmpty(mContentDescription)) {
             title.setContentDescription(mContentDescription);
         }
@@ -79,6 +80,7 @@ public class FooterPreference extends Preference {
             if (!TextUtils.isEmpty(mLearnMoreContentDescription)) {
                 learnMore.setContentDescription(mLearnMoreContentDescription);
             }
+            learnMore.setFocusable(false);
         } else {
             learnMore.setVisibility(View.GONE);
         }

@@ -3374,6 +3374,11 @@ public abstract class BatteryStats implements Parcelable {
     public abstract Map<String, ? extends Timer> getKernelWakelockStats();
 
     /**
+     * Returns aggregated wake lock stats.
+     */
+    public abstract WakeLockStats getWakeLockStats();
+
+    /**
      * Returns Timers tracking the total time of each Resource Power Manager state and voter.
      */
     public abstract Map<String, ? extends Timer> getRpmStats();
