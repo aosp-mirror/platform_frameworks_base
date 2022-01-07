@@ -40,7 +40,10 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class VibratorHelperTest extends UiServiceTestCase {
 
+    // OFF/ON vibration pattern
     private static final long[] CUSTOM_PATTERN = new long[] { 100, 200, 300, 400 };
+    // (amplitude, frequency, duration) triples list
+    private static final float[] PWLE_PATTERN = new float[] { 1, 0, 100 };
 
     @Mock private Vibrator mVibrator;
 
@@ -58,12 +61,16 @@ public class VibratorHelperTest extends UiServiceTestCase {
     public void createWaveformVibration_insistent_createsRepeatingVibration() {
         assertRepeatingVibration(
                 VibratorHelper.createWaveformVibration(CUSTOM_PATTERN, /* insistent= */ true));
+        assertRepeatingVibration(
+                VibratorHelper.createPwleWaveformVibration(PWLE_PATTERN, /* insistent= */ true));
     }
 
     @Test
     public void createWaveformVibration_nonInsistent_createsSingleShotVibration() {
         assertSingleVibration(
                 VibratorHelper.createWaveformVibration(CUSTOM_PATTERN, /* insistent= */ false));
+        assertSingleVibration(
+                VibratorHelper.createPwleWaveformVibration(PWLE_PATTERN, /* insistent= */ false));
     }
 
     @Test
@@ -71,6 +78,11 @@ public class VibratorHelperTest extends UiServiceTestCase {
         assertNull(VibratorHelper.createWaveformVibration(null, false));
         assertNull(VibratorHelper.createWaveformVibration(new long[0], false));
         assertNull(VibratorHelper.createWaveformVibration(new long[] { 0, 0 }, false));
+
+        assertNull(VibratorHelper.createPwleWaveformVibration(null, false));
+        assertNull(VibratorHelper.createPwleWaveformVibration(new float[0], false));
+        assertNull(VibratorHelper.createPwleWaveformVibration(new float[] { 0 }, false));
+        assertNull(VibratorHelper.createPwleWaveformVibration(new float[] { 0, 0, 0 }, false));
     }
 
     @Test
