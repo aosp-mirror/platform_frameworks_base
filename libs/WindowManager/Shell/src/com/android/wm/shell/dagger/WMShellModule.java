@@ -22,6 +22,7 @@ import android.content.pm.LauncherApps;
 import android.os.Handler;
 import android.view.WindowManager;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.IconProvider;
@@ -143,10 +144,10 @@ public class WMShellModule {
     static OneHandedController provideOneHandedController(Context context,
             WindowManager windowManager, DisplayController displayController,
             DisplayLayout displayLayout, TaskStackListenerImpl taskStackListener,
-            UiEventLogger uiEventLogger, @ShellMainThread ShellExecutor mainExecutor,
-            @ShellMainThread Handler mainHandler) {
+            UiEventLogger uiEventLogger, InteractionJankMonitor jankMonitor,
+            @ShellMainThread ShellExecutor mainExecutor, @ShellMainThread Handler mainHandler) {
         return OneHandedController.create(context, windowManager, displayController, displayLayout,
-                taskStackListener, uiEventLogger, mainExecutor, mainHandler);
+                taskStackListener, jankMonitor, uiEventLogger, mainExecutor, mainHandler);
     }
 
     //
