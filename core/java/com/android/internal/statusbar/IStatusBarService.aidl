@@ -28,7 +28,9 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 
+import com.android.internal.logging.InstanceId;
 import com.android.internal.statusbar.IAddTileResultCallback;
+import com.android.internal.statusbar.ISessionListener;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -178,4 +180,17 @@ interface IStatusBarService
     * @hide
     */
     int getNavBarModeOverride();
+
+    /**
+    * Register a listener for certain sessions. Each session may be guarded by its own permission.
+    */
+    void registerSessionListener(int sessionFlags, in ISessionListener listener);
+    void unregisterSessionListener(int sessionFlags, in ISessionListener listener);
+
+    /**
+    * Informs all registered listeners that a session has begun and has the following instanceId.
+    * Can only be set by callers with certain permission based on the session type being updated.
+    */
+    void onSessionStarted(int sessionType, in InstanceId instanceId);
+    void onSessionEnded(int sessionType, in InstanceId instanceId);
 }

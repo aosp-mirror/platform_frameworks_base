@@ -21,6 +21,7 @@ import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
 import static android.app.StatusBarManager.NAV_BAR_MODE_OVERRIDE_KIDS;
 import static android.app.StatusBarManager.NAV_BAR_MODE_OVERRIDE_NONE;
 import static android.app.StatusBarManager.NavBarModeOverride;
+import static android.app.StatusBarManager.SessionFlags;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
 
@@ -84,8 +85,10 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
+import com.android.internal.logging.InstanceId;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.statusbar.IAddTileResultCallback;
+import com.android.internal.statusbar.ISessionListener;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -145,6 +148,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private final ActivityManagerInternal mActivityManagerInternal;
     private final ActivityTaskManagerInternal mActivityTaskManager;
     private final PackageManagerInternal mPackageManagerInternal;
+    private final SessionMonitor mSessionMonitor;
     private int mCurrentUserId;
     private boolean mTracingEnabled;
 
@@ -260,6 +264,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mTileRequestTracker = new TileRequestTracker(mContext);
+        mSessionMonitor = new SessionMonitor(mContext);
     }
 
     private IOverlayManager getOverlayManager() {
@@ -1868,6 +1873,28 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         synchronized (mCurrentRequestAddTilePackages) {
             return mCurrentRequestAddTilePackages.remove(packageName) != null;
         }
+    }
+
+    @Override
+    public void onSessionStarted(@SessionFlags int sessionType, InstanceId instance) {
+        mSessionMonitor.onSessionStarted(sessionType, instance);
+    }
+
+    @Override
+    public void onSessionEnded(@SessionFlags int sessionType, InstanceId instance) {
+        mSessionMonitor.onSessionEnded(sessionType, instance);
+    }
+
+    @Override
+    public void registerSessionListener(@SessionFlags int sessionFlags,
+            ISessionListener listener) {
+        mSessionMonitor.registerSessionListener(sessionFlags, listener);
+    }
+
+    @Override
+    public void unregisterSessionListener(@SessionFlags int sessionFlags,
+            ISessionListener listener) {
+        mSessionMonitor.unregisterSessionListener(sessionFlags, listener);
     }
 
     public String[] getStatusBarIcons() {

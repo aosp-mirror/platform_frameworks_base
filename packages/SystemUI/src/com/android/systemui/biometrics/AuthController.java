@@ -168,6 +168,10 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                 mCurrentDialog = null;
                 mOrientationListener.disable();
 
+                for (Callback cb : mCallbacks) {
+                    cb.onBiometricPromptDismissed();
+                }
+
                 try {
                     if (mReceiver != null) {
                         mReceiver.onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
@@ -197,6 +201,10 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                         mCurrentDialog.dismissWithoutCallback(true /* animate */);
                         mCurrentDialog = null;
                         mOrientationListener.disable();
+
+                        for (Callback cb : mCallbacks) {
+                            cb.onBiometricPromptDismissed();
+                        }
 
                         if (mReceiver != null) {
                             mReceiver.onDialogDismissed(
@@ -460,6 +468,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             Log.e(TAG, "sendResultAndCleanUp: Receiver is null");
             return;
         }
+
         try {
             mReceiver.onDialogDismissed(reason, credentialAttestation);
         } catch (RemoteException e) {
@@ -811,6 +820,9 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         }
 
         mReceiver = (IBiometricSysuiReceiver) args.arg2;
+        for (Callback cb : mCallbacks) {
+            cb.onBiometricPromptShown();
+        }
         mCurrentDialog = newDialog;
         mCurrentDialog.show(mWindowManager, savedState);
         mOrientationListener.enable();
@@ -821,6 +833,11 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         if (mCurrentDialog == null) {
             Log.w(TAG, "Dialog already dismissed");
         }
+
+        for (Callback cb : mCallbacks) {
+            cb.onBiometricPromptDismissed();
+        }
+
         mReceiver = null;
         mCurrentDialog = null;
         mOrientationListener.disable();
@@ -891,12 +908,22 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
          * Called when authenticators are registered. If authenticators are already
          * registered before this call, this callback will never be triggered.
          */
-        void onAllAuthenticatorsRegistered();
+        default void onAllAuthenticatorsRegistered() {}
 
         /**
          * Called when UDFPS enrollments have changed. This is called after boot and on changes to
          * enrollment.
          */
-        void onEnrollmentsChanged();
+        default void onEnrollmentsChanged() {}
+
+        /**
+         * Called when the biometric prompt starts showing.
+         */
+        default void onBiometricPromptShown() {}
+
+        /**
+         * Called when the biometric prompt is no longer showing.
+         */
+        default void onBiometricPromptDismissed() {}
     }
 }
