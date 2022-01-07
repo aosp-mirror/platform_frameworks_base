@@ -9159,6 +9159,7 @@ package android.bluetooth {
     field public static final int AUDIO = 2097152; // 0x200000
     field public static final int CAPTURE = 524288; // 0x80000
     field public static final int INFORMATION = 8388608; // 0x800000
+    field public static final int LE_AUDIO = 16384; // 0x4000
     field public static final int LIMITED_DISCOVERABILITY = 8192; // 0x2000
     field public static final int NETWORKING = 131072; // 0x20000
     field public static final int OBJECT_TRANSFER = 1048576; // 0x100000
