@@ -458,7 +458,7 @@ public class StackScrollAlgorithm {
                 final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
                 ((FooterView.FooterViewState) viewState).hideContent =
                         isShelfShowing || noSpaceForFooter
-                                || (ambientState.isDismissAllInProgress()
+                                || (ambientState.isClearAllInProgress()
                                 && !hasOngoingNotifs(algorithmState));
             }
         } else {

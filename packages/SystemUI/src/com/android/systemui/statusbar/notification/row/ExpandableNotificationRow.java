@@ -1462,7 +1462,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void performDismiss(boolean fromAccessibility) {
         Dependency.get(MetricsLogger.class).count(NotificationCounters.NOTIFICATION_DISMISSED, 1);
         dismiss(fromAccessibility);
-        if (mEntry.isClearable()) {
+        if (mEntry.isDismissable()) {
             if (mOnUserInteractionCallback != null) {
                 mOnUserInteractionCallback.onDismiss(mEntry, REASON_CANCEL,
                         mOnUserInteractionCallback.getGroupSummaryToDismiss(mEntry));
@@ -2673,9 +2673,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * @return Whether this view is allowed to be dismissed. Only valid for visible notifications as
      *         otherwise some state might not be updated. To request about the general clearability
-     *         see {@link NotificationEntry#isClearable()}.
+     *         see {@link NotificationEntry#isDismissable()}.
      */
     public boolean canViewBeDismissed() {
+        return mEntry.isDismissable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
+    }
+
+    /**
+     * @return Whether this view is allowed to be cleared with clear all. Only valid for visible
+     * notifications as otherwise some state might not be updated. To request about the general
+     * clearability see {@link NotificationEntry#isClearable()}.
+     */
+    public boolean canViewBeCleared() {
         return mEntry.isClearable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
     }
 
