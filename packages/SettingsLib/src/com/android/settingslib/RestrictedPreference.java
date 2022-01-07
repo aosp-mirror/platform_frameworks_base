@@ -22,7 +22,6 @@ import android.content.Context;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.AttributeSet;
-import android.view.View;
 
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceManager;
@@ -67,23 +66,9 @@ public class RestrictedPreference extends TwoTargetPreference {
     }
 
     @Override
-    protected int getSecondTargetResId() {
-        return R.layout.restricted_icon;
-    }
-
-    @Override
-    protected boolean shouldHideSecondTarget() {
-        return !isDisabledByAdmin();
-    }
-
-    @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         mHelper.onBindViewHolder(holder);
-        final View restrictedIcon = holder.findViewById(R.id.restricted_icon);
-        if (restrictedIcon != null) {
-            restrictedIcon.setVisibility(isDisabledByAdmin() ? View.VISIBLE : View.GONE);
-        }
     }
 
     @Override
