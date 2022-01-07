@@ -1383,7 +1383,8 @@ public class StatusBar extends CoreStartable implements
 
     private void setUpPresenter() {
         // Set up the initial notification state.
-        mActivityLaunchAnimator.setCallback(mKeyguardHandler);
+        mActivityLaunchAnimator.setCallback(mActivityLaunchAnimatorCallback);
+        mActivityLaunchAnimator.addListener(mActivityLaunchAnimatorListener);
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
                 mNotificationShadeWindowViewController,
                 mStackScrollerController.getNotificationListContainer(),
@@ -4367,7 +4368,7 @@ public class StatusBar extends CoreStartable implements
                 }
             };
 
-    private final ActivityLaunchAnimator.Callback mKeyguardHandler =
+    private final ActivityLaunchAnimator.Callback mActivityLaunchAnimatorCallback =
             new ActivityLaunchAnimator.Callback() {
                 @Override
                 public boolean isOnKeyguard() {
@@ -4386,11 +4387,6 @@ public class StatusBar extends CoreStartable implements
                 }
 
                 @Override
-                public void setBlursDisabledForAppLaunch(boolean disabled) {
-                    mKeyguardViewMediator.setBlursDisabledForAppLaunch(disabled);
-                }
-
-                @Override
                 public int getBackgroundColor(TaskInfo task) {
                     if (!mStartingSurfaceOptional.isPresent()) {
                         Log.w(TAG, "No starting surface, defaulting to SystemBGColor");
@@ -4398,6 +4394,19 @@ public class StatusBar extends CoreStartable implements
                     }
 
                     return mStartingSurfaceOptional.get().getBackgroundColor(task);
+                }
+            };
+
+    private final ActivityLaunchAnimator.Listener mActivityLaunchAnimatorListener =
+            new ActivityLaunchAnimator.Listener() {
+                @Override
+                public void onLaunchAnimationStart() {
+                    mKeyguardViewMediator.setBlursDisabledForAppLaunch(true);
+                }
+
+                @Override
+                public void onLaunchAnimationEnd() {
+                    mKeyguardViewMediator.setBlursDisabledForAppLaunch(false);
                 }
             };
 

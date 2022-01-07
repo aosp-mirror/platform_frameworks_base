@@ -58,6 +58,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
@@ -180,6 +181,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private TypedArray mBrightnessBacklight;
     @Mock
     private SystemUIDialogManager mSystemUIDialogManager;
+    @Mock
+    private ActivityLaunchAnimator mActivityLaunchAnimator;
 
     // Capture listeners so that they can be used to send events
     @Captor private ArgumentCaptor<IUdfpsOverlayController> mOverlayCaptor;
@@ -252,7 +255,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mSystemClock,
                 mUnlockedScreenOffAnimationController,
                 mSystemUIDialogManager,
-                mLatencyTracker);
+                mLatencyTracker,
+                mActivityLaunchAnimator);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
