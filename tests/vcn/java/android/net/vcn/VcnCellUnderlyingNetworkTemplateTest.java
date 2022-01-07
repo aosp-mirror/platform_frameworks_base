@@ -15,8 +15,8 @@
  */
 package android.net.vcn;
 
-import static android.net.vcn.VcnUnderlyingNetworkPriority.NETWORK_QUALITY_ANY;
-import static android.net.vcn.VcnUnderlyingNetworkPriority.NETWORK_QUALITY_OK;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_ANY;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_OK;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -27,13 +27,13 @@ import org.junit.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-public class VcnCellUnderlyingNetworkPriorityTest {
+public class VcnCellUnderlyingNetworkTemplateTest {
     private static final Set<String> ALLOWED_PLMN_IDS = new HashSet<>();
     private static final Set<Integer> ALLOWED_CARRIER_IDS = new HashSet<>();
 
     // Package private for use in VcnGatewayConnectionConfigTest
-    static VcnCellUnderlyingNetworkPriority getTestNetworkPriority() {
-        return new VcnCellUnderlyingNetworkPriority.Builder()
+    static VcnCellUnderlyingNetworkTemplate getTestNetworkPriority() {
+        return new VcnCellUnderlyingNetworkTemplate.Builder()
                 .setNetworkQuality(NETWORK_QUALITY_OK)
                 .setAllowMetered(true /* allowMetered */)
                 .setAllowedOperatorPlmnIds(ALLOWED_PLMN_IDS)
@@ -45,7 +45,7 @@ public class VcnCellUnderlyingNetworkPriorityTest {
 
     @Test
     public void testBuilderAndGetters() {
-        final VcnCellUnderlyingNetworkPriority networkPriority = getTestNetworkPriority();
+        final VcnCellUnderlyingNetworkTemplate networkPriority = getTestNetworkPriority();
         assertEquals(NETWORK_QUALITY_OK, networkPriority.getNetworkQuality());
         assertTrue(networkPriority.allowMetered());
         assertEquals(ALLOWED_PLMN_IDS, networkPriority.getAllowedOperatorPlmnIds());
@@ -56,8 +56,8 @@ public class VcnCellUnderlyingNetworkPriorityTest {
 
     @Test
     public void testBuilderAndGettersForDefaultValues() {
-        final VcnCellUnderlyingNetworkPriority networkPriority =
-                new VcnCellUnderlyingNetworkPriority.Builder().build();
+        final VcnCellUnderlyingNetworkTemplate networkPriority =
+                new VcnCellUnderlyingNetworkTemplate.Builder().build();
         assertEquals(NETWORK_QUALITY_ANY, networkPriority.getNetworkQuality());
         assertFalse(networkPriority.allowMetered());
         assertEquals(new HashSet<String>(), networkPriority.getAllowedOperatorPlmnIds());
@@ -68,10 +68,10 @@ public class VcnCellUnderlyingNetworkPriorityTest {
 
     @Test
     public void testPersistableBundle() {
-        final VcnCellUnderlyingNetworkPriority networkPriority = getTestNetworkPriority();
+        final VcnCellUnderlyingNetworkTemplate networkPriority = getTestNetworkPriority();
         assertEquals(
                 networkPriority,
-                VcnUnderlyingNetworkPriority.fromPersistableBundle(
+                VcnUnderlyingNetworkTemplate.fromPersistableBundle(
                         networkPriority.toPersistableBundle()));
     }
 }
