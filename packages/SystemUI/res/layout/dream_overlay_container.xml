@@ -28,6 +28,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <include layout="@layout/dream_overlay_complications_layer" />
+
     <com.android.systemui.dreams.DreamOverlayStatusBarView
         android:id="@+id/dream_overlay_status_bar"
         android:layout_width="match_parent"
