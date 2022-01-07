@@ -1152,7 +1152,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
      */
     @Nullable
     private ArrayMap<String, String> buildAppClassNamesByProcess() {
-        if (processes == null) {
+        if (ArrayUtils.size(processes) == 0) {
             return null;
         }
         final ArrayMap<String, String> ret = new ArrayMap<>(4);
