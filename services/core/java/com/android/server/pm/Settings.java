@@ -4863,11 +4863,11 @@ public final class Settings implements Watchable, Snappable {
             pw.print(userState.isInstantApp());
             pw.print(" virtual=");
             pw.println(userState.isVirtualPreload());
-            pw.print(" installReason=");
+            pw.print("      installReason=");
             pw.println(userState.getInstallReason());
 
             final PackageUserStateInternal pus = ps.readUserState(user.id);
-            pw.print(" firstInstallTime=");
+            pw.print("      firstInstallTime=");
             date.setTime(pus.getFirstInstallTime());
             pw.println(sdf.format(date));
 
