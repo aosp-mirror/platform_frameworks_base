@@ -812,6 +812,21 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Report whether the display supports DISPLAY_DECORATION.
+     *
+     * @param displayId The display whose support is being queried.
+     *
+     * @hide
+     */
+    public boolean getDisplayDecorationSupport(int displayId) {
+        try {
+            return mDm.getDisplayDecorationSupport(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the brightness of the display.
      *
      * @param displayId The display from which to get the brightness

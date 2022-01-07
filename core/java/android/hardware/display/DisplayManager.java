@@ -1206,6 +1206,17 @@ public final class DisplayManager {
     }
 
     /**
+     * Returns whether the specified display supports DISPLAY_DECORATION.
+     *
+     * @param displayId The display to query support.
+     *
+     * @hide
+     */
+    public boolean getDisplayDecorationSupport(int displayId) {
+        return mGlobal.getDisplayDecorationSupport(displayId);
+    }
+
+    /**
      * Returns the user preference for "Match content frame rate".
      * <p>
      * Never: Even if the app requests it, the device will never try to match its output to the
