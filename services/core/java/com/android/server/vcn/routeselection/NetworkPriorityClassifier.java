@@ -20,8 +20,8 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
-import static android.net.vcn.VcnUnderlyingNetworkPriority.NETWORK_QUALITY_ANY;
-import static android.net.vcn.VcnUnderlyingNetworkPriority.NETWORK_QUALITY_OK;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_ANY;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_OK;
 
 import static com.android.server.VcnManagementService.LOCAL_LOG;
 
@@ -29,10 +29,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.NetworkCapabilities;
 import android.net.TelephonyNetworkSpecifier;
-import android.net.vcn.VcnCellUnderlyingNetworkPriority;
+import android.net.vcn.VcnCellUnderlyingNetworkTemplate;
 import android.net.vcn.VcnManager;
-import android.net.vcn.VcnUnderlyingNetworkPriority;
-import android.net.vcn.VcnWifiUnderlyingNetworkPriority;
+import android.net.vcn.VcnUnderlyingNetworkTemplate;
+import android.net.vcn.VcnWifiUnderlyingNetworkTemplate;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
 import android.telephony.SubscriptionManager;
@@ -76,7 +76,7 @@ class NetworkPriorityClassifier {
     public static int calculatePriorityClass(
             VcnContext vcnContext,
             UnderlyingNetworkRecord networkRecord,
-            LinkedHashSet<VcnUnderlyingNetworkPriority> underlyingNetworkPriorities,
+            LinkedHashSet<VcnUnderlyingNetworkTemplate> underlyingNetworkPriorities,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
@@ -94,7 +94,7 @@ class NetworkPriorityClassifier {
         }
 
         int priorityIndex = 0;
-        for (VcnUnderlyingNetworkPriority nwPriority : underlyingNetworkPriorities) {
+        for (VcnUnderlyingNetworkTemplate nwPriority : underlyingNetworkPriorities) {
             if (checkMatchesPriorityRule(
                     vcnContext,
                     nwPriority,
@@ -113,7 +113,7 @@ class NetworkPriorityClassifier {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public static boolean checkMatchesPriorityRule(
             VcnContext vcnContext,
-            VcnUnderlyingNetworkPriority networkPriority,
+            VcnUnderlyingNetworkTemplate networkPriority,
             UnderlyingNetworkRecord networkRecord,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
@@ -130,32 +130,32 @@ class NetworkPriorityClassifier {
             return true;
         }
 
-        if (networkPriority instanceof VcnWifiUnderlyingNetworkPriority) {
+        if (networkPriority instanceof VcnWifiUnderlyingNetworkTemplate) {
             return checkMatchesWifiPriorityRule(
-                    (VcnWifiUnderlyingNetworkPriority) networkPriority,
+                    (VcnWifiUnderlyingNetworkTemplate) networkPriority,
                     networkRecord,
                     currentlySelected,
                     carrierConfig);
         }
 
-        if (networkPriority instanceof VcnCellUnderlyingNetworkPriority) {
+        if (networkPriority instanceof VcnCellUnderlyingNetworkTemplate) {
             return checkMatchesCellPriorityRule(
                     vcnContext,
-                    (VcnCellUnderlyingNetworkPriority) networkPriority,
+                    (VcnCellUnderlyingNetworkTemplate) networkPriority,
                     networkRecord,
                     subscriptionGroup,
                     snapshot);
         }
 
         logWtf(
-                "Got unknown VcnUnderlyingNetworkPriority class: "
+                "Got unknown VcnUnderlyingNetworkTemplate class: "
                         + networkPriority.getClass().getSimpleName());
         return false;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public static boolean checkMatchesWifiPriorityRule(
-            VcnWifiUnderlyingNetworkPriority networkPriority,
+            VcnWifiUnderlyingNetworkTemplate networkPriority,
             UnderlyingNetworkRecord networkRecord,
             UnderlyingNetworkRecord currentlySelected,
             PersistableBundle carrierConfig) {
@@ -202,7 +202,7 @@ class NetworkPriorityClassifier {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public static boolean checkMatchesCellPriorityRule(
             VcnContext vcnContext,
-            VcnCellUnderlyingNetworkPriority networkPriority,
+            VcnCellUnderlyingNetworkTemplate networkPriority,
             UnderlyingNetworkRecord networkRecord,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot) {

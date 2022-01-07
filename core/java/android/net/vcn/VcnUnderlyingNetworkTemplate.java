@@ -33,7 +33,7 @@ import java.util.Objects;
 
 // TODO: Add documents
 /** @hide */
-public abstract class VcnUnderlyingNetworkPriority {
+public abstract class VcnUnderlyingNetworkTemplate {
     /** @hide */
     protected static final int NETWORK_PRIORITY_TYPE_WIFI = 1;
     /** @hide */
@@ -68,7 +68,7 @@ public abstract class VcnUnderlyingNetworkPriority {
     private final boolean mAllowMetered;
 
     /** @hide */
-    protected VcnUnderlyingNetworkPriority(
+    protected VcnUnderlyingNetworkTemplate(
             int networkPriorityType, int networkQuality, boolean allowMetered) {
         mNetworkPriorityType = networkPriorityType;
         mNetworkQuality = networkQuality;
@@ -89,16 +89,16 @@ public abstract class VcnUnderlyingNetworkPriority {
     /** @hide */
     @NonNull
     @VisibleForTesting(visibility = Visibility.PROTECTED)
-    public static VcnUnderlyingNetworkPriority fromPersistableBundle(
+    public static VcnUnderlyingNetworkTemplate fromPersistableBundle(
             @NonNull PersistableBundle in) {
         Objects.requireNonNull(in, "PersistableBundle is null");
 
         final int networkPriorityType = in.getInt(NETWORK_PRIORITY_TYPE_KEY);
         switch (networkPriorityType) {
             case NETWORK_PRIORITY_TYPE_WIFI:
-                return VcnWifiUnderlyingNetworkPriority.fromPersistableBundle(in);
+                return VcnWifiUnderlyingNetworkTemplate.fromPersistableBundle(in);
             case NETWORK_PRIORITY_TYPE_CELL:
-                return VcnCellUnderlyingNetworkPriority.fromPersistableBundle(in);
+                return VcnCellUnderlyingNetworkTemplate.fromPersistableBundle(in);
             default:
                 throw new IllegalArgumentException(
                         "Invalid networkPriorityType:" + networkPriorityType);
@@ -124,11 +124,11 @@ public abstract class VcnUnderlyingNetworkPriority {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        if (!(other instanceof VcnUnderlyingNetworkPriority)) {
+        if (!(other instanceof VcnUnderlyingNetworkTemplate)) {
             return false;
         }
 
-        final VcnUnderlyingNetworkPriority rhs = (VcnUnderlyingNetworkPriority) other;
+        final VcnUnderlyingNetworkTemplate rhs = (VcnUnderlyingNetworkTemplate) other;
         return mNetworkPriorityType == rhs.mNetworkPriorityType
                 && mNetworkQuality == rhs.mNetworkQuality
                 && mAllowMetered == rhs.mAllowMetered;
@@ -168,7 +168,7 @@ public abstract class VcnUnderlyingNetworkPriority {
     }
 
     /**
-     * This class is used to incrementally build VcnUnderlyingNetworkPriority objects.
+     * This class is used to incrementally build VcnUnderlyingNetworkTemplate objects.
      *
      * @param <T> The subclass to be built.
      */
