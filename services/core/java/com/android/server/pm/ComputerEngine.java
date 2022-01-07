@@ -3490,9 +3490,8 @@ public class ComputerEngine implements Computer {
         return mSettings.getRenamedPackageLPr(packageName);
     }
 
-    @NonNull
-    @Override
-    public WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries() {
+    private WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
+            getSharedLibraries() {
         return mSharedLibraries.getAll();
     }
 
