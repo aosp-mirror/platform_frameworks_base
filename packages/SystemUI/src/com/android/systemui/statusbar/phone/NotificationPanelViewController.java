@@ -2433,7 +2433,7 @@ public class NotificationPanelViewController extends PanelViewController {
         // mLockscreenShadeTransitionController.getDragProgress change.
         // When in lockscreen, getDragProgress indicates the true expanded fraction of QS
         float shadeExpandedFraction = mTransitioningToFullShadeProgress > 0
-                ? mLockscreenShadeTransitionController.getDragProgress()
+                ? mLockscreenShadeTransitionController.getQSDragProgress()
                 : getExpandedFraction();
         mSplitShadeHeaderController.setShadeExpandedFraction(shadeExpandedFraction);
         mSplitShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
@@ -4766,7 +4766,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
                 @Override
                 public float getLockscreenShadeDragProgress() {
-                    return mLockscreenShadeTransitionController.getDragProgress();
+                    return mLockscreenShadeTransitionController.getQSDragProgress();
                 }
             };
 
