@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.render
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.ListEntry
@@ -31,18 +32,18 @@ import com.android.systemui.statusbar.notification.stack.BUCKET_PEOPLE
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.notification.stack.PriorityBucket
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.mock
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 class NodeSpecBuilderTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var viewBarn: NotifViewBarn
+    private val mediaContainerController: MediaContainerController = mock()
+    private val sectionsFeatureManager: NotificationSectionsFeatureManager = mock()
+    private val viewBarn: NotifViewBarn = mock()
 
     private var rootController: NodeController = buildFakeController("rootController")
     private var headerController0: NodeController = buildFakeController("header0")
@@ -66,13 +67,12 @@ class NodeSpecBuilderTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
-        `when`(viewBarn.requireNodeController(any())).thenAnswer {
+        whenever(mediaContainerController.mediaContainerView).thenReturn(mock())
+        whenever(viewBarn.requireNodeController(any())).thenAnswer {
             fakeViewBarn.getViewByEntry(it.getArgument(0))
         }
 
-        specBuilder = NodeSpecBuilder(viewBarn)
+        specBuilder = NodeSpecBuilder(mediaContainerController, sectionsFeatureManager, viewBarn)
     }
 
     @Test
@@ -109,6 +109,30 @@ class NodeSpecBuilderTest : SysuiTestCase() {
     @Test
     fun testSimpleMapping() {
         checkOutput(
+            // GIVEN a simple flat list of notifications all in the same headerless section
+            listOf(
+                notif(0, section0NoHeader),
+                notif(1, section0NoHeader),
+                notif(2, section0NoHeader),
+                notif(3, section0NoHeader)
+            ),
+
+            // THEN we output a similarly simple flag list of nodes
+            tree(
+                notifNode(0),
+                notifNode(1),
+                notifNode(2),
+                notifNode(3)
+            )
+        )
+    }
+
+    @Test
+    fun testSimpleMappingWithMedia() {
+        // WHEN media controls are enabled
+        whenever(sectionsFeatureManager.isMediaControlsEnabled()).thenReturn(true)
+
+        checkOutput(
                 // GIVEN a simple flat list of notifications all in the same headerless section
                 listOf(
                         notif(0, section0NoHeader),
@@ -117,8 +141,9 @@ class NodeSpecBuilderTest : SysuiTestCase() {
                         notif(3, section0NoHeader)
                 ),
 
-                // THEN we output a similarly simple flag list of nodes
+                // THEN we output a similarly simple flag list of nodes, with media at the top
                 tree(
+                        node(mediaContainerController),
                         notifNode(0),
                         notifNode(1),
                         notifNode(2),
@@ -333,7 +358,7 @@ private class FakeViewBarn {
 
 private fun buildFakeController(name: String): NodeController {
     val controller = Mockito.mock(NodeController::class.java)
-    `when`(controller.nodeLabel).thenReturn(name)
+    whenever(controller.nodeLabel).thenReturn(name)
     return controller
 }
 

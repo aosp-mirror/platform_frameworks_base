@@ -25,9 +25,9 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 /**
  * Root view to insert Lock screen media controls into the notification stack.
  */
-public class MediaHeaderView extends ExpandableView {
+public class MediaContainerView extends ExpandableView {
 
-    public MediaHeaderView(Context context, AttributeSet attrs) {
+    public MediaContainerView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 

@@ -574,7 +574,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mScreenOffAnimationController =
                 Dependency.get(ScreenOffAnimationController.class);
         updateSplitNotificationShade();
-        mSectionsManager.initialize(this, LayoutInflater.from(context));
+        mSectionsManager.initialize(this);
         mSections = mSectionsManager.createSectionsForBuckets();
 
         mAmbientState = Dependency.get(AmbientState.class);
@@ -665,7 +665,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         inflateFooterView();
         inflateEmptyShadeView();
         updateFooter();
-        mSectionsManager.reinflateViews(LayoutInflater.from(mContext));
+        mSectionsManager.reinflateViews();
     }
 
     public void setIsRemoteInputActive(boolean isActive) {
@@ -2228,7 +2228,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 height += viewHeight;
 
                 numShownItems++;
-                if (viewHeight > 0 || !(expandableView instanceof MediaHeaderView)) {
+                if (viewHeight > 0 || !(expandableView instanceof MediaContainerView)) {
                     // Only count the media as a notification if it has a positive height.
                     numShownNotifs++;
                 }
@@ -3202,7 +3202,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     ignoreChildren = false;
                 }
                 childWasSwipedOut |= isFullySwipedOut(row);
-            } else if (child instanceof MediaHeaderView) {
+            } else if (child instanceof MediaContainerView) {
                 childWasSwipedOut = true;
             }
             if (!childWasSwipedOut) {

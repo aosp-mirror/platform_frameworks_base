@@ -41,7 +41,6 @@ import static org.mockito.Mockito.when;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -54,6 +53,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.render.MediaContainerController;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -87,6 +87,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Mock private NotificationRowComponent mNotificationRowComponent;
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
     @Mock private NotificationSectionsLogger mLogger;
+    @Mock private MediaContainerController mMediaContainerController;
     @Mock private SectionHeaderController mIncomingHeaderController;
     @Mock private SectionHeaderController mPeopleHeaderController;
     @Mock private SectionHeaderController mAlertingHeaderController;
@@ -114,6 +115,8 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                 });
         when(mNotificationRowComponent.getActivatableNotificationViewController())
                 .thenReturn(mActivatableNotificationViewController);
+        when(mMediaContainerController.getMediaContainerView())
+                .thenReturn(mock(MediaContainerView.class));
         when(mIncomingHeaderController.getHeaderView()).thenReturn(mock(SectionHeaderView.class));
         when(mPeopleHeaderController.getHeaderView()).thenReturn(mock(SectionHeaderView.class));
         when(mAlertingHeaderController.getHeaderView()).thenReturn(mock(SectionHeaderView.class));
@@ -126,6 +129,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                         mSectionsFeatureManager,
                         mLogger,
                         mNotifPipelineFlags,
+                        mMediaContainerController,
                         mIncomingHeaderController,
                         mPeopleHeaderController,
                         mAlertingHeaderController,
@@ -134,7 +138,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         // Required in order for the header inflation to work properly
         when(mNssl.generateLayoutParams(any(AttributeSet.class)))
                 .thenReturn(new ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-        mSectionsManager.initialize(mNssl, LayoutInflater.from(mContext));
+        mSectionsManager.initialize(mNssl);
         when(mNssl.indexOfChild(any(View.class))).thenReturn(-1);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
 
@@ -142,7 +146,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
 
     @Test(expected =  IllegalStateException.class)
     public void testDuplicateInitializeThrows() {
-        mSectionsManager.initialize(mNssl, LayoutInflater.from(mContext));
+        mSectionsManager.initialize(mNssl);
     }
 
     @Test
