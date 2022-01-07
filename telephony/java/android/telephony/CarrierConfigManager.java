@@ -798,6 +798,14 @@ public class CarrierConfigManager {
             "carrier_cross_sim_ims_available_bool";
 
     /**
+     * Flag specifying whether cross sim calling on opportunistic data is supported for carrier.
+     * When {@code false} the carrier does not support cross sim calling on opportunistic data.
+     * When {@code true} the carrier does support cross sim calling on opportunistic data.
+     */
+    public static final String KEY_ENABLE_CROSS_SIM_CALLING_ON_OPPORTUNISTIC_DATA_BOOL =
+            "enable_cross_sim_calling_on_opportunistic_data_bool";
+
+    /**
      * Specifies a map from dialstrings to replacements for roaming network service numbers which
      * cannot be replaced on the carrier side.
      * <p>
@@ -2265,6 +2273,7 @@ public class CarrierConfigManager {
      * android.provider.BlockedNumberContract.SystemContract#ENHANCED_SETTING_KEY_BLOCK_PRIVATE
      * android.provider.BlockedNumberContract.SystemContract#ENHANCED_SETTING_KEY_BLOCK_PAYPHONE
      * android.provider.BlockedNumberContract.SystemContract#ENHANCED_SETTING_KEY_BLOCK_UNKNOWN
+     * android.provider.BlockedNumberContract.SystemContract#ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE
      *
      * <p>
      * 1. For Single SIM(SS) device, it can be customized in both carrier_config_mccmnc.xml
@@ -5587,6 +5596,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_VILTE_DATA_IS_METERED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL, false);
+        sDefaults.putBoolean(KEY_ENABLE_CROSS_SIM_CALLING_ON_OPPORTUNISTIC_DATA_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_WFC_SUPPORTS_WIFI_ONLY_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL, false);

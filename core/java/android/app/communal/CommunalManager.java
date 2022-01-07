@@ -23,9 +23,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
-import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.RemoteException;
@@ -46,31 +43,10 @@ public final class CommunalManager {
     private final ICommunalManager mService;
     private final ArrayMap<CommunalModeListener, ICommunalModeListener> mCommunalModeListeners;
 
-    /**
-     * This change id is used to annotate packages which can run in communal mode by default,
-     * without requiring user opt-in.
-     *
-     * @hide
-     */
-    @ChangeId
-    @Overridable
-    @Disabled
-    public static final long ALLOW_COMMUNAL_MODE_BY_DEFAULT = 203673428L;
-
-    /**
-     * This change id is used to annotate packages which are allowed to run in communal mode.
-     *
-     * @hide
-     */
-    @ChangeId
-    @Overridable
-    @Disabled
-    public static final long ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT = 200324021L;
-
     /** @hide */
     public CommunalManager(ICommunalManager service) {
         mService = service;
-        mCommunalModeListeners = new ArrayMap<CommunalModeListener, ICommunalModeListener>();
+        mCommunalModeListeners = new ArrayMap<>();
     }
 
     /**

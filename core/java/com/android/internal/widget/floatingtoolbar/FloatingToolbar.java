@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.widget;
+package com.android.internal.widget.floatingtoolbar;
 
 import android.annotation.Nullable;
 import android.graphics.Rect;
@@ -50,13 +50,9 @@ public final class FloatingToolbar {
     private final FloatingToolbarPopup mPopup;
 
     private final Rect mContentRect = new Rect();
-    private final Rect mPreviousContentRect = new Rect();
 
     private Menu mMenu;
     private MenuItem.OnMenuItemClickListener mMenuItemClickListener = NO_OP_MENUITEM_CLICK_LISTENER;
-
-    private int mSuggestedWidth;
-    private boolean mWidthChanged = true;
 
     private final OnLayoutChangeListener mOrientationChangeHandler = new OnLayoutChangeListener() {
 
@@ -71,7 +67,7 @@ public final class FloatingToolbar {
             mNewRect.set(newLeft, newRight, newTop, newBottom);
             mOldRect.set(oldLeft, oldRight, oldTop, oldBottom);
             if (mPopup.isShowing() && !mNewRect.equals(mOldRect)) {
-                mWidthChanged = true;
+                mPopup.setWidthChanged(true);
                 updateLayout();
             }
         }
@@ -114,7 +110,7 @@ public final class FloatingToolbar {
         // TODO(b/65172902): Pass context in constructor when DecorView (and other callers)
         // supports multi-display.
         mWindow = Objects.requireNonNull(window);
-        mPopup = new FloatingToolbarPopup(window.getContext(), window.getDecorView());
+        mPopup = FloatingToolbarPopup.createInstance(window.getContext(), window.getDecorView());
     }
 
     /**
@@ -159,11 +155,7 @@ public final class FloatingToolbar {
      * toolbar.
      */
     public FloatingToolbar setSuggestedWidth(int suggestedWidth) {
-        // Check if there's been a substantial width spec change.
-        int difference = Math.abs(suggestedWidth - mSuggestedWidth);
-        mWidthChanged = difference > (mSuggestedWidth * 0.2);
-
-        mSuggestedWidth = suggestedWidth;
+        mPopup.setSuggestedWidth(suggestedWidth);
         return this;
     }
 
@@ -232,19 +224,7 @@ public final class FloatingToolbar {
     private void doShow() {
         List<MenuItem> menuItems = getVisibleAndEnabledMenuItems(mMenu);
         menuItems.sort(mMenuItemComparator);
-        if (mPopup.isLayoutRequired(menuItems) || mWidthChanged) {
-            mPopup.dismiss();
-            mPopup.layoutMenuItems(menuItems, mMenuItemClickListener, mSuggestedWidth);
-        } else {
-            mPopup.updateMenuItems(menuItems, mMenuItemClickListener);
-        }
-        if (!mPopup.isShowing()) {
-            mPopup.show(mContentRect);
-        } else if (!mPreviousContentRect.equals(mContentRect)) {
-            mPopup.updateCoordinates(mContentRect);
-        }
-        mWidthChanged = false;
-        mPreviousContentRect.set(mContentRect);
+        mPopup.show(menuItems, mMenuItemClickListener, mContentRect);
     }
 
     /**

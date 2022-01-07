@@ -2754,7 +2754,7 @@ public class UserManager {
             new PropertyInvalidatedCache<Integer, Boolean>(
                 32, CACHE_KEY_IS_USER_UNLOCKED_PROPERTY) {
                 @Override
-                protected Boolean recompute(Integer query) {
+                public Boolean recompute(Integer query) {
                     try {
                         return mService.isUserUnlocked(query);
                     } catch (RemoteException re) {
@@ -2762,7 +2762,7 @@ public class UserManager {
                     }
                 }
                 @Override
-                protected boolean bypass(Integer query) {
+                public boolean bypass(Integer query) {
                     return query < 0;
                 }
             };
@@ -2772,7 +2772,7 @@ public class UserManager {
             new PropertyInvalidatedCache<Integer, Boolean>(
                 32, CACHE_KEY_IS_USER_UNLOCKED_PROPERTY) {
                 @Override
-                protected Boolean recompute(Integer query) {
+                public Boolean recompute(Integer query) {
                     try {
                         return mService.isUserUnlockingOrUnlocked(query);
                     } catch (RemoteException re) {
@@ -2780,7 +2780,7 @@ public class UserManager {
                     }
                 }
                 @Override
-                protected boolean bypass(Integer query) {
+                public boolean bypass(Integer query) {
                     return query < 0;
                 }
             };

@@ -215,8 +215,7 @@ class NotificationSectionsManager @Inject internal constructor(
                             // TODO: We should really cancel the active animations here. This will
                             //  happen automatically when the view's intro animation starts, but
                             //  it's a fragile link.
-                            header.transientContainer?.removeTransientView(header)
-                            header.transientContainer = null
+                            header.removeFromTransientContainer()
                             parent.addView(header, target)
                         } else {
                             parent.changeViewPosition(header, target)

@@ -990,6 +990,11 @@ public class TelecomManager {
      */
     public static final int PRESENTATION_PAYPHONE = 4;
 
+    /**
+     * Indicates that the address or number of a call is unavailable.
+     */
+    public static final int PRESENTATION_UNAVAILABLE = 5;
+
 
     /*
      * Values for the adb property "persist.radio.videocall.audio.output"
@@ -1006,7 +1011,7 @@ public class TelecomManager {
     @IntDef(
             prefix = { "PRESENTATION_" },
             value = {PRESENTATION_ALLOWED, PRESENTATION_RESTRICTED, PRESENTATION_UNKNOWN,
-            PRESENTATION_PAYPHONE})
+            PRESENTATION_PAYPHONE, PRESENTATION_UNAVAILABLE})
     public @interface Presentation {}
 
 

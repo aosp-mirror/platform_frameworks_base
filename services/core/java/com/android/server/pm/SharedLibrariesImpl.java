@@ -381,7 +381,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
      * @return The package setting that represents the latest version of shared library info.
      */
     @Nullable
-    PackageSetting getSharedLibLatestVersionSetting(@NonNull ScanResult scanResult) {
+    PackageSetting getStaticSharedLibLatestVersionSetting(@NonNull ScanResult scanResult) {
         PackageSetting sharedLibPackage = null;
         synchronized (mPm.mLock) {
             final SharedLibraryInfo latestSharedLibraVersionLPr =

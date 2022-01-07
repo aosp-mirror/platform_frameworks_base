@@ -189,6 +189,7 @@ import android.app.ProfilerInfo;
 import android.app.PropertyInvalidatedCache;
 import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
+import android.app.WtfException;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
 import android.app.compat.CompatChanges;
@@ -5822,7 +5823,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         return Arrays.binarySearch(allowlist, appId) >= 0
                 || Arrays.binarySearch(mDeviceIdleTempAllowlist, appId) >= 0
-                || mPendingTempAllowlist.indexOfKey(uid) >= 0;
+                || mPendingTempAllowlist.get(uid) != null;
     }
 
     /**
@@ -12634,6 +12635,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int callingUid;
         int callingPid;
         boolean instantApp;
+        boolean throwWtfException = false;
         synchronized(this) {
             if (caller != null) {
                 callerApp = getRecordForAppLOSP(caller);
@@ -12728,13 +12730,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         + "RECEIVER_NOT_EXPORTED be specified when registering a "
                                         + "receiver");
                     } else {
-                        Slog.wtf(TAG,
-                                callerPackage + ": Targeting T+ (version "
-                                        + Build.VERSION_CODES.TIRAMISU
-                                        + " and above) requires that one of RECEIVER_EXPORTED or "
-                                        + "RECEIVER_NOT_EXPORTED be specified when registering a "
-                                        + "receiver");
+                        // will be removed when enforcement is required
                         // Assume default behavior-- flag check is not enforced
+                        throwWtfException = true;
                         flags |= Context.RECEIVER_EXPORTED;
                     }
                 } else if (!requireExplicitFlagForDynamicReceivers) {
@@ -12863,6 +12861,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                     queue.enqueueParallelBroadcastLocked(r);
                     queue.scheduleBroadcastsLocked();
                 }
+            }
+
+            if (throwWtfException) {
+                throw new WtfException(
+                        callerPackage + ": Targeting T+ (version "
+                                + Build.VERSION_CODES.TIRAMISU
+                                + " and above) requires that one of RECEIVER_EXPORTED or "
+                                + "RECEIVER_NOT_EXPORTED be specified when registering a "
+                                + "receiver");
             }
 
             return sticky;
@@ -15115,11 +15122,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // First copy out the pending changes...  we need to leave them in the map for now,
         // in case someone needs to check what is coming up while we don't have the lock held.
-        synchronized (mProcLock) {
-            N = mPendingTempAllowlist.size();
-            list = new PendingTempAllowlist[N];
-            for (int i = 0; i < N; i++) {
-                list[i] = mPendingTempAllowlist.valueAt(i);
+        synchronized (this) {
+            synchronized (mProcLock) {
+                N = mPendingTempAllowlist.size();
+                list = new PendingTempAllowlist[N];
+                for (int i = 0; i < N; i++) {
+                    list[i] = mPendingTempAllowlist.valueAt(i);
+                }
             }
         }
 

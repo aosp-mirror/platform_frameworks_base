@@ -77,11 +77,11 @@ public class PropertyInvalidatedCacheTests {
         PropertyInvalidatedCache<Integer, Boolean> testCache =
                 new PropertyInvalidatedCache<>(4, CACHE_PROPERTY) {
                     @Override
-                    protected Boolean recompute(Integer x) {
+                    public Boolean recompute(Integer x) {
                         return tester.query(x);
                     }
                     @Override
-                    protected boolean bypass(Integer x) {
+                    public boolean bypass(Integer x) {
                         return x % 13 == 0;
                     }
                 };
@@ -131,21 +131,21 @@ public class PropertyInvalidatedCacheTests {
         PropertyInvalidatedCache<Integer, Boolean> cache1 =
                 new PropertyInvalidatedCache<>(4, CACHE_PROPERTY) {
                     @Override
-                    protected Boolean recompute(Integer x) {
+                    public Boolean recompute(Integer x) {
                         return tester.query(x);
                     }
                 };
         PropertyInvalidatedCache<Integer, Boolean> cache2 =
                 new PropertyInvalidatedCache<>(4, CACHE_PROPERTY) {
                     @Override
-                    protected Boolean recompute(Integer x) {
+                    public Boolean recompute(Integer x) {
                         return tester.query(x);
                     }
                 };
         PropertyInvalidatedCache<Integer, Boolean> cache3 =
                 new PropertyInvalidatedCache<>(4, CACHE_PROPERTY, "cache3") {
                     @Override
-                    protected Boolean recompute(Integer x) {
+                    public Boolean recompute(Integer x) {
                         return tester.query(x);
                     }
                 };
@@ -171,7 +171,7 @@ public class PropertyInvalidatedCacheTests {
         // Create a new cache1.  Verify that the new instance is disabled.
         cache1 = new PropertyInvalidatedCache<>(4, CACHE_PROPERTY) {
                     @Override
-                    protected Boolean recompute(Integer x) {
+                    public Boolean recompute(Integer x) {
                         return tester.query(x);
                     }
                 };

@@ -3213,10 +3213,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     // Clean up any potential transient views if the child has already been swiped
                     // out, as we won't be animating it further (due to its height already being
                     // clipped to 0.
-                    ViewGroup transientContainer = child.getTransientContainer();
-                    if (transientContainer != null) {
-                        transientContainer.removeTransientView(child);
-                    }
+                    child.removeFromTransientContainer();
                 }
             }
             int animationType = childWasSwipedOut
@@ -3933,7 +3930,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void clearTemporaryViewsInGroup(ViewGroup viewGroup) {
         while (viewGroup != null && viewGroup.getTransientViewCount() != 0) {
-            viewGroup.removeTransientView(viewGroup.getTransientView(0));
+            final View transientView = viewGroup.getTransientView(0);
+            viewGroup.removeTransientView(transientView);
+            if (transientView instanceof ExpandableView) {
+                ((ExpandableView) transientView).setTransientContainer(null);
+            }
         }
     }
 
@@ -4102,7 +4103,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void clearTransient() {
         for (ExpandableView view : mClearTransientViewsWhenFinished) {
-            StackStateAnimator.removeTransientView(view);
+            view.removeFromTransientContainer();
         }
         mClearTransientViewsWhenFinished.clear();
     }

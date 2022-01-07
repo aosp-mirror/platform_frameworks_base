@@ -391,6 +391,21 @@ public final class Settings {
             "android.settings.REDUCE_BRIGHT_COLORS_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of Color correction.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_COLOR_CORRECTION_SETTINGS =
+            "com.android.settings.ACCESSIBILITY_COLOR_SPACE_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of Color inversion.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -10104,6 +10119,14 @@ public final class Settings {
                 "theme_customization_overlay_packages";
 
         /**
+         * Indicates whether the device is in kids nav mode.
+         * <p>Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String NAV_BAR_KIDS_MODE = "nav_bar_kids_mode";
+
+        /**
          * Navigation bar mode.
          *  0 = 3 button
          *  1 = 2 button
@@ -10465,13 +10488,6 @@ public final class Settings {
          * @hide
          */
         public static final String COMMUNAL_MODE_ENABLED = "communal_mode_enabled";
-
-        /**
-         * An array of all the packages which have been enabled for hub mode by the user.
-         *
-         * @hide
-         */
-        public static final String COMMUNAL_MODE_PACKAGES = "communal_mode_packages";
 
         /**
          * An array of SSIDs of Wi-Fi networks that, when connected, are considered safe to enable
@@ -15201,7 +15217,10 @@ public final class Settings {
          * {@code p1[url_bar]:p2:p3[url_foo,url_bas]}
          *
          * @hide
+         * @deprecated Use {@link android.view.autofill.AutofillManager
+         * #DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES} instead.
          */
+        @Deprecated
         @SystemApi
         @Readable
         public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES =

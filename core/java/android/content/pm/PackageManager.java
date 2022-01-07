@@ -145,6 +145,20 @@ public abstract class PackageManager {
             "android.media.PROPERTY_MEDIA_CAPABILITIES";
 
     /**
+     * Application level property that an app can specify to opt-out from having private data
+     * directories both on the internal and external storages.
+     *
+     * <p>Changing the value of this property during app update is not supported, and such updates
+     * will be rejected.
+     *
+     * <p>This should only be set by platform apps that know what they are doing.
+     *
+     * @hide
+     */
+    public static final String PROPERTY_NO_APP_DATA_STORAGE =
+            "android.internal.PROPERTY_NO_APP_DATA_STORAGE";
+
+    /**
      * A property value set within the manifest.
      * <p>
      * The value of a property will only have a single type, as defined by
@@ -10173,16 +10187,15 @@ public abstract class PackageManager {
                     16, PermissionManager.CACHE_KEY_PACKAGE_INFO,
                     "getApplicationInfo") {
                 @Override
-                protected ApplicationInfo recompute(ApplicationInfoQuery query) {
+                public ApplicationInfo recompute(ApplicationInfoQuery query) {
                     return getApplicationInfoAsUserUncached(
                             query.packageName, query.flags, query.userId);
                 }
                 @Override
-                protected ApplicationInfo maybeCheckConsistency(
-                        ApplicationInfoQuery query, ApplicationInfo proposedResult) {
+                public boolean resultEquals(ApplicationInfo cached, ApplicationInfo fetched) {
                     // Implementing this debug check for ApplicationInfo would require a
                     // complicated deep comparison, so just bypass it for now.
-                    return proposedResult;
+                    return true;
                 }
             };
 
@@ -10275,16 +10288,15 @@ public abstract class PackageManager {
                     32, PermissionManager.CACHE_KEY_PACKAGE_INFO,
                     "getPackageInfo") {
                 @Override
-                protected PackageInfo recompute(PackageInfoQuery query) {
+                public PackageInfo recompute(PackageInfoQuery query) {
                     return getPackageInfoAsUserUncached(
                             query.packageName, query.flags, query.userId);
                 }
                 @Override
-                protected PackageInfo maybeCheckConsistency(
-                        PackageInfoQuery query, PackageInfo proposedResult) {
+                public boolean resultEquals(PackageInfo cached, PackageInfo fetched) {
                     // Implementing this debug check for PackageInfo would require a
                     // complicated deep comparison, so just bypass it for now.
-                    return proposedResult;
+                    return true;
                 }
             };
 

@@ -1062,7 +1062,7 @@ public final class BluetoothAdapter {
                 8, BLUETOOTH_GET_STATE_CACHE_PROPERTY) {
                 @Override
                 @SuppressLint("AndroidFrameworkRequiresPermission")
-                protected Integer recompute(Void query) {
+                public Integer recompute(Void query) {
                     try {
                         return mService.getState();
                     } catch (RemoteException e) {
@@ -2085,7 +2085,7 @@ public final class BluetoothAdapter {
                 8, BLUETOOTH_FILTERING_CACHE_PROPERTY) {
                 @Override
                 @SuppressLint("AndroidFrameworkRequiresPermission")
-                protected Boolean recompute(Void query) {
+                public Boolean recompute(Void query) {
                     try {
                         mServiceLock.readLock().lock();
                         if (mService != null) {
@@ -2540,7 +2540,7 @@ public final class BluetoothAdapter {
                  */
                 @Override
                 @SuppressLint("AndroidFrameworkRequiresPermission")
-                protected Integer recompute(Void query) {
+                public Integer recompute(Void query) {
                     try {
                         return mService.getAdapterConnectionState();
                     } catch (RemoteException e) {
@@ -2605,7 +2605,7 @@ public final class BluetoothAdapter {
                 8, BLUETOOTH_PROFILE_CACHE_PROPERTY) {
                 @Override
                 @SuppressLint("AndroidFrameworkRequiresPermission")
-                protected Integer recompute(Integer query) {
+                public Integer recompute(Integer query) {
                     try {
                         mServiceLock.readLock().lock();
                         if (mService != null) {

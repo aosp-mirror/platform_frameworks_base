@@ -141,6 +141,10 @@ class BubbleOverflow(
         return null
     }
 
+    override fun getRawAppBadge(): Bitmap? {
+        return null
+    }
+
     override fun getBubbleIcon(): Bitmap {
         return bitmap
     }

@@ -170,7 +170,7 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
         when(mFile.getUsableSpace()).thenReturn(10000L);
         when(mFile.getTotalSpace()).thenReturn(100000L);
         long result = mSm.getStorageCacheBytes(mFile, 0);
-        assertThat(result).isEqualTo(4666L);
+        assertThat(result).isEqualTo(4667L);
     }
 
     /**

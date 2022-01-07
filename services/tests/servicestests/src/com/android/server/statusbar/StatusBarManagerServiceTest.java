@@ -21,6 +21,7 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
@@ -573,6 +574,30 @@ public class StatusBarManagerServiceTest {
             mAddTileResultCallbackCaptor.getValue().onTileRequest(
                     StatusBarManager.TILE_ADD_REQUEST_RESULT_DIALOG_DISMISSED);
         }
+    }
+
+    @Test
+    public void testSetNavBarModeOverride_setsOverrideModeKids() {
+        int navBarModeOverrideKids = StatusBarManager.NAV_BAR_MODE_OVERRIDE_KIDS;
+        mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideKids);
+
+        assertEquals(navBarModeOverrideKids, mStatusBarManagerService.getNavBarModeOverride());
+    }
+
+    @Test
+    public void testSetNavBarModeOverride_setsOverrideModeNone() {
+        int navBarModeOverrideNone = StatusBarManager.NAV_BAR_MODE_OVERRIDE_NONE;
+        mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideNone);
+
+        assertEquals(navBarModeOverrideNone, mStatusBarManagerService.getNavBarModeOverride());
+    }
+
+    @Test
+    public void testSetNavBarModeOverride_invalidInputThrowsError() {
+        int navBarModeOverrideInvalid = -1;
+
+        assertThrows(UnsupportedOperationException.class,
+                () -> mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideInvalid));
     }
 
     private void mockUidCheck() {

@@ -108,6 +108,8 @@ public class Bubble implements BubbleViewProvider {
     private Bitmap mBubbleBitmap;
     // The app badge for the bubble
     private Bitmap mBadgeBitmap;
+    // App badge without any markings for important conversations
+    private Bitmap mRawBadgeBitmap;
     private int mDotColor;
     private Path mDotPath;
     private int mFlags;
@@ -245,6 +247,11 @@ public class Bubble implements BubbleViewProvider {
     @Override
     public Bitmap getAppBadge() {
         return mBadgeBitmap;
+    }
+
+    @Override
+    public Bitmap getRawAppBadge() {
+        return mRawBadgeBitmap;
     }
 
     @Override
@@ -409,6 +416,7 @@ public class Bubble implements BubbleViewProvider {
         mFlyoutMessage = info.flyoutMessage;
 
         mBadgeBitmap = info.badgeBitmap;
+        mRawBadgeBitmap = info.mRawBadgeBitmap;
         mBubbleBitmap = info.bubbleBitmap;
 
         mDotColor = info.dotColor;

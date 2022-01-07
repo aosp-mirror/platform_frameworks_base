@@ -1355,6 +1355,17 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return getVisibility(starting) != TASK_FRAGMENT_VISIBILITY_INVISIBLE;
     }
 
+    /**
+     * Returns {@code true} is the activity in this TaskFragment can be resumed.
+     *
+     * @param starting The currently starting activity or {@code null} if there is none.
+     */
+    boolean canBeResumed(@Nullable ActivityRecord starting) {
+        // No need to resume activity in TaskFragment that is not visible.
+        return isTopActivityFocusable()
+                && getVisibility(starting) == TASK_FRAGMENT_VISIBILITY_VISIBLE;
+    }
+
     boolean isFocusableAndVisible() {
         return isTopActivityFocusable() && shouldBeVisible(null /* starting */);
     }

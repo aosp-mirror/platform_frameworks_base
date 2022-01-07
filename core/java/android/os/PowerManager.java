@@ -1011,7 +1011,7 @@ public final class PowerManager {
             new PropertyInvalidatedCache<Void, Boolean>(MAX_CACHE_ENTRIES,
                 CACHE_KEY_IS_POWER_SAVE_MODE_PROPERTY) {
                 @Override
-                protected Boolean recompute(Void query) {
+                public Boolean recompute(Void query) {
                     try {
                         return mService.isPowerSaveMode();
                     } catch (RemoteException e) {
@@ -1024,7 +1024,7 @@ public final class PowerManager {
             new PropertyInvalidatedCache<Void, Boolean>(MAX_CACHE_ENTRIES,
                 CACHE_KEY_IS_INTERACTIVE_PROPERTY) {
                 @Override
-                protected Boolean recompute(Void query) {
+                public Boolean recompute(Void query) {
                     try {
                         return mService.isInteractive();
                     } catch (RemoteException e) {

@@ -1525,10 +1525,11 @@ public class StorageManager {
             result = totalBytes * CACHE_RESERVE_PERCENT_LOW / 100;
         } else {
             // Else, linearly interpolate the amount of space to reserve
-            result = ((CACHE_RESERVE_PERCENT_HIGH - CACHE_RESERVE_PERCENT_LOW)
-                      * (usableBytes - storageThresholdHighBytes) + CACHE_RESERVE_PERCENT_HIGH
-                      * (storageThresholdHighBytes - storageThresholdLowBytes)) * totalBytes
-                      / (100 * (storageThresholdHighBytes - storageThresholdLowBytes));
+            double slope = (CACHE_RESERVE_PERCENT_HIGH - CACHE_RESERVE_PERCENT_LOW) * totalBytes
+                    / (100.0 * (storageThresholdHighBytes - storageThresholdLowBytes));
+            double intercept = totalBytes * CACHE_RESERVE_PERCENT_LOW / 100.0
+                    - storageThresholdLowBytes * slope;
+            result = Math.round(slope * usableBytes + intercept);
         }
         return result;
     }

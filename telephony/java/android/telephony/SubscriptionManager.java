@@ -194,7 +194,7 @@ public class SubscriptionManager {
         }
 
         @Override
-        protected T recompute(Void aVoid) {
+        public T recompute(Void aVoid) {
             T result = mDefaultValue;
 
             try {
@@ -228,7 +228,7 @@ public class SubscriptionManager {
         }
 
         @Override
-        protected T recompute(Integer query) {
+        public T recompute(Integer query) {
             T result = mDefaultValue;
 
             try {

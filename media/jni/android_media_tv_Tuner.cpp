@@ -1044,7 +1044,7 @@ void FrontendClientCallbackImpl::executeOnScanMessage(
             } else {
                 env->CallVoidMethod(
                         frontend,
-                        env->GetMethodID(clazz, "onUnLocked", "()V"));
+                        env->GetMethodID(clazz, "onUnlocked", "()V"));
             }
             break;
         }

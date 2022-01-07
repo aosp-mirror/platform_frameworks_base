@@ -340,6 +340,20 @@ public abstract class PermissionControllerService extends Service {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 
+    /**
+     * Get the count of unused, hibernating apps on the device.
+     *
+     * @param callback callback after count is retrieved
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_APP_HIBERNATION)
+    @NonNull
+    public void onGetUnusedAppCount(@NonNull IntConsumer callback) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
+
     @Override
     public final @NonNull IBinder onBind(Intent intent) {
         return new IPermissionController.Stub() {
@@ -614,6 +628,20 @@ public abstract class PermissionControllerService extends Service {
                     Objects.requireNonNull(callback);
                     PermissionControllerService.this.onGetGroupOfPlatformPermission(
                             permissionGroupName, callback::complete);
+                } catch (Throwable t) {
+                    callback.completeExceptionally(t);
+                }
+            }
+
+            @Override
+            public void getUnusedAppCount(@NonNull AndroidFuture callback) {
+                try {
+                    Objects.requireNonNull(callback);
+
+                    enforceSomePermissionsGrantedToCaller(
+                            Manifest.permission.MANAGE_APP_HIBERNATION);
+
+                    PermissionControllerService.this.onGetUnusedAppCount(callback::complete);
                 } catch (Throwable t) {
                     callback.completeExceptionally(t);
                 }

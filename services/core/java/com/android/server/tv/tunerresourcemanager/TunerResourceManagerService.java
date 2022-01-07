@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.IResourceManagerService;
 import android.media.tv.TvInputManager;
 import android.media.tv.tunerresourcemanager.CasSessionRequest;
@@ -542,6 +543,12 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         @Override
         protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
+
+            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("Permission Denial: can't dump!");
+                return;
+            }
 
             synchronized (mLock) {
                 if (mClientProfiles != null) {

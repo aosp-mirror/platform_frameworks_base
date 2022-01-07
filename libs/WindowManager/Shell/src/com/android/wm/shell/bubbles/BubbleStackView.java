@@ -2615,11 +2615,13 @@ public class BubbleStackView extends FrameLayout
 
         // If available, update the manage menu's settings option with the expanded bubble's app
         // name and icon.
-        if (show && mBubbleData.hasBubbleInStackWithKey(mExpandedBubble.getKey())) {
+        if (show) {
             final Bubble bubble = mBubbleData.getBubbleInStackWithKey(mExpandedBubble.getKey());
-            mManageSettingsIcon.setImageBitmap(bubble.getAppBadge());
-            mManageSettingsText.setText(getResources().getString(
-                    R.string.bubbles_app_settings, bubble.getAppName()));
+            if (bubble != null) {
+                mManageSettingsIcon.setImageBitmap(bubble.getRawAppBadge());
+                mManageSettingsText.setText(getResources().getString(
+                        R.string.bubbles_app_settings, bubble.getAppName()));
+            }
         }
 
         if (mExpandedBubble.getExpandedView().getTaskView() != null) {

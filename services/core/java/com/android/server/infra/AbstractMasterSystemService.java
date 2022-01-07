@@ -509,7 +509,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      *
      * <pre><code>
      * resolver.registerContentObserver(Settings.Global.getUriFor(
-     *     Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES), false, observer,
+     *     Settings.Global.AUTOFILL_LOGGING_LEVEL), false, observer,
      *     UserHandle.USER_ALL);
      * </code></pre>
      *

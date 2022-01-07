@@ -93,6 +93,12 @@ public class BrightnessDialog extends Activity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         MetricsLogger.hidden(this, MetricsEvent.BRIGHTNESS_DIALOG);
