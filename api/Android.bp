@@ -116,7 +116,6 @@ combined_apis {
         "framework-graphics",
         "framework-media",
         "framework-mediaprovider",
-        "framework-nearby",
         "framework-permission",
         "framework-permission-s",
         "framework-scheduling",

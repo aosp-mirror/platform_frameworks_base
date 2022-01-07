@@ -169,7 +169,6 @@ java_library_with_nonpublic_deps {
         "framework-statsd.impl",
         "framework-supplementalprocess.impl",
         "framework-tethering.impl",
-        "framework-nearby.impl",
         "framework-uwb.impl",
         "framework-wifi.impl",
         "updatable-media",
