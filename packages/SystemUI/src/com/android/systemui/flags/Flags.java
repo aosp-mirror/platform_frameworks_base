@@ -123,7 +123,8 @@ public class Flags {
     /***************************************/
     // 900 - media
     public static final BooleanFlag MEDIA_TAP_TO_TRANSFER = new BooleanFlag(900, false);
-    public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, false);
+    public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, true);
+    public static final BooleanFlag MEDIA_SESSION_LAYOUT = new BooleanFlag(902, false);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

@@ -418,7 +418,7 @@ class MediaCarouselController @Inject constructor(
                 .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
         if (existingPlayer == null) {
             var newPlayer = mediaControlPanelFactory.get()
-            if (mediaFlags.areMediaSessionActionsEnabled()) {
+            if (mediaFlags.useMediaSessionLayout()) {
                 newPlayer.attachPlayer(
                         PlayerSessionViewHolder.create(LayoutInflater.from(context), mediaContent),
                         MediaViewController.TYPE.PLAYER_SESSION)

@@ -202,6 +202,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 resumeAction = null)
 
         whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(false)
+        whenever(mediaFlags.useMediaSessionLayout()).thenReturn(false)
     }
 
     /** Mock view holder for the notification player */
@@ -301,8 +302,47 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun bindSemanticActions() {
+    fun bindSemanticActionsOldLayout() {
         whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
+        whenever(mediaFlags.useMediaSessionLayout()).thenReturn(false)
+
+        val icon = Icon.createWithResource(context, android.R.drawable.ic_media_play)
+        val semanticActions = MediaButton(
+            playOrPause = MediaAction(icon, Runnable {}, "play"),
+            nextOrCustom = MediaAction(icon, Runnable {}, "next"),
+            startCustom = MediaAction(icon, null, "custom 1"),
+            endCustom = MediaAction(icon, null, "custom 2")
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(holder, MediaViewController.TYPE.PLAYER)
+        player.bindPlayer(state, PACKAGE)
+
+        verify(expandedSet).setVisibility(R.id.action0, ConstraintSet.VISIBLE)
+        assertThat(action0.contentDescription).isEqualTo("custom 1")
+        assertThat(action0.isEnabled()).isFalse()
+
+        verify(expandedSet).setVisibility(R.id.action1, ConstraintSet.INVISIBLE)
+        assertThat(action1.isEnabled()).isFalse()
+
+        verify(expandedSet).setVisibility(R.id.action2, ConstraintSet.VISIBLE)
+        assertThat(action2.isEnabled()).isTrue()
+        assertThat(action2.contentDescription).isEqualTo("play")
+
+        verify(expandedSet).setVisibility(R.id.action3, ConstraintSet.VISIBLE)
+        assertThat(action3.isEnabled()).isTrue()
+        assertThat(action3.contentDescription).isEqualTo("next")
+
+        verify(expandedSet).setVisibility(R.id.action4, ConstraintSet.VISIBLE)
+        assertThat(action4.contentDescription).isEqualTo("custom 2")
+        assertThat(action4.isEnabled()).isFalse()
+    }
+
+    @Test
+    fun bindSemanticActionsNewLayout() {
+        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
+        whenever(mediaFlags.useMediaSessionLayout()).thenReturn(true)
+
         val icon = Icon.createWithResource(context, android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
                 playOrPause = MediaAction(icon, Runnable {}, "play"),
