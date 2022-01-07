@@ -540,11 +540,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void showTransient(int displayId, @InternalInsetsType int[] types) {
+        public void showTransient(int displayId, @InternalInsetsType int[] types,
+                boolean isGestureOnSystemBar) {
             getUiState(displayId).showTransient(types);
             if (mBar != null) {
                 try {
-                    mBar.showTransient(displayId, types);
+                    mBar.showTransient(displayId, types, isGestureOnSystemBar);
                 } catch (RemoteException ex) { }
             }
         }

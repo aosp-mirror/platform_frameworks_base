@@ -332,7 +332,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertTrue(rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
 
         provider.getSource().setVisible(false);
-        mDisplayContent.getInsetsPolicy().showTransient(new int[] { ITYPE_STATUS_BAR });
+        mDisplayContent.getInsetsPolicy().showTransient(new int[] { ITYPE_STATUS_BAR },
+                true /* isGestureOnSystemBar */);
 
         assertTrue(mDisplayContent.getInsetsPolicy().isTransient(ITYPE_STATUS_BAR));
         assertFalse(app.getInsetsState().getSource(ITYPE_STATUS_BAR).isVisible());
