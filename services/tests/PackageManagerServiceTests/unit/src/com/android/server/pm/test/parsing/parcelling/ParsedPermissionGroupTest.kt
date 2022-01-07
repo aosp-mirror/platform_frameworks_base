@@ -16,8 +16,8 @@
 
 package com.android.server.pm.test.parsing.parcelling
 
-import android.content.pm.parsing.component.ParsedPermissionGroup
-import android.content.pm.parsing.component.ParsedPermissionGroupImpl
+import com.android.server.pm.pkg.component.ParsedPermissionGroup
+import com.android.server.pm.pkg.component.ParsedPermissionGroupImpl
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
@@ -26,7 +26,8 @@ class ParsedPermissionGroupTest : ParsedComponentTest(
     ParsedPermissionGroupImpl::class,
 ) {
 
-    override val defaultImpl = ParsedPermissionGroupImpl()
+    override val defaultImpl =
+        ParsedPermissionGroupImpl()
     override val creator = ParsedPermissionGroupImpl.CREATOR
 
     override val subclassBaseParams = listOf(

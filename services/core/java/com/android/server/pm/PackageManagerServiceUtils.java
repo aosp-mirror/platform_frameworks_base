@@ -51,7 +51,7 @@ import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
-import android.content.pm.parsing.component.ParsedMainComponent;
+import com.android.server.pm.pkg.component.ParsedMainComponent;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Binder;

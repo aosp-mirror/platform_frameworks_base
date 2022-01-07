@@ -17,7 +17,7 @@
 package com.android.server.pm.parsing.pkg;
 
 import android.content.pm.PackageInfo;
-import android.content.pm.parsing.PkgWithoutStatePackageInfo;
+import com.android.server.pm.pkg.parsing.PkgWithoutStatePackageInfo;
 
 import com.android.server.pm.PackageManagerService;
 

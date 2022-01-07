@@ -20,8 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.parsing.component.ParsedMainComponent;
-import android.content.pm.pkg.PackageUserStateUtils;
+import com.android.server.pm.pkg.component.ParsedMainComponent;
+
 import android.util.SparseArray;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;

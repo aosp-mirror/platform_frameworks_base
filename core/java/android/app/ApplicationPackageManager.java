@@ -62,6 +62,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -73,12 +74,6 @@ import android.content.pm.SuspendDialogInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
-import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseResult;
-import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -2333,37 +2328,6 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public CharSequence getApplicationLabel(ApplicationInfo info) {
         return info.loadLabel(this);
-    }
-
-    @Nullable
-    public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath, int flags) {
-        return getPackageArchiveInfo(archiveFilePath, PackageInfoFlags.of(flags));
-    }
-
-    @Nullable
-    public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath,
-            PackageInfoFlags flags) {
-        long flagsBits = flags.getValue();
-        if ((flagsBits & (PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                | PackageManager.MATCH_DIRECT_BOOT_AWARE)) == 0) {
-            // Caller expressed no opinion about what encryption
-            // aware/unaware components they want to see, so match both
-            flagsBits |= PackageManager.MATCH_DIRECT_BOOT_AWARE
-                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
-        }
-
-        boolean collectCertificates = (flagsBits & PackageManager.GET_SIGNATURES) != 0
-                || (flagsBits & PackageManager.GET_SIGNING_CERTIFICATES) != 0;
-
-        ParseInput input = ParseTypeImpl.forParsingWithoutPlatformCompat().reset();
-        ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefault(input,
-                new File(archiveFilePath), 0, getPermissionManager().getSplitPermissions(),
-                collectCertificates);
-        if (result.isError()) {
-            return null;
-        }
-        return PackageInfoWithoutStateUtils.generate(result.getResult(), null, flagsBits, 0, 0,
-                null, FrameworkPackageUserState.DEFAULT, UserHandle.getCallingUserId());
     }
 
     @Override
