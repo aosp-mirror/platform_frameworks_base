@@ -217,6 +217,11 @@ final class DefaultPermissionGrantPolicy {
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.NEARBY_WIFI_DEVICES);
     }
 
+    private static final Set<String> NOTIFICATION_PERMISSIONS = new ArraySet<>();
+    static {
+        NOTIFICATION_PERMISSIONS.add(Manifest.permission.POST_NOTIFICATIONS);
+    }
+
     private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
 
     private static final String ACTION_TRACK = "com.android.fitness.TRACK";
@@ -378,18 +383,43 @@ final class DefaultPermissionGrantPolicy {
 
         grantPermissionsToSysComponentsAndPrivApps(pm, userId);
         grantDefaultSystemHandlerPermissions(pm, userId);
+        grantSignatureAppsNotificationPermissions(pm, userId);
         grantDefaultPermissionExceptions(pm, userId);
 
         // Apply delayed state
         pm.apply();
     }
 
+    private void grantSignatureAppsNotificationPermissions(PackageManagerWrapper pm, int userId) {
+        Log.i(TAG, "Granting Notification permissions to platform signature apps for user "
+                + userId);
+        List<PackageInfo> packages = mContext.getPackageManager().getInstalledPackagesAsUser(
+                DEFAULT_PACKAGE_INFO_QUERY_FLAGS, UserHandle.USER_SYSTEM);
+        for (PackageInfo pkg : packages) {
+            if (pkg == null || !pkg.applicationInfo.isSystemApp()
+                    || !pkg.applicationInfo.isSignedWithPlatformKey()) {
+                continue;
+            }
+            grantRuntimePermissionsForSystemPackage(pm, userId, pkg, NOTIFICATION_PERMISSIONS);
+        }
+
+    }
+
     private void grantRuntimePermissionsForSystemPackage(PackageManagerWrapper pm,
             int userId, PackageInfo pkg) {
+        grantRuntimePermissionsForSystemPackage(pm, userId, pkg, null);
+    }
+
+    private void grantRuntimePermissionsForSystemPackage(PackageManagerWrapper pm,
+            int userId, PackageInfo pkg, Set<String> filterPermissions) {
+        if (ArrayUtils.isEmpty(pkg.requestedPermissions)) {
+            return;
+        }
         Set<String> permissions = new ArraySet<>();
         for (String permission : pkg.requestedPermissions) {
             final PermissionInfo perm = pm.getPermissionInfo(permission);
-            if (perm == null) {
+            if (perm == null
+                    || (filterPermissions != null && !filterPermissions.contains(permission))) {
                 continue;
             }
             if (perm.isRuntime()) {
@@ -547,23 +577,31 @@ final class DefaultPermissionGrantPolicy {
         String[] calendarSyncAdapterPackages = (syncAdapterPackagesProvider != null) ?
                 syncAdapterPackagesProvider.getPackages(CalendarContract.AUTHORITY, userId) : null;
 
+        // PermissionController
+        grantSystemFixedPermissionsToSystemPackage(pm,
+                mContext.getPackageManager().getPermissionControllerPackageName(), userId,
+                NOTIFICATION_PERMISSIONS);
+
         // Installer
         grantSystemFixedPermissionsToSystemPackage(pm,
                 ArrayUtils.firstOrNull(getKnownPackages(
                         PackageManagerInternal.PACKAGE_INSTALLER, userId)),
-                userId, STORAGE_PERMISSIONS);
+                userId, STORAGE_PERMISSIONS, NOTIFICATION_PERMISSIONS);
 
         // Verifier
         final String verifier = ArrayUtils.firstOrNull(getKnownPackages(
                 PackageManagerInternal.PACKAGE_VERIFIER, userId));
         grantSystemFixedPermissionsToSystemPackage(pm, verifier, userId, STORAGE_PERMISSIONS);
-        grantPermissionsToSystemPackage(pm, verifier, userId, PHONE_PERMISSIONS, SMS_PERMISSIONS);
+        grantPermissionsToSystemPackage(pm, verifier, userId, PHONE_PERMISSIONS, SMS_PERMISSIONS,
+                NOTIFICATION_PERMISSIONS);
 
         // SetupWizard
         final String setupWizardPackage = ArrayUtils.firstOrNull(getKnownPackages(
                 PackageManagerInternal.PACKAGE_SETUP_WIZARD, userId));
         grantPermissionsToSystemPackage(pm, setupWizardPackage, userId, PHONE_PERMISSIONS,
                 CONTACTS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, CAMERA_PERMISSIONS);
+        grantSystemFixedPermissionsToSystemPackage(pm, setupWizardPackage, userId,
+                NOTIFICATION_PERMISSIONS);
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH, 0)
                 || mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE,
                 0)) {
@@ -585,12 +623,12 @@ final class DefaultPermissionGrantPolicy {
         // Media provider
         grantSystemFixedPermissionsToSystemPackage(pm,
                 getDefaultProviderAuthorityPackage(MediaStore.AUTHORITY, userId), userId,
-                STORAGE_PERMISSIONS);
+                STORAGE_PERMISSIONS, NOTIFICATION_PERMISSIONS);
 
         // Downloads provider
         grantSystemFixedPermissionsToSystemPackage(pm,
                 getDefaultProviderAuthorityPackage("downloads", userId), userId,
-                STORAGE_PERMISSIONS);
+                STORAGE_PERMISSIONS, NOTIFICATION_PERMISSIONS);
 
         // Downloads UI
         grantSystemFixedPermissionsToSystemPackage(pm,
@@ -649,7 +687,7 @@ final class DefaultPermissionGrantPolicy {
         // Cell Broadcast Receiver
         grantSystemFixedPermissionsToSystemPackage(pm,
                 getDefaultSystemHandlerActivityPackage(pm, Intents.SMS_CB_RECEIVED_ACTION, userId),
-                userId, SMS_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
+                userId, SMS_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS, NOTIFICATION_PERMISSIONS);
 
         // Carrier Provisioning Service
         grantPermissionsToSystemPackage(pm,
@@ -661,7 +699,7 @@ final class DefaultPermissionGrantPolicy {
         grantPermissionsToSystemPackage(pm,
                 getDefaultSystemHandlerActivityPackageForCategory(pm,
                         Intent.CATEGORY_APP_CALENDAR, userId),
-                userId, CALENDAR_PERMISSIONS, CONTACTS_PERMISSIONS);
+                userId, CALENDAR_PERMISSIONS, CONTACTS_PERMISSIONS, NOTIFICATION_PERMISSIONS);
 
         // Calendar provider
         String calendarProvider =
@@ -762,7 +800,8 @@ final class DefaultPermissionGrantPolicy {
                 grantPermissionsToSystemPackage(pm, packageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
-                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
+                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS,
+                        NOTIFICATION_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(pm, packageName, userId,
                         ALWAYS_LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }
@@ -791,7 +830,7 @@ final class DefaultPermissionGrantPolicy {
                 .addCategory(Intent.CATEGORY_LAUNCHER_APP);
         grantPermissionsToSystemPackage(pm,
                 getDefaultSystemHandlerActivityPackage(pm, homeIntent, userId), userId,
-                ALWAYS_LOCATION_PERMISSIONS);
+                ALWAYS_LOCATION_PERMISSIONS, NOTIFICATION_PERMISSIONS);
 
         // Watches
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH, 0)) {
@@ -816,7 +855,7 @@ final class DefaultPermissionGrantPolicy {
 
         // Print Spooler
         grantSystemFixedPermissionsToSystemPackage(pm, PrintManager.PRINT_SPOOLER_PACKAGE_NAME,
-                userId, ALWAYS_LOCATION_PERMISSIONS);
+                userId, ALWAYS_LOCATION_PERMISSIONS, NOTIFICATION_PERMISSIONS);
 
         // EmergencyInfo
         grantSystemFixedPermissionsToSystemPackage(pm,
@@ -920,12 +959,13 @@ final class DefaultPermissionGrantPolicy {
                 mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH, 0);
         if (isPhonePermFixed) {
             grantSystemFixedPermissionsToSystemPackage(pm, dialerPackage, userId,
-                    PHONE_PERMISSIONS);
+                    PHONE_PERMISSIONS, NOTIFICATION_PERMISSIONS);
         } else {
             grantPermissionsToSystemPackage(pm, dialerPackage, userId, PHONE_PERMISSIONS);
         }
         grantPermissionsToSystemPackage(pm, dialerPackage, userId,
-                CONTACTS_PERMISSIONS, SMS_PERMISSIONS, MICROPHONE_PERMISSIONS, CAMERA_PERMISSIONS);
+                CONTACTS_PERMISSIONS, SMS_PERMISSIONS, MICROPHONE_PERMISSIONS, CAMERA_PERMISSIONS,
+                NOTIFICATION_PERMISSIONS);
         boolean isAndroidAutomotive =
                 mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0);
         if (isAndroidAutomotive) {
@@ -937,7 +977,8 @@ final class DefaultPermissionGrantPolicy {
             String smsPackage, int userId) {
         grantPermissionsToSystemPackage(pm, smsPackage, userId,
                 PHONE_PERMISSIONS, CONTACTS_PERMISSIONS, SMS_PERMISSIONS,
-                STORAGE_PERMISSIONS, MICROPHONE_PERMISSIONS, CAMERA_PERMISSIONS);
+                STORAGE_PERMISSIONS, MICROPHONE_PERMISSIONS, CAMERA_PERMISSIONS,
+                NOTIFICATION_PERMISSIONS);
     }
 
     private void grantDefaultPermissionsToDefaultSystemUseOpenWifiApp(PackageManagerWrapper pm,
