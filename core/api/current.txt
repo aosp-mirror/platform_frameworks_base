@@ -3131,11 +3131,13 @@ package android.accessibilityservice {
     method public void addListener(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController.OnMagnificationChangedListener, @Nullable android.os.Handler);
     method public float getCenterX();
     method public float getCenterY();
+    method @NonNull public android.graphics.Region getCurrentMagnificationRegion();
     method @Nullable public android.accessibilityservice.MagnificationConfig getMagnificationConfig();
     method @NonNull public android.graphics.Region getMagnificationRegion();
     method public float getScale();
     method public boolean removeListener(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController.OnMagnificationChangedListener);
     method public boolean reset(boolean);
+    method public boolean resetCurrentMagnification(boolean);
     method public boolean setCenter(float, float, boolean);
     method public boolean setMagnificationConfig(@NonNull android.accessibilityservice.MagnificationConfig, boolean);
     method public boolean setScale(float, boolean);
