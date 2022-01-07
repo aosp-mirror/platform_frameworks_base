@@ -552,7 +552,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"প্ৰতিবাৰতে সোধক"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"আপুনি অফ নকৰা পর্যন্ত"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"এই মাত্ৰ"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ফ’নৰ স্পীকাৰ"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"এই ফ’নটো"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"এই ফ’নটো"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"সংযোগ হোৱাত সমস্যা হৈছে। ডিভাইচটো অফ কৰি পুনৰ অন কৰক"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"তাঁৰযুক্ত অডিঅ’ ডিভাইচ"</string>

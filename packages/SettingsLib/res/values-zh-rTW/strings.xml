@@ -552,7 +552,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"每次都詢問"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"直到你關閉為止"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"剛剛"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"手機喇叭"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"這支手機"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"這支手機"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"無法連線，請關閉裝置後再重新開啟"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線音訊裝置"</string>

@@ -552,7 +552,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"प्रत्येक वेळी विचारा"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"तुम्ही बंद करेपर्यंत"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"आत्ताच"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"फोनचा स्पीकर"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"हा फोन"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"हा फोन"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"कनेक्‍ट करण्‍यात समस्‍या आली. डिव्हाइस बंद करा आणि नंतर सुरू करा"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"वायर असलेले ऑडिओ डिव्हाइस"</string>

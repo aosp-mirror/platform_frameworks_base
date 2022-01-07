@@ -552,7 +552,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ஒவ்வொரு முறையும் கேள்"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"ஆஃப் செய்யும் வரை"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"சற்றுமுன்"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"மொபைல் ஸ்பீக்கர்"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"இந்த மொபைல்"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"இந்த மொபைல்"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"இணைப்பதில் சிக்கல். சாதனத்தை ஆஃப் செய்து மீண்டும் ஆன் செய்யவும்"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"வயருடன்கூடிய ஆடியோ சாதனம்"</string>
