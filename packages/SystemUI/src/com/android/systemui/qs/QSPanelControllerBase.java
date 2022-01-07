@@ -401,6 +401,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 pw.print("    "); pw.println(record.tileView.toString());
             }
         }
+        if (mMediaHost != null) {
+            pw.println("  media bounds: " + mMediaHost.getCurrentBounds());
+        }
     }
 
     public QSPanel.QSTileLayout getTileLayout() {

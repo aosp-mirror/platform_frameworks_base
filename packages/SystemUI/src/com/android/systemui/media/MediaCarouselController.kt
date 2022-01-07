@@ -865,6 +865,10 @@ class MediaCarouselController @Inject constructor(
             println("playerKeys: ${MediaPlayerData.playerKeys()}")
             println("smartspaceMediaData: ${MediaPlayerData.smartspaceMediaData}")
             println("shouldPrioritizeSs: ${MediaPlayerData.shouldPrioritizeSs}")
+            println("current size: $currentCarouselWidth x $currentCarouselHeight")
+            println("location: $desiredLocation")
+            println("state: ${desiredHostState?.expansion}, " +
+                "only active ${desiredHostState?.showsOnlyActiveMedia}")
         }
     }
 }

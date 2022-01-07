@@ -218,7 +218,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         String expected = "TestableQSPanelControllerBase:\n"
                 + "  Tile records:\n"
                 + "    " + mockTileString + "\n"
-                + "    " + mockTileViewString + "\n";
+                + "    " + mockTileViewString + "\n"
+                + "  media bounds: null\n";
         assertEquals(expected, w.getBuffer().toString());
     }
 
