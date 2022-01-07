@@ -28,7 +28,6 @@ import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
-import static android.window.TransitionInfo.isIndependent;
 
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
@@ -48,7 +47,6 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.util.ArrayMap;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -62,8 +60,8 @@ import androidx.annotation.Nullable;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.transition.CounterRotatorHelper;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.CounterRotator;
 
 import java.util.Optional;
 
@@ -322,35 +320,11 @@ public class PipTransition extends PipTransitionController {
         final int displayH = displayRotationChange.getEndAbsBounds().height();
 
         // Counter-rotate all "going-away" things since they are still in the old orientation.
-        final ArrayMap<WindowContainerToken, CounterRotator> counterRotators = new ArrayMap<>();
-        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-            final TransitionInfo.Change change = info.getChanges().get(i);
-            if (!Transitions.isClosingType(change.getMode())
-                    || !isIndependent(change, info)
-                    || change.getParent() == null) {
-                continue;
-            }
-            CounterRotator crot = counterRotators.get(change.getParent());
-            if (crot == null) {
-                crot = new CounterRotator();
-                crot.setup(startTransaction,
-                        info.getChange(change.getParent()).getLeash(),
-                        rotateDelta, displayW, displayH);
-                if (crot.getSurface() != null) {
-                    // Wallpaper should be placed at the bottom.
-                    final int layer = (change.getFlags() & FLAG_IS_WALLPAPER) == 0
-                            ? info.getChanges().size() - i
-                            : -1;
-                    startTransaction.setLayer(crot.getSurface(), layer);
-                }
-                counterRotators.put(change.getParent(), crot);
-            }
-            crot.addChild(startTransaction, change.getLeash());
-        }
+        final CounterRotatorHelper rotator = new CounterRotatorHelper();
+        rotator.handleClosingChanges(info, startTransaction, rotateDelta, displayW, displayH);
+
         mFinishCallback = (wct, wctCB) -> {
-            for (int i = 0; i < counterRotators.size(); ++i) {
-                counterRotators.valueAt(i).cleanUp(info.getRootLeash());
-            }
+            rotator.cleanUp();
             mPipOrganizer.onExitPipFinished(pipChange.getTaskInfo());
             finishCallback.onTransitionFinished(wct, wctCB);
         };
