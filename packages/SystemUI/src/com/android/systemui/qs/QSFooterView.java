@@ -48,6 +48,7 @@ public class QSFooterView extends FrameLayout {
     private TextView mBuildText;
     private View mActionsContainer;
 
+    @Nullable
     protected TouchAnimator mFooterAnimator;
 
     private boolean mQsDisabled;
@@ -56,6 +57,7 @@ public class QSFooterView extends FrameLayout {
 
     private boolean mShouldShowBuildText;
 
+    @Nullable
     private OnClickListener mExpandClickListener;
 
     private final ContentObserver mDeveloperSettingsObserver = new ContentObserver(

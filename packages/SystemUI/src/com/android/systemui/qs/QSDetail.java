@@ -64,15 +64,18 @@ public class QSDetail extends LinearLayout {
     protected TextView mDetailDoneButton;
     @VisibleForTesting
     QSDetailClipper mClipper;
+    @Nullable
     private DetailAdapter mDetailAdapter;
     private QSPanelController mQsPanelController;
 
     protected View mQsDetailHeader;
     protected TextView mQsDetailHeaderTitle;
     private ViewStub mQsDetailHeaderSwitchStub;
+    @Nullable
     private Switch mQsDetailHeaderSwitch;
     protected ImageView mQsDetailHeaderProgress;
 
+    @Nullable
     protected QSTileHost mHost;
 
     private boolean mScanState;
@@ -87,6 +90,7 @@ public class QSDetail extends LinearLayout {
     private boolean mSwitchState;
     private QSFooter mFooter;
 
+    @Nullable
     private QSContainerController mQsContainerController;
 
     public QSDetail(Context context, @Nullable AttributeSet attrs) {
@@ -183,12 +187,14 @@ public class QSDetail extends LinearLayout {
     }
 
     public interface Callback {
-        void onShowingDetail(DetailAdapter detail, int x, int y);
+        /** Handle an event of showing detail. */
+        void onShowingDetail(@Nullable DetailAdapter detail, int x, int y);
         void onToggleStateChanged(boolean state);
         void onScanStateChanged(boolean state);
     }
 
-    public void handleShowingDetail(final DetailAdapter adapter, int x, int y,
+    /** Handle an event of showing detail. */
+    public void handleShowingDetail(final @Nullable DetailAdapter adapter, int x, int y,
             boolean toggleQs) {
         final boolean showingDetail = adapter != null;
         final boolean wasShowingDetail = mDetailAdapter != null;
@@ -378,7 +384,8 @@ public class QSDetail extends LinearLayout {
         }
 
         @Override
-        public void onShowingDetail(final DetailAdapter detail, final int x, final int y) {
+        public void onShowingDetail(
+                final @Nullable DetailAdapter detail, final int x, final int y) {
             post(new Runnable() {
                 @Override
                 public void run() {

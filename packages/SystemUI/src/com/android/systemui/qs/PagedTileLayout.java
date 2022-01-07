@@ -19,6 +19,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Scroller;
 
+import androidx.annotation.Nullable;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
@@ -51,14 +52,17 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private final ArrayList<TileRecord> mTiles = new ArrayList<>();
     private final ArrayList<TileLayout> mPages = new ArrayList<>();
 
+    @Nullable
     private PageIndicator mPageIndicator;
     private float mPageIndicatorPosition;
 
+    @Nullable
     private PageListener mPageListener;
 
     private boolean mListening;
     private Scroller mScroller;
 
+    @Nullable
     private AnimatorSet mBounceAnimatorSet;
     private float mLastExpansion;
     private boolean mDistributeTiles = false;

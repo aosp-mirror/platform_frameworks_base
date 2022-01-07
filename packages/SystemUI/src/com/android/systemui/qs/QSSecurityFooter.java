@@ -48,6 +48,7 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -85,8 +86,10 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     protected H mHandler;
 
     private boolean mIsVisible;
+    @Nullable
     private CharSequence mFooterTextContent = null;
     private int mFooterIconId;
+    @Nullable
     private Drawable mPrimaryFooterIconDrawable;
 
     @Inject
@@ -240,6 +243,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         mMainHandler.post(mUpdateDisplayState);
     }
 
+    @Nullable
     protected CharSequence getFooterText(boolean isDeviceManaged, boolean hasWorkProfile,
             boolean hasCACerts, boolean hasCACertsInWorkProfile, boolean isNetworkLoggingEnabled,
             String vpnName, String vpnNameWorkProfile, CharSequence organizationName,
@@ -497,6 +501,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         return mContext.getString(R.string.ok);
     }
 
+    @Nullable
     private String getNegativeButton() {
         if (mSecurityController.isParentalControlsEnabled()) {
             return mContext.getString(R.string.monitoring_button_view_controls);
@@ -504,6 +509,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         return null;
     }
 
+    @Nullable
     protected CharSequence getManagementMessage(boolean isDeviceManaged,
             CharSequence organizationName) {
         if (!isDeviceManaged) {
@@ -521,6 +527,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         return mContext.getString(R.string.monitoring_description_management);
     }
 
+    @Nullable
     protected CharSequence getCaCertsMessage(boolean isDeviceManaged, boolean hasCACerts,
             boolean hasCACertsInWorkProfile) {
         if (!(hasCACerts || hasCACertsInWorkProfile)) return null;
@@ -534,6 +541,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         return mContext.getString(R.string.monitoring_description_ca_certificate);
     }
 
+    @Nullable
     protected CharSequence getNetworkLoggingMessage(boolean isDeviceManaged,
             boolean isNetworkLoggingEnabled) {
         if (!isNetworkLoggingEnabled) return null;
@@ -545,6 +553,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         }
     }
 
+    @Nullable
     protected CharSequence getVpnMessage(boolean isDeviceManaged, boolean hasWorkProfile,
             String vpnName, String vpnNameWorkProfile) {
         if (vpnName == null && vpnNameWorkProfile == null) return null;

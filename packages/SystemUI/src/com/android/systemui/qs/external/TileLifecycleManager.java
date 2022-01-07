@@ -36,6 +36,7 @@ import android.service.quicksettings.TileService;
 import android.util.ArraySet;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -85,6 +86,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private final BroadcastDispatcher mBroadcastDispatcher;
 
     private Set<Integer> mQueuedMessages = new ArraySet<>();
+    @Nullable
     private QSTileServiceWrapper mWrapper;
     private boolean mListening;
     private IBinder mClickBinder;
@@ -95,6 +97,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private AtomicBoolean mPackageReceiverRegistered = new AtomicBoolean(false);
     private AtomicBoolean mUserReceiverRegistered = new AtomicBoolean(false);
     private boolean mUnbindImmediate;
+    @Nullable
     private TileChangeListener mChangeListener;
     // Return value from bindServiceAsUser, determines whether safe to call unbind.
     private boolean mIsBound;
@@ -466,6 +469,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         }
     }
 
+    @Nullable
     @Override
     public IBinder asBinder() {
         return mWrapper != null ? mWrapper.asBinder() : null;

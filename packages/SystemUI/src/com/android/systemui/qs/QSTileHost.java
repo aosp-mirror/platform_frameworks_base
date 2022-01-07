@@ -29,6 +29,8 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.UiEventLogger;
@@ -98,6 +100,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final CustomTileStatePersister mCustomTileStatePersister;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
+    @Nullable
     private AutoTileManager mAutoTiles;
     private final StatusBarIconController mIconController;
     private final ArrayList<QSFactory> mQsFactories = new ArrayList<>();
@@ -472,6 +475,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         saveTilesToSettings(newTiles);
     }
 
+    /** Create a {@link QSTile} of a {@code tileSpec} type. */
+    @Nullable
     public QSTile createTile(String tileSpec) {
         for (int i = 0; i < mQsFactories.size(); i++) {
             QSTile t = mQsFactories.get(i).createTile(tileSpec);
