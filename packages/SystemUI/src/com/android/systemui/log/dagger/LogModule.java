@@ -52,6 +52,14 @@ public class LogModule {
         return factory.create("NotifLog", 1000);
     }
 
+    /** Provides a logging buffer for all logs for lockscreen to shade transition events. */
+    @Provides
+    @SysUISingleton
+    @LSShadeTransitionLog
+    public static LogBuffer provideLSShadeTransitionControllerBuffer(LogBufferFactory factory) {
+        return factory.create("LSShadeTransitionLog", 50);
+    }
+
     /** Provides a logging buffer for all logs related to managing notification sections. */
     @Provides
     @SysUISingleton
