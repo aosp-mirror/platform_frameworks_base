@@ -1485,6 +1485,25 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
+    /**
+     * Update bubbles' icon views clickable states.
+     */
+    public void updateBubblesClickableStates() {
+        for (int i = 0; i < mBubbleData.getBubbles().size(); i++) {
+            final Bubble bubble = mBubbleData.getBubbles().get(i);
+            if (bubble.getIconView() != null) {
+                if (mIsExpanded) {
+                    // when stack is expanded all bubbles are clickable
+                    bubble.getIconView().setClickable(true);
+                } else {
+                    // when stack is collapsed, only the top bubble needs to be clickable,
+                    // so that a11y ignores all the inaccessible bubbles in the stack
+                    bubble.getIconView().setClickable(i == 0);
+                }
+            }
+        }
+    }
+
     private void updateSystemGestureExcludeRects() {
         // Exclude the region occupied by the first BubbleView in the stack
         Rect excludeZone = mSystemGestureExclusionRects.get(0);
