@@ -1208,11 +1208,8 @@ public class Vpn {
             for (RouteInfo route : mConfig.routes) {
                 lp.addRoute(route);
                 InetAddress address = route.getDestination().getAddress();
-
-                if (route.getType() == RouteInfo.RTN_UNICAST) {
-                    allowIPv4 |= address instanceof Inet4Address;
-                    allowIPv6 |= address instanceof Inet6Address;
-                }
+                allowIPv4 |= address instanceof Inet4Address;
+                allowIPv6 |= address instanceof Inet6Address;
             }
         }
 
