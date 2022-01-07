@@ -41666,15 +41666,69 @@ package android.telephony {
   }
 
   public static final class CarrierConfigManager.Ims {
+    field public static final int E911_RTCP_INACTIVITY_ON_CONNECTED = 3; // 0x3
+    field public static final int E911_RTP_INACTIVITY_ON_CONNECTED = 4; // 0x4
+    field public static final int GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR = 4; // 0x4
+    field public static final int GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI = 2; // 0x2
+    field public static final int GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR = 3; // 0x3
+    field public static final int GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI = 1; // 0x1
+    field public static final int IPSEC_AUTHENTICATION_ALGORITHM_HMAC_MD5 = 0; // 0x0
+    field public static final int IPSEC_AUTHENTICATION_ALGORITHM_HMAC_SHA1 = 1; // 0x1
+    field public static final int IPSEC_ENCRYPTION_ALGORITHM_AES_CBC = 2; // 0x2
+    field public static final int IPSEC_ENCRYPTION_ALGORITHM_DES_EDE3_CBC = 1; // 0x1
+    field public static final int IPSEC_ENCRYPTION_ALGORITHM_NULL = 0; // 0x0
+    field public static final int IP_TYPE_IPV4 = 1; // 0x1
+    field public static final int IP_TYPE_IPV4V6 = 0; // 0x0
+    field public static final int IP_TYPE_IPV6 = 2; // 0x2
     field public static final String KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL = "ims.enable_presence_capability_exchange_bool";
     field public static final String KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL = "ims.enable_presence_group_subscribe_bool";
     field public static final String KEY_ENABLE_PRESENCE_PUBLISH_BOOL = "ims.enable_presence_publish_bool";
+    field public static final String KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY = "ims.geolocation_pidf_in_sip_invite_support_int_array";
+    field public static final String KEY_GEOLOCATION_PIDF_IN_SIP_REGISTER_SUPPORT_INT_ARRAY = "ims.geolocation_pidf_in_sip_register_support_int_array";
+    field public static final String KEY_GRUU_ENABLED_BOOL = "ims.gruu_enabled_bool";
+    field public static final String KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY = "ims.ims_pdn_enabled_in_no_vops_support_int_array";
     field public static final String KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL = "ims.ims_single_registration_required_bool";
+    field public static final String KEY_IMS_USER_AGENT_STRING = "ims.ims_user_agent_string";
+    field public static final String KEY_IPSEC_AUTHENTICATION_ALGORITHMS_INT_ARRAY = "ims.ipsec_authentication_algorithms_int_array";
+    field public static final String KEY_IPSEC_ENCRYPTION_ALGORITHMS_INT_ARRAY = "ims.ipsec_encryption_algorithms_int_array";
+    field public static final String KEY_IPV4_SIP_MTU_SIZE_CELLULAR_INT = "ims.ipv4_sip_mtu_size_cellular_int";
+    field public static final String KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT = "ims.ipv6_sip_mtu_size_cellular_int";
+    field public static final String KEY_KEEP_PDN_UP_IN_NO_VOPS_BOOL = "ims.keep_pdn_up_in_no_vops_bool";
     field public static final String KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT = "ims.non_rcs_capabilities_cache_expiration_sec_int";
+    field public static final String KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING = "ims.phone_context_domain_name_string";
     field public static final String KEY_PREFIX = "ims.";
     field public static final String KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL = "ims.rcs_bulk_capability_exchange_bool";
     field public static final String KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY = "ims.rcs_feature_tag_allowed_string_array";
+    field public static final String KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL = "ims.registration_event_package_supported_bool";
+    field public static final String KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT = "ims.registration_expiry_timer_sec_int";
+    field public static final String KEY_REGISTRATION_RETRY_BASE_TIMER_MILLIS_INT = "ims.registration_retry_base_timer_millis_int";
+    field public static final String KEY_REGISTRATION_RETRY_MAX_TIMER_MILLIS_INT = "ims.registration_retry_max_timer_millis_int";
+    field public static final String KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT = "ims.registration_subscribe_expiry_timer_sec_int";
+    field public static final String KEY_REQUEST_URI_TYPE_INT = "ims.request_uri_type_int";
+    field public static final String KEY_SIP_OVER_IPSEC_ENABLED_BOOL = "ims.sip_over_ipsec_enabled_bool";
+    field public static final String KEY_SIP_PREFERRED_TRANSPORT_INT = "ims.sip_preferred_transport_int";
+    field public static final String KEY_SIP_SERVER_PORT_NUMBER_INT = "ims.sip_server_port_number_int";
+    field public static final String KEY_SIP_TIMER_B_MILLIS_INT = "ims.sip_timer_b_millis_int";
+    field public static final String KEY_SIP_TIMER_C_MILLIS_INT = "ims.sip_timer_c_millis_int";
+    field public static final String KEY_SIP_TIMER_D_MILLIS_INT = "ims.sip_timer_d_millis_int";
+    field public static final String KEY_SIP_TIMER_F_MILLIS_INT = "ims.sip_timer_f_millis_int";
+    field public static final String KEY_SIP_TIMER_H_MILLIS_INT = "ims.sip_timer_h_millis_int";
+    field public static final String KEY_SIP_TIMER_J_MILLIS_INT = "ims.sip_timer_j_millis_int";
+    field public static final String KEY_SIP_TIMER_T1_MILLIS_INT = "ims.sip_timer_t1_millis_int";
+    field public static final String KEY_SIP_TIMER_T2_MILLIS_INT = "ims.sip_timer_t2_millis_int";
+    field public static final String KEY_SIP_TIMER_T4_MILLIS_INT = "ims.sip_timer_t4_millis_int";
     field public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT = "ims.wifi_off_deferring_time_millis_int";
+    field public static final int NETWORK_TYPE_HOME = 0; // 0x0
+    field public static final int NETWORK_TYPE_ROAMING = 1; // 0x1
+    field public static final int PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP = 2; // 0x2
+    field public static final int PREFERRED_TRANSPORT_TCP = 1; // 0x1
+    field public static final int PREFERRED_TRANSPORT_TLS = 3; // 0x3
+    field public static final int PREFERRED_TRANSPORT_UDP = 0; // 0x0
+    field public static final int REQUEST_URI_FORMAT_SIP = 1; // 0x1
+    field public static final int REQUEST_URI_FORMAT_TEL = 0; // 0x0
+    field public static final int RTCP_INACTIVITY_ON_CONNECTED = 1; // 0x1
+    field public static final int RTCP_INACTIVITY_ON_HOLD = 0; // 0x0
+    field public static final int RTP_INACTIVITY_ON_CONNECTED = 2; // 0x2
   }
 
   public static final class CarrierConfigManager.ImsServiceEntitlement {

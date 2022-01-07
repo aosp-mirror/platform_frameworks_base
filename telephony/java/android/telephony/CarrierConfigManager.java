@@ -4790,6 +4790,414 @@ public class CarrierConfigManager {
         public static final String KEY_RCS_REQUEST_RETRY_INTERVAL_MILLIS_LONG =
                 KEY_PREFIX + "rcs_request_retry_interval_millis_long";
 
+        /** SIP timer T1 as per 3GPP TS 24.229 Table 7.7.1 */
+        public static final String KEY_SIP_TIMER_T1_MILLIS_INT =
+                KEY_PREFIX + "sip_timer_t1_millis_int";
+
+        /** SIP timer T2 as per 3GPP TS 24.229 Table 7.7.1 */
+        public static final String KEY_SIP_TIMER_T2_MILLIS_INT =
+                KEY_PREFIX + "sip_timer_t2_millis_int";
+
+        /** SIP timer T4 as per 3GPP TS 24.229 Table 7.7.1 */
+        public static final String KEY_SIP_TIMER_T4_MILLIS_INT =
+                KEY_PREFIX + "sip_timer_t4_millis_int";
+
+        /** SIP timer B as per 3GPP TS 24.229 Table 7.7.1 */
+        public static final String KEY_SIP_TIMER_B_MILLIS_INT =
+                KEY_PREFIX + "sip_timer_b_millis_int";
+
+        /** SIP timer C as per 3GPP TS 24.229 Table 7.7.1 */
+        public static final String KEY_SIP_TIMER_C_MILLIS_INT =
+                KEY_PREFIX + "sip_timer_c_millis_int";
+
+        /** SIP timer D as per 3GPP TS 24.229 Table 7.7.1 */
+        public static final String KEY_SIP_TIMER_D_MILLIS_INT =
+                KEY_PREFIX + "sip_timer_d_millis_int";
+
+        /** SIP timer F as per 3GPP TS 24.229 Table 7.7.1 */
+        public static final String KEY_SIP_TIMER_F_MILLIS_INT =
+                KEY_PREFIX + "sip_timer_f_millis_int";
+
+        /** SIP timer H as per 3GPP TS 24.229 Table 7.7.1 */
+        public static final String KEY_SIP_TIMER_H_MILLIS_INT =
+                KEY_PREFIX + "sip_timer_h_millis_int";
+
+        /** SIP timer J as per 3GPP TS 24.229 Table 7.7.1 */
+        public static final String KEY_SIP_TIMER_J_MILLIS_INT =
+                KEY_PREFIX + "sip_timer_j_millis_int";
+
+        /** Specifies the SIP Server default port. */
+        public static final String KEY_SIP_SERVER_PORT_NUMBER_INT  =
+                KEY_PREFIX + "sip_server_port_number_int";
+
+        /**
+         * Specify the “phone-context” parameter as defined in
+         * section 7.2A.10 in 3GPP TS 24.229.
+         */
+        public static final String KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING =
+                KEY_PREFIX + "phone_context_domain_name_string";
+
+        /** @hide */
+        @IntDef({REQUEST_URI_FORMAT_TEL, REQUEST_URI_FORMAT_SIP})
+
+        public @interface RequestUriFormatType {}
+
+        /**
+         *  Request URI is of type TEL URI.
+         */
+        public static final int REQUEST_URI_FORMAT_TEL = 0;
+
+        /**
+         *  Request URI is of type SIP URI.
+         */
+        public static final int REQUEST_URI_FORMAT_SIP = 1;
+
+        /**
+         * Specify whether the request URI is SIP URI
+         * {@link #REQUEST_URI_FORMAT_SIP} or
+         * TEL URI {@link #REQUEST_URI_FORMAT_TEL}.
+         */
+        public static final String KEY_REQUEST_URI_TYPE_INT =
+                KEY_PREFIX + "request_uri_type_int";
+
+        /**
+         * Flag indicating whether Globally Routable User agent (GRUU)
+         * in supported HEADER is included or not.
+         *
+         * <p> Reference: RFC 5627.
+         */
+        public static final String KEY_GRUU_ENABLED_BOOL =
+                KEY_PREFIX + "gruu_enabled_bool";
+
+        /**
+         * Flag indicating whether to keep/release IMS PDN in case of
+         * moving to non VOPS area.
+         *
+         * <p>if {@code True}, keep IMS PDN in case of moving to non VOPS area.
+         * if {@code false}, otherwise.
+         */
+        public static final String KEY_KEEP_PDN_UP_IN_NO_VOPS_BOOL =
+                KEY_PREFIX + "keep_pdn_up_in_no_vops_bool";
+
+        /** @hide */
+        @IntDef({
+            IP_TYPE_IPV4V6,
+            IP_TYPE_IPV4,
+            IP_TYPE_IPV6
+        })
+
+        public @interface IpType {}
+
+        /** IP Type is IPV4V6 */
+        public static final int IP_TYPE_IPV4V6 = 0;
+
+        /** IP Type is IPV4 */
+        public static final int IP_TYPE_IPV4 = 1;
+
+        /** IP Type is IPV6 */
+        public static final int IP_TYPE_IPV6 = 2;
+
+        /** @hide */
+        @IntDef({
+            PREFERRED_TRANSPORT_UDP,
+            PREFERRED_TRANSPORT_TCP,
+            PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP,
+            PREFERRED_TRANSPORT_TLS
+        })
+
+        public @interface PreferredTransportType {}
+
+        /** Preferred Transport is always UDP. */
+        public static final int PREFERRED_TRANSPORT_UDP = 0;
+
+        /** Preferred Transport is always TCP. */
+        public static final int PREFERRED_TRANSPORT_TCP = 1;
+
+        /**
+         *  Preferred Transport is both UDP and TCP and selected based
+         *  on MTU size specified in {@link #KEY_IPV4_SIP_MTU_SIZE_CELLULAR_INT}
+         *  and {@link KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT}.
+         *
+         *  <p>Default transport is UDP. If message size is larger
+         *  than MTU, then TCP shall be used.
+         */
+        public static final int PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP = 2;
+
+        /** Preferred Transport is TLS. */
+        public static final int PREFERRED_TRANSPORT_TLS = 3;
+
+        /**
+         * Specify the preferred transport protocol for SIP messages.
+         *
+         * <p>Possible values are,
+         * {@link PREFERRED_TRANSPORT_UDP},
+         * {@link PREFERRED_TRANSPORT_TCP},
+         * {@link PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP}
+         */
+        public static final String KEY_SIP_PREFERRED_TRANSPORT_INT =
+                KEY_PREFIX + "sip_preferred_transport_int";
+
+        /**
+         * Specify the maximum IPV4 MTU size of SIP message on Cellular.
+         *
+         * <p>If {@link #KEY_SIP_PREFERRED_TRANSPORT_INT} is
+         * {@link #PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP} and SIP message MTU size
+         * is more than this value, then SIP transport will be TCP, else the
+         * SIP transport is UDP.
+         */
+        public static final String KEY_IPV4_SIP_MTU_SIZE_CELLULAR_INT =
+                KEY_PREFIX + "ipv4_sip_mtu_size_cellular_int";
+
+        /**
+         * Specify the maximum IPV6 MTU size of SIP message on Cellular.
+         *
+         * <p>If {@link #KEY_SIP_PREFERRED_TRANSPORT_INT} is
+         * {@link #PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP} and SIP message MTU size
+         * is more than this value, then SIP transport will be TCP, else the
+         * SIP transport is UDP.
+         */
+        public static final String KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT =
+                KEY_PREFIX + "ipv6_sip_mtu_size_cellular_int";
+
+        /**
+         * This config determines whether IMS PDN needs to be enabled
+         * when VOPS support is not available in both home and roaming scenarios.
+         *
+         * <p>This is applicable before IMS PDN is up, to decide whether
+         * IMS PDN needs to be enabled based on VOPS support in home/roaming.
+         *
+         * <p>Possible values are,
+         * {@link NETWORK_TYPE_HOME},
+         * {@link NETWORK_TYPE_ROAMING}
+         * An empty array indicates IMS PDN depends on VOPS on both home
+         * and roaming scenarios.
+         */
+        public static final String KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY =
+                KEY_PREFIX + "ims_pdn_enabled_in_no_vops_support_int_array";
+
+        /**
+         * Flag indicating whether IPSec enabled for SIP messages.
+         *
+         * <p> Reference: 3GPP TS 33.203 and RFC 3329.
+         */
+        public static final String KEY_SIP_OVER_IPSEC_ENABLED_BOOL =
+                KEY_PREFIX + "sip_over_ipsec_enabled_bool";
+
+        /** @hide */
+        @IntDef({IPSEC_AUTHENTICATION_ALGORITHM_HMAC_MD5, IPSEC_AUTHENTICATION_ALGORITHM_HMAC_SHA1})
+
+        public @interface IpsecAuthenticationAlgorithmType {}
+
+        /** IPSec Authentication algorithm is HMAC-MD5. see Annex H of TS 33.203 */
+        public static final int IPSEC_AUTHENTICATION_ALGORITHM_HMAC_MD5 = 0;
+
+        /** IPSec Authentication algorithm is HMAC-SHA1. see Annex H of TS 33.203 */
+        public static final int IPSEC_AUTHENTICATION_ALGORITHM_HMAC_SHA1 = 1;
+
+        /**
+         * List of supported IPSEC Authentication algorithms.
+         *
+         * <p>Possible values are,
+         * {@link IPSEC_AUTHENTICATION_ALGORITHM_HMAC_MD5},
+         * {@link IPSEC_AUTHENTICATION_ALGORITHM_HMAC_SHA1}
+         */
+        public static final String KEY_IPSEC_AUTHENTICATION_ALGORITHMS_INT_ARRAY =
+                KEY_PREFIX + "ipsec_authentication_algorithms_int_array";
+
+        /** @hide */
+        @IntDef({
+            IPSEC_ENCRYPTION_ALGORITHM_NULL,
+            IPSEC_ENCRYPTION_ALGORITHM_DES_EDE3_CBC,
+            IPSEC_ENCRYPTION_ALGORITHM_AES_CBC
+        })
+
+        public @interface IpsecEncryptionAlgorithmType {}
+
+        /** IPSec Encryption algorithm is NULL. see Annex H of TS 33.203 */
+        public static final int IPSEC_ENCRYPTION_ALGORITHM_NULL = 0;
+
+        /** IPSec Encryption algorithm is DES_EDE3_CBC. see Annex H of TS 33.203 */
+        public static final int IPSEC_ENCRYPTION_ALGORITHM_DES_EDE3_CBC = 1;
+
+        /** IPSec Encryption algorithm is AES_CBC. see Annex H of TS 33.203 */
+        public static final int IPSEC_ENCRYPTION_ALGORITHM_AES_CBC = 2;
+
+        /**
+         * List of supported IPSEC encryption algorithms.
+         *
+         * <p>Possible values are,
+         * {@link IPSEC_ENCRYPTION_ALGORITHM_NULL},
+         * {@link IPSEC_ENCRYPTION_ALGORITHM_DES_EDE3_CBC},
+         * {@link IPSEC_ENCRYPTION_ALGORITHM_AES_CBC}
+         */
+        public static final String KEY_IPSEC_ENCRYPTION_ALGORITHMS_INT_ARRAY =
+                KEY_PREFIX + "ipsec_encryption_algorithms_int_array";
+
+        /**
+         * Expiry timer for IMS Registration in seconds.
+         * <p>Reference: RFC 3261 Section 20.19.
+         */
+        public static final String KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT =
+                KEY_PREFIX + "registration_expiry_timer_sec_int";
+
+        /** Registration Retry Base-time as per RFC 5626 Section 4.5. */
+        public static final String KEY_REGISTRATION_RETRY_BASE_TIMER_MILLIS_INT =
+                KEY_PREFIX + "registration_retry_base_timer_millis_int";
+
+        /** Registration Retry max-time as per RFC 5626 Section 4.5. */
+        public static final String KEY_REGISTRATION_RETRY_MAX_TIMER_MILLIS_INT =
+                KEY_PREFIX + "registration_retry_max_timer_millis_int";
+
+        /**
+         * Flag indicating whether subscription to registration event package
+         * is supported or not.
+         */
+        public static final String KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL =
+                KEY_PREFIX + "registration_event_package_supported_bool";
+
+        /**
+         * Expiry timer for SUBSCRIBE in seconds.
+         * <p>Reference: RFC 3261 Section 20.19.
+         */
+        public static final String KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT =
+                KEY_PREFIX + "registration_subscribe_expiry_timer_sec_int";
+
+        /** @hide */
+        @IntDef({
+            GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI,
+            GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI,
+            GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR,
+            GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR
+        })
+
+        public @interface GeolocationPidfAllowedType {}
+
+        /**
+         * Indicates geolocation PIDF XML needs to be included for
+         * normal/non-emergency call scenario on WiFi
+         *
+         * <p>Geolocation for normal/non-emergency call should only include
+         * country code.
+         */
+        public static final int GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI = 1;
+
+        /**
+         * Indicates geolocation PIDF XML needs to be included for emergency
+         * call scenario on WiFi
+         */
+        public static final int GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI = 2;
+
+        /**
+         * Indicates geolocation PIDF XML needs to be included for normal/non-emergency
+         * call scenario on Cellular
+         *
+         * <p>Geolocation for normal/non-emergency call should only include
+         * country code.
+         */
+        public static final int GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR = 3;
+
+        /**
+         * Indicates geolocation PIDF XML needs to be included for emergency
+         * call scenario on Cellular
+         */
+        public static final int GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR = 4;
+
+        /**
+         * List of cases where geolocation PIDF XML needs to be included in the
+         * SIP REGISTER over WiFi and Cellular.
+         *
+         * <p>Possible values are,
+         * {@link GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI},
+         * {@link GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI},
+         * {@link GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR},
+         * {@link GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR}
+         *
+         * <p>An empty array indicates geolocation PIDF XML should not be included in
+         * the SIP REGISTER over WiFi and Cellular.
+         */
+        public static final String KEY_GEOLOCATION_PIDF_IN_SIP_REGISTER_SUPPORT_INT_ARRAY =
+                KEY_PREFIX + "geolocation_pidf_in_sip_register_support_int_array";
+
+        /**
+         * List of cases where geolocation PIDF XML needs to be included in the
+         * SIP INVITE over WiFi and Cellular.
+         *
+         * <p>Possible values are,
+         * {@link GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI},
+         * {@link GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI},
+         * {@link GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR},
+         * {@link GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR}
+         *
+         * <p>An empty array indicates geolocation PIDF XML should not be included
+         * in the SIP INVITE over WiFi and Cellular.
+         */
+        public static final String KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY =
+                KEY_PREFIX + "geolocation_pidf_in_sip_invite_support_int_array";
+
+        /**
+         * Specifies the IMS User Agent in template format.
+         *
+         * <p>Example: #MANUFACTURER#_#MODEL#_Android#AV#_#BUILD#".
+         * IMS Stack should internally substitute the tokens with the
+         * values from the respective android properties.
+         *
+         * <p>List of allowed tokens and the corresponding android properties are,
+         * <UL>
+         *   <LI>MANUFACTURER : ro.product.manufacturer</LI>
+         *   <LI>MODEL :  ro.product.model</LI>
+         *   <LI>AV : ro.build.version.release"</LI>
+         *   <LI>BUILD : ro.build.id</LI>
+         * </UL>
+         * <p> Vendor IMS Stack should strip any whitespace characters present
+         * in the android properties values before replacing the token.
+         *
+         * <p> An empty string is invalid as per IR92 section 2.6. This key is
+         * considered invalid if the format is violated. If the key is invalid or
+         * not configured, IMS stack should use internal default values.
+         */
+        public static final String KEY_IMS_USER_AGENT_STRING =
+                KEY_PREFIX + "ims_user_agent_string";
+
+        /** @hide */
+        @IntDef({
+            NETWORK_TYPE_HOME,
+            NETWORK_TYPE_ROAMING
+        })
+
+        public @interface NetworkType {}
+
+        /** Indicates HOME Network. */
+        public static final int NETWORK_TYPE_HOME = 0;
+
+        /** Indicates Roaming Network. */
+        public static final int NETWORK_TYPE_ROAMING = 1;
+
+        /** @hide */
+        @IntDef({
+            RTCP_INACTIVITY_ON_HOLD,
+            RTCP_INACTIVITY_ON_CONNECTED,
+            RTP_INACTIVITY_ON_CONNECTED,
+            E911_RTCP_INACTIVITY_ON_CONNECTED,
+            E911_RTP_INACTIVITY_ON_CONNECTED
+        })
+
+        public @interface MediaInactivityReason {}
+
+        /**  RTCP inactivity occurred when call is on HOLD. */
+        public static final int RTCP_INACTIVITY_ON_HOLD = 0;
+
+        /**  RTCP inactivity occurred when call is connected. */
+        public static final int RTCP_INACTIVITY_ON_CONNECTED = 1;
+
+        /**  RTP inactivity occurred when call is connected. */
+        public static final int RTP_INACTIVITY_ON_CONNECTED = 2;
+
+        /**  E911 RTCP inactivity occurred when call is connected. */
+        public static final int E911_RTCP_INACTIVITY_ON_CONNECTED = 3;
+
+        /**  E911 RTP inactivity occurred when call is connected. */
+        public static final int E911_RTP_INACTIVITY_ON_CONNECTED = 4;
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
@@ -4825,6 +5233,62 @@ public class CarrierConfigManager {
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.chatbot.sa\"",
                     "+g.gsma.rcs.botversion=\"#=1,#=2\"",
                     "+g.gsma.rcs.cpimext"});
+
+            defaults.putBoolean(KEY_GRUU_ENABLED_BOOL, true);
+            defaults.putBoolean(KEY_SIP_OVER_IPSEC_ENABLED_BOOL, true);
+            defaults.putBoolean(KEY_KEEP_PDN_UP_IN_NO_VOPS_BOOL, false);
+            defaults.putBoolean(KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL, true);
+
+            defaults.putInt(KEY_SIP_TIMER_T1_MILLIS_INT, 2000);
+            defaults.putInt(KEY_SIP_TIMER_T2_MILLIS_INT, 16000);
+            defaults.putInt(KEY_SIP_TIMER_T4_MILLIS_INT, 17000);
+            defaults.putInt(KEY_SIP_TIMER_B_MILLIS_INT, 128000);
+            defaults.putInt(KEY_SIP_TIMER_C_MILLIS_INT, 210000);
+            defaults.putInt(KEY_SIP_TIMER_D_MILLIS_INT, 130000);
+            defaults.putInt(KEY_SIP_TIMER_F_MILLIS_INT, 128000);
+            defaults.putInt(KEY_SIP_TIMER_H_MILLIS_INT, 128000);
+            defaults.putInt(KEY_SIP_TIMER_J_MILLIS_INT, 128000);
+            defaults.putInt(KEY_SIP_SERVER_PORT_NUMBER_INT, 5060);
+            defaults.putInt(KEY_REQUEST_URI_TYPE_INT, REQUEST_URI_FORMAT_SIP);
+            defaults.putInt(KEY_SIP_PREFERRED_TRANSPORT_INT, PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP);
+            defaults.putInt(KEY_IPV4_SIP_MTU_SIZE_CELLULAR_INT, 1500);
+            defaults.putInt(KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT, 1500);
+            defaults.putInt(KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT, 600000);
+            defaults.putInt(KEY_REGISTRATION_RETRY_BASE_TIMER_MILLIS_INT, 30000);
+            defaults.putInt(KEY_REGISTRATION_RETRY_MAX_TIMER_MILLIS_INT, 1800000);
+            defaults.putInt(KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT, 600000);
+
+            defaults.putIntArray(
+                    KEY_IPSEC_AUTHENTICATION_ALGORITHMS_INT_ARRAY,
+                    new int[] {
+                        IPSEC_AUTHENTICATION_ALGORITHM_HMAC_MD5,
+                        IPSEC_AUTHENTICATION_ALGORITHM_HMAC_SHA1
+                    });
+            defaults.putIntArray(
+                    KEY_IPSEC_ENCRYPTION_ALGORITHMS_INT_ARRAY,
+                    new int[] {
+                        IPSEC_ENCRYPTION_ALGORITHM_NULL,
+                        IPSEC_ENCRYPTION_ALGORITHM_DES_EDE3_CBC,
+                        IPSEC_ENCRYPTION_ALGORITHM_AES_CBC
+                    });
+            defaults.putIntArray(
+                    KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY,
+                    new int[] {
+                    });
+            defaults.putIntArray(
+                    KEY_GEOLOCATION_PIDF_IN_SIP_REGISTER_SUPPORT_INT_ARRAY,
+                    new int[] {
+                        GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI
+                    });
+            defaults.putIntArray(
+                    KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    new int[] {
+                        GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI
+                    });
+
+            defaults.putString(KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING, "");
+            defaults.putString(KEY_IMS_USER_AGENT_STRING,
+                               "#MANUFACTURER#_#MODEL#_Android#AV#_#BUILD#");
 
             return defaults;
         }
