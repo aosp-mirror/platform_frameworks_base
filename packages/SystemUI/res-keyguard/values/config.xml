@@ -27,6 +27,6 @@
     <bool name="can_use_one_handed_bouncer">false</bool>
     <!-- Will display the bouncer on one side of the display, and the current user icon and
          user switcher on the other side -->
-    <bool name="bouncer_display_user_switcher">false</bool>
+    <bool name="config_enableBouncerUserSwitcher">false</bool>
 
 </resources>
