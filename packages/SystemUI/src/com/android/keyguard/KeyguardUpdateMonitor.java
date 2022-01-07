@@ -37,6 +37,8 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.UserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
@@ -102,6 +104,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -109,6 +113,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.util.RingerModeTracker;
 
 import com.google.android.collect.Lists;
@@ -143,8 +148,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final boolean DEBUG_SIM_STATES = KeyguardConstants.DEBUG_SIM_STATES;
     private static final boolean DEBUG_FACE = Build.IS_DEBUGGABLE;
     private static final boolean DEBUG_FINGERPRINT = Build.IS_DEBUGGABLE;
+    private static final boolean DEBUG_ACTIVE_UNLOCK = Build.IS_DEBUGGABLE;
     private static final boolean DEBUG_SPEW = false;
     private static final int BIOMETRIC_LOCKOUT_RESET_DELAY_MS = 600;
+    private int mNumActiveUnlockTriggers = 0;
 
     private static final String ACTION_FACE_UNLOCK_STARTED
             = "com.android.facelock.FACE_UNLOCK_STARTED";
@@ -334,6 +341,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private final Executor mBackgroundExecutor;
     private SensorPrivacyManager mSensorPrivacyManager;
+    private FeatureFlags mFeatureFlags;
     private int mFaceAuthUserId;
 
     /**
@@ -1311,6 +1319,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     void setAssistantVisible(boolean assistantVisible) {
         mAssistantVisible = assistantVisible;
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE);
+        if (mAssistantVisible) {
+            requestActiveUnlock();
+        }
     }
 
     static class DisplayClientState {
@@ -1650,6 +1661,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         Trace.beginSection("KeyguardUpdateMonitor#handleStartedWakingUp");
         Assert.isMainThread();
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE);
+        requestActiveUnlock();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1777,7 +1789,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             AuthController authController,
             TelephonyListenerManager telephonyListenerManager,
             InteractionJankMonitor interactionJankMonitor,
-            LatencyTracker latencyTracker) {
+            LatencyTracker latencyTracker,
+            FeatureFlags featureFlags) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mTelephonyListenerManager = telephonyListenerManager;
@@ -1795,6 +1808,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mAuthController = authController;
         dumpManager.registerDumpable(getClass().getName(), this);
         mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
+        mFeatureFlags = featureFlags;
 
         mHandler = new Handler(mainLooper) {
             @Override
@@ -2180,6 +2194,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
         mAuthInterruptActive = active;
         updateFaceListeningState(BIOMETRIC_ACTION_UPDATE);
+        requestActiveUnlock();
     }
 
     /**
@@ -2228,6 +2243,97 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
+    /**
+     * Attempts to trigger active unlock.
+     */
+    public void requestActiveUnlock() {
+        // If this message exists, FP has already authenticated, so wait until that is handled
+        if (mHandler.hasMessages(MSG_BIOMETRIC_AUTHENTICATION_CONTINUE)) {
+            return;
+        }
+
+        if (shouldTriggerActiveUnlock() && mFeatureFlags.isEnabled(Flags.ACTIVE_UNLOCK)) {
+            // TODO (b/192405661): call new TrustManager API
+            mNumActiveUnlockTriggers++;
+            Log.d("ActiveUnlock", "would have triggered times=" + mNumActiveUnlockTriggers);
+            showActiveUnlockNotification(mNumActiveUnlockTriggers);
+        }
+    }
+
+    /**
+     * TODO (b/192405661): Only for testing. Remove before release.
+     */
+    private void showActiveUnlockNotification(int times) {
+        final String message = "Active unlock triggered "  + times + " times.";
+        final Notification.Builder nb =
+                new Notification.Builder(mContext, NotificationChannels.GENERAL)
+                        .setSmallIcon(R.drawable.ic_volume_ringer)
+                        .setContentTitle(message)
+                        .setStyle(new Notification.BigTextStyle().bigText(message));
+        mContext.getSystemService(NotificationManager.class).notifyAsUser(
+                "active_unlock",
+                0,
+                nb.build(),
+                UserHandle.ALL);
+    }
+
+    private boolean shouldTriggerActiveUnlock() {
+        // TODO: check if active unlock is ENABLED / AVAILABLE
+
+        // Triggers:
+        final boolean triggerActiveUnlockForAssistant = shouldTriggerActiveUnlockForAssistant();
+        final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep
+                && mStatusBarState != StatusBarState.SHADE_LOCKED;
+
+        // Gates:
+        final int user = getCurrentUser();
+
+        // No need to trigger active unlock if we're already unlocked or don't have
+        // pin/pattern/password setup
+        final boolean userCanDismissLockScreen = getUserCanSkipBouncer(user)
+                || !mLockPatternUtils.isSecure(user);
+
+        // Don't trigger active unlock if fp is locked out TODO: confirm this one
+        final boolean fpLockedout = mFingerprintLockedOut || mFingerprintLockedOutPermanent;
+
+        // Don't trigger active unlock if primary auth is required
+        final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(user);
+        final boolean isLockDown =
+                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
+                        || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+        final boolean isEncryptedOrTimedOut =
+                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT)
+                        || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_TIMEOUT);
+
+        final boolean shouldTriggerActiveUnlock =
+                (mAuthInterruptActive || triggerActiveUnlockForAssistant || awakeKeyguard)
+                        && !mSwitchingUser
+                        && !userCanDismissLockScreen
+                        && !fpLockedout
+                        && !isLockDown
+                        && !isEncryptedOrTimedOut
+                        && !mKeyguardGoingAway
+                        && !mSecureCameraLaunched;
+
+        // Aggregate relevant fields for debug logging.
+        if (DEBUG_ACTIVE_UNLOCK || DEBUG_SPEW) {
+            maybeLogListenerModelData(
+                    new KeyguardActiveUnlockModel(
+                            System.currentTimeMillis(),
+                            user,
+                            shouldTriggerActiveUnlock,
+                            mAuthInterruptActive,
+                            isEncryptedOrTimedOut,
+                            fpLockedout,
+                            isLockDown,
+                            mSwitchingUser,
+                            triggerActiveUnlockForAssistant,
+                            userCanDismissLockScreen));
+        }
+
+        return shouldTriggerActiveUnlock;
+    }
+
     private boolean shouldListenForFingerprintAssistant() {
         BiometricAuthenticated fingerprint = mUserFingerprintAuthenticated.get(getCurrentUser());
         return mAssistantVisible && mKeyguardOccluded
@@ -2239,6 +2345,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         BiometricAuthenticated face = mUserFaceAuthenticated.get(getCurrentUser());
         return mAssistantVisible && mKeyguardOccluded
                 && !(face != null && face.mAuthenticated)
+                && !mUserHasTrust.get(getCurrentUser(), false);
+    }
+
+    private boolean shouldTriggerActiveUnlockForAssistant() {
+        return mAssistantVisible && mKeyguardOccluded
                 && !mUserHasTrust.get(getCurrentUser(), false);
     }
 
@@ -2404,6 +2515,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // Too chatty, but very useful when debugging issues.
         if (DEBUG_SPEW) {
             Log.v(TAG, model.toString());
+        }
+
+        if (DEBUG_ACTIVE_UNLOCK
+                && model instanceof KeyguardActiveUnlockModel
+                && model.getListening()) {
+            mListenModels.add(model);
+            return;
         }
 
         // Add model data to the historical buffer.
