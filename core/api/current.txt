@@ -41660,104 +41660,21 @@ package android.telephony {
     field public static final String PROTOCOL_IPV6 = "IPV6";
   }
 
-  public static final class CarrierConfigManager.Bsf {
-    field public static final String KEY_BSF_SERVER_FQDN_STRING = "bsf.bsf_server_fqdn_string";
-    field public static final String KEY_BSF_SERVER_PORT_INT = "bsf.bsf_server_port_int";
-    field public static final String KEY_BSF_TRANSPORT_TYPE_INT = "bsf.bsf_transport type_int";
-    field public static final String KEY_PREFIX = "bsf.";
-  }
-
   public static final class CarrierConfigManager.Gps {
     field public static final String KEY_PERSIST_LPP_MODE_BOOL = "gps.persist_lpp_mode_bool";
     field public static final String KEY_PREFIX = "gps.";
   }
 
   public static final class CarrierConfigManager.Ims {
-    field public static final int E911_RTCP_INACTIVITY_ON_CONNECTED = 3; // 0x3
-    field public static final int E911_RTP_INACTIVITY_ON_CONNECTED = 4; // 0x4
-    field public static final int GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR = 4; // 0x4
-    field public static final int GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI = 2; // 0x2
-    field public static final int GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR = 3; // 0x3
-    field public static final int GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI = 1; // 0x1
-    field public static final int IPSEC_AUTHENTICATION_ALGORITHM_HMAC_MD5 = 0; // 0x0
-    field public static final int IPSEC_AUTHENTICATION_ALGORITHM_HMAC_SHA1 = 1; // 0x1
-    field public static final int IPSEC_ENCRYPTION_ALGORITHM_AES_CBC = 2; // 0x2
-    field public static final int IPSEC_ENCRYPTION_ALGORITHM_DES_EDE3_CBC = 1; // 0x1
-    field public static final int IPSEC_ENCRYPTION_ALGORITHM_NULL = 0; // 0x0
-    field public static final int IP_TYPE_IPV4 = 1; // 0x1
-    field public static final int IP_TYPE_IPV4V6 = 0; // 0x0
-    field public static final int IP_TYPE_IPV6 = 2; // 0x2
     field public static final String KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL = "ims.enable_presence_capability_exchange_bool";
     field public static final String KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL = "ims.enable_presence_group_subscribe_bool";
     field public static final String KEY_ENABLE_PRESENCE_PUBLISH_BOOL = "ims.enable_presence_publish_bool";
-    field public static final String KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY = "ims.geolocation_pidf_in_sip_invite_support_int_array";
-    field public static final String KEY_GEOLOCATION_PIDF_IN_SIP_REGISTER_SUPPORT_INT_ARRAY = "ims.geolocation_pidf_in_sip_register_support_int_array";
-    field public static final String KEY_GRUU_ENABLED_BOOL = "ims.gruu_enabled_bool";
-    field public static final String KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY = "ims.ims_pdn_enabled_in_no_vops_support_int_array";
     field public static final String KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL = "ims.ims_single_registration_required_bool";
-    field public static final String KEY_IMS_USER_AGENT_STRING = "ims.ims_user_agent_string";
-    field public static final String KEY_IPSEC_AUTHENTICATION_ALGORITHMS_INT_ARRAY = "ims.ipsec_authentication_algorithms_int_array";
-    field public static final String KEY_IPSEC_ENCRYPTION_ALGORITHMS_INT_ARRAY = "ims.ipsec_encryption_algorithms_int_array";
-    field public static final String KEY_IPV4_SIP_MTU_SIZE_CELLULAR_INT = "ims.ipv4_sip_mtu_size_cellular_int";
-    field public static final String KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT = "ims.ipv6_sip_mtu_size_cellular_int";
-    field public static final String KEY_KEEP_PDN_UP_IN_NO_VOPS_BOOL = "ims.keep_pdn_up_in_no_vops_bool";
     field public static final String KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT = "ims.non_rcs_capabilities_cache_expiration_sec_int";
-    field public static final String KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING = "ims.phone_context_domain_name_string";
     field public static final String KEY_PREFIX = "ims.";
     field public static final String KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL = "ims.rcs_bulk_capability_exchange_bool";
     field public static final String KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY = "ims.rcs_feature_tag_allowed_string_array";
-    field public static final String KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL = "ims.registration_event_package_supported_bool";
-    field public static final String KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT = "ims.registration_expiry_timer_sec_int";
-    field public static final String KEY_REGISTRATION_RETRY_BASE_TIMER_MILLIS_INT = "ims.registration_retry_base_timer_millis_int";
-    field public static final String KEY_REGISTRATION_RETRY_MAX_TIMER_MILLIS_INT = "ims.registration_retry_max_timer_millis_int";
-    field public static final String KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT = "ims.registration_subscribe_expiry_timer_sec_int";
-    field public static final String KEY_REQUEST_URI_TYPE_INT = "ims.request_uri_type_int";
-    field public static final String KEY_SIP_OVER_IPSEC_ENABLED_BOOL = "ims.sip_over_ipsec_enabled_bool";
-    field public static final String KEY_SIP_PREFERRED_TRANSPORT_INT = "ims.sip_preferred_transport_int";
-    field public static final String KEY_SIP_SERVER_PORT_NUMBER_INT = "ims.sip_server_port_number_int";
-    field public static final String KEY_SIP_TIMER_B_MILLIS_INT = "ims.sip_timer_b_millis_int";
-    field public static final String KEY_SIP_TIMER_C_MILLIS_INT = "ims.sip_timer_c_millis_int";
-    field public static final String KEY_SIP_TIMER_D_MILLIS_INT = "ims.sip_timer_d_millis_int";
-    field public static final String KEY_SIP_TIMER_F_MILLIS_INT = "ims.sip_timer_f_millis_int";
-    field public static final String KEY_SIP_TIMER_H_MILLIS_INT = "ims.sip_timer_h_millis_int";
-    field public static final String KEY_SIP_TIMER_J_MILLIS_INT = "ims.sip_timer_j_millis_int";
-    field public static final String KEY_SIP_TIMER_T1_MILLIS_INT = "ims.sip_timer_t1_millis_int";
-    field public static final String KEY_SIP_TIMER_T2_MILLIS_INT = "ims.sip_timer_t2_millis_int";
-    field public static final String KEY_SIP_TIMER_T4_MILLIS_INT = "ims.sip_timer_t4_millis_int";
     field public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT = "ims.wifi_off_deferring_time_millis_int";
-    field public static final int NETWORK_TYPE_HOME = 0; // 0x0
-    field public static final int NETWORK_TYPE_ROAMING = 1; // 0x1
-    field public static final int PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP = 2; // 0x2
-    field public static final int PREFERRED_TRANSPORT_TCP = 1; // 0x1
-    field public static final int PREFERRED_TRANSPORT_TLS = 3; // 0x3
-    field public static final int PREFERRED_TRANSPORT_UDP = 0; // 0x0
-    field public static final int REQUEST_URI_FORMAT_SIP = 1; // 0x1
-    field public static final int REQUEST_URI_FORMAT_TEL = 0; // 0x0
-    field public static final int RTCP_INACTIVITY_ON_CONNECTED = 1; // 0x1
-    field public static final int RTCP_INACTIVITY_ON_HOLD = 0; // 0x0
-    field public static final int RTP_INACTIVITY_ON_CONNECTED = 2; // 0x2
-  }
-
-  public static final class CarrierConfigManager.ImsEmergency {
-    field public static final String KEY_EMERGENCY_CALLBACK_MODE_SUPPORTED_BOOL = "imsemergency.emergency_callback_mode_supported_bool";
-    field public static final String KEY_EMERGENCY_OVER_IMS_SUPPORTED_RATS_INT_ARRAY = "imsemergency.emergency_over_ims_supported_rats_int_array";
-    field public static final String KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL = "imsemergency.emergency_qos_precondition_supported_bool";
-    field public static final String KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT = "imsemergency.emergency_registration_timer_millis_int";
-    field public static final String KEY_PREFIX = "imsemergency.";
-    field public static final String KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL = "imsemergency.retry_emergency_on_ims_pdn_bool";
-  }
-
-  public static final class CarrierConfigManager.ImsRtt {
-    field public static final String KEY_PREFIX = "imsrtt.";
-    field public static final String KEY_RED_PAYLOAD_TYPE_INT = "imsrtt.red_payload_type_int";
-    field public static final String KEY_T140_PAYLOAD_TYPE_INT = "imsrtt.t140_payload_type_int";
-    field public static final String KEY_TEXT_AS_BANDWIDTH_KBPS_INT = "imsrtt.text_as_bandwidth_kbps_int";
-    field public static final String KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE = "imsrtt.text_codec_capability_payload_types_bundle";
-    field public static final String KEY_TEXT_INACTIVITY_CALL_END_REASONS_INT_ARRAY = "imsrtt.text_inactivity_call_end_reasons_int_array";
-    field public static final String KEY_TEXT_ON_DEFAULT_BEARER_SUPPORTED_BOOL = "imsrtt.text_on_default_bearer_supported_bool";
-    field public static final String KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL = "imsrtt.text_qos_precondition_supported_bool";
-    field public static final String KEY_TEXT_RR_BANDWIDTH_BPS_INT = "imsrtt.text_rr_bandwidth_bps_int";
-    field public static final String KEY_TEXT_RS_BANDWIDTH_BPS_INT = "imsrtt.text_rs_bandwidth_bps_int";
   }
 
   public static final class CarrierConfigManager.ImsServiceEntitlement {
@@ -41766,167 +41683,6 @@ package android.telephony {
     field public static final String KEY_IMS_PROVISIONING_BOOL = "imsserviceentitlement.ims_provisioning_bool";
     field public static final String KEY_PREFIX = "imsserviceentitlement.";
     field public static final String KEY_SHOW_VOWIFI_WEBVIEW_BOOL = "imsserviceentitlement.show_vowifi_webview_bool";
-  }
-
-  public static final class CarrierConfigManager.ImsSms {
-    field public static final String KEY_PREFIX = "imssms.";
-    field public static final String KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL = "imssms.sms_csfb_retry_on_failure_bool";
-    field public static final String KEY_SMS_OVER_IMS_FORMAT_INT = "imssms.sms_over_ims_format_int";
-    field public static final String KEY_SMS_OVER_IMS_SUPPORTED_BOOL = "imssms.sms_over_ims_supported_bool";
-    field public static final String KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY = "imssms.sms_over_ims_supported_rats_int_array";
-    field public static final int SMS_FORMAT_3GPP = 0; // 0x0
-    field public static final int SMS_FORMAT_3GPP2 = 1; // 0x1
-  }
-
-  public static final class CarrierConfigManager.ImsSs {
-    field public static final String KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL = "imsss.network_initiated_ussd_over_ims_supported_bool";
-    field public static final String KEY_PREFIX = "imsss.";
-    field public static final String KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL = "imsss.use_csfb_on_xcap_over_ut_failure_bool";
-    field public static final String KEY_UT_AS_SERVER_FQDN_STRING = "imsss.ut_as_server_fqdn_string";
-    field public static final String KEY_UT_AS_SERVER_PORT_INT = "imsss.ut_as_server_port_int";
-    field public static final String KEY_UT_IPTYPE_HOME_INT = "imsss.ut_iptype_home_int";
-    field public static final String KEY_UT_IPTYPE_ROAMING_INT = "imsss.ut_iptype_roaming_int";
-    field public static final String KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL = "imsss.ut_requires_ims_registration_bool";
-    field public static final String KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY = "imsss.ut_server_based_services_int_array";
-    field public static final String KEY_UT_SUPPORTED_WHEN_PS_DATA_OFF_BOOL = "imsss.ut_supported_when_ps_data_off_bool";
-    field public static final String KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY = "imsss.ut_terminal_based_services_int_array";
-    field public static final String KEY_UT_TRANSPORT_TYPE_INT = "imsss.ut_transport_type_int";
-    field public static final String KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY = "imsss.xcap_over_ut_supported_rats_int_array";
-    field public static final int SUPPLEMENTARY_SERVICE_CB_ACR = 20; // 0x14
-    field public static final int SUPPLEMENTARY_SERVICE_CB_ALL = 12; // 0xc
-    field public static final int SUPPLEMENTARY_SERVICE_CB_BAIC = 18; // 0x12
-    field public static final int SUPPLEMENTARY_SERVICE_CB_BAOC = 14; // 0xe
-    field public static final int SUPPLEMENTARY_SERVICE_CB_BIC_ROAM = 19; // 0x13
-    field public static final int SUPPLEMENTARY_SERVICE_CB_BIL = 21; // 0x15
-    field public static final int SUPPLEMENTARY_SERVICE_CB_BOIC = 15; // 0xf
-    field public static final int SUPPLEMENTARY_SERVICE_CB_BOIC_EXHC = 16; // 0x10
-    field public static final int SUPPLEMENTARY_SERVICE_CB_IBS = 17; // 0x11
-    field public static final int SUPPLEMENTARY_SERVICE_CB_OBS = 13; // 0xd
-    field public static final int SUPPLEMENTARY_SERVICE_CF_ALL = 1; // 0x1
-    field public static final int SUPPLEMENTARY_SERVICE_CF_ALL_CONDITONAL_FORWARDING = 3; // 0x3
-    field public static final int SUPPLEMENTARY_SERVICE_CF_CFB = 4; // 0x4
-    field public static final int SUPPLEMENTARY_SERVICE_CF_CFNL = 7; // 0x7
-    field public static final int SUPPLEMENTARY_SERVICE_CF_CFNRC = 6; // 0x6
-    field public static final int SUPPLEMENTARY_SERVICE_CF_CFNRY = 5; // 0x5
-    field public static final int SUPPLEMENTARY_SERVICE_CF_CFU = 2; // 0x2
-    field public static final int SUPPLEMENTARY_SERVICE_CW = 0; // 0x0
-    field public static final int SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIP = 8; // 0x8
-    field public static final int SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR = 10; // 0xa
-    field public static final int SUPPLEMENTARY_SERVICE_IDENTIFICATION_TIP = 9; // 0x9
-    field public static final int SUPPLEMENTARY_SERVICE_IDENTIFICATION_TIR = 11; // 0xb
-  }
-
-  public static final class CarrierConfigManager.ImsVoice {
-    field public static final int ALERTING_SRVCC_SUPPORT = 1; // 0x1
-    field public static final int BANDWIDTH_EFFICIENT = 0; // 0x0
-    field public static final int BASIC_SRVCC_SUPPORT = 0; // 0x0
-    field public static final int CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG = 0; // 0x0
-    field public static final int CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG = 1; // 0x1
-    field public static final int EVS_ENCODED_BW_TYPE_FB = 3; // 0x3
-    field public static final int EVS_ENCODED_BW_TYPE_NB = 0; // 0x0
-    field public static final int EVS_ENCODED_BW_TYPE_NB_WB = 4; // 0x4
-    field public static final int EVS_ENCODED_BW_TYPE_NB_WB_SWB = 5; // 0x5
-    field public static final int EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB = 6; // 0x6
-    field public static final int EVS_ENCODED_BW_TYPE_SWB = 2; // 0x2
-    field public static final int EVS_ENCODED_BW_TYPE_WB = 1; // 0x1
-    field public static final int EVS_ENCODED_BW_TYPE_WB_SWB = 7; // 0x7
-    field public static final int EVS_ENCODED_BW_TYPE_WB_SWB_FB = 8; // 0x8
-    field public static final int EVS_OPERATIONAL_MODE_AMRWB_IO = 1; // 0x1
-    field public static final int EVS_OPERATIONAL_MODE_PRIMARY = 0; // 0x0
-    field public static final int EVS_PRIMARY_MODE_BITRATE_128_0_KBPS = 11; // 0xb
-    field public static final int EVS_PRIMARY_MODE_BITRATE_13_2_KBPS = 4; // 0x4
-    field public static final int EVS_PRIMARY_MODE_BITRATE_16_4_KBPS = 5; // 0x5
-    field public static final int EVS_PRIMARY_MODE_BITRATE_24_4_KBPS = 6; // 0x6
-    field public static final int EVS_PRIMARY_MODE_BITRATE_32_0_KBPS = 7; // 0x7
-    field public static final int EVS_PRIMARY_MODE_BITRATE_48_0_KBPS = 8; // 0x8
-    field public static final int EVS_PRIMARY_MODE_BITRATE_5_9_KBPS = 0; // 0x0
-    field public static final int EVS_PRIMARY_MODE_BITRATE_64_0_KBPS = 9; // 0x9
-    field public static final int EVS_PRIMARY_MODE_BITRATE_7_2_KBPS = 1; // 0x1
-    field public static final int EVS_PRIMARY_MODE_BITRATE_8_0_KBPS = 2; // 0x2
-    field public static final int EVS_PRIMARY_MODE_BITRATE_96_0_KBPS = 10; // 0xa
-    field public static final int EVS_PRIMARY_MODE_BITRATE_9_6_KBPS = 3; // 0x3
-    field public static final String KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE = "imsvoice.amrnb_payload_description_bundle";
-    field public static final String KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY = "imsvoice.amrnb_payload_type_int_array";
-    field public static final String KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE = "imsvoice.amrwb_payload_description_bundle";
-    field public static final String KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY = "imsvoice.amrwb_payload_type_int_array";
-    field public static final String KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY = "imsvoice.amr_codec_attribute_modeset_int_array";
-    field public static final String KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT = "imsvoice.amr_codec_attribute_payload_format_int";
-    field public static final String KEY_AUDIO_AS_BANDWIDTH_KBPS_INT = "imsvoice.audio_as_bandwidth_kbps_int";
-    field public static final String KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE = "imsvoice.audio_codec_capability_payload_types_bundle";
-    field public static final String KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY = "imsvoice.audio_inactivity_call_end_reasons_int_array";
-    field public static final String KEY_AUDIO_RR_BANDWIDTH_BPS_INT = "imsvoice.audio_rr_bandwidth_bps_int";
-    field public static final String KEY_AUDIO_RS_BANDWIDTH_BPS_INT = "imsvoice.audio_rs_bandwidth_bps_int";
-    field public static final String KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT = "imsvoice.audio_rtcp_inactivity_timer_millis_int";
-    field public static final String KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT = "imsvoice.audio_rtp_inactivity_timer_millis_int";
-    field public static final String KEY_CARRIER_VOLTE_ROAMING_AVAILABLE_BOOL = "imsvoice.carrier_volte_roaming_available_bool";
-    field public static final String KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT = "imsvoice.codec_attribute_mode_change_capability_int";
-    field public static final String KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT = "imsvoice.codec_attribute_mode_change_neighbor_int";
-    field public static final String KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT = "imsvoice.codec_attribute_mode_change_period_int";
-    field public static final String KEY_CONFERENCE_FACTORY_URI_STRING = "imsvoice.conference_factory_uri_string";
-    field public static final String KEY_CONFERENCE_SUBSCRIBE_TYPE_INT = "imsvoice.conference_subscribe_type_int";
-    field public static final String KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT = "imsvoice.dedicated_bearer_wait_timer_millis_int";
-    field public static final String KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY = "imsvoice.dtmfnb_payload_type_int_array";
-    field public static final String KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY = "imsvoice.dtmfwb_payload_type_int_array";
-    field public static final String KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT = "imsvoice.evs_codec_attribute_bandwidth_int";
-    field public static final String KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY = "imsvoice.evs_codec_attribute_bitrate_int_array";
-    field public static final String KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT = "imsvoice.evs_codec_attribute_channels_int";
-    field public static final String KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT = "imsvoice.evs_codec_attribute_ch_aw_recv_int";
-    field public static final String KEY_EVS_CODEC_ATTRIBUTE_CMR_INT = "imsvoice.codec_attribute_cmr_int";
-    field public static final String KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL = "imsvoice.evs_codec_attribute_dtx_bool";
-    field public static final String KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL = "imsvoice.evs_codec_attribute_dtx_recv_bool";
-    field public static final String KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT = "imsvoice.evs_codec_attribute_hf_only_int";
-    field public static final String KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT = "imsvoice.evs_codec_attribute_mode_switch_int";
-    field public static final String KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE = "imsvoice.evs_payload_description_bundle";
-    field public static final String KEY_EVS_PAYLOAD_TYPE_INT_ARRAY = "imsvoice.evs_payload_type_int_array";
-    field public static final String KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL = "imsvoice.include_caller_id_service_codes_in_sip_invite_bool";
-    field public static final String KEY_MINIMUM_SESSION_EXPIRES_TIMER_SEC_INT = "imsvoice.minimum_session_expires_timer_sec_int";
-    field public static final String KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT = "imsvoice.mo_call_request_timeout_millis_int";
-    field public static final String KEY_MULTIENDPOINT_SUPPORTED_BOOL = "imsvoice.multiendpoint_supported_bool";
-    field public static final String KEY_OIP_SOURCE_FROM_HEADER_BOOL = "imsvoice.oip_source_from_header_bool";
-    field public static final String KEY_PRACK_SUPPORTED_FOR_18X_BOOL = "imsvoice.prack_supported_for_18x_bool";
-    field public static final String KEY_PREFIX = "imsvoice.";
-    field public static final String KEY_RINGBACK_TIMER_MILLIS_INT = "imsvoice.ringback_timer_millis_int";
-    field public static final String KEY_RINGING_TIMER_MILLIS_INT = "imsvoice.ringing_timer_millis_int";
-    field public static final String KEY_SESSION_EXPIRES_TIMER_SEC_INT = "imsvoice.session_expires_timer_sec_int";
-    field public static final String KEY_SESSION_REFRESHER_TYPE_INT = "imsvoice.session_refresher_type_int";
-    field public static final String KEY_SESSION_REFRESH_METHOD_INT = "imsvoice.session_refresh_method_int";
-    field public static final String KEY_SESSION_TIMER_SUPPORTED_BOOL = "imsvoice.session_timer_supported_bool";
-    field public static final String KEY_SRVCC_TYPE_INT_ARRAY = "imsvoice.srvcc_type_int_array";
-    field public static final String KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL = "imsvoice.voice_on_default_bearer_supported_bool";
-    field public static final String KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL = "imsvoice.voice_qos_precondition_supported_bool";
-    field public static final int MIDCALL_SRVCC_SUPPORT = 3; // 0x3
-    field public static final int OCTET_ALIGNED = 1; // 0x1
-    field public static final int PREALERTING_SRVCC_SUPPORT = 2; // 0x2
-    field public static final int SESSION_REFRESHER_TYPE_UAC = 1; // 0x1
-    field public static final int SESSION_REFRESHER_TYPE_UAS = 2; // 0x2
-    field public static final int SESSION_REFRESHER_TYPE_UNKNOWN = 0; // 0x0
-    field public static final int SESSION_REFRESH_METHOD_INVITE = 0; // 0x0
-    field public static final int SESSION_REFRESH_METHOD_UPDATE_PREFERRED = 1; // 0x1
-  }
-
-  public static final class CarrierConfigManager.ImsVt {
-    field public static final String KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE = "imsvt.h264_payload_description_bundle";
-    field public static final String KEY_H264_PAYLOAD_TYPE_INT_ARRAY = "imsvt.h264_payload_type_int_array";
-    field public static final String KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING = "imsvt.h264_video_codec_attribute_profile_level_id_string";
-    field public static final String KEY_PREFIX = "imsvt.";
-    field public static final String KEY_VIDEO_AS_BANDWIDTH_KBPS_INT = "imsvt.video_as_bandwidth_kbps_int";
-    field public static final String KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT = "imsvt.video_codec_attribute_frame_rate_int";
-    field public static final String KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT = "imsvt.video_codec_attribute_packetization_mode_int";
-    field public static final String KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY = "imsvt.video_codec_attribute_resolution_int_array";
-    field public static final String KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE = "imsvt.video_codec_capability_payload_types_bundle";
-    field public static final String KEY_VIDEO_ON_DEFAULT_BEARER_SUPPORTED_BOOL = "imsvt.video_on_default_bearer_supported_bool";
-    field public static final String KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL = "imsvt.video_qos_precondition_supported_bool";
-    field public static final String KEY_VIDEO_RR_BANDWIDTH_BPS_INT = "imsvt.video_rr_bandwidth_bps_int";
-    field public static final String KEY_VIDEO_RS_BANDWIDTH_BPS_INT = "imsvt.video_rs_bandwidth_bps_int";
-    field public static final String KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT = "imsvt.video_rtcp_inactivity_timer_millis_int";
-    field public static final String KEY_VIDEO_RTP_DSCP_INT = "imsvt.video_rtp_dscp_int";
-    field public static final String KEY_VIDEO_RTP_INACTIVITY_TIMER_MILLIS_INT = "imsvt.video_rtp_inactivity_timer_millis_int";
-  }
-
-  public static final class CarrierConfigManager.ImsWfc {
-    field public static final String KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL = "imswfc.emergency_call_over_emergency_pdn_bool";
-    field public static final String KEY_PIDF_SHORT_CODE_STRING_ARRAY = "imswfc.pidf_short_code_string_array";
-    field public static final String KEY_PREFIX = "imswfc.";
   }
 
   public static final class CarrierConfigManager.Iwlan {
