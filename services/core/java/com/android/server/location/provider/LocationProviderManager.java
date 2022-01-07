@@ -509,8 +509,8 @@ public class LocationProviderManager extends
         }
 
         @GuardedBy("mLock")
-        final boolean onLocationPermissionsChanged(String packageName) {
-            if (getIdentity().getPackageName().equals(packageName)) {
+        final boolean onLocationPermissionsChanged(@Nullable String packageName) {
+            if (packageName == null || getIdentity().getPackageName().equals(packageName)) {
                 return onLocationPermissionsChanged();
             }
 
@@ -1344,7 +1344,7 @@ public class LocationProviderManager extends
     private final LocationPermissionsListener mLocationPermissionsListener =
             new LocationPermissionsListener() {
                 @Override
-                public void onLocationPermissionsChanged(String packageName) {
+                public void onLocationPermissionsChanged(@Nullable String packageName) {
                     LocationProviderManager.this.onLocationPermissionsChanged(packageName);
                 }
 
@@ -2350,7 +2350,7 @@ public class LocationProviderManager extends
         }
     }
 
-    private void onLocationPermissionsChanged(String packageName) {
+    private void onLocationPermissionsChanged(@Nullable String packageName) {
         synchronized (mLock) {
             updateRegistrations(
                     registration -> registration.onLocationPermissionsChanged(packageName));
