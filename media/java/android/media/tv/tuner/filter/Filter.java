@@ -283,9 +283,21 @@ public class Filter implements AutoCloseable {
                     synchronized (mCallbackLock) {
                         if (mCallback != null) {
                             mCallback.onFilterEvent(this, events);
+                        } else {
+                            for (FilterEvent event : events) {
+                                if (event instanceof MediaEvent) {
+                                    ((MediaEvent)event).release();
+                                }
+                            }
                         }
                     }
                 });
+            } else {
+                for (FilterEvent event : events) {
+                    if (event instanceof MediaEvent) {
+                        ((MediaEvent)event).release();
+                    }
+                }
             }
         }
     }
@@ -558,6 +570,8 @@ public class Filter implements AutoCloseable {
             if (res != Tuner.RESULT_SUCCESS) {
                 TunerUtils.throwExceptionForResult(res, "Failed to close filter.");
             } else {
+                mCallback = null;
+                mExecutor = null;
                 mIsStarted = false;
                 mIsClosed = true;
             }
