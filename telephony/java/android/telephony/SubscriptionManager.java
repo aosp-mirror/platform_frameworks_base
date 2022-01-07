@@ -3811,14 +3811,21 @@ public class SubscriptionManager {
     }
 
     /**
-     * Returns the phone number for the given {@code subId} and {@code source},
+     * Returns the phone number for the given {@code subscriptionId} and {@code source},
      * or an empty string if not available.
      *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS}, or
-     * READ_PRIVILEGED_PHONE_STATE permission (can only be granted to apps preloaded on device),
-     * or that the calling app has carrier privileges
-     * (see {@link TelephonyManager#hasCarrierPrivileges}).
+     * <p>General apps that need to know the phone number should use {@link #getPhoneNumber(int)}
+     * instead. This API may be suitable specific apps that needs to know the phone number from
+     * a specific source. For example, a carrier app needs to know exactly what's on
+     * {@link #PHONE_NUMBER_SOURCE_UICC UICC} and decide if the previously set phone number
+     * of source {@link #PHONE_NUMBER_SOURCE_CARRIER carrier} should be updated.
+     *
+     * <p>Note the assumption is that one subscription (which usually means one SIM) has
+     * only one phone number. The multiple sources backup each other so hopefully at least one
+     * is availavle. For example, for a carrier that doesn't typically set phone numbers
+     * on {@link #PHONE_NUMBER_SOURCE_UICC UICC}, the source {@link #PHONE_NUMBER_SOURCE_IMS IMS}
+     * may provide one. Or, a carrier may decide to provide the phone number via source
+     * {@link #PHONE_NUMBER_SOURCE_CARRIER carrier} if neither source UICC nor IMS is available.
      *
      * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
      *                       for the default one.
@@ -3831,10 +3838,10 @@ public class SubscriptionManager {
      * @see #PHONE_NUMBER_SOURCE_CARRIER
      * @see #PHONE_NUMBER_SOURCE_IMS
      */
-    @SuppressAutoDoc // No support for carrier privileges (b/72967236)
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PHONE_NUMBERS,
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            "carrier privileges",
     })
     @NonNull
     public String getPhoneNumber(int subscriptionId, @PhoneNumberSource int source) {
@@ -3863,15 +3870,13 @@ public class SubscriptionManager {
      * Returns the phone number for the given {@code subId}, or an empty string if
      * not available.
      *
+     * <p>This API is suitable for general apps that needs to know the phone number.
+     * For specific apps that needs to know the phone number provided by a specific source,
+     * {@link #getPhoneNumber(int, int)} may be suitable.
+     *
      * <p>This API is built up on {@link #getPhoneNumber(int, int)}, but picks
      * from available sources in the following order: {@link #PHONE_NUMBER_SOURCE_CARRIER}
      * > {@link #PHONE_NUMBER_SOURCE_UICC} > {@link #PHONE_NUMBER_SOURCE_IMS}.
-     *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS}, or
-     * READ_PRIVILEGED_PHONE_STATE permission (can only be granted to apps preloaded on device),
-     * or that the calling app has carrier privileges
-     * (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
      * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
      *                       for the default one.
@@ -3880,10 +3885,10 @@ public class SubscriptionManager {
      * @throws SecurityException if the caller doesn't have permissions required.
      * @see #getPhoneNumber(int, int)
      */
-    @SuppressAutoDoc // No support for carrier privileges (b/72967236)
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PHONE_NUMBERS,
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            "carrier privileges",
     })
     @NonNull
     public String getPhoneNumber(int subscriptionId) {
@@ -3908,8 +3913,8 @@ public class SubscriptionManager {
      * {@link #PHONE_NUMBER_SOURCE_CARRIER carrier}.
      * Sets an empty string to remove the previously set phone number.
      *
-     * <p>Requires Permission: the calling app has carrier privileges
-     * (see {@link TelephonyManager#hasCarrierPrivileges}).
+     * <p>The API is suitable for carrier apps to provide a phone number, for example when
+     * it's not possible to update {@link #PHONE_NUMBER_SOURCE_UICC UICC} directly.
      *
      * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
      *                       for the default one.
@@ -3918,6 +3923,7 @@ public class SubscriptionManager {
      * @throws NullPointerException if {@code number} is {@code null}.
      * @throws SecurityException if the caller doesn't have permissions required.
      */
+    @RequiresPermission("carrier privileges")
     public void setCarrierPhoneNumber(int subscriptionId, @NonNull String number) {
         if (subscriptionId == DEFAULT_SUBSCRIPTION_ID) {
             subscriptionId = getDefaultSubscriptionId();
