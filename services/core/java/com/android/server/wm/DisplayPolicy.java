@@ -429,7 +429,7 @@ public class DisplayPolicy {
                         WindowState targetBar = (msg.arg1 == MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS)
                                 ? getStatusBar() : getNavigationBar();
                         if (targetBar != null) {
-                            requestTransientBars(targetBar);
+                            requestTransientBars(targetBar, true /* isGestureOnSystemBar */);
                         }
                     }
                     break;
@@ -480,26 +480,25 @@ public class DisplayPolicy {
         // TODO(b/181821798) Migrate SystemGesturesPointerEventListener to use window context.
         mSystemGestures = new SystemGesturesPointerEventListener(mUiContext, mHandler,
                 new SystemGesturesPointerEventListener.Callbacks() {
+
                     @Override
                     public void onSwipeFromTop() {
                         synchronized (mLock) {
-                            if (mStatusBar != null) {
-                                requestTransientBars(mStatusBar);
-                            }
-                            checkAltBarSwipeForTransientBars(ALT_BAR_TOP,
-                                    false /* allowForAllPositions */);
+                            final WindowState bar = mStatusBar != null
+                                    ? mStatusBar
+                                    : findAltBarMatchingPosition(ALT_BAR_TOP);
+                            requestTransientBars(bar, true /* isGestureOnSystemBar */);
                         }
                     }
 
                     @Override
                     public void onSwipeFromBottom() {
                         synchronized (mLock) {
-                            if (mNavigationBar != null
-                                    && mNavigationBarPosition == NAV_BAR_BOTTOM) {
-                                requestTransientBars(mNavigationBar);
-                            }
-                            checkAltBarSwipeForTransientBars(ALT_BAR_BOTTOM,
-                                    false /* allowForAllPositions */);
+                            final WindowState bar = mNavigationBar != null
+                                        && mNavigationBarPosition == NAV_BAR_BOTTOM
+                                    ? mNavigationBar
+                                    : findAltBarMatchingPosition(ALT_BAR_BOTTOM);
+                            requestTransientBars(bar, true /* isGestureOnSystemBar */);
                         }
                     }
 
@@ -509,13 +508,8 @@ public class DisplayPolicy {
                         synchronized (mLock) {
                             mDisplayContent.calculateSystemGestureExclusion(
                                     excludedRegion, null /* outUnrestricted */);
-                            final boolean allowSideSwipe = mNavigationBarAlwaysShowOnSideGesture &&
-                                    !mSystemGestures.currentGestureStartedInRegion(excludedRegion);
-                            if (mNavigationBar != null && (mNavigationBarPosition == NAV_BAR_RIGHT
-                                    || allowSideSwipe)) {
-                                requestTransientBars(mNavigationBar);
-                            }
-                            checkAltBarSwipeForTransientBars(ALT_BAR_RIGHT, allowSideSwipe);
+                            requestTransientBarsForSideSwipe(excludedRegion, NAV_BAR_RIGHT,
+                                    ALT_BAR_RIGHT);
                         }
                         excludedRegion.recycle();
                     }
@@ -526,15 +520,31 @@ public class DisplayPolicy {
                         synchronized (mLock) {
                             mDisplayContent.calculateSystemGestureExclusion(
                                     excludedRegion, null /* outUnrestricted */);
-                            final boolean allowSideSwipe = mNavigationBarAlwaysShowOnSideGesture &&
-                                    !mSystemGestures.currentGestureStartedInRegion(excludedRegion);
-                            if (mNavigationBar != null && (mNavigationBarPosition == NAV_BAR_LEFT
-                                    || allowSideSwipe)) {
-                                requestTransientBars(mNavigationBar);
-                            }
-                            checkAltBarSwipeForTransientBars(ALT_BAR_LEFT, allowSideSwipe);
+                            requestTransientBarsForSideSwipe(excludedRegion, NAV_BAR_LEFT,
+                                    ALT_BAR_LEFT);
                         }
                         excludedRegion.recycle();
+                    }
+
+                    private void requestTransientBarsForSideSwipe(Region excludedRegion,
+                            int navBarSide, int altBarSide) {
+                        final WindowState barMatchingSide = mNavigationBar != null
+                                        && mNavigationBarPosition == navBarSide
+                                ? mNavigationBar
+                                : findAltBarMatchingPosition(altBarSide);
+                        final boolean allowSideSwipe = mNavigationBarAlwaysShowOnSideGesture &&
+                                !mSystemGestures.currentGestureStartedInRegion(excludedRegion);
+                        if (barMatchingSide == null && !allowSideSwipe) {
+                            return;
+                        }
+
+                        // Request transient bars on the matching bar, or any bar if we always allow
+                        // side swipes to show the bars
+                        final boolean isGestureOnSystemBar = barMatchingSide != null;
+                        final WindowState bar = barMatchingSide != null
+                                ? barMatchingSide
+                                : findTransientNavOrAltBar();
+                        requestTransientBars(bar, isGestureOnSystemBar);
                     }
 
                     @Override
@@ -686,21 +696,39 @@ public class DisplayPolicy {
         mHandler.post(mGestureNavigationSettingsObserver::register);
     }
 
-    private void checkAltBarSwipeForTransientBars(@WindowManagerPolicy.AltBarPosition int pos,
-            boolean allowForAllPositions) {
-        if (mStatusBarAlt != null && (mStatusBarAltPosition == pos || allowForAllPositions)) {
-            requestTransientBars(mStatusBarAlt);
+    /**
+     * Returns the first non-null alt bar window matching the given position.
+     */
+    private WindowState findAltBarMatchingPosition(@WindowManagerPolicy.AltBarPosition int pos) {
+        if (mStatusBarAlt != null && mStatusBarAltPosition == pos) {
+            return mStatusBarAlt;
         }
-        if (mNavigationBarAlt != null
-                && (mNavigationBarAltPosition == pos || allowForAllPositions)) {
-            requestTransientBars(mNavigationBarAlt);
+        if (mNavigationBarAlt != null && mNavigationBarAltPosition == pos) {
+            return mNavigationBarAlt;
         }
-        if (mClimateBarAlt != null && (mClimateBarAltPosition == pos || allowForAllPositions)) {
-            requestTransientBars(mClimateBarAlt);
+        if (mClimateBarAlt != null && mClimateBarAltPosition == pos) {
+            return mClimateBarAlt;
         }
-        if (mExtraNavBarAlt != null && (mExtraNavBarAltPosition == pos || allowForAllPositions)) {
-            requestTransientBars(mExtraNavBarAlt);
+        if (mExtraNavBarAlt != null && mExtraNavBarAltPosition == pos) {
+            return mExtraNavBarAlt;
         }
+        return null;
+    }
+
+    /**
+     * Finds the first non-null nav bar to request transient for.
+     */
+    private WindowState findTransientNavOrAltBar() {
+        if (mNavigationBar != null) {
+            return mNavigationBar;
+        }
+        if (mNavigationBarAlt != null) {
+            return mNavigationBarAlt;
+        }
+        if (mExtraNavBarAlt != null) {
+            return mExtraNavBarAlt;
+        }
+        return null;
     }
 
     void systemReady() {
@@ -2622,8 +2650,8 @@ public class DisplayPolicy {
         updateSystemBarAttributes();
     }
 
-    private void requestTransientBars(WindowState swipeTarget) {
-        if (!mService.mPolicy.isUserSetupComplete()) {
+    private void requestTransientBars(WindowState swipeTarget, boolean isGestureOnSystemBar) {
+        if (swipeTarget == null || !mService.mPolicy.isUserSetupComplete()) {
             // Swipe-up for navigation bar is disabled during setup
             return;
         }
@@ -2659,7 +2687,8 @@ public class DisplayPolicy {
 
         if (controlTarget.canShowTransient()) {
             // Show transient bars if they are hidden; restore position if they are visible.
-            mDisplayContent.getInsetsPolicy().showTransient(SHOW_TYPES_FOR_SWIPE);
+            mDisplayContent.getInsetsPolicy().showTransient(SHOW_TYPES_FOR_SWIPE,
+                    isGestureOnSystemBar);
             controlTarget.showInsets(restorePositionTypes, false);
         } else {
             // Restore visibilities and positions of system bars.
@@ -2881,7 +2910,8 @@ public class DisplayPolicy {
             // we're no longer on the Keyguard and the screen is ready. We can now request the bars.
             mPendingPanicGestureUptime = 0;
             if (!isNavBarEmpty(disableFlags)) {
-                mDisplayContent.getInsetsPolicy().showTransient(SHOW_TYPES_FOR_PANIC);
+                mDisplayContent.getInsetsPolicy().showTransient(SHOW_TYPES_FOR_PANIC,
+                        true /* isGestureOnSystemBar */);
             }
         }
 

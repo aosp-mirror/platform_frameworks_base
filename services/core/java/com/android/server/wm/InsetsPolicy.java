@@ -159,7 +159,7 @@ class InsetsPolicy {
         return provider != null && provider.hasWindow() && !provider.getSource().isVisible();
     }
 
-    void showTransient(@InternalInsetsType int[] types) {
+    void showTransient(@InternalInsetsType int[] types, boolean isGestureOnSystemBar) {
         boolean changed = false;
         for (int i = types.length - 1; i >= 0; i--) {
             final @InternalInsetsType int type = types[i];
@@ -176,8 +176,8 @@ class InsetsPolicy {
             StatusBarManagerInternal statusBarManagerInternal =
                     mPolicy.getStatusBarManagerInternal();
             if (statusBarManagerInternal != null) {
-                statusBarManagerInternal.showTransient(
-                        mDisplayContent.getDisplayId(), mShowingTransientTypes.toArray());
+                statusBarManagerInternal.showTransient(mDisplayContent.getDisplayId(),
+                        mShowingTransientTypes.toArray(), isGestureOnSystemBar);
             }
             updateBarControlTarget(mFocusedWin);
 

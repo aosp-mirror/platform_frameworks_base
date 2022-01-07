@@ -495,7 +495,8 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
     }
 
     @Override
-    public void showTransient(int displayId, @InternalInsetsType int[] types) {
+    public void showTransient(int displayId, @InternalInsetsType int[] types,
+            boolean isGestureOnSystemBar) {
         if (displayId != mDisplayId) {
             return;
         }

@@ -151,17 +151,17 @@ public class CommandQueueTest extends SysuiTestCase {
     @Test
     public void testShowTransient() {
         int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
-        mCommandQueue.showTransient(DEFAULT_DISPLAY, types);
+        mCommandQueue.showTransient(DEFAULT_DISPLAY, types, true /* isGestureOnSystemBar */);
         waitForIdleSync();
-        verify(mCallbacks).showTransient(eq(DEFAULT_DISPLAY), eq(types));
+        verify(mCallbacks).showTransient(eq(DEFAULT_DISPLAY), eq(types), eq(true));
     }
 
     @Test
     public void testShowTransientForSecondaryDisplay() {
         int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
-        mCommandQueue.showTransient(SECONDARY_DISPLAY, types);
+        mCommandQueue.showTransient(SECONDARY_DISPLAY, types, true /* isGestureOnSystemBar */);
         waitForIdleSync();
-        verify(mCallbacks).showTransient(eq(SECONDARY_DISPLAY), eq(types));
+        verify(mCallbacks).showTransient(eq(SECONDARY_DISPLAY), eq(types), eq(true));
     }
 
     @Test
