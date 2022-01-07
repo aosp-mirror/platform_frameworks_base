@@ -3569,6 +3569,18 @@
     <permission android:name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"
         android:protectionLevel="signature|privileged" />
 
+    <!-- ========================================= -->
+    <!-- Permissions for SupplementalApi -->
+    <!-- ========================================= -->
+    <eat-comment />
+
+    <!-- TODO(b/213488783): Update with correct names. -->
+    <!-- Allows an application to access SupplementalApis. -->
+    <permission android:name="android.permission.ACCESS_SUPPLEMENTAL_APIS"
+        android:label="@string/permlab_accessSupplementalApi"
+        android:description="@string/permdesc_accessSupplementalApi"
+        android:protectionLevel="normal" />
+
     <!-- ==================================== -->
     <!-- Private permissions                  -->
     <!-- ==================================== -->
