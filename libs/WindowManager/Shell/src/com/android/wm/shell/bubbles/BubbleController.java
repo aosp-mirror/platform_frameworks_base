@@ -1319,6 +1319,7 @@ public class BubbleController {
      * Updates the visibility of the bubbles based on current state.
      * Does not un-bubble, just hides or un-hides.
      * Updates stack description for TalkBack focus.
+     * Updates bubbles' icon views clickable states
      */
     public void updateStack() {
         if (mStackView == null) {
@@ -1336,6 +1337,8 @@ public class BubbleController {
         }
 
         mStackView.updateContentDescription();
+
+        mStackView.updateBubblesClickableStates();
     }
 
     @VisibleForTesting
