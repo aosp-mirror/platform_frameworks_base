@@ -99,11 +99,7 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun appLayerReplacesLauncher() {
-        // This test doesn't work in shell transitions because of b/206094140
-        assumeFalse(isShellTransitionsEnabled)
-        super.appLayerReplacesLauncher()
-    }
+    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
 
     /** {@inheritDoc} */
     @Presubmit

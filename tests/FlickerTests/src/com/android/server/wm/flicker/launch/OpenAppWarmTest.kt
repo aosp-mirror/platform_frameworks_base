@@ -96,20 +96,14 @@ class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun appWindowReplacesLauncherAsTopWindow() {
-        // This test doesn't work in shell transitions because of b/206094140
-        assumeFalse(isShellTransitionsEnabled)
-        super.appWindowReplacesLauncherAsTopWindow()
-    }
+    override fun appWindowReplacesLauncherAsTopWindow() =
+            super.appWindowReplacesLauncherAsTopWindow()
 
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        // This test doesn't work in shell transitions because of b/206094140
-        assumeFalse(isShellTransitionsEnabled)
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+            super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
     @FlakyTest
@@ -119,11 +113,7 @@ class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun appLayerReplacesLauncher() {
-        // This test doesn't work in shell transitions because of b/206094140
-        assumeFalse(isShellTransitionsEnabled)
-        super.appLayerReplacesLauncher()
-    }
+    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
 
     /** {@inheritDoc} */
     @Presubmit
