@@ -9,6 +9,8 @@ import com.android.systemui.ExpandHelper
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.media.MediaHierarchyManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
@@ -18,7 +20,7 @@ import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.LockscreenGestureLogger
+import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.StatusBar
@@ -56,7 +58,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     lateinit var transitionController: LockscreenShadeTransitionController
     lateinit var row: ExpandableNotificationRow
     @Mock lateinit var statusbarStateController: SysuiStatusBarStateController
-    @Mock lateinit var lockscreenGestureLogger: LockscreenGestureLogger
+    @Mock lateinit var logger: LSShadeTransitionLogger
+    @Mock lateinit var dumpManager:  DumpManager
     @Mock lateinit var keyguardBypassController: KeyguardBypassController
     @Mock lateinit var lockScreenUserManager: NotificationLockscreenUserManager
     @Mock lateinit var falsingCollector: FalsingCollector
@@ -66,6 +69,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var scrimController: ScrimController
     @Mock lateinit var configurationController: ConfigurationController
     @Mock lateinit var falsingManager: FalsingManager
+    @Mock lateinit var buffer: LogBuffer
     @Mock lateinit var notificationPanelController: NotificationPanelViewController
     @Mock lateinit var nsslController: NotificationStackScrollLayoutController
     @Mock lateinit var depthController: NotificationShadeDepthController
@@ -86,18 +90,18 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 .addOverride(R.bool.config_use_split_notification_shade, false)
         transitionController = LockscreenShadeTransitionController(
             statusBarStateController = statusbarStateController,
-            lockscreenGestureLogger = lockscreenGestureLogger,
+            logger = logger,
             keyguardBypassController = keyguardBypassController,
             lockScreenUserManager = lockScreenUserManager,
             falsingCollector = falsingCollector,
             ambientState = ambientState,
-            displayMetrics = displayMetrics,
             mediaHierarchyManager = mediaHierarchyManager,
             scrimController = scrimController,
             depthController = depthController,
             context = context,
             configurationController = configurationController,
-            falsingManager = falsingManager
+            falsingManager = falsingManager,
+            dumpManager = dumpManager
         )
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
