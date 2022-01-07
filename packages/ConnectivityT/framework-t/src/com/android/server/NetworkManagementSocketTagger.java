@@ -18,7 +18,6 @@ package com.android.server;
 
 import android.os.StrictMode;
 import android.util.Log;
-import android.util.Slog;
 
 import dalvik.system.SocketTagger;
 
@@ -122,7 +121,7 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
     public static void resetKernelUidStats(int uid) {
         int errno = native_deleteTagData(0, uid);
         if (errno < 0) {
-            Slog.w(TAG, "problem clearing counters for uid " + uid + " : errno " + errno);
+            Log.w(TAG, "problem clearing counters for uid " + uid + " : errno " + errno);
         }
     }
 
