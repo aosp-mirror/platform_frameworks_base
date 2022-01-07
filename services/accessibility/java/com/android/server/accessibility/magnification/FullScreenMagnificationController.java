@@ -91,6 +91,8 @@ public class FullScreenMagnificationController implements
     private final SparseArray<DisplayMagnification> mDisplays = new SparseArray<>(0);
 
     private final Rect mTempRect = new Rect();
+    // Whether the following typing focus feature for magnification is enabled.
+    private boolean mMagnificationFollowTypingEnabled = true;
 
     /**
      * This class implements {@link WindowManagerInternal.MagnificationCallbacks} and holds
@@ -744,6 +746,9 @@ public class FullScreenMagnificationController implements
     public void onRectangleOnScreenRequested(int displayId, int left, int top, int right,
             int bottom) {
         synchronized (mLock) {
+            if (!mMagnificationFollowTypingEnabled) {
+                return;
+            }
             final DisplayMagnification display = mDisplays.get(displayId);
             if (display == null) {
                 return;
@@ -758,6 +763,10 @@ public class FullScreenMagnificationController implements
             }
             display.onRectangleOnScreenRequested(left, top, right, bottom);
         }
+    }
+
+    void setMagnificationFollowTypingEnabled(boolean enabled) {
+        mMagnificationFollowTypingEnabled = enabled;
     }
 
     /**

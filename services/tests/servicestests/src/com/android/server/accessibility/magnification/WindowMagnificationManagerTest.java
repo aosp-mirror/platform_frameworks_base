@@ -372,6 +372,25 @@ public class WindowMagnificationManagerTest {
     }
 
     @Test
+    public void onRectangleOnScreenRequested_followTypingIsDisabled_withoutMovingMagnification()
+            throws RemoteException {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, 50f, 50f);
+        final Region beforeRegion = new Region();
+        mWindowMagnificationManager.getMagnificationSourceBounds(TEST_DISPLAY, beforeRegion);
+        final Rect requestedRect = beforeRegion.getBounds();
+        requestedRect.offsetTo(requestedRect.right + 10, requestedRect.bottom + 10);
+        mWindowMagnificationManager.setMagnificationFollowTypingEnabled(false);
+
+        mWindowMagnificationManager.onRectangleOnScreenRequested(TEST_DISPLAY,
+                requestedRect.left, requestedRect.top, requestedRect.right, requestedRect.bottom);
+
+        final Region afterRegion = new Region();
+        mWindowMagnificationManager.getMagnificationSourceBounds(TEST_DISPLAY, afterRegion);
+        assertEquals(afterRegion, beforeRegion);
+    }
+
+    @Test
     public void moveWindowMagnifier_enabled_invokeConnectionMethod() throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2f, NaN, NaN);

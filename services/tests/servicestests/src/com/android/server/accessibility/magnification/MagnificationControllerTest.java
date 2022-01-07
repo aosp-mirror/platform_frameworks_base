@@ -479,6 +479,14 @@ public class MagnificationControllerTest {
     }
 
     @Test
+    public void setPreferenceMagnificationFollowTypingEnabled_setPrefDisabled_disableAll() {
+        mMagnificationController.setMagnificationFollowTypingEnabled(false);
+
+        verify(mWindowMagnificationManager).setMagnificationFollowTypingEnabled(eq(false));
+        verify(mScreenMagnificationController).setMagnificationFollowTypingEnabled(eq(false));
+    }
+
+    @Test
     public void onRectangleOnScreenRequested_fullScreenIsActivated_fullScreenDispatchEvent() {
         mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY,
                 true);

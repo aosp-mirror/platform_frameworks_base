@@ -530,6 +530,16 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         mMagnificationCapabilities = capabilities;
     }
 
+    /**
+     * Called when the following typing focus feature is switched.
+     *
+     * @param enabled Enable the following typing focus feature
+     */
+    public void setMagnificationFollowTypingEnabled(boolean enabled) {
+        getWindowMagnificationMgr().setMagnificationFollowTypingEnabled(enabled);
+        getFullScreenMagnificationController().setMagnificationFollowTypingEnabled(enabled);
+    }
+
     private DisableMagnificationCallback getDisableMagnificationEndRunnableLocked(
             int displayId) {
         return mMagnificationEndRunnableSparseArray.get(displayId);

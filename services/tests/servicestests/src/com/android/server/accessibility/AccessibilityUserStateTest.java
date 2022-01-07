@@ -172,6 +172,7 @@ public class AccessibilityUserStateTest {
                 mUserState.getMagnificationModeLocked(TEST_DISPLAY));
         assertEquals(mFocusStrokeWidthDefaultValue, mUserState.getFocusStrokeWidthLocked());
         assertEquals(mFocusColorDefaultValue, mUserState.getFocusColorLocked());
+        assertTrue(mUserState.isMagnificationFollowTypingEnabled());
     }
 
     @Test
@@ -371,6 +372,15 @@ public class AccessibilityUserStateTest {
 
         assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
                 mUserState.getMagnificationModeLocked(TEST_DISPLAY));
+    }
+
+    @Test
+    public void setMagnificationFollowTypingEnabled_defaultTrueAndThenDisable_returnFalse() {
+        assertTrue(mUserState.isMagnificationFollowTypingEnabled());
+
+        mUserState.setMagnificationFollowTypingEnabled(false);
+
+        assertFalse(mUserState.isMagnificationFollowTypingEnabled());
     }
 
     @Test

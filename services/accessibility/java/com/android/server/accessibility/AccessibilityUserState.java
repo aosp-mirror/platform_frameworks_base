@@ -129,6 +129,8 @@ class AccessibilityUserState {
     private final SparseIntArray mMagnificationModes = new SparseIntArray();
     // The magnification capabilities used to know magnification mode could be switched.
     private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+    // Whether the following typing focus feature for magnification is enabled.
+    private boolean mMagnificationFollowTypingEnabled = true;
 
     /** The stroke width of the focus rectangle in pixels */
     private int mFocusStrokeWidth;
@@ -210,6 +212,7 @@ class AccessibilityUserState {
         mMagnificationModes.clear();
         mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
         mFocusColor = mFocusColorDefaultValue;
+        mMagnificationFollowTypingEnabled = true;
     }
 
     void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
@@ -683,6 +686,14 @@ class AccessibilityUserState {
      */
     public void setMagnificationCapabilitiesLocked(int capabilities) {
         mMagnificationCapabilities = capabilities;
+    }
+
+    public void setMagnificationFollowTypingEnabled(boolean enabled) {
+        mMagnificationFollowTypingEnabled = enabled;
+    }
+
+    public boolean isMagnificationFollowTypingEnabled() {
+        return mMagnificationFollowTypingEnabled;
     }
 
     /**

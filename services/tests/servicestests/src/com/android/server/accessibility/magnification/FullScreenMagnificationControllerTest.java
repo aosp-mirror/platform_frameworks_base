@@ -921,6 +921,22 @@ public class FullScreenMagnificationControllerTest {
     }
 
     @Test
+    public void requestRectOnScreen_disabledByPrefSetting_doesNothing() {
+        register(DISPLAY_0);
+        zoomIn2xToMiddle(DISPLAY_0);
+        Mockito.reset(mMockWindowManager);
+        MagnificationSpec startSpec = getCurrentMagnificationSpec(DISPLAY_0);
+        MagnificationSpec expectedEndSpec = getMagnificationSpec(2.0f, 0, 0);
+        mFullScreenMagnificationController.setMagnificationFollowTypingEnabled(false);
+
+        mFullScreenMagnificationController.onRectangleOnScreenRequested(DISPLAY_0, 0, 0, 1, 1);
+
+        assertThat(getCurrentMagnificationSpec(DISPLAY_0), closeTo(startSpec));
+        verify(mMockWindowManager, never()).setMagnificationSpec(eq(DISPLAY_0),
+                argThat(closeTo(expectedEndSpec)));
+    }
+
+    @Test
     public void testRequestRectOnScreen_rectCanFitOnScreen_pansToGetRectOnScreen() {
         for (int i = 0; i < DISPLAY_COUNT; i++) {
             requestRectOnScreen_rectCanFitOnScreen_pansToGetRectOnScreen(i);
