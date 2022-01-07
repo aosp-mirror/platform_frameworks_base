@@ -25,6 +25,7 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -34,6 +35,9 @@ import java.util.List;
 public class WifiPowerCalculator extends PowerCalculator {
     private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
     private static final String TAG = "WifiPowerCalculator";
+
+    private static final BatteryConsumer.Key[] UNINITIALIZED_KEYS = new BatteryConsumer.Key[0];
+
     private final UsageBasedPowerEstimator mIdlePowerEstimator;
     private final UsageBasedPowerEstimator mTxPowerEstimator;
     private final UsageBasedPowerEstimator mRxPowerEstimator;
@@ -51,6 +55,9 @@ public class WifiPowerCalculator extends PowerCalculator {
         public long wifiTxPackets;
         public long wifiRxBytes;
         public long wifiTxBytes;
+
+        public BatteryConsumer.Key[] keys;
+        public double[] powerPerKeyMah;
     }
 
     public WifiPowerCalculator(PowerProfile profile) {
@@ -77,7 +84,7 @@ public class WifiPowerCalculator extends PowerCalculator {
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
-
+        BatteryConsumer.Key[] keys = UNINITIALIZED_KEYS;
         long totalAppDurationMs = 0;
         double totalAppPowerMah = 0;
         final PowerDurationAndTraffic powerDurationAndTraffic = new PowerDurationAndTraffic();
@@ -85,9 +92,20 @@ public class WifiPowerCalculator extends PowerCalculator {
                 builder.getUidBatteryConsumerBuilders();
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
+            if (keys == UNINITIALIZED_KEYS) {
+                if (query.isProcessStateDataNeeded()) {
+                    keys = app.getKeys(BatteryConsumer.POWER_COMPONENT_WIFI);
+                    powerDurationAndTraffic.keys = keys;
+                    powerDurationAndTraffic.powerPerKeyMah = new double[keys.length];
+                } else {
+                    keys = null;
+                }
+            }
+
             final long consumptionUC =
                     app.getBatteryStatsUid().getWifiMeasuredBatteryConsumptionUC();
             final int powerModel = getPowerModel(consumptionUC, query);
+
             calculateApp(powerDurationAndTraffic, app.getBatteryStatsUid(), powerModel,
                     rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED,
                     batteryStats.hasWifiActivityReporting(), consumptionUC);
@@ -99,6 +117,20 @@ public class WifiPowerCalculator extends PowerCalculator {
                     powerDurationAndTraffic.durationMs);
             app.setConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI,
                     powerDurationAndTraffic.powerMah, powerModel);
+
+            if (query.isProcessStateDataNeeded() && keys != null) {
+                for (int j = 0; j < keys.length; j++) {
+                    BatteryConsumer.Key key = keys[j];
+                    final int processState = key.processState;
+                    if (processState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
+                        // Already populated with the total across all process states
+                        continue;
+                    }
+
+                    app.setConsumedPower(key, powerDurationAndTraffic.powerPerKeyMah[j],
+                            powerModel);
+                }
+            }
         }
 
         final long consumptionUC = batteryStats.getWifiMeasuredBatteryConsumptionUC();
@@ -193,21 +225,23 @@ public class WifiPowerCalculator extends PowerCalculator {
                 BatteryStats.NETWORK_WIFI_TX_DATA,
                 statsType);
 
-        if (powerModel == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY) {
-            powerDurationAndTraffic.powerMah = uCtoMah(consumptionUC);
-        }
-
         if (hasWifiActivityReporting && mHasWifiPowerController) {
             final BatteryStats.ControllerActivityCounter counter = u.getWifiControllerActivity();
             if (counter != null) {
-                final long idleTime = counter.getIdleTimeCounter().getCountLocked(statsType);
-                final long txTime = counter.getTxTimeCounters()[0].getCountLocked(statsType);
-                final long rxTime = counter.getRxTimeCounter().getCountLocked(statsType);
+                final BatteryStats.LongCounter rxTimeCounter = counter.getRxTimeCounter();
+                final BatteryStats.LongCounter txTimeCounter = counter.getTxTimeCounters()[0];
+                final BatteryStats.LongCounter idleTimeCounter = counter.getIdleTimeCounter();
+
+                final long rxTime = rxTimeCounter.getCountLocked(statsType);
+                final long txTime = txTimeCounter.getCountLocked(statsType);
+                final long idleTime = idleTimeCounter.getCountLocked(statsType);
 
                 powerDurationAndTraffic.durationMs = idleTime + rxTime + txTime;
                 if (powerModel == BatteryConsumer.POWER_MODEL_POWER_PROFILE) {
                     powerDurationAndTraffic.powerMah
                             = calcPowerFromControllerDataMah(rxTime, txTime, idleTime);
+                } else {
+                    powerDurationAndTraffic.powerMah = uCtoMah(consumptionUC);
                 }
 
                 if (DEBUG && powerDurationAndTraffic.powerMah != 0) {
@@ -215,9 +249,32 @@ public class WifiPowerCalculator extends PowerCalculator {
                             + "ms tx=" + txTime + "ms power=" + formatCharge(
                             powerDurationAndTraffic.powerMah));
                 }
+
+                if (powerDurationAndTraffic.keys != null) {
+                    for (int i = 0; i < powerDurationAndTraffic.keys.length; i++) {
+                        final int processState = powerDurationAndTraffic.keys[i].processState;
+                        if (processState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
+                            continue;
+                        }
+
+                        if (powerModel == BatteryConsumer.POWER_MODEL_POWER_PROFILE) {
+                            powerDurationAndTraffic.powerPerKeyMah[i] =
+                                    calcPowerFromControllerDataMah(
+                                            rxTimeCounter.getCountForProcessState(processState),
+                                            txTimeCounter.getCountForProcessState(processState),
+                                            idleTimeCounter.getCountForProcessState(processState));
+                        } else {
+                            powerDurationAndTraffic.powerPerKeyMah[i] =
+                                    uCtoMah(u.getWifiMeasuredBatteryConsumptionUC(processState));
+                        }
+                    }
+                }
             } else {
                 powerDurationAndTraffic.durationMs = 0;
                 powerDurationAndTraffic.powerMah = 0;
+                if (powerDurationAndTraffic.powerPerKeyMah != null) {
+                    Arrays.fill(powerDurationAndTraffic.powerPerKeyMah, 0);
+                }
             }
         } else {
             final long wifiRunningTime = u.getWifiRunningTime(rawRealtimeUs, statsType) / 1000;
@@ -233,6 +290,14 @@ public class WifiPowerCalculator extends PowerCalculator {
                         powerDurationAndTraffic.wifiRxPackets,
                         powerDurationAndTraffic.wifiTxPackets,
                         wifiRunningTime, wifiScanTimeMs, batchTimeMs);
+            } else {
+                powerDurationAndTraffic.powerMah = uCtoMah(consumptionUC);
+            }
+
+            if (powerDurationAndTraffic.powerPerKeyMah != null) {
+                // Per-process state attribution is not supported in the absence of WiFi
+                // activity reporting
+                Arrays.fill(powerDurationAndTraffic.powerPerKeyMah, 0);
             }
 
             if (DEBUG && powerDurationAndTraffic.powerMah != 0) {

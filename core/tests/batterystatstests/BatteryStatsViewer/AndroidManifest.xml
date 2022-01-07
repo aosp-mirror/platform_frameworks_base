@@ -16,8 +16,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.frameworks.core.batterystatsviewer"
-          android:sharedUserId="android.uid.system">
+          package="com.android.frameworks.core.batterystatsviewer">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.BATTERY_STATS"/>
