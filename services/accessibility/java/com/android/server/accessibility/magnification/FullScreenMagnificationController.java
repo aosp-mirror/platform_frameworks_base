@@ -17,10 +17,12 @@
 package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
+import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
 import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
 import static com.android.server.accessibility.AccessibilityManagerService.INVALID_SERVICE_ID;
 
+import android.accessibilityservice.MagnificationConfig;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
@@ -363,9 +365,16 @@ public class FullScreenMagnificationController implements
             return mIdOfLastServiceToMagnify;
         }
 
+        @GuardedBy("mLock")
         void onMagnificationChangedLocked() {
-            mControllerCtx.getAms().notifyMagnificationChanged(mDisplayId, mMagnificationRegion,
-                    getScale(), getCenterX(), getCenterY());
+            final MagnificationConfig config = new MagnificationConfig.Builder()
+                    .setMode(MAGNIFICATION_MODE_FULLSCREEN)
+                    .setScale(getScale())
+                    .setCenterX(getCenterX())
+                    .setCenterY(getCenterY()).build();
+            mControllerCtx.getAms().notifyMagnificationChanged(mDisplayId,
+                    mMagnificationRegion,
+                    config);
             if (mUnregisterPending && !isMagnifying()) {
                 unregister(mDeleteAfterUnregister);
             }

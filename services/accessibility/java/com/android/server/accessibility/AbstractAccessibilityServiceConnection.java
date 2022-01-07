@@ -1542,9 +1542,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
-            float scale, float centerX, float centerY) {
+            @NonNull MagnificationConfig config) {
         mInvocationHandler
-                .notifyMagnificationChangedLocked(displayId, region, scale, centerX, centerY);
+                .notifyMagnificationChangedLocked(displayId, region, config);
     }
 
     public void notifySoftKeyboardShowModeChangedLocked(int showState) {
@@ -1564,15 +1564,15 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      * state of magnification has changed.
      */
     private void notifyMagnificationChangedInternal(int displayId, @NonNull Region region,
-            float scale, float centerX, float centerY) {
+            @NonNull MagnificationConfig config) {
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("onMagnificationChanged", displayId + ", " + region + ", "
-                            + scale + ", " + centerX + ", " + centerY);
+                            + config.toString());
                 }
-                listener.onMagnificationChanged(displayId, region, scale, centerX, centerY);
+                listener.onMagnificationChanged(displayId, region, config);
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error sending magnification changes to " + mService, re);
             }
@@ -1899,11 +1899,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 case MSG_ON_MAGNIFICATION_CHANGED: {
                     final SomeArgs args = (SomeArgs) message.obj;
                     final Region region = (Region) args.arg1;
-                    final float scale = (float) args.arg2;
-                    final float centerX = (float) args.arg3;
-                    final float centerY = (float) args.arg4;
+                    final MagnificationConfig config = (MagnificationConfig) args.arg2;
                     final int displayId = args.argi1;
-                    notifyMagnificationChangedInternal(displayId, region, scale, centerX, centerY);
+                    notifyMagnificationChangedInternal(displayId, region, config);
                     args.recycle();
                 } break;
 
@@ -1932,7 +1930,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
 
         public void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
-                float scale, float centerX, float centerY) {
+                @NonNull MagnificationConfig config) {
             synchronized (mLock) {
                 if (mMagnificationCallbackState.get(displayId) == null) {
                     return;
@@ -1941,9 +1939,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
             final SomeArgs args = SomeArgs.obtain();
             args.arg1 = region;
-            args.arg2 = scale;
-            args.arg3 = centerX;
-            args.arg4 = centerY;
+            args.arg2 = config;
             args.argi1 = displayId;
 
             final Message msg = obtainMessage(MSG_ON_MAGNIFICATION_CHANGED, args);

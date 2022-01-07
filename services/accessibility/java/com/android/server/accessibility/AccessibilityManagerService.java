@@ -44,6 +44,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.accessibilityservice.MagnificationConfig;
 import android.accessibilityservice.TouchInteractionController;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1301,18 +1302,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * Called by the MagnificationController when the state of display
      * magnification changes.
      *
-     * @param displayId The logical display id.
+     * <p>
+     * It can notify window magnification change if the service supports controlling all the
+     * magnification mode.
+     * </p>
+     *
+     * @param displayId The logical display id
      * @param region the new magnified region, may be empty if
      *               magnification is not enabled (e.g. scale is 1)
-     * @param scale the new scale
-     * @param centerX the new screen-relative center X coordinate
-     * @param centerY the new screen-relative center Y coordinate
+     * @param config The magnification config. That has magnification mode, the new scale and the
+     *              new screen-relative center position
      */
     public void notifyMagnificationChanged(int displayId, @NonNull Region region,
-            float scale, float centerX, float centerY) {
+            @NonNull MagnificationConfig config) {
         synchronized (mLock) {
             notifyClearAccessibilityCacheLocked();
-            notifyMagnificationChangedLocked(displayId, region, scale, centerX, centerY);
+            notifyMagnificationChangedLocked(displayId, region, config);
         }
     }
 
@@ -1613,11 +1618,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
-            float scale, float centerX, float centerY) {
+            @NonNull MagnificationConfig config) {
         final AccessibilityUserState state = getCurrentUserStateLocked();
         for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
             final AccessibilityServiceConnection service = state.mBoundServices.get(i);
-            service.notifyMagnificationChangedLocked(displayId, region, scale, centerX, centerY);
+            service.notifyMagnificationChangedLocked(displayId, region, config);
         }
     }
 

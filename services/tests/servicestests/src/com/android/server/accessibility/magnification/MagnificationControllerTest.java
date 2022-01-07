@@ -430,6 +430,21 @@ public class MagnificationControllerTest {
     }
 
     @Test
+    public void onSourceBoundsChanged_notifyMagnificationChanged() {
+        Rect rect = new Rect(0, 0, 100, 120);
+        Region region = new Region(rect);
+
+        mMagnificationController.onSourceBoundsChanged(TEST_DISPLAY, rect);
+
+        final ArgumentCaptor<MagnificationConfig> configCaptor = ArgumentCaptor.forClass(
+                MagnificationConfig.class);
+        verify(mService).notifyMagnificationChanged(eq(TEST_DISPLAY), eq(region),
+                configCaptor.capture());
+        assertEquals(rect.exactCenterX(), configCaptor.getValue().getCenterX(), 0);
+        assertEquals(rect.exactCenterY(), configCaptor.getValue().getCenterY(), 0);
+    }
+
+    @Test
     public void onAccessibilityActionPerformed_magnifierEnabled_showMagnificationButton()
             throws RemoteException {
         setMagnificationEnabled(MODE_WINDOW);

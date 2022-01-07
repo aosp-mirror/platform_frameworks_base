@@ -139,6 +139,14 @@ public class WindowMagnificationManager implements
         void onWindowMagnificationActivationState(int displayId, boolean activated);
 
         /**
+         * Called when the magnification source bounds are changed.
+         *
+         * @param displayId The logical display id.
+         * @param bounds    The magnified source bounds on the display.
+         */
+        void onSourceBoundsChanged(int displayId, Rect bounds);
+
+        /**
          * Called from {@link IWindowMagnificationConnection} to request changing the magnification
          * mode on the given display.
          *
@@ -689,6 +697,7 @@ public class WindowMagnificationManager implements
                 }
                 magnifier.onSourceBoundsChanged(sourceBounds);
             }
+            mCallback.onSourceBoundsChanged(displayId, sourceBounds);
         }
 
         @Override

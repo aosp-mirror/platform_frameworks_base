@@ -3143,6 +3143,7 @@ package android.accessibilityservice {
 
   public static interface AccessibilityService.MagnificationController.OnMagnificationChangedListener {
     method public void onMagnificationChanged(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController, @NonNull android.graphics.Region, float, float, float);
+    method public default void onMagnificationChanged(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController, @NonNull android.graphics.Region, @NonNull android.accessibilityservice.MagnificationConfig);
   }
 
   public static final class AccessibilityService.ScreenshotResult {

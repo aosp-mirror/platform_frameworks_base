@@ -588,7 +588,7 @@ public abstract class AccessibilityService extends Service {
         boolean onKeyEvent(KeyEvent event);
         /** Magnification changed callbacks for different displays */
         void onMagnificationChanged(int displayId, @NonNull Region region,
-                float scale, float centerX, float centerY);
+                MagnificationConfig config);
         /** Callbacks for receiving motion events. */
         void onMotionEvent(MotionEvent event);
         /** Callback for tuch state changes. */
@@ -1183,14 +1183,14 @@ public abstract class AccessibilityService extends Service {
         }
     }
 
-    private void onMagnificationChanged(int displayId, @NonNull Region region, float scale,
-            float centerX, float centerY) {
+    private void onMagnificationChanged(int displayId, @NonNull Region region,
+            MagnificationConfig config) {
         MagnificationController controller;
         synchronized (mLock) {
             controller = mMagnificationControllers.get(displayId);
         }
         if (controller != null) {
-            controller.dispatchMagnificationChanged(region, scale, centerX, centerY);
+            controller.dispatchMagnificationChanged(region, config);
         }
     }
 
@@ -1328,8 +1328,8 @@ public abstract class AccessibilityService extends Service {
          * Dispatches magnification changes to any registered listeners. This
          * should be called on the service's main thread.
          */
-        void dispatchMagnificationChanged(final @NonNull Region region, final float scale,
-                final float centerX, final float centerY) {
+        void dispatchMagnificationChanged(final @NonNull Region region,
+                final MagnificationConfig config) {
             final ArrayMap<OnMagnificationChangedListener, Handler> entries;
             synchronized (mLock) {
                 if (mListeners == null || mListeners.isEmpty()) {
@@ -1348,16 +1348,13 @@ public abstract class AccessibilityService extends Service {
                 final OnMagnificationChangedListener listener = entries.keyAt(i);
                 final Handler handler = entries.valueAt(i);
                 if (handler != null) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onMagnificationChanged(MagnificationController.this,
-                                    region, scale, centerX, centerY);
-                        }
+                    handler.post(() -> {
+                        listener.onMagnificationChanged(MagnificationController.this,
+                                region, config);
                     });
                 } else {
                     // We're already on the main thread, just run the listener.
-                    listener.onMagnificationChanged(this, region, scale, centerX, centerY);
+                    listener.onMagnificationChanged(this, region, config);
                 }
             }
         }
@@ -1665,6 +1662,10 @@ public abstract class AccessibilityService extends Service {
         public interface OnMagnificationChangedListener {
             /**
              * Called when the magnified region, scale, or center changes.
+             * <p>
+             * <strong>Note:</strong> This legacy callback notifies only full-screen
+             * magnification change.
+             * </p>
              *
              * @param controller the magnification controller
              * @param region the magnification region
@@ -1676,6 +1677,38 @@ public abstract class AccessibilityService extends Service {
              */
             void onMagnificationChanged(@NonNull MagnificationController controller,
                     @NonNull Region region, float scale, float centerX, float centerY);
+
+            /**
+             * Called when the magnified region, mode, scale, or center changes of
+             * all magnification modes.
+             * <p>
+             * <strong>Note:</strong> This method can be overridden to listen to the
+             * magnification changes of all magnification modes then the legacy callback
+             * would not receive the notifications.
+             * Skipping calling super when overriding this method results in
+             * {@link #onMagnificationChanged(MagnificationController, Region, float, float, float)}
+             * not getting called.
+             * </p>
+             *
+             * @param controller the magnification controller
+             * @param region the magnification region
+             *               If the config mode is
+             *               {@link MagnificationConfig#MAGNIFICATION_MODE_FULLSCREEN},
+             *               it is the region of the screen currently active for magnification.
+             *               that is the same region as {@link #getMagnificationRegion()}.
+             *               If the config mode is
+             *               {@link MagnificationConfig#MAGNIFICATION_MODE_WINDOW},
+             *               it is the region of screen projected on the magnification window.
+             * @param config The magnification config. That has the controlling magnification
+             *               mode, the new scale and the new screen-relative center position
+             */
+            default void onMagnificationChanged(@NonNull MagnificationController controller,
+                    @NonNull Region region, @NonNull MagnificationConfig config) {
+                if (config.getMode() == MAGNIFICATION_MODE_FULLSCREEN) {
+                    onMagnificationChanged(controller, region,
+                            config.getScale(), config.getCenterX(), config.getCenterY());
+                }
+            }
         }
     }
 
@@ -2449,9 +2482,8 @@ public abstract class AccessibilityService extends Service {
 
             @Override
             public void onMagnificationChanged(int displayId, @NonNull Region region,
-                    float scale, float centerX, float centerY) {
-                AccessibilityService.this.onMagnificationChanged(displayId, region, scale,
-                        centerX, centerY);
+                    MagnificationConfig config) {
+                AccessibilityService.this.onMagnificationChanged(displayId, region, config);
             }
 
             @Override
@@ -2575,12 +2607,10 @@ public abstract class AccessibilityService extends Service {
 
         /** Magnification changed callbacks for different displays */
         public void onMagnificationChanged(int displayId, @NonNull Region region,
-                float scale, float centerX, float centerY) {
+                MagnificationConfig config) {
             final SomeArgs args = SomeArgs.obtain();
             args.arg1 = region;
-            args.arg2 = scale;
-            args.arg3 = centerX;
-            args.arg4 = centerY;
+            args.arg2 = config;
             args.argi1 = displayId;
 
             final Message message = mCaller.obtainMessageO(DO_ON_MAGNIFICATION_CHANGED, args);
@@ -2739,13 +2769,10 @@ public abstract class AccessibilityService extends Service {
                     if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
                         final SomeArgs args = (SomeArgs) message.obj;
                         final Region region = (Region) args.arg1;
-                        final float scale = (float) args.arg2;
-                        final float centerX = (float) args.arg3;
-                        final float centerY = (float) args.arg4;
+                        final MagnificationConfig config = (MagnificationConfig) args.arg2;
                         final int displayId = args.argi1;
                         args.recycle();
-                        mCallback.onMagnificationChanged(displayId, region, scale,
-                                centerX, centerY);
+                        mCallback.onMagnificationChanged(displayId, region, config);
                     }
                     return;
                 }

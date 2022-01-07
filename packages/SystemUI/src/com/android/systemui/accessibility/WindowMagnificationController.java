@@ -252,7 +252,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                                 mMagnificationFrame.height());
                         mTransaction.setGeometry(mMirrorSurface, mSourceBounds, mTmpRect,
                                 Surface.ROTATION_0).apply();
-                        mWindowMagnifierCallback.onSourceBoundsChanged(mDisplayId, mSourceBounds);
+
+                        // Notify source bounds change when the magnifier is not animating.
+                        if (!mAnimationController.isAnimating()) {
+                            mWindowMagnifierCallback.onSourceBoundsChanged(mDisplayId,
+                                    mSourceBounds);
+                        }
                     }
                 };
         mUpdateStateDescriptionRunnable = () -> {
@@ -596,7 +601,6 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private void modifyWindowMagnification(SurfaceControl.Transaction t) {
         mSfVsyncFrameProvider.postFrameCallback(mMirrorViewGeometryVsyncCallback);
         updateMirrorViewLayout();
-
     }
 
     /**
@@ -800,7 +804,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      *                          are as same as current values, or the transition is interrupted
      *                          due to the new transition request.
      */
-    void enableWindowMagnification(float scale, float centerX, float centerY,
+    public void enableWindowMagnification(float scale, float centerX, float centerY,
             float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
             @Nullable IRemoteMagnificationAnimationCallback animationCallback) {
         mAnimationController.enableWindowMagnification(scale, centerX, centerY,
