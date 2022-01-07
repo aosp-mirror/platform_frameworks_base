@@ -437,6 +437,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         synchronized (mLock) {
             mImeWindowVisible = shown;
         }
+        getWindowMagnificationMgr().onImeWindowVisibilityChanged(shown);
         logMagnificationModeWithImeOnIfNeeded();
     }
 

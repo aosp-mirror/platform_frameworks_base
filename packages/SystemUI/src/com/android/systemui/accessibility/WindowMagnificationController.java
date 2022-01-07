@@ -964,6 +964,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     @Override
     public boolean onDrag(float offsetX, float offsetY) {
         moveWindowMagnifier(offsetX, offsetY);
+        mWindowMagnifierCallback.onDrag(mDisplayId);
         return true;
     }
 

@@ -225,6 +225,13 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     }
 
     @Override
+    public void onDrag(int displayId) {
+        if (mWindowMagnificationConnectionImpl != null) {
+            mWindowMagnificationConnectionImpl.onDrag(displayId);
+        }
+    }
+
+    @Override
     public void requestWindowMagnificationConnection(boolean connect) {
         if (connect) {
             setWindowMagnificationConnection();
