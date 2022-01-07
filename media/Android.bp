@@ -20,7 +20,9 @@ aidl_interface {
         "aidl/android/media/audio/common/AudioFormat.aidl",
         "aidl/android/media/audio/common/AudioOffloadInfo.aidl",
         "aidl/android/media/audio/common/AudioStreamType.aidl",
-        "aidl/android/media/audio/common/AudioUsage.aidl",
+    ],
+    imports: [
+        "android.media.audio.common.types",
     ],
 }
 
@@ -66,4 +68,38 @@ aidl_interface {
         "audio_common-aidl",
         "media_permission-aidl",
     ],
+}
+
+aidl_interface {
+    name: "android.media.audio.common.types",
+    vendor_available: true,
+    host_supported: true,
+    double_loadable: true,
+    flags: [
+        "-Werror",
+        "-Weverything",
+    ],
+    local_include_dir: "aidl",
+    srcs: [
+        "aidl/android/media/audio/common/AudioContentType.aidl",
+        "aidl/android/media/audio/common/AudioSource.aidl",
+        "aidl/android/media/audio/common/AudioUsage.aidl",
+    ],
+    stability: "vintf",
+    backend: {
+        cpp: {
+            min_sdk_version: "29",
+            apex_available: [
+                "//apex_available:platform",
+                "com.android.media",
+            ],
+        },
+        java: {
+        },
+        ndk: {
+            vndk: {
+                enabled: true,
+            },
+        },
+    },
 }
