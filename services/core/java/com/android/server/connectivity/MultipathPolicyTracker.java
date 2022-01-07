@@ -68,7 +68,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.net.NetworkPolicyManagerInternal;
-import com.android.server.net.NetworkStatsManagerInternal;
 
 import java.time.Clock;
 import java.time.ZoneId;
@@ -262,8 +261,10 @@ public class MultipathPolicyTracker {
 
         private long getNetworkTotalBytes(long start, long end) {
             try {
-                return LocalServices.getService(NetworkStatsManagerInternal.class)
-                        .getNetworkTotalBytes(mNetworkTemplate, start, end);
+                final android.app.usage.NetworkStats.Bucket ret =
+                        mContext.getSystemService(NetworkStatsManager.class)
+                        .querySummaryForDevice(mNetworkTemplate, start, end);
+                return ret.getRxBytes() + ret.getTxBytes();
             } catch (RuntimeException e) {
                 Log.w(TAG, "Failed to get data usage: " + e);
                 return -1;
