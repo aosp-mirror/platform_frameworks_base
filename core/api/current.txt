@@ -33201,6 +33201,7 @@ package android.os.storage {
     method public String getDescription(android.content.Context);
     method @Nullable public java.io.File getDirectory();
     method @Nullable public String getMediaStoreVolumeName();
+    method @NonNull public android.os.UserHandle getOwner();
     method public String getState();
     method @Nullable public java.util.UUID getStorageUuid();
     method @Nullable public String getUuid();
