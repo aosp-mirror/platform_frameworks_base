@@ -343,9 +343,17 @@ public class CommandQueue extends IStatusBar.Stub implements
                 String packageName) { }
 
         /**
-         * @see IStatusBar#showTransient(int, int[]).
+         * @see IStatusBar#showTransient(int, int[], boolean).
          */
         default void showTransient(int displayId, @InternalInsetsType int[] types) { }
+
+        /**
+         * @see IStatusBar#showTransient(int, int[], boolean).
+         */
+        default void showTransient(int displayId, @InternalInsetsType int[] types,
+                boolean isGestureOnSystemBar) {
+            showTransient(displayId, types);
+        }
 
         /**
          * @see IStatusBar#abortTransient(int, int[]).
@@ -1019,9 +1027,10 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void showTransient(int displayId, int[] types) {
+    public void showTransient(int displayId, int[] types, boolean isGestureOnSystemBar) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_SHOW_TRANSIENT, displayId, 0, types).sendToTarget();
+            mHandler.obtainMessage(MSG_SHOW_TRANSIENT, displayId, isGestureOnSystemBar ? 1 : 0,
+                    types).sendToTarget();
         }
     }
 
@@ -1404,8 +1413,9 @@ public class CommandQueue extends IStatusBar.Stub implements
                 case MSG_SHOW_TRANSIENT: {
                     final int displayId = msg.arg1;
                     final int[] types = (int[]) msg.obj;
+                    final boolean isGestureOnSystemBar = msg.arg2 != 0;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showTransient(displayId, types);
+                        mCallbacks.get(i).showTransient(displayId, types, isGestureOnSystemBar);
                     }
                     break;
                 }
