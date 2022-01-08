@@ -2851,6 +2851,7 @@ public class DisplayPolicy {
 
     void release() {
         mHandler.post(mGestureNavigationSettingsObserver::unregister);
+        mImmersiveModeConfirmation.release();
     }
 
     @VisibleForTesting
