@@ -200,11 +200,8 @@
     <!-- Size of user education views on large screens (phone is just match parent). -->
     <dimen name="bubbles_user_education_width_large_screen">400dp</dimen>
 
-    <!-- The width of the size compat restart button including padding. -->
-    <dimen name="size_compat_button_width">80dp</dimen>
-
-    <!-- The height of the size compat restart button including padding. -->
-    <dimen name="size_compat_button_height">64dp</dimen>
+    <!-- Bottom and end margin for compat buttons. -->
+    <dimen name="compat_button_margin">16dp</dimen>
 
     <!-- The radius of the corners of the compat hint bubble. -->
     <dimen name="compat_hint_corner_radius">28dp</dimen>
@@ -212,8 +209,8 @@
     <!-- The width of the compat hint point. -->
     <dimen name="compat_hint_point_width">10dp</dimen>
 
-    <!-- The end padding for the compat hint. Computed as (size_compat_button_width / 2
-         - compat_hint_corner_radius - compat_hint_point_width /2). -->
+    <!-- The end padding for the compat hint. Computed as (compat button width (=48) / 2
+        + compat_button_margin - compat_hint_corner_radius - compat_hint_point_width / 2). -->
     <dimen name="compat_hint_padding_end">7dp</dimen>
 
     <!-- The width of the size compat hint. -->
