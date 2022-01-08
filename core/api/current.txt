@@ -948,6 +948,7 @@ package android {
     field public static final int left = 16843181; // 0x10101ad
     field public static final int letterSpacing = 16843958; // 0x10104b6
     field public static final int level = 16844032; // 0x1010500
+    field public static final int lineBreakStyle = 16844365; // 0x101064d
     field public static final int lineHeight = 16844159; // 0x101057f
     field public static final int lineSpacingExtra = 16843287; // 0x1010217
     field public static final int lineSpacingMultiplier = 16843288; // 0x1010218
@@ -17520,6 +17521,17 @@ package android.graphics.pdf {
 
 package android.graphics.text {
 
+  public final class LineBreakConfig {
+    ctor public LineBreakConfig();
+    method public int getLineBreakStyle();
+    method public void set(@Nullable android.graphics.text.LineBreakConfig);
+    method public void setLineBreakStyle(int);
+    field public static final int LINE_BREAK_STYLE_LOOSE = 1; // 0x1
+    field public static final int LINE_BREAK_STYLE_NONE = 0; // 0x0
+    field public static final int LINE_BREAK_STYLE_NORMAL = 2; // 0x2
+    field public static final int LINE_BREAK_STYLE_STRICT = 3; // 0x3
+  }
+
   public class LineBreaker {
     method @NonNull public android.graphics.text.LineBreaker.Result computeLineBreaks(@NonNull android.graphics.text.MeasuredText, @NonNull android.graphics.text.LineBreaker.ParagraphConstraints, @IntRange(from=0) int);
     field public static final int BREAK_STRATEGY_BALANCED = 2; // 0x2
@@ -17575,6 +17587,7 @@ package android.graphics.text {
     ctor public MeasuredText.Builder(@NonNull android.graphics.text.MeasuredText);
     method @NonNull public android.graphics.text.MeasuredText.Builder appendReplacementRun(@NonNull android.graphics.Paint, @IntRange(from=0) int, @FloatRange(from=0) @Px float);
     method @NonNull public android.graphics.text.MeasuredText.Builder appendStyleRun(@NonNull android.graphics.Paint, @IntRange(from=0) int, boolean);
+    method @NonNull public android.graphics.text.MeasuredText.Builder appendStyleRun(@NonNull android.graphics.Paint, @Nullable android.graphics.text.LineBreakConfig, @IntRange(from=0) int, boolean);
     method @NonNull public android.graphics.text.MeasuredText build();
     method @Deprecated @NonNull public android.graphics.text.MeasuredText.Builder setComputeHyphenation(boolean);
     method @NonNull public android.graphics.text.MeasuredText.Builder setComputeHyphenation(int);
@@ -45283,6 +45296,7 @@ package android.text {
   public static final class PrecomputedText.Params {
     method public int getBreakStrategy();
     method public int getHyphenationFrequency();
+    method @Nullable public android.graphics.text.LineBreakConfig getLineBreakConfig();
     method @NonNull public android.text.TextDirectionHeuristic getTextDirection();
     method @NonNull public android.text.TextPaint getTextPaint();
   }
@@ -45293,6 +45307,7 @@ package android.text {
     method @NonNull public android.text.PrecomputedText.Params build();
     method public android.text.PrecomputedText.Params.Builder setBreakStrategy(int);
     method public android.text.PrecomputedText.Params.Builder setHyphenationFrequency(int);
+    method @NonNull public android.text.PrecomputedText.Params.Builder setLineBreakConfig(@NonNull android.graphics.text.LineBreakConfig);
     method public android.text.PrecomputedText.Params.Builder setTextDirection(@NonNull android.text.TextDirectionHeuristic);
   }
 
@@ -45453,6 +45468,7 @@ package android.text {
     method @NonNull public android.text.StaticLayout.Builder setIncludePad(boolean);
     method @NonNull public android.text.StaticLayout.Builder setIndents(@Nullable int[], @Nullable int[]);
     method @NonNull public android.text.StaticLayout.Builder setJustificationMode(int);
+    method @NonNull public android.text.StaticLayout.Builder setLineBreakConfig(@NonNull android.graphics.text.LineBreakConfig);
     method @NonNull public android.text.StaticLayout.Builder setLineSpacing(float, @FloatRange(from=0.0) float);
     method @NonNull public android.text.StaticLayout.Builder setMaxLines(@IntRange(from=0) int);
     method public android.text.StaticLayout.Builder setText(CharSequence);
@@ -57467,6 +57483,7 @@ package android.widget {
     method public final android.text.Layout getLayout();
     method public float getLetterSpacing();
     method public int getLineBounds(int, android.graphics.Rect);
+    method @NonNull public android.graphics.text.LineBreakConfig getLineBreakConfig();
     method public int getLineCount();
     method public int getLineHeight();
     method public float getLineSpacingExtra();
@@ -57594,6 +57611,7 @@ package android.widget {
     method public void setKeyListener(android.text.method.KeyListener);
     method public void setLastBaselineToBottomHeight(@IntRange(from=0) @Px int);
     method public void setLetterSpacing(float);
+    method public void setLineBreakConfig(@NonNull android.graphics.text.LineBreakConfig);
     method public void setLineHeight(@IntRange(from=0) @Px int);
     method public void setLineSpacing(float, float);
     method public void setLines(int);

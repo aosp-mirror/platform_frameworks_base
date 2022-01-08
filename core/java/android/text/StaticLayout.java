@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
+import android.graphics.text.LineBreakConfig;
 import android.graphics.text.LineBreaker;
 import android.os.Build;
 import android.text.style.LeadingMarginSpan;
@@ -403,6 +404,21 @@ public class StaticLayout extends Layout {
         }
 
         /**
+         * Set the line break configuration. The line break will be passed to native used for
+         * calculating the text wrapping. The default value of the line break style is
+         * {@link LineBreakConfig#LINE_BREAK_STYLE_NONE}
+         *
+         * @param lineBreakConfig the line break configuration for text wrapping.
+         * @return this builder, useful for chaining.
+         * @see android.widget.TextView#setLineBreakConfig
+         */
+        @NonNull
+        public Builder setLineBreakConfig(@NonNull LineBreakConfig lineBreakConfig) {
+            mLineBreakConfig = lineBreakConfig;
+            return this;
+        }
+
+        /**
          * Build the {@link StaticLayout} after options have been set.
          *
          * <p>Note: the builder object must not be reused in any way after calling this
@@ -438,6 +454,7 @@ public class StaticLayout extends Layout {
         @Nullable private int[] mRightIndents;
         private int mJustificationMode;
         private boolean mAddLastLineLineSpacing;
+        private LineBreakConfig mLineBreakConfig;
 
         private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -670,7 +687,7 @@ public class StaticLayout extends Layout {
             PrecomputedText precomputed = (PrecomputedText) source;
             final @PrecomputedText.Params.CheckResultUsableResult int checkResult =
                     precomputed.checkResultUsable(bufStart, bufEnd, textDir, paint,
-                            b.mBreakStrategy, b.mHyphenationFrequency);
+                            b.mBreakStrategy, b.mHyphenationFrequency, b.mLineBreakConfig);
             switch (checkResult) {
                 case PrecomputedText.Params.UNUSABLE:
                     break;
@@ -680,6 +697,7 @@ public class StaticLayout extends Layout {
                                 .setBreakStrategy(b.mBreakStrategy)
                                 .setHyphenationFrequency(b.mHyphenationFrequency)
                                 .setTextDirection(textDir)
+                                .setLineBreakConfig(b.mLineBreakConfig)
                                 .build();
                     precomputed = PrecomputedText.create(precomputed, newParams);
                     paragraphInfo = precomputed.getParagraphInfo();
@@ -692,8 +710,8 @@ public class StaticLayout extends Layout {
         }
 
         if (paragraphInfo == null) {
-            final PrecomputedText.Params param = new PrecomputedText.Params(paint, textDir,
-                    b.mBreakStrategy, b.mHyphenationFrequency);
+            final PrecomputedText.Params param = new PrecomputedText.Params(paint,
+                    b.mLineBreakConfig, textDir, b.mBreakStrategy, b.mHyphenationFrequency);
             paragraphInfo = PrecomputedText.createMeasuredParagraphs(source, param, bufStart,
                     bufEnd, false /* computeLayout */);
         }
