@@ -183,7 +183,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
-import com.android.systemui.statusbar.notification.stack.MediaHeaderView;
+import com.android.systemui.statusbar.notification.stack.MediaContainerView;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -1581,7 +1581,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 if (row.isRemoved()) {
                     continue;
                 }
-            } else if (child instanceof MediaHeaderView) {
+            } else if (child instanceof MediaContainerView) {
                 if (child.getVisibility() == GONE) {
                     continue;
                 }
@@ -2433,7 +2433,7 @@ public class NotificationPanelViewController extends PanelViewController {
         // mLockscreenShadeTransitionController.getDragProgress change.
         // When in lockscreen, getDragProgress indicates the true expanded fraction of QS
         float shadeExpandedFraction = mTransitioningToFullShadeProgress > 0
-                ? mLockscreenShadeTransitionController.getDragProgress()
+                ? mLockscreenShadeTransitionController.getQSDragProgress()
                 : getExpandedFraction();
         mSplitShadeHeaderController.setShadeExpandedFraction(shadeExpandedFraction);
         mSplitShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
@@ -4766,7 +4766,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
                 @Override
                 public float getLockscreenShadeDragProgress() {
-                    return mLockscreenShadeTransitionController.getDragProgress();
+                    return mLockscreenShadeTransitionController.getQSDragProgress();
                 }
             };
 

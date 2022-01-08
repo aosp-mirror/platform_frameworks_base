@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.qs.DetailAdapter;
 
@@ -26,13 +28,14 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class QSDetailDisplayer {
+    @Nullable
     private QSPanelController mQsPanelController;
 
     @Inject
     public QSDetailDisplayer() {
     }
 
-    public void setQsPanelController(QSPanelController qsPanelController) {
+    public void setQsPanelController(@Nullable QSPanelController qsPanelController) {
         mQsPanelController = qsPanelController;
     }
 

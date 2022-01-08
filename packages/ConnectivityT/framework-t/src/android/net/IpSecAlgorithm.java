@@ -343,7 +343,7 @@ public final class IpSecAlgorithm implements Parcelable {
         // Load and validate the optional algorithm resource. Undefined or duplicate algorithms in
         // the resource are not allowed.
         final String[] resourceAlgos = systemResources.getStringArray(
-                com.android.internal.R.array.config_optionalIpSecAlgorithms);
+                android.R.array.config_optionalIpSecAlgorithms);
         for (String str : resourceAlgos) {
             if (!ALGO_TO_REQUIRED_FIRST_SDK.containsKey(str) || !enabledAlgos.add(str)) {
                 // This error should be caught by CTS and never be thrown to API callers

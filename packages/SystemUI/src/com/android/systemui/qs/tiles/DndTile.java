@@ -360,6 +360,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     private final class DndDetailAdapter implements DetailAdapter, OnAttachStateChangeListener {
 
+        @Nullable
         private ZenModePanel mZenPanel;
         private boolean mAuto;
 

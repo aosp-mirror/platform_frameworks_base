@@ -16,7 +16,7 @@
 
 package com.android.server.vcn.routeselection;
 
-import static android.net.vcn.VcnUnderlyingNetworkPriority.NETWORK_QUALITY_OK;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_OK;
 
 import static com.android.server.vcn.VcnTestUtils.setupSystemService;
 import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.PRIORITY_ANY;
@@ -39,10 +39,10 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.TelephonyNetworkSpecifier;
-import android.net.vcn.VcnCellUnderlyingNetworkPriority;
+import android.net.vcn.VcnCellUnderlyingNetworkTemplate;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnManager;
-import android.net.vcn.VcnWifiUnderlyingNetworkPriority;
+import android.net.vcn.VcnWifiUnderlyingNetworkTemplate;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
 import android.os.test.TestLooper;
@@ -142,8 +142,8 @@ public class NetworkPriorityClassifierTest {
 
     @Test
     public void testMatchWithoutNotMeteredBit() {
-        final VcnWifiUnderlyingNetworkPriority wifiNetworkPriority =
-                new VcnWifiUnderlyingNetworkPriority.Builder()
+        final VcnWifiUnderlyingNetworkTemplate wifiNetworkPriority =
+                new VcnWifiUnderlyingNetworkTemplate.Builder()
                         .setNetworkQuality(NETWORK_QUALITY_OK)
                         .setAllowMetered(false /* allowMetered */)
                         .build();
@@ -161,8 +161,8 @@ public class NetworkPriorityClassifierTest {
 
     private void verifyMatchWifi(
             boolean isSelectedNetwork, PersistableBundle carrierConfig, boolean expectMatch) {
-        final VcnWifiUnderlyingNetworkPriority wifiNetworkPriority =
-                new VcnWifiUnderlyingNetworkPriority.Builder()
+        final VcnWifiUnderlyingNetworkTemplate wifiNetworkPriority =
+                new VcnWifiUnderlyingNetworkTemplate.Builder()
                         .setNetworkQuality(NETWORK_QUALITY_OK)
                         .setAllowMetered(true /* allowMetered */)
                         .build();
@@ -211,8 +211,8 @@ public class NetworkPriorityClassifierTest {
 
     private void verifyMatchWifiWithSsid(boolean useMatchedSsid, boolean expectMatch) {
         final String nwPrioritySsid = useMatchedSsid ? SSID : SSID_OTHER;
-        final VcnWifiUnderlyingNetworkPriority wifiNetworkPriority =
-                new VcnWifiUnderlyingNetworkPriority.Builder()
+        final VcnWifiUnderlyingNetworkTemplate wifiNetworkPriority =
+                new VcnWifiUnderlyingNetworkTemplate.Builder()
                         .setNetworkQuality(NETWORK_QUALITY_OK)
                         .setAllowMetered(true /* allowMetered */)
                         .setSsid(nwPrioritySsid)
@@ -237,8 +237,8 @@ public class NetworkPriorityClassifierTest {
         verifyMatchWifiWithSsid(false /* useMatchedSsid */, false /* expectMatch */);
     }
 
-    private static VcnCellUnderlyingNetworkPriority.Builder getCellNetworkPriorityBuilder() {
-        return new VcnCellUnderlyingNetworkPriority.Builder()
+    private static VcnCellUnderlyingNetworkTemplate.Builder getCellNetworkPriorityBuilder() {
+        return new VcnCellUnderlyingNetworkTemplate.Builder()
                 .setNetworkQuality(NETWORK_QUALITY_OK)
                 .setAllowMetered(true /* allowMetered */)
                 .setAllowRoaming(true /* allowRoaming */);
@@ -257,7 +257,7 @@ public class NetworkPriorityClassifierTest {
 
     @Test
     public void testMatchOpportunisticCell() {
-        final VcnCellUnderlyingNetworkPriority opportunisticCellNetworkPriority =
+        final VcnCellUnderlyingNetworkTemplate opportunisticCellNetworkPriority =
                 getCellNetworkPriorityBuilder()
                         .setRequireOpportunistic(true /* requireOpportunistic */)
                         .build();
@@ -277,7 +277,7 @@ public class NetworkPriorityClassifierTest {
     private void verifyMatchMacroCellWithAllowedPlmnIds(
             boolean useMatchedPlmnId, boolean expectMatch) {
         final String networkPriorityPlmnId = useMatchedPlmnId ? PLMN_ID : PLMN_ID_OTHER;
-        final VcnCellUnderlyingNetworkPriority networkPriority =
+        final VcnCellUnderlyingNetworkTemplate networkPriority =
                 getCellNetworkPriorityBuilder()
                         .setAllowedOperatorPlmnIds(Set.of(networkPriorityPlmnId))
                         .build();
@@ -306,7 +306,7 @@ public class NetworkPriorityClassifierTest {
     private void verifyMatchMacroCellWithAllowedSpecificCarrierIds(
             boolean useMatchedCarrierId, boolean expectMatch) {
         final int networkPriorityCarrierId = useMatchedCarrierId ? CARRIER_ID : CARRIER_ID_OTHER;
-        final VcnCellUnderlyingNetworkPriority networkPriority =
+        final VcnCellUnderlyingNetworkTemplate networkPriority =
                 getCellNetworkPriorityBuilder()
                         .setAllowedSpecificCarrierIds(Set.of(networkPriorityCarrierId))
                         .build();
@@ -335,7 +335,7 @@ public class NetworkPriorityClassifierTest {
 
     @Test
     public void testMatchWifiFailWithoutNotRoamingBit() {
-        final VcnCellUnderlyingNetworkPriority networkPriority =
+        final VcnCellUnderlyingNetworkTemplate networkPriority =
                 getCellNetworkPriorityBuilder().setAllowRoaming(false /* allowRoaming */).build();
 
         assertFalse(

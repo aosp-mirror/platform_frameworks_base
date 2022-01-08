@@ -27,7 +27,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
-import com.android.systemui.statusbar.notification.stack.MediaHeaderView
+import com.android.systemui.statusbar.notification.stack.MediaContainerView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.Utils
@@ -96,14 +96,14 @@ class KeyguardMediaController @Inject constructor(
     /**
      * single pane media container placed at the top of the notifications list
      */
-    var singlePaneContainer: MediaHeaderView? = null
+    var singlePaneContainer: MediaContainerView? = null
         private set
     private var splitShadeContainer: ViewGroup? = null
 
     /**
      * Attaches media container in single pane mode, situated at the top of the notifications list
      */
-    fun attachSinglePaneContainer(mediaView: MediaHeaderView?) {
+    fun attachSinglePaneContainer(mediaView: MediaContainerView?) {
         val needsListener = singlePaneContainer == null
         singlePaneContainer = mediaView
         if (needsListener) {

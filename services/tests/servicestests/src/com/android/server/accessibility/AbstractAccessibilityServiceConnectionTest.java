@@ -595,6 +595,20 @@ public class AbstractAccessibilityServiceConnectionTest {
     }
 
     @Test
+    public void getCurrentMagnificationRegion_returnRegion() {
+        final int displayId = 1;
+        final Region region = new Region(10, 20, 100, 200);
+        doAnswer((invocation) -> {
+            ((Region) invocation.getArguments()[1]).set(region);
+            return null;
+        }).when(mMockMagnificationProcessor).getCurrentMagnificationRegion(eq(displayId), any(),
+                anyBoolean());
+
+        final Region result = mServiceConnection.getCurrentMagnificationRegion(displayId);
+        assertEquals(result, region);
+    }
+
+    @Test
     public void getMagnificationCenterX_serviceNotBelongCurrentUser_returnZero() {
         final int displayId = 1;
         final float centerX = 480.0f;

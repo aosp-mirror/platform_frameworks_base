@@ -257,7 +257,9 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     private static final class CallbackInfo {
         boolean airplaneModeEnabled;
+        @Nullable
         CharSequence dataSubscriptionName;
+        @Nullable
         CharSequence dataContentDescription;
         boolean activityIn;
         boolean activityOut;
@@ -320,6 +322,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
             return mContext.getString(R.string.quick_settings_cellular_detail_title);
         }
 
+        @Nullable
         @Override
         public Boolean getToggleState() {
             return mDataController.isMobileDataSupported()

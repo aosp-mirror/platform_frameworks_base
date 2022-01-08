@@ -258,6 +258,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
         return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI);
     }
 
+    @Nullable
     private static String removeDoubleQuotes(String string) {
         if (string == null) return null;
         final int length = string.length();
@@ -271,11 +272,14 @@ public class WifiTile extends QSTileImpl<SignalState> {
         boolean enabled;
         boolean connected;
         int wifiSignalIconId;
+        @Nullable
         String ssid;
         boolean activityIn;
         boolean activityOut;
+        @Nullable
         String wifiSignalContentDescription;
         boolean isTransient;
+        @Nullable
         public String statusLabel;
 
         @Override
@@ -321,7 +325,9 @@ public class WifiTile extends QSTileImpl<SignalState> {
     protected class WifiDetailAdapter implements DetailAdapter,
             AccessPointController.AccessPointCallback, QSDetailItems.Callback {
 
+        @Nullable
         private QSDetailItems mItems;
+        @Nullable
         private WifiEntry[] mAccessPoints;
 
         @Override

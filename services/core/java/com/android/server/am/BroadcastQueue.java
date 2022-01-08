@@ -349,6 +349,11 @@ public final class BroadcastQueue {
                 prr.removeCurReceiver(r);
             }
         }
+
+        // if something bad happens here, launch the app and try again
+        if (app.isKilled()) {
+            throw new RemoteException("app gets killed during broadcasting");
+        }
     }
 
     public boolean sendPendingBroadcastsLocked(ProcessRecord app) {

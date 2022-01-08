@@ -45,6 +45,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayChangeController;
@@ -194,7 +195,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
     public static OneHandedController create(
             Context context, WindowManager windowManager, DisplayController displayController,
             DisplayLayout displayLayout, TaskStackListenerImpl taskStackListener,
-            UiEventLogger uiEventLogger, ShellExecutor mainExecutor, Handler mainHandler) {
+            InteractionJankMonitor jankMonitor, UiEventLogger uiEventLogger,
+            ShellExecutor mainExecutor, Handler mainHandler) {
         OneHandedSettingsUtil settingsUtil = new OneHandedSettingsUtil();
         OneHandedAccessibilityUtil accessibilityUtil = new OneHandedAccessibilityUtil(context);
         OneHandedTimeoutHandler timeoutHandler = new OneHandedTimeoutHandler(mainExecutor);
@@ -210,13 +212,13 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
                         mainExecutor);
         OneHandedDisplayAreaOrganizer organizer = new OneHandedDisplayAreaOrganizer(
                 context, displayLayout, settingsUtil, animationController, tutorialHandler,
-                oneHandedBackgroundPanelOrganizer, mainExecutor);
+                oneHandedBackgroundPanelOrganizer, jankMonitor, mainExecutor);
         OneHandedUiEventLogger oneHandedUiEventsLogger = new OneHandedUiEventLogger(uiEventLogger);
         IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
         return new OneHandedController(context, displayController,
                 oneHandedBackgroundPanelOrganizer, organizer, touchHandler, tutorialHandler,
-                settingsUtil, accessibilityUtil, timeoutHandler, oneHandedState,
+                settingsUtil, accessibilityUtil, timeoutHandler, oneHandedState, jankMonitor,
                 oneHandedUiEventsLogger, overlayManager, taskStackListener, mainExecutor,
                 mainHandler);
     }
@@ -232,6 +234,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
             OneHandedAccessibilityUtil oneHandedAccessibilityUtil,
             OneHandedTimeoutHandler timeoutHandler,
             OneHandedState state,
+            InteractionJankMonitor jankMonitor,
             OneHandedUiEventLogger uiEventsLogger,
             IOverlayManager overlayManager,
             TaskStackListenerImpl taskStackListener,

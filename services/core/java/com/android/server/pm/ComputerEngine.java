@@ -3490,9 +3490,8 @@ public class ComputerEngine implements Computer {
         return mSettings.getRenamedPackageLPr(packageName);
     }
 
-    @NonNull
-    @Override
-    public WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries() {
+    private WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
+            getSharedLibraries() {
         return mSharedLibraries.getAll();
     }
 
@@ -4788,7 +4787,7 @@ public class ComputerEngine implements Computer {
     @Override
     public List<PackageStateInternal> findSharedNonSystemLibraries(
             @NonNull PackageStateInternal pkgSetting) {
-        List<SharedLibraryInfo> deps = SharedLibraryHelper.findSharedLibraries(pkgSetting);
+        List<SharedLibraryInfo> deps = SharedLibraryUtils.findSharedLibraries(pkgSetting);
         if (!deps.isEmpty()) {
             List<PackageStateInternal> retValue = new ArrayList<>();
             for (SharedLibraryInfo info : deps) {

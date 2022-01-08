@@ -42,7 +42,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -98,6 +97,7 @@ public class InternetDialog extends SystemUIDialog implements
     private InternetDialogFactory mInternetDialogFactory;
     private SubscriptionManager mSubscriptionManager;
     private TelephonyManager mTelephonyManager;
+    @Nullable
     private AlertDialog mAlertDialog;
     private UiEventLogger mUiEventLogger;
     private Context mContext;
@@ -130,12 +130,14 @@ public class InternetDialog extends SystemUIDialog implements
     private Button mDoneButton;
     private Button mAirplaneModeButton;
     private Drawable mBackgroundOn;
+    @Nullable
     private Drawable mBackgroundOff = null;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private boolean mCanConfigMobileData;
 
     // Wi-Fi entries
     private int mWifiNetworkHeight;
+    @Nullable
     @VisibleForTesting
     protected WifiEntry mConnectedWifiEntry;
     @VisibleForTesting
@@ -536,6 +538,7 @@ public class InternetDialog extends SystemUIDialog implements
         return mInternetDialogController.getDialogTitleText();
     }
 
+    @Nullable
     CharSequence getSubtitleText() {
         return mInternetDialogController.getSubtitleText(
                 mIsProgressBarVisible && !mIsSearchingHidden);

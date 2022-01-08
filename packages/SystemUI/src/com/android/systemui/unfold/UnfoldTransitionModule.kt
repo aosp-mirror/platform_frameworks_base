@@ -24,8 +24,10 @@ import android.view.IWindowManager
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.LifecycleScreenStatusProvider
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
+import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
+import com.android.systemui.util.time.SystemClockImpl
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider
 import dagger.Lazy
 import dagger.Module
@@ -48,7 +50,7 @@ class UnfoldTransitionModule {
         sensorManager: SensorManager,
         @Main executor: Executor,
         @Main handler: Handler
-    ) =
+    ): Optional<UnfoldTransitionProgressProvider> =
         if (config.isEnabled) {
             Optional.of(
                 createUnfoldTransitionProgressProvider(
@@ -59,11 +61,43 @@ class UnfoldTransitionModule {
                     sensorManager,
                     handler,
                     executor,
-                    tracingTagPrefix = "systemui"
-                )
-            )
+                    tracingTagPrefix = "systemui"))
         } else {
             Optional.empty()
+        }
+
+    @Provides
+    @Singleton
+    fun provideFoldStateProvider(
+        context: Context,
+        config: UnfoldTransitionConfig,
+        screenStatusProvider: Lazy<LifecycleScreenStatusProvider>,
+        deviceStateManager: DeviceStateManager,
+        sensorManager: SensorManager,
+        @Main executor: Executor,
+        @Main handler: Handler
+    ): Optional<FoldStateProvider> =
+        if (!config.isHingeAngleEnabled) {
+            Optional.empty()
+        } else {
+            Optional.of(
+                createFoldStateProvider(
+                    context,
+                    config,
+                    screenStatusProvider.get(),
+                    deviceStateManager,
+                    sensorManager,
+                    handler,
+                    executor))
+        }
+
+    @Provides
+    @Singleton
+    fun providesFoldStateLoggingProvider(
+        optionalFoldStateProvider: Optional<FoldStateProvider>
+    ): Optional<FoldStateLoggingProvider> =
+        optionalFoldStateProvider.map { foldStateProvider ->
+            FoldStateLoggingProviderImpl(foldStateProvider, SystemClockImpl())
         }
 
     @Provides
@@ -77,13 +111,9 @@ class UnfoldTransitionModule {
         context: Context,
         windowManager: IWindowManager,
         unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider>
-    ) =
-        unfoldTransitionProgressProvider.map {
-            provider -> NaturalRotationUnfoldProgressProvider(
-                context,
-                windowManager,
-                provider
-            )
+    ): Optional<NaturalRotationUnfoldProgressProvider> =
+        unfoldTransitionProgressProvider.map { provider ->
+            NaturalRotationUnfoldProgressProvider(context, windowManager, provider)
         }
 
     @Provides
@@ -91,10 +121,8 @@ class UnfoldTransitionModule {
     @Singleton
     fun provideStatusBarScopedTransitionProvider(
         source: Optional<NaturalRotationUnfoldProgressProvider>
-    ) =
-        source.map {
-            provider -> ScopedUnfoldTransitionProgressProvider(provider)
-        }
+    ): Optional<ScopedUnfoldTransitionProgressProvider> =
+        source.map { provider -> ScopedUnfoldTransitionProgressProvider(provider) }
 
     @Provides
     @Singleton

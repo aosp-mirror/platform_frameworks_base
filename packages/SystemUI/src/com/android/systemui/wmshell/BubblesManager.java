@@ -761,7 +761,7 @@ public class BubblesManager implements Dumpable {
     }
 
     static BubbleEntry notifToBubbleEntry(NotificationEntry e) {
-        return new BubbleEntry(e.getSbn(), e.getRanking(), e.isClearable(),
+        return new BubbleEntry(e.getSbn(), e.getRanking(), e.isDismissable(),
                 e.shouldSuppressNotificationDot(), e.shouldSuppressNotificationList(),
                 e.shouldSuppressPeek());
     }

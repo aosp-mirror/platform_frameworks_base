@@ -60,7 +60,7 @@ internal class SectionHeaderNodeControllerImpl @Inject constructor(
     override fun reinflateView(parent: ViewGroup) {
         var oldPos = -1
         _view?.let { _view ->
-            _view.transientContainer?.removeView(_view)
+            _view.removeFromTransientContainer()
             if (_view.parent === parent) {
                 oldPos = parent.indexOfChild(_view)
                 parent.removeView(_view)

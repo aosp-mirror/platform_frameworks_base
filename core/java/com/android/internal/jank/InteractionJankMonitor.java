@@ -41,6 +41,8 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_TO_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_UNLOCK_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_ENTER_TRANSITION;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_EXIT_TRANSITION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PIP_TRANSITION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF_SHOW_AOD;
@@ -181,6 +183,8 @@ public class InteractionJankMonitor {
     public static final int CUJ_SPLASHSCREEN_EXIT_ANIM = 39;
     public static final int CUJ_SCREEN_OFF = 40;
     public static final int CUJ_SCREEN_OFF_SHOW_AOD = 41;
+    public static final int CUJ_ONE_HANDED_ENTER_TRANSITION = 42;
+    public static final int CUJ_ONE_HANDED_EXIT_TRANSITION = 43;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -231,6 +235,8 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_EXIT_ANIM,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF_SHOW_AOD,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_ENTER_TRANSITION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_EXIT_TRANSITION,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -293,6 +299,8 @@ public class InteractionJankMonitor {
             CUJ_SPLASHSCREEN_EXIT_ANIM,
             CUJ_SCREEN_OFF,
             CUJ_SCREEN_OFF_SHOW_AOD,
+            CUJ_ONE_HANDED_ENTER_TRANSITION,
+            CUJ_ONE_HANDED_EXIT_TRANSITION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -712,6 +720,10 @@ public class InteractionJankMonitor {
                 return "SCREEN_OFF";
             case CUJ_SCREEN_OFF_SHOW_AOD:
                 return "SCREEN_OFF_SHOW_AOD";
+            case CUJ_ONE_HANDED_ENTER_TRANSITION:
+                return "ONE_HANDED_ENTER_TRANSITION";
+            case CUJ_ONE_HANDED_EXIT_TRANSITION:
+                return "ONE_HANDED_EXIT_TRANSITION";
         }
         return "UNKNOWN";
     }

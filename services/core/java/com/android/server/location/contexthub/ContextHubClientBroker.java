@@ -896,8 +896,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         info.packageName = mPackage;
         info.attributionTag = mAttributionTag;
         info.type = (mUid == Process.SYSTEM_UID)
-             ? HostEndpointInfo.Type.TYPE_FRAMEWORK
-             : HostEndpointInfo.Type.TYPE_APP;
+             ? HostEndpointInfo.Type.FRAMEWORK
+             : HostEndpointInfo.Type.APP;
         mContextHubProxy.onHostEndpointConnected(info);
     }
 

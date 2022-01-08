@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.render
 
+import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -32,6 +33,8 @@ import com.android.systemui.util.traceSection
  * need to present in the shade, notably the section headers.
  */
 class NodeSpecBuilder(
+    private val mediaContainerController: MediaContainerController,
+    private val sectionsFeatureManager: NotificationSectionsFeatureManager,
     private val viewBarn: NotifViewBarn
 ) {
     fun buildNodeSpec(
@@ -39,6 +42,13 @@ class NodeSpecBuilder(
         notifList: List<ListEntry>
     ): NodeSpec = traceSection("NodeSpecBuilder.buildNodeSpec") {
         val root = NodeSpecImpl(null, rootController)
+
+        // The media container should be added as the first child of the root node
+        // TODO: Perhaps the node spec building process should be more of a pipeline of its own?
+        if (sectionsFeatureManager.isMediaControlsEnabled()) {
+            root.children.add(NodeSpecImpl(root, mediaContainerController))
+        }
+
         var currentSection: NotifSection? = null
         val prevSections = mutableSetOf<NotifSection?>()
 

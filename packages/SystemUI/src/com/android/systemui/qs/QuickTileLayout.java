@@ -7,13 +7,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
+
 public class QuickTileLayout extends LinearLayout {
 
     public QuickTileLayout(Context context) {
         this(context, null);
     }
 
-    public QuickTileLayout(Context context, AttributeSet attrs) {
+    public QuickTileLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setGravity(Gravity.CENTER);
     }

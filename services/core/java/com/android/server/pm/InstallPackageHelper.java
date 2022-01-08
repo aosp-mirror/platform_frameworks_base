@@ -894,8 +894,6 @@ final class InstallPackageHelper {
         final Map<String, PackageInstalledInfo> installResults = new ArrayMap<>(requests.size());
         final Map<String, PrepareResult> prepareResults = new ArrayMap<>(requests.size());
         final Map<String, Settings.VersionInfo> versionInfos = new ArrayMap<>(requests.size());
-        final Map<String, PackageSetting> lastStaticSharedLibSettings =
-                new ArrayMap<>(requests.size());
         final Map<String, Boolean> createdAppId = new ArrayMap<>(requests.size());
         boolean success = false;
         try {
@@ -955,35 +953,22 @@ final class InstallPackageHelper {
                     createdAppId.put(packageName, optimisticallyRegisterAppId(result));
                     versionInfos.put(result.mPkgSetting.getPkg().getPackageName(),
                             mPm.getSettingsVersionForPackage(result.mPkgSetting.getPkg()));
-                    if (result.mStaticSharedLibraryInfo != null) {
-                        final PackageSetting staticSharedLibLatestVersionSetting =
-                                mSharedLibraries.getStaticSharedLibLatestVersionSetting(result);
-                        if (staticSharedLibLatestVersionSetting != null) {
-                            lastStaticSharedLibSettings.put(
-                                    result.mPkgSetting.getPkg().getPackageName(),
-                                    staticSharedLibLatestVersionSetting);
-                        }
-                    }
                 } catch (PackageManagerException e) {
                     request.mInstallResult.setError("Scanning Failed.", e);
                     return;
                 }
             }
-            ReconcileRequest
-                    reconcileRequest = new ReconcileRequest(preparedScans, installArgs,
-                    installResults,
-                    prepareResults,
-                    mSharedLibraries.getAll(),
-                    Collections.unmodifiableMap(mPm.mPackages), versionInfos,
-                    lastStaticSharedLibSettings);
+            ReconcileRequest reconcileRequest = new ReconcileRequest(preparedScans, installArgs,
+                    installResults, prepareResults,
+                    Collections.unmodifiableMap(mPm.mPackages), versionInfos);
             CommitRequest commitRequest = null;
             synchronized (mPm.mLock) {
                 Map<String, ReconciledPackage> reconciledPackages;
                 try {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "reconcilePackages");
                     reconciledPackages = ReconcilePackageUtils.reconcilePackages(
-                            reconcileRequest, mPm.mSettings.getKeySetManagerService(),
-                            mPm.mInjector);
+                            reconcileRequest, mSharedLibraries,
+                            mPm.mSettings.getKeySetManagerService());
                 } catch (ReconcileFailure e) {
                     for (InstallRequest request : requests) {
                         request.mInstallResult.setError("Reconciliation failed...", e);
@@ -3586,15 +3571,12 @@ final class InstallPackageHelper {
                     final String pkgName = scanResult.mPkgSetting.getPackageName();
                     final ReconcileRequest reconcileRequest = new ReconcileRequest(
                             Collections.singletonMap(pkgName, scanResult),
-                            mSharedLibraries.getAll(), mPm.mPackages,
+                            mPm.mPackages,
                             Collections.singletonMap(pkgName,
-                                    mPm.getSettingsVersionForPackage(parsedPackage)),
-                            Collections.singletonMap(pkgName,
-                                    mSharedLibraries.getStaticSharedLibLatestVersionSetting(
-                                            scanResult)));
+                                    mPm.getSettingsVersionForPackage(parsedPackage)));
                     final Map<String, ReconciledPackage> reconcileResult =
                             ReconcilePackageUtils.reconcilePackages(reconcileRequest,
-                                    mPm.mSettings.getKeySetManagerService(), mPm.mInjector);
+                                    mSharedLibraries, mPm.mSettings.getKeySetManagerService());
                     appIdCreated = optimisticallyRegisterAppId(scanResult);
                     commitReconciledScanResultLocked(reconcileResult.get(pkgName),
                             mPm.mUserManager.getUserIds());

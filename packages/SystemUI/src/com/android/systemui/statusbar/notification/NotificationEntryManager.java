@@ -626,7 +626,6 @@ public class NotificationEntryManager implements
             entry = new NotificationEntry(
                     notification,
                     ranking,
-                    mFgsFeatureController.isForegroundServiceDismissalEnabled(),
                     SystemClock.uptimeMillis());
             mAllNotifications.add(entry);
             mLeakDetector.trackInstance(entry);

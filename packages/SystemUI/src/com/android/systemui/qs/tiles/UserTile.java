@@ -48,6 +48,7 @@ public class UserTile extends QSTileImpl<State> implements UserInfoController.On
 
     private final UserSwitcherController mUserSwitcherController;
     private final UserInfoController mUserInfoController;
+    @Nullable
     private Pair<String, Drawable> mLastUpdate;
 
     @Inject

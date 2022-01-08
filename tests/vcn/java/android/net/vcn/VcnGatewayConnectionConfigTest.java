@@ -54,7 +54,7 @@ public class VcnGatewayConnectionConfigTest {
             };
     public static final int[] UNDERLYING_CAPS = new int[] {NetworkCapabilities.NET_CAPABILITY_DUN};
 
-    private static final LinkedHashSet<VcnUnderlyingNetworkPriority> UNDERLYING_NETWORK_PRIORITIES =
+    private static final LinkedHashSet<VcnUnderlyingNetworkTemplate> UNDERLYING_NETWORK_PRIORITIES =
             new LinkedHashSet();
 
     static {
@@ -62,9 +62,9 @@ public class VcnGatewayConnectionConfigTest {
         Arrays.sort(UNDERLYING_CAPS);
 
         UNDERLYING_NETWORK_PRIORITIES.add(
-                VcnCellUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+                VcnCellUnderlyingNetworkTemplateTest.getTestNetworkPriority());
         UNDERLYING_NETWORK_PRIORITIES.add(
-                VcnWifiUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+                VcnWifiUnderlyingNetworkTemplateTest.getTestNetworkPriority());
     }
 
     public static final long[] RETRY_INTERVALS_MS =
@@ -286,7 +286,7 @@ public class VcnGatewayConnectionConfigTest {
     }
 
     private static VcnGatewayConnectionConfig buildTestConfigWithVcnUnderlyingNetworkPriorities(
-            LinkedHashSet<VcnUnderlyingNetworkPriority> networkPriorities) {
+            LinkedHashSet<VcnUnderlyingNetworkTemplate> networkPriorities) {
         return buildTestConfigWithExposedCaps(
                 new VcnGatewayConnectionConfig.Builder(
                                 "buildTestConfigWithVcnUnderlyingNetworkPriorities",
@@ -300,17 +300,17 @@ public class VcnGatewayConnectionConfigTest {
         final VcnGatewayConnectionConfig config =
                 buildTestConfigWithVcnUnderlyingNetworkPriorities(UNDERLYING_NETWORK_PRIORITIES);
 
-        final LinkedHashSet<VcnUnderlyingNetworkPriority> networkPrioritiesEqual =
+        final LinkedHashSet<VcnUnderlyingNetworkTemplate> networkPrioritiesEqual =
                 new LinkedHashSet();
-        networkPrioritiesEqual.add(VcnCellUnderlyingNetworkPriorityTest.getTestNetworkPriority());
-        networkPrioritiesEqual.add(VcnWifiUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+        networkPrioritiesEqual.add(VcnCellUnderlyingNetworkTemplateTest.getTestNetworkPriority());
+        networkPrioritiesEqual.add(VcnWifiUnderlyingNetworkTemplateTest.getTestNetworkPriority());
         final VcnGatewayConnectionConfig configEqual =
                 buildTestConfigWithVcnUnderlyingNetworkPriorities(networkPrioritiesEqual);
 
-        final LinkedHashSet<VcnUnderlyingNetworkPriority> networkPrioritiesNotEqual =
+        final LinkedHashSet<VcnUnderlyingNetworkTemplate> networkPrioritiesNotEqual =
                 new LinkedHashSet();
         networkPrioritiesNotEqual.add(
-                VcnWifiUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+                VcnWifiUnderlyingNetworkTemplateTest.getTestNetworkPriority());
         final VcnGatewayConnectionConfig configNotEqual =
                 buildTestConfigWithVcnUnderlyingNetworkPriorities(networkPrioritiesNotEqual);
 

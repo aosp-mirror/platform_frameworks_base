@@ -227,6 +227,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private @Behavior int mBehavior;
 
     private boolean mTransientShown;
+    private boolean mTransientShownFromGestureOnSystemBar;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
     private LightBarController mLightBarController;
     private final LightBarController mMainLightBarController;
@@ -871,6 +872,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 + windowStateToString(mNavigationBarWindowState));
         pw.println("  mNavigationBarMode="
                 + BarTransitions.modeToString(mNavigationBarMode));
+        pw.println("  mTransientShown=" + mTransientShown);
+        pw.println("  mTransientShownFromGestureOnSystemBar="
+                + mTransientShownFromGestureOnSystemBar);
         dumpBarTransitions(pw, "mNavigationBarView", mNavigationBarView.getBarTransitions());
         mNavigationBarView.dump(pw);
     }
@@ -989,7 +993,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     }
 
     @Override
-    public void showTransient(int displayId, @InternalInsetsType int[] types) {
+    public void showTransient(int displayId, @InternalInsetsType int[] types,
+            boolean isGestureOnSystemBar) {
         if (displayId != mDisplayId) {
             return;
         }
@@ -998,6 +1003,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
         if (!mTransientShown) {
             mTransientShown = true;
+            mTransientShownFromGestureOnSystemBar = isGestureOnSystemBar;
             handleTransientChanged();
         }
     }
@@ -1016,12 +1022,14 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private void clearTransient() {
         if (mTransientShown) {
             mTransientShown = false;
+            mTransientShownFromGestureOnSystemBar = false;
             handleTransientChanged();
         }
     }
 
     private void handleTransientChanged() {
-        mNavigationBarView.onTransientStateChanged(mTransientShown);
+        mNavigationBarView.onTransientStateChanged(mTransientShown,
+                mTransientShownFromGestureOnSystemBar);
         final int barMode = barMode(mTransientShown, mAppearance);
         if (updateBarMode(barMode) && mLightBarController != null) {
             mLightBarController.onNavigationBarModeChanged(barMode);

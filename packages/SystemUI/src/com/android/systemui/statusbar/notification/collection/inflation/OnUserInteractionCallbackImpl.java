@@ -111,7 +111,7 @@ public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback 
         String group = entry.getSbn().getGroup();
         if (mNotifCollection.isOnlyChildInGroup(entry)) {
             NotificationEntry summary = mNotifCollection.getGroupSummary(group);
-            if (summary != null && summary.isClearable()) return summary;
+            if (summary != null && summary.isDismissable()) return summary;
         }
         return null;
     }

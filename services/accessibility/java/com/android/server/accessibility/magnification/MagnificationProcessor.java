@@ -203,6 +203,36 @@ public class MagnificationProcessor {
     }
 
     /**
+     * Returns the region of the screen currently active for magnification if the
+     * controlling magnification is {@link MagnificationConfig#MAGNIFICATION_MODE_FULLSCREEN}.
+     * Returns the region of screen projected on the magnification window if the controlling
+     * magnification is {@link MagnificationConfig#MAGNIFICATION_MODE_WINDOW}.
+     * <p>
+     * If the controlling mode is {@link MagnificationConfig#MAGNIFICATION_MODE_FULLSCREEN},
+     * the returned region will be empty if the magnification is
+     * not active. And the magnification is active if magnification gestures are enabled
+     * or if a service is running that can control magnification.
+     * </p><p>
+     * If the controlling mode is {@link MagnificationConfig#MAGNIFICATION_MODE_WINDOW},
+     * the returned region will be empty if the magnification is not activated.
+     * </p>
+     *
+     * @param displayId The logical display id
+     * @param outRegion the region to populate
+     * @param canControlMagnification Whether the service can control magnification
+     */
+    public void getCurrentMagnificationRegion(int displayId, @NonNull Region outRegion,
+            boolean canControlMagnification) {
+        int currentMode = getControllingMode(displayId);
+        if (currentMode == MAGNIFICATION_MODE_FULLSCREEN) {
+            getFullscreenMagnificationRegion(displayId, outRegion, canControlMagnification);
+        } else if (currentMode == MAGNIFICATION_MODE_WINDOW) {
+            mController.getWindowMagnificationMgr().getMagnificationSourceBounds(displayId,
+                    outRegion);
+        }
+    }
+
+    /**
      * Returns the magnification bounds of full-screen magnification on the given display.
      *
      * @param displayId The logical display id
@@ -224,8 +254,8 @@ public class MagnificationProcessor {
     }
 
     /**
-     * Resets the current magnification on the given display. The reset mode could be
-     * full-screen or window if it is activated.
+     * Resets the controlling magnifier on the given display.
+     * For resetting window magnifier, it disables the magnifier by setting the scale to 1.
      *
      * @param displayId The logical display id.
      * @param animate   {@code true} to animate the transition, {@code false}

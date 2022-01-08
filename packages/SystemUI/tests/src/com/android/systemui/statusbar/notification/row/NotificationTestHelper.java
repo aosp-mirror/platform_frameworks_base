@@ -115,6 +115,7 @@ public class NotificationTestHelper {
     private final IconManager mIconManager;
     private StatusBarStateController mStatusBarStateController;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
+    public final OnUserInteractionCallback mOnUserInteractionCallback;
 
     public NotificationTestHelper(
             Context context,
@@ -173,6 +174,7 @@ public class NotificationTestHelper {
         verify(collection).addCollectionListener(collectionListenerCaptor.capture());
         mBindPipelineEntryListener = collectionListenerCaptor.getValue();
         mPeopleNotificationIdentifier = mock(PeopleNotificationIdentifier.class);
+        mOnUserInteractionCallback = mock(OnUserInteractionCallback.class);
     }
 
     /**
@@ -499,7 +501,7 @@ public class NotificationTestHelper {
                 new FalsingCollectorFake(),
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
-                mock(OnUserInteractionCallback.class),
+                mOnUserInteractionCallback,
                 Optional.of(mock(BubblesManager.class)),
                 mock(NotificationGutsManager.class));
 

@@ -89,7 +89,9 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     private final TileServiceManager mServiceManager;
     private final int mUser;
     private final CustomTileStatePersister mCustomTileStatePersister;
+    @Nullable
     private android.graphics.drawable.Icon mDefaultIcon;
+    @Nullable
     private CharSequence mDefaultLabel;
 
     private final Context mUserContext;
@@ -197,8 +199,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     /**
      * Compare two icons, only works for resources.
      */
-    private boolean iconEquals(android.graphics.drawable.Icon icon1,
-            android.graphics.drawable.Icon icon2) {
+    private boolean iconEquals(@Nullable android.graphics.drawable.Icon icon1,
+            @Nullable android.graphics.drawable.Icon icon2) {
         if (icon1 == icon2) {
             return true;
         }
@@ -372,6 +374,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
                 Uri.fromParts("package", mComponent.getPackageName(), null));
     }
 
+    @Nullable
     private Intent resolveIntent(Intent i) {
         ResolveInfo result = mContext.getPackageManager().resolveActivityAsUser(i, 0, mUser);
         return result != null ? new Intent(TileService.ACTION_QS_TILE_PREFERENCES)

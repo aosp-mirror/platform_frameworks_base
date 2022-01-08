@@ -303,6 +303,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         return new Intent(ACTION_NETWORK_PROVIDER_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
+    @Nullable
     protected Intent getWifiDetailsSettingsIntent(String key) {
         if (TextUtils.isEmpty(key)) {
             if (DEBUG) {
@@ -320,6 +321,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         return mContext.getText(R.string.quick_settings_internet_label);
     }
 
+    @Nullable
     CharSequence getSubtitleText(boolean isProgressBarVisible) {
         if (mCanConfigWifi && !mWifiManager.isWifiEnabled()) {
             // When Wi-Fi is disabled.
@@ -391,6 +393,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         return null;
     }
 
+    @Nullable
     Drawable getInternetWifiDrawable(@NonNull WifiEntry wifiEntry) {
         if (wifiEntry.getLevel() == WifiEntry.WIFI_LEVEL_UNREACHABLE) {
             return null;

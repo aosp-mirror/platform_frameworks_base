@@ -28,6 +28,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toolbar;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -107,7 +108,7 @@ public class QSCustomizer extends LinearLayout {
         mQsContainerController = controller;
     }
 
-    public void setQs(QS qs) {
+    public void setQs(@Nullable QS qs) {
         mQs = qs;
     }
 
