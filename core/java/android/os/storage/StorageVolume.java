@@ -99,7 +99,7 @@ public final class StorageVolume implements Parcelable {
     @UnsupportedAppUsage
     private final boolean mRemovable;
     private final boolean mEmulated;
-    private final boolean mStub;
+    private final boolean mExternallyManaged;
     private final boolean mAllowMassStorage;
     private final long mMaxFileSize;
     private final UserHandle mOwner;
@@ -138,7 +138,7 @@ public final class StorageVolume implements Parcelable {
 
     /** {@hide} */
     public StorageVolume(String id, File path, File internalPath, String description,
-            boolean primary, boolean removable, boolean emulated, boolean stub,
+            boolean primary, boolean removable, boolean emulated, boolean externallyManaged,
             boolean allowMassStorage, long maxFileSize, UserHandle owner, UUID uuid, String fsUuid,
             String state) {
         mId = Preconditions.checkNotNull(id);
@@ -148,7 +148,7 @@ public final class StorageVolume implements Parcelable {
         mPrimary = primary;
         mRemovable = removable;
         mEmulated = emulated;
-        mStub = stub;
+        mExternallyManaged = externallyManaged;
         mAllowMassStorage = allowMassStorage;
         mMaxFileSize = maxFileSize;
         mOwner = Preconditions.checkNotNull(owner);
@@ -165,7 +165,7 @@ public final class StorageVolume implements Parcelable {
         mPrimary = in.readInt() != 0;
         mRemovable = in.readInt() != 0;
         mEmulated = in.readInt() != 0;
-        mStub = in.readInt() != 0;
+        mExternallyManaged = in.readInt() != 0;
         mAllowMassStorage = in.readInt() != 0;
         mMaxFileSize = in.readLong();
         mOwner = in.readParcelable(null, android.os.UserHandle.class);
@@ -275,13 +275,13 @@ public final class StorageVolume implements Parcelable {
     }
 
     /**
-     * Returns true if the volume is a stub volume (a volume managed from outside Android).
+     * Returns true if the volume is managed from outside Android.
      *
      * @hide
      */
     @SystemApi
-    public boolean isStub() {
-        return mStub;
+    public boolean isExternallyManaged() {
+        return mExternallyManaged;
     }
 
     /**
@@ -520,7 +520,7 @@ public final class StorageVolume implements Parcelable {
         pw.printPair("mPrimary", mPrimary);
         pw.printPair("mRemovable", mRemovable);
         pw.printPair("mEmulated", mEmulated);
-        pw.printPair("mStub", mStub);
+        pw.printPair("mExternallyManaged", mExternallyManaged);
         pw.printPair("mAllowMassStorage", mAllowMassStorage);
         pw.printPair("mMaxFileSize", mMaxFileSize);
         pw.printPair("mOwner", mOwner);
@@ -555,7 +555,7 @@ public final class StorageVolume implements Parcelable {
         parcel.writeInt(mPrimary ? 1 : 0);
         parcel.writeInt(mRemovable ? 1 : 0);
         parcel.writeInt(mEmulated ? 1 : 0);
-        parcel.writeInt(mStub ? 1 : 0);
+        parcel.writeInt(mExternallyManaged ? 1 : 0);
         parcel.writeInt(mAllowMassStorage ? 1 : 0);
         parcel.writeLong(mMaxFileSize);
         parcel.writeParcelable(mOwner, flags);
@@ -637,7 +637,7 @@ public final class StorageVolume implements Parcelable {
                     mPrimary,
                     mRemovable,
                     mEmulated,
-                    /* stub= */ false,
+                    /* externallyManaged= */ false,
                     /* allowMassStorage= */ false,
                     /* maxFileSize= */ 0,
                     mOwner,
