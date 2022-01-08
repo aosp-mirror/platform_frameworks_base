@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Kilit ekranı"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"İş profili kilit ekranı"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Kapat"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Kablosuz kapatıldı."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Kablosuz açıldı."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Uçak modu kapatıldı."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Uçak modu açıldı."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"tamamen sessiz"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"yalnızca alarmlar"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Rahatsız Etmeyin."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"Rahatsız Etmeyin ayarı kapalı."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"Rahatsız Etmeyin ayarı açık."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth açık."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"Bluetooth kapatıldı."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"Bluetooth açıldı."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"Konum Bildirme kapatıldı."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"Konum Bildirme açıldı."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Alarm saati: <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Daha uzun süre."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Daha kısa süre."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"El feneri kapatıldı."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"El feneri açıldı."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Renkleri ters çevirme işlevi kapatıldı."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Renkleri ters çevirme işlevi açıldı."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobil hotspot kapatıldı."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobil hotspot açıldı."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Ekran yayını durduruldu."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Veri Tasarrufu kapatıldı."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Veri Tasarrufu açıldı."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Ekran parlaklığı"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Mobil veri duraklatıldı"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Veri kullanımı duraklatıldı"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Kablosuz ağ bağlı değil"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Parlaklık"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Rengi ters çevirme"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Diğer ayarlar"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Kullanıcı ayarları"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Bitti"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Klavyenizi tabletinize bağlamak için önce Bluetooth\'u açmanız gerekir."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Aç"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Güç bildirim kontrolleri"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Açık - Yüze göre"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Güç bildirim kontrolleriyle, bir uygulamanın bildirimleri için 0 ile 5 arasında bir önem düzeyi ayarlayabilirsiniz. \n\n"<b>"5. Düzey"</b>" \n- Bildirim listesinin en üstünde gösterilsin \n- Tam ekran kesintisine izin verilsin \n- Ekranda her zaman kısaca belirsin \n\n"<b>"4. Düzey"</b>" \n- Tam ekran kesintisi engellensin \n- Ekranda her zaman kısaca belirsin \n\n"<b>"3. Düzey"</b>" \n- Tam ekran kesintisi engellensin \n- Ekranda hiçbir zaman kısaca belirmesin \n\n"<b>"2. Düzey"</b>" \n- Tam ekran kesintisi engellensin \n- Ekranda hiçbir zaman belirmesin \n- Hiçbir zaman ses çıkarmasın ve titreştirmesin \n\n"<b>"1. Düzey"</b>" \n- Tam ekran kesintisi engellensin \n- Ekranda hiçbir zaman kısaca belirmesin \n- Hiçbir zaman ses çıkarmasın veya titreştirmesin \n- Kilit ekranından ve durum çubuğundan gizlensin \n- Bildirim listesinin en altında gösterilsin \n\n"<b>"0. Düzey"</b>" \n- Uygulamadan gelen tüm bildirimler engellensin"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Bitti"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Uygula"</string>

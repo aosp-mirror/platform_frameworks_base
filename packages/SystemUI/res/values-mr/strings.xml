@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"लॉक स्क्रीन."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"कार्य लॉक स्क्रीन"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"बंद करा"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wifi बंद झाले."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wifi सुरू झाले."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"विमान मोड बंद केला."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"विमान मोड सुरू केला."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"संपूर्ण शांतता"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"फक्‍त अलार्म"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"व्यत्यय आणू नका."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"व्यत्यय आणू नका बंद केले आहे."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"व्यत्यय आणू नका सुरू केले आहे."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ब्लूटूथ."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"ब्लूटूथ सुरू."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"ब्लूटूथ बंद केले."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"ब्लूटूथ सुरू केले."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"स्थान अहवाल देणे बंद केले."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"स्थान अहवाल देणे सुरू केले."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"<xliff:g id="TIME">%s</xliff:g> साठी अलार्म सेट केला."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"अधिक वेळ."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"कमी वेळ."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"फ्लॅशलाइट बंद केला."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"फ्लॅशलाइट सुरू केला."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"रंग उत्क्रमण बंद केले."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"रंग उत्क्रमण सुरू केले."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"मोबाइल हॉटस्पॉट बंद केला."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"मोबाइल हॉटस्पॉट सुरू केला."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"स्क्रीन कास्ट करणे थांबले."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"डेटा सर्व्हर बंद केला."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"डेटा सर्व्हर सुरू केला."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"डिस्प्ले चमक"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"मोबाइल डेटा थांबवला आहे"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"डेटास विराम दिला आहे"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"वाय-फाय नाही"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"चमक"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"कलर इन्व्हर्जन"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"अधिक सेटिंग्ज"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"वापरकर्ता सेटिंग्ज"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"पूर्ण झाले"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"तुमचा कीबोर्ड तुमच्या टॅबलेटसह कनेक्ट करण्यासाठी, तुम्ही प्रथम ब्लूटूथ सुरू करणे आवश्यक आहे."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"सुरू करा"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"पॉवर सूचना नियंत्रणे"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"सुरू - चेहऱ्यावर आधारित"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"पॉवर सूचना नियंत्रणांच्या साहाय्याने तुम्ही अ‍ॅप सूचनांसाठी 0 ते 5 असे महत्त्व स्तर सेट करू शकता. \n\n"<b>"स्तर 5"</b>" \n- सूचना सूचीच्या शीर्षस्थानी दाखवा \n- फुल स्क्रीन व्यत्ययास अनुमती द्या \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 4"</b>\n" - फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 3"</b>" \n- फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n\n"<b>"स्तर 2"</b>" \n- फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा व्हायब्रेट करू नका \n\n"<b>"स्तर 1"</b>\n"- फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा व्हायब्रेट करू नका \n- लॉक स्क्रीन आणि स्टेटस बार मधून लपवा \n- सूचना सूचीच्या तळाशी दर्शवा \n\n"<b>"स्तर 0"</b>" \n- अ‍ॅपमधील सर्व सूचना ब्लॉक करा"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"पूर्ण झाले"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"लागू करा"</string>

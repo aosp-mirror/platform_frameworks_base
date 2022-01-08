@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Бекіту экраны."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Әрекетті құлыптау экраны"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Жабу"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wi-Fi өшірілді."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wi-Fi қосылды."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Ұшақ режимі өшірілді."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Ұшақ режимі қосылды."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"үнсіз"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"оятқыштар ғана"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Мазаламау."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"Мазаламау режимі өшірілді."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"Мазаламау режимі қосылды."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth қосулы."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"Bluetooth өшірілді."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"Bluetooth қосылды."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"Геодерек жіберу функциясы өшірілді."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"Геодерек жіберу функциясы қосылды."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Дабыл <xliff:g id="TIME">%s</xliff:g> уақытына реттелген."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Көбірек уақыт."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Азырақ уақыт."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Қол шам өшірілді."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Қол шам қосылды."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Түстердің инверсиясы өшірілді."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Түстердің инверсиясы қосылды."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Мобильді хотспот өшірілді."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Мобильді хотспот қосылды."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Экранды трансляциялау тоқтатылды."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Трафикті үнемдеу режимі өшірілді."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Трафикті үнемдеу режимі қосылды."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Дисплей жарықтығы"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Мобильдік деректер кідіртілді"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Деректер кідіртілді"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi желісіне жалғанбаған"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Жарықтығы"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Түс инверсиясы"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Қосымша параметрлер"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Пайдаланушы параметрлері"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Дайын"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Пернетақтаны планшетке қосу үшін алдымен Bluetooth функциясын қосу керек."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Қосу"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Қуат хабарландыруының басқару элементтері"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Қосулы – бет негізінде"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Қуат хабарландыруының басқару элементтерімен қолданбаның хабарландырулары үшін 0-ден бастап 5-ке дейін маңыздылық деңгейін орнатуға болады. \n\n"<b>"5-деңгей"</b>" \n- Хабарландыру тізімінің ең басында көрсету \n- Толық экранға ашылуын рұқсат ету \n- Әрдайым қалқымалы хабарландыру түрінде көрсету \n\n"<b>"4-деңгей"</b>" \n- Толық экранға шығармау \n- Әрдайым қалқымалы хабарландыру түрінде көрсету \n\n"<b>"3-деңгей"</b>" \n- Толық экранға шығармау \n- Ешқашан қалқымалы хабарландыру түрінде көрсетпеу \n\n"<b>"2-деңгей"</b>" \n- Толық экранға шығармау \n- Ешқашан қалқымалы хабарландыру түрінде көрсетпеу \n- Ешқашан дыбыс және діріл шығармау \n\n"<b>"1-деңгей"</b>" \n- Толық экранға шығармау \n- Ешқашан қалқымалы хабарландыру түрінде көрсетпеу \n- Ешқашан дыбыс немесе діріл шығармау \n- Құлыпталған экраннан және күйін көрсету жолағынан жасыру \n- Хабарландыру тізімінің ең астында көрсету \n\n"<b>"0-деңгей"</b>" \n- Қолданбадағы барлық хабарландыруларға тыйым салу"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Дайын"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Қолдану"</string>

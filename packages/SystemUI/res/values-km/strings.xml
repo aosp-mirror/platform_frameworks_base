@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ចាក់​សោ​អេក្រង់។"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"អេក្រង់​ចាក់​សោ​លក្ខណៈ​ការងារ"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"បិទ"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"បាន​បិទ​វ៉ាយហ្វាយ។"</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"បាន​បើក​វ៉ាយហ្វាយ។"</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"បាន​បិទ​របៀប​ជិះ​យន្តហោះ។"</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"បាន​បើក​របៀប​ជិះ​យន្តហោះ។"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"បិទសំឡេង​ទាំងស្រុង"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"សំឡេងរោទ៍​ប៉ុណ្ណោះ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"កុំ​រំខាន។"</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"បានបិទមុខងារកុំរំខាន។"</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"បានបើកមុខងារកុំរំខាន។"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ប៊្លូធូស"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"បើក​ប៊្លូធូស។"</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"បាន​បិទ​ប៊្លូធូស។"</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"បាន​បើក​ប៊្លូធូស។"</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"បាន​បិទ​ការ​រាយការណ៍​ទីតាំង។"</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"បាន​បើក​ការ​រាយការណ៍​ទីតាំង។"</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"កំណត់​សំឡេង​រោទ៍​សម្រាប់ <xliff:g id="TIME">%s</xliff:g> ។"</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"ច្រើនជាង"</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"តិច​ជាង"</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"បាន​បិទ​ពិល។"</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"បាន​បើក​ពិល។"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"បាន​បិទ​ការ​បញ្ច្រាស​ពណ៌។"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"បាន​បើក​ការ​បញ្ច្រាស​ពណ៌។"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"បាន​បិទ​ហតស្ប៉ត​ចល័ត។"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"បាន​បើក​ហតស្ប៉ត​ចល័ត។"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"បាន​បញ្ឈប់​ការ​ចាត់​ថ្នាក់​អេក្រង់។"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"បានបិទកម្មវិធីសន្សំសំចៃទិន្នន័យ"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"បានបើកកម្មវិធីសន្សំសំចៃទិន្នន័យ"</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"ពន្លឺ​ការ​បង្ហាញ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"ទិន្នន័យទូរសព្ទចល័តបានផ្អាក"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"ទិន្នន័យត្រូវបានផ្អាក"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"មិនមាន​ការតភ្ជាប់ Wi-Fi ទេ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ពន្លឺ"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ការបញ្ច្រាស​ពណ៌"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ការ​កំណត់​ច្រើន​ទៀត"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ការកំណត់អ្នកប្រើប្រាស់"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"រួចរាល់"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"ដើម្បីភ្ជាប់ក្តារចុចរបស់អ្នកជាមួយនឹងថេប្លេតរបស់អ្នក អ្នកត្រូវតែបើកប៊្លូធូសជាមុនសិន។"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"បើក"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"អង្គគ្រប់គ្រងការជូនដំណឹងថាមពល"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"បើក - ផ្អែកលើមុខ"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ជាមួយអង្គគ្រប់គ្រងការជូនដំណឹងថាមពល អ្នកអាចកំណត់កម្រិតសំខាន់ពី 0 ទៅ 5 សម្រាប់ការជូនដំណឹងរបស់កម្មវិធី។ \n\n"<b>"កម្រិត 5"</b>" \n- បង្ហាញនៅផ្នែកខាងលើបញ្ជីជូនដំណឹង \n- អនុញ្ញាតការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 4"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 3"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 2"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n\n"<b>"កម្រិត 1"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n- លាក់ពីអេក្រង់ចាក់សោ និងរបារស្ថានភាព \n- បង្ហាញនៅផ្នែកខាងក្រោមបញ្ជីជូនដំណឹង \n\n"<b>"កម្រិត 0"</b>" \n- រារាំងការជូនដំណឹងទាំងអស់ពីកម្មវិធី"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"រួចរាល់"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"ប្រើ"</string>
