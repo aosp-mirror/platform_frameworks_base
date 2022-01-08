@@ -16,7 +16,9 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.FLAG_NO_CLEAR;
+import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
@@ -797,7 +799,7 @@ public class NotifCollectionTest extends SysuiTestCase {
     }
 
     @Test
-    public void testDismissingSummaryDoesNotDismissForegroundServiceChildren() {
+    public void testDismissingSummaryDoesDismissForegroundServiceChildren() {
         // GIVEN a collection with three grouped notifs in it
         CollectionEvent notif0 = postNotif(
                 buildNotif(TEST_PACKAGE, 0)
@@ -814,7 +816,31 @@ public class NotifCollectionTest extends SysuiTestCase {
         // WHEN the summary is dismissed
         mCollection.dismissNotification(notif0.entry, defaultStats(notif0.entry));
 
-        // THEN the foreground service child is not dismissed
+        // THEN the foreground service child is dismissed
+        assertEquals(DISMISSED, notif0.entry.getDismissState());
+        assertEquals(PARENT_DISMISSED, notif1.entry.getDismissState());
+        assertEquals(PARENT_DISMISSED, notif2.entry.getDismissState());
+    }
+
+    @Test
+    public void testDismissingSummaryDoesNotDismissOngoingChildren() {
+        // GIVEN a collection with three grouped notifs in it
+        CollectionEvent notif0 = postNotif(
+                buildNotif(TEST_PACKAGE, 0)
+                        .setGroup(mContext, GROUP_1)
+                        .setGroupSummary(mContext, true));
+        CollectionEvent notif1 = postNotif(
+                buildNotif(TEST_PACKAGE, 1)
+                        .setGroup(mContext, GROUP_1)
+                        .setFlag(mContext, FLAG_ONGOING_EVENT, true));
+        CollectionEvent notif2 = postNotif(
+                buildNotif(TEST_PACKAGE, 2)
+                        .setGroup(mContext, GROUP_1));
+
+        // WHEN the summary is dismissed
+        mCollection.dismissNotification(notif0.entry, defaultStats(notif0.entry));
+
+        // THEN the ongoing child is not dismissed
         assertEquals(DISMISSED, notif0.entry.getDismissState());
         assertEquals(NOT_DISMISSED, notif1.entry.getDismissState());
         assertEquals(PARENT_DISMISSED, notif2.entry.getDismissState());
@@ -1425,6 +1451,37 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mCollectionListener, never()).onRankingApplied();
         verify(mCollectionListener, never()).onEntryUpdated(any());
         verify(mCollectionListener, never()).onEntryUpdated(any(), anyBoolean());
+    }
+
+    @Test
+    public void testCannotDismissOngoingNotificationChildren() {
+        // GIVEN an ongoing notification
+        final NotificationEntry container = new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE)
+                .setId(47)
+                .setGroup(mContext, "group")
+                .setFlag(mContext, FLAG_ONGOING_EVENT, true)
+                .build();
+
+        // THEN its children are not dismissible
+        assertFalse(mCollection.shouldAutoDismissChildren(
+                container, container.getSbn().getGroupKey()));
+    }
+
+    @Test
+    public void testCanDismissFgsNotificationChildren() {
+        // GIVEN an FGS but not ongoing notification
+        final NotificationEntry container = new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE)
+                .setId(47)
+                .setGroup(mContext, "group")
+                .setFlag(mContext, FLAG_FOREGROUND_SERVICE, true)
+                .build();
+        container.setDismissState(NOT_DISMISSED);
+
+        // THEN its children are dismissible
+        assertTrue(mCollection.shouldAutoDismissChildren(
+                container, container.getSbn().getGroupKey()));
     }
 
     private static NotificationEntryBuilder buildNotif(String pkg, int id, String tag) {

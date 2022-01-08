@@ -23,12 +23,15 @@ import android.graphics.drawable.TransitionDrawable;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 
+import androidx.annotation.Nullable;
+
 /** Helper for quick settings detail panel clip animations. **/
 public class QSDetailClipper {
 
     private final View mDetail;
     private final TransitionDrawable mBackground;
 
+    @Nullable
     private Animator mAnimator;
 
     public QSDetailClipper(View detail) {

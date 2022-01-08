@@ -19,7 +19,7 @@ package com.android.server.companion;
 
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
-import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
+import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.FEATURE_COMPANION_DEVICE_SETUP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -1169,7 +1169,7 @@ public class CompanionDeviceManagerService extends SystemService
         } else {
             scanner.startScan(
                     filters,
-                    new ScanSettings.Builder().setScanMode(SCAN_MODE_BALANCED).build(),
+                    new ScanSettings.Builder().setScanMode(SCAN_MODE_LOW_POWER).build(),
                     mBleScanCallback);
         }
     }

@@ -66,7 +66,12 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
      * @hide
      */
     public void setBatchingEnabled(boolean batchingEnabled) {
+        if (mBatchingEnabled == batchingEnabled) {
+            return;
+        }
+
         mBatchingEnabled = batchingEnabled;
+        mHandler.removeCallbacks(mConsumeBatchedInputEvents);
         if (!batchingEnabled) {
             unscheduleBatchedInput();
             mHandler.post(mConsumeBatchedInputEvents);

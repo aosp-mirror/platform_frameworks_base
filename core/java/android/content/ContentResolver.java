@@ -2670,6 +2670,9 @@ public abstract class ContentResolver implements ContentInterface {
      * {@link ContentObserver#onChange(boolean, Collection, int, UserHandle)} should be
      * overwritten to get the corresponding {@link UserHandle} for that notification.
      *
+     * <p> If you don't hold the {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}
+     * permission, you can register the {@link ContentObserver} only for current user.
+     *
      * @param uri                  The URI to watch for changes. This can be a specific row URI,
      *                             or a base URI for a whole class of content.
      * @param notifyForDescendants When false, the observer will be notified

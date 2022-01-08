@@ -49,8 +49,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.utils.WatchedArrayMap;
-import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -308,10 +306,6 @@ public interface Computer {
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     String getRenamedPackage(@NonNull String packageName);
-
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
-    @NonNull
-    WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries();
 
     /**
      * @return set of packages to notify

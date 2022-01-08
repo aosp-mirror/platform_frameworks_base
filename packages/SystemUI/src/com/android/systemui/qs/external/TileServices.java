@@ -35,6 +35,8 @@ import android.service.quicksettings.TileService;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -297,6 +299,7 @@ public class TileServices extends IQSService.Stub {
         }
     }
 
+    @Nullable
     @Override
     public Tile getTile(IBinder token) {
         CustomTile customTile = getTileForToken(token);
@@ -330,12 +333,14 @@ public class TileServices extends IQSService.Stub {
         return keyguardStateController.isMethodSecure() && keyguardStateController.isShowing();
     }
 
+    @Nullable
     private CustomTile getTileForToken(IBinder token) {
         synchronized (mServices) {
             return mTokenMap.get(token);
         }
     }
 
+    @Nullable
     private CustomTile getTileForComponent(ComponentName component) {
         synchronized (mServices) {
             return mTiles.get(component);

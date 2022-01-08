@@ -24,15 +24,18 @@ import android.content.res.Configuration
 import android.os.PowerManager
 import android.os.PowerManager.WAKE_REASON_GESTURE
 import android.os.SystemClock
+import android.util.IndentingPrintWriter
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
+import com.android.systemui.Dumpable
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
@@ -43,6 +46,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import java.io.FileDescriptor
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
 
@@ -61,8 +66,9 @@ constructor(
     private val statusBarStateController: StatusBarStateController,
     private val falsingManager: FalsingManager,
     private val lockscreenShadeTransitionController: LockscreenShadeTransitionController,
-    private val falsingCollector: FalsingCollector
-) : Gefingerpoken {
+    private val falsingCollector: FalsingCollector,
+    dumpManager: DumpManager
+) : Gefingerpoken, Dumpable {
     companion object {
         private val SPRING_BACK_ANIMATION_LENGTH_MS = 375
     }
@@ -120,6 +126,7 @@ constructor(
             }
         })
         mPowerManager = context.getSystemService(PowerManager::class.java)
+        dumpManager.registerDumpable(this)
     }
 
     private fun initResources(context: Context) {
@@ -328,5 +335,18 @@ constructor(
 
     fun onStartedWakingUp() {
         isWakingToShadeLocked = false
+    }
+
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+        IndentingPrintWriter(pw, "  ").let {
+            it.println("PulseExpansionHandler:")
+            it.increaseIndent()
+            it.println("isExpanding: $isExpanding")
+            it.println("leavingLockscreen: $leavingLockscreen")
+            it.println("mPulsing: $mPulsing")
+            it.println("isWakingToShadeLocked: $isWakingToShadeLocked")
+            it.println("qsExpanded: $qsExpanded")
+            it.println("bouncerShowing: $bouncerShowing")
+        }
     }
 }

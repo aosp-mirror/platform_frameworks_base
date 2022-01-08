@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility.magnification;
 
+import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_WINDOW;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
@@ -379,6 +380,16 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         mAms.changeMagnificationMode(displayId, magnificationMode);
     }
 
+    @Override
+    public void onSourceBoundsChanged(int displayId, Rect bounds) {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(MAGNIFICATION_MODE_WINDOW)
+                .setScale(mScaleProvider.getScale(displayId))
+                .setCenterX(bounds.exactCenterX())
+                .setCenterY(bounds.exactCenterY()).build();
+        mAms.notifyMagnificationChanged(displayId, new Region(bounds), config);
+    }
+
     private void disableFullScreenMagnificationIfNeeded(int displayId) {
         final FullScreenMagnificationController fullScreenMagnificationController =
                 getFullScreenMagnificationController();
@@ -426,6 +437,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         synchronized (mLock) {
             mImeWindowVisible = shown;
         }
+        getWindowMagnificationMgr().onImeWindowVisibilityChanged(shown);
         logMagnificationModeWithImeOnIfNeeded();
     }
 
@@ -516,6 +528,16 @@ public class MagnificationController implements WindowMagnificationManager.Callb
 
     public void setMagnificationCapabilities(int capabilities) {
         mMagnificationCapabilities = capabilities;
+    }
+
+    /**
+     * Called when the following typing focus feature is switched.
+     *
+     * @param enabled Enable the following typing focus feature
+     */
+    public void setMagnificationFollowTypingEnabled(boolean enabled) {
+        getWindowMagnificationMgr().setMagnificationFollowTypingEnabled(enabled);
+        getFullScreenMagnificationController().setMagnificationFollowTypingEnabled(enabled);
     }
 
     private DisableMagnificationCallback getDisableMagnificationEndRunnableLocked(

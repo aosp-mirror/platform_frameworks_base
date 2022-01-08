@@ -39,7 +39,7 @@ import java.util.Set;
 
 // TODO: Add documents
 /** @hide */
-public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetworkPriority {
+public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetworkTemplate {
     private static final String ALLOWED_NETWORK_PLMN_IDS_KEY = "mAllowedNetworkPlmnIds";
     @NonNull private final Set<String> mAllowedNetworkPlmnIds;
     private static final String ALLOWED_SPECIFIC_CARRIER_IDS_KEY = "mAllowedSpecificCarrierIds";
@@ -51,7 +51,7 @@ public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetwork
     private static final String REQUIRE_OPPORTUNISTIC_KEY = "mRequireOpportunistic";
     private final boolean mRequireOpportunistic;
 
-    private VcnCellUnderlyingNetworkPriority(
+    private VcnCellUnderlyingNetworkTemplate(
             int networkQuality,
             boolean allowMetered,
             Set<String> allowedNetworkPlmnIds,
@@ -92,7 +92,7 @@ public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetwork
     /** @hide */
     @NonNull
     @VisibleForTesting(visibility = Visibility.PROTECTED)
-    public static VcnCellUnderlyingNetworkPriority fromPersistableBundle(
+    public static VcnCellUnderlyingNetworkTemplate fromPersistableBundle(
             @NonNull PersistableBundle in) {
         Objects.requireNonNull(in, "PersistableBundle is null");
 
@@ -117,7 +117,7 @@ public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetwork
         final boolean allowRoaming = in.getBoolean(ALLOW_ROAMING_KEY);
         final boolean requireOpportunistic = in.getBoolean(REQUIRE_OPPORTUNISTIC_KEY);
 
-        return new VcnCellUnderlyingNetworkPriority(
+        return new VcnCellUnderlyingNetworkTemplate(
                 networkQuality,
                 allowMetered,
                 allowedNetworkPlmnIds,
@@ -190,11 +190,11 @@ public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetwork
             return false;
         }
 
-        if (!(other instanceof VcnCellUnderlyingNetworkPriority)) {
+        if (!(other instanceof VcnCellUnderlyingNetworkTemplate)) {
             return false;
         }
 
-        final VcnCellUnderlyingNetworkPriority rhs = (VcnCellUnderlyingNetworkPriority) other;
+        final VcnCellUnderlyingNetworkTemplate rhs = (VcnCellUnderlyingNetworkTemplate) other;
         return Objects.equals(mAllowedNetworkPlmnIds, rhs.mAllowedNetworkPlmnIds)
                 && Objects.equals(mAllowedSpecificCarrierIds, rhs.mAllowedSpecificCarrierIds)
                 && mAllowRoaming == rhs.mAllowRoaming
@@ -211,7 +211,7 @@ public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetwork
     }
 
     /** This class is used to incrementally build WifiNetworkPriority objects. */
-    public static final class Builder extends VcnUnderlyingNetworkPriority.Builder<Builder> {
+    public static final class Builder extends VcnUnderlyingNetworkTemplate.Builder<Builder> {
         @NonNull private final Set<String> mAllowedNetworkPlmnIds = new ArraySet<>();
         @NonNull private final Set<Integer> mAllowedSpecificCarrierIds = new ArraySet<>();
 
@@ -280,10 +280,10 @@ public final class VcnCellUnderlyingNetworkPriority extends VcnUnderlyingNetwork
             return this;
         }
 
-        /** Build the VcnCellUnderlyingNetworkPriority. */
+        /** Build the VcnCellUnderlyingNetworkTemplate. */
         @NonNull
-        public VcnCellUnderlyingNetworkPriority build() {
-            return new VcnCellUnderlyingNetworkPriority(
+        public VcnCellUnderlyingNetworkTemplate build() {
+            return new VcnCellUnderlyingNetworkTemplate(
                     mNetworkQuality,
                     mAllowMetered,
                     mAllowedNetworkPlmnIds,

@@ -36,6 +36,7 @@ public class AutoSizingList extends LinearLayout {
     private final int mItemSize;
     private final Handler mHandler;
 
+    @Nullable
     private ListAdapter mAdapter;
     private int mCount;
     private boolean mEnableAutoSizing;

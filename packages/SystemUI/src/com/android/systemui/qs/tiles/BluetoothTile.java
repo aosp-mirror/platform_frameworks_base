@@ -320,6 +320,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         // We probably won't ever have space in the UI for more than 20 devices, so don't
         // get info for them.
         private static final int MAX_DEVICES = 20;
+        @Nullable
         private QSDetailItems mItems;
 
         @Override

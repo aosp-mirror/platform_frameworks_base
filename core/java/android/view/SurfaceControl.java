@@ -231,6 +231,7 @@ public final class SurfaceControl implements Parcelable {
             float shadowRadius);
     private static native void nativeSetGlobalShadowSettings(@Size(4) float[] ambientColor,
             @Size(4) float[] spotColor, float lightPosY, float lightPosZ, float lightRadius);
+    private static native boolean nativeGetDisplayDecorationSupport(IBinder displayToken);
 
     private static native void nativeSetFrameRate(long transactionObj, long nativeObject,
             float frameRate, int compatibility, int changeFrameRateStrategy);
@@ -2648,6 +2649,20 @@ public final class SurfaceControl implements Parcelable {
         validateColorArg(ambientColor);
         validateColorArg(spotColor);
         nativeSetGlobalShadowSettings(ambientColor, spotColor, lightPosY, lightPosZ, lightRadius);
+    }
+
+    /**
+     * Returns whether a display supports DISPLAY_DECORATION.
+     *
+     * @param displayToken
+     *      The token for the display.
+     *
+     * @return Whether the display supports DISPLAY_DECORATION.
+     *
+     * @hide
+     */
+    public static boolean getDisplayDecorationSupport(IBinder displayToken) {
+        return nativeGetDisplayDecorationSupport(displayToken);
     }
 
     /**

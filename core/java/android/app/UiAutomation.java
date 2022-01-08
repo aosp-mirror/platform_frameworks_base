@@ -22,6 +22,7 @@ import android.accessibilityservice.AccessibilityService.IAccessibilityServiceCl
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.accessibilityservice.MagnificationConfig;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1581,7 +1582,7 @@ public final class UiAutomation {
 
                 @Override
                 public void onMagnificationChanged(int displayId, @NonNull Region region,
-                        float scale, float centerX, float centerY) {
+                        MagnificationConfig config) {
                     /* do nothing */
                 }
 

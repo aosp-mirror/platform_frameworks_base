@@ -612,7 +612,6 @@ public class StaticLayout extends Layout {
         TextPaint paint = b.mPaint;
         int outerWidth = b.mWidth;
         TextDirectionHeuristic textDir = b.mTextDir;
-        final boolean fallbackLineSpacing = b.mFallbackLineSpacing;
         float spacingmult = b.mSpacingMult;
         float spacingadd = b.mSpacingAdd;
         float ellipsizedWidth = b.mEllipsizedWidth;
@@ -630,6 +629,7 @@ public class StaticLayout extends Layout {
         mLineCount = 0;
         mEllipsized = false;
         mMaxLineHeight = mMaximumVisibleLineCount < 1 ? 0 : DEFAULT_MAX_LINE_HEIGHT;
+        mFallbackLineSpacing = b.mFallbackLineSpacing;
 
         int v = 0;
         boolean needMultiply = (spacingmult != 1 || spacingadd != 0);
@@ -867,17 +867,17 @@ public class StaticLayout extends Layout {
 
                     boolean moreChars = (endPos < bufEnd);
 
-                    final int ascent = fallbackLineSpacing
+                    final int ascent = mFallbackLineSpacing
                             ? Math.min(fmAscent, Math.round(ascents[breakIndex]))
                             : fmAscent;
-                    final int descent = fallbackLineSpacing
+                    final int descent = mFallbackLineSpacing
                             ? Math.max(fmDescent, Math.round(descents[breakIndex]))
                             : fmDescent;
 
                     // The fallback ascent/descent may be larger than top/bottom of the default font
                     // metrics. Adjust top/bottom with ascent/descent for avoiding unexpected
                     // clipping.
-                    if (fallbackLineSpacing) {
+                    if (mFallbackLineSpacing) {
                         if (ascent < fmTop) {
                             fmTop = ascent;
                         }
@@ -1381,6 +1381,11 @@ public class StaticLayout extends Layout {
         return mEllipsizedWidth;
     }
 
+    @Override
+    public boolean isFallbackLineSpacingEnabled() {
+        return mFallbackLineSpacing;
+    }
+
     /**
      * Return the total height of this layout.
      *
@@ -1407,6 +1412,7 @@ public class StaticLayout extends Layout {
     @UnsupportedAppUsage
     private int mColumns;
     private int mEllipsizedWidth;
+    private boolean mFallbackLineSpacing;
 
     /**
      * Keeps track if ellipsize is applied to the text.

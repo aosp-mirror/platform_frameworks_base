@@ -448,7 +448,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         handlerThread.start();
         mHandler = new NetworkStatsHandler(handlerThread.getLooper());
         mNetworkStatsSubscriptionsMonitor = deps.makeSubscriptionsMonitor(mContext,
-                mHandler.getLooper(), new HandlerExecutor(mHandler), this);
+                new HandlerExecutor(mHandler), this);
         mContentResolver = mContext.getContentResolver();
         mContentObserver = mDeps.makeContentObserver(mHandler, mSettings,
                 mNetworkStatsSubscriptionsMonitor);
@@ -474,11 +474,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
          */
         @NonNull
         public NetworkStatsSubscriptionsMonitor makeSubscriptionsMonitor(@NonNull Context context,
-                @NonNull Looper looper, @NonNull Executor executor,
-                @NonNull NetworkStatsService service) {
+                @NonNull Executor executor, @NonNull NetworkStatsService service) {
             // TODO: Update RatType passively in NSS, instead of querying into the monitor
             //  when notifyNetworkStatus.
-            return new NetworkStatsSubscriptionsMonitor(context, looper, executor,
+            return new NetworkStatsSubscriptionsMonitor(context, executor,
                     (subscriberId, type) -> service.handleOnCollapsedRatTypeChanged());
         }
 

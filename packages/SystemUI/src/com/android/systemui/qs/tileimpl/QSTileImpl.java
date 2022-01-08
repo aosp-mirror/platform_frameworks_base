@@ -116,6 +116,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     private boolean mAnnounceNextStateChange;
 
     private String mTileSpec;
+    @Nullable
     private EnforcedAdmin mEnforcedAdmin;
     private boolean mShowingDetail;
     private int mIsFullQs;
@@ -260,6 +261,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         return new QSIconViewImpl(context);
     }
 
+    /** Returns corresponding DetailAdapter. */
+    @Nullable
     public DetailAdapter getDetailAdapter() {
         return null; // optional
     }
@@ -342,7 +345,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         refreshState(null);
     }
 
-    protected final void refreshState(Object arg) {
+    protected final void refreshState(@Nullable Object arg) {
         mHandler.obtainMessage(H.REFRESH_STATE, arg).sendToTarget();
     }
 
@@ -432,9 +435,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      *
      * @return the intent to launch
      */
+    @Nullable
     public abstract Intent getLongClickIntent();
 
-    protected void handleRefreshState(Object arg) {
+    protected void handleRefreshState(@Nullable Object arg) {
         handleUpdateState(mTmpState, arg);
         boolean changed = mTmpState.copyTo(mState);
         if (mReadyState == READY_STATE_READYING) {

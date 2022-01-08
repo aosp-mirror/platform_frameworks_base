@@ -72,8 +72,10 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     private final SecureSettings mSecureSettings;
     private final QuickAccessWalletController mController;
 
+    @Nullable
     private WalletCard mSelectedCard;
     private boolean mIsWalletUpdating = true;
+    @Nullable
     @VisibleForTesting Drawable mCardViewDrawable;
 
     @Inject
@@ -200,6 +202,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 && mSecureSettings.getString(NFC_PAYMENT_DEFAULT_COMPONENT) != null;
     }
 
+    @Nullable
     @Override
     public Intent getLongClickIntent() {
         return null;

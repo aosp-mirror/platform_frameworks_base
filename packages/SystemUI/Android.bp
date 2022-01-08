@@ -138,6 +138,7 @@ filegroup {
         "tests/src/com/android/systemui/statusbar/RankingBuilder.java",
         "tests/src/com/android/systemui/statusbar/SbnBuilder.java",
         "tests/src/com/android/systemui/SysuiTestableContext.java",
+        "tests/src/com/android/systemui/util/**/*Fake.java",
         "tests/src/com/android/systemui/utils/leaks/BaseLeakChecker.java",
         "tests/src/com/android/systemui/utils/leaks/LeakCheckedTest.java",
         "tests/src/com/android/systemui/**/Fake*.java",

@@ -3131,11 +3131,13 @@ package android.accessibilityservice {
     method public void addListener(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController.OnMagnificationChangedListener, @Nullable android.os.Handler);
     method public float getCenterX();
     method public float getCenterY();
+    method @NonNull public android.graphics.Region getCurrentMagnificationRegion();
     method @Nullable public android.accessibilityservice.MagnificationConfig getMagnificationConfig();
     method @NonNull public android.graphics.Region getMagnificationRegion();
     method public float getScale();
     method public boolean removeListener(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController.OnMagnificationChangedListener);
     method public boolean reset(boolean);
+    method public boolean resetCurrentMagnification(boolean);
     method public boolean setCenter(float, float, boolean);
     method public boolean setMagnificationConfig(@NonNull android.accessibilityservice.MagnificationConfig, boolean);
     method public boolean setScale(float, boolean);
@@ -3143,6 +3145,7 @@ package android.accessibilityservice {
 
   public static interface AccessibilityService.MagnificationController.OnMagnificationChangedListener {
     method public void onMagnificationChanged(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController, @NonNull android.graphics.Region, float, float, float);
+    method public default void onMagnificationChanged(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController, @NonNull android.graphics.Region, @NonNull android.accessibilityservice.MagnificationConfig);
   }
 
   public static final class AccessibilityService.ScreenshotResult {
@@ -9159,6 +9162,7 @@ package android.bluetooth {
     field public static final int AUDIO = 2097152; // 0x200000
     field public static final int CAPTURE = 524288; // 0x80000
     field public static final int INFORMATION = 8388608; // 0x800000
+    field public static final int LE_AUDIO = 16384; // 0x4000
     field public static final int LIMITED_DISCOVERABILITY = 8192; // 0x2000
     field public static final int NETWORKING = 131072; // 0x20000
     field public static final int OBJECT_TRANSFER = 1048576; // 0x100000
@@ -15973,6 +15977,8 @@ package android.graphics {
     method public String getFontFeatureSettings();
     method public float getFontMetrics(android.graphics.Paint.FontMetrics);
     method public android.graphics.Paint.FontMetrics getFontMetrics();
+    method public void getFontMetricsInt(@NonNull CharSequence, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0) int, boolean, @NonNull android.graphics.Paint.FontMetricsInt);
+    method public void getFontMetricsInt(@NonNull char[], @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0) int, boolean, @NonNull android.graphics.Paint.FontMetricsInt);
     method public int getFontMetricsInt(android.graphics.Paint.FontMetricsInt);
     method public android.graphics.Paint.FontMetricsInt getFontMetricsInt();
     method public float getFontSpacing();
@@ -41698,6 +41704,7 @@ package android.telephony {
     field public static final String KEY_CHILD_SESSION_AES_CTR_KEY_SIZE_INT_ARRAY = "iwlan.child_session_aes_ctr_key_size_int_array";
     field public static final String KEY_DIFFIE_HELLMAN_GROUPS_INT_ARRAY = "iwlan.diffie_hellman_groups_int_array";
     field public static final String KEY_DPD_TIMER_SEC_INT = "iwlan.dpd_timer_sec_int";
+    field public static final String KEY_ENABLE_SUPPORT_FOR_EAP_AKA_FAST_REAUTH_BOOL = "iwlan.enable_support_for_eap_aka_fast_reauth_bool";
     field public static final String KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY = "iwlan.epdg_address_priority_int_array";
     field public static final String KEY_EPDG_AUTHENTICATION_METHOD_INT = "iwlan.epdg_authentication_method_int";
     field public static final String KEY_EPDG_PCO_ID_IPV4_INT = "iwlan.epdg_pco_id_ipv4_int";
@@ -44649,6 +44656,7 @@ package android.text {
   public class BoringLayout extends android.text.Layout implements android.text.TextUtils.EllipsizeCallback {
     ctor public BoringLayout(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
     ctor public BoringLayout(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
+    ctor public BoringLayout(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, float, float, @NonNull android.text.BoringLayout.Metrics, boolean, @NonNull android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
     method public void ellipsized(int, int);
     method public int getBottomPadding();
     method public int getEllipsisCount(int);
@@ -44663,9 +44671,12 @@ package android.text {
     method public int getTopPadding();
     method public static android.text.BoringLayout.Metrics isBoring(CharSequence, android.text.TextPaint);
     method public static android.text.BoringLayout.Metrics isBoring(CharSequence, android.text.TextPaint, android.text.BoringLayout.Metrics);
+    method @Nullable public static android.text.BoringLayout.Metrics isBoring(@NonNull CharSequence, @NonNull android.text.TextPaint, @NonNull android.text.TextDirectionHeuristic, boolean, @Nullable android.text.BoringLayout.Metrics);
     method public static android.text.BoringLayout make(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
     method public static android.text.BoringLayout make(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
+    method @NonNull public static android.text.BoringLayout make(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, @NonNull android.text.BoringLayout.Metrics, boolean, @NonNull android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
     method public android.text.BoringLayout replaceOrMake(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
+    method @NonNull public android.text.BoringLayout replaceOrMake(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, @NonNull android.text.BoringLayout.Metrics, boolean, @NonNull android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
     method public android.text.BoringLayout replaceOrMake(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
   }
 
@@ -44874,6 +44885,7 @@ package android.text {
     method public abstract int getTopPadding();
     method public final int getWidth();
     method public final void increaseWidthTo(int);
+    method public boolean isFallbackLineSpacingEnabled();
     method public boolean isRtlCharAt(int);
     method protected final boolean isSpanned();
     field public static final int BREAK_STRATEGY_BALANCED = 2; // 0x2

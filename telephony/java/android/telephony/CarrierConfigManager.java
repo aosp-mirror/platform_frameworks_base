@@ -5036,6 +5036,10 @@ public class CarrierConfigManager {
         /** Specifies the PCO id for IPv4 Epdg server address */
         public static final String KEY_EPDG_PCO_ID_IPV4_INT = KEY_PREFIX + "epdg_pco_id_ipv4_int";
 
+        /** Controls if the IKE tunnel setup supports EAP-AKA fast reauth */
+        public static final String KEY_ENABLE_SUPPORT_FOR_EAP_AKA_FAST_REAUTH_BOOL =
+                KEY_PREFIX + "enable_support_for_eap_aka_fast_reauth_bool";
+
         /** @hide */
         @IntDef({AUTHENTICATION_METHOD_EAP_ONLY, AUTHENTICATION_METHOD_CERT})
         public @interface AuthenticationMethodType {}
@@ -5179,6 +5183,7 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_ADD_KE_TO_CHILD_SESSION_REKEY_BOOL, false);
             defaults.putInt(KEY_EPDG_PCO_ID_IPV6_INT, 0);
             defaults.putInt(KEY_EPDG_PCO_ID_IPV4_INT, 0);
+            defaults.putBoolean(KEY_ENABLE_SUPPORT_FOR_EAP_AKA_FAST_REAUTH_BOOL, false);
 
             return defaults;
         }
