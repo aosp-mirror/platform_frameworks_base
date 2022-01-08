@@ -1369,7 +1369,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"I-MIDI nge-USB ivuliwe"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Insiza ye-USB ixhunyiwe"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Thepha ngezinketho eziningi."</string>
-    <string name="usb_power_notification_message" msgid="7284765627437897702">"Ishaja idivayisi exhunyiwe. Thepha ukuze uthole ezinye izinketho."</string>
+    <string name="usb_power_notification_message" msgid="7284765627437897702">"Ishaja idivayisi exhunyiwe. Thepha ukuze uthole okunye okungakhethwa."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Kutholwe isisetshenziswa se-analog yomsindo"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Idivayisi enamathiselwe kwi-imeyili ayihambisani nale foni. Thepha ukuze ufunde kabanzi."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Ukulungisa iphutha le-USB kuxhunyiwe"</string>
