@@ -226,9 +226,9 @@
     <string name="reboot_to_update_title" msgid="2125818841916373708">"Pemutakhiran sistem Android"</string>
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Bersiap untuk memperbarui..."</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Memproses pembaruan paket…"</string>
-    <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Memulai kembali…"</string>
+    <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Memulai ulang…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"Kembalikan ke setelan pabrik"</string>
-    <string name="reboot_to_reset_message" msgid="3347690497972074356">"Memulai kembali…"</string>
+    <string name="reboot_to_reset_message" msgid="3347690497972074356">"Memulai ulang…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Sedang mematikan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Tablet Anda akan dimatikan."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Perangkat Android TV akan dimatikan."</string>
@@ -1351,7 +1351,7 @@
     <string name="sim_done_button" msgid="6464250841528410598">"Selesai"</string>
     <string name="sim_added_title" msgid="7930779986759414595">"Kartu SIM ditambahkan"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Mulai ulang perangkat Anda untuk mengakses jaringan selular."</string>
-    <string name="sim_restart_button" msgid="8481803851341190038">"Nyalakan Ulang"</string>
+    <string name="sim_restart_button" msgid="8481803851341190038">"Mulai Ulang"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktifkan layanan seluler"</string>
     <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Download aplikasi operator untuk mengaktifkan SIM baru"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"Download aplikasi <xliff:g id="APP_NAME">%1$s</xliff:g> untuk mengaktifkan SIM baru"</string>
