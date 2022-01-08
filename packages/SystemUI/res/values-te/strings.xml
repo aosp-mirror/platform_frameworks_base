@@ -927,7 +927,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"శీఘ్ర సెట్టింగ్‌లను తెరవండి."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"శీఘ్ర సెట్టింగ్‌లను మూసివేయండి."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"అలారం సెట్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> వలె సైన్ ఇన్ చేశారు"</string>
+    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> లాగా సైన్ ఇన్ చేశారు"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"యూజర్‌ను ఎంపిక చేయండి"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ఇంటర్నెట్ లేదు"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"వివరాలను తెరవండి."</string>
