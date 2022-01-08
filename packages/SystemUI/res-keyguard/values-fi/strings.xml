@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Laite lukittiin manuaalisesti"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Ei tunnistettu"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ei tunnistettu"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Jos haluat käyttää kasvojentunnistusavausta, valitse Asetukset &gt; Yksityisyys ja laita "<b>"Pääsy kameraan"</b>" päälle"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Anna SIM-kortin PIN-koodi. Sinulla on <xliff:g id="NUMBER_1">%d</xliff:g> yritystä jäljellä.</item>
       <item quantity="one">Anna SIM-kortin PIN-koodi. <xliff:g id="NUMBER_0">%d</xliff:g> yrityksen jälkeen laite lukittuu, ja vain operaattori voi avata sen.</item>

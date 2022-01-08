@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Apparaat is handmatig vergrendeld"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Niet herkend"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Niet herkend"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Als je Ontgrendelen via gezichtsherkenning wilt gebruiken, zet je "<b>"Cameratoegang"</b>" aan via Instellingen &gt; Privacy"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Geef de pincode van de simkaart op. Je hebt nog <xliff:g id="NUMBER_1">%d</xliff:g> pogingen over.</item>
       <item quantity="one">Geef de pincode van de simkaart op. Je hebt nog <xliff:g id="NUMBER_0">%d</xliff:g> poging over voordat je contact met je provider moet opnemen om het apparaat te ontgrendelen.</item>

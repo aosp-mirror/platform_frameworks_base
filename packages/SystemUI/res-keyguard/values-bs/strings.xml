@@ -96,6 +96,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Uređaj je ručno zaključan"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Nije prepoznato"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nije prepoznato"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Da koristite otključavanje licem, uključite "<b>"Pristup kameri"</b>" u meniju Postavke &gt; Privatnost"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">Unesite PIN za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj.</item>
       <item quantity="few">Unesite PIN za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
