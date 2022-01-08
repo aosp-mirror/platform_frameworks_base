@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Leyfir forritinu að breyta símtalaskrá Android TV tækisins, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Leyfir forriti að breyta símtalaskrá símans, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"fá aðgang að líkamsskynjurum (s.s. hjartsláttarmælum)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Veitir forritinu aðgang að gögnum frá skynjurum sem fylgjast með líkamsstarfsemi þinni, svo sem hjartslætti."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Aðgangur að gögnum frá líkamsskynjurum, svo sem um hjartslátt, hitastig, súrefnismettun í blóði o.s.frv."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"aðgangur að líkamsskynjurum (svo sem púlsmælum) í bakgrunni"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Aðgangur að gögnum frá líkamsskynjurum, svo sem um hjartslátt, hitastig, súrefnismettun í blóði o.s.frv. í bakgrunni."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lesa dagatalsviðburði og upplýsingar"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Þetta forrit getur lesið alla dagatalsviðburði sem eru vistaðir í spjaldtölvunni og deilt eða vistað dagatalsgögnin þín."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Þetta forrit getur lesið alla dagatalsviðburði sem eru vistaðir í Android TV og deilt eða vistað dagatalsgögnin þín."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Leyfir forriti að lesa og skrifa í grunnstillingu „Ónáðið ekki“."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"heimildanotkun upphafsyfirlits"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Leyfir handhafa að byrja heimildanotkun fyrir forrit. Ætti aldrei að þurfa fyrir venjuleg forrit."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"byrja að skoða eiginleika forrits"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Leyfir handhafa að skoða upplýsingar um eiginleika tiltekins forrits."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"aðgangur að skynjaragögnum með hárri upptökutíðni"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Sérsniðin forritatilkynning"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Viltu leyfa <xliff:g id="APP">%1$s</xliff:g> að stofna nýjan notanda með <xliff:g id="ACCOUNT">%2$s</xliff:g> (notandi með þennan reikning er þegar fyrir hendi)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Leyfa <xliff:g id="APP">%1$s</xliff:g> að stofna nýjan notanda með <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Bæta við stýrðum notanda"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Bæta við tungumáli"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Svæðisval"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Sláðu inn heiti tungumáls"</string>

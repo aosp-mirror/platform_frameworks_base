@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Lar appen endre samtaleloggen på Android TV-enheten din, inkludert data om innkommende og utgående anrop. Skadelige apper kan bruke denne tillatelsen til å slette eller endre samtaleloggen din."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Lar appen endre telefonens samtalelogg, inkludert data om innkommende og utgående anrop. Skadelige apper kan utnytte denne tillatelsen til å slette eller endre samtaleloggen din."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"få tilgang til kroppssensorer (f.eks. pulsmålere)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Gir appen tilgang til data fra sensorer som overvåker den fysiske tilstanden din, for eksempel hjertefrekvensen din."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Tilgang til data fra kroppssensorer, for eksempel puls, temperatur, oksygenmetning i blodet osv."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"få tilgang til kroppssensorer (f.eks. pulsmålere) i bakgrunnen"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Tilgang til data fra kroppssensorer, for eksempel puls, temperatur, oksygenmetning i blodet osv., i bakgrunnen."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Les kalenderaktivitet og detaljer"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Denne appen kan lese all kalenderaktivitet som er lagret på nettbrettet ditt, og dele eller lagre kalenderdataene."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Denne appen kan lese all kalenderaktivitet som er lagret på Android TV-enheten din, og dele eller lagre kalenderdataene."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Lar appen lese og skrive konfigurasjon av Ikke forstyrr."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"start visning av bruk av tillatelser"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Lar innehaveren starte bruk av tillatelser for en app. Dette skal aldri være nødvendig for vanlige apper."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"starte visning av appfunksjoner"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Lar innehaveren se informasjon om funksjonene for en app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"tilgang til sensordata ved høy samplingfrekvens"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Tilpasset appvarsel"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Vil du la <xliff:g id="APP">%1$s</xliff:g> opprette en ny bruker med <xliff:g id="ACCOUNT">%2$s</xliff:g> (en bruker med denne kontoen eksisterer allerede)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Vil du la <xliff:g id="APP">%1$s</xliff:g> opprette en ny bruker med <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Legg til administrert bruker"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Legg til et språk"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Regionsinnstilling"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Skriv inn språknavn"</string>

@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Аппад таны Android TV төхөөрөмжийн ирсэн болон залгасан дуудлага зэрэг өгөгдөл бүхий дуудлагын жагсаалтыг өөрчлөхийг зөвшөөрнө. Хортой аппууд үүнийг ашиглан таны дуудлагын жагсаалтыг устгаж эсвэл өөрчилж болзошгүй."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Апп нь таны утасны ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан таны дуудлагын логыг өөрчлөх болон арилгах боломжтой."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"биеийн мэдрэгчид хандах (зүрхний хэмнэл шалгагч г.м)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Апп-т таны зүрхний цохилт гэх мэт биеийн байдлыг хянадаг мэдрэгчдийн датанд хандалт хийх боломж олгоно."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Зүрхний хэм, температур, цусны хүчилтөрөгчийн хувь гэх мэт биеийн мэдрэгчийн өгөгдөлд хандана уу"</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"арын дэвсгэрт ажиллах үед биеийн мэдрэгчид (зүрхний хэм хянагч гэх мэт) хандах"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Арын дэвсгэрт ажиллах үед зүрхний хэм, температур, цусны хүчилтөрөгчийн хувь гэх мэт биеийн мэдрэгчийн өгөгдөлд хандана уу."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Календарийн арга хэмжээ, дэлгэрэнгүйг унших"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Энэ апп таны таблетад хадгалсан календарийн бүх арга хэмжээг унших, календарийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Энэ апп таны Android TV төхөөрөмжид хадгалсан календарийн бүх арга хэмжээг унших болон таны календарийн өгөгдлийг хуваалцах эсвэл хадгалах боломжтой."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Апп-д Бүү саад бол тохируулгыг уншиж, бичихийг зөвшөөрөх"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"зөвшөөрлийн ашиглалтыг харж эхлэх"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Эзэмшигчид аппын зөвшөөрлөө ашиглаж эхлэхийг зөвшөөрдөг. Энгийн аппуудад шаардлагагүй."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"аппын онцлогуудыг үзэж эхлэх"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Аппын онцлогуудын мэдээллийг үзэж эхлэхийг эзэмшигчид зөвшөөрдөг."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"түүврийн өндөр хувиар мэдрэгчийн өгөгдөлд хандах"</string>

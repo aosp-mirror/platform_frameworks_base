@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Allows the app to modify your Android TV device\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to delete or modify your call log."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Allows the app to modify your phone\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to erase or modify your call log."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"access body sensors (like heart rate monitors)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Allows the app to access data from sensors that monitor your physical condition, such as your heart rate."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Access to data from body sensors, such as heart rate, temperature, blood oxygen percentage, etc."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"access body sensors (like heart rate monitors) while in the background"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Access to data from body sensors, such as heart rate, temperature, blood oxygen percentage, etc. while in the background."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Read calendar events and details"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"This app can read all calendar events stored on your tablet and share or save your calendar data."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"This app can read all calendar events stored on your Android TV device and share or save your calendar data."</string>
@@ -731,6 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Allows the app to read and write Do Not Disturb configuration."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"start view permission usage"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Allows the holder to start the permission usage for an app. Should never be needed for normal apps."</string>
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"start view permission decisions"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Allows the holder to start screen to review permission decisions. Should never be needed for normal apps."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"start view app features"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Allows the holder to start viewing the features info for an app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"access sensor data at a high sampling rate"</string>

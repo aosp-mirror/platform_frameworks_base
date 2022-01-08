@@ -303,29 +303,29 @@
     <string name="user_owner_label" msgid="8628726904184471211">"Passa al profilo personale"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Passa a profilo di lavoro"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatti"</string>
-    <string name="permgroupdesc_contacts" msgid="9163927941244182567">"accedere ai contatti"</string>
+    <string name="permgroupdesc_contacts" msgid="9163927941244182567">"Possono accedere ai contatti"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Posizione"</string>
-    <string name="permgroupdesc_location" msgid="1995955142118450685">"accedere alla posizione di questo dispositivo"</string>
+    <string name="permgroupdesc_location" msgid="1995955142118450685">"Possono accedere alla posizione di questo dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendario"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accedere al calendario"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Possono accedere al calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="5726462398070064542">"inviare e visualizzare SMS"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"File e contenuti multimediali"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"accedere a foto, contenuti multimediali e file sul dispositivo"</string>
+    <string name="permgroupdesc_sms" msgid="5726462398070064542">"Possono inviare e visualizzare SMS"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"File/contenuti multimediali"</string>
+    <string name="permgroupdesc_storage" msgid="6351503740613026600">"Possono accedere a foto, contenuti multimediali e file sul dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfono"</string>
-    <string name="permgroupdesc_microphone" msgid="1047786732792487722">"registrare audio"</string>
+    <string name="permgroupdesc_microphone" msgid="1047786732792487722">"Possono registrare audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Attività fisica"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"Consente di accedere all\'attività fisica"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"Possono accedere all\'attività fisica"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotocamera"</string>
-    <string name="permgroupdesc_camera" msgid="7585150538459320326">"scattare foto e registrare video"</string>
+    <string name="permgroupdesc_camera" msgid="7585150538459320326">"Possono scattare foto e registrare video"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Dispositivi nelle vicinanze"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"Consente di rilevare dispositivi nelle vicinanze e di connettersi a tali dispositivi"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registri chiamate"</string>
-    <string name="permgroupdesc_calllog" msgid="2026996642917801803">"leggere e modificare il registro chiamate del telefono"</string>
+    <string name="permgroupdesc_calllog" msgid="2026996642917801803">"Possono leggere e modificare il registro chiamate del telefono"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefono"</string>
-    <string name="permgroupdesc_phone" msgid="270048070781478204">"eseguire e gestire le telefonate"</string>
+    <string name="permgroupdesc_phone" msgid="270048070781478204">"Possono eseguire e gestire le telefonate"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensori del corpo"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"accedere ai dati dei sensori relativi ai tuoi parametri vitali"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"Possono accedere ai dati dei sensori relativi ai tuoi parametri vitali"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notifiche"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"Visualizzazione di notifiche"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperare contenuti della finestra"</string>
@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Consente all\'app di modificare il registro chiamate del dispositivo Android TV, inclusi i dati relativi alle chiamate in arrivo e in uscita. Le app dannose potrebbero farne uso per cancellare o modificare il registro chiamate."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Consente all\'applicazione di modificare il registro chiamate del telefono, inclusi i dati sulle chiamate in arrivo e in uscita. Le applicazioni dannose potrebbero farne uso per cancellare o modificare il registro chiamate."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"accesso ai sensori (come il cardiofrequenzimetro)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Consente all\'app di accedere ai dati relativi ai sensori che monitorano le tue condizioni fisiche, ad esempio la frequenza cardiaca."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Accedere ai dati dei sensori del corpo, ad esempio a frequenza cardiaca, temperatura, percentuale di ossigeno nel sangue e così via."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"Accesso ai sensori del corpo (come i cardiofrequenzimetri) in background"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Accedere ai dati dei sensori del corpo, ad esempio a frequenza cardiaca, temperatura, percentuale di ossigeno nel sangue e così via in background."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"lettura di eventi di calendario e dettagli"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Questa app può leggere tutti gli eventi di calendario memorizzati sul tablet e condividere o salvare i dati di calendario."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Questa app può leggere tutti gli eventi di calendario memorizzati sul dispositivo Android TV e condividere o salvare i dati di calendario."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Consente all\'app di leggere e modificare la configurazione della funzione Non disturbare."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"avvio dell\'uso dell\'autorizzazione di visualizzazione"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Consente al titolare di avviare l\'uso delle autorizzazioni per un\'app. Non dovrebbe essere mai necessaria per le normali applicazioni."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"Inizio della visualizzazione di funzionalità delle app"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Consente all\'app che ha questa autorizzazione di iniziare a visualizzare le informazioni relative alle funzionalità di un\'app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Accesso ai dati dei sensori a una frequenza di campionamento elevata"</string>

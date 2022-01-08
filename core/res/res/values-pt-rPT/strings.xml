@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permite à app modificar o registo de chamadas do seu dispositivo Android TV, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem utilizar esta funcionalidade para apagar ou modificar o seu registo de chamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permite à app modificar o registo de chamadas do telemóvel, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem utilizar esta funcionalidade para apagar ou modificar o seu registo de chamadas."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"aceder a sensores corporais (como monitores do ritmo cardíaco)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Permite que a app aceda a dados de sensores que monitorizam a sua condição física, como o ritmo cardíaco."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Acesso a dados dos sensores de corpo, como o ritmo cardíaco, a temperatura, a percentagem de oxigénio no sangue, etc."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"aceder a sensores de corpo (como monitores do ritmo cardíaco) em segundo plano"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Acesso a dados dos sensores de corpo, como o ritmo cardíaco, a temperatura, a percentagem de oxigénio no sangue, etc., em segundo plano."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ler detalhes e eventos do calendário"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Esta app pode ler todos os eventos do calendário armazenados no seu tablet e partilhar ou guardar os dados do calendário."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Esta app pode ler todos os eventos do calendário armazenados no seu dispositivo Android TV e partilhar ou guardar os dados do calendário."</string>
@@ -731,6 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite à app ler e alterar a configuração de Não incomodar"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar utilização da autorização de visualização"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite que o titular inicie a utilização de autorizações para uma app. Nunca deverá ser necessário para aplicações normais."</string>
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"começar a ver as decisões de autorização"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Permite ao titular iniciar o ecrã para rever as decisões de autorização. Nunca deverá ser preciso para apps normais."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"começar a ver as funcionalidades da app"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite que o titular comece a ver as informações das funcionalidades de uma app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"aceder aos dados de sensores a uma taxa de amostragem elevada"</string>
@@ -1989,8 +1993,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notificação de app personalizada"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Permitir que a app <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com a conta <xliff:g id="ACCOUNT">%2$s</xliff:g> (já existe um utilizador com esta conta)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Permitir que a app <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com a conta <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Adicionar utilizador supervisionado"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Adicionar um idioma"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferência de região"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Intr. nome do idioma"</string>

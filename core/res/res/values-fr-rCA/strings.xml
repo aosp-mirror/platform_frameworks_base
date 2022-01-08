@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permet à l\'application de modifier le journal d\'appels de votre appareil Android TV, y compris les données sur les appels entrants et sortants. Des applications malveillantes pourraient utiliser cette fonctionnalité pour effacer ou modifier votre journal d\'appels."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permet à l\'application de lire le journal d\'appels de votre téléphone, y compris les données relatives aux appels entrants et sortants. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier votre journal d\'appels."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"accéder aux capteurs corporels (comme les moniteurs de fréquence cardiaque)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Permet à l\'application d\'accéder aux données des capteurs qui surveillent votre condition physique, comme votre rythme cardiaque."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Accès aux données des capteurs corporels comme la fréquence cardiaque, la température, le pourcentage d\'oxygène dans le sang, etc."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"Accès capteurs corporels (comme moniteurs fréquence cardiaque) en arrière-plan"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Accès aux données des capteurs corporels comme la fréquence cardiaque, la température, le pourcentage d\'oxygène dans le sang, etc. en arrière-plan."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lire les événements d\'agenda et leurs détails"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Cette application peut lire tous les événements d\'agenda stockés sur votre tablette et partager ou enregistrer les données de votre agenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Cette application peut lire tous les événements d\'agenda stockés sur votre appareil Android TV et partager ou enregistrer les données de votre agenda."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permet à l\'application de consulter et de modifier la configuration du mode Ne pas déranger."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"démarrer l\'affichage de l\'usage des autorisations"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permet au détenteur de démarrer l\'usage des autorisations pour une application. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"démarrer l\'affichage des fonctionnalités de l\'application"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permet au détenteur de commencer à afficher les renseignements sur les fonctionnalités d\'une application."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"accéder aux données des capteurs à un taux d’échantillonnage élevé"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notification d\'application personnalisée"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un utilisateur <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Un utilisateur est déjà associé à ce compte)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil d\'utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Ajouter un utilisateur supervisé"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Ajouter une langue"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Préférences régionales"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Entrez la langue"</string>

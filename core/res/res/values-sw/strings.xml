@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Huruhusu programu irekebishe kumbukumbu za simu ya kifaa chako cha Android TV, ikiwa ni pamoja na data kuhusu simu zinazoingia na simu unazopiga. Huenda programu hasidi zikatumia ruhusa hii ili kufuta au kurekebisha kumbukumbu zako za simu."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Huruhusu programu kurekebisha rajisi ya simu yako, ikiwa ni pamoja na simu zinazoingia na kutoka. Huenda programu hasidi zikatumia hii ili kufuta au kurekebisha rajisi ya simu yako."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"fikia vitambua shughuli za mwili (kama vifuatiliaji vya mapigo ya moyo)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Huruhusu programu kufikia data kutoka vihisi vinavyofuatilia hali yako ya kimwili, kama vile mapigo ya moyo."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Kufikia data katika vitambuzi vya shughuli za mwili kama vile mapigo ya moyo, halijoto, asilimia ya oksijeni kwenye damu n.k."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"kufikia vitambuzi vya shughuli za mwili (kama vile vifuatiliaji vya mapigo ya moyo) inapotumika chinichini"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Kufikia data katika vitambuzi vya shughuli za mwili kama vile mapigo ya moyo, halijoto, asilimia ya oksijeni kwenye damu n.k. inapotumika chinichini."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Soma matukio na maelezo ya kalenda"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kompyuta yako kibao na kushiriki au kuhifadhi data yako ya kalenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kifaa chako cha Android TV na kushiriki au kuhifadhi data ya kalenda yako."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Inaruhusu programu kusoma na kuandika usanidi wa kipengee cha Usinisumbue."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"anzisha kipengele cha kuona matumizi ya ruhusa"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Huruhusu kishikiliaji kuanzisha matumizi ya ruhusa ya programu. Haipaswi kuhitajika kwa ajili ya programu za kawaida."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"anzisha kipengele cha kuangalia vipengele vya programu"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Huruhusu mmiliki kuanza kuangalia maelezo ya vipengele vya programu."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"fikia data ya vitambuzi kwa kasi ya juu ya sampuli"</string>

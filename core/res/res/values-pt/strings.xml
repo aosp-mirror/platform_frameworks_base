@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permite que o app modifique o registro de chamadas do seu dispositivo Android TV, incluindo dados sobre chamadas recebidas e realizadas. Apps maliciosos podem usar essa permissão para apagar ou modificar seu registro de chamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permite que o app modifique o registro de chamadas de seu telefone, incluindo dados sobre chamadas recebidas e efetuadas. Apps maliciosos podem usar esta permissão para apagar ou modificar seu registro de chamadas."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"acessar sensores corporais (como monitores de frequência cardíaca)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Permite que o app acesse dados de sensores que monitoram sua condição física, como a frequência cardíaca."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Acesso a dados dos sensores corporais, como frequência cardíaca, temperatura, porcentagem de oxigênio no sangue etc."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"acessar sensores corporais (como monitores de frequência cardíaca) em segundo plano"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Acesso a dados dos sensores corporais, como frequência cardíaca, temperatura, porcentagem de oxigênio no sangue etc. em segundo plano."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ler detalhes e eventos da agenda"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Este app pode ler todos os eventos da agenda armazenados no seu tablet e compartilhar ou salvar os dados da sua agenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Este app pode ler todos os eventos da agenda armazenados no seu dispositivo Android TV e compartilhar ou salvar os dados da sua agenda."</string>
@@ -731,6 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permitir que o app leia e grave a configuração \"Não perturbe\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso da permissão para visualização"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite que o sistema inicie o uso de permissão para um app. Não deve ser necessário para apps comuns."</string>
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"decisões de permissão da visualização inicial"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Autoriza o detentor a iniciar a tela para revisar as decisões de permissão. Não deve ser necessário para apps normais."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ver recursos do app"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite que o sistema comece a ver as informações de recursos de um app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"acessar os dados do sensor em uma taxa de amostragem elevada"</string>
