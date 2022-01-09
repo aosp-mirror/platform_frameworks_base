@@ -28,11 +28,11 @@ import java.util.Objects;
 
 // TODO: Add documents
 /** @hide */
-public final class VcnWifiUnderlyingNetworkPriority extends VcnUnderlyingNetworkPriority {
+public final class VcnWifiUnderlyingNetworkTemplate extends VcnUnderlyingNetworkTemplate {
     private static final String SSID_KEY = "mSsid";
     @Nullable private final String mSsid;
 
-    private VcnWifiUnderlyingNetworkPriority(
+    private VcnWifiUnderlyingNetworkTemplate(
             int networkQuality, boolean allowMetered, String ssid) {
         super(NETWORK_PRIORITY_TYPE_WIFI, networkQuality, allowMetered);
         mSsid = ssid;
@@ -43,14 +43,14 @@ public final class VcnWifiUnderlyingNetworkPriority extends VcnUnderlyingNetwork
     /** @hide */
     @NonNull
     @VisibleForTesting(visibility = Visibility.PROTECTED)
-    public static VcnWifiUnderlyingNetworkPriority fromPersistableBundle(
+    public static VcnWifiUnderlyingNetworkTemplate fromPersistableBundle(
             @NonNull PersistableBundle in) {
         Objects.requireNonNull(in, "PersistableBundle is null");
 
         final int networkQuality = in.getInt(NETWORK_QUALITY_KEY);
         final boolean allowMetered = in.getBoolean(ALLOW_METERED_KEY);
         final String ssid = in.getString(SSID_KEY);
-        return new VcnWifiUnderlyingNetworkPriority(networkQuality, allowMetered, ssid);
+        return new VcnWifiUnderlyingNetworkTemplate(networkQuality, allowMetered, ssid);
     }
 
     /** @hide */
@@ -74,11 +74,11 @@ public final class VcnWifiUnderlyingNetworkPriority extends VcnUnderlyingNetwork
             return false;
         }
 
-        if (!(other instanceof VcnWifiUnderlyingNetworkPriority)) {
+        if (!(other instanceof VcnWifiUnderlyingNetworkTemplate)) {
             return false;
         }
 
-        final VcnWifiUnderlyingNetworkPriority rhs = (VcnWifiUnderlyingNetworkPriority) other;
+        final VcnWifiUnderlyingNetworkTemplate rhs = (VcnWifiUnderlyingNetworkTemplate) other;
         return mSsid.equals(rhs.mSsid);
     }
 
@@ -94,8 +94,8 @@ public final class VcnWifiUnderlyingNetworkPriority extends VcnUnderlyingNetwork
         return mSsid;
     }
 
-    /** This class is used to incrementally build VcnWifiUnderlyingNetworkPriority objects. */
-    public static class Builder extends VcnUnderlyingNetworkPriority.Builder<Builder> {
+    /** This class is used to incrementally build VcnWifiUnderlyingNetworkTemplate objects. */
+    public static class Builder extends VcnUnderlyingNetworkTemplate.Builder<Builder> {
         @Nullable private String mSsid;
 
         /** Construct a Builder object. */
@@ -112,10 +112,10 @@ public final class VcnWifiUnderlyingNetworkPriority extends VcnUnderlyingNetwork
             return this;
         }
 
-        /** Build the VcnWifiUnderlyingNetworkPriority. */
+        /** Build the VcnWifiUnderlyingNetworkTemplate. */
         @NonNull
-        public VcnWifiUnderlyingNetworkPriority build() {
-            return new VcnWifiUnderlyingNetworkPriority(mNetworkQuality, mAllowMetered, mSsid);
+        public VcnWifiUnderlyingNetworkTemplate build() {
+            return new VcnWifiUnderlyingNetworkTemplate(mNetworkQuality, mAllowMetered, mSsid);
         }
 
         /** @hide */

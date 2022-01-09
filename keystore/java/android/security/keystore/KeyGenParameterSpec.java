@@ -276,7 +276,7 @@ import javax.security.auth.x500.X500Principal;
  *         "HMACSHA256", sharedSecret, salt, info.toByteArray(), 32));
  * byte[] associatedData = {};
  * return key.decrypt(ciphertext, associatedData);
- * }
+ * }</pre>
  */
 public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAuthArgs {
     private static final X500Principal DEFAULT_ATTESTATION_CERT_SUBJECT =

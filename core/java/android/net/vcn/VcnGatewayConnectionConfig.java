@@ -16,7 +16,7 @@
 package android.net.vcn;
 
 import static android.net.ipsec.ike.IkeSessionParams.IKE_OPTION_MOBIKE;
-import static android.net.vcn.VcnUnderlyingNetworkPriority.NETWORK_QUALITY_OK;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_OK;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 
@@ -162,12 +162,12 @@ public final class VcnGatewayConnectionConfig {
 
     /** @hide */
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    public static final LinkedHashSet<VcnUnderlyingNetworkPriority>
+    public static final LinkedHashSet<VcnUnderlyingNetworkTemplate>
             DEFAULT_UNDERLYING_NETWORK_PRIORITIES = new LinkedHashSet<>();
 
     static {
         DEFAULT_UNDERLYING_NETWORK_PRIORITIES.add(
-                new VcnCellUnderlyingNetworkPriority.Builder()
+                new VcnCellUnderlyingNetworkTemplate.Builder()
                         .setNetworkQuality(NETWORK_QUALITY_OK)
                         .setAllowMetered(true /* allowMetered */)
                         .setAllowRoaming(true /* allowRoaming */)
@@ -175,13 +175,13 @@ public final class VcnGatewayConnectionConfig {
                         .build());
 
         DEFAULT_UNDERLYING_NETWORK_PRIORITIES.add(
-                new VcnWifiUnderlyingNetworkPriority.Builder()
+                new VcnWifiUnderlyingNetworkTemplate.Builder()
                         .setNetworkQuality(NETWORK_QUALITY_OK)
                         .setAllowMetered(true /* allowMetered */)
                         .build());
 
         DEFAULT_UNDERLYING_NETWORK_PRIORITIES.add(
-                new VcnCellUnderlyingNetworkPriority.Builder()
+                new VcnCellUnderlyingNetworkTemplate.Builder()
                         .setNetworkQuality(NETWORK_QUALITY_OK)
                         .setAllowMetered(true /* allowMetered */)
                         .setAllowRoaming(true /* allowRoaming */)
@@ -202,7 +202,7 @@ public final class VcnGatewayConnectionConfig {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public static final String UNDERLYING_NETWORK_PRIORITIES_KEY = "mUnderlyingNetworkPriorities";
 
-    @NonNull private final LinkedHashSet<VcnUnderlyingNetworkPriority> mUnderlyingNetworkPriorities;
+    @NonNull private final LinkedHashSet<VcnUnderlyingNetworkTemplate> mUnderlyingNetworkPriorities;
 
     private static final String MAX_MTU_KEY = "mMaxMtu";
     private final int mMaxMtu;
@@ -215,7 +215,7 @@ public final class VcnGatewayConnectionConfig {
             @NonNull String gatewayConnectionName,
             @NonNull IkeTunnelConnectionParams tunnelConnectionParams,
             @NonNull Set<Integer> exposedCapabilities,
-            @NonNull LinkedHashSet<VcnUnderlyingNetworkPriority> underlyingNetworkPriorities,
+            @NonNull LinkedHashSet<VcnUnderlyingNetworkTemplate> underlyingNetworkPriorities,
             @NonNull long[] retryIntervalsMs,
             @IntRange(from = MIN_MTU_V6) int maxMtu) {
         mGatewayConnectionName = gatewayConnectionName;
@@ -265,7 +265,7 @@ public final class VcnGatewayConnectionConfig {
                     new LinkedHashSet<>(
                             PersistableBundleUtils.toList(
                                     networkPrioritiesBundle,
-                                    VcnUnderlyingNetworkPriority::fromPersistableBundle));
+                                    VcnUnderlyingNetworkTemplate::fromPersistableBundle));
         }
 
         mRetryIntervalsMs = in.getLongArray(RETRY_INTERVAL_MS_KEY);
@@ -368,14 +368,14 @@ public final class VcnGatewayConnectionConfig {
     }
 
     /**
-     * Retrieve the configured VcnUnderlyingNetworkPriority list, or a default list if it is not
+     * Retrieve the configured VcnUnderlyingNetworkTemplate list, or a default list if it is not
      * configured.
      *
-     * @see Builder#setVcnUnderlyingNetworkPriorities(LinkedHashSet<VcnUnderlyingNetworkPriority>)
+     * @see Builder#setVcnUnderlyingNetworkPriorities(LinkedHashSet<VcnUnderlyingNetworkTemplate>)
      * @hide
      */
     @NonNull
-    public LinkedHashSet<VcnUnderlyingNetworkPriority> getVcnUnderlyingNetworkPriorities() {
+    public LinkedHashSet<VcnUnderlyingNetworkTemplate> getVcnUnderlyingNetworkPriorities() {
         return new LinkedHashSet<>(mUnderlyingNetworkPriorities);
     }
 
@@ -418,7 +418,7 @@ public final class VcnGatewayConnectionConfig {
         final PersistableBundle networkPrioritiesBundle =
                 PersistableBundleUtils.fromList(
                         new ArrayList<>(mUnderlyingNetworkPriorities),
-                        VcnUnderlyingNetworkPriority::toPersistableBundle);
+                        VcnUnderlyingNetworkTemplate::toPersistableBundle);
 
         result.putString(GATEWAY_CONNECTION_NAME_KEY, mGatewayConnectionName);
         result.putPersistableBundle(TUNNEL_CONNECTION_PARAMS_KEY, tunnelConnectionParamsBundle);
@@ -465,7 +465,7 @@ public final class VcnGatewayConnectionConfig {
         @NonNull private final Set<Integer> mExposedCapabilities = new ArraySet();
 
         @NonNull
-        private final LinkedHashSet<VcnUnderlyingNetworkPriority> mUnderlyingNetworkPriorities =
+        private final LinkedHashSet<VcnUnderlyingNetworkTemplate> mUnderlyingNetworkPriorities =
                 new LinkedHashSet<>(DEFAULT_UNDERLYING_NETWORK_PRIORITIES);
 
         @NonNull private long[] mRetryIntervalsMs = DEFAULT_RETRY_INTERVALS_MS;
@@ -539,7 +539,7 @@ public final class VcnGatewayConnectionConfig {
         }
 
         /**
-         * Set the VcnUnderlyingNetworkPriority list.
+         * Set the VcnUnderlyingNetworkTemplate list.
          *
          * @param underlyingNetworkPriorities a list of unique VcnUnderlyingNetworkPriorities that
          *     are ordered from most to least preferred, or an empty list to use the default
@@ -550,7 +550,7 @@ public final class VcnGatewayConnectionConfig {
         /** @hide */
         @NonNull
         public Builder setVcnUnderlyingNetworkPriorities(
-                @NonNull LinkedHashSet<VcnUnderlyingNetworkPriority> underlyingNetworkPriorities) {
+                @NonNull LinkedHashSet<VcnUnderlyingNetworkTemplate> underlyingNetworkPriorities) {
             Objects.requireNonNull(
                     mUnderlyingNetworkPriorities, "underlyingNetworkPriorities is null");
 

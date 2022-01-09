@@ -77,6 +77,7 @@ import java.util.Map;
 
 import android.telephony.UiccCardInfo;
 import android.telephony.UiccSlotInfo;
+import android.telephony.UiccSlotMapping;
 
 /**
  * Interface used to interact with the phone.  Mostly this is used by the
@@ -1742,15 +1743,33 @@ interface ITelephony {
      * @return UiccSlotInfo array.
      * @hide
      */
-    UiccSlotInfo[] getUiccSlotsInfo();
+    UiccSlotInfo[] getUiccSlotsInfo(String callingPackage);
 
     /**
      * Map logicalSlot to physicalSlot, and activate the physicalSlot if it is inactive.
      * @param physicalSlots Index i in the array representing physical slot for phone i. The array
      *        size should be same as getPhoneCount().
+     * @deprecated Use {@link #setSimSlotMapping(in List<UiccSlotMapping> slotMapping)} instead.
      * @return boolean Return true if the switch succeeds, false if the switch fails.
      */
     boolean switchSlots(in int[] physicalSlots);
+
+    /**
+     * Maps the logical slots to the SlotPortMapping which consist of both physical slot index and
+     * port index. Logical slot is the slot that is seen by modem. Physical slot is the actual
+     * physical slot. Port index is the index (enumerated value) for the associated port available
+     * on the SIM. Each physical slot can have multiple ports which enables multi-enabled profile
+     * (MEP). If eUICC physical slot supports 2 ports, then the port index is numbered 0,1 and if
+     * eUICC2 supports 4 ports then the port index is numbered 0,1,2,3. Each portId is unique within
+     * a UICC physical slot but not necessarily unique across UICC’s. SEP(Single enabled profile)
+     * eUICC and non-eUICC will only have port Index 0.
+     *
+     * Logical slots that are already mapped to the requested SlotPortMapping are not impacted.
+     * @param slotMapping Index i in the list representing slot mapping for phone i.
+     *
+     * @return {@code true} if the switch succeeds, {@code false} if the switch fails.
+     */
+    boolean setSimSlotMapping(in List<UiccSlotMapping> slotMapping);
 
     /**
      * Returns whether mobile data roaming is enabled on the subscription with id {@code subId}.
@@ -2130,7 +2149,7 @@ interface ITelephony {
     /**
      * Get the mapping from logical slots to physical slots.
      */
-    int[] getSlotsMapping();
+    int[] getSlotsMapping(String callingPackage);
 
     /**
      * Get the IRadio HAL Version encoded as 100 * MAJOR_VERSION + MINOR_VERSION or -1 if unknown

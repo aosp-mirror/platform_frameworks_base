@@ -18,8 +18,6 @@ package com.android.server.net;
 
 import static android.app.usage.NetworkStatsManager.MIN_THRESHOLD_BYTES;
 
-import static com.android.internal.util.Preconditions.checkArgument;
-
 import android.app.usage.NetworkStatsManager;
 import android.net.DataUsageRequest;
 import android.net.NetworkIdentitySet;
@@ -38,7 +36,7 @@ import android.os.Messenger;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.ArrayMap;
-import android.util.Slog;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -83,7 +81,7 @@ class NetworkStatsObservers {
         RequestInfo requestInfo = buildRequestInfo(request, messenger, binder, callingUid,
                 accessLevel);
 
-        if (LOGV) Slog.v(TAG, "Registering observer for " + request);
+        if (LOGV) Log.v(TAG, "Registering observer for " + request);
         getHandler().sendMessage(mHandler.obtainMessage(MSG_REGISTER, requestInfo));
         return request;
     }
@@ -116,7 +114,7 @@ class NetworkStatsObservers {
         if (mHandler == null) {
             synchronized (this) {
                 if (mHandler == null) {
-                    if (LOGV) Slog.v(TAG, "Creating handler");
+                    if (LOGV) Log.v(TAG, "Creating handler");
                     mHandler = new Handler(getHandlerLooperLocked(), mHandlerCallback);
                 }
             }
@@ -172,15 +170,15 @@ class NetworkStatsObservers {
         RequestInfo requestInfo;
         requestInfo = mDataUsageRequests.get(request.requestId);
         if (requestInfo == null) {
-            if (LOGV) Slog.v(TAG, "Trying to unregister unknown request " + request);
+            if (LOGV) Log.v(TAG, "Trying to unregister unknown request " + request);
             return;
         }
         if (Process.SYSTEM_UID != callingUid && requestInfo.mCallingUid != callingUid) {
-            Slog.w(TAG, "Caller uid " + callingUid + " is not owner of " + request);
+            Log.w(TAG, "Caller uid " + callingUid + " is not owner of " + request);
             return;
         }
 
-        if (LOGV) Slog.v(TAG, "Unregistering " + request);
+        if (LOGV) Log.v(TAG, "Unregistering " + request);
         mDataUsageRequests.remove(request.requestId);
         requestInfo.unlinkDeathRecipient();
         requestInfo.callCallback(NetworkStatsManager.CALLBACK_RELEASED);
@@ -201,7 +199,7 @@ class NetworkStatsObservers {
         // Cap the minimum threshold to a safe default to avoid too many callbacks
         long thresholdInBytes = Math.max(MIN_THRESHOLD_BYTES, request.thresholdInBytes);
         if (thresholdInBytes < request.thresholdInBytes) {
-            Slog.w(TAG, "Threshold was too low for " + request
+            Log.w(TAG, "Threshold was too low for " + request
                     + ". Overriding to a safer default of " + thresholdInBytes + " bytes");
         }
         return new DataUsageRequest(mNextDataUsageRequestId.incrementAndGet(),
@@ -216,7 +214,10 @@ class NetworkStatsObservers {
                     accessLevel);
         } else {
             // Safety check in case a new access level is added and we forgot to update this
-            checkArgument(accessLevel >= NetworkStatsAccess.Level.DEVICESUMMARY);
+            if (accessLevel < NetworkStatsAccess.Level.DEVICESUMMARY) {
+                throw new IllegalArgumentException(
+                        "accessLevel " + accessLevel + " is less than DEVICESUMMARY.");
+            }
             return new NetworkUsageRequestInfo(this, request, messenger, binder, callingUid,
                     accessLevel);
         }
@@ -255,8 +256,9 @@ class NetworkStatsObservers {
 
         @Override
         public void binderDied() {
-            if (LOGV) Slog.v(TAG, "RequestInfo binderDied("
-                    + mRequest + ", " + mBinder + ")");
+            if (LOGV) {
+                Log.v(TAG, "RequestInfo binderDied(" + mRequest + ", " + mBinder + ")");
+            }
             mStatsObserver.unregister(mRequest, Process.SYSTEM_UID);
             callCallback(NetworkStatsManager.CALLBACK_RELEASED);
         }
@@ -299,13 +301,13 @@ class NetworkStatsObservers {
             msg.setData(bundle);
             try {
                 if (LOGV) {
-                    Slog.v(TAG, "sending notification " + callbackTypeToName(callbackType)
+                    Log.v(TAG, "sending notification " + callbackTypeToName(callbackType)
                             + " for " + mRequest);
                 }
                 mMessenger.send(msg);
             } catch (RemoteException e) {
                 // May occur naturally in the race of binder death.
-                Slog.w(TAG, "RemoteException caught trying to send a callback msg for " + mRequest);
+                Log.w(TAG, "RemoteException caught trying to send a callback msg for " + mRequest);
             }
         }
 
@@ -341,7 +343,7 @@ class NetworkStatsObservers {
         protected boolean checkStats() {
             long bytesSoFar = getTotalBytesForNetwork(mRequest.template);
             if (LOGV) {
-                Slog.v(TAG, bytesSoFar + " bytes so far since notification for "
+                Log.v(TAG, bytesSoFar + " bytes so far since notification for "
                         + mRequest.template);
             }
             if (bytesSoFar > mRequest.thresholdInBytes) {
@@ -416,7 +418,7 @@ class NetworkStatsObservers {
                 return history.getTotalBytes();
             } catch (SecurityException e) {
                 if (LOGV) {
-                    Slog.w(TAG, "CallerUid " + mCallingUid + " may have lost access to uid "
+                    Log.w(TAG, "CallerUid " + mCallingUid + " may have lost access to uid "
                             + uid);
                 }
                 return 0;
