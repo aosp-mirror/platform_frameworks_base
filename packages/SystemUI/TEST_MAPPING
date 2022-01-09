@@ -15,12 +15,6 @@
             "exclude-annotation": "org.junit.Ignore"
         },
         {
-            "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-            "exclude-annotation": "android.platform.helpers.Staging"
-        },
-        {
             "exclude-annotation": "android.platform.test.annotations.Postsubmit"
         },
         {
@@ -97,9 +91,6 @@
         },
         {
             "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-            "exclude-annotation": "android.platform.helpers.Staging"
         },
         {
             "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
