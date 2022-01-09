@@ -38,7 +38,7 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Aktivera"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Aktivera batterisparläget"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Inställningar"</string>
-    <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wifi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotera skärmen automatiskt"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"TYST"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO"</string>
@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zooma för att fylla skärm"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Dra för att fylla skärmen"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skärmbild"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock har inaktiverats"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"har skickat en bild"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skärmbilden sparas ..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skärmbilden sparas ..."</string>
@@ -92,14 +93,10 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Fånga mer"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Stäng skärmbild"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Förhandsgranskning av skärmbild"</string>
-    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
-    <skip />
-    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
-    <skip />
-    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
-    <skip />
-    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
-    <skip />
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Övre gräns: <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Nedre gräns: <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Vänster gräns: <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Höger gräns: <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skärminspelare"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Behandlar skärminspelning"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Avisering om att skärminspelning pågår"</string>
@@ -110,7 +107,7 @@
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Ljud från enheten, till exempel musik, samtal och ringsignaler"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Ljud på enheten och från mikrofonen"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Start"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Starta"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Skärminspelning pågår"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Skärm- och ljudinspelning pågår"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Visa tryck på skärmen"</string>
@@ -121,7 +118,7 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Avbryt"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Dela"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Skärminspelningen har avbrutits"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"Skärminspelningen har sparats"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Skärminspelning sparad"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Tryck för att visa"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Det gick inte att radera skärminspelningen"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Behörighet saknas"</string>
@@ -140,7 +137,9 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Mobil"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Röstassistent"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Lås upp"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"Enheten är låst"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Väntar på fingeravtryck"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Lås upp utan att använda fingeravtryck"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Registrerar ansikte"</string>
@@ -160,21 +159,21 @@
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Slutför genom att trycka på Bekräfta"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentiserad"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Använd pinkod"</string>
-    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Använd grafiskt lösenord"</string>
+    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Använd mönster"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Använd lösenord"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Fel pinkod"</string>
-    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Fel grafiskt lösenord"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Fel mönster"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Fel lösenord"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"För många felaktiga försök.\nFörsök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Försök igen. Försök <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> av <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Din data raderas."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Enhetens data raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Enhetens data raderas om du ritar fel mönster vid nästa försök."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Enhetens data raderas om du anger fel pinkod vid nästa försök."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Enhetens data raderas om du anger fel lösenord vid nästa försök."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Användaren raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Användaren raderas om du ritar fel mönster vid nästa försök."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Användaren raderas om du anger fel pinkod vid nästa försök."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Den här användaren raderas om du anger fel lösenord vid nästa försök."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jobbprofilen och dess data raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jobbprofilen och dess data raderas om du ritar fel mönster vid nästa försök."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Jobbprofilen och dess data raderas om du anger fel pinkod vid nästa försök."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Din jobbprofil och dess data raderas om du anger fel lösenord vid nästa försök."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"För många felaktiga försök. Enhetens data raderas."</string>
@@ -186,6 +185,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ansiktet kändes inte igen. Använd fingeravtryck."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Fortsätt med hjälp av ditt fingeravtryck"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Fingeravtrycket kändes inte igen. Använd låsskärmen i stället."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Håller utkik efter dig …"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ansiktsikon"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Knapp för kompatibilitetszoom."</string>
@@ -219,7 +220,7 @@
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Ansluter."</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
-    <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wifi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"Inget SIM-kort."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Mobildata"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Mobildata har aktiverats"</string>
@@ -254,8 +255,8 @@
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Låsskärm för arbete"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Stäng"</string>
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wi-Fi har inaktiverats."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wi-Fi har aktiverats."</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"wifi har inaktiverats."</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"wifi har aktiverats."</string>
     <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"Mobil <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"Batteri <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"Flygplansläge av."</string>
@@ -292,9 +293,7 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Den mobila surfzonen har inaktiverats."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Den mobila surfzonen har aktiverats."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Castningen av skärmen har stoppats."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Arbetsläget är inaktiverat."</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Arbetsläget aktiverat."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Arbetsläget har inaktiverats."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Jobbläget har pausats."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Arbetsläget har aktiverats."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Databesparing har inaktiverats."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Databesparing har aktiverats."</string>
@@ -310,7 +309,7 @@
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Återuppta"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"Sökning efter GPS pågår"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Platsen har identifierats av GPS"</string>
-    <string name="accessibility_location_active" msgid="2845747916764660369">"Det finns aktiva platsbegäranden"</string>
+    <string name="accessibility_location_active" msgid="2845747916764660369">"Det finns aktiva platsförfrågningar"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Sensorer har inaktiverats"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Ta bort alla meddelanden."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"<xliff:g id="NUMBER">%s</xliff:g> till"</string>
@@ -367,22 +366,22 @@
     <string name="quick_settings_user_label" msgid="1253515509432672496">"Jag"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Användare"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Ny användare"</string>
-    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wifi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Nätverk är tillgängliga"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Inga nätverk är tillgängliga"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Ej ansluten"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Inget nätverk"</string>
-    <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi av"</string>
-    <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi är aktiverat"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Det finns inga tillgängliga Wi-Fi-nätverk"</string>
+    <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"wifi av"</string>
+    <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"wifi är aktiverat"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Det finns inga tillgängliga wifi-nätverk"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Aktiverar …"</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"Casta skärmen"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Castar"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Namnlös enhet"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Redo att casta"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Inga tillgängliga enheter"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Inte ansluten till Wi-Fi"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Ej ansluten till wifi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Ljusstyrka"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTO"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Invertera färger"</string>
@@ -412,7 +411,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> används"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Gräns: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Varning <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Jobbprofil"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Jobbappar"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nattljus"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"På från solnedgången"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Till soluppgången"</string>
@@ -427,7 +426,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC är inaktiverat"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC är aktiverat"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Skärminspelning"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Skärminspelning"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Starta"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stoppa"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vill du återaktivera enhetens mikrofon?"</string>
@@ -436,9 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Detta återaktiverar åtkomsten för alla appar och tjänster som tillåts att använda mikrofonen."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Detta återaktiverar åtkomsten för alla appar och tjänster som tillåts att använda kameran."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Detta återaktiverar åtkomsten för alla appar och tjänster som tillåts att använda kameran eller mikrofonen."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Enhet"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Byt appar genom att svepa uppåt"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Tryck och dra åt höger för att snabbt byta mellan appar"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Annan enhet"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aktivera och inaktivera översikten"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Laddat"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Laddar"</string>
@@ -456,7 +453,9 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Mindre brådskande aviseringar nedan"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Tryck igen för att öppna"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Tryck igen"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Öppna genom att svepa uppåt"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Tryck för att öppna"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Svep uppåt om du vill försöka igen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås upp om du vill använda NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Den här enheten tillhör organisationen"</string>
@@ -472,10 +471,10 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Helt\ntyst"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Endast\nprioriterade"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Endast\nalarm"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="7343602278805644915">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laddas trådlöst (fulladdat om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time" msgid="4927557805886436909">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laddas (fulladdat om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laddas snabbt (fulladdat om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="245442950133408398">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laddas långsamt (fulladdat om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laddas trådlöst • Fulladdat om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laddas • Fulladdat om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laddas snabbt • Fulladdat om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laddas långsamt • Fulladdat om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Byt användare"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Byt användare. Aktuell användare: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Aktuell användare <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -655,8 +654,8 @@
     <string name="output_none_found" msgid="5488087293120982770">"Inga enheter hittades"</string>
     <string name="output_none_found_service_off" msgid="935667567681386368">"Inga enheter hittades. Testa att aktivera <xliff:g id="SERVICE">%1$s</xliff:g>"</string>
     <string name="output_service_bt" msgid="4315362133973911687">"Bluetooth"</string>
-    <string name="output_service_wifi" msgid="9003667810868222134">"Wi-Fi"</string>
-    <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth och Wi-Fi"</string>
+    <string name="output_service_wifi" msgid="9003667810868222134">"Wifi"</string>
+    <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth och wifi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Inställningar för systemgränssnitt"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"Visa inbäddad batteriprocent"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Visa batterinivå i procent i statusfältsikonen när enheten inte laddas"</string>
@@ -669,14 +668,14 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
-    <skip />
-    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
-    <skip />
-    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Klar"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Konfigurera betalning"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Lägg till en betalningsmetod för att betala snabbare och säkrare med telefonen"</string>
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"Visa alla"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Lås upp för att betala"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Lägg till ett kort"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Uppdaterar"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås upp för att använda"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Det gick inte att hämta dina kort. Försök igen senare."</string>
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Inställningar för låsskärm"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Jobbprofil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flygplansläge"</string>
     <string name="add_tile" msgid="6239678623873086686">"Lägg till en ruta"</string>
@@ -711,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Prioritetsinställningar för aviseringar"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Av"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"På"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"På – ansiktsbaserad"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Med aviseringsinställningarna kan du ange prioritetsnivå från 0 till 5 för aviseringar från en app. \n\n"<b>"Nivå 5"</b>" \n– Visa högst upp i aviseringslistan\n– Tillåt avbrott i helskärmsläge \n– Snabbvisa alltid \n\n"<b>"Nivå 4"</b>" \n– Tillåt inte avbrott i helskärmsläge \n– Snabbvisa alltid \n\n"<b>"Nivå 3"</b>" \n- Tillåt inte avbrott i helskärmsläge \n– Snabbvisa aldrig \n\n"<b>"Nivå 2"</b>" \n– Tillåt inte avbrott i helskärmsläge \n– Snabbvisa aldrig \n– Aldrig med ljud eller vibration \n\n"<b>"Nivå 1"</b>" \n– Tillåt inte avbrott i helskärmsläge \n– Snabbvisa aldrig \n– Aldrig med ljud eller vibration \n– Visa inte på låsskärmen och i statusfältet \n– Visa längst ned i aviseringslistan \n\n"<b>"Nivå 0"</b>" \n– Blockera alla aviseringar från appen"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Aviseringar"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"De här aviseringarna visas inte längre"</string>
@@ -745,9 +745,12 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Ändrad till Tyst"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Höjd"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Sänkt"</string>
-    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Visas alltid överst i aviseringarna, även när prioritetsläget är på"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Visas högst upp i konversationsaviseringarna och som profilbild på låsskärmen"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Visas högst upp i konversationsaviseringarna och som profilbild på låsskärmen, visas som bubbla"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Visas högst upp i konversationsaviseringarna och som profilbild på låsskärmen, åsidosätter Stör ej"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Visas högst upp i konversationsaviseringarna och som profilbild på låsskärmen, visas som bubbla, åsidosätter Stör ej"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Inställningar"</string>
-    <string name="notification_priority_title" msgid="5256226572739882190">"Prioriterade konversationer"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> har inte stöd för konversationsfunktioner"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Det går inte att ändra de här aviseringarna."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Den här aviseringsgruppen kan inte konfigureras här"</string>
@@ -790,7 +793,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"alternativ för att snooza aviseringar"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Påminn mig"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"Inställningar"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"ÅNGRA"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"Ångra"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Snoozad i <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d timmar</item>
@@ -830,6 +833,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Infoga"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Numeriskt tangentbord <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Ta bort bilagan"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"System"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Startsida"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Senaste"</string>
@@ -860,8 +864,9 @@
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Databesparing är aktiverat"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Databesparing är inaktiverat"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"På"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Inaktiverat"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Av"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Inte tillgängligt"</string>
+    <string name="tile_disabled" msgid="373212051546573069">"Inaktiverat"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Navigeringsfält"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Layout"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Knapptyp för extra vänster"</string>
@@ -972,7 +977,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"Mobildata"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g> <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi är inaktiverat"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"wifi är inaktiverat"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth är inaktiverat"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Stör ej är inaktiverat"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Stör ej aktiverades via en automatisk regel (<xliff:g id="ID_1">%s</xliff:g>)."</string>
@@ -984,7 +989,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Appar körs i bakgrunden"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Tryck för information om batteri- och dataanvändning"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Vill du inaktivera mobildata?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du kan inte skicka data eller använda internet via <xliff:g id="CARRIER">%s</xliff:g>. Internetanslutning blir bara möjlig via Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du kan inte skicka data eller använda internet via <xliff:g id="CARRIER">%s</xliff:g>. Internetanslutning blir bara möjlig via wifi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"din operatör"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Svaret kan inte verifieras av Inställningar eftersom en app skymmer en begäran om behörighet."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Tillåter du att bitar av <xliff:g id="APP_2">%2$s</xliff:g> visas i <xliff:g id="APP_0">%1$s</xliff:g>?"</string>
@@ -1005,11 +1010,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"<xliff:g id="TYPES_LIST">%s</xliff:g> används av appar."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" och "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> använder <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> använde <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> nyligen"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(företag)"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Används just nu av <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Användes nyligen av <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(jobb)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonsamtal"</string>
-    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(genom <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(via <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"plats"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
@@ -1020,14 +1025,6 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemnavigeringen har uppdaterats. Öppna inställningarna om du vill ändra något."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Öppna inställningarna och uppdatera systemnavigeringen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Viloläge"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Konversationen har angetts som prioriterad"</string>
-    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Prioriterade konversationer"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"De här konversationerna visas överst i listan och kan alltid nå dig när prioritetsläget på"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Profilbilder visas på låsskärmen"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Du hittar enkelt de här konversationerna i bubblor på startskärmen"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Avbryt Stör ej"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Inställningar"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Förstoringsfönster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Inställningar för förstoringsfönster"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Zooma in"</string>
@@ -1041,6 +1038,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Förstora en del av skärmen"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Reglage"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Tillgänglighetsknappen har ersatt tillgänglighetsrörelsen\n\n"<annotation id="link">"Visa inställningarna"</annotation></string>
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Du kan byta från tillgänglighetsrörelsen till en knapp\n\n"<annotation id="link">"Inställningar"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Flytta knappen till kanten för att dölja den tillfälligt"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Flytta högst upp till vänster"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Flytta högst upp till höger"</string>
@@ -1048,10 +1046,8 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Flytta längst ned till höger"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Flytta till kanten och dölj"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Flytta från kanten och visa"</string>
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"aktivera och inaktivera"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Enhetsstyrning"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Lägg till snabbkontroller för anslutna enheter"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfigurera enhetsstyrning"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Håll strömbrytaren nedtryckt för att få åtkomst till snabbkontrollerna"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Välj en app om du vill lägga till snabbkontroller"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kontroller har lagts till.</item>
@@ -1065,7 +1061,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ta bort från favoriter"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Flytta till position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Välj snabbkontroller som ska visas i strömbrytarmenyn"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Välj kontrollerna som ska visas i snabbinställningarna"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Ändra ordning på kontrollerna genom att trycka och dra"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alla kontroller har tagits bort"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ändringarna har inte sparats"</string>
@@ -1089,11 +1085,16 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Svep om du vill se mer"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Rekommendationer läses in"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"Dölj den aktuella sessionen."</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"Det går inte att dölja den aktuella sessionen."</string>
+    <string name="controls_media_close_session" msgid="1193000643003066508">"Vill du dölja mediesessionen?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"Den aktuella mediesessionen kan inte döljas."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Stäng"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Återuppta"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Inställningar"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> med <xliff:g id="ARTIST_NAME">%2$s</xliff:g> spelas upp från <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Spela upp"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Öppna <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Spela upp <xliff:g id="SONG_NAME">%1$s</xliff:g> med <xliff:g id="ARTIST_NAME">%2$s</xliff:g> från <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Spela upp <xliff:g id="SONG_NAME">%1$s</xliff:g> från <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv, kolla appen"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Fel, försöker igen …"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hittades inte"</string>
@@ -1103,7 +1104,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Status otillgänglig"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Fel, försök igen"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Pågår"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"De nya snabbkontrollerna visas om du håller strömbrytaren nedtryckt"</string>
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"De nya kontrollerna visas om du öppnar snabbinställningarna"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Lägg till snabbkontroller"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Redigera snabbkontroller"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Lägg till utgångar"</string>
@@ -1118,19 +1119,21 @@
     <string name="basic_status" msgid="2315371112182658176">"Öppen konversation"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Konversationswidgetar"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tryck på en konversation för att lägga till den på startskärmen"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Besök den här sidan igen när du har fått meddelanden"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"De senaste konversationerna visas här"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioriterade konversationer"</string>
-    <string name="recent_conversations" msgid="8531874684782574622">"Aktuella konversationer"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Senaste konversationerna"</string>
     <string name="okay" msgid="6490552955618608554">"Okej"</string>
-    <string name="timestamp" msgid="6577851592534538533">"För <xliff:g id="DURATION">%1$s</xliff:g> sedan"</string>
-    <string name="less_than_timestamp" msgid="6598972791137724517">"Mindre än <xliff:g id="DURATION">%1$s</xliff:g> sedan"</string>
-    <string name="over_timestamp" msgid="4765793502859358634">"Mer än <xliff:g id="DURATION">%1$s</xliff:g> sedan"</string>
+    <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> dagar sedan"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"1 vecka sedan"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 veckor sedan"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"Över 1 vecka sedan"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"Över 2 veckor sedan"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Födelsedag"</string>
-    <string name="birthday_status_content_description" msgid="7677415209545817153">"<xliff:g id="NAME">%1$s</xliff:g> fyller år"</string>
+    <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> fyller år"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Födelsedag inom kort"</string>
-    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"<xliff:g id="NAME">%1$s</xliff:g> fyller snart år"</string>
-    <string name="anniversary_status" msgid="1790034157507590838">"Högtidsdag"</string>
-    <string name="anniversary_status_content_description" msgid="6214503393960662875">"<xliff:g id="NAME">%1$s</xliff:g> har bemärkelsedag"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"<xliff:g id="NAME">%1$s</xliff:g> fyller snart år"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Årsdag"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"<xliff:g id="NAME">%1$s</xliff:g> har bemärkelsedag"</string>
     <string name="location_status" msgid="1294990572202541812">"Delar plats"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> delar sin plats"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Ny artikel"</string>
@@ -1145,9 +1148,36 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"över <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Se de senaste meddelandena, missade samtal och statusuppdateringar"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Konversation"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> skickade ett meddelande"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Pausad av Stör ej"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> skickade ett meddelande: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> skickade en bild"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> har gjort en statusuppdatering: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"Tillgänglig"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Batteriindikatorn visas inte"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tryck för mer information"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Inget inställt alarm"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Fingeravtryckssensor"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Fingeravtryckssensorn är inaktiverad"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autentisera"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"ange enhet"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Öppna med fingeravtryck"</string>
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autentisering krävs. Identifiera dig genom att trycka på fingeravtryckssensorn."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Pågående samtal"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobildata"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Ansluten"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Du ansluts inte till mobildata automatiskt"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Ingen anslutning"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Inga andra nätverk är tillgängliga"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"Det finns inga tillgängliga nätverk"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wifi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Nätverksinformation"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Tryck på ett nätverk för att ansluta"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Lås upp för att visa nätverk"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Söker efter nätverk …"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Det gick inte att ansluta till nätverket"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Du ansluts inte till wifi automatiskt för närvarande"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Visa alla"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Koppla bort Ethernet för att växla nätverk"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"I syfte att förbättra upplevelsen med enheten kan appar och tjänster fortfarande söka efter wifi-nätverk när som helst, även om wifi har inaktiverats. "<annotation id="link">"Ändra"</annotation></string>
 </resources>

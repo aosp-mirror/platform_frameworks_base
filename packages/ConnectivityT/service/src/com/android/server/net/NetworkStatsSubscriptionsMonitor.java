@@ -21,7 +21,6 @@ import static android.net.NetworkTemplate.getCollapsedRatType;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.os.Looper;
 import android.telephony.Annotation;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneStateListener;
@@ -33,7 +32,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.CollectionUtils;
+import com.android.net.module.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,9 +78,9 @@ public class NetworkStatsSubscriptionsMonitor extends
     @NonNull
     private final Executor mExecutor;
 
-    NetworkStatsSubscriptionsMonitor(@NonNull Context context, @NonNull Looper looper,
+    NetworkStatsSubscriptionsMonitor(@NonNull Context context,
             @NonNull Executor executor, @NonNull Delegate delegate) {
-        super(looper);
+        super();
         mSubscriptionManager = (SubscriptionManager) context.getSystemService(
                 Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         mTeleManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -99,18 +98,20 @@ public class NetworkStatsSubscriptionsMonitor extends
         // prevent binder call to telephony when querying RAT. Keep listener registration with empty
         // IMSI is meaningless since the RAT type changed is ambiguous for multi-SIM if reported
         // with empty IMSI. So filter the subs w/o a valid IMSI to prevent such registration.
-        final List<Pair<Integer, String>> filteredNewSubs =
-                CollectionUtils.mapNotNull(newSubs, subId -> {
-                    final String subscriberId = mTeleManager.getSubscriberId(subId);
-                    return TextUtils.isEmpty(subscriberId) ? null : new Pair(subId, subscriberId);
-                });
+        final List<Pair<Integer, String>> filteredNewSubs = new ArrayList<>();
+        for (final int subId : newSubs) {
+            final String subscriberId =
+                    mTeleManager.createForSubscriptionId(subId).getSubscriberId();
+            if (!TextUtils.isEmpty(subscriberId)) {
+                filteredNewSubs.add(new Pair(subId, subscriberId));
+            }
+        }
 
         for (final Pair<Integer, String> sub : filteredNewSubs) {
             // Fully match listener with subId and IMSI, since in some rare cases, IMSI might be
             // suddenly change regardless of subId, such as switch IMSI feature in modem side.
             // If that happens, register new listener with new IMSI and remove old one later.
-            if (CollectionUtils.find(mRatListeners,
-                    it -> it.equalsKey(sub.first, sub.second)) != null) {
+            if (CollectionUtils.any(mRatListeners, it -> it.equalsKey(sub.first, sub.second))) {
                 continue;
             }
 
@@ -126,8 +127,8 @@ public class NetworkStatsSubscriptionsMonitor extends
 
         for (final RatTypeListener listener : new ArrayList<>(mRatListeners)) {
             // If there is no subId and IMSI matched the listener, removes it.
-            if (CollectionUtils.find(filteredNewSubs,
-                    it -> listener.equalsKey(it.first, it.second)) == null) {
+            if (!CollectionUtils.any(filteredNewSubs,
+                    it -> listener.equalsKey(it.first, it.second))) {
                 handleRemoveRatTypeListener(listener);
             }
         }
@@ -148,9 +149,10 @@ public class NetworkStatsSubscriptionsMonitor extends
      * @return collapsed RatType for the given subscriberId
      */
     public int getRatTypeForSubscriberId(@NonNull String subscriberId) {
-        final RatTypeListener match = CollectionUtils.find(mRatListeners,
+        final int index = CollectionUtils.indexOf(mRatListeners,
                 it -> TextUtils.equals(subscriberId, it.mSubscriberId));
-        return match != null ? match.mLastCollapsedRatType : TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        return index != -1 ? mRatListeners.get(index).mLastCollapsedRatType
+                : TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 
     /**

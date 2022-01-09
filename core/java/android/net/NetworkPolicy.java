@@ -339,7 +339,8 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
 
         out.writeInt(template.getMatchRule());
         BackupUtils.writeString(out, template.getSubscriberIds().iterator().next());
-        BackupUtils.writeString(out, template.getWifiNetworkKey());
+        BackupUtils.writeString(out, template.getWifiNetworkKeys().isEmpty()
+                ? null : template.getWifiNetworkKeys().iterator().next());
         out.writeInt(template.getMeteredness());
 
         return baos.toByteArray();
@@ -369,10 +370,12 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
 
         try {
             final NetworkTemplate.Builder builder = new NetworkTemplate.Builder(matchRule)
-                    .setWifiNetworkKey(wifiNetworkKey)
                     .setMeteredness(metered);
             if (subscriberId != null) {
                 builder.setSubscriberIds(Set.of(subscriberId));
+            }
+            if (wifiNetworkKey != null) {
+                builder.setWifiNetworkKeys(Set.of(wifiNetworkKey));
             }
             return builder.build();
         } catch (IllegalArgumentException e) {
@@ -393,7 +396,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
             case MATCH_MOBILE:
                 return !template.getSubscriberIds().isEmpty();
             case MATCH_WIFI:
-                if (Objects.equals(template.getWifiNetworkKey(), null)
+                if (template.getWifiNetworkKeys().isEmpty()
                         && template.getSubscriberIds().isEmpty()) {
                     return false;
                 }

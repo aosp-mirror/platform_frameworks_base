@@ -1255,9 +1255,7 @@ public class StagingManager {
                     info.diskImagePath = ai.modulePath;
                     info.versionCode = ai.versionCode;
                     info.versionName = ai.versionName;
-                    info.hasBootClassPathJars = ai.hasBootClassPathJars;
-                    info.hasDex2OatBootClassPathJars = ai.hasDex2OatBootClassPathJars;
-                    info.hasSystemServerClassPathJars = ai.hasSystemServerClassPathJars;
+                    info.hasClassPathJars = ai.hasClassPathJars;
                     return info;
                 }
             }
