@@ -303,7 +303,7 @@
     <string name="user_owner_label" msgid="8628726904184471211">"개인 프로필로 전환"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"직장 프로필로 전환"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"연락처"</string>
-    <string name="permgroupdesc_contacts" msgid="9163927941244182567">"주소록에 액세스"</string>
+    <string name="permgroupdesc_contacts" msgid="9163927941244182567">"연락처에 액세스"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"위치"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"이 기기의 위치정보에 액세스"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"캘린더"</string>
@@ -1300,7 +1300,7 @@
     <string name="ringtone_silent" msgid="397111123930141876">"없음"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"벨소리"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"알람 소리"</string>
-    <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"알림 사운드"</string>
+    <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"알림음"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"알 수 없음"</string>
     <string name="wifi_available_sign_in" msgid="381054692557675237">"Wi-Fi 네트워크에 로그인"</string>
     <string name="network_available_sign_in" msgid="1520342291829283114">"네트워크에 로그인"</string>
