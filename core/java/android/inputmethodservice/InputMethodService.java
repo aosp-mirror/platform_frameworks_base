@@ -524,6 +524,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private Handler mHandler;
     private boolean mImeSurfaceScheduledForRemoval;
     private ImsConfigurationTracker mConfigTracker = new ImsConfigurationTracker();
+    private boolean mDestroyed;
 
     /**
      * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#showSoftInput}
@@ -602,6 +603,11 @@ public class InputMethodService extends AbstractInputMethodService {
                 IInputMethodPrivilegedOperations privilegedOperations, int configChanges) {
             if (InputMethodPrivilegedOperationsRegistry.isRegistered(token)) {
                 Log.w(TAG, "The token has already registered, ignore this initialization.");
+                return;
+            }
+            if (mDestroyed) {
+                Log.i(TAG, "The InputMethodService has already onDestroyed()."
+                    + "Ignore the initialization.");
                 return;
             }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.initializeInternal");
@@ -1403,6 +1409,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     @Override public void onDestroy() {
+        mDestroyed = true;
         super.onDestroy();
         mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
                 mInsetsComputer);
