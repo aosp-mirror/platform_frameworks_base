@@ -54,9 +54,9 @@
     <item msgid="9048424957228926377">"Uvijek provjeri"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
-    <item msgid="4045840870658484038">"Nikada ne koristi HDCP provjeru"</item>
-    <item msgid="8254225038262324761">"Koristi HDCP provjeru samo za DRM sadržaj"</item>
-    <item msgid="6421717003037072581">"Uvijek koristi HDCP provjeru"</item>
+    <item msgid="4045840870658484038">"Nikada ne koristite HDCP provjeru"</item>
+    <item msgid="8254225038262324761">"Koristite HDCP provjeru samo za DRM sadržaj"</item>
+    <item msgid="6421717003037072581">"Uvijek koristite HDCP provjeru"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"Onemogućeno"</item>
@@ -217,7 +217,7 @@
     <item msgid="2464080977843960236">"Animacija razmjera 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="4497393944195787240">"Nema"</item>
+    <item msgid="4497393944195787240">"Ništa"</item>
     <item msgid="8461943978957133391">"480p"</item>
     <item msgid="6923083594932909205">"480p (sigurno)"</item>
     <item msgid="1226941831391497335">"720p"</item>
@@ -231,7 +231,7 @@
     <item msgid="7346816300608639624">"720p, 1080p (dupli ekran)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
-    <item msgid="4433736508877934305">"Nema"</item>
+    <item msgid="4433736508877934305">"Ništa"</item>
     <item msgid="9140053004929079158">"Logcat"</item>
     <item msgid="3866871644917859262">"Systrace (grafika)"</item>
     <item msgid="7345673972166571060">"Pozovi skupinu na glGetError"</item>
