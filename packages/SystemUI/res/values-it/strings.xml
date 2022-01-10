@@ -314,8 +314,8 @@
     <string name="accessibility_clear_all" msgid="970525598287244592">"Cancella tutte le notifiche."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
       <item quantity="other">Altre <xliff:g id="NUMBER_1">%s</xliff:g> notifiche nel gruppo.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> altra notifica nel gruppo.</item>
     </plurals>
     <string name="notification_summary_message_format" msgid="5158219088501909966">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="6818779631806163080">"Impostazioni di notifica"</string>
@@ -398,8 +398,8 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Attivazione…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Risp. dati attivo"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
+      <item quantity="one">%d devices</item>
       <item quantity="other">%d dispositivi</item>
-      <item quantity="one">%d dispositivo</item>
     </plurals>
     <string name="quick_settings_notifications_label" msgid="3379631363952582758">"Notifiche"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Torcia"</string>
@@ -498,8 +498,8 @@
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Il nuovo utente, una volta aggiunto, deve impostare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite di utenti raggiunto"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
+      <item quantity="one">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
       <item quantity="other">Puoi aggiungere fino a <xliff:g id="COUNT">%d</xliff:g> utenti.</item>
-      <item quantity="one">È possibile creare un solo utente.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Rimuovere l\'utente?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Tutte le app e i dati di questo utente verranno eliminati."</string>
@@ -516,7 +516,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestisci"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Cronologia"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nuove"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Silenziose"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Notifiche silenziose"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notifiche"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversazioni"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Cancella tutte le notifiche silenziose"</string>
@@ -796,12 +796,12 @@
     <string name="snooze_undo" msgid="2738844148845992103">"Annulla"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Posticipato di <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
+      <item quantity="one">%d hours</item>
       <item quantity="other">%d ore</item>
-      <item quantity="one">%d ora</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
+      <item quantity="one">%d minutes</item>
       <item quantity="other">%d minuti</item>
-      <item quantity="one">%d minuto</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Utilizzo batteria"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Risparmio energetico non disponibile durante la ricarica"</string>
@@ -1047,11 +1047,11 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Sposta fino a bordo e nascondi"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Sposta fuori da bordo e mostra"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"attiva/disattiva"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Controllo dei dispositivi"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Controllo dispositivi"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Scegli un\'app per aggiungere controlli"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> controlli aggiunti.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> controlli aggiunti.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> controllo aggiunto.</item>
     </plurals>
     <string name="controls_removed" msgid="3731789252222856959">"Rimosso"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Aggiunto ai preferiti"</string>
@@ -1155,7 +1155,7 @@
     <string name="person_available" msgid="2318599327472755472">"Disponibile"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problema durante la lettura dell\'indicatore di livello della batteria"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tocca per ulteriori informazioni"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nessuna sveglia"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nessuna"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sensore di impronte digitali"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Sensore di impronte digitali disattivato"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"effettuare l\'autenticazione"</string>
