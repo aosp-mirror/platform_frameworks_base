@@ -428,6 +428,25 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowHigher(mImeWindow, imeAppTarget);
     }
 
+    @Test
+    public void testAssignWindowLayers_ForImeOnPopupImeLayeringTarget() {
+        final WindowState imeAppTarget = createWindow(null, TYPE_APPLICATION,
+                mAppWindow.mActivityRecord, "imeAppTarget");
+        mDisplayContent.setImeInputTarget(imeAppTarget);
+        mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        mDisplayContent.setImeControlTarget(imeAppTarget);
+
+        // Set a popup IME layering target and keeps the original IME control target behinds it.
+        final WindowState popupImeTargetWin = createWindow(imeAppTarget,
+                TYPE_APPLICATION_SUB_PANEL, mAppWindow.mActivityRecord, "popupImeTargetWin");
+        mDisplayContent.setImeLayeringTarget(popupImeTargetWin);
+        mDisplayContent.updateImeParent();
+
+        // Ime should on top of the popup IME layering target window.
+        mDisplayContent.assignChildLayers(mTransaction);
+        assertWindowHigher(mImeWindow, popupImeTargetWin);
+    }
+
 
     @Test
     public void testAssignWindowLayers_ForNegativelyZOrderedSubtype() {
