@@ -10636,8 +10636,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
 
-        if ((mMarquee == null || mMarquee.isStopped()) && (isFocused() || isSelected())
-                && getLineCount() == 1 && canMarquee()) {
+        if ((mMarquee == null || mMarquee.isStopped()) && isAggregatedVisible()
+                && (isFocused() || isSelected()) && getLineCount() == 1 && canMarquee()) {
 
             if (mMarqueeFadeMode == MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
                 mMarqueeFadeMode = MARQUEE_FADE_SWITCH_SHOW_FADE;
@@ -11094,6 +11094,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mEditor.hideCursorAndSpanControllers();
             stopTextActionMode();
         }
+    }
+
+    @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+        startStopMarquee(isVisible);
     }
 
     /**
@@ -13749,7 +13755,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mChoreographer.removeFrameCallback(mTickCallback);
 
             final TextView textView = mView.get();
-            if (textView != null && (textView.isFocused() || textView.isSelected())) {
+            if (textView != null && textView.isAggregatedVisible()
+                    && (textView.isFocused() || textView.isSelected())) {
                 long currentMs = mChoreographer.getFrameTime();
                 long deltaMs = currentMs - mLastAnimationMs;
                 mLastAnimationMs = currentMs;
