@@ -25,6 +25,7 @@ import static android.provider.DeviceConfig.NAMESPACE_APP_COMPAT_OVERRIDES;
 import static com.android.server.compat.overrides.AppCompatOverridesParser.FLAG_OWNED_CHANGE_IDS;
 import static com.android.server.compat.overrides.AppCompatOverridesParser.FLAG_REMOVE_OVERRIDES;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 
 import android.annotation.NonNull;
@@ -157,17 +158,17 @@ public final class AppCompatOverridesService {
         Map<String, CompatibilityOverridesToRemoveConfig> packageNameToOverridesToRemove =
                 new ArrayMap<>();
         for (String packageName : packageNames) {
-            Long versionCode = getVersionCodeOrNull(packageName);
-            if (versionCode == null) {
-                // Package isn't installed yet.
-                continue;
-            }
-
             Set<Long> changeIdsToSkip = packageToChangeIdsToSkip.getOrDefault(packageName,
                     emptySet());
-            Map<Long, PackageOverride> overridesToAdd = mOverridesParser.parsePackageOverrides(
-                    properties.getString(packageName, /* defaultValue= */ ""), packageName,
-                    versionCode, changeIdsToSkip);
+
+            Map<Long, PackageOverride> overridesToAdd = emptyMap();
+            Long versionCode = getVersionCodeOrNull(packageName);
+            if (versionCode != null) {
+                // Only if package installed add overrides, otherwise just remove.
+                overridesToAdd = mOverridesParser.parsePackageOverrides(
+                        properties.getString(packageName, /* defaultValue= */ ""), packageName,
+                        versionCode, changeIdsToSkip);
+            }
             if (!overridesToAdd.isEmpty()) {
                 packageNameToOverridesToAdd.put(packageName,
                         new CompatibilityOverrideConfig(overridesToAdd));
