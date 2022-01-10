@@ -591,8 +591,7 @@ public abstract class Layout {
             } else {
                 tl.set(paint, buf, start, end, dir, directions, hasTab, tabStops,
                         getEllipsisStart(lineNum),
-                        getEllipsisStart(lineNum) + getEllipsisCount(lineNum),
-                        isFallbackLineSpacingEnabled());
+                        getEllipsisStart(lineNum) + getEllipsisCount(lineNum));
                 if (justify) {
                     tl.justify(right - left - indentWidth);
                 }
@@ -961,15 +960,6 @@ public abstract class Layout {
     }
 
     /**
-     * Return true if the fallback line space is enabled in this Layout.
-     *
-     * @return true if the fallback line space is enabled. Otherwise returns false.
-     */
-    public boolean isFallbackLineSpacingEnabled() {
-        return false;
-    }
-
-    /**
      * Returns true if the character at offset and the preceding character
      * are at different run levels (and thus there's a split caret).
      * @param offset the offset
@@ -1241,8 +1231,7 @@ public abstract class Layout {
 
         TextLine tl = TextLine.obtain();
         tl.set(mPaint, mText, start, end, dir, directions, hasTab, tabStops,
-                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
-                isFallbackLineSpacingEnabled());
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         float wid = tl.measure(offset - start, trailing, null);
         TextLine.recycle(tl);
 
@@ -1282,8 +1271,7 @@ public abstract class Layout {
 
         TextLine tl = TextLine.obtain();
         tl.set(mPaint, mText, start, end, dir, directions, hasTab, tabStops,
-                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
-                isFallbackLineSpacingEnabled());
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         boolean[] trailings = primaryIsTrailingPreviousAllLineOffsets(line);
         if (!primary) {
             for (int offset = 0; offset < trailings.length; ++offset) {
@@ -1468,8 +1456,7 @@ public abstract class Layout {
         paint.setStartHyphenEdit(getStartHyphenEdit(line));
         paint.setEndHyphenEdit(getEndHyphenEdit(line));
         tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops,
-                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
-                isFallbackLineSpacingEnabled());
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
@@ -1499,8 +1486,7 @@ public abstract class Layout {
         paint.setStartHyphenEdit(getStartHyphenEdit(line));
         paint.setEndHyphenEdit(getEndHyphenEdit(line));
         tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops,
-                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
-                isFallbackLineSpacingEnabled());
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
@@ -1586,8 +1572,7 @@ public abstract class Layout {
         // XXX: we don't care about tabs as we just use TextLine#getOffsetToLeftRightOf here.
         tl.set(mPaint, mText, lineStartOffset, lineEndOffset, getParagraphDirection(line), dirs,
                 false, null,
-                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
-                isFallbackLineSpacingEnabled());
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         final HorizontalMeasurementProvider horizontal =
                 new HorizontalMeasurementProvider(line, primary);
 
@@ -1843,8 +1828,7 @@ public abstract class Layout {
         TextLine tl = TextLine.obtain();
         // XXX: we don't care about tabs
         tl.set(mPaint, mText, lineStart, lineEnd, lineDir, directions, false, null,
-                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
-                isFallbackLineSpacingEnabled());
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         caret = lineStart + tl.getOffsetToLeftRightOf(caret - lineStart, toLeft);
         TextLine.recycle(tl);
         return caret;
@@ -2218,8 +2202,7 @@ public abstract class Layout {
                 }
             }
             tl.set(paint, text, start, end, dir, directions, hasTabs, tabStops,
-                    0 /* ellipsisStart */, 0 /* ellipsisEnd */,
-                    false /* use fallback line spacing. unused */);
+                    0 /* ellipsisStart */, 0 /* ellipsisEnd */);
             return margin + Math.abs(tl.metrics(null));
         } finally {
             TextLine.recycle(tl);
