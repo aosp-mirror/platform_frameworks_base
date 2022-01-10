@@ -4165,10 +4165,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final SurfaceControl newParent = computeImeParent();
         if (newParent != null && newParent != mInputMethodSurfaceParent) {
             mInputMethodSurfaceParent = newParent;
-            getPendingTransaction().reparent(mImeWindowsContainer.mSurfaceControl, newParent);
+            getSyncTransaction().reparent(mImeWindowsContainer.mSurfaceControl, newParent);
             // When surface parent is removed, the relative layer will also be removed. We need to
             // do a force update to make sure there is a layer set for the new parent.
-            assignRelativeLayerForIme(getPendingTransaction(), true /* forceUpdate */);
+            assignRelativeLayerForIme(getSyncTransaction(), true /* forceUpdate */);
             scheduleAnimation();
         }
     }
