@@ -552,7 +552,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"សួរគ្រប់ពេល"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"រហូតទាល់តែ​អ្នកបិទ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"អម្បាញ់មិញ"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ឧបករណ៍​បំពង​សំឡេង​ទូរសព្ទ"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ទូរសព្ទនេះ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ទូរសព្ទនេះ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"មាន​បញ្ហា​ក្នុងការ​ភ្ជាប់។ បិទ រួច​បើក​ឧបករណ៍​វិញ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ឧបករណ៍​សំឡេងប្រើខ្សែ"</string>

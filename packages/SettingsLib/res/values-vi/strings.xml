@@ -552,7 +552,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Luôn hỏi"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Cho đến khi bạn tắt"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Vừa xong"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Loa điện thoại"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Điện thoại này"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Điện thoại này"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Sự cố kết nối. Hãy tắt thiết bị rồi bật lại"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Thiết bị âm thanh có dây"</string>

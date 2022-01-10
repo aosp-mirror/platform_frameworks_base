@@ -553,7 +553,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Pitaj svaki put"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Dok ne isključite"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Upravo"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Zvučnik telefona"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Ovaj telefon"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ovaj telefon"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Došlo je do problema prilikom povezivanja. Isključite, pa ponovo uključite uređaj"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Žičani audio uređaj"</string>
