@@ -550,41 +550,32 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     public void removeFromTransientContainerForAdditionTo(ViewGroup newParent) {
         final ViewParent parent = getParent();
         final ViewGroup transientContainer = getTransientContainer();
-        if (parent == null) {
-            // If this view has no parent, the add will succeed, so just make sure the tracked
-            // transient container is in sync with the lack of a parent.
-            if (transientContainer != null) {
+        if (parent == null || parent == newParent) {
+            // If this view's current parent is null or the same as the new parent, the add will
+            // succeed, so just make sure the tracked transient container is in sync with the
+            // current parent.
+            if (transientContainer != null && transientContainer != parent) {
                 Log.w(TAG, "Expandable view " + this
                         + " has transient container " + transientContainer
-                        + " but no parent");
+                        + " but different parent" + parent);
                 setTransientContainer(null);
             }
             return;
         }
         if (transientContainer == null) {
-            throw new IllegalStateException(
-                    "Can't add view " + this + " to container " + newParent + "; current parent "
-                            + parent + " is not a transient container");
+            throw new IllegalStateException("Can't add view " + this + " to container " + newParent
+                    + "; current parent " + parent + " is not a transient container");
         }
         if (transientContainer != parent) {
-            String transientContainerOutOfSyncError = "Expandable view " + this
+            // Crash with details before addView() crashes without any; the view is being added
+            // to a different parent, and the transient container isn't the parent, so we can't
+            // even (safely) clean that up.
+            throw new IllegalStateException("Expandable view " + this
                     + " has transient container " + transientContainer
-                    + " but different parent " + parent;
-            if (parent != newParent) {
-                // Crash with details before addView() crashes without any; the view is being added
-                // to a different parent, and the transient container isn't the parent, so we can't
-                // even (safely) clean that up.
-                throw new IllegalStateException(transientContainerOutOfSyncError);
-            } else {
-                Log.w(TAG, transientContainerOutOfSyncError);
-                setTransientContainer(null);
-                return;
-            }
+                    + " but different parent " + parent);
         }
-        if (parent != newParent) {
-            Log.w(TAG, "Moving view " + this + " from transient container "
-                    + transientContainer + " to parent " + newParent);
-        }
+        Log.w(TAG, "Removing view " + this + " from transient container "
+                + transientContainer + " in preparation for moving to parent " + newParent);
         transientContainer.removeTransientView(this);
         setTransientContainer(null);
     }
