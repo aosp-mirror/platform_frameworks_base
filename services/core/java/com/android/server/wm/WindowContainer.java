@@ -661,6 +661,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    /** Returns the total number of descendants, including self. */
+    int getTreeWeight() {
+        return mTreeWeight;
+    }
+
     /**
      * @return The index of this element in the hierarchy tree in prefix order.
      */

@@ -37,7 +37,6 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHA
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -72,6 +71,7 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -156,7 +156,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     final ArraySet<WindowContainer> mParticipants = new ArraySet<>();
 
     /** The final animation targets derived from participants after promotion. */
-    private ArraySet<WindowContainer> mTargets = null;
+    private ArrayList<WindowContainer> mTargets;
 
     /** The main display running this transition. */
     private DisplayContent mTargetDisplay;
@@ -385,7 +385,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // usually only size 1
         final ArraySet<DisplayContent> displays = new ArraySet<>();
         for (int i = mTargets.size() - 1; i >= 0; --i) {
-            final WindowContainer target = mTargets.valueAt(i);
+            final WindowContainer target = mTargets.get(i);
             if (target.getParent() != null) {
                 final SurfaceControl targetLeash = getLeashSurface(target);
                 final SurfaceControl origParent = getOrigParentSurface(target);
@@ -818,7 +818,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // Search for the home task. If it is supposed to be visible, then the navbar is not at
         // the bottom of the screen, so we need to animate it.
         for (int i = 0; i < mTargets.size(); ++i) {
-            final Task task = mTargets.valueAt(i).asTask();
+            final Task task = mTargets.get(i).asTask();
             if (task == null || !task.isHomeOrRecentsRootTask()) continue;
             animate = task.isVisibleRequested();
             break;
@@ -901,23 +901,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private static boolean reportIfNotTop(WindowContainer wc) {
         // Organized tasks need to be reported anyways because Core won't show() their surfaces
         // and we can't rely on onTaskAppeared because it isn't in sync.
-        // Also report wallpaper so it can be handled properly during display change/rotation.
         // TODO(shell-transitions): switch onTaskAppeared usage over to transitions OPEN.
-        return wc.isOrganized() || isWallpaper(wc);
-    }
-
-    /** @return the depth of child within ancestor, 0 if child == ancestor, or -1 if not a child. */
-    private static int getChildDepth(WindowContainer child, WindowContainer ancestor) {
-        WindowContainer parent = child;
-        int depth = 0;
-        while (parent != null) {
-            if (parent == ancestor) {
-                return depth;
-            }
-            parent = parent.getParent();
-            ++depth;
-        }
-        return -1;
+        return wc.isOrganized();
     }
 
     private static boolean isWallpaper(WindowContainer wc) {
@@ -947,61 +932,48 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      *
      * @return {@code true} if transition in target can be promoted to its parent.
      */
-    private static boolean canPromote(WindowContainer target, ArraySet<WindowContainer> topTargets,
+    private static boolean canPromote(WindowContainer<?> target, Targets targets,
             ArrayMap<WindowContainer, ChangeInfo> changes) {
-        final WindowContainer parent = target.getParent();
-        final ChangeInfo parentChanges = parent != null ? changes.get(parent) : null;
-        if (parent == null || !parent.canCreateRemoteAnimationTarget()
-                || parentChanges == null || !parentChanges.hasChanged(parent)) {
+        final WindowContainer<?> parent = target.getParent();
+        final ChangeInfo parentChange = changes.get(parent);
+        if (!parent.canCreateRemoteAnimationTarget()
+                || parentChange == null || !parentChange.hasChanged(parent)) {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "      SKIP: %s",
-                    parent == null ? "no parent" : ("parent can't be target " + parent));
+                    "parent can't be target " + parent);
             return false;
         }
         if (isWallpaper(target)) {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "      SKIP: is wallpaper");
             return false;
         }
-        @TransitionInfo.TransitionMode int mode = TRANSIT_NONE;
-        // Go through all siblings of this target to see if any of them would prevent
-        // the target from promoting.
-        siblingLoop:
+
+        final @TransitionInfo.TransitionMode int mode = changes.get(target).getTransitMode(target);
         for (int i = parent.getChildCount() - 1; i >= 0; --i) {
-            final WindowContainer sibling = parent.getChildAt(i);
+            final WindowContainer<?> sibling = parent.getChildAt(i);
+            if (target == sibling) continue;
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "      check sibling %s",
                     sibling);
-            // Check if any topTargets are the sibling or within it
-            for (int j = topTargets.size() - 1; j >= 0; --j) {
-                final int depth = getChildDepth(topTargets.valueAt(j), sibling);
-                if (depth < 0) continue;
-                if (depth == 0) {
-                    final int siblingMode = changes.get(sibling).getTransitMode(sibling);
+            final ChangeInfo siblingChange = changes.get(sibling);
+            if (siblingChange == null || !targets.wasParticipated(sibling)) {
+                if (sibling.isVisibleRequested()) {
+                    // Sibling is visible but not animating, so no promote.
                     ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                            "        sibling is a top target with mode %s",
-                            TransitionInfo.modeToString(siblingMode));
-                    if (mode == TRANSIT_NONE) {
-                        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                                "          no common mode yet, so set it");
-                        mode = siblingMode;
-                    } else if (mode != siblingMode) {
-                        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                                "          SKIP: common mode mismatch. was %s",
-                                TransitionInfo.modeToString(mode));
-                        return false;
-                    }
-                    continue siblingLoop;
-                } else {
-                    // Sibling subtree may not be promotable.
-                    ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                            "        SKIP: sibling contains top target %s",
-                            topTargets.valueAt(j));
+                            "        SKIP: sibling is visible but not part of transition");
                     return false;
                 }
-            }
-            // No other animations are playing in this sibling
-            if (sibling.isVisibleRequested()) {
-                // Sibling is visible but not animating, so no promote.
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                        "        SKIP: sibling is visible but not part of transition");
+                        "        unrelated invisible sibling %s", sibling);
+                continue;
+            }
+
+            final int siblingMode = siblingChange.getTransitMode(sibling);
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "        sibling is a participant with mode %s",
+                    TransitionInfo.modeToString(siblingMode));
+            if (mode != siblingMode) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "          SKIP: common mode mismatch. was %s",
+                        TransitionInfo.modeToString(mode));
                 return false;
             }
         }
@@ -1011,58 +983,40 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     /**
      * Go through topTargets and try to promote (see {@link #canPromote}) one of them.
      *
-     * @param topTargets set of just the top-most targets in the hierarchy of participants.
      * @param targets all targets that will be sent to the player.
-     * @return {@code true} if something was promoted.
      */
-    private static boolean tryPromote(ArraySet<WindowContainer> topTargets,
-            ArraySet<WindowContainer> targets, ArrayMap<WindowContainer, ChangeInfo> changes) {
-        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "  --- Start combine pass ---");
-        // Go through each target until we find one that can be promoted.
-        for (WindowContainer targ : topTargets) {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "    checking %s", targ);
-            if (!canPromote(targ, topTargets, changes)) {
+    private static void tryPromote(Targets targets, ArrayMap<WindowContainer, ChangeInfo> changes) {
+        WindowContainer<?> lastNonPromotableParent = null;
+        // Go through from the deepest target.
+        for (int i = targets.mArray.size() - 1; i >= 0; --i) {
+            final WindowContainer<?> target = targets.mArray.valueAt(i);
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "    checking %s", target);
+            final WindowContainer<?> parent = target.getParent();
+            if (parent == lastNonPromotableParent) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "      SKIP: its sibling was rejected");
                 continue;
             }
-            // No obstructions found to promotion, so promote
-            final WindowContainer parent = targ.getParent();
-            final ChangeInfo parentInfo = changes.get(parent);
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                    "      CAN PROMOTE: promoting to parent %s", parent);
-            targets.add(parent);
-
-            // Go through all children of newly-promoted container and remove them from the
-            // top-targets.
-            for (int i = parent.getChildCount() - 1; i >= 0; --i) {
-                final WindowContainer child = parent.getChildAt(i);
-                int idx = targets.indexOf(child);
-                if (idx >= 0) {
-                    final ChangeInfo childInfo = changes.get(child);
-                    if (reportIfNotTop(child)) {
-                        childInfo.mParent = parent;
-                        parentInfo.addChild(child);
-                        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                                "        keep as target %s", child);
-                    } else {
-                        if (childInfo.mChildren != null) {
-                            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                                    "        merging children in from %s: %s", child,
-                                    childInfo.mChildren);
-                            parentInfo.addChildren(childInfo.mChildren);
-                        }
-                        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                                "        remove from targets %s", child);
-                        targets.removeAt(idx);
-                    }
-                }
-                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                        "        remove from topTargets %s", child);
-                topTargets.remove(child);
+            if (!canPromote(target, targets, changes)) {
+                lastNonPromotableParent = parent;
+                continue;
             }
-            topTargets.add(parent);
-            return true;
+            if (reportIfNotTop(target)) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "        keep as target %s", target);
+            } else {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "        remove from targets %s", target);
+                targets.remove(i, target);
+            }
+            if (targets.mArray.indexOfValue(parent) < 0) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "      CAN PROMOTE: promoting to parent %s", parent);
+                // The parent has lower depth, so it will be checked in the later iteration.
+                i++;
+                targets.add(parent);
+            }
         }
-        return false;
     }
 
     /**
@@ -1071,22 +1025,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      */
     @VisibleForTesting
     @NonNull
-    static ArraySet<WindowContainer> calculateTargets(ArraySet<WindowContainer> participants,
+    static ArrayList<WindowContainer> calculateTargets(ArraySet<WindowContainer> participants,
             ArrayMap<WindowContainer, ChangeInfo> changes) {
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                 "Start calculating TransitionInfo based on participants: %s", participants);
 
-        final ArraySet<WindowContainer> topTargets = new ArraySet<>();
-        // The final animation targets which cannot promote to higher level anymore.
-        final ArraySet<WindowContainer> targets = new ArraySet<>();
-
-        final ArrayList<WindowContainer> tmpList = new ArrayList<>();
-
-        // Build initial set of top-level participants by removing any participants that are no-ops
-        // or children of other participants or are otherwise invalid; however, keep around a list
-        // of participants that should always be reported even if they aren't top.
-        for (WindowContainer wc : participants) {
-            // Don't include detached windows.
+        // Add all valid participants to the target container.
+        final Targets targets = new Targets();
+        for (int i = participants.size() - 1; i >= 0; --i) {
+            final WindowContainer<?> wc = participants.valueAt(i);
             if (!wc.isAttached()) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "  Rejecting as detached: %s", wc);
@@ -1101,70 +1048,62 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                         "  Rejecting as no-op: %s", wc);
                 continue;
             }
-
-            // Search through ancestors to find the top-most participant (if one exists)
-            WindowContainer topParent = null;
-            tmpList.clear();
-            if (reportIfNotTop(wc)) {
-                tmpList.add(wc);
-            }
-            // Wallpaper must be the top (regardless of how nested it is in DisplayAreas).
-            boolean skipIntermediateReports = isWallpaper(wc);
-            for (WindowContainer p = wc.getParent(); p != null; p = p.getParent()) {
-                if (!p.isAttached() || changes.get(p) == null || !changes.get(p).hasChanged(p)) {
-                    // Again, we're skipping no-ops
-                    break;
-                }
-                if (participants.contains(p)) {
-                    topParent = p;
-                    break;
-                } else if (isWallpaper(p)) {
-                    skipIntermediateReports = true;
-                } else if (reportIfNotTop(p) && !skipIntermediateReports) {
-                    tmpList.add(p);
-                }
-            }
-            if (topParent != null) {
-                // There was an ancestor participant, so don't add wc to targets unless always-
-                // report. Similarly, add any always-report parents along the way.
-                for (int i = 0; i < tmpList.size(); ++i) {
-                    targets.add(tmpList.get(i));
-                    final ChangeInfo info = changes.get(tmpList.get(i));
-                    info.mParent = i < tmpList.size() - 1 ? tmpList.get(i + 1) : topParent;
-                }
-                continue;
-            }
-            // No ancestors in participant-list, so wc is a top target.
             targets.add(wc);
-            topTargets.add(wc);
+            targets.mValidParticipants.add(wc);
         }
+        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "  Initial targets: %s",
+                targets.mArray);
+        // Combine the targets from bottom to top if possible.
+        tryPromote(targets, changes);
+        // Establish the relationship between the targets and their top changes.
+        populateParentChanges(targets, changes);
 
-        // Populate children lists
-        for (int i = targets.size() - 1; i >= 0; --i) {
-            if (changes.get(targets.valueAt(i)).mParent != null) {
-                changes.get(changes.get(targets.valueAt(i)).mParent).addChild(targets.valueAt(i));
-            }
-        }
-
-        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "  Initial targets: %s", targets);
-        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "  Top targets: %s", topTargets);
-
-        // Combine targets by repeatedly going through the topTargets to see if they can be
-        // promoted until there aren't any promotions possible.
-        while (tryPromote(topTargets, targets, changes)) {
-            // Empty on purpose
-        }
-        return targets;
+        final ArrayList<WindowContainer> targetList = targets.getListSortedByZ();
+        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "  Final targets: %s", targetList);
+        return targetList;
     }
 
-    /** Add any of `members` within `root` to `out` in top-to-bottom z-order. */
-    private static void addMembersInOrder(WindowContainer root, ArraySet<WindowContainer> members,
-            ArrayList<WindowContainer> out) {
-        for (int i = root.getChildCount() - 1; i >= 0; --i) {
-            final WindowContainer child = root.getChildAt(i);
-            addMembersInOrder(child, members, out);
-            if (members.contains(child)) {
-                out.add(child);
+    /** Populates parent to the change info and collects intermediate targets. */
+    private static void populateParentChanges(Targets targets,
+            ArrayMap<WindowContainer, ChangeInfo> changes) {
+        final ArrayList<WindowContainer<?>> intermediates = new ArrayList<>();
+        for (int i = targets.mValidParticipants.size() - 1; i >= 0; --i) {
+            WindowContainer<?> wc = targets.mValidParticipants.get(i);
+            // Go up if the participant has been represented by its parent.
+            while (targets.mArray.indexOfValue(wc) < 0 && wc.getParent() != null) {
+                wc = wc.getParent();
+            }
+            // Wallpaper must belong to the top (regardless of how nested it is in DisplayAreas).
+            final boolean skipIntermediateReports = isWallpaper(wc);
+            intermediates.clear();
+            // Collect the intermediate parents between target and top changed parent.
+            for (WindowContainer<?> p = wc.getParent(); p != null; p = p.getParent()) {
+                final ChangeInfo parentChange = changes.get(p);
+                if (parentChange == null || !parentChange.hasChanged(p)) break;
+                if (parentChange.mParent != null && !skipIntermediateReports) {
+                    changes.get(wc).mParent = p;
+                    // The chain above the parent was processed.
+                    break;
+                }
+                if (targets.mValidParticipants.contains(p)) {
+                    if (skipIntermediateReports) {
+                        changes.get(wc).mParent = p;
+                    } else {
+                        intermediates.add(p);
+                    }
+                    // The parent reaches a participant.
+                    break;
+                } else if (reportIfNotTop(p) && !skipIntermediateReports) {
+                    intermediates.add(p);
+                }
+            }
+            if (intermediates.isEmpty()) continue;
+            // Add any always-report parents along the way.
+            changes.get(wc).mParent = intermediates.get(0);
+            for (int j = 0; j < intermediates.size() - 1; j++) {
+                final WindowContainer<?> intermediate = intermediates.get(j);
+                changes.get(intermediate).mParent = intermediates.get(j + 1);
+                targets.add(intermediate);
             }
         }
     }
@@ -1201,43 +1140,42 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     /**
      * Construct a TransitionInfo object from a set of targets and changes. Also populates the
      * root surface.
+     * @param sortedTargets The targets sorted by z-order from top (index 0) to bottom.
      */
     @VisibleForTesting
     @NonNull
     static TransitionInfo calculateTransitionInfo(@TransitionType int type, int flags,
-            ArraySet<WindowContainer> targets, ArrayMap<WindowContainer, ChangeInfo> changes) {
+            ArrayList<WindowContainer> sortedTargets,
+            ArrayMap<WindowContainer, ChangeInfo> changes) {
         final TransitionInfo out = new TransitionInfo(type, flags);
 
-        final ArraySet<WindowContainer> appTargets = new ArraySet<>();
-        final ArraySet<WindowContainer> wallpapers = new ArraySet<>();
-        for (int i = targets.size() - 1; i >= 0; --i) {
-            (isWallpaper(targets.valueAt(i)) ? wallpapers : appTargets).add(targets.valueAt(i));
+        WindowContainer<?> topApp = null;
+        for (int i = 0; i < sortedTargets.size(); i++) {
+            final WindowContainer<?> wc = sortedTargets.get(i);
+            if (!isWallpaper(wc)) {
+                topApp = wc;
+                break;
+            }
         }
-
-        // Find the top-most shared ancestor of app targets
-        if (appTargets.isEmpty()) {
+        if (topApp == null) {
             out.setRootLeash(new SurfaceControl(), 0, 0);
             return out;
         }
-        WindowContainer ancestor = appTargets.valueAt(appTargets.size() - 1).getParent();
 
+        // Find the top-most shared ancestor of app targets.
+        WindowContainer<?> ancestor = topApp.getParent();
         // Go up ancestor parent chain until all targets are descendants.
         ancestorLoop:
         while (ancestor != null) {
-            for (int i = appTargets.size() - 1; i >= 0; --i) {
-                final WindowContainer wc = appTargets.valueAt(i);
-                if (!wc.isDescendantOf(ancestor)) {
+            for (int i = sortedTargets.size() - 1; i >= 0; --i) {
+                final WindowContainer wc = sortedTargets.get(i);
+                if (!isWallpaper(wc) && !wc.isDescendantOf(ancestor)) {
                     ancestor = ancestor.getParent();
                     continue ancestorLoop;
                 }
             }
             break;
         }
-
-        // Sort targets top-to-bottom in Z. Check ALL targets here in case the display area itself
-        // is animating: then we want to include wallpapers at the right position.
-        ArrayList<WindowContainer> sortedTargets = new ArrayList<>();
-        addMembersInOrder(ancestor, targets, sortedTargets);
 
         // make leash based on highest (z-order) direct child of ancestor with a participant.
         WindowContainer leashReference = sortedTargets.get(0);
@@ -1251,14 +1189,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         t.apply();
         t.close();
         out.setRootLeash(rootLeash, ancestor.getBounds().left, ancestor.getBounds().top);
-
-        // add the wallpapers at the bottom
-        for (int i = wallpapers.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = wallpapers.valueAt(i);
-            // If the displayarea itself is animating, then the wallpaper was already added.
-            if (wc.isDescendantOf(ancestor)) break;
-            sortedTargets.add(wc);
-        }
 
         // Convert all the resolved ChangeInfos into TransactionInfo.Change objects in order.
         final int count = sortedTargets.size();
@@ -1403,7 +1333,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     static class ChangeInfo {
         // Usually "post" change state.
         WindowContainer mParent;
-        ArraySet<WindowContainer> mChildren;
 
         // State tracking
         boolean mExistenceChanged = false;
@@ -1498,19 +1427,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
             return flags;
         }
-
-        void addChild(@NonNull WindowContainer wc) {
-            if (mChildren == null) {
-                mChildren = new ArraySet<>();
-            }
-            mChildren.add(wc);
-        }
-        void addChildren(@NonNull ArraySet<WindowContainer> wcs) {
-            if (mChildren == null) {
-                mChildren = new ArraySet<>();
-            }
-            mChildren.addAll(wcs);
-        }
     }
 
     /**
@@ -1601,6 +1517,66 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                         .append(mReadyGroups.valueAt(i));
             }
             return b.toString();
+        }
+    }
+
+    /**
+     * The container to represent the depth relation for calculating transition targets. The window
+     * container with larger depth is put at larger index. For the same depth, higher z-order has
+     * larger index.
+     */
+    private static class Targets {
+        /** All targets. Its keys (depth) are sorted in ascending order naturally. */
+        final SparseArray<WindowContainer<?>> mArray = new SparseArray<>();
+        /** The initial participants which have changes. */
+        final ArrayList<WindowContainer<?>> mValidParticipants = new ArrayList<>();
+        /** The targets which were represented by their parent. */
+        private ArrayList<WindowContainer<?>> mRemovedTargets;
+        private int mDepthFactor;
+
+        void add(WindowContainer<?> target) {
+            // The number of slots per depth is larger than the total number of window container,
+            // so the depth score (key) won't have collision.
+            if (mDepthFactor == 0) {
+                mDepthFactor = target.mWmService.mRoot.getTreeWeight() + 1;
+            }
+            int score = target.getPrefixOrderIndex();
+            WindowContainer<?> wc = target;
+            while (wc != null) {
+                final WindowContainer<?> parent = wc.getParent();
+                if (parent != null) {
+                    score += mDepthFactor;
+                }
+                wc = parent;
+            }
+            mArray.put(score, target);
+        }
+
+        void remove(int index, WindowContainer<?> removingTarget) {
+            mArray.removeAt(index);
+            if (mRemovedTargets == null) {
+                mRemovedTargets = new ArrayList<>();
+            }
+            mRemovedTargets.add(removingTarget);
+        }
+
+        boolean wasParticipated(WindowContainer<?> wc) {
+            return mArray.indexOfValue(wc) >= 0
+                    || (mRemovedTargets != null && mRemovedTargets.contains(wc));
+        }
+
+        /** Returns the target list sorted by z-order in ascending order (index 0 is top). */
+        ArrayList<WindowContainer> getListSortedByZ() {
+            final SparseArray<WindowContainer<?>> arrayByZ = new SparseArray<>(mArray.size());
+            for (int i = mArray.size() - 1; i >= 0; --i) {
+                final int zOrder = mArray.keyAt(i) % mDepthFactor;
+                arrayByZ.put(zOrder, mArray.valueAt(i));
+            }
+            final ArrayList<WindowContainer> sortedTargets = new ArrayList<>(arrayByZ.size());
+            for (int i = arrayByZ.size() - 1; i >= 0; --i) {
+                sortedTargets.add(arrayByZ.valueAt(i));
+            }
+            return sortedTargets;
         }
     }
 }
