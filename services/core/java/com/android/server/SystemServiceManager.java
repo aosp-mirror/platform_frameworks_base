@@ -45,6 +45,8 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -91,7 +93,7 @@ public final class SystemServiceManager implements Dumpable {
     private long mRuntimeStartUptime;
 
     // Services that should receive lifecycle events.
-    private final ArrayList<SystemService> mServices = new ArrayList<SystemService>();
+    private List<SystemService> mServices;
 
     private int mCurrentPhase = -1;
 
@@ -113,11 +115,12 @@ public final class SystemServiceManager implements Dumpable {
 
     SystemServiceManager(Context context) {
         mContext = context;
+        mServices = new ArrayList<>();
         // Disable using the thread pool for low ram devices
         sUseLifecycleThreadPool = sUseLifecycleThreadPool
-                                    && !ActivityManager.isLowRamDeviceStatic();
+                && !ActivityManager.isLowRamDeviceStatic();
         mNumUserPoolThreads = Math.min(Runtime.getRuntime().availableProcessors(),
-                                       DEFAULT_MAX_USER_POOL_THREADS);
+                DEFAULT_MAX_USER_POOL_THREADS);
     }
 
     /**
@@ -220,11 +223,16 @@ public final class SystemServiceManager implements Dumpable {
         warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onStart");
     }
 
+    /** Disallow starting new services after this call. */
+    void sealStartedServices() {
+        mServices = Collections.unmodifiableList(mServices);
+    }
+
     /**
      * Starts the specified boot phase for all system services that have been started up to
      * this point.
      *
-     * @param t trace logger
+     * @param t     trace logger
      * @param phase The boot phase to start.
      */
     public void startBootPhase(@NonNull TimingsTraceAndSlog t, int phase) {
@@ -398,8 +406,8 @@ public final class SystemServiceManager implements Dumpable {
         // Limit the lifecycle parallelization to all users other than the system user
         // and only for the user start lifecycle phase for now.
         final boolean useThreadPool = sUseLifecycleThreadPool
-                                        && curUserId != UserHandle.USER_SYSTEM
-                                        && onWhat.equals(USER_STARTING);
+                && curUserId != UserHandle.USER_SYSTEM
+                && onWhat.equals(USER_STARTING);
         final ExecutorService threadPool =
                 useThreadPool ? Executors.newFixedThreadPool(mNumUserPoolThreads) : null;
         for (int i = 0; i < serviceLen; i++) {
@@ -419,7 +427,7 @@ public final class SystemServiceManager implements Dumpable {
                             + serviceName + " because it's not supported (curUser: "
                             + curUser + ", prevUser:" + prevUser + ")");
                 } else {
-                    Slog.i(TAG,  "Skipping " + onWhat + "User-" + curUserId + " on "
+                    Slog.i(TAG, "Skipping " + onWhat + "User-" + curUserId + " on "
                             + serviceName);
                 }
                 continue;
@@ -516,6 +524,7 @@ public final class SystemServiceManager implements Dumpable {
 
     /**
      * Returns whether we are booting into safe mode.
+     *
      * @return safe mode flag
      */
     public boolean isSafeMode() {
@@ -559,9 +568,10 @@ public final class SystemServiceManager implements Dumpable {
 
     /**
      * Ensures that the system directory exist creating one if needed.
+     *
+     * @return The system directory.
      * @deprecated Use {@link Environment#getDataSystemCeDirectory()}
      * or {@link Environment#getDataSystemDeDirectory()} instead.
-     * @return The system directory.
      */
     @Deprecated
     public static File ensureSystemDir() {
@@ -578,7 +588,9 @@ public final class SystemServiceManager implements Dumpable {
         pw.printf("Current phase: %d\n", mCurrentPhase);
         synchronized (mTargetUsers) {
             if (mCurrentUser != null) {
-                pw.print("Current user: "); mCurrentUser.dump(pw); pw.println();
+                pw.print("Current user: ");
+                mCurrentUser.dump(pw);
+                pw.println();
             } else {
                 pw.println("Current user not set!");
             }
