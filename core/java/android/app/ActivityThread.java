@@ -1646,7 +1646,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void dumpCacheInfo(ParcelFileDescriptor pfd, String[] args) {
-            PropertyInvalidatedCache.dumpCacheInfo(pfd.getFileDescriptor(), args);
+            PropertyInvalidatedCache.dumpCacheInfo(pfd, args);
             IoUtils.closeQuietly(pfd);
         }
 
@@ -6378,9 +6378,7 @@ public final class ActivityThread extends ClientTransactionHandler
         if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Trimming memory to level: " + level);
 
         if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
-            for (PropertyInvalidatedCache pic : PropertyInvalidatedCache.getActiveCaches()) {
-                pic.clear();
-            }
+            PropertyInvalidatedCache.onTrimMemory();
         }
 
         final ArrayList<ComponentCallbacks2> callbacks =
