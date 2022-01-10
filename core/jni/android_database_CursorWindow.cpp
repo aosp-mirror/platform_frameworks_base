@@ -38,8 +38,10 @@
 #define LOG_NDEBUG 1
 
 #include <androidfw/CursorWindow.h>
+#ifdef __ANDROID__
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
+#endif
 #include "android_database_SQLiteCommon.h"
 
 #include "core_jni_helpers.h"
@@ -67,6 +69,7 @@ static void throwUnknownTypeException(JNIEnv * env, jint type) {
     jniThrowException(env, "java/lang/IllegalStateException", msg.string());
 }
 
+#ifdef __ANDROID__
 static int getFdCount() {
     char fdpath[PATH_MAX];
     int count = 0;
@@ -82,6 +85,7 @@ static int getFdCount() {
     }
     return count;
 }
+#endif
 
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring nameObj, jint cursorWindowSize) {
     status_t status;
@@ -111,6 +115,7 @@ fail:
     return 0;
 }
 
+#ifdef __ANDROID__
 static jlong nativeCreateFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
 
@@ -128,6 +133,7 @@ static jlong nativeCreateFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj
             window->getNumRows(), window->getNumColumns(), window);
     return reinterpret_cast<jlong>(window);
 }
+#endif
 
 static void nativeDispose(JNIEnv* env, jclass clazz, jlong windowPtr) {
     CursorWindow* window = reinterpret_cast<CursorWindow*>(windowPtr);
@@ -142,6 +148,7 @@ static jstring nativeGetName(JNIEnv* env, jclass clazz, jlong windowPtr) {
     return env->NewStringUTF(window->name().string());
 }
 
+#ifdef __ANDROID__
 static void nativeWriteToParcel(JNIEnv * env, jclass clazz, jlong windowPtr,
         jobject parcelObj) {
     CursorWindow* window = reinterpret_cast<CursorWindow*>(windowPtr);
@@ -154,6 +161,7 @@ static void nativeWriteToParcel(JNIEnv * env, jclass clazz, jlong windowPtr,
         jniThrowRuntimeException(env, msg.string());
     }
 }
+#endif
 
 static void nativeClear(JNIEnv * env, jclass clazz, jlong windowPtr) {
     CursorWindow* window = reinterpret_cast<CursorWindow*>(windowPtr);
@@ -520,55 +528,38 @@ static jboolean nativePutNull(JNIEnv* env, jclass clazz, jlong windowPtr,
     return true;
 }
 
-static const JNINativeMethod sMethods[] =
-{
-    /* name, signature, funcPtr */
-    { "nativeCreate", "(Ljava/lang/String;I)J",
-            (void*)nativeCreate },
-    { "nativeCreateFromParcel", "(Landroid/os/Parcel;)J",
-            (void*)nativeCreateFromParcel },
-    { "nativeDispose", "(J)V",
-            (void*)nativeDispose },
-    { "nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
-            (void*)nativeWriteToParcel },
+static const JNINativeMethod sMethods[] = {
+        /* name, signature, funcPtr */
+        {"nativeCreate", "(Ljava/lang/String;I)J", (void*)nativeCreate},
+#ifdef __ANDROID__
+        {"nativeCreateFromParcel", "(Landroid/os/Parcel;)J", (void*)nativeCreateFromParcel},
+#endif
+        {"nativeDispose", "(J)V", (void*)nativeDispose},
+#ifdef __ANDROID__
+        {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V", (void*)nativeWriteToParcel},
 
-    { "nativeGetName", "(J)Ljava/lang/String;",
-            (void*)nativeGetName },
-    { "nativeGetBlob", "(JII)[B",
-            (void*)nativeGetBlob },
-    { "nativeGetString", "(JII)Ljava/lang/String;",
-            (void*)nativeGetString },
-    { "nativeCopyStringToBuffer", "(JIILandroid/database/CharArrayBuffer;)V",
-            (void*)nativeCopyStringToBuffer },
-    { "nativePutBlob", "(J[BII)Z",
-            (void*)nativePutBlob },
-    { "nativePutString", "(JLjava/lang/String;II)Z",
-            (void*)nativePutString },
+#endif
+        {"nativeGetName", "(J)Ljava/lang/String;", (void*)nativeGetName},
+        {"nativeGetBlob", "(JII)[B", (void*)nativeGetBlob},
+        {"nativeGetString", "(JII)Ljava/lang/String;", (void*)nativeGetString},
+        {"nativeCopyStringToBuffer", "(JIILandroid/database/CharArrayBuffer;)V",
+         (void*)nativeCopyStringToBuffer},
+        {"nativePutBlob", "(J[BII)Z", (void*)nativePutBlob},
+        {"nativePutString", "(JLjava/lang/String;II)Z", (void*)nativePutString},
 
-    // ------- @FastNative below here ----------------------
-    { "nativeClear", "(J)V",
-            (void*)nativeClear },
-    { "nativeGetNumRows", "(J)I",
-            (void*)nativeGetNumRows },
-    { "nativeSetNumColumns", "(JI)Z",
-            (void*)nativeSetNumColumns },
-    { "nativeAllocRow", "(J)Z",
-            (void*)nativeAllocRow },
-    { "nativeFreeLastRow", "(J)V",
-            (void*)nativeFreeLastRow },
-    { "nativeGetType", "(JII)I",
-            (void*)nativeGetType },
-    { "nativeGetLong", "(JII)J",
-            (void*)nativeGetLong },
-    { "nativeGetDouble", "(JII)D",
-            (void*)nativeGetDouble },
+        // ------- @FastNative below here ----------------------
+        {"nativeClear", "(J)V", (void*)nativeClear},
+        {"nativeGetNumRows", "(J)I", (void*)nativeGetNumRows},
+        {"nativeSetNumColumns", "(JI)Z", (void*)nativeSetNumColumns},
+        {"nativeAllocRow", "(J)Z", (void*)nativeAllocRow},
+        {"nativeFreeLastRow", "(J)V", (void*)nativeFreeLastRow},
+        {"nativeGetType", "(JII)I", (void*)nativeGetType},
+        {"nativeGetLong", "(JII)J", (void*)nativeGetLong},
+        {"nativeGetDouble", "(JII)D", (void*)nativeGetDouble},
 
-    { "nativePutLong", "(JJII)Z",
-            (void*)nativePutLong },
-    { "nativePutDouble", "(JDII)Z",
-            (void*)nativePutDouble },
-    { "nativePutNull", "(JII)Z",
-            (void*)nativePutNull },
+        {"nativePutLong", "(JJII)Z", (void*)nativePutLong},
+        {"nativePutDouble", "(JDII)Z", (void*)nativePutDouble},
+        {"nativePutNull", "(JII)Z", (void*)nativePutNull},
 };
 
 int register_android_database_CursorWindow(JNIEnv* env)

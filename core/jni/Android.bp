@@ -385,3 +385,42 @@ cc_library_shared {
         never: true,
     },
 }
+
+cc_library_shared {
+    name: "librobolectric-nativeruntime",
+    host_supported: true,
+    cflags: [
+      "-Wno-unused-parameter",
+    ],
+    target: {
+      linux_glibc: {
+        srcs: [
+          "android_database_CursorWindow.cpp",
+          "android_database_SQLiteCommon.cpp",
+          "android_database_SQLiteConnection.cpp",
+          "android_database_SQLiteGlobal.cpp",
+          "android_database_SQLiteDebug.cpp",
+          "android_util_Log.cpp",
+          "RobolectricNativeRuntime.cpp",
+        ],
+        static_libs: [
+          "libnativehelper_lazy",
+          "libsqlite",
+          "libandroidfw",
+          "libbase",
+          "libutils",
+          "liblog",
+          "libcutils",
+          "libicui18n",
+          "libicuuc",
+          "libicuuc_stubdata",
+        ],
+        stl: "libc++_static",
+        ldflags: ["-static-libgcc"],
+      }
+    },
+    export_include_dirs: [
+        ".",
+        "include",
+    ],
+}
