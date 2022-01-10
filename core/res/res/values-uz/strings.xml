@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Ilovaga Android TV qurilmangizdagi chaqiruvlar jurnali, kirish va chiqish chaqiruvlari haqidagi axborotni oʻzgartirish huquqini beradi. Zararli ilovalar undan chaqiruvlar jurnalini oʻzgartirish yoki oʻchirish uchun foydalanishi mumkin."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Ilovaga telefoningizdagi qo‘ng‘iroq jurnallari, kiruvchi va chiquvchi qo‘ng‘rioqlar haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Zararli ilovalar bundan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"tana sezgichlari (m-n, yurak urishi sensori) ma’lumotlaridan foydalanishga ruxsat"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Ilovaga sezgichlardan olingan jismoniy holatingiz haqidagi ma’lumotlarni, masalan, yurak urishini kuzatish uchun ruxsat beradi."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Yurak urishi, harorat, qondagi kislorod foizi kabi tana sezgilaridan olingan maʼlumotlarga kirish."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"orqa fonda tana sezgilari (m-n, yurak urishi sensori) maʼlumotlariga kirish"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Yurak urishi, harorat, qondagi kislorod foizi kabi tana sezgilaridan olingan maʼlumotlarga orqa fonda kirish."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Taqvim tadbirlari va tafsilotlarini o‘qish"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Bu ilova planshetdagi barcha taqvim tadbirlarini o‘qiy olishi hamda taqvim ma’lumotlarini ulashishi yoki saqlashi mumkin."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Bu ilova Android TV qurilmangizda barcha taqvim tadbirlarini oʻqiy olishi hamda taqvim maʼlumotlarini ulashishi yoki saqlashi mumkin."</string>
@@ -731,6 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"“Bezovta qilinmasin” rejimi sozlamalarini ko‘rish va o‘zgartirish."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"foydalaniladigan ruxsatlar axborotini ochish"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Ilova foydalanadigan ruxsatlar axborotini ishga tushirishga ruxsat beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ilova ruxsatlarini tekshirishni boshlash"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Qurilma egasiga ilova ruxsatlarini tekshirishni boshlash imkonini beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ilova funksiyalari axborotini koʻrish"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Qurilma egasiga ilova funksiyalari axborotini koʻrishga ruxsat beradi."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"yuqori diskretlash chastotali sensor axborotiga ruxsat"</string>

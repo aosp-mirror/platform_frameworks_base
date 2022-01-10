@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Cho phép ứng dụng sửa đổi nhật ký cuộc gọi trên thiết bị Android TV, bao gồm cả dữ liệu về cuộc gọi đến và cuộc gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi nhật ký cuộc gọi của bạn."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Cho phép ứng dụng sửa đổi nhật ký cuộc gọi trên điện thoại của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi nhật ký cuộc gọi của bạn."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"truy cập cảm biến cơ thể (như máy đo nhịp tim)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Cho phép ứng dụng truy cập dữ liệu từ bộ cảm biến giám sát tình trạng sức khỏe của bạn, ví dụ như nhịp tim."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Quyền truy cập vào dữ liệu từ các cảm biến cơ thể, chẳng hạn như dữ liệu về nhịp tim, nhiệt độ, tỷ lệ phần trăm oxy trong máu và các dữ liệu khác."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"truy cập vào các cảm biến cơ thể (như máy đo nhịp tim) khi ở trong nền"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Quyền truy cập vào dữ liệu từ các cảm biến cơ thể, chẳng hạn như dữ liệu về nhịp tim, nhiệt độ, tỷ lệ phần trăm oxy trong máu và các dữ liệu khác khi ở trong nền."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Đọc chi tiết và sự kiện lịch"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ứng dụng này có thể đọc tất cả các sự kiện lịch được lưu trữ trên máy tính bảng của bạn và chia sẻ hoặc lưu dữ liệu lịch của bạn."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ứng dụng này có thể đọc tất cả sự kiện trên lịch mà bạn lưu vào thiết bị Android TV cũng như chia sẻ hoặc lưu dữ liệu lịch của bạn."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Cho phép ứng dụng đọc và ghi cấu hình Không làm phiền."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"cấp quyền xem"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Cho phép chủ sở hữu cấp quyền cho một ứng dụng. Các ứng dụng thông thường sẽ không bao giờ cần quyền này."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"bắt đầu xem các tính năng của ứng dụng"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Cho phép chủ sở hữu bắt đầu xem thông tin về tính năng của một ứng dụng."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"truy cập vào dữ liệu cảm biến ở tốc độ lấy mẫu cao"</string>

@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ઍપને ઇનકમિંગ અને આઉટગોઇંગ કૉલ વિશેના ડેટા સહિત, તમારા Android TV ડિવાઇસના કૉલ લૉગને સંશોધિત કરવાની મંજૂરી આપે છે. દુર્ભાવનાપૂર્ણ ઍપ આનો ઉપયોગ તમારા કૉલ લૉગને કાઢી નાખવા અથવા સંશોધિત કરવા માટે કરી શકે છે."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"એપ્લિકેશનને ઇનકમિંગ અને આઉટગોઇંગ કૉલ્સ વિશેનાં ડેટા સહિત, તમારા ફોનના કૉલ લૉગને સંશોધિત કરવાની મંજૂરી આપે છે. દુર્ભાવનાપૂર્ણ ઍપ્લિકેશનો આનો ઉપયોગ તમારા કૉલ લૉગને કાઢી નાખવા અથવા સંશોધિત માટે કરી શકે છે."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"બૉડીસેન્સર્સ ઍક્સેસ(જેમકે હ્રદય ગતી મૉનિટર)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"એપ્લિકેશનને તમારી હૃદય ગતિ જેવી તમારી શારીરિક સ્થિતિને મૉનિટર કરતાં સેન્સર્સથી ડેટા ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"બૉડી સેન્સરના ડેટાનો ઍક્સેસ જેમ કે હૃદયના ધબકારા, તાપમાન, લોહીમાં ઑક્સિજનની ટકાવારી વગેરે."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"બૉડી સેન્સર (જેમ કે હૃદયના ધબકારાના નિરીક્ષણો) બૅકગ્રાઉન્ડમાં ઍક્સેસ કરો"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"બૅકગ્રાઉન્ડમાં હોય ત્યારે બૉડી સેન્સરના ડેટાનો ઍક્સેસ જેમ કે હૃદયના ધબકારા, તાપમાન, લોહીમાં ઑક્સિજનની ટકાવારી વગેરે."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"કૅલેન્ડર ઇવેન્ટ્સ અને વિગતો વાંચો"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"આ ઍપ્લિકેશન, તમારા ટેબ્લેટ પર સંગ્રહિત તમામ કૅલેન્ડર ઇવેન્ટ્સને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત બધા કૅલેન્ડર ઇવેન્ટને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"એપ્લિકેશનને ખલેલ પાડશો નહીં ગોઠવણી વાંચવા અને લખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"પરવાનગી વપરાશ જુઓને શરૂ કરો"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"કોઈ ઍપ માટે પરવાનગી વપરાશ શરૂ કરવાની ધારકને મંજૂરી આપે છે. સામાન્ય ઍપ માટે ક્યારેય જરૂર પડી ન શકે."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ઍપની સુવિધાઓ જોવા માટેની પરવાનગી ચાલુ કરો"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ધારકને ઍપ માટેની સુવિધાઓની માહિતી જોવાનું શરૂ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ઉચ્ચ સેમ્પ્લિંગ રેટ પર સેન્સરનો ડેટા ઍક્સેસ કરો"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ઍપનું કસ્ટમ નોટિફિકેશન"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g>ને <xliff:g id="ACCOUNT">%2$s</xliff:g> માટે એક નવા વપરાશકર્તા બનાવવાની મંજૂરી આપીએ (આ એકાઉન્ટ માટે એક વપરાશકર્તા પહેલાંથી અસ્તિત્વમાં છે) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g>ને <xliff:g id="ACCOUNT">%2$s</xliff:g> માટે એક નવા વપરાશકર્તા બનાવવાની મંજૂરી આપીએ ?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"નિરીક્ષિત વપરાશકર્તા ઉમેરો"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ભાષા ઉમેરો"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"પ્રદેશ પસંદગી"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ભાષાનું નામ ટાઇપ કરો"</string>

@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Թույլ է տալիս հավելվածին փոփոխել Android TV սարքի զանգերի մատյանը, այդ թվում՝ մուտքային և ելքային զանգերի մասին տվյալները: Վնասարար հավելվածները կարող են սա օգտագործել՝ ձեր զանգերի մատյանը ջնջելու կամ փոփոխելու համար:"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Թույլ է տալիս հավելվածին փոփոխել ձեր հեռախոսի զանգերի մատյանը, այդ թվում` մուտքային և ելքային զանգերի մասին տվյալները: Վնասարար հավելվածները կարող են սա օգտագործել` ձեր զանգերի մատյանը ջնջելու կամ փոփոխելու համար:"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"օգտագործել մարմնի սենսորները (օրինակ՝ սրտի կծկումների հաճախականության չափիչ)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Հավելվածին թույլ է տալիս մուտք ունենալ սենսորների տվյալներին, որոնք վերահսկում են ձեր ֆիզիկական վիճակը, օրինակ՝ ձեր սրտի զարկերը:"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Մարմնի սենսորների տվյալների (օրինակ՝ սրտի զարկերի հաճախականության, ջերմաստիճանի, արյան մեջ թթվածնի տոկոսային պարունակության ցուցանիշների) օգտագործման թույլտվություն"</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"ֆոնային ռեժիմում մարմնի սենսորների տվյալների օգտագործման թույլտվություն"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Ֆոնային ռեժիմում մարմնի սենսորների տվյալների (օրինակ՝ սրտի զարկերի հաճախականության, ջերմաստիճանի, արյան մեջ թթվածնի տոկոսային պարունակության ցուցանիշների) օգտագործման թույլտվություն"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Կարդալ օրացույցի միջոցառումները և տվյալները"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր պլանշետում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր Android TV սարքում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Թույլ է տալիս հավելվածին փոփոխել «Չանհանգստացնել» գործառույթի կազմաձևումը:"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"թույլտվությունների մասին տվյալների հասանելիություն"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Հավելվածին հասանելի կդառնան թույլտվությունների մասին տվյալները։ Այս թույլտվությունն անհրաժեշտ չէ սովորական հավելվածներին։"</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"հավելվածի գործառույթների դիտում"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Թույլ է տալիս դիտել հավելվածի գործառույթների մասին տեղեկությունները։"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"օգտագործել սենսորների տվյալները բարձր հաճախականության վրա"</string>

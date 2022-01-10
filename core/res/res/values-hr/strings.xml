@@ -430,7 +430,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Aplikaciji omogućuje izmjenu zapisnika poziva vašeg Android TV uređaja, uključujući podatke o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrijebiti za brisanje ili izmjenu zapisnika poziva."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg telefona zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"pristupati biometrijskim senzorima (kao što su monitori otkucaja srca)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Omogućuje aplikaciji pristup podacima sa senzora koji nadziru vaše fizičko stanje, na primjer, broj otkucaja srca."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Pristupite podacima biometrijskih senzora kao što su puls, temperatura, postotak kisika u krvi itd."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"pristup biometrijskim senzorima (kao što su monitori pulsa) u pozadini"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Pristupite podacima biometrijskih senzora kao što su puls, temperatura, postotak kisika u krvi itd. u pozadini."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Čitanje događaja i pojedinosti kalendara"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Aplikacija može čitati sve kalendarske događaje pohranjene na tabletu i dijeliti ili spremati podatke iz vašeg kalendara."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Aplikacija može čitati sve kalendarske događaje pohranjene na Android TV uređaju i dijeliti ili spremati podatke iz vašeg kalendara."</string>
@@ -734,6 +736,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Omogućuje aplikaciji čitanje i pisanje konfiguracije opcije Ne uznemiravaj."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"pokrenuti upotrebu dopuštenja za pregled"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Dopušta nositelju pokretanje upotrebe dopuštenja za aplikaciju. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"pokretanje prikaza značajki aplikacije"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Dopušta nositelju pokretanje prikaza informacija o značajkama aplikacije."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"pristup podacima senzora pri višoj brzini uzorkovanja"</string>

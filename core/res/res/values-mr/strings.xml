@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, तुमच्या Android TV डिव्हाइसचा कॉल लॉग सुधारित करण्यासाठी ॲपला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स तुमचा कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या फोनचा कॉल लॉग सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स तुमचा कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"शरीर सेन्सर (हृदय गती मॉनिटरसारखे) अ‍ॅक्सेस करा"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"हृदय गती सारख्या, आपल्या शारीरिक स्थितीचे नियंत्रण करणार्‍या सेन्सरवरून डेटामध्ये प्रवेश करण्यासाठी ॲपला अनुमती देते."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"हार्ट रेट, तापमान, रक्तातील ऑक्सिजनची टक्केवारी इ. सारख्या शरीर सेन्सरवरील डेटाचा अ‍ॅक्सेस आहे."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"बॅकग्राउंडमध्ये असताना शरीर सेन्सर (जसे की हार्ट रेट मॉनिटर) अ‍ॅक्सेस करा"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"बॅकग्राउंडमध्ये असताना हार्ट रेट, तापमान, रक्तातील ऑक्सिजनची टक्केवारी इ. सारखा शरीर सेन्सरवरील डेटा अ‍ॅक्सेस करा."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"कॅलेंडर इव्हेंट आणि तपशील वाचा"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"हा अ‍ॅप आपल्या टॅब्लेटवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"हे अ‍ॅप तुमच्या Android TV डिव्हाइसवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"व्यत्यय आणू नका कॉंफिगरेशन वाचण्यासाठी आणि लिहिण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"व्ह्यू परवानगी वापर सुरू करा"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"धारकास अ‍ॅपसाठी परवानगी वापरणे सुरू करण्याची अनुमती देते. सामान्य अ‍ॅप्ससाठी कधीही आवश्यकता नसते."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ॲप वैशिष्ट्ये पाहणे सुरू करा"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"होल्डरला ॲपसाठी वैशिष्ट्यांची माहिती पाहण्यास सुरू करण्याची अनुमती देते."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"उच्च नमुना दराने सेन्सर डेटा अ‍ॅक्सेस करते"</string>

@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"允許應用程式修改 Android TV 裝置的通話記錄，包括來電和撥出電話的相關資料。惡意應用程式可能會藉此清除或修改您的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"允許應用程式修改手機的通話記錄，包括來電和已撥電話相關資料。惡意應用程式可能會藉此刪除或修改您的通話記錄。"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"存取人體感應器 (例如心跳監測器)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"允許應用程式存取感應器所收集的資料 (這類感應器可監測您的體能狀態，例如您的心率)。"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"存取人體感應器的資料，例如心率、體溫、血氧百分比等。"</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"在背景中存取人體感應器 (例如心率感應器)"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"在背景中存取人體感應器的資料，例如心率、體溫、血氧百分比等。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"讀取日曆活動和詳情"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"此應用程式可以讀取所有儲存在您的平板電腦的日曆活動，並分享或儲存您的日曆資料。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"此應用程式可以讀取所有儲存在 Android TV 裝置上的日曆活動，並分享或儲存您的日曆資料。"</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"允許應用程式讀取和寫入「請勿騷擾」設定。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"開始查看權限使用情況"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"允許應用程式開始查看應用程式的權限使用情況 (一般應用程式並不需要)。"</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"開始查看應用程式功能"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"允許擁有者開始查看應用程式的功能資料。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"以高取樣率存取感應器資料"</string>

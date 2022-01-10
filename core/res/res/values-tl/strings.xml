@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Nagbibigay-daan sa app na baguhin ang log ng tawag ng iyong Android TV device, kasama ang data tungkol sa mga papasok at papalabas na tawag. Puwede itong gamitin ng mga mapaminsalang app para burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong telepono, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"i-access ang mga sensor sa katawan (tulad ng mga monitor ng bilis ng tibok ng puso)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Pinapayagan ang app na i-access ang data mula sa mga sensor na sumusubaybay sa iyong pisikal na kondisyon, tulad ng iyong heart rate."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Access sa data mula sa mga sensor ng katawan gaya ng bilis ng tibok ng puso, temperatura, porsyento ng oxygen sa dugo, atbp."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"i-access ang body sensors (tulad ng heart rate monitors) habang nasa background"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Access sa data mula sa mga sensor ng katawan gaya ng bilis ng tibok ng puso, temperatura, porsyento ng oxygen sa dugo, atbp. habang nasa background."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Magbasa ng mga event sa kalendaryo at detalye"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong tablet at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong Android TV device at maibabahagi o mase-save nito ang data ng kalendaryo mo."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Nagbibigay-daan sa app na basahin at isulat ang configuration ng Huwag Istorbohin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"simulan ang paggamit sa pahintulot sa pagtingin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Binibigyang-daan ang may hawak na simulan ang paggamit ng pahintulot para sa isang app. Hindi dapat kailanganin kailanman para sa mga normal na app."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"simulang tingnan ang mga feature ng app"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Nagbibigay-daan sa may hawak na simulang tingnan ang impormasyon ng mga feature para sa isang app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mag-access ng data ng sensor sa mataas na rate ng pag-sample"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Custom na notification ng app"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Payagan ang <xliff:g id="APP">%1$s</xliff:g> na gumawa ng bagong User sa <xliff:g id="ACCOUNT">%2$s</xliff:g> (mayroon nang User sa account na ito) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Payagan ang <xliff:g id="APP">%1$s</xliff:g> na gumawa ng bagong User sa <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Magdagdag ng pinapangasiwaang user"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Magdagdag ng wika"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Kagustuhan sa rehiyon"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"I-type ang wika"</string>

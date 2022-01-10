@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Tillåter att appen gör ändringar i Android TV-enhetens samtalshistorik, inklusive i uppgifter om inkommande och utgående samtal. Skadliga appar kan använda detta för att radera eller ändra samtalshistoriken."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Tillåter att appen gör ändringar i mobilens samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga program kan använda detta för att radera eller ändra din samtalslista."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"få åtkomst till kroppssensorer (till exempel pulsmätare)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Ger appen åtkomst till information från sensorer om ditt fysiska tillstånd, till exempel din puls."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Åtkomst till data från kroppssensorer, t.ex. puls, kroppstemperatur, procentandel syre i blodet med mera."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"åtkomst till kroppssensorer (t.ex. pulsmätare) i bakgrunden"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Åtkomst till data från kroppssensorer, t.ex. puls, kroppstemperatur, procentandel syre i blodet med mera, i bakgrunden."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Läsa kalenderhändelser och kalenderuppgifter"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Appen kan läsa alla kalenderhändelser som sparats på surfplattan och dela eller spara uppgifter i din kalender."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Appen kan läsa alla kalenderhändelser som sparats på Android TV-enheten och dela eller spara uppgifter i din kalender."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ger appen läs- och skrivbehörighet till konfigurationen för Stör ej."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"börja visa behörighetsanvändningen"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Gör att innehavaren kan öppna behörighetsanvändning för en app. Ska inte behövas för vanliga appar."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"börja visa appfunktioner"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Tillåter att innehavaren börjar visa information om funktioner för en app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"åtkomst till sensordata med en hög samplingsfrekvens"</string>

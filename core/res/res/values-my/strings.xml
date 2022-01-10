@@ -317,7 +317,7 @@
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ကိုယ်ခန္ဓာလှုပ်ရှားမှု"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"သင့်ကိုယ်ခန္ဓာလှုပ်ရှားမှုကို ဝင်ကြည့်ရန်"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"ကင်မရာ"</string>
-    <string name="permgroupdesc_camera" msgid="7585150538459320326">"ဓာတ်ပုံ ရိုက်ပြီးနောက် ဗွီဒီယို မှတ်တမ်းတင်ရန်"</string>
+    <string name="permgroupdesc_camera" msgid="7585150538459320326">"ဓာတ်ပုံနှင့် ဗီဒီယို ရိုက်ကူးရန်"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"အနီးတစ်ဝိုက်ရှိ စက်များ"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"အနီးတစ်ဝိုက်ရှိ စက်များကို ရှာဖွေပြီးချိတ်ဆက်မည်"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"ခေါ်ဆိုမှတ်တမ်း"</string>
@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"အဝင်နှင့် အထွက်ခေါ်ဆိုမှု အချက်အလက်များ အပါအဝင် သင့် Android TV စက်ပစ္စည်းပေါ်ရှိ ခေါ်ဆိုထားသော မှတ်တမ်းကို အက်ပ်အား မွမ်းမံခွင့်ပြုသည်။ သံသယဖြစ်နိုင်ဖွယ်ရှိသည့် အက်ပ်များသည် ၎င်းကို အသုံးပြုပြီး သင်၏ ခေါ်ဆိုထားသော မှတ်တမ်းကို ဖျက်နိုင်သည်။"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"အပလီကေးရှင်းအား သင့်ဖုန်း၏ ဖုန်းခေါ်ဆိုမှု မှတ်တမ်း (အဝင်အထွက်ခေါ်ဆိုမှု အချက်အလက်များ) ကို ပြင်ဆင်ခွင့် ပေးခြင်း။ အန္တရာယ်ရှိ အပလီကေးရှင်းများမှ ဤအချက်ကို အသုံးပြု၍ သင့် ဖုန်းခေါ်ဆိုမှု မှတ်တမ်းကို ဖျက်ပစ်ခြင်း၊ ပြင်ဆင်ခြင်းများ ပြုလုပ်နိုင်ပါသည်"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"ခန္ဓာကိုယ် အာရုံကိရိယာများကို (နှလုံးခုန်နှုန်း မော်နီတာလို)ကို ရယူသုံးရန်"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"သင်၏ နှလုံးခုန်နှုန်းလို ရုပ်ပိုင်း အခြေအနေကို စောင့်ကြပ်သည့် အာရုံခံစက်များထံမှ ဒေတာများကို အက်ပ်အား ရယူသုံးခွင့် ပြုပါ။"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"နှလုံးခုန်နှုန်း၊ အပူချိန်၊ သွေးတွင်း အောက်ဆီဂျင် ရာခိုင်နှုန်း စသည့် ခန္ဓာကိုယ် အာရုံခံကိရိယာများမှ ဒေတာသုံးခွင့်။"</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"(နှလုံးခုန်နှုန်း စောင့်ကြည့်ခြင်းကဲ့သို့) ခန္ဓာကိုယ် အာရုံခံကိရိယာများကို နောက်ခံ၌သုံးခွင့်"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"နှလုံးခုန်နှုန်း၊ အပူချိန်၊ သွေးတွင်း အောက်ဆီဂျင် ရာခိုင်နှုန်း စသည့် ခန္ဓာကိုယ် အာရုံခံကိရိယာများမှ ဒေတာကို နောက်ခံ၌သုံးခွင့်။"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ပြက္ခဒိန်ဖြစ်ရပ်များနှင့် အသေးစိတ်အချက်အလက်များကို ဖတ်ခြင်း"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ဤအက်ပ်သည် သင့်တက်ဘလက်တွင် သိမ်းဆည်းထားသည့် ပြက္ခဒိန်ဖြစ်ရပ်များကို ကြည့်ရှုနိုင်ပြီး သင့်ပြက္ခဒိန်ဒေတာများကို မျှဝေခြင်းနှင့် သိမ်းဆည်းခြင်းတို့ ပြုလုပ်နိုင်ပါသည်။"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ဤအက်ပ်သည် သင့် Android TV စက်ပစ္စည်းတွင် သိမ်းဆည်းထားသည့် ပြက္ခဒိန်ဖြစ်ရပ်များအားလုံးကို ဖတ်နိုင်ပြီး သင်၏ ပြက္ခဒိန်ဒေတာများကို မျှဝေခြင်း သို့မဟုတ် သိမ်းဆည်းခြင်းတို့ ပြုလုပ်နိုင်သည်။"</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"မနှောင့်ယှက်ရန် ချိန်ညှိမှုကို အပ်ဖ်များ ဖတ်ခြင်း ပြင်ခြင်းပြုလုပ်နိုင်ရန် ခွင့်ပြုမည်။"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"အစမြင်ကွင်း ခွင့်ပြုချက် အသုံးပြုမှု"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"အက်ပ်တစ်ခုအတွက် ခွင့်ပြုချက်စတင်အသုံးပြုမှုကို ကိုင်ဆောင်သူအား ခွင့်ပြုသည်။ ပုံမှန်အက်ပ်များအတွက် ဘယ်သောအခါမျှ မလိုအပ်ပါ။"</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"အက်ပ်ဝန်ဆောင်မှုများကို စတင်ကြည့်ခြင်း"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ဝန်ဆောင်မှုအချက်အလက်ကိုများကို ခွင့်ပြုချက်ရထားသည့် အက်ပ်အား စတင်ကြည့်နိုင်ရန် ခွင့်ပြုသည်။"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"နမူနာနှုန်းမြင့်သော အာရုံခံစနစ်ဒေတာကို သုံးပါ"</string>
@@ -1711,12 +1717,12 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ဖယ်ရှားရန်"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"အသံကို အကြံပြုထားသည့် ပမာဏထက် မြှင့်ပေးရမလား?\n\nအသံကို မြင့်သည့် အဆင့်မှာ ကြာရှည်စွာ နားထောင်ခြင်းက သင်၏ နားကို ထိခိုက်စေနိုင်သည်။"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်ကို အသုံးပြုလိုပါသလား။"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ဖြတ်လမ်းလင့်ခ်ကို ဖွင့်ထားစဉ် အသံထိန်းခလုတ် နှစ်ခုစလုံးကို ၃ စက္ကန့်ခန့် ဖိထားခြင်းဖြင့် အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုကို ဖွင့်နိုင်သည်။"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ဖြတ်လမ်းလင့်ခ်ကို ဖွင့်ထားစဉ် အသံထိန်းခလုတ် နှစ်ခုစလုံးကို ၃ စက္ကန့်ခန့် ဖိထားခြင်းဖြင့် အများသုံးနိုင်သည့် ဝန်ဆောင်မှုကို ဖွင့်နိုင်သည်။"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများအတွက် ဖြတ်လမ်းကို ဖွင့်မလား။"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"အသံခလုတ်နှစ်ခုလုံးကို စက္ကန့်အနည်းငယ် ဖိထားခြင်းက အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများ ဖွင့်ပေးသည်။ ဤလုပ်ဆောင်ချက်က သင့်စက်အလုပ်လုပ်ပုံကို ပြောင်းလဲနိုင်သည်။\n\nလက်ရှိ ဝန်ဆောင်မှုများ-\n<xliff:g id="SERVICE">%1$s</xliff:g>\n\'ဆက်တင်များ &gt; အများသုံးစွဲနိုင်မှု\' တွင် ရွေးထားသည့် ဝန်ဆောင်မှုများကို ပြောင်းနိုင်သည်။"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> ဖြတ်လမ်းကို ဖွင့်မလား။"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"အသံခလုတ်နှစ်ခုလုံးကို စက္ကန့်အနည်းငယ် ဖိထားခြင်းက အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုဖြစ်သော <xliff:g id="SERVICE">%1$s</xliff:g> ကို ဖွင့်ပေးသည်။ ဤလုပ်ဆောင်ချက်က သင့်စက်အလုပ်လုပ်ပုံကို ပြောင်းလဲနိုင်သည်။\n\nဤဖြတ်လမ်းလင့်ခ်ကို \'ဆက်တင်များ &gt; အများသုံးစွဲနိုင်မှု\' တွင် နောက်ဝန်ဆောင်မှုတစ်ခုသို့ ပြောင်းနိုင်သည်။"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"အသံခလုတ်နှစ်ခုလုံးကို စက္ကန့်အနည်းငယ် ဖိထားခြင်းက အများသုံးနိုင်သည့် ဝန်ဆောင်မှုဖြစ်သော <xliff:g id="SERVICE">%1$s</xliff:g> ကို ဖွင့်ပေးသည်။ ဤလုပ်ဆောင်ချက်က သင့်စက်အလုပ်လုပ်ပုံကို ပြောင်းလဲနိုင်သည်။\n\nဤဖြတ်လမ်းလင့်ခ်ကို ဆက်တင်များ &gt; အများသုံးနိုင်မှုတွင် နောက်ဝန်ဆောင်မှုတစ်ခုသို့ ပြောင်းနိုင်သည်။"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ဖွင့်ရန်"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"မဖွင့်ပါနှင့်"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ဖွင့်"</string>
@@ -1745,9 +1751,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်လိုက်သည်။"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ပိတ်လိုက်သည်။"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို သုံးရန် အသံအတိုးအလျှော့ ခလုတ်နှစ်ခုလုံးကို သုံးစက္ကန့်ကြာ ဖိထားပါ"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"အများသုံးစွဲနိုင်မှု ခလုတ်ကို တို့သည့်အခါ အသုံးပြုမည့် ဝန်ဆောင်မှုကို ရွေးချယ်ပါ−"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"အများသုံးစွဲနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (ဖန်သားပြင်အောက်ခြေမှနေ၍ လက်နှစ်ချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"အများသုံးစွဲနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (ဖန်သားပြင်အောက်ခြေမှနေ၍ လက်သုံးချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"သုံးနိုင်မှုခလုတ်ကို တို့ပြီးလျှင် ဝန်ဆောင်မှုတစ်ခု ရွေးပါ−"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"သုံးနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (ဖန်သားပြင်အောက်ခြေမှနေ၍ လက်နှစ်ချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"သုံးနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (ဖန်သားပြင်အောက်ခြေမှနေ၍ လက်သုံးချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် အများသုံးစွဲနိုင်မှုခလုတ်ကို ဖိထားပါ။"</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် လက်နှစ်ချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် လက်သုံးချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"စိတ်ကြိုက်အက်ပ် အကြောင်းကြားချက်"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ်ကို <xliff:g id="APP">%1$s</xliff:g> အား ဖန်တီးခွင့်ပြုလိုပါသလား (ဤအကောင့်ဖြင့် အသုံးပြုသူ ရှိနှင့်ပြီးဖြစ်သည်) ။"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ်ကို <xliff:g id="APP">%1$s</xliff:g> အား ဖန်တီးခွင့်ပြုလိုပါသလား ။"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"ကြီးကြပ်ခံ အသုံးပြုသူ ထည့်ရန်"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ဘာသာစကားတစ်ခု ထည့်ပါ"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ဒေသရွေးချယ်မှု"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ဘာသာစကားအမည် ထည့်ပါ"</string>

@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ Android TV උපාංගයෙහි ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට ඉඩ දෙයි. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කළ හැකිය."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"පැමිණෙන සහ පිටවෙන ඇමතුම් දත්ත ඇතුළුව ඔබගේ දුරකථනයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කල හැක."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"දේහ සංවේදකවලට (හෘද ස්පන්දන වේග මොනිටර වැනි) පිවිසීම"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"හෘද ස්පන්දන වේගය වැනි ඔබගේ ශාරීරික තත්ත්වය නිරීක්ෂණය කරන සංවේදක වලින් දත්ත ලබාගැනීමට යෙදුමට ඉඩ දෙන්න."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"හෘද ස්පන්දන වේගය, උෂ්ණත්වය, රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදකවලින් දත්ත වෙත ප්‍රවේශය."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"පසුබිමේ සිටියදී ශරීර සංවේදක (හෘද ස්පන්දන වේග මොනිටර වැනි) වෙත ප්‍රවේශය"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"පසුබිමේ සිටියදී, හෘද ස්පන්දන වේගය, උෂ්ණත්වය, රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදකවලින් දත්ත වෙත ප්‍රවේශය."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"දින දර්ශන සිදුවීම් හා විස්තර කියවන්න"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"මෙම යෙදුමට ඔබගේ ටැබ්ලට් පරිගණකය මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"මෙම යෙදුමට ඔබගේ Android TV මත ගබඩා කර ඇති සියලු දින දර්ශන සිදුවීම් කියවීමට සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ සුරැකීමට හැකිය."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"බාධා නොකරන්න වින්‍යාස කිරීම කියවීමට සහ ලිවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"අවසර භාවිතය බැලීමට ආරම්භ කරන්න"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"තබා සිටින්නාට යෙදුමක් සඳහා අවසර භාවිතය ආරම්භ කිරීමට ඉඩ දෙයි. සාමාන්‍ය යෙදුම් සඳහා කිසි විටෙක අවශ්‍ය නොවිය යුතු ය."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"යෙදුම බලන්න විශේෂාංග ආරම්භ කරන්න"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"යෙදුමක් සඳහා විශේෂාංග තොරතුරු බැලීම ආරම්භ කිරීමට දරන්නාට ඉඩ දෙන්න."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ඉහළ නියැදි කිරීමේ වේගයකින් සංවේදක දත්ත වෙත පිවිසෙන්න"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"අභිරුචි යෙදුම් දැනුම් දීම"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද (මෙම ගිණුම සහිත පරිශීලකයෙකු දැනටමත් සිටී) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද ?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"අධීක්ෂණය කළ පරිශීලක එක් කරන්න"</string>
     <string name="language_selection_title" msgid="52674936078683285">"භාෂාවක් එක් කරන්න"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ප්‍රදේශ මනාපය"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"භාෂා නම ටයිප් කරන්න"</string>
