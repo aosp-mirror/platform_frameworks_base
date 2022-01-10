@@ -799,19 +799,18 @@ public class AppTransitionController {
     }
 
     /**
-     * Returns {@code true} if a given {@link WindowContainer} is an embedded Task.
+     * Returns {@code true} if a given {@link WindowContainer} is an embedded Task in
+     * {@link com.android.wm.shell.TaskView}.
      *
      * Note that this is a short term workaround to support Android Auto until it migrate to
      * ShellTransition. This should only be used by {@link #getAnimationTargets}.
      *
      * TODO(b/213312721): Remove this predicate and its callers once ShellTransition is enabled.
      */
-    private static boolean isEmbeddedTask(WindowContainer wc) {
+    private static boolean isTaskViewTask(WindowContainer wc) {
         // We use Task#mRemoveWithTaskOrganizer to identify an embedded Task, but this is a hack and
         // it is not guaranteed to work this logic in the future version.
-        return !WindowManagerService.sEnableShellTransitions
-                && wc instanceof Task
-                && ((Task) wc).mRemoveWithTaskOrganizer;
+        return wc instanceof Task && ((Task) wc).mRemoveWithTaskOrganizer;
     }
 
     /**
@@ -860,7 +859,7 @@ public class AppTransitionController {
             siblings.add(current);
             boolean canPromote = true;
 
-            if (isEmbeddedTask(current)) {
+            if (isTaskViewTask(current)) {
                 // Don't animate an embedded Task in app transition. This is a short term workaround
                 // to prevent conflict of surface hierarchy changes between legacy app transition
                 // and TaskView (b/205189147).
@@ -909,7 +908,7 @@ public class AppTransitionController {
                 for (int j = 0; j < parent.getChildCount(); ++j) {
                     final WindowContainer sibling = parent.getChildAt(j);
                     if (candidates.remove(sibling)) {
-                        if (!isEmbeddedTask(sibling)) {
+                        if (!isTaskViewTask(sibling)) {
                             // Don't animate an embedded Task in app transition. This is a short
                             // term workaround to prevent conflict of surface hierarchy changes
                             // between legacy app transition and TaskView (b/205189147).
