@@ -2,7 +2,7 @@ package com.android.systemui.unfold.updates.hinge
 
 import androidx.core.util.Consumer
 
-internal class EmptyHingeAngleProvider : HingeAngleProvider {
+internal object EmptyHingeAngleProvider : HingeAngleProvider {
     override fun start() {
     }
 

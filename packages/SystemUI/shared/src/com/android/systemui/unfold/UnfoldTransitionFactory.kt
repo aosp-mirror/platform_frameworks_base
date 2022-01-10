@@ -23,22 +23,16 @@ import android.hardware.devicestate.DeviceStateManager
 import android.os.Handler
 import com.android.systemui.unfold.config.ResourceUnfoldTransitionConfig
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
-import com.android.systemui.unfold.progress.FixedTimingTransitionProgressProvider
-import com.android.systemui.unfold.progress.PhysicsBasedUnfoldTransitionProgressProvider
-import com.android.systemui.unfold.updates.DeviceFoldStateProvider
-import com.android.systemui.unfold.updates.FoldStateProvider
-import com.android.systemui.unfold.updates.hinge.EmptyHingeAngleProvider
-import com.android.systemui.unfold.updates.hinge.HingeSensorAngleProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
-import com.android.systemui.unfold.util.ATraceLoggerTransitionProgressListener
-import com.android.systemui.unfold.util.ScaleAwareTransitionProgressProvider
 import java.util.concurrent.Executor
 
 /**
  * Factory for [UnfoldTransitionProgressProvider].
  *
- * This is needed as Launcher has to create the object manually. Sysui create it using dagger (see
- * [UnfoldTransitionModule]).
+ * This is needed as Launcher has to create the object manually. If dagger is available, this object
+ * is provided in [UnfoldSharedModule].
+ *
+ * This should **never** be called from sysui, as the object is already provided in that process.
  */
 fun createUnfoldTransitionProgressProvider(
     context: Context,
@@ -49,62 +43,21 @@ fun createUnfoldTransitionProgressProvider(
     mainHandler: Handler,
     mainExecutor: Executor,
     tracingTagPrefix: String
-): UnfoldTransitionProgressProvider {
-
-    if (!config.isEnabled) {
-        throw IllegalStateException(
-            "Trying to create " +
-                "UnfoldTransitionProgressProvider when the transition is disabled")
-    }
-
-    val foldStateProvider =
-        createFoldStateProvider(
+): UnfoldTransitionProgressProvider =
+    DaggerUnfoldSharedComponent.factory()
+        .create(
             context,
             config,
             screenStatusProvider,
             deviceStateManager,
             sensorManager,
             mainHandler,
-            mainExecutor)
-
-    val unfoldTransitionProgressProvider =
-        if (config.isHingeAngleEnabled) {
-            PhysicsBasedUnfoldTransitionProgressProvider(foldStateProvider)
-        } else {
-            FixedTimingTransitionProgressProvider(foldStateProvider)
-        }
-
-    return ScaleAwareTransitionProgressProvider(
-            unfoldTransitionProgressProvider, context.contentResolver)
-        .apply {
-            // Always present callback that logs animation beginning and end.
-            addCallback(ATraceLoggerTransitionProgressListener(tracingTagPrefix))
-        }
-}
-
-fun createFoldStateProvider(
-    context: Context,
-    config: UnfoldTransitionConfig,
-    screenStatusProvider: ScreenStatusProvider,
-    deviceStateManager: DeviceStateManager,
-    sensorManager: SensorManager,
-    mainHandler: Handler,
-    mainExecutor: Executor
-): FoldStateProvider {
-    val hingeAngleProvider =
-        if (config.isHingeAngleEnabled) {
-            HingeSensorAngleProvider(sensorManager)
-        } else {
-            EmptyHingeAngleProvider()
-        }
-
-    return DeviceFoldStateProvider(
-        context,
-        hingeAngleProvider,
-        screenStatusProvider,
-        deviceStateManager,
-        mainExecutor,
-        mainHandler)
-}
+            mainExecutor,
+            tracingTagPrefix)
+        .unfoldTransitionProvider
+        .orElse(null)
+        ?: throw IllegalStateException(
+            "Trying to create " +
+                "UnfoldTransitionProgressProvider when the transition is disabled")
 
 fun createConfig(context: Context): UnfoldTransitionConfig = ResourceUnfoldTransitionConfig(context)
