@@ -18,14 +18,16 @@ package com.android.server.net;
 
 import static android.net.NetworkTemplate.NETWORK_TYPE_5G_NSA;
 import static android.net.NetworkTemplate.getCollapsedRatType;
+import static android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED;
+import static android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_LTE;
 
 import android.annotation.NonNull;
 import android.content.Context;
 import android.telephony.Annotation;
-import android.telephony.NetworkRegistrationInfo;
-import android.telephony.PhoneStateListener;
-import android.telephony.ServiceState;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyCallback;
+import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -63,7 +65,7 @@ public class NetworkStatsSubscriptionsMonitor extends
     private final Delegate mDelegate;
 
     /**
-     * Receivers that watches for {@link ServiceState} changes for each subscription, to
+     * Receivers that watches for {@link TelephonyDisplayInfo} changes for each subscription, to
      * monitor the transitioning between Radio Access Technology(RAT) types for each sub.
      */
     @NonNull
@@ -115,13 +117,12 @@ public class NetworkStatsSubscriptionsMonitor extends
                 continue;
             }
 
-            final RatTypeListener listener =
-                    new RatTypeListener(mExecutor, this, sub.first, sub.second);
+            final RatTypeListener listener = new RatTypeListener(this, sub.first, sub.second);
             mRatListeners.add(listener);
 
             // Register listener to the telephony manager that associated with specific sub.
             mTeleManager.createForSubscriptionId(sub.first)
-                    .listen(listener, PhoneStateListener.LISTEN_SERVICE_STATE);
+                    .registerTelephonyCallback(mExecutor, listener);
             Log.d(NetworkStatsService.TAG, "RAT type listener registered for sub " + sub.first);
         }
 
@@ -175,7 +176,7 @@ public class NetworkStatsSubscriptionsMonitor extends
 
     private void handleRemoveRatTypeListener(@NonNull RatTypeListener listener) {
         mTeleManager.createForSubscriptionId(listener.mSubId)
-                .listen(listener, PhoneStateListener.LISTEN_NONE);
+                .unregisterTelephonyCallback(listener);
         Log.d(NetworkStatsService.TAG, "RAT type listener unregistered for sub " + listener.mSubId);
         mRatListeners.remove(listener);
 
@@ -185,7 +186,8 @@ public class NetworkStatsSubscriptionsMonitor extends
                 listener.mSubscriberId, TelephonyManager.NETWORK_TYPE_UNKNOWN);
     }
 
-    static class RatTypeListener extends PhoneStateListener {
+    static class RatTypeListener extends TelephonyCallback
+            implements TelephonyCallback.DisplayInfoListener {
         // Unique id for the subscription. See {@link SubscriptionInfo#getSubscriptionId}.
         @NonNull
         private final int mSubId;
@@ -199,29 +201,27 @@ public class NetworkStatsSubscriptionsMonitor extends
         @NonNull
         private final NetworkStatsSubscriptionsMonitor mMonitor;
 
-        RatTypeListener(@NonNull Executor executor,
-                @NonNull NetworkStatsSubscriptionsMonitor monitor, int subId,
+        RatTypeListener(@NonNull NetworkStatsSubscriptionsMonitor monitor, int subId,
                 @NonNull String subscriberId) {
-            super(executor);
             mSubId = subId;
             mSubscriberId = subscriberId;
             mMonitor = monitor;
         }
 
         @Override
-        public void onServiceStateChanged(@NonNull ServiceState ss) {
+        public void onDisplayInfoChanged(TelephonyDisplayInfo displayInfo) {
             // In 5G SA (Stand Alone) mode, the primary cell itself will be 5G hence telephony
             // would report RAT = 5G_NR.
             // However, in 5G NSA (Non Stand Alone) mode, the primary cell is still LTE and
             // network allocates a secondary 5G cell so telephony reports RAT = LTE along with
             // NR state as connected. In such case, attributes the data usage to NR.
             // See b/160727498.
-            final boolean is5GNsa = (ss.getDataNetworkType() == TelephonyManager.NETWORK_TYPE_LTE
-                    || ss.getDataNetworkType() == TelephonyManager.NETWORK_TYPE_LTE_CA)
-                    && ss.getNrState() == NetworkRegistrationInfo.NR_STATE_CONNECTED;
+            final boolean is5GNsa = displayInfo.getNetworkType() == NETWORK_TYPE_LTE
+                    && (displayInfo.getOverrideNetworkType() == OVERRIDE_NETWORK_TYPE_NR_NSA
+                    || displayInfo.getOverrideNetworkType() == OVERRIDE_NETWORK_TYPE_NR_ADVANCED);
 
             final int networkType =
-                    (is5GNsa ? NETWORK_TYPE_5G_NSA : ss.getDataNetworkType());
+                    (is5GNsa ? NETWORK_TYPE_5G_NSA : displayInfo.getNetworkType());
             final int collapsedRatType = getCollapsedRatType(networkType);
             if (collapsedRatType == mLastCollapsedRatType) return;
 
