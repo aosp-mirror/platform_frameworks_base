@@ -459,7 +459,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         mCollection.dismissNotification(entry1, defaultStats(entry1));
 
         // THEN lifetime extenders are never queried
-        verify(mExtender1, never()).shouldExtendLifetime(eq(entry1), anyInt());
+        verify(mExtender1, never()).maybeExtendLifetime(eq(entry1), anyInt());
     }
 
     @Test
@@ -912,9 +912,9 @@ public class NotifCollectionTest extends SysuiTestCase {
         mNoMan.retractNotif(notif2.sbn, REASON_APP_CANCEL);
 
         // THEN each extender is asked whether to extend, even if earlier ones return true
-        verify(mExtender1).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
-        verify(mExtender2).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
-        verify(mExtender3).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
+        verify(mExtender1).maybeExtendLifetime(entry2, REASON_APP_CANCEL);
+        verify(mExtender2).maybeExtendLifetime(entry2, REASON_APP_CANCEL);
+        verify(mExtender3).maybeExtendLifetime(entry2, REASON_APP_CANCEL);
 
         // THEN the entry is not removed
         assertTrue(mCollection.getAllNotifs().contains(entry2));
@@ -948,9 +948,9 @@ public class NotifCollectionTest extends SysuiTestCase {
         mExtender2.callback.onEndLifetimeExtension(mExtender2, entry2);
 
         // THEN each extender is re-queried
-        verify(mExtender1).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
-        verify(mExtender2).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
-        verify(mExtender3).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
+        verify(mExtender1).maybeExtendLifetime(entry2, REASON_APP_CANCEL);
+        verify(mExtender2).maybeExtendLifetime(entry2, REASON_APP_CANCEL);
+        verify(mExtender3).maybeExtendLifetime(entry2, REASON_APP_CANCEL);
 
         // THEN the entry is not removed
         assertTrue(mCollection.getAllNotifs().contains(entry2));
@@ -986,9 +986,9 @@ public class NotifCollectionTest extends SysuiTestCase {
         assertTrue(mCollection.getAllNotifs().contains(entry2));
 
         // THEN we don't re-query the extenders
-        verify(mExtender1, never()).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
-        verify(mExtender2, never()).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
-        verify(mExtender3, never()).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
+        verify(mExtender1, never()).maybeExtendLifetime(entry2, REASON_APP_CANCEL);
+        verify(mExtender2, never()).maybeExtendLifetime(entry2, REASON_APP_CANCEL);
+        verify(mExtender3, never()).maybeExtendLifetime(entry2, REASON_APP_CANCEL);
 
         // THEN the entry properly records all extenders that returned true
         assertEquals(singletonList(mExtender1), entry2.mLifetimeExtenders);
@@ -1585,7 +1585,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         }
 
         @Override
-        public boolean shouldExtendLifetime(
+        public boolean maybeExtendLifetime(
                 @NonNull NotificationEntry entry,
                 @CancellationReason int reason) {
             return shouldExtendLifetime;

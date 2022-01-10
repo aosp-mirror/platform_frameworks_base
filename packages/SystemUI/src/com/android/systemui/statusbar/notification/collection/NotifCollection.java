@@ -622,7 +622,7 @@ public class NotifCollection implements Dumpable {
         entry.mLifetimeExtenders.clear();
         mAmDispatchingToOtherCode = true;
         for (NotifLifetimeExtender extender : mLifetimeExtenders) {
-            if (extender.shouldExtendLifetime(entry, entry.mCancellationReason)) {
+            if (extender.maybeExtendLifetime(entry, entry.mCancellationReason)) {
                 mLogger.logLifetimeExtended(entry.getKey(), extender);
                 entry.mLifetimeExtenders.add(extender);
             }
