@@ -18,8 +18,8 @@ package com.android.server.locales;
 
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
+import android.util.SparseArray;
 
-import java.io.File;
 import java.time.Clock;
 
 /**
@@ -30,7 +30,8 @@ import java.time.Clock;
 public class ShadowLocaleManagerBackupHelper extends LocaleManagerBackupHelper {
     ShadowLocaleManagerBackupHelper(Context context,
             LocaleManagerService localeManagerService,
-            PackageManagerInternal pmInternal, File stagedLocalesDir, Clock clock) {
-        super(context, localeManagerService, pmInternal, stagedLocalesDir, clock);
+            PackageManagerInternal pmInternal, Clock clock,
+            SparseArray<LocaleManagerBackupHelper.StagedData> stagedData) {
+        super(context, localeManagerService, pmInternal, clock, stagedData);
     }
 }
