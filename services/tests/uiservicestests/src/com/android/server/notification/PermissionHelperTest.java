@@ -16,6 +16,7 @@
 package com.android.server.notification;
 
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
@@ -224,7 +225,30 @@ public class PermissionHelperTest extends UiServiceTestCase {
         verify(mPermManager).grantRuntimePermission(
                 "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                FLAG_PERMISSION_USER_SET, FLAG_PERMISSION_USER_SET, true, 10);
+                FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_REVIEW_REQUIRED,
+                FLAG_PERMISSION_USER_SET, true, 10);
+    }
+
+    @Test
+    public void testSetNotificationPermission_grantReviewRequired() throws Exception {
+        mPermissionHelper.setNotificationPermission("pkg", 10, true, false, true);
+
+        verify(mPermManager).grantRuntimePermission(
+                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
+        verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
+                FLAG_PERMISSION_REVIEW_REQUIRED, FLAG_PERMISSION_REVIEW_REQUIRED, true, 10);
+    }
+
+    @Test
+    public void testSetNotificationPermission_pkgPerm_grantReviewRequired() throws Exception {
+        PermissionHelper.PackagePermission pkgPerm = new PermissionHelper.PackagePermission(
+                "pkg", 10, true, false);
+        mPermissionHelper.setNotificationPermission(pkgPerm);
+
+        verify(mPermManager).grantRuntimePermission(
+                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
+        verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
+                FLAG_PERMISSION_REVIEW_REQUIRED, FLAG_PERMISSION_REVIEW_REQUIRED, true, 10);
     }
 
     @Test
@@ -234,7 +258,8 @@ public class PermissionHelperTest extends UiServiceTestCase {
         verify(mPermManager).revokeRuntimePermission(
                 eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                FLAG_PERMISSION_USER_SET, FLAG_PERMISSION_USER_SET, true, 10);
+                FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_REVIEW_REQUIRED,
+                FLAG_PERMISSION_USER_SET, true, 10);
     }
 
     @Test

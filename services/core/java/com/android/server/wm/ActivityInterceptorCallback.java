@@ -54,6 +54,7 @@ public abstract class ActivityInterceptorCallback {
     @IntDef(suffix = { "_ORDERED_ID" }, value = {
             FIRST_ORDERED_ID,
             COMMUNAL_MODE_ORDERED_ID,
+            PERMISSION_POLICY_ORDERED_ID,
             LAST_ORDERED_ID // Update this when adding new ids
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -70,10 +71,15 @@ public abstract class ActivityInterceptorCallback {
     public static final int COMMUNAL_MODE_ORDERED_ID = 1;
 
     /**
+     * The identifier for {@link com.android.server.policy.PermissionPolicyService} interceptor
+     */
+    public static final int PERMISSION_POLICY_ORDERED_ID = 2;
+
+    /**
      * The final id, used by the framework to determine the valid range of ids. Update this when
      * adding new ids.
      */
-    static final int LAST_ORDERED_ID = COMMUNAL_MODE_ORDERED_ID;
+    static final int LAST_ORDERED_ID = PERMISSION_POLICY_ORDERED_ID;
 
     /**
      * Data class for storing the various arguments needed for activity interception.

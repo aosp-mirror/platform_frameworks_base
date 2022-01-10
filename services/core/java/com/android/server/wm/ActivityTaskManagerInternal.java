@@ -687,4 +687,7 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Get the most recent task excluding the first running task (the one on the front most). */
     public abstract ActivityManager.RecentTaskInfo getMostRecentTaskFromBackground();
+
+    /** Get the app tasks for a package */
+    public abstract List<ActivityManager.AppTask> getAppTasks(String pkgName, int uid);
 }
