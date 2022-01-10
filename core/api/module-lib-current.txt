@@ -139,9 +139,14 @@ package android.content {
 
 package android.content.pm {
 
+  public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    method @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraryInfos();
+  }
+
   public abstract class PackageManager {
     method @NonNull public String getPermissionControllerPackageName();
     method @NonNull public String getSupplementalProcessPackageName();
+    field public static final int MATCH_STATIC_SHARED_AND_SDK_LIBRARIES = 67108864; // 0x4000000
   }
 
 }
