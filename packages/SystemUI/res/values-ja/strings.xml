@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ロック画面"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"仕事用プロファイルのロック画面"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"閉じる"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wi-FiをOFFにしました。"</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wi-FiをONにしました。"</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"機内モードをOFFにしました。"</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"機内モードをONにしました。"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"サイレント"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"アラームのみ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"サイレント モード。"</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"サイレント モードを無効にしました。"</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"サイレント モードを有効にしました。"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"BluetoothがONです。"</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"BluetoothをOFFにしました。"</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"BluetoothをONにしました。"</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"現在地送信機能をOFFにしました。"</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"現在地送信機能をONにしました。"</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"アラームは<xliff:g id="TIME">%s</xliff:g>に設定されています。"</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"長くします。"</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"短くします。"</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"ライトをOFFにしました。"</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"ライトをONにしました。"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"色反転をOFFにしました。"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"色反転をONにしました。"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"モバイルアクセスポイントをOFFにしました。"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"モバイルアクセスポイントをONにしました。"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"画面のキャストが停止しました。"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"データセーバーが OFF になりました。"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"データセーバーが ON になりました。"</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"ディスプレイの明るさ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"モバイルデータが一時停止"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"データの一時停止"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi 未接続"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"画面の明るさ"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"色反転"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"詳細設定"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ユーザー設定"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"完了"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"タブレットでキーボードに接続するには、最初にBluetoothをONにする必要があります。"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ONにする"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"電源通知管理"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ON - 顔ベース"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"電源通知管理では、アプリの通知の重要度をレベル 0～5 で設定できます。\n\n"<b>"レベル 5"</b>" \n- 通知リストの一番上に表示する \n- 全画面表示を許可する \n- 常にポップアップする \n\n"<b>"レベル 4"</b>" \n- 全画面表示しない \n- 常にポップアップする \n\n"<b>"レベル 3"</b>" \n- 全画面表示しない \n- ポップアップしない \n\n"<b>"レベル 2"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n\n"<b>"レベル 1"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n- ロック画面やステータスバーに表示しない \n- 通知リストの一番下に表示する \n\n"<b>"レベル 0"</b>" \n- アプリからのすべての通知をブロックする"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"完了"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"適用"</string>

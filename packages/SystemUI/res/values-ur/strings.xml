@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"مقفل اسکرین۔"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"دفتری مقفل اسکرین"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"بند کریں"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"‏Wifi کو آف کر دیا گیا۔"</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"‏Wifi کو آن کر دیا گیا۔"</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"ہوائی جہاز وضع کو آف کر دیا گیا۔"</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"ہوائی جہاز وضع کو آن کر دیا گیا۔"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"مکمل خاموشی"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"صرف الارمز"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ڈسٹرب نہ کریں۔"</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\'ڈسٹرب نہ کریں\' کو آف کر دیا گیا۔"</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"\'ڈسٹرب نہ کریں\' کو آن کر دیا گیا۔"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"بلوٹوتھ۔"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"بلوٹوتھ آن ہے۔"</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"بلوٹوتھ کو آف کر دیا گیا۔"</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"بلوٹوتھ کو آن کر دیا گیا۔"</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"مقام کی اطلاع دہندگی کو آف کر دیا گیا۔"</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"مقام کی اطلاع دہندگی کو آن کر دیا گیا۔"</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"الارم <xliff:g id="TIME">%s</xliff:g> کیلئے سیٹ ہے۔"</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"مزید وقت۔"</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"کم وقت۔"</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"فلیش لائٹ کو آف کر دیا گیا۔"</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"فلیش لائٹ کو آن کر دیا گیا۔"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"رنگ کی تبدیلی کو آف کر دیا گیا۔"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"رنگ کی تبدیلی کو آن کر دیا گیا۔"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"موبائل ہاٹ اسپاٹ کو آف کر دیا گیا۔"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"موبائل ہاٹ اسپاٹ کو آن کر دیا گیا۔"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"اسکرین کو کاسٹ کرنا بند کر دیا۔"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ڈیٹا سیور آف ہو گیا۔"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"ڈیٹا سرور آن ہو گیا۔"</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"ڈسپلے کی چمک"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"موبائل ڈیٹا موقوف کر دیا گیا ہے"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"ڈیٹا موقوف کر دیا گیا"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"‏Wi-Fi سے منسلک نہیں ہے"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"چمکیلا پن"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"رنگوں کی تقلیب"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"مزید ترتیبات"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"صارف کی ترتیبات"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ہو گیا"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"اپنے کی بورڈ کو اپنے ٹیبلٹ کے ساتھ منسلک کرنے کیلئے پہلے آپ کو اپنا بلو ٹوتھ آن کرنا ہو گا۔"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"آن کریں"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"پاور اطلاع کے کنٹرولز"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"آن - چہرے پر مبنی"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"پاور اطلاع کنٹرولز کے ساتھ آپ کسی ایپ کی اطلاعات کیلئے 0 سے 5 تک اہمیت کی سطح سیٹ کر سکتے ہیں۔ \n\n"<b>"سطح 5"</b>\n"- اطلاعات کی فہرست کے اوپر دکھائیں \n- پوری اسکرین کی مداخلت کی اجازت دیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 4"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 3"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n\n"<b>"سطح 2"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n- کبھی آواز اور ارتعاش پیدا نہ کرنا \n\n"<b>" سطح 1"</b>\n"- پوری اسکرین کی مداخلت کو روکنا \n- کبھی نہ جھانکنا \n- کبھی بھی آواز یا ارتعاش پیدا نہ کرنا\n- مقفل اسکرین اور اسٹیٹس بار سے چھپانا \n - اطلاع کی فہرست کی نیچے دکھانا \n\n"<b>"سطح 0"</b>\n"- ایپ سے تمام اطلاعات مسدود کریں"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"ہو گیا"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"لاگو کریں"</string>

@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"صفحه قفل."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"صفحه قفل کاری"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"بستن"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"‏Wi-Fi خاموش شد."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"‏Wi-Fi روشن شد."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"حالت هواپیما خاموش شد."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"حالت هواپیما روشن شد."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"سکوت کامل"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"فقط زنگ ساعت"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"مزاحم نشوید."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"«مزاحم نشوید» خاموش شد."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"«مزاحم نشوید» روشن شد."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"بلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"بلوتوث روشن است."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"بلوتوث خاموش شد."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"بلوتوث روشن شد."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"گزارش موقعیت مکانی خاموش شد."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"گزارش موقعیت مکانی روشن شد."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"زنگ برای <xliff:g id="TIME">%s</xliff:g> تنظیم شد."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"زمان بیشتر."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"زمان کمتر."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"چراغ قوه خاموش شد."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"چراغ قوه روشن شد."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"وارونگی رنگ خاموش شد."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"وارونگی رنگ روشن شد."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"نقطه اتصال دستگاه همراه خاموش شد."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"نقطه اتصال دستگاه همراه روشن شد."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"فرستادن صفحه نمایش متوقف شد."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"صرفه‌جویی داده خاموش شد."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"صرفه‌جویی داده روشن شد."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"روشنایی نمایشگر"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"داده تلفن همراه موقتاً متوقف شده است"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"داده موقتاً متوقف شده است"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"‏Wi-Fi وصل نیست"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"روشنایی"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"وارونگی رنگ"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"تنظیمات بیشتر"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"تنظیمات کاربر"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"تمام"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"برای مرتبط کردن صفحه‌کلید با رایانه لوحی، ابتدا باید بلوتوث را روشن کنید."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"روشن کردن"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"کنترل‌های قدرتمند اعلان"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"روشن - براساس چهره"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"با کنترل‌های قدرتمند اعلان می‌توانید سطح اهمیت اعلان‌های هر برنامه را از ۰ تا ۵ تعیین کنید. \n\n"<b>"سطح ۵"</b>" \n- در صدر فهرست اعلان‌ها نشان داده می‌شود \n- وقفه برای نمایش تمام‌صفحه مجاز است \n- همیشه اجمالی نشان داده می‌شود \n\n"<b>"سطح ۴"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- همیشه اجمالی نشان داده می‌شود \n\n"<b>"سطح ۳"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n\n"<b>"سطح ۲"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n- هیچ‌وقت صدا و لرزش ایجاد نمی‌کند \n\n"<b>"سطح ۱"</b>" \n- نمایش تمام صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n- هیچ‌وقت صدا یا لرزش ایجاد نمی‌کند \n- در صفحه قفل و نوار وضعیت پنهان است \n- در پایین فهرست اعلان‌ها نشان داده می‌شود \n\n"<b>"سطح ۰"</b>" \n- همه اعلان‌های این برنامه مسدود است"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"تمام"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"اعمال"</string>

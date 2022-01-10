@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Ecranul de blocare."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Ecran de blocare pentru serviciu"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Închideți"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Conexiunea prin Wi-Fi este dezactivată."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Conexiunea prin Wi-Fi este activată."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Modul Avion este dezactivat."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Modul Avion este activat."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"niciun sunet"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"numai alarme"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Nu deranja."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"Funcția Nu deranja a fost dezactivată."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"Funcția Nu deranja a fost activată."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Conexiunea prin Bluetooth este activată."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"Conexiunea prin Bluetooth este dezactivată."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"Conexiunea prin Bluetooth este activată."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"Raportarea locației este dezactivată."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"Raportarea locației este activată."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Alarmă setată pentru <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Mai mult timp."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Mai puțin timp."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Lanterna este dezactivată."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Lanterna este activată."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Inversarea culorilor este dezactivată."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Inversarea culorilor este activată."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Hotspotul mobil este dezactivat."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Hotspotul mobil este activat."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Transmiterea ecranului a fost oprită."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Economizorul de date a fost dezactivat."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Economizorul de date a fost activat."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Luminozitatea ecranului"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Datele mobile sunt întrerupte"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Conexiunea de date este întreruptă"</string>
@@ -252,6 +234,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Rețeaua Wi-Fi nu este conectată"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Luminozitate"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversarea culorilor"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Mai multe setări"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Setări de utilizator"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Terminat"</string>
@@ -490,6 +474,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Pentru a conecta tastatura la tabletă, mai întâi trebuie să activați Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Activați"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Comenzi de gestionare a notificărilor"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Activată – În funcție de chip"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Folosind comenzile de gestionare a notificărilor, puteți să setați un nivel de importanță de la 0 la 5 pentru notificările unei aplicații. \n\n"<b>"Nivelul 5"</b>" \n– Se afișează la începutul listei de notificări \n– Se permite întreruperea pe ecranul complet \n– Se afișează întotdeauna scurt \n\n"<b>"Nivelul 4"</b>" \n– Se împiedică întreruperea pe ecranul complet \n– Se afișează întotdeauna scurt \n\n"<b>"Nivelul 3"</b>" \n– Se împiedică întreruperea pe ecranul complet \n– Nu se afișează niciodată scurt \n\n"<b>"Nivelul 2"</b>" \n– Se împiedică întreruperea pe ecranul complet \n– Nu se afișează niciodată scurt \n– Nu se emit sunete și nu vibrează niciodată \n\n"<b>"Nivelul 1"</b>" \n– Se împiedică întreruperea pe ecranul complet \n– Nu se afișează niciodată scurt \n– Nu se emit sunete și nu vibrează niciodată \n– Se ascunde în ecranul de blocare și în bara de stare \n– Se afișează la finalul listei de notificări \n\n"<b>"Nivelul 0"</b>" \n– Se blochează toate notificările din aplicație"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Gata"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Aplicați"</string>

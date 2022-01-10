@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"લૉક સ્ક્રીન."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"કાર્ય લૉક સ્ક્રીન"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"બંધ કરો"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wifi બંધ કર્યું."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wifi ચાલુ કર્યું."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"એરપ્લેન મોડ બંધ કર્યું."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"એરપ્લેન મોડ ચાલુ કર્યો."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"બિલકુલ અવાજ નહીં"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"માત્ર અલાર્મ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ખલેલ પાડશો નહીં."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"ખલેલ પાડશો નહીં બંધ કર્યું."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"ખલેલ પાડશો નહીં ચાલુ કર્યું."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"બ્લૂટૂથ."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"બ્લૂટૂથ ચાલુ."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"બ્લૂટૂથ બંધ કરી."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"બ્લૂટૂથ ચાલુ કર્યું."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"સ્થાનની જાણ કરવી બંધ કર્યું."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"સ્થાનની જાણ કરવી ચાલુ કર્યું."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"<xliff:g id="TIME">%s</xliff:g> માટે એલાર્મ સેટ કર્યું."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"વધુ સમય."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"ઓછો સમય."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"ફ્લેશલાઇટ બંધ કરી."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"ફ્લેશલાઇટ ચાલુ કરી."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"રંગ ઉલટાવવાનું બંધ કર્યું."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"રંગ ઉલટાવવાનું ચાલુ કર્યું."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"મોબાઇલ હૉટસ્પૉટ બંધ કર્યું."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"મોબાઇલ હૉટસ્પૉટ ચાલુ કર્યું."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"સ્ક્રીન કાસ્ટિંગ બંધ કર્યું."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ડેટા સેવર બંધ કર્યું."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"ડેટા સેવર ચાલુ કર્યું."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"પ્રદર્શન તેજ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"મોબાઇલ ડેટા થોભાવ્યો છે"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"ડેટા થોભાવ્યો છે"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"વાઇ-ફાઇ કનેક્ટ નથી"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"તેજ"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"વિપરીત રંગમાં બદલવું"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"વધુ સેટિંગ"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"વપરાશકર્તા સેટિંગ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"થઈ ગયું"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"તમારા ટેબ્લેટ સાથે કીબોર્ડ કનેક્ટ કરવા માટે, તમારે પહેલાં બ્લૂટૂથ ચાલુ કરવાની જરૂર પડશે."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ચાલુ કરો"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"પાવર સૂચના નિયંત્રણો"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ચાલુ છે - ચહેરા આધારિત રોટેશન"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"પાવર સૂચના નિયંત્રણો સાથે, તમે ઍપની સૂચનાઓ માટે 0 થી 5 સુધીના મહત્વના સ્તરને સેટ કરી શકો છો. \n\n"<b>"સ્તર 5"</b>" \n- સૂચના સૂચિની ટોચ પર બતાવો \n- પૂર્ણ સ્ક્રીન અવરોધની મંજૂરી આપો \n- હંમેશાં ત્વરિત દૃષ્ટિ કરો \n\n"<b>"સ્તર 4"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- હંમેશાં ત્વરિત દૃષ્ટિ કરો \n\n"<b>"સ્તર 3"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- ક્યારેય ત્વરિત દૃષ્ટિ કરશો નહીં \n\n"<b>"સ્તર 2"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- ક્યારેય ત્વરિત દૃષ્ટિ કરશો નહીં \n- ક્યારેય અવાજ અથવા વાઇબ્રેટ કરશો નહીં \n\n"<b>"સ્તર 1"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધની મંજૂરી આપો \n- ક્યારેય ત્વરિત દૃષ્ટિ કરશો નહીં \n- ક્યારેય અવાજ અથવા વાઇબ્રેટ કરશો નહીં \n- લૉક સ્ક્રીન અને સ્ટેટસ બારથી છુપાવો \n- સૂચના સૂચિના તળિયા પર બતાવો \n\n"<b>"સ્તર 0"</b>" \n- ઍપની તમામ સૂચનાઓને બ્લૉક કરો"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"થઈ ગયું"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"લાગુ કરો"</string>
