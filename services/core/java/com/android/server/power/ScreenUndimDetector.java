@@ -28,6 +28,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.util.Slog;
+import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
@@ -123,8 +124,8 @@ public class ScreenUndimDetector {
      * Launches a message that figures out the screen transitions and detects user undims. Must be
      * called by the parent that is trying to update the screen policy.
      */
-    public void recordScreenPolicy(int newPolicy) {
-        if (newPolicy == mCurrentScreenPolicy) {
+    public void recordScreenPolicy(int displayGroupId, int newPolicy) {
+        if (displayGroupId != Display.DEFAULT_DISPLAY_GROUP || newPolicy == mCurrentScreenPolicy) {
             return;
         }
 
@@ -268,7 +269,10 @@ public class ScreenUndimDetector {
      * The user interacted with the screen after an undim, indicating the phone is in use.
      * We use this event for logging.
      */
-    public void userActivity() {
+    public void userActivity(int displayGroupId) {
+        if (displayGroupId != Display.DEFAULT_DISPLAY) {
+            return;
+        }
         if (mUndimOccurredTime != 1 && mInteractionAfterUndimTime == -1) {
             mInteractionAfterUndimTime = mClock.getCurrentTime();
         }
