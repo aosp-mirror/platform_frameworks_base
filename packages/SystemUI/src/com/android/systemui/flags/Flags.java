@@ -57,8 +57,10 @@ public class Flags {
 
     /***************************************/
     // 200 - keyguard/lockscreen
-    public static final BooleanFlag KEYGUARD_LAYOUT =
-            new BooleanFlag(200, true);
+
+    // ** Flag retired **
+    // public static final BooleanFlag KEYGUARD_LAYOUT =
+    //         new BooleanFlag(200, true);
 
     public static final BooleanFlag LOCKSCREEN_ANIMATIONS =
             new BooleanFlag(201, true);
@@ -68,6 +70,9 @@ public class Flags {
 
     public static final ResourceBooleanFlag CHARGING_RIPPLE =
             new ResourceBooleanFlag(203, R.bool.flag_charging_ripple);
+
+    public static final ResourceBooleanFlag BOUNCER_USER_SWITCHER =
+            new ResourceBooleanFlag(204, R.bool.config_enableBouncerUserSwitcher);
 
     /***************************************/
     // 300 - power menu

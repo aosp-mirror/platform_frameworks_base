@@ -616,9 +616,13 @@ public class KeyguardSecurityContainer extends FrameLayout {
             final View view = getChildAt(i);
             if (view.getVisibility() != GONE) {
                 int updatedWidthMeasureSpec = mViewMode.getChildWidthMeasureSpec(widthMeasureSpec);
+                final LayoutParams lp = (LayoutParams) view.getLayoutParams();
+
+                // When using EXACTLY spec, measure will use the layout width if > 0. Set before
+                // measuring the child
+                lp.width = MeasureSpec.getSize(updatedWidthMeasureSpec);
                 measureChildWithMargins(view, updatedWidthMeasureSpec, 0, heightMeasureSpec, 0);
 
-                final LayoutParams lp = (LayoutParams) view.getLayoutParams();
                 maxWidth = Math.max(maxWidth,
                         view.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
                 maxHeight = Math.max(maxHeight,
@@ -969,7 +973,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         public int getChildWidthMeasureSpec(int parentWidthMeasureSpec) {
             return MeasureSpec.makeMeasureSpec(
                     MeasureSpec.getSize(parentWidthMeasureSpec) / 2,
-                    MeasureSpec.getMode(parentWidthMeasureSpec));
+                    MeasureSpec.EXACTLY);
         }
 
         @Override
@@ -1026,7 +1030,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         public int getChildWidthMeasureSpec(int parentWidthMeasureSpec) {
             return MeasureSpec.makeMeasureSpec(
                     MeasureSpec.getSize(parentWidthMeasureSpec) / 2,
-                    MeasureSpec.getMode(parentWidthMeasureSpec));
+                    MeasureSpec.EXACTLY);
         }
 
         private void updateSecurityViewGravity() {
