@@ -17411,6 +17411,12 @@ public final class Settings {
             public static final String TOUCH_AND_HOLD_WATCH_FACE = "touch_and_hold_watchface";
 
             /**
+             * Whether bedtime mode is enabled.
+             * @hide
+             */
+            public static final String BEDTIME_MODE = "bedtime_mode";
+
+            /**
              * Whether the current watchface is decomposable.
              * @hide
              */
