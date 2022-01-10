@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Il dispositivo è stato bloccato manualmente"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Non riconosciuto"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Non riconosciuto"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Per utilizzare lo sblocco con il volto, attiva "<b>"l\'accesso alla fotocamera"</b>" in Impostazioni &gt; Privacy"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">Enter SIM PIN. You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
       <item quantity="other">Inserisci il codice PIN della SIM. Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione.</item>
