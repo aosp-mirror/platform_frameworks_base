@@ -33,6 +33,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.ChangeId;
@@ -235,6 +236,41 @@ public final class PermissionManager {
         return PermissionChecker.checkPermissionForDataDelivery(mContext, permission,
                 // FIXME(b/199526514): PID should be passed inside AttributionSource.
                 PermissionChecker.PID_UNKNOWN, attributionSource, message);
+    }
+
+    /**
+     *
+     * Similar to checkPermissionForDataDelivery, except it results in an app op start, rather than
+     * a note. If this method is used, then {@link #finishDataDelivery(String, AttributionSource)}
+     * must be used when access is finished.
+     *
+     * @param permission The permission to check.
+     * @param attributionSource the permission identity
+     * @param message A message describing the reason the permission was checked
+     * @return The permission check result which is either {@link #PERMISSION_GRANTED}
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
+     *
+     * @see #checkPermissionForDataDelivery(String, AttributionSource, String)
+     */
+    @PermissionCheckerManager.PermissionResult
+    public int checkPermissionForStartDataDelivery(@NonNull String permission,
+            @NonNull AttributionSource attributionSource, @Nullable String message) {
+        return PermissionChecker.checkPermissionForDataDelivery(mContext, permission,
+                // FIXME(b/199526514): PID should be passed inside AttributionSource.
+                PermissionChecker.PID_UNKNOWN, attributionSource, message, true);
+    }
+
+    /**
+     * Indicate that usage has finished for an {@link AttributionSource} started with
+     * {@link #checkPermissionForStartDataDelivery(String, AttributionSource, String)}
+     *
+     * @param permission The permission to check.
+     * @param attributionSource the permission identity to finish
+     */
+    public void finishDataDelivery(@NonNull String permission,
+            @NonNull AttributionSource attributionSource) {
+        PermissionChecker.finishDataDelivery(mContext, AppOpsManager.permissionToOp(permission),
+                attributionSource);
     }
 
     /**
