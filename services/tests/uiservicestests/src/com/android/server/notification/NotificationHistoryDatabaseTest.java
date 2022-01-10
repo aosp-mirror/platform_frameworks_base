@@ -108,7 +108,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
 
     @Test
     public void testDeletionReceiver() {
-        verify(mContext, times(1)).registerReceiver(any(), any());
+        verify(mContext, times(1)).registerReceiver(any(), any(), anyInt());
     }
 
     @Test

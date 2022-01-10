@@ -94,7 +94,8 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
     @Override
     public void onConnected() {
         if (DEBUG) Slog.d(TAG, "onConnected");
-        mContext.registerReceiver(mReceiver, new IntentFilter(ACTION));
+        mContext.registerReceiver(mReceiver, new IntentFilter(ACTION),
+                Context.RECEIVER_EXPORTED_UNAUDITED);
         mConnected = true;
     }
 
