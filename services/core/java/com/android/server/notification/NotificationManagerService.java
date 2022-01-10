@@ -83,6 +83,7 @@ import static android.service.notification.NotificationListenerService.NOTIFICAT
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
+import static android.service.notification.NotificationListenerService.REASON_ASSISTANT_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CHANNEL_BANNED;
@@ -474,6 +475,14 @@ public class NotificationManagerService extends SystemService {
     @ChangeId
     @LoggingOnly
     private static final long RATE_LIMIT_TOASTS = 174840628L;
+
+    /**
+     * Whether listeners understand the more specific reason provided for notification
+     * cancellations from an assistant, rather than using the more general REASON_LISTENER_CANCEL.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S_V2)
+    private static final long NOTIFICATION_LOG_ASSISTANT_CANCEL = 195579280L;
 
     private IActivityManager mAm;
     private ActivityTaskManagerInternal mAtm;
@@ -4387,6 +4396,13 @@ public class NotificationManagerService extends SystemService {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
 
+                    // Cancellation reason. If the token comes from assistant, label the
+                    // cancellation as coming from the assistant; default to LISTENER_CANCEL.
+                    int reason = REASON_LISTENER_CANCEL;
+                    if (mAssistants.isServiceTokenValidLocked(token)) {
+                        reason = REASON_ASSISTANT_CANCEL;
+                    }
+
                     if (keys != null) {
                         final int N = keys.length;
                         for (int i = 0; i < N; i++) {
@@ -4399,7 +4415,7 @@ public class NotificationManagerService extends SystemService {
                             }
                             cancelNotificationFromListenerLocked(info, callingUid, callingPid,
                                     r.getSbn().getPackageName(), r.getSbn().getTag(),
-                                    r.getSbn().getId(), userId);
+                                    r.getSbn().getId(), userId, reason);
                         }
                     } else {
                         cancelAllLocked(callingUid, callingPid, info.userid,
@@ -4493,12 +4509,13 @@ public class NotificationManagerService extends SystemService {
          */
         @GuardedBy("mNotificationLock")
         private void cancelNotificationFromListenerLocked(ManagedServiceInfo info,
-                int callingUid, int callingPid, String pkg, String tag, int id, int userId) {
+                int callingUid, int callingPid, String pkg, String tag, int id, int userId,
+                int reason) {
             int mustNotHaveFlags = FLAG_ONGOING_EVENT;
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0 /* mustHaveFlags */,
                     mustNotHaveFlags,
                     true,
-                    userId, REASON_LISTENER_CANCEL, info);
+                    userId, reason, info);
         }
 
         /**
@@ -4640,13 +4657,17 @@ public class NotificationManagerService extends SystemService {
             try {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                    int cancelReason = REASON_LISTENER_CANCEL;
+                    if (mAssistants.isServiceTokenValidLocked(token)) {
+                        cancelReason = REASON_ASSISTANT_CANCEL;
+                    }
                     if (info.supportsProfiles()) {
                         Slog.e(TAG, "Ignoring deprecated cancelNotification(pkg, tag, id) "
                                 + "from " + info.component
                                 + " use cancelNotification(key) instead.");
                     } else {
                         cancelNotificationFromListenerLocked(info, callingUid, callingPid,
-                                pkg, tag, id, info.userid);
+                                pkg, tag, id, info.userid, cancelReason);
                     }
                 }
             } finally {
@@ -11021,6 +11042,12 @@ public class NotificationManagerService extends SystemService {
                 if (!CompatChanges.isChangeEnabled(NOTIFICATION_CANCELLATION_REASONS, info.uid)
                         && (reason == REASON_CHANNEL_REMOVED || reason == REASON_CLEAR_DATA)) {
                     reason = REASON_CHANNEL_BANNED;
+                }
+                // apps before T don't know about REASON_ASSISTANT, so replace it with the
+                // previously-used case, REASON_LISTENER_CANCEL
+                if (!CompatChanges.isChangeEnabled(NOTIFICATION_LOG_ASSISTANT_CANCEL, info.uid)
+                        && reason == REASON_ASSISTANT_CANCEL) {
+                    reason = REASON_LISTENER_CANCEL;
                 }
                 listener.onNotificationRemoved(sbnHolder, rankingUpdate, stats, reason);
             } catch (RemoteException ex) {
