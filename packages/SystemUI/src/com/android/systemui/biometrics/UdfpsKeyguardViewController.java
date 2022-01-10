@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -55,6 +56,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @NonNull private final UdfpsController mUdfpsController;
     @NonNull private final UnlockedScreenOffAnimationController
             mUnlockedScreenOffAnimationController;
+    @NonNull private final ActivityLaunchAnimator mActivityLaunchAnimator;
 
     private boolean mShowingUdfpsBouncer;
     private boolean mUdfpsRequested;
@@ -66,6 +68,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     private long mLastUdfpsBouncerShowTime = -1;
     private float mStatusBarExpansion;
     private boolean mLaunchTransitionFadingAway;
+    private boolean mIsLaunchingActivity;
+    private float mActivityLaunchProgress;
 
     /**
      * hidden amount of pin/pattern/password bouncer
@@ -88,7 +92,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             @NonNull KeyguardStateController keyguardStateController,
             @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             @NonNull SystemUIDialogManager systemUIDialogManager,
-            @NonNull UdfpsController udfpsController) {
+            @NonNull UdfpsController udfpsController,
+            @NonNull ActivityLaunchAnimator activityLaunchAnimator) {
         super(view, statusBarStateController, panelExpansionStateManager, systemUIDialogManager,
                 dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
@@ -99,6 +104,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mKeyguardStateController = keyguardStateController;
         mUdfpsController = udfpsController;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mActivityLaunchAnimator = activityLaunchAnimator;
     }
 
     @Override
@@ -136,6 +142,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
         mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(this);
         mUnlockedScreenOffAnimationController.addCallback(mUnlockedScreenOffCallback);
+        mActivityLaunchAnimator.addListener(mActivityLaunchAnimatorListener);
     }
 
     @Override
@@ -153,6 +160,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(null);
         }
         mUnlockedScreenOffAnimationController.removeCallback(mUnlockedScreenOffCallback);
+        mActivityLaunchAnimator.removeListener(mActivityLaunchAnimatorListener);
     }
 
     @Override
@@ -294,6 +302,12 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                     0f, 255f);
         if (!mShowingUdfpsBouncer) {
             alpha *= (1.0f - mTransitionToFullShadeProgress);
+
+            // Fade out the icon if we are animating an activity launch over the lockscreen and the
+            // activity didn't request the UDFPS.
+            if (mIsLaunchingActivity && !mUdfpsRequested) {
+                alpha *= (1.0f - mActivityLaunchProgress);
+            }
         }
         mView.setUnpausedAlpha(alpha);
     }
@@ -426,4 +440,26 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
     private final UnlockedScreenOffAnimationController.Callback mUnlockedScreenOffCallback =
             (linear, eased) -> mStateListener.onDozeAmountChanged(linear, eased);
+
+    private final ActivityLaunchAnimator.Listener mActivityLaunchAnimatorListener =
+            new ActivityLaunchAnimator.Listener() {
+                @Override
+                public void onLaunchAnimationStart() {
+                    mIsLaunchingActivity = true;
+                    mActivityLaunchProgress = 0f;
+                    updateAlpha();
+                }
+
+                @Override
+                public void onLaunchAnimationEnd() {
+                    mIsLaunchingActivity = false;
+                    updateAlpha();
+                }
+
+                @Override
+                public void onLaunchAnimationProgress(float linearProgress) {
+                    mActivityLaunchProgress = linearProgress;
+                    updateAlpha();
+                }
+            };
 }
