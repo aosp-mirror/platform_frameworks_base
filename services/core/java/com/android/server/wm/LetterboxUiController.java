@@ -150,7 +150,7 @@ final class LetterboxUiController {
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> mActivityRecord.makeChildSurface(null),
                         mActivityRecord.mWmService.mTransactionFactory,
-                        mLetterboxConfiguration::isLetterboxActivityCornersRounded,
+                        this::shouldLetterboxHaveRoundedCorners,
                         this::getLetterboxBackgroundColor,
                         this::hasWallpaperBackgroudForLetterbox,
                         this::getLetterboxWallpaperBlurRadius,
@@ -173,6 +173,13 @@ final class LetterboxUiController {
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
+    }
+
+    private boolean shouldLetterboxHaveRoundedCorners() {
+        // TODO(b/214030873): remove once background is drawn for transparent activities
+        // Letterbox shouldn't have rounded corners if the activity is transparent
+        return mLetterboxConfiguration.isLetterboxActivityCornersRounded()
+                && mActivityRecord.fillsParent();
     }
 
     float getHorizontalPositionMultiplier(Configuration parentConfiguration) {
@@ -257,8 +264,6 @@ final class LetterboxUiController {
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
         return isSurfaceReadyAndVisible(mainWindow) && mainWindow.areAppWindowBoundsLetterboxed()
-                // Check that an activity isn't transparent.
-                && mActivityRecord.fillsParent()
                 // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
                 // WindowContainer#showWallpaper because the later will return true when this
                 // activity is using blurred wallpaper for letterbox backgroud.
