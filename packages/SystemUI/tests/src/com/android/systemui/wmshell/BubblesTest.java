@@ -112,6 +112,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
+import com.android.wm.shell.bubbles.BubbleBadgeIconFactory;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEntry;
@@ -1217,6 +1218,7 @@ public class BubblesTest extends SysuiTestCase {
                 mBubbleController,
                 mBubbleController.getStackView(),
                 new BubbleIconFactory(mContext),
+                new BubbleBadgeIconFactory(mContext),
                 bubble,
                 true /* skipInflation */);
         verify(userContext, times(1)).getPackageManager();

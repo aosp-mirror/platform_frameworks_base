@@ -364,13 +364,15 @@ public class Bubble implements BubbleViewProvider {
      * @param context the context for the bubble.
      * @param controller the bubble controller.
      * @param stackView the stackView the bubble is eventually added to.
-     * @param iconFactory the iconfactory use to create badged images for the bubble.
+     * @param iconFactory the icon factory use to create images for the bubble.
+     * @param badgeIconFactory the icon factory to create app badges for the bubble.
      */
     void inflate(BubbleViewInfoTask.Callback callback,
             Context context,
             BubbleController controller,
             BubbleStackView stackView,
             BubbleIconFactory iconFactory,
+            BubbleBadgeIconFactory badgeIconFactory,
             boolean skipInflation) {
         if (isBubbleLoading()) {
             mInflationTask.cancel(true /* mayInterruptIfRunning */);
@@ -380,6 +382,7 @@ public class Bubble implements BubbleViewProvider {
                 controller,
                 stackView,
                 iconFactory,
+                badgeIconFactory,
                 skipInflation,
                 callback,
                 mMainExecutor);
