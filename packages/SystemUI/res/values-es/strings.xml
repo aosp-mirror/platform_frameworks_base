@@ -24,7 +24,7 @@
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"No tienes notificaciones"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"Entrante"</string>
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"Notificaciones"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"Es posible que te quedes sin batería pronto"</string>
+    <string name="battery_low_title" msgid="6891106956328275225">"Puede que te quedes sin batería pronto"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Queda un <xliff:g id="PERCENTAGE">%1$s</xliff:g> (tiempo restante aproximado según tu uso: <xliff:g id="TIME">%2$s</xliff:g>)"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"Queda un <xliff:g id="PERCENTAGE">%1$s</xliff:g> (tiempo restante aproximado: <xliff:g id="TIME">%2$s</xliff:g>)"</string>
@@ -471,7 +471,7 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Silencio\ntotal"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Solo\ncon prioridad"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Solo\nalarmas"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga sin cables • En <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> terminará de cargarse"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga inalámbrica • En <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> terminará de cargarse"</string>
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando • En <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> terminará de cargarse"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga rápida • En <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> terminará de cargarse"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga lenta • En <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> terminará de cargarse"</string>
