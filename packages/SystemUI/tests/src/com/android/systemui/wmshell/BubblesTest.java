@@ -92,6 +92,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -151,6 +152,8 @@ import java.util.Optional;
 public class BubblesTest extends SysuiTestCase {
     @Mock
     private NotificationEntryManager mNotificationEntryManager;
+    @Mock
+    private CommonNotifCollection mCommonNotifCollection;
     @Mock
     private NotificationGroupManagerLegacy mNotificationGroupManager;
     @Mock
@@ -299,9 +302,8 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleEntry2User11 = BubblesManager.notifToBubbleEntry(
                 mNotificationTestHelper.createBubble(handle));
 
-        // Return non-null notification data from the NEM
-        when(mNotificationEntryManager
-                .getActiveNotificationUnfiltered(mRow.getKey())).thenReturn(mRow);
+        // Return non-null notification data from the CommonNotifCollection
+        when(mCommonNotifCollection.getEntry(mRow.getKey())).thenReturn(mRow);
 
         mZenModeConfig.suppressedVisualEffects = 0;
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
@@ -371,12 +373,14 @@ public class BubblesTest extends SysuiTestCase {
                 mLockscreenUserManager,
                 mNotificationGroupManager,
                 mNotificationEntryManager,
+                mCommonNotifCollection,
                 mNotifPipeline,
                 mSysUiState,
                 mNotifPipelineFlags,
                 mDumpManager,
                 syncExecutor);
 
+        // XXX: Does *this* need to be changed?
         // Get a reference to the BubbleController's entry listener
         verify(mNotificationEntryManager, atLeastOnce())
                 .addNotificationEntryListener(mEntryListenerCaptor.capture());
@@ -421,10 +425,8 @@ public class BubblesTest extends SysuiTestCase {
     public void testPromoteBubble_autoExpand() throws Exception {
         mBubbleController.updateBubble(mBubbleEntry2);
         mBubbleController.updateBubble(mBubbleEntry);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow.getKey()))
-                .thenReturn(mRow);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow2.getKey()))
-                .thenReturn(mRow2);
+        when(mCommonNotifCollection.getEntry(mRow.getKey())).thenReturn(mRow);
+        when(mCommonNotifCollection.getEntry(mRow2.getKey())).thenReturn(mRow2);
         mBubbleController.removeBubble(
                 mRow.getKey(), Bubbles.DISMISS_USER_GESTURE);
 
@@ -452,10 +454,8 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.updateBubble(mBubbleEntry2);
         mBubbleController.updateBubble(mBubbleEntry, /* suppressFlyout */
                 false, /* showInShade */ true);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow.getKey()))
-                .thenReturn(mRow);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow2.getKey()))
-                .thenReturn(mRow2);
+        when(mCommonNotifCollection.getEntry(mRow.getKey())).thenReturn(mRow);
+        when(mCommonNotifCollection.getEntry(mRow2.getKey())).thenReturn(mRow2);
         mBubbleController.removeBubble(
                 mRow.getKey(), Bubbles.DISMISS_USER_GESTURE);
 
@@ -958,12 +958,9 @@ public class BubblesTest extends SysuiTestCase {
                 mBubbleEntry2, /* suppressFlyout */ false, /* showInShade */ false);
         mBubbleController.updateBubble(
                 mBubbleEntry3, /* suppressFlyout */ false, /* showInShade */ false);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow.getKey()))
-                .thenReturn(mRow);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow2.getKey()))
-                .thenReturn(mRow2);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow3.getKey()))
-                .thenReturn(mRow3);
+        when(mCommonNotifCollection.getEntry(mRow.getKey())).thenReturn(mRow);
+        when(mCommonNotifCollection.getEntry(mRow2.getKey())).thenReturn(mRow2);
+        when(mCommonNotifCollection.getEntry(mRow3.getKey())).thenReturn(mRow3);
         assertEquals(mBubbleData.getBubbles().size(), 3);
 
         mBubbleData.setMaxOverflowBubbles(1);
@@ -1021,7 +1018,7 @@ public class BubblesTest extends SysuiTestCase {
         // GIVEN a group summary with a bubble child
         ExpandableNotificationRow groupSummary = mNotificationTestHelper.createGroup(0);
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
-        when(mNotificationEntryManager.getPendingOrActiveNotif(groupedBubble.getEntry().getKey()))
+        when(mCommonNotifCollection.getEntry(groupedBubble.getEntry().getKey()))
                 .thenReturn(groupedBubble.getEntry());
         mEntryListener.onPendingEntryAdded(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
@@ -1046,7 +1043,7 @@ public class BubblesTest extends SysuiTestCase {
         ExpandableNotificationRow groupSummary = mNotificationTestHelper.createGroup(0);
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
         mEntryListener.onPendingEntryAdded(groupedBubble.getEntry());
-        when(mNotificationEntryManager.getPendingOrActiveNotif(groupedBubble.getEntry().getKey()))
+        when(mCommonNotifCollection.getEntry(groupedBubble.getEntry().getKey()))
                 .thenReturn(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
         assertTrue(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));
@@ -1069,7 +1066,7 @@ public class BubblesTest extends SysuiTestCase {
         // GIVEN a group summary with two (non-bubble) children and one bubble child
         ExpandableNotificationRow groupSummary = mNotificationTestHelper.createGroup(2);
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
-        when(mNotificationEntryManager.getPendingOrActiveNotif(groupedBubble.getEntry().getKey()))
+        when(mCommonNotifCollection.getEntry(groupedBubble.getEntry().getKey()))
                 .thenReturn(groupedBubble.getEntry());
         mEntryListener.onPendingEntryAdded(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
