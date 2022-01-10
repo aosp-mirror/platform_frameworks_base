@@ -3537,8 +3537,11 @@ public class UserManagerService extends IUserManager.Stub {
                     Slog.wtf(LOG_TAG, "Seeing both legacy and current local restrictions in xml");
                 }
             } else if (legacyLocalRestrictions != null) {
-                mDevicePolicyLocalUserRestrictions.put(id,
-                        new RestrictionsSet(id, legacyLocalRestrictions));
+                RestrictionsSet legacyLocalRestrictionsSet =
+                        legacyLocalRestrictions.isEmpty()
+                                ? new RestrictionsSet()
+                                : new RestrictionsSet(id, legacyLocalRestrictions);
+                mDevicePolicyLocalUserRestrictions.put(id, legacyLocalRestrictionsSet);
             }
             if (globalRestrictions != null) {
                 mDevicePolicyGlobalUserRestrictions.updateRestrictions(id,
