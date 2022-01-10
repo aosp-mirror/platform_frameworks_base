@@ -26,12 +26,13 @@ import android.os.Bundle;
 import android.view.Surface;
 
 /**
- * Sub-interface of ITvIAppService.aidl which is created per session and has its own context.
+ * Sub-interface of ITvInteractiveAppService.aidl which is created per session and has its own
+ * context.
  * @hide
  */
-oneway interface ITvIAppSession {
-    void startIApp();
-    void stopIApp();
+oneway interface ITvInteractiveAppSession {
+    void startInteractiveApp();
+    void stopInteractiveApp();
     void createBiInteractiveApp(in Uri biIAppUri, in Bundle params);
     void destroyBiInteractiveApp(in String biIAppId);
     void sendCurrentChannelUri(in Uri channelUri);

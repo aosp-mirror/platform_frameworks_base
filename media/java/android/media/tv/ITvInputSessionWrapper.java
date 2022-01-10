@@ -247,7 +247,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 break;
             }
             case DO_SET_IAPP_NOTIFICATION_ENABLED: {
-                mTvInputSessionImpl.setIAppNotificationEnabled((Boolean) msg.obj);
+                mTvInputSessionImpl.setInteractiveAppNotificationEnabled((Boolean) msg.obj);
                 break;
             }
             case DO_REQUEST_AD: {
@@ -322,7 +322,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void setIAppNotificationEnabled(boolean enabled) {
+    public void setInteractiveAppNotificationEnabled(boolean enabled) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageO(DO_SET_IAPP_NOTIFICATION_ENABLED, enabled));
     }

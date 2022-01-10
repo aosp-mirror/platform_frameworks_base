@@ -42,7 +42,7 @@ oneway interface ITvInputSession {
     void setCaptionEnabled(boolean enabled);
     void selectTrack(int type, in String trackId);
 
-    void setIAppNotificationEnabled(boolean enable);
+    void setInteractiveAppNotificationEnabled(boolean enable);
 
     void appPrivateCommand(in String action, in Bundle data);
 

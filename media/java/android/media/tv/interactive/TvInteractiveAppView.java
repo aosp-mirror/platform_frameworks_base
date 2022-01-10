@@ -16,6 +16,7 @@
 
 package android.media.tv.interactive;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -45,13 +46,14 @@ import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Displays contents of interactive TV applications.
  * @hide
  */
-public class TvIAppView extends ViewGroup {
-    private static final String TAG = "TvIAppView";
+public class TvInteractiveAppView extends ViewGroup {
+    private static final String TAG = "TvInteractiveAppView";
     private static final boolean DEBUG = false;
 
     private static final int SET_TVVIEW_SUCCESS = 1;
@@ -59,11 +61,13 @@ public class TvIAppView extends ViewGroup {
     private static final int UNSET_TVVIEW_SUCCESS = 3;
     private static final int UNSET_TVVIEW_FAIL = 4;
 
-    private final TvIAppManager mTvIAppManager;
+    private final TvIAppManager mTvInteractiveAppManager;
     private final Handler mHandler = new Handler();
+    private final Object mCallbackLock = new Object();
     private Session mSession;
     private MySessionCallback mSessionCallback;
-    private TvIAppCallback mCallback;
+    private TvInteractiveAppCallback mCallback;
+    private Executor mCallbackExecutor;
     private SurfaceView mSurfaceView;
     private Surface mSurface;
 
@@ -114,15 +118,16 @@ public class TvIAppView extends ViewGroup {
         }
     };
 
-    public TvIAppView(@NonNull Context context) {
+    public TvInteractiveAppView(@NonNull Context context) {
         this(context, null, 0);
     }
 
-    public TvIAppView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public TvInteractiveAppView(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public TvIAppView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public TvInteractiveAppView(@NonNull Context context, @Nullable AttributeSet attrs,
+            int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         int sourceResId = Resources.getAttributeSetSourceResId(attrs);
         if (sourceResId != Resources.ID_NULL) {
@@ -136,31 +141,50 @@ public class TvIAppView extends ViewGroup {
         }
         mDefStyleAttr = defStyleAttr;
         resetSurfaceView();
-        mTvIAppManager = (TvIAppManager) getContext().getSystemService(Context.TV_IAPP_SERVICE);
+        mTvInteractiveAppManager = (TvIAppManager) getContext().getSystemService(
+                Context.TV_IAPP_SERVICE);
     }
 
     /**
-     * Sets the callback to be invoked when an event is dispatched to this TvIAppView.
+     * Sets the callback to be invoked when an event is dispatched to this TvInteractiveAppView.
      *
      * @param callback The callback to receive events. A value of {@code null} removes the existing
-     *            callback.
+     *                 callback.
      */
-    public void setCallback(@Nullable TvIAppCallback callback) {
-        mCallback = callback;
+    public void setCallback(
+            @NonNull TvInteractiveAppCallback callback,
+            @NonNull @CallbackExecutor Executor executor) {
+        synchronized (mCallbackLock) {
+            mCallbackExecutor = executor;
+            mCallback = callback;
+        }
     }
 
+    /**
+     * Clears the callback.
+     */
+    public void clearCallback() {
+        synchronized (mCallbackLock) {
+            mCallback = null;
+            mCallbackExecutor = null;
+        }
+    }
+
+    /** @hide */
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         createSessionMediaView();
     }
 
+    /** @hide */
     @Override
     protected void onDetachedFromWindow() {
         removeSessionMediaView();
         super.onDetachedFromWindow();
     }
 
+    /** @hide */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (DEBUG) {
@@ -175,6 +199,7 @@ public class TvIAppView extends ViewGroup {
         }
     }
 
+    /** @hide */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         mSurfaceView.measure(widthMeasureSpec, heightMeasureSpec);
@@ -186,6 +211,7 @@ public class TvIAppView extends ViewGroup {
                         childState << MEASURED_HEIGHT_STATE_SHIFT));
     }
 
+    /** @hide */
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
@@ -216,7 +242,8 @@ public class TvIAppView extends ViewGroup {
     }
 
     /**
-     * Resets this TvIAppView.
+     * Resets this TvInteractiveAppView.
+     * @hide
      */
     public void reset() {
         if (DEBUG) Log.d(TAG, "reset()");
@@ -302,6 +329,7 @@ public class TvIAppView extends ViewGroup {
 
     /**
      * Dispatches an unhandled input event to the next receiver.
+     * @hide
      */
     public boolean dispatchUnhandledInputEvent(@NonNull InputEvent event) {
         if (mOnUnhandledInputEventListener != null) {
@@ -314,11 +342,13 @@ public class TvIAppView extends ViewGroup {
 
     /**
      * Called when an unhandled input event also has not been handled by the user provided
-     * callback. This is the last chance to handle the unhandled input event in the TvIAppView.
+     * callback. This is the last chance to handle the unhandled input event in the
+     * TvInteractiveAppView.
      *
      * @param event The input event.
      * @return If you handled the event, return {@code true}. If you want to allow the event to be
      *         handled by the next receiver, return {@code false}.
+     * @hide
      */
     public boolean onUnhandledInputEvent(@NonNull InputEvent event) {
         return false;
@@ -329,6 +359,7 @@ public class TvIAppView extends ViewGroup {
      * by the TV Interactive App.
      *
      * @param listener The callback to be invoked when the unhandled input event is received.
+     * @hide
      */
     public void setOnUnhandledInputEventListener(@NonNull OnUnhandledInputEventListener listener) {
         mOnUnhandledInputEventListener = listener;
@@ -350,44 +381,47 @@ public class TvIAppView extends ViewGroup {
 
     /**
      * Prepares the interactive application.
+     * @hide
      */
-    public void prepareIApp(@NonNull String iAppServiceId, int type) {
+    public void prepareInteractiveApp(@NonNull String iAppServiceId, int type) {
         // TODO: document and handle the cases that this method is called multiple times.
         if (DEBUG) {
-            Log.d(TAG, "prepareIApp");
+            Log.d(TAG, "prepareInteractiveApp");
         }
         mSessionCallback = new MySessionCallback(iAppServiceId, type);
-        if (mTvIAppManager != null) {
-            mTvIAppManager.createSession(iAppServiceId, type, mSessionCallback, mHandler);
+        if (mTvInteractiveAppManager != null) {
+            mTvInteractiveAppManager.createSession(iAppServiceId, type, mSessionCallback, mHandler);
         }
     }
 
     /**
      * Starts the interactive application.
      */
-    public void startIApp() {
+    public void startInteractiveApp() {
         if (DEBUG) {
-            Log.d(TAG, "startIApp");
+            Log.d(TAG, "startInteractiveApp");
         }
         if (mSession != null) {
-            mSession.startIApp();
+            mSession.startInteractiveApp();
         }
     }
 
     /**
      * Stops the interactive application.
+     * @hide
      */
-    public void stopIApp() {
+    public void stopInteractiveApp() {
         if (DEBUG) {
-            Log.d(TAG, "stopIApp");
+            Log.d(TAG, "stopInteractiveApp");
         }
         if (mSession != null) {
-            mSession.stopIApp();
+            mSession.stopInteractiveApp();
         }
     }
 
     /**
      * Sends current channel URI to related TV interactive app.
+     * @hide
      */
     public void sendCurrentChannelUri(Uri channelUri) {
         if (DEBUG) {
@@ -400,6 +434,7 @@ public class TvIAppView extends ViewGroup {
 
     /**
      * Sends current channel logical channel number (LCN) to related TV interactive app.
+     * @hide
      */
     public void sendCurrentChannelLcn(int lcn) {
         if (DEBUG) {
@@ -412,6 +447,7 @@ public class TvIAppView extends ViewGroup {
 
     /**
      * Sends stream volume to related TV interactive app.
+     * @hide
      */
     public void sendStreamVolume(float volume) {
         if (DEBUG) {
@@ -424,6 +460,7 @@ public class TvIAppView extends ViewGroup {
 
     /**
      * Sends track info list to related TV interactive app.
+     * @hide
      */
     public void sendTrackInfoList(List<TvTrackInfo> tracks) {
         if (DEBUG) {
@@ -478,16 +515,18 @@ public class TvIAppView extends ViewGroup {
         }
     }
 
-    public Session getIAppSession() {
+    /** @hide */
+    public Session getInteractiveAppSession() {
         return mSession;
     }
 
     /**
-     * Sets the TvIAppView to receive events from TIS. This method links the session of
+     * Sets the TvInteractiveAppView to receive events from TIS. This method links the session of
      * TvIAppManager to TvInputManager session, so the TIAS can get the TIS events.
      *
-     * @param tvView the TvView to be linked to this TvIAppView via linking of Sessions.
+     * @param tvView the TvView to be linked to this TvInteractiveAppView via linking of Sessions.
      * @return to be added
+     * @hide
      */
     public int setTvView(@Nullable TvView tvView) {
         if (tvView == null) {
@@ -498,7 +537,7 @@ public class TvIAppView extends ViewGroup {
             return SET_TVVIEW_FAIL;
         }
         mSession.setInputSession(inputSession);
-        inputSession.setIAppSession(mSession);
+        inputSession.setInteractiveAppSession(mSession);
         return SET_TVVIEW_SUCCESS;
     }
 
@@ -506,15 +545,16 @@ public class TvIAppView extends ViewGroup {
         if (mSession == null || mSession.getInputSession() == null) {
             return UNSET_TVVIEW_FAIL;
         }
-        mSession.getInputSession().setIAppSession(null);
+        mSession.getInputSession().setInteractiveAppSession(null);
         mSession.setInputSession(null);
         return UNSET_TVVIEW_SUCCESS;
     }
 
     /**
-     * Callback used to receive various status updates on the {@link TvIAppView}.
+     * Callback used to receive various status updates on the {@link TvInteractiveAppView}.
      */
-    public abstract static class TvIAppCallback {
+    public abstract static class TvInteractiveAppCallback {
+        // TODO: unhide the following public APIs
 
         /**
          * This is called when a command is requested to be processed by the related TV input.
@@ -522,10 +562,11 @@ public class TvIAppView extends ViewGroup {
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param cmdType type of the command
          * @param parameters parameters of the command
+         * @hide
          */
         public void onCommandRequest(
                 @NonNull String iAppServiceId,
-                @NonNull @TvIAppService.IAppServiceCommandType String cmdType,
+                @NonNull @TvIAppService.InteractiveAppServiceCommandType String cmdType,
                 @Nullable Bundle parameters) {
         }
 
@@ -534,6 +575,7 @@ public class TvIAppView extends ViewGroup {
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param state current session state.
+         * @hide
          */
         public void onSessionStateChanged(@NonNull String iAppServiceId, int state) {
         }
@@ -546,6 +588,7 @@ public class TvIAppView extends ViewGroup {
          *                  {@link Session#createBiInteractiveApp(Uri, Bundle)}
          * @param biIAppId BI interactive app ID, which can be used to destroy the BI interactive
          *                 app.
+         * @hide
          */
         public void onBiInteractiveAppCreated(@NonNull String iAppServiceId, @NonNull Uri biIAppUri,
                 @Nullable String biIAppId) {
@@ -555,38 +598,47 @@ public class TvIAppView extends ViewGroup {
          * This is called when {@link TvIAppService.Session#SetVideoBounds} is called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @hide
          */
         public void onSetVideoBounds(@NonNull String iAppServiceId, @NonNull Rect rect) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#RequestCurrentChannelUri} is called.
+         * This is called when {@link TvIAppService.Session#RequestCurrentChannelUri} is
+         * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @hide
          */
         public void onRequestCurrentChannelUri(@NonNull String iAppServiceId) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#RequestCurrentChannelLcn} is called.
+         * This is called when {@link TvIAppService.Session#RequestCurrentChannelLcn} is
+         * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @hide
          */
         public void onRequestCurrentChannelLcn(@NonNull String iAppServiceId) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#RequestStreamVolume} is called.
+         * This is called when {@link TvIAppService.Session#RequestStreamVolume} is
+         * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @hide
          */
         public void onRequestStreamVolume(@NonNull String iAppServiceId) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#RequestTrackInfoList} is called.
+         * This is called when {@link TvIAppService.Session#RequestTrackInfoList} is
+         * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @hide
          */
         public void onRequestTrackInfoList(@NonNull String iAppServiceId) {
         }
@@ -595,6 +647,7 @@ public class TvIAppView extends ViewGroup {
 
     /**
      * Interface definition for a callback to be invoked when the unhandled input event is received.
+     * @hide
      */
     public interface OnUnhandledInputEventListener {
         /**
@@ -685,8 +738,10 @@ public class TvIAppView extends ViewGroup {
         }
 
         @Override
-        public void onCommandRequest(Session session,
-                @TvIAppService.IAppServiceCommandType String cmdType, Bundle parameters) {
+        public void onCommandRequest(
+                Session session,
+                @TvIAppService.InteractiveAppServiceCommandType String cmdType,
+                Bundle parameters) {
             if (DEBUG) {
                 Log.d(TAG, "onCommandRequest (cmdType=" + cmdType + ", parameters="
                         + parameters.toString() + ")");
@@ -695,8 +750,16 @@ public class TvIAppView extends ViewGroup {
                 Log.w(TAG, "onCommandRequest - session not created");
                 return;
             }
-            if (mCallback != null) {
-                mCallback.onCommandRequest(mIAppServiceId, cmdType, parameters);
+            synchronized (mCallbackLock) {
+                if (mCallbackExecutor != null) {
+                    mCallbackExecutor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (mCallback != null) {
+                                mCallback.onCommandRequest(mIAppServiceId, cmdType, parameters);
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -709,8 +772,16 @@ public class TvIAppView extends ViewGroup {
                 Log.w(TAG, "onSessionStateChanged - session not created");
                 return;
             }
-            if (mCallback != null) {
-                mCallback.onSessionStateChanged(mIAppServiceId, state);
+            synchronized (mCallbackLock) {
+                if (mCallbackExecutor != null) {
+                    mCallbackExecutor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (mCallback != null) {
+                                mCallback.onSessionStateChanged(mIAppServiceId, state);
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -724,8 +795,17 @@ public class TvIAppView extends ViewGroup {
                 Log.w(TAG, "onBiInteractiveAppCreated - session not created");
                 return;
             }
-            if (mCallback != null) {
-                mCallback.onBiInteractiveAppCreated(mIAppServiceId, biIAppUri, biIAppId);
+            synchronized (mCallbackLock) {
+                if (mCallbackExecutor != null) {
+                    mCallbackExecutor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (mCallback != null) {
+                                mCallback.onBiInteractiveAppCreated(
+                                        mIAppServiceId, biIAppUri, biIAppId);
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -738,8 +818,16 @@ public class TvIAppView extends ViewGroup {
                 Log.w(TAG, "onSetVideoBounds - session not created");
                 return;
             }
-            if (mCallback != null) {
-                mCallback.onSetVideoBounds(mIAppServiceId, rect);
+            synchronized (mCallbackLock) {
+                if (mCallbackExecutor != null) {
+                    mCallbackExecutor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (mCallback != null) {
+                                mCallback.onSetVideoBounds(mIAppServiceId, rect);
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -752,8 +840,16 @@ public class TvIAppView extends ViewGroup {
                 Log.w(TAG, "onRequestCurrentChannelUri - session not created");
                 return;
             }
-            if (mCallback != null) {
-                mCallback.onRequestCurrentChannelUri(mIAppServiceId);
+            synchronized (mCallbackLock) {
+                if (mCallbackExecutor != null) {
+                    mCallbackExecutor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (mCallback != null) {
+                                mCallback.onRequestCurrentChannelUri(mIAppServiceId);
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -766,8 +862,16 @@ public class TvIAppView extends ViewGroup {
                 Log.w(TAG, "onRequestCurrentChannelLcn - session not created");
                 return;
             }
-            if (mCallback != null) {
-                mCallback.onRequestCurrentChannelLcn(mIAppServiceId);
+            synchronized (mCallbackLock) {
+                if (mCallbackExecutor != null) {
+                    mCallbackExecutor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (mCallback != null) {
+                                mCallback.onRequestCurrentChannelLcn(mIAppServiceId);
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -780,8 +884,16 @@ public class TvIAppView extends ViewGroup {
                 Log.w(TAG, "onRequestStreamVolume - session not created");
                 return;
             }
-            if (mCallback != null) {
-                mCallback.onRequestStreamVolume(mIAppServiceId);
+            synchronized (mCallbackLock) {
+                if (mCallbackExecutor != null) {
+                    mCallbackExecutor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (mCallback != null) {
+                                mCallback.onRequestStreamVolume(mIAppServiceId);
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -794,8 +906,16 @@ public class TvIAppView extends ViewGroup {
                 Log.w(TAG, "onRequestTrackInfoList - session not created");
                 return;
             }
-            if (mCallback != null) {
-                mCallback.onRequestTrackInfoList(mIAppServiceId);
+            synchronized (mCallbackLock) {
+                if (mCallbackExecutor != null) {
+                    mCallbackExecutor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (mCallback != null) {
+                                mCallback.onRequestTrackInfoList(mIAppServiceId);
+                            }
+                        }
+                    });
+                }
             }
         }
     }

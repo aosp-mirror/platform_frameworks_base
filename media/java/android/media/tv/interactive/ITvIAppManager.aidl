@@ -20,9 +20,9 @@ import android.graphics.Rect;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvTrackInfo;
-import android.media.tv.interactive.ITvIAppClient;
-import android.media.tv.interactive.ITvIAppManagerCallback;
-import android.media.tv.interactive.TvIAppInfo;
+import android.media.tv.interactive.ITvInteractiveAppClient;
+import android.media.tv.interactive.ITvInteractiveAppManagerCallback;
+import android.media.tv.interactive.TvInteractiveAppInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Surface;
@@ -32,12 +32,12 @@ import android.view.Surface;
  * @hide
  */
 interface ITvIAppManager {
-    List<TvIAppInfo> getTvIAppServiceList(int userId);
+    List<TvInteractiveAppInfo> getTvInteractiveAppServiceList(int userId);
     void prepare(String tiasId, int type, int userId);
     void notifyAppLinkInfo(String tiasId, in Bundle info, int userId);
     void sendAppLinkCommand(String tiasId, in Bundle command, int userId);
-    void startIApp(in IBinder sessionToken, int userId);
-    void stopIApp(in IBinder sessionToken, int userId);
+    void startInteractiveApp(in IBinder sessionToken, int userId);
+    void stopInteractiveApp(in IBinder sessionToken, int userId);
     void createBiInteractiveApp(
             in IBinder sessionToken, in Uri biIAppUri, in Bundle params, int userId);
     void destroyBiInteractiveApp(in IBinder sessionToken, in String biIAppId, int userId);
@@ -45,8 +45,8 @@ interface ITvIAppManager {
     void sendCurrentChannelLcn(in IBinder sessionToken, int lcn, int userId);
     void sendStreamVolume(in IBinder sessionToken, float volume, int userId);
     void sendTrackInfoList(in IBinder sessionToken, in List<TvTrackInfo> tracks, int userId);
-    void createSession(
-            in ITvIAppClient client, in String iAppServiceId, int type, int seq, int userId);
+    void createSession(in ITvInteractiveAppClient client, in String iAppServiceId, int type,
+            int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
     void notifyTuned(in IBinder sessionToken, in Uri channelUri, int userId);
     void notifyTrackSelected(in IBinder sessionToken, int type, in String trackId, int userId);
@@ -67,6 +67,6 @@ interface ITvIAppManager {
     void relayoutMediaView(in IBinder sessionToken, in Rect frame, int userId);
     void removeMediaView(in IBinder sessionToken, int userId);
 
-    void registerCallback(in ITvIAppManagerCallback callback, int userId);
-    void unregisterCallback(in ITvIAppManagerCallback callback, int userId);
+    void registerCallback(in ITvInteractiveAppManagerCallback callback, int userId);
+    void unregisterCallback(in ITvInteractiveAppManagerCallback callback, int userId);
 }

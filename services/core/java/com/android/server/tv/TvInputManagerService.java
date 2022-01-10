@@ -1851,18 +1851,19 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void setIAppNotificationEnabled(IBinder sessionToken, boolean enabled, int userId) {
+        public void setInteractiveAppNotificationEnabled(
+                IBinder sessionToken, boolean enabled, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "setIAppNotificationEnabled");
+                    userId, "setInteractiveAppNotificationEnabled");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId)
-                                .setIAppNotificationEnabled(enabled);
+                                .setInteractiveAppNotificationEnabled(enabled);
                     } catch (RemoteException | SessionNotFoundException e) {
-                        Slog.e(TAG, "error in setIAppNotificationEnabled", e);
+                        Slog.e(TAG, "error in setInteractiveAppNotificationEnabled", e);
                     }
                 }
             } finally {
