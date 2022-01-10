@@ -357,18 +357,18 @@ public class StretchShaderActivity extends Activity {
         float uScrollX = mScrollX;
         float uScrollY = mScrollY;
 
-        mRuntimeShader.setUniform("uMaxStretchIntensity", mMaxStretchIntensity);
-        mRuntimeShader.setUniform("uStretchAffectedDist", mStretchAffectedDistance);
-        mRuntimeShader.setUniform("uDistanceStretchedX", distanceStretchedX);
-        mRuntimeShader.setUniform("uDistanceStretchedY", distanceStretchedY);
-        mRuntimeShader.setUniform("uDistDiffX", diffX);
-        mRuntimeShader.setUniform("uDistDiffY", diffY);
-        mRuntimeShader.setUniform("uOverscrollX", normOverScrollDistX);
-        mRuntimeShader.setUniform("uOverscrollY", normOverScrollDistY);
-        mRuntimeShader.setUniform("uScrollX", uScrollX);
-        mRuntimeShader.setUniform("uScrollY", uScrollY);
-        mRuntimeShader.setUniform("viewportWidth", width);
-        mRuntimeShader.setUniform("viewportHeight", height);
+        mRuntimeShader.setFloatUniform("uMaxStretchIntensity", mMaxStretchIntensity);
+        mRuntimeShader.setFloatUniform("uStretchAffectedDist", mStretchAffectedDistance);
+        mRuntimeShader.setFloatUniform("uDistanceStretchedX", distanceStretchedX);
+        mRuntimeShader.setFloatUniform("uDistanceStretchedY", distanceStretchedY);
+        mRuntimeShader.setFloatUniform("uDistDiffX", diffX);
+        mRuntimeShader.setFloatUniform("uDistDiffY", diffY);
+        mRuntimeShader.setFloatUniform("uOverscrollX", normOverScrollDistX);
+        mRuntimeShader.setFloatUniform("uOverscrollY", normOverScrollDistY);
+        mRuntimeShader.setFloatUniform("uScrollX", uScrollX);
+        mRuntimeShader.setFloatUniform("uScrollY", uScrollY);
+        mRuntimeShader.setFloatUniform("viewportWidth", width);
+        mRuntimeShader.setFloatUniform("viewportHeight", height);
 
         mImageView.setRenderEffect(RenderEffect.createShaderEffect(mRuntimeShader));
 

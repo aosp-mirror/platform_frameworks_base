@@ -178,36 +178,6 @@ public class RuntimeShader extends Shader {
         setUniform(uniformName, values, false);
     }
 
-    /**
-     * Old method signature used by some callers within the platform code
-     * @hide
-     * @deprecated use setFloatUniform instead
-     */
-    @Deprecated
-    public void setUniform(@NonNull String uniformName, float[] values) {
-        setFloatUniform(uniformName, values);
-    }
-
-    /**
-     * Old method signature used by some callers within the platform code
-     * @hide
-     * @deprecated use setFloatUniform instead
-     */
-    @Deprecated
-    public void setUniform(@NonNull String uniformName, float value) {
-        setFloatUniform(uniformName, value);
-    }
-
-    /**
-     * Old method signature used by some callers within the platform code
-     * @hide
-     * @deprecated use setFloatUniform instead
-     */
-    @Deprecated
-    public void setUniform(@NonNull String uniformName, float value1, float value2) {
-        setFloatUniform(uniformName, value1, value2);
-    }
-
     private void setFloatUniform(@NonNull String uniformName, float value1, float value2,
             float value3, float value4, int count) {
         if (uniformName == null) {
