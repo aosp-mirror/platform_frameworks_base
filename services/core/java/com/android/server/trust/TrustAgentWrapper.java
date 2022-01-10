@@ -16,6 +16,8 @@
 
 package com.android.server.trust;
 
+import static android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_DISPLAY_MESSAGE;
+
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -99,6 +101,7 @@ public class TrustAgentWrapper {
     // Trust state
     private boolean mTrusted;
     private CharSequence mMessage;
+    private boolean mDisplayTrustGrantedMessage;
     private boolean mTrustDisabledByDpm;
     private boolean mManagingTrust;
     private IBinder mSetTrustAgentFeaturesToken;
@@ -132,6 +135,7 @@ public class TrustAgentWrapper {
                     mTrusted = true;
                     mMessage = (CharSequence) msg.obj;
                     int flags = msg.arg1;
+                    mDisplayTrustGrantedMessage = (flags & FLAG_GRANT_TRUST_DISPLAY_MESSAGE) != 0;
                     long durationMs = msg.getData().getLong(DATA_DURATION);
                     if (durationMs > 0) {
                         final long duration;
@@ -166,6 +170,7 @@ public class TrustAgentWrapper {
                     // Fall through.
                 case MSG_REVOKE_TRUST:
                     mTrusted = false;
+                    mDisplayTrustGrantedMessage = false;
                     mMessage = null;
                     mHandler.removeMessages(MSG_TRUST_TIMEOUT);
                     if (msg.what == MSG_REVOKE_TRUST) {
@@ -199,6 +204,7 @@ public class TrustAgentWrapper {
                     mManagingTrust = msg.arg1 != 0;
                     if (!mManagingTrust) {
                         mTrusted = false;
+                        mDisplayTrustGrantedMessage = false;
                         mMessage = null;
                     }
                     mTrustManagerService.mArchive.logManagingTrust(mUserId, mName, mManagingTrust);
@@ -271,12 +277,13 @@ public class TrustAgentWrapper {
     private ITrustAgentServiceCallback mCallback = new ITrustAgentServiceCallback.Stub() {
 
         @Override
-        public void grantTrust(CharSequence userMessage, long durationMs, int flags) {
-            if (DEBUG) Slog.d(TAG, "enableTrust(" + userMessage + ", durationMs = " + durationMs
+        public void grantTrust(CharSequence message, long durationMs, int flags) {
+            if (DEBUG) {
+                Slog.d(TAG, "enableTrust(" + message + ", durationMs = " + durationMs
                         + ", flags = " + flags + ")");
+            }
 
-            Message msg = mHandler.obtainMessage(
-                    MSG_GRANT_TRUST, flags, 0, userMessage);
+            Message msg = mHandler.obtainMessage(MSG_GRANT_TRUST, flags, 0, message);
             msg.getData().putLong(DATA_DURATION, durationMs);
             msg.sendToTarget();
         }
@@ -577,6 +584,14 @@ public class TrustAgentWrapper {
 
     public CharSequence getMessage() {
         return mMessage;
+    }
+
+    /**
+     * Whether the trust agent would like to display {@link #getMessage()} to the user when trust
+     * is granted.
+     */
+    public boolean shouldDisplayTrustGrantedMessage() {
+        return mDisplayTrustGrantedMessage;
     }
 
     public void destroy() {

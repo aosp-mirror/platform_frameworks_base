@@ -443,7 +443,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     @Override
-    public void onTrustChanged(boolean enabled, int userId, int flags) {
+    public void onTrustChanged(boolean enabled, int userId, int flags,
+            List<String> trustGrantedMessages) {
         Assert.isMainThread();
         boolean wasTrusted = mUserHasTrust.get(userId, false);
         mUserHasTrust.put(userId, enabled);
@@ -462,6 +463,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 cb.onTrustChanged(userId);
                 if (enabled && flags != 0) {
                     cb.onTrustGrantedWithFlags(flags, userId);
+                }
+            }
+        }
+
+        if (KeyguardUpdateMonitor.getCurrentUser() == userId && getUserHasTrust(userId)) {
+            CharSequence message = null;
+            if (trustGrantedMessages != null && trustGrantedMessages.size() > 0) {
+                message = trustGrantedMessages.get(0); // for now only shows the first in the list
+            }
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                if (cb != null) {
+                    cb.showTrustGrantedMessage(message);
                 }
             }
         }
