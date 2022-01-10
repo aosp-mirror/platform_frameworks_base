@@ -10896,6 +10896,7 @@ package android.service.games {
     ctor public GameSession();
     method public void onCreate();
     method public void onDestroy();
+    method public void setTaskOverlayView(@NonNull android.view.View, @NonNull android.view.ViewGroup.LayoutParams);
   }
 
   public abstract class GameSessionService extends android.app.Service {
