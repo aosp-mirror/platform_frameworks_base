@@ -39,8 +39,8 @@ namespace android {
 
 static JavaVM* sJvm = nullptr;
 static jmethodID sMethodIdOnComplete;
-static jclass sFrequencyMappingClass;
-static jmethodID sFrequencyMappingCtor;
+static jclass sFrequencyProfileClass;
+static jmethodID sFrequencyProfileCtor;
 static struct {
     jmethodID setCapabilities;
     jmethodID setSupportedEffects;
@@ -51,7 +51,7 @@ static struct {
     jmethodID setPrimitiveDelayMax;
     jmethodID setCompositionSizeMax;
     jmethodID setQFactor;
-    jmethodID setFrequencyMapping;
+    jmethodID setFrequencyProfile;
 } sVibratorInfoBuilderClassInfo;
 static struct {
     jfieldID id;
@@ -437,11 +437,11 @@ static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
         env->SetFloatArrayRegion(maxAmplitudes, 0, amplitudes.size(),
                                  reinterpret_cast<jfloat*>(amplitudes.data()));
     }
-    jobject frequencyMapping =
-            env->NewObject(sFrequencyMappingClass, sFrequencyMappingCtor, resonantFrequency,
+    jobject frequencyProfile =
+            env->NewObject(sFrequencyProfileClass, sFrequencyProfileCtor, resonantFrequency,
                            minFrequency, frequencyResolution, maxAmplitudes);
-    env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setFrequencyMapping,
-                          frequencyMapping);
+    env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setFrequencyProfile,
+                          frequencyProfile);
 
     return info.isFailedLogged("vibratorGetInfo") ? JNI_FALSE : JNI_TRUE;
 }
@@ -485,9 +485,9 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     sRampClassInfo.endFrequencyHz = GetFieldIDOrDie(env, rampClass, "mEndFrequencyHz", "F");
     sRampClassInfo.duration = GetFieldIDOrDie(env, rampClass, "mDuration", "I");
 
-    jclass frequencyMappingClass = FindClassOrDie(env, "android/os/VibratorInfo$FrequencyMapping");
-    sFrequencyMappingClass = static_cast<jclass>(env->NewGlobalRef(frequencyMappingClass));
-    sFrequencyMappingCtor = GetMethodIDOrDie(env, sFrequencyMappingClass, "<init>", "(FFF[F)V");
+    jclass frequencyProfileClass = FindClassOrDie(env, "android/os/VibratorInfo$FrequencyProfile");
+    sFrequencyProfileClass = static_cast<jclass>(env->NewGlobalRef(frequencyProfileClass));
+    sFrequencyProfileCtor = GetMethodIDOrDie(env, sFrequencyProfileClass, "<init>", "(FFF[F)V");
 
     jclass vibratorInfoBuilderClass = FindClassOrDie(env, "android/os/VibratorInfo$Builder");
     sVibratorInfoBuilderClassInfo.setCapabilities =
@@ -517,9 +517,9 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     sVibratorInfoBuilderClassInfo.setQFactor =
             GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setQFactor",
                              "(F)Landroid/os/VibratorInfo$Builder;");
-    sVibratorInfoBuilderClassInfo.setFrequencyMapping =
-            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setFrequencyMapping",
-                             "(Landroid/os/VibratorInfo$FrequencyMapping;)"
+    sVibratorInfoBuilderClassInfo.setFrequencyProfile =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setFrequencyProfile",
+                             "(Landroid/os/VibratorInfo$FrequencyProfile;)"
                              "Landroid/os/VibratorInfo$Builder;");
 
     return jniRegisterNativeMethods(env,

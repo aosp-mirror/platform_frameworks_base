@@ -32955,9 +32955,13 @@ package android.os {
     method @NonNull public int[] areEffectsSupported(@NonNull int...);
     method @NonNull public boolean[] arePrimitivesSupported(@NonNull int...);
     method @RequiresPermission(android.Manifest.permission.VIBRATE) public abstract void cancel();
+    method @Nullable public android.os.vibrator.VibratorFrequencyProfile getFrequencyProfile();
     method public int getId();
     method @NonNull public int[] getPrimitiveDurations(@NonNull int...);
+    method public float getQFactor();
+    method public float getResonantFrequency();
     method public abstract boolean hasAmplitudeControl();
+    method public boolean hasFrequencyControl();
     method public abstract boolean hasVibrator();
     method @Deprecated @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(long);
     method @Deprecated @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(long, android.media.AudioAttributes);
@@ -33279,6 +33283,17 @@ package android.os.strictmode {
   }
 
   public final class WebViewMethodCalledOnWrongThreadViolation extends android.os.strictmode.Violation {
+  }
+
+}
+
+package android.os.vibrator {
+
+  public final class VibratorFrequencyProfile {
+    method public float getMaxAmplitudeMeasurementInterval();
+    method @FloatRange(from=0, to=1) @NonNull public float[] getMaxAmplitudeMeasurements();
+    method public float getMaxFrequency();
+    method public float getMinFrequency();
   }
 
 }
