@@ -24,7 +24,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 /**
- * Helper interface for ITvInteractiveAppSession to allow TvIAppService to notify the
+ * Helper interface for ITvInteractiveAppSession to allow TvInteractiveAppService to notify the
  * system service when there is a related event.
  * @hide
  */

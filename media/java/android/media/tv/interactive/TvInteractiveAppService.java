@@ -65,11 +65,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The TvIAppService class represents a TV interactive applications RTE.
+ * The TvInteractiveAppService class represents a TV interactive applications RTE.
  */
-public abstract class TvIAppService extends Service {
+public abstract class TvInteractiveAppService extends Service {
     private static final boolean DEBUG = false;
-    private static final String TAG = "TvIAppService";
+    private static final String TAG = "TvInteractiveAppService";
 
     private static final int DETACH_MEDIA_VIEW_TIMEOUT_MS = 5000;
 
@@ -83,12 +83,12 @@ public abstract class TvIAppService extends Service {
      * cannot abuse it.
      */
     public static final String SERVICE_INTERFACE =
-            "android.media.tv.interactive.TvIAppService";
+            "android.media.tv.interactive.TvInteractiveAppService";
 
     /**
-     * Name under which a TvIAppService component publishes information about itself. This
+     * Name under which a TvInteractiveAppService component publishes information about itself. This
      * meta-data must reference an XML resource containing an
-     * <code>&lt;{@link android.R.styleable#TvIAppService tv-interactive-app}&gt;</code>
+     * <code>&lt;{@link android.R.styleable#TvInteractiveAppService tv-interactive-app}&gt;</code>
      * tag.
      */
     public static final String SERVICE_META_DATA = "android.media.tv.interactive.app";
@@ -247,7 +247,7 @@ public abstract class TvIAppService extends Service {
      * @hide
      */
     public final void notifyStateChanged(
-            int type, @TvIAppManager.TvInteractiveAppRteState int state) {
+            int type, @TvInteractiveAppManager.TvInteractiveAppRteState int state) {
         mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_RTE_STATE_CHANGED,
                 type, state).sendToTarget();
     }
@@ -319,14 +319,14 @@ public abstract class TvIAppService extends Service {
         }
 
         /**
-         * Starts TvIAppService session.
+         * Starts TvInteractiveAppService session.
          * @hide
          */
         public void onStartInteractiveApp() {
         }
 
         /**
-         * Stops TvIAppService session.
+         * Stops TvInteractiveAppService session.
          * @hide
          */
         public void onStopInteractiveApp() {
@@ -364,6 +364,7 @@ public abstract class TvIAppService extends Service {
         /**
          * To toggle Digital Teletext Application if there is one in AIT app list.
          * @param enable
+         * @hide
          */
         public void onSetTeletextAppEnabled(boolean enable) {
         }
@@ -454,7 +455,7 @@ public abstract class TvIAppService extends Service {
         }
 
         /**
-         * Releases TvIAppService session.
+         * Releases TvInteractiveAppService session.
          * @hide
          */
         public void onRelease() {
@@ -989,8 +990,8 @@ public abstract class TvIAppService extends Service {
          * Notifies when the session state is changed.
          * @param state the current state.
          */
-        public void notifySessionStateChanged(
-                @TvIAppManager.TvInteractiveAppRteState int state) {
+        public final void notifySessionStateChanged(
+                @TvInteractiveAppManager.TvInteractiveAppRteState int state) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -1039,8 +1040,10 @@ public abstract class TvIAppService extends Service {
         /**
          * Notifies when the digital teletext app state is changed.
          * @param state the current state.
+         * @hide
          */
-        public final void notifyTeletextAppStateChanged(@TvIAppManager.TeletextAppState int state) {
+        public final void notifyTeletextAppStateChanged(
+                @TvInteractiveAppManager.TeletextAppState int state) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -1068,7 +1071,7 @@ public abstract class TvIAppService extends Service {
             if (event instanceof KeyEvent) {
                 KeyEvent keyEvent = (KeyEvent) event;
                 if (keyEvent.dispatch(this, mDispatcherState, this)) {
-                    return TvIAppManager.Session.DISPATCH_HANDLED;
+                    return TvInteractiveAppManager.Session.DISPATCH_HANDLED;
                 }
 
                 // TODO: special handlings of navigation keys and media keys
@@ -1077,20 +1080,20 @@ public abstract class TvIAppService extends Service {
                 final int source = motionEvent.getSource();
                 if (motionEvent.isTouchEvent()) {
                     if (onTouchEvent(motionEvent)) {
-                        return TvIAppManager.Session.DISPATCH_HANDLED;
+                        return TvInteractiveAppManager.Session.DISPATCH_HANDLED;
                     }
                 } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
                     if (onTrackballEvent(motionEvent)) {
-                        return TvIAppManager.Session.DISPATCH_HANDLED;
+                        return TvInteractiveAppManager.Session.DISPATCH_HANDLED;
                     }
                 } else {
                     if (onGenericMotionEvent(motionEvent)) {
-                        return TvIAppManager.Session.DISPATCH_HANDLED;
+                        return TvInteractiveAppManager.Session.DISPATCH_HANDLED;
                     }
                 }
             }
             // TODO: handle overlay view
-            return TvIAppManager.Session.DISPATCH_NOT_HANDLED;
+            return TvInteractiveAppManager.Session.DISPATCH_NOT_HANDLED;
         }
 
         private void initialize(ITvInteractiveAppSessionCallback callback) {
@@ -1443,9 +1446,9 @@ public abstract class TvIAppService extends Service {
                 }
 
                 int handled = mSessionImpl.dispatchInputEvent(event, this);
-                if (handled != TvIAppManager.Session.DISPATCH_IN_PROGRESS) {
+                if (handled != TvInteractiveAppManager.Session.DISPATCH_IN_PROGRESS) {
                     finishInputEvent(
-                            event, handled == TvIAppManager.Session.DISPATCH_HANDLED);
+                            event, handled == TvInteractiveAppManager.Session.DISPATCH_HANDLED);
                 }
             }
         }
@@ -1491,7 +1494,7 @@ public abstract class TvIAppService extends Service {
                         return;
                     }
                     ITvInteractiveAppSession stub = new ITvInteractiveAppSessionWrapper(
-                            android.media.tv.interactive.TvIAppService.this, sessionImpl, channel);
+                            TvInteractiveAppService.this, sessionImpl, channel);
 
                     SomeArgs someArgs = SomeArgs.obtain();
                     someArgs.arg1 = sessionImpl;

@@ -23,7 +23,7 @@ import android.view.InputChannel;
 
 /**
  * Top-level interface to a TV Interactive App component (implemented in a Service). It's used for
- * TvIAppManagerService to communicate with TvIAppService.
+ * TvInteractiveAppManagerService to communicate with TvInteractiveAppService.
  * @hide
  */
 oneway interface ITvInteractiveAppService {

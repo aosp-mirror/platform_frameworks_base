@@ -124,8 +124,8 @@ import android.media.projection.MediaProjectionManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
-import android.media.tv.interactive.ITvIAppManager;
-import android.media.tv.interactive.TvIAppManager;
+import android.media.tv.interactive.ITvInteractiveAppManager;
+import android.media.tv.interactive.TvInteractiveAppManager;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.nearby.NearbyFrameworkInitializer;
@@ -964,13 +964,16 @@ public final class SystemServiceRegistry {
                     }
                 });
 
-        registerService(Context.TV_IAPP_SERVICE, TvIAppManager.class,
-                new CachedServiceFetcher<TvIAppManager>() {
+        registerService(Context.TV_INTERACTIVE_APP_SERVICE, TvInteractiveAppManager.class,
+                new CachedServiceFetcher<TvInteractiveAppManager>() {
             @Override
-            public TvIAppManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder iBinder = ServiceManager.getServiceOrThrow(Context.TV_IAPP_SERVICE);
-                ITvIAppManager service = ITvIAppManager.Stub.asInterface(iBinder);
-                return new TvIAppManager(service, ctx.getUserId());
+            public TvInteractiveAppManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                IBinder iBinder =
+                        ServiceManager.getServiceOrThrow(Context.TV_INTERACTIVE_APP_SERVICE);
+                ITvInteractiveAppManager service =
+                        ITvInteractiveAppManager.Stub.asInterface(iBinder);
+                return new TvInteractiveAppManager(service, ctx.getUserId());
             }});
 
         registerService(Context.TV_INPUT_SERVICE, TvInputManager.class,
