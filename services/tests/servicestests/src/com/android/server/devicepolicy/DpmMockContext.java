@@ -47,6 +47,7 @@ import org.junit.Assert;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Context used throughout DPMS tests.
@@ -234,6 +235,8 @@ public class DpmMockContext extends MockContext {
                 return mMockSystemServices.vpnManager;
             case Context.DEVICE_POLICY_SERVICE:
                 return mMockSystemServices.devicePolicyManager;
+            case Context.LOCATION_SERVICE:
+                return mMockSystemServices.locationManager;
         }
         throw new UnsupportedOperationException();
     }
@@ -490,6 +493,11 @@ public class DpmMockContext extends MockContext {
     @Override
     public int getUserId() {
         return UserHandle.getUserId(binder.getCallingUid());
+    }
+
+    @Override
+    public Executor getMainExecutor() {
+        return mMockSystemServices.executor;
     }
 
     @Override
