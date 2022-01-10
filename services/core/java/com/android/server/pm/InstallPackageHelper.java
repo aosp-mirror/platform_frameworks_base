@@ -1969,14 +1969,15 @@ final class InstallPackageHelper {
                             reconciledPkg.mPrepareResult.mExistingPackage.getPackageName());
                     if ((reconciledPkg.mInstallArgs.mInstallFlags & PackageManager.DONT_KILL_APP)
                             == 0) {
-                        if (ps1.getOldCodePaths() == null) {
-                            ps1.setOldCodePaths(new ArraySet<>());
+                        Set<String> oldCodePaths = ps1.getOldCodePaths();
+                        if (oldCodePaths == null) {
+                            oldCodePaths = new ArraySet<>();
                         }
-                        Collections.addAll(ps1.getOldCodePaths(), oldPackage.getBaseApkPath());
+                        Collections.addAll(oldCodePaths, oldPackage.getBaseApkPath());
                         if (oldPackage.getSplitCodePaths() != null) {
-                            Collections.addAll(ps1.getOldCodePaths(),
-                                    oldPackage.getSplitCodePaths());
+                            Collections.addAll(oldCodePaths, oldPackage.getSplitCodePaths());
                         }
+                        ps1.setOldCodePaths(oldCodePaths);
                     } else {
                         ps1.setOldCodePaths(null);
                     }
