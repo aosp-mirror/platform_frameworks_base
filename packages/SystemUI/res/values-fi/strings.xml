@@ -1047,7 +1047,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Siirrä reunaan ja piilota"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Siirrä pois reunasta ja näytä"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"vaihda"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Laitteiden hallinta"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Laitehallinta"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Valitse sovellus lisätäksesi säätimiä"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> säädintä lisätty</item>
