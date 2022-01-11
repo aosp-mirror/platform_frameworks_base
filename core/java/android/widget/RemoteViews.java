@@ -2419,8 +2419,8 @@ public class RemoteViews implements Parcelable, Filter {
                             target.removeViews(nextChild, recycledViewIndex - nextChild);
                         }
                         setNextRecyclableChild(target, nextChild + 1, target.getChildCount());
-                        rvToApply.reapply(context, child, handler, null /* size */, colorResources,
-                                false /* topLevel */);
+                        rvToApply.reapplyNestedViews(context, child, rootParent, handler,
+                                null /* size */, colorResources);
                         return;
                     }
                     // If we cannot recycle the views, we still remove all views in between to
@@ -2431,8 +2431,8 @@ public class RemoteViews implements Parcelable, Filter {
             // If we cannot recycle, insert the new view before the next recyclable child.
 
             // Inflate nested views and add as children
-            View nestedView = rvToApply.apply(context, target, handler, null /* size */,
-                    colorResources);
+            View nestedView = rvToApply.applyNestedViews(context, target, rootParent, handler,
+                    null /* size */, colorResources);
             if (mStableId != NO_ID) {
                 setStableId(nestedView, mStableId);
             }
@@ -3780,7 +3780,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param parcel
      */
     public RemoteViews(Parcel parcel) {
-        this(parcel, /* rootParent= */ null, /* info= */ null, /* depth= */ 0);
+        this(parcel, /* rootData= */ null, /* info= */ null, /* depth= */ 0);
     }
 
     private RemoteViews(@NonNull Parcel parcel, @Nullable HierarchyRootData rootData,
@@ -5580,6 +5580,16 @@ public class RemoteViews implements Parcelable, Filter {
         return result;
     }
 
+    private View applyNestedViews(Context context, ViewGroup directParent,
+            ViewGroup rootParent, InteractionHandler handler, SizeF size,
+            ColorResources colorResources) {
+        RemoteViews rvToApply = getRemoteViewsToApply(context, size);
+
+        View result = inflateView(context, rvToApply, directParent, 0, colorResources);
+        rvToApply.performApply(result, rootParent, handler, colorResources);
+        return result;
+    }
+
     private View inflateView(Context context, RemoteViews rv, ViewGroup parent) {
         return inflateView(context, rv, parent, 0, null);
     }
@@ -5893,6 +5903,12 @@ public class RemoteViews implements Parcelable, Filter {
         if (topLevel && v instanceof ViewGroup) {
             finalizeViewRecycling((ViewGroup) v);
         }
+    }
+
+    private void reapplyNestedViews(Context context, View v, ViewGroup rootParent,
+            InteractionHandler handler, SizeF size, ColorResources colorResources) {
+        RemoteViews rvToApply = getRemoteViewsToReapply(context, v, size);
+        rvToApply.performApply(v, rootParent, handler, colorResources);
     }
 
     /**
