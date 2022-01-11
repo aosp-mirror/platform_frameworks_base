@@ -45,7 +45,7 @@
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"الإشعارات"</string>
     <string name="bluetooth_tethered" msgid="4171071193052799041">"تم إنشاء الاتصال بالإنترنت عن طريق البلوتوث."</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"إعداد أسلوب الإدخال"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"لوحة مفاتيح فعلية"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"لوحة مفاتيح خارجية"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"‏هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟\nلم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>؟"</string>
@@ -331,7 +331,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="5785739044300729592">"تم قفل الشاشة الآن في الاتجاه الأفقي."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"تم قفل الشاشة الآن في الاتجاه الرأسي."</string>
     <string name="dessert_case" msgid="9104973640704357717">"حالة الحلويات"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"شاشة التوقف"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"شاشة الاستراحة"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"انقر مع الاستمرار على الرموز للحصول على المزيد من الخيارات."</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"عدم الإزعاج"</string>
@@ -349,7 +349,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"سماعات الأذن الطبية"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"جارٍ التفعيل…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"السطوع"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"تدوير تلقائي"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"التدوير التلقائي"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"التدوير التلقائي للشاشة"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"وضع <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"تم قفل التدوير"</string>
@@ -1067,7 +1067,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"نقله إلى الحافة وإخفاؤه"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"نقله إلى خارج الحافة وإظهاره"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"إيقاف/تفعيل"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"أدوات التحكم بالأجهزة"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"التحكم بالجهاز"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"اختيار تطبيق لإضافة عناصر التحكّم"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="zero">تمت إضافة <xliff:g id="NUMBER_1">%s</xliff:g> عنصر تحكّم.</item>

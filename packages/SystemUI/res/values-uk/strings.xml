@@ -734,8 +734,8 @@
     <string name="inline_minimize_button" msgid="1474436209299333445">"Згорнути"</string>
     <string name="inline_silent_button_silent" msgid="525243786649275816">"Без звуку"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Без звуку"</string>
-    <string name="inline_silent_button_alert" msgid="5705343216858250354">"Сповіщення"</string>
-    <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Отримувати сповіщення"</string>
+    <string name="inline_silent_button_alert" msgid="5705343216858250354">"Зі звуком"</string>
+    <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Надсилати сповіщення"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Вимкнути сповіщення"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Чи показувати сповіщення з цього додатка надалі?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Без звуку"</string>
