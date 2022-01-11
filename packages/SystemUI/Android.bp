@@ -129,8 +129,15 @@ android_library {
 }
 
 filegroup {
+    name: "AAA-src",
+    srcs: ["tests/src/com/android/AAAPlusPlusVerifySysuiRequiredTestPropertiesTest.java"],
+    path: "tests/src",
+}
+
+filegroup {
     name: "SystemUI-tests-utils",
     srcs: [
+        "tests/src/com/android/systemui/SysuiBaseFragmentTest.java",
         "tests/src/com/android/systemui/SysuiTestCase.java",
         "tests/src/com/android/systemui/TestableDependency.java",
         "tests/src/com/android/systemui/classifier/FalsingManagerFake.java",
