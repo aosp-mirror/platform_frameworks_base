@@ -190,7 +190,7 @@ public class PresResInstanceInfo implements Parcelable{
         mResInstanceState = source.readInt();
         mPresentityUri = source.readString();
         Parcelable[] tempParcelableArray = source.readParcelableArray(
-                                    PresTupleInfo.class.getClassLoader());
+                                    PresTupleInfo.class.getClassLoader(), PresTupleInfo.class);
         mTupleInfoArray = new PresTupleInfo[] {};
         if(tempParcelableArray != null) {
             mTupleInfoArray = Arrays.copyOf(tempParcelableArray, tempParcelableArray.length,
