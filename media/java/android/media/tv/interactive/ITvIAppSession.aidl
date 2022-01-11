@@ -42,6 +42,10 @@ oneway interface ITvIAppSession {
     void notifyTuned(in Uri channelUri);
     void notifyTrackSelected(int type, in String trackId);
     void notifyTracksChanged(in List<TvTrackInfo> tracks);
+    void notifyVideoAvailable();
+    void notifyVideoUnavailable(int reason);
+    void notifyContentAllowed();
+    void notifyContentBlocked(in String rating);
     void setSurface(in Surface surface);
     void dispatchSurfaceChanged(int format, int width, int height);
     void notifyBroadcastInfoResponse(in BroadcastInfoResponse response);

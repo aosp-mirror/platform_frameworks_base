@@ -51,6 +51,10 @@ interface ITvIAppManager {
     void notifyTuned(in IBinder sessionToken, in Uri channelUri, int userId);
     void notifyTrackSelected(in IBinder sessionToken, int type, in String trackId, int userId);
     void notifyTracksChanged(in IBinder sessionToken, in List<TvTrackInfo> tracks, int userId);
+    void notifyVideoAvailable(in IBinder sessionToken, int userId);
+    void notifyVideoUnavailable(in IBinder sessionToken, int reason, int userId);
+    void notifyContentAllowed(in IBinder sessionToken, int userId);
+    void notifyContentBlocked(in IBinder sessionToken, in String rating, int userId);
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
     void dispatchSurfaceChanged(in IBinder sessionToken, int format, int width, int height,
             int userId);
