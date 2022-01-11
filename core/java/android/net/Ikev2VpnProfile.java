@@ -35,6 +35,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.content.pm.PackageManager;
 import android.security.Credentials;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.net.VpnProfile;
@@ -70,6 +71,7 @@ import java.util.Objects;
  *     Exchange, Version 2 (IKEv2)</a>
  */
 public final class Ikev2VpnProfile extends PlatformVpnProfile {
+    private static final String TAG = Ikev2VpnProfile.class.getSimpleName();
     /** Prefix for when a Private Key is an alias to look for in KeyStore @hide */
     public static final String PREFIX_KEYSTORE_ALIAS = "KEYSTORE_ALIAS:";
     /** Prefix for when a Private Key is stored directly in the profile @hide */
@@ -524,7 +526,10 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
                 throw new IllegalArgumentException("Invalid auth method set");
         }
 
-        builder.setExcludeLocalRoutes(profile.excludeLocalRoutes);
+        if (profile.excludeLocalRoutes && !profile.isBypassable) {
+            Log.w(TAG, "ExcludeLocalRoutes should only be set in the bypassable VPN");
+        }
+        builder.setExcludeLocalRoutes(profile.excludeLocalRoutes && profile.isBypassable);
 
         return builder.build();
     }
