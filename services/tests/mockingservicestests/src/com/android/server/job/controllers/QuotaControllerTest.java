@@ -63,16 +63,13 @@ import android.app.job.JobInfo;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ServiceInfo;
-import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.Handler;
 import android.os.Looper;
@@ -126,7 +123,6 @@ public class QuotaControllerTest {
     private static final String SOURCE_PACKAGE = "com.android.frameworks.mockingservicestests";
     private static final int SOURCE_USER_ID = 0;
 
-    private BroadcastReceiver mChargingReceiver;
     private QuotaController mQuotaController;
     private QuotaController.QcConstants mQcConstants;
     private JobSchedulerService.Constants mConstants = new JobSchedulerService.Constants();
@@ -225,8 +221,6 @@ public class QuotaControllerTest {
 
         // Initialize real objects.
         // Capture the listeners.
-        ArgumentCaptor<BroadcastReceiver> receiverCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
         ArgumentCaptor<IUidObserver> uidObserverCaptor =
                 ArgumentCaptor.forClass(IUidObserver.class);
         ArgumentCaptor<PowerAllowlistInternal.TempAllowlistChangeListener> taChangeCaptor =
@@ -236,11 +230,6 @@ public class QuotaControllerTest {
         mQuotaController = new QuotaController(mJobSchedulerService,
                 mock(BackgroundJobsController.class), mock(ConnectivityController.class));
 
-        verify(mContext).registerReceiver(receiverCaptor.capture(),
-                ArgumentMatchers.argThat(filter ->
-                        filter.hasAction(BatteryManager.ACTION_CHARGING)
-                                && filter.hasAction(BatteryManager.ACTION_DISCHARGING)));
-        mChargingReceiver = receiverCaptor.getValue();
         verify(mPowerAllowlistInternal)
                 .registerTempAllowlistChangeListener(taChangeCaptor.capture());
         mTempAllowlistListener = taChangeCaptor.getValue();
@@ -280,13 +269,17 @@ public class QuotaControllerTest {
     }
 
     private void setCharging() {
-        Intent intent = new Intent(BatteryManager.ACTION_CHARGING);
-        mChargingReceiver.onReceive(mContext, intent);
+        doReturn(true).when(mJobSchedulerService).isBatteryCharging();
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.onBatteryStateChangedLocked();
+        }
     }
 
     private void setDischarging() {
-        Intent intent = new Intent(BatteryManager.ACTION_DISCHARGING);
-        mChargingReceiver.onReceive(mContext, intent);
+        doReturn(false).when(mJobSchedulerService).isBatteryCharging();
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.onBatteryStateChangedLocked();
+        }
     }
 
     private void setProcessState(int procState) {
