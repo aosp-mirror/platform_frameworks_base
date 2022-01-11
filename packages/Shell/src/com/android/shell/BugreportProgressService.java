@@ -733,14 +733,16 @@ public class BugreportProgressService extends Service {
         nf.setMaximumFractionDigits(2);
         final String percentageText = nf.format((double) info.progress.intValue() / 100);
 
-        String title = mContext.getString(R.string.bugreport_in_progress_title, info.id);
-
-        // TODO: Remove this workaround when notification progress is implemented on Wear.
+        final String title;
         if (mIsWatch) {
+            // TODO: Remove this workaround when notification progress is implemented on Wear.
             nf.setMinimumFractionDigits(0);
             nf.setMaximumFractionDigits(0);
             final String watchPercentageText = nf.format((double) info.progress.intValue() / 100);
-            title = title + "\n" + watchPercentageText;
+            title = mContext.getString(
+                R.string.bugreport_in_progress_title, info.id, watchPercentageText);
+        } else {
+            title = mContext.getString(R.string.bugreport_in_progress_title, info.id);
         }
 
         final String name =
