@@ -1139,13 +1139,11 @@ public final class PermissionPolicyService extends SystemService {
         private boolean shouldForceShowNotificationPermissionRequest(@NonNull String pkgName,
                 @NonNull UserHandle user) {
             AndroidPackage pkg = mPackageManagerInternal.getPackage(pkgName);
-            // TODO(b/205888750): Remove platform key and permissionController lines after pregrants
-            // are in place
-            if (pkg == null || pkg.getPackageName() == null || pkg.isSignedWithPlatformKey()
-                    || pkg.getPackageName().contains("nexuslauncher")
+            if (pkg == null || pkg.getPackageName() == null
                     || Objects.equals(pkgName, mPackageManager.getPermissionControllerPackageName())
                     || pkg.getTargetSdkVersion() < Build.VERSION_CODES.M) {
-                // TODO(b/205888750) add warning logs when pregrants in place
+                Slog.w(LOG_TAG, "Cannot check for Notification prompt, no package for "
+                        + pkgName + " or pkg is Permission Controller");
                 return false;
             }
 
