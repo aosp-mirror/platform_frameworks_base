@@ -18,26 +18,21 @@ package com.android.settingslib.net;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
-import android.net.INetworkStatsSession;
-import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.RemoteException;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.text.format.DateUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,8 +49,6 @@ public class DataUsageControllerTest {
     private static final String SUB_ID_2 = "Test Subscriber 2";
 
     @Mock
-    private INetworkStatsSession mSession;
-    @Mock
     private TelephonyManager mTelephonyManager;
     @Mock
     private SubscriptionManager mSubscriptionManager;
@@ -68,7 +61,6 @@ public class DataUsageControllerTest {
     private NetworkTemplate mWifiNetworkTemplate;
 
     private DataUsageController mController;
-    private NetworkStatsHistory mNetworkStatsHistory;
     private final int mDefaultSubscriptionId = 1234;
 
     @Before
@@ -80,10 +72,6 @@ public class DataUsageControllerTest {
                 .thenReturn(mSubscriptionManager);
         when(mContext.getSystemService(NetworkStatsManager.class)).thenReturn(mNetworkStatsManager);
         mController = new DataUsageController(mContext);
-        mNetworkStatsHistory = spy(
-                new NetworkStatsHistory(DateUtils.DAY_IN_MILLIS /* bucketDuration */));
-        doReturn(mNetworkStatsHistory)
-                .when(mSession).getHistoryForNetwork(any(NetworkTemplate.class), anyInt());
         ShadowSubscriptionManager.setDefaultDataSubscriptionId(mDefaultSubscriptionId);
         doReturn(SUB_ID).when(mTelephonyManager).getSubscriberId();
 
