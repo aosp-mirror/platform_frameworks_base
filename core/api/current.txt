@@ -15229,6 +15229,11 @@ package android.graphics {
 
   public class BitmapShader extends android.graphics.Shader {
     ctor public BitmapShader(@NonNull android.graphics.Bitmap, @NonNull android.graphics.Shader.TileMode, @NonNull android.graphics.Shader.TileMode);
+    method public int getFilterMode();
+    method public void setFilterMode(int);
+    field public static final int FILTER_MODE_DEFAULT = 0; // 0x0
+    field public static final int FILTER_MODE_LINEAR = 2; // 0x2
+    field public static final int FILTER_MODE_NEAREST = 1; // 0x1
   }
 
   public enum BlendMode {
@@ -16635,6 +16640,7 @@ package android.graphics {
     method public void setFloatUniform(@NonNull String, float, float, float);
     method public void setFloatUniform(@NonNull String, float, float, float, float);
     method public void setFloatUniform(@NonNull String, @NonNull float[]);
+    method public void setInputBuffer(@NonNull String, @NonNull android.graphics.BitmapShader);
     method public void setInputShader(@NonNull String, @NonNull android.graphics.Shader);
     method public void setIntUniform(@NonNull String, int);
     method public void setIntUniform(@NonNull String, int, int);
