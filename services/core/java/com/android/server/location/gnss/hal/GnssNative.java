@@ -124,12 +124,9 @@ public class GnssNative {
     // IMPORTANT - must match OEM definitions, this isn't part of a hal for some reason
     public static final int AGPS_REF_LOCATION_TYPE_GSM_CELLID = 1;
     public static final int AGPS_REF_LOCATION_TYPE_UMTS_CELLID = 2;
-    public static final int AGPS_REF_LOCATION_TYPE_LTE_CELLID = 4;
-    public static final int AGPS_REF_LOCATION_TYPE_NR_CELLID = 8;
 
     @IntDef(prefix = "AGPS_REF_LOCATION_TYPE_", value = {AGPS_REF_LOCATION_TYPE_GSM_CELLID,
-            AGPS_REF_LOCATION_TYPE_UMTS_CELLID, AGPS_REF_LOCATION_TYPE_LTE_CELLID,
-            AGPS_REF_LOCATION_TYPE_NR_CELLID})
+            AGPS_REF_LOCATION_TYPE_UMTS_CELLID})
     @Retention(RetentionPolicy.SOURCE)
     public @interface AgpsReferenceLocationType {}
 
@@ -933,9 +930,9 @@ public class GnssNative {
      * Sets AGPS reference cell id location.
      */
     public void setAgpsReferenceLocationCellId(@AgpsReferenceLocationType int type, int mcc,
-            int mnc, int lac, long cid, int tac, int pcid, int arfcn) {
+            int mnc, int lac, int cid) {
         Preconditions.checkState(mRegistered);
-        mGnssHal.setAgpsReferenceLocationCellId(type, mcc, mnc, lac, cid, tac, pcid, arfcn);
+        mGnssHal.setAgpsReferenceLocationCellId(type, mcc, mnc, lac, cid);
     }
 
     /**
@@ -1436,8 +1433,8 @@ public class GnssNative {
         }
 
         protected void setAgpsReferenceLocationCellId(@AgpsReferenceLocationType int type, int mcc,
-                int mnc, int lac, long cid, int tac, int pcid, int arfcn) {
-            native_agps_set_ref_location_cellid(type, mcc, mnc, lac, cid, tac, pcid, arfcn);
+                int mnc, int lac, int cid) {
+            native_agps_set_ref_location_cellid(type, mcc, mnc, lac, cid);
         }
 
         protected boolean isPsdsSupported() {
@@ -1578,7 +1575,7 @@ public class GnssNative {
     private static native void native_agps_set_id(int type, String setid);
 
     private static native void native_agps_set_ref_location_cellid(int type, int mcc, int mnc,
-            int lac, long cid, int tac, int pcid, int arfcn);
+            int lac, int cid);
 
     // PSDS APIs
 
