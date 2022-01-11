@@ -1727,6 +1727,21 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 || mUpdateMonitor.isSimPinSecure();
     }
 
+    /**
+     * Whether any of the SIMs on the device are secured with a PIN. If so, the keyguard should not
+     * be dismissable until the PIN is entered, even if the device itself has no lock set.
+     */
+    public boolean isAnySimPinSecure() {
+        for (int i = 0; i < mLastSimStates.size(); i++) {
+            final int key = mLastSimStates.keyAt(i);
+            if (KeyguardUpdateMonitor.isSimPinSecure(mLastSimStates.get(key))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void setSwitchingUser(boolean switching) {
         mUpdateMonitor.setSwitchingUser(switching);
     }

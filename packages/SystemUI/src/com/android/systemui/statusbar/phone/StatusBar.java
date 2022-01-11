@@ -1354,10 +1354,14 @@ public class StatusBar extends SystemUI implements
         // Things that mean we're not dismissing the keyguard, and should ignore this expansion:
         // - Keyguard isn't even visible.
         // - Keyguard is visible, but can't be dismissed (swiping up will show PIN/password prompt).
+        // - The SIM is locked, you can't swipe to unlock. If the SIM is locked but there is no
+        //   device lock set, canDismissLockScreen returns true even though you should not be able
+        //   to dismiss the lock screen until entering the SIM PIN.
         // - QS is expanded and we're swiping - swiping up now will hide QS, not dismiss the
         //   keyguard.
         if (!isKeyguardShowing()
                 || !mKeyguardStateController.canDismissLockScreen()
+                || mKeyguardViewMediator.isAnySimPinSecure()
                 || (mNotificationPanelViewController.isQsExpanded() && trackingTouch)) {
             return;
         }
