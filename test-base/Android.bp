@@ -26,7 +26,19 @@ package {
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
     //   SPDX-license-identifier-CPL-1.0
-    default_applicable_licenses: ["frameworks_base_license"],
+    default_applicable_licenses: ["frameworks_base_test-base_license"],
+}
+
+license {
+    name: "frameworks_base_test-base_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+        "SPDX-license-identifier-CPL-1.0",
+    ],
+    license_text: [
+        "src/junit/cpl-v10.html",
+    ],
 }
 
 java_sdk_library {
