@@ -89,6 +89,7 @@ class ScopedUnfoldTransitionProgressProvider @JvmOverloads constructor(
 
     override fun destroy() {
         source?.removeCallback(this)
+        source?.destroy()
     }
 
     override fun onTransitionStarted() {
