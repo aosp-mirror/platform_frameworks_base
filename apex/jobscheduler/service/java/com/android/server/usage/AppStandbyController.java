@@ -300,6 +300,8 @@ public class AppStandbyController
     long mStrongUsageTimeoutMillis = ConstantsObserver.DEFAULT_STRONG_USAGE_TIMEOUT;
     /** Minimum time a notification seen event should keep the bucket elevated. */
     long mNotificationSeenTimeoutMillis = ConstantsObserver.DEFAULT_NOTIFICATION_TIMEOUT;
+    /** Minimum time a slice pinned event should keep the bucket elevated. */
+    long mSlicePinnedTimeoutMillis = ConstantsObserver.DEFAULT_SLICE_PINNED_TIMEOUT;
     /** The standby bucket that an app will be promoted on a notification-seen event */
     int mNotificationSeenPromotedBucket =
             ConstantsObserver.DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET;
@@ -997,9 +999,8 @@ public class AppStandbyController
             // Mild usage elevates to WORKING_SET but doesn't change usage time.
             mAppIdleHistory.reportUsage(appHistory, pkg, userId,
                     STANDBY_BUCKET_WORKING_SET, subReason,
-                    0, elapsedRealtime + mNotificationSeenTimeoutMillis);
-            // TODO: Add a separate setting to control the timeout for SLICE_PINNED event.
-            nextCheckDelay = mNotificationSeenTimeoutMillis;
+                    0, elapsedRealtime + mSlicePinnedTimeoutMillis);
+            nextCheckDelay = mSlicePinnedTimeoutMillis;
         } else if (eventType == UsageEvents.Event.SYSTEM_INTERACTION) {
             mAppIdleHistory.reportUsage(appHistory, pkg, userId,
                     STANDBY_BUCKET_ACTIVE, subReason,
@@ -1998,6 +1999,9 @@ public class AppStandbyController
         pw.print("  mNotificationSeenPromotedBucket=");
         pw.print(standbyBucketToString(mNotificationSeenPromotedBucket));
         pw.println();
+        pw.print("  mSlicePinnedTimeoutMillis=");
+        TimeUtils.formatDuration(mSlicePinnedTimeoutMillis, pw);
+        pw.println();
         pw.print("  mSyncAdapterTimeoutMillis=");
         TimeUtils.formatDuration(mSyncAdapterTimeoutMillis, pw);
         pw.println();
@@ -2422,6 +2426,8 @@ public class AppStandbyController
                 "notification_seen_duration";
         private static final String KEY_NOTIFICATION_SEEN_PROMOTED_BUCKET =
                 "notification_seen_promoted_bucket";
+        private static final String KEY_SLICE_PINNED_HOLD_DURATION =
+                "slice_pinned_duration";
         private static final String KEY_SYSTEM_UPDATE_HOLD_DURATION =
                 "system_update_usage_duration";
         private static final String KEY_PREDICTION_TIMEOUT = "prediction_timeout";
@@ -2463,6 +2469,8 @@ public class AppStandbyController
         public static final long DEFAULT_STRONG_USAGE_TIMEOUT =
                 COMPRESS_TIME ? ONE_MINUTE : 1 * ONE_HOUR;
         public static final long DEFAULT_NOTIFICATION_TIMEOUT =
+                COMPRESS_TIME ? 12 * ONE_MINUTE : 12 * ONE_HOUR;
+        public static final long DEFAULT_SLICE_PINNED_TIMEOUT =
                 COMPRESS_TIME ? 12 * ONE_MINUTE : 12 * ONE_HOUR;
         public static final int DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET =
                 STANDBY_BUCKET_WORKING_SET;
@@ -2555,6 +2563,11 @@ public class AppStandbyController
                             mNotificationSeenPromotedBucket = properties.getInt(
                                     KEY_NOTIFICATION_SEEN_PROMOTED_BUCKET,
                                     DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET);
+                            break;
+                        case KEY_SLICE_PINNED_HOLD_DURATION:
+                            mSlicePinnedTimeoutMillis = properties.getLong(
+                                    KEY_SLICE_PINNED_HOLD_DURATION,
+                                    DEFAULT_SLICE_PINNED_TIMEOUT);
                             break;
                         case KEY_STRONG_USAGE_HOLD_DURATION:
                             mStrongUsageTimeoutMillis = properties.getLong(
