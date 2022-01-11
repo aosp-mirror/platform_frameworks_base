@@ -21,7 +21,7 @@ import static android.content.pm.PackageManager.GET_CONFIGURATIONS;
 import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 
-import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
+import static com.android.server.companion.CompanionDeviceManagerService.TAG;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -96,7 +96,7 @@ final class PackageUtils {
             final boolean requiresPermission = Manifest.permission.BIND_COMPANION_DEVICE_SERVICE
                     .equals(resolveInfo.serviceInfo.permission);
             if (!requiresPermission) {
-                Slog.w(LOG_TAG, "CompanionDeviceService "
+                Slog.w(TAG, "CompanionDeviceService "
                         + service.getComponentName().flattenToShortString() + " must require "
                         + "android.permission.BIND_COMPANION_DEVICE_SERVICE");
                 continue;
