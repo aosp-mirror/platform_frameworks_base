@@ -73,6 +73,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.window.ClientWindowFrames;
+import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
@@ -862,5 +863,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    @Override
+    public void setOnBackInvokedCallback(IWindow iWindow,
+            IOnBackInvokedCallback iOnBackInvokedCallback) throws RemoteException {
+        // TODO: Set the callback to the WindowState of the window.
     }
 }

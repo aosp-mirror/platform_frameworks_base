@@ -28,6 +28,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.MergedConfiguration;
 import android.window.ClientWindowFrames;
+import android.window.IOnBackInvokedCallback;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -494,6 +495,10 @@ public class WindowlessWindowManager implements IWindowSession {
     public void generateDisplayHash(IWindow window, Rect boundsInWindow, String hashAlgorithm,
             RemoteCallback callback) {
     }
+
+    @Override
+    public void setOnBackInvokedCallback(IWindow iWindow,
+            IOnBackInvokedCallback iOnBackInvokedCallback) throws RemoteException { }
 
     @Override
     public boolean dropForAccessibility(IWindow window, int x, int y) {

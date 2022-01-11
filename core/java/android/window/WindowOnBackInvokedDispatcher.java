@@ -17,10 +17,18 @@
 package android.window;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.Handler;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.OnBackInvokedCallback;
 import android.view.OnBackInvokedDispatcher;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeMap;
 
 /**
  * Provides window based implementation of {@link OnBackInvokedDispatcher}.
@@ -39,6 +47,18 @@ import android.view.OnBackInvokedDispatcher;
 public class WindowOnBackInvokedDispatcher extends OnBackInvokedDispatcher {
     private IWindowSession mWindowSession;
     private IWindow mWindow;
+    private static final String TAG = "WindowOnBackDispatcher";
+    private static final boolean DEBUG = false;
+
+    /** The currently most prioritized callback. */
+    @Nullable
+    private OnBackInvokedCallbackWrapper mTopCallback;
+
+    /** Convenience hashmap to quickly decide if a callback has been added. */
+    private final HashMap<OnBackInvokedCallback, Integer> mAllCallbacks = new HashMap<>();
+    /** Holds all callbacks by priorities. */
+    private final TreeMap<Integer, ArrayList<OnBackInvokedCallback>>
+            mOnBackInvokedCallbacks = new TreeMap<>();
 
     /**
      * Sends the pending top callback (if one exists) to WM when the view root
@@ -47,7 +67,9 @@ public class WindowOnBackInvokedDispatcher extends OnBackInvokedDispatcher {
     public void attachToWindow(@NonNull IWindowSession windowSession, @NonNull IWindow window) {
         mWindowSession = windowSession;
         mWindow = window;
-        // TODO(b/209867448): Send the top callback to WM (if one exists).
+        if (mTopCallback != null) {
+            setTopOnBackInvokedCallback(mTopCallback);
+        }
     }
 
     /** Detaches the dispatcher instance from its window. */
@@ -56,20 +78,124 @@ public class WindowOnBackInvokedDispatcher extends OnBackInvokedDispatcher {
         mWindowSession = null;
     }
 
+    // TODO: Take an Executor for the callback to run on.
     @Override
     public void registerOnBackInvokedCallback(
             @NonNull OnBackInvokedCallback callback, @Priority int priority) {
-        // TODO(b/209867448): To be implemented.
+        if (!mOnBackInvokedCallbacks.containsKey(priority)) {
+            mOnBackInvokedCallbacks.put(priority, new ArrayList<>());
+        }
+        ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
+
+        // If callback has already been added, remove it and re-add it.
+        if (mAllCallbacks.containsKey(callback)) {
+            if (DEBUG) {
+                Log.i(TAG, "Callback already added. Removing and re-adding it.");
+            }
+            Integer prevPriority = mAllCallbacks.get(callback);
+            mOnBackInvokedCallbacks.get(prevPriority).remove(callback);
+        }
+
+        callbacks.add(callback);
+        mAllCallbacks.put(callback, priority);
+        if (mTopCallback == null || (mTopCallback.getCallback() != callback
+                && mAllCallbacks.get(mTopCallback.getCallback()) <= priority)) {
+            setTopOnBackInvokedCallback(new OnBackInvokedCallbackWrapper(callback, priority));
+        }
     }
 
     @Override
-    public void unregisterOnBackInvokedCallback(
-            @NonNull OnBackInvokedCallback callback) {
-        // TODO(b/209867448): To be implemented.
+    public void unregisterOnBackInvokedCallback(@NonNull OnBackInvokedCallback callback) {
+        if (!mAllCallbacks.containsKey(callback)) {
+            if (DEBUG) {
+                Log.i(TAG, "Callback not found. returning...");
+            }
+            return;
+        }
+        Integer priority = mAllCallbacks.get(callback);
+        mOnBackInvokedCallbacks.get(priority).remove(callback);
+        mAllCallbacks.remove(callback);
+        if (mTopCallback != null && mTopCallback.getCallback() == callback) {
+            findAndSetTopOnBackInvokedCallback();
+        }
     }
 
     /** Clears all registered callbacks on the instance. */
     public void clear() {
-        // TODO(b/209867448): To be implemented.
+        mAllCallbacks.clear();
+        mTopCallback = null;
+        mOnBackInvokedCallbacks.clear();
+    }
+
+    /**
+     * Iterates through all callbacks to find the most prioritized one and pushes it to
+     * window manager.
+     */
+    private void findAndSetTopOnBackInvokedCallback() {
+        if (mAllCallbacks.isEmpty()) {
+            setTopOnBackInvokedCallback(null);
+            return;
+        }
+
+        for (Integer priority : mOnBackInvokedCallbacks.descendingKeySet()) {
+            ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
+            if (!callbacks.isEmpty()) {
+                OnBackInvokedCallbackWrapper callback = new OnBackInvokedCallbackWrapper(
+                        callbacks.get(callbacks.size() - 1), priority);
+                setTopOnBackInvokedCallback(callback);
+                return;
+            }
+        }
+        setTopOnBackInvokedCallback(null);
+    }
+
+    // Pushes the top priority callback to window manager.
+    private void setTopOnBackInvokedCallback(@Nullable OnBackInvokedCallbackWrapper callback) {
+        mTopCallback = callback;
+        if (mWindowSession == null || mWindow == null) {
+            return;
+        }
+        try {
+            mWindowSession.setOnBackInvokedCallback(mWindow, mTopCallback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set OnBackInvokedCallback to WM. Error: " + e);
+        }
+    }
+
+    private class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
+        private final OnBackInvokedCallback mCallback;
+        private final @Priority int mPriority;
+
+        OnBackInvokedCallbackWrapper(
+                @NonNull OnBackInvokedCallback callback, @Priority int priority) {
+            mCallback = callback;
+            mPriority = priority;
+        }
+
+        @NonNull
+        public OnBackInvokedCallback getCallback() {
+            return mCallback;
+        }
+
+        @Override
+        public void onBackStarted() throws RemoteException {
+            Handler.getMain().post(() -> mCallback.onBackStarted());
+        }
+
+        @Override
+        public void onBackProgressed(int touchX, int touchY, float progress)
+                throws RemoteException {
+            Handler.getMain().post(() -> mCallback.onBackProgressed(touchX, touchY, progress));
+        }
+
+        @Override
+        public void onBackCancelled() throws RemoteException {
+            Handler.getMain().post(() -> mCallback.onBackCancelled());
+        }
+
+        @Override
+        public void onBackInvoked() throws RemoteException {
+            Handler.getMain().post(() -> mCallback.onBackInvoked());
+        }
     }
 }

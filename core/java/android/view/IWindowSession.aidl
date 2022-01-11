@@ -37,6 +37,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.window.ClientWindowFrames;
+import android.window.IOnBackInvokedCallback;
 
 import java.util.List;
 
@@ -328,4 +329,12 @@ interface IWindowSession {
      */
     oneway void generateDisplayHash(IWindow window, in Rect boundsInWindow,
             in String hashAlgorithm, in RemoteCallback callback);
+
+    /**
+     * Sets the {@link IOnBackInvokedCallback} to be invoked for a window when back is triggered.
+     *
+     * @param window The token for the window to set the callback to.
+     * @param callback The {@link IOnBackInvokedCallback} to set.
+     */
+    oneway void setOnBackInvokedCallback(IWindow window, IOnBackInvokedCallback callback);
 }
