@@ -41,6 +41,7 @@ import android.view.accessibility.AccessibilityManager.TouchExplorationStateChan
 import androidx.annotation.LayoutRes
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
+import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -81,7 +82,8 @@ class UdfpsControllerOverlay(
     private var hbmProvider: UdfpsHbmProvider,
     @ShowReason val requestReason: Int,
     private val controllerCallback: IUdfpsOverlayControllerCallback,
-    private val onTouch: (View, MotionEvent, Boolean) -> Boolean
+    private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
+    private val activityLaunchAnimator: ActivityLaunchAnimator
 ) {
     /** The view, when [isShowing], or null. */
     var overlayView: UdfpsView? = null
@@ -200,7 +202,8 @@ class UdfpsControllerOverlay(
                     keyguardStateController,
                     unlockedScreenOffAnimationController,
                     dialogManager,
-                    controller
+                    controller,
+                    activityLaunchAnimator
                 )
             }
             BiometricOverlayConstants.REASON_AUTH_BP -> {

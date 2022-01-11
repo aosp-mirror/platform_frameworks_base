@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"อนุญาตให้แอปแก้ไขบันทึกการโทรจากอุปกรณ์ Android TV รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและสายโทรออก แอปที่เป็นอันตรายอาจใช้สิทธิ์นี้เพื่อลบหรือแก้ไขบันทึกการโทรได้"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"อนุญาตให้แอปแก้ไขบันทึกการโทรจากโทรศัพท์ของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขบันทึกการโทรของคุณ"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"เข้าถึงเซ็นเซอร์ร่างกาย (เช่น ตัววัดอัตราการเต้นของหัวใจ)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"อนุญาตให้แอปเข้าถึงข้อมูลจากเซ็นเซอร์ที่ตรวจสอบสภาพทางกายภาพ เช่น อัตราการเต้นของหัวใจ"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"เข้าถึงข้อมูลจากเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ อุณหภูมิ เปอร์เซ็นต์ออกซิเจนในเลือด ฯลฯ"</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"เข้าถึงเซ็นเซอร์ร่างกาย (เช่น เครื่องวัดอัตราการเต้นของหัวใจ) ในเบื้องหลัง"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"เข้าถึงข้อมูลจากเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ อุณหภูมิ เปอร์เซ็นต์ออกซิเจนในเลือด ฯลฯ ในเบื้องหลัง"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"อ่านกิจกรรมในปฏิทินและรายละเอียด"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"แอปนี้สามารถอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในแท็บเล็ต รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณ"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"แอปนี้อ่านกิจกรรมทั้งหมดในปฏิทินที่จัดเก็บไว้ในอุปกรณ์ Android TV ได้ รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ด้วย"</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"อนุญาตให้แอปอ่านและเขียนการกำหนดค่าโหมดห้ามรบกวน"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"เริ่มการใช้สิทธิ์การดู"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"อนุญาตให้เจ้าของเริ่มการใช้สิทธิ์ของแอป ไม่จำเป็นสำหรับแอปทั่วไป"</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"เริ่มดูฟีเจอร์ของแอป"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"อนุญาตให้เจ้าของเริ่มดูข้อมูลฟีเจอร์สำหรับแอป"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"เข้าถึงข้อมูลเซ็นเซอร์ที่อัตราการสุ่มตัวอย่างสูง"</string>

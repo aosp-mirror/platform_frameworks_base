@@ -87,7 +87,7 @@ final class FakeVibratorControllerProvider {
         @Override
         public long on(long milliseconds, long vibrationId) {
             mEffectSegments.add(new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE,
-                    /* frequency= */ 0, (int) milliseconds));
+                    /* frequencyHz= */ 0, (int) milliseconds));
             applyLatency();
             scheduleListener(milliseconds, vibrationId);
             return milliseconds;
@@ -158,7 +158,7 @@ final class FakeVibratorControllerProvider {
         }
 
         @Override
-        public boolean getInfo(float suggestedFrequencyRange, VibratorInfo.Builder infoBuilder) {
+        public boolean getInfo(VibratorInfo.Builder infoBuilder) {
             infoBuilder.setCapabilities(mCapabilities);
             infoBuilder.setSupportedBraking(mSupportedBraking);
             infoBuilder.setPwleSizeMax(mPwleSizeMax);
@@ -170,9 +170,8 @@ final class FakeVibratorControllerProvider {
             }
             infoBuilder.setCompositionSizeMax(mCompositionSizeMax);
             infoBuilder.setQFactor(mQFactor);
-            infoBuilder.setFrequencyMapping(new VibratorInfo.FrequencyMapping(mMinFrequency,
-                    mResonantFrequency, mFrequencyResolution, suggestedFrequencyRange,
-                    mMaxAmplitudes));
+            infoBuilder.setFrequencyMapping(new VibratorInfo.FrequencyMapping(
+                    mResonantFrequency, mMinFrequency, mFrequencyResolution, mMaxAmplitudes));
             return mIsInfoLoadSuccessful;
         }
 

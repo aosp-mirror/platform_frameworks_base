@@ -51,6 +51,8 @@ import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -83,6 +85,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final FalsingManager mFalsingManager;
     private final UserSwitcherController mUserSwitcherController;
     private final GlobalSettings mGlobalSettings;
+    private final FeatureFlags mFeatureFlags;
 
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
 
@@ -238,6 +241,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             FalsingCollector falsingCollector,
             FalsingManager falsingManager,
             UserSwitcherController userSwitcherController,
+            FeatureFlags featureFlags,
             GlobalSettings globalSettings) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
@@ -255,6 +259,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
         mUserSwitcherController = userSwitcherController;
+        mFeatureFlags = featureFlags;
         mGlobalSettings = globalSettings;
     }
 
@@ -510,7 +515,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     private boolean canDisplayUserSwitcher() {
-        return getResources().getBoolean(R.bool.bouncer_display_user_switcher);
+        return mFeatureFlags.isEnabled(Flags.BOUNCER_USER_SWITCHER);
     }
 
     private void configureMode() {
@@ -615,6 +620,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         private final FalsingCollector mFalsingCollector;
         private final FalsingManager mFalsingManager;
         private final GlobalSettings mGlobalSettings;
+        private final FeatureFlags mFeatureFlags;
         private final UserSwitcherController mUserSwitcherController;
 
         @Inject
@@ -632,6 +638,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 FalsingCollector falsingCollector,
                 FalsingManager falsingManager,
                 UserSwitcherController userSwitcherController,
+                FeatureFlags featureFlags,
                 GlobalSettings globalSettings) {
             mView = view;
             mAdminSecondaryLockScreenControllerFactory = adminSecondaryLockScreenControllerFactory;
@@ -645,6 +652,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mConfigurationController = configurationController;
             mFalsingCollector = falsingCollector;
             mFalsingManager = falsingManager;
+            mFeatureFlags = featureFlags;
             mGlobalSettings = globalSettings;
             mUserSwitcherController = userSwitcherController;
         }
@@ -656,8 +664,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
                     mKeyguardStateController, securityCallback, mSecurityViewFlipperController,
                     mConfigurationController, mFalsingCollector, mFalsingManager,
-                    mUserSwitcherController, mGlobalSettings);
+                    mUserSwitcherController, mFeatureFlags, mGlobalSettings);
         }
-
     }
 }

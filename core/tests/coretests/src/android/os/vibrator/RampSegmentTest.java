@@ -39,19 +39,19 @@ public class RampSegmentTest {
     @Test
     public void testCreation() {
         RampSegment ramp = new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 0,
-                /* StartFrequency= */ -1, /* endFrequency= */ 1, /* duration= */ 100);
+                /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 200, /* duration= */ 100);
 
         assertEquals(100L, ramp.getDuration());
         assertTrue(ramp.hasNonZeroAmplitude());
         assertEquals(1f, ramp.getStartAmplitude());
         assertEquals(0f, ramp.getEndAmplitude());
-        assertEquals(-1f, ramp.getStartFrequency());
-        assertEquals(1f, ramp.getEndFrequency());
+        assertEquals(100f, ramp.getStartFrequencyHz());
+        assertEquals(200f, ramp.getEndFrequencyHz());
     }
 
     @Test
     public void testSerialization() {
-        RampSegment original = new RampSegment(0, 1, 0, 0.5f, 10);
+        RampSegment original = new RampSegment(0, 1, 10, 20.5f, 10);
         Parcel parcel = Parcel.obtain();
         original.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
@@ -61,7 +61,9 @@ public class RampSegmentTest {
     @Test
     public void testValidate() {
         new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 0,
-                /* StartFrequency= */ -1, /* endFrequency= */ 1, /* duration= */ 100).validate();
+                /* startFrequencyHz= */ 2, /* endFrequencyHz= */ 1, /* duration= */ 100).validate();
+        // Zero frequency is still used internally for unset frequency.
+        new RampSegment(0, 0, 0, 0, 0).validate();
 
         assertThrows(IllegalArgumentException.class,
                 () -> new RampSegment(VibrationEffect.DEFAULT_AMPLITUDE, 0, 0, 0, 0).validate());
@@ -70,7 +72,15 @@ public class RampSegmentTest {
         assertThrows(IllegalArgumentException.class,
                 () -> new RampSegment(0, /* endAmplitude= */ 2, 0, 0, 0).validate());
         assertThrows(IllegalArgumentException.class,
+                () -> new RampSegment(0, 0, /* startFrequencyHz= */ -1, 0, 0).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new RampSegment(0, 0, 0, /* endFrequencyHz= */ -3, 0).validate());
+        assertThrows(IllegalArgumentException.class,
                 () -> new RampSegment(0, 0, 0, 0, /* duration= */ -1).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new RampSegment(/* startAmplitude= */ Float.NaN, 0, 0, 0, 0).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new RampSegment(0, 0, /* startFrequencyHz= */ Float.NaN, 0, 0).validate());
     }
 
     @Test

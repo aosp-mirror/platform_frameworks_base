@@ -433,7 +433,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Programai leidžiama keisti „Android TV“ įrenginio skambučių žurnalą, įskaitant gaunamųjų ir siunčiamųjų skambučių duomenis. Kenkėjiškos programos gali ištrinti arba keisti skambučių žurnalą."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Programai leidžiama skaityti telefono skambučių žurnalą, įskaitant duomenis apie gaunamuosius ir siunčiamuosius skambučius. Kenkėjiškos programos tai gali naudoti, kad ištrintų ar keistų jūsų skambučių žurnalą."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"pas. k. jut. (pvz., pul. dažn. st. įr.)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Programai leidžiama pasiekti duomenis, gautus iš jutiklių, stebinčių fizinę būseną, pvz., širdies ritmą."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Pasiekti kūno jutiklių duomenis, pvz., pulso dažnį, temperatūrą, deguonies procentinę dalį kraujyje ir kt."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"pasiekti kūno jutiklių duom. (pvz., pulso dažn. stebėjimo įreng.), veikiant fone"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Pasiekti kūno jutiklių duomenis, pvz., pulso dažnį, temperatūrą, deguonies procentinę dalį kraujyje ir kt., kai veikia fone."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Skaityti kalendoriaus įvykius arba išsamią informaciją"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ši programa gali nuskaityti visus planšetiniame kompiuteryje saugomus kalendoriaus įvykius ir bendrinti arba išsaugoti kalendoriaus duomenis."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ši programa gali nuskaityti visus „Android TV“ įrenginyje saugomus kalendoriaus įvykius ir bendrinti arba išsaugoti kalendoriaus duomenis."</string>
@@ -737,6 +739,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Leidžiama programai skaityti ir rašyti „Do Not Disturb“ konfigūraciją."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"pradėti peržiūrėti leidimo naudojimą"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Leidžia savininkui pradėti naudoti programos leidimą. Įprastoms programoms to neturėtų prireikti."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"pradėti programos funkcijų peržiūrą"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Savininkui leidžiama pradėti programos funkcijų informacijos peržiūrą."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"pasiekti jutiklių duomenis dideliu skaitmeninimo dažniu"</string>

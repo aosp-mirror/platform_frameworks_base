@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ডিভাইসটিকে ম্যানুয়ালি লক করা হয়েছে"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"শনাক্ত করা যায়নি"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"শনাক্ত করা যায়নি"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"\'ফেস আনলক\' ফিচার ব্যবহার করতে \'সেটিংস ও গোপনীয়তা\' বিকল্পে গিয়ে "<b>"ক্যামেরায় অ্যাক্সেস দিন"</b></string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">সিমের পিন লিখুন। আপনি আর <xliff:g id="NUMBER_1">%d</xliff:g> বার চেষ্টা করতে পারবেন।</item>
       <item quantity="other">সিমের পিন লিখুন। আপনি আর <xliff:g id="NUMBER_1">%d</xliff:g> বার চেষ্টা করতে পারবেন।</item>

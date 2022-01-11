@@ -553,8 +553,8 @@ public class VibrationThreadTest {
         VibrationEffect effect = VibrationEffect.startWaveform()
                 .addStep(1, 10)
                 .addRamp(0, 20)
-                .addStep(0.8f, 1, 30)
-                .addRamp(0.6f, -1, 40)
+                .addStep(0.8f, 100, 30)
+                .addRamp(0.6f, 200, 40)
                 .build();
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
         waitForCompletion(thread);
@@ -565,12 +565,13 @@ public class VibrationThreadTest {
         verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
         assertEquals(Arrays.asList(
-                expectedRamp(/* amplitude= */ 1, /* frequency= */ 150, /* duration= */ 10),
-                expectedRamp(/* StartAmplitude= */ 1, /* endAmplitude= */ 0,
-                        /* startFrequency= */ 150, /* endFrequency= */ 150, /* duration= */ 20),
-                expectedRamp(/* amplitude= */ 0.6f, /* frequency= */ 200, /* duration= */ 30),
-                expectedRamp(/* StartAmplitude= */ 0.6f, /* endAmplitude= */ 0.5f,
-                        /* startFrequency= */ 200, /* endFrequency= */ 100, /* duration= */ 40)),
+                expectedRamp(/* amplitude= */ 1, /* frequencyHz= */ 150, /* duration= */ 10),
+                expectedRamp(/* startAmplitude= */ 1, /* endAmplitude= */ 0,
+                        /* startFrequencyHz= */ 150, /* endFrequencyHz= */ 150, /* duration= */ 20),
+                expectedRamp(/* amplitude= */ 0.5f, /* frequencyHz= */ 100, /* duration= */ 30),
+                expectedRamp(/* startAmplitude= */ 0.5f, /* endAmplitude= */ 0.6f,
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 200,
+                        /* duration= */ 40)),
                 fakeVibrator.getEffectSegments());
         assertEquals(Arrays.asList(Braking.CLAB), fakeVibrator.getBraking());
     }
@@ -589,8 +590,8 @@ public class VibrationThreadTest {
         VibrationEffect effect = VibrationEffect.startWaveform()
                 .addStep(1, 10)
                 .addRamp(0, 20)
-                .addStep(0.8f, 1, 30)
-                .addRamp(0.6f, -1, 40)
+                .addStep(0.8f, 10, 30)
+                .addRamp(0.6f, 100, 40)
                 .build();
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
         waitForCompletion(thread);
@@ -1345,7 +1346,8 @@ public class VibrationThreadTest {
     }
 
     private VibrationEffectSegment expectedOneShot(long millis) {
-        return new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, /* frequency= */ 0, (int) millis);
+        return new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE,
+                /* frequencyHz= */ 0, (int) millis);
     }
 
     private VibrationEffectSegment expectedPrebaked(int effectId) {
@@ -1356,13 +1358,13 @@ public class VibrationThreadTest {
         return new PrimitiveSegment(primitiveId, scale, delay);
     }
 
-    private VibrationEffectSegment expectedRamp(float amplitude, float frequency, int duration) {
-        return expectedRamp(amplitude, amplitude, frequency, frequency, duration);
+    private VibrationEffectSegment expectedRamp(float amplitude, float frequencyHz, int duration) {
+        return expectedRamp(amplitude, amplitude, frequencyHz, frequencyHz, duration);
     }
 
     private VibrationEffectSegment expectedRamp(float startAmplitude, float endAmplitude,
-            float startFrequency, float endFrequency, int duration) {
-        return new RampSegment(startAmplitude, endAmplitude, startFrequency, endFrequency,
+            float startFrequencyHz, float endFrequencyHz, int duration) {
+        return new RampSegment(startAmplitude, endAmplitude, startFrequencyHz, endFrequencyHz,
                 duration);
     }
 

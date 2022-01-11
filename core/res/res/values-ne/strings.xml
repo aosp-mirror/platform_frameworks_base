@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"एपलाई तपाईंको Android टिभी डिभाइसको आगमन र बहिर्गमन कलसम्बन्धी डेटासहित कल लग परिमार्जन गर्ने अनुमति दिन्छ। हानिकारक एपहरूले यसलाई तपाईंको कल लग मेटाउन वा परिमार्जन गर्न प्रयोग गर्न सक्छन्।"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"एपलाई तपाईंको फोनको आउने र बाहिर जाने कलहरूको बारेको डेटा सहित कल लग परिमार्जन गर्न अनुमति दिन्छ। खराब एपहरूले यसलाई तपाईंको कल लग मेटाउन वा परिमार्जन गर्न प्रयोग गर्न सक्दछ।"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"शरीरका सेन्सरहरूमा पहुँच गराउनुहोस् (जस्तै हृदय धड्कन निगरानीहरू)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"तपाईँको हृदय गति जस्तो सेंसर बाट डेटा पहुँचको लागि एप अनुमति दिन्छ जसले तपाईँको भौतिक अवस्था अनुगमन गर्छ।"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"बडी सेन्सरका सहायताले हृदयको गति, शरीरको तापक्रम, रगतमा रहेको अक्सिजनको प्रतिशतलगायतका डेटा हेर्ने अनुमति।"</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"ब्याकग्राउन्डमा काम गर्ने बडी सेन्सरका सहायताले (हृदयको गति मापन जस्ता) डेटा हेर्ने अनुमति"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"ब्याकग्राउन्डमा काम गर्ने बडी सेन्सरका सहायताले हृदयको गति, शरीरको तापक्रम, रगतमा रहेको अक्सिजनको प्रतिशतलगायतका डेटा हेर्ने अनुमति।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"पात्रोका कार्यक्रम र विवरणहरू पढ्ने"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यस एपले तपाईंको ट्याब्लेटमा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यस एपले तपाईंको Android टिभी डिभाइसमा भण्डार गरिएका पात्रोसम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"बाधा नपुर्याउँनुहोस् कन्फिगरेसन पढ्न र लेख्‍नको लागि एपलाई अनुमति दिनुहोस्।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"हेर्ने अनुमतिको प्रयोग सुरु गर्नुहोस्"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"वाहकलाई कुनै एपसम्बन्धी अनुमतिको प्रयोग सुरु गर्न दिन्छ। साधारण एपहरूलाई कहिल्यै आवश्यक नपर्नु पर्ने हो।"</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"एपका सुविधासम्बन्धी जानकारी हेर्न थाल्नुहोस्"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"होल्डरलाई एपका सुविधासम्बन्धी जानकारी हेर्न दिन्छ।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"नमुना लिने उच्च दरमा सेन्सरसम्बन्धी डेटा प्रयोग गर्ने"</string>

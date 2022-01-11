@@ -433,7 +433,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"‏מאפשרת לאפליקציה לשנות את יומן השיחות של מכשיר ה-Android TV, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות להשתמש בכך כדי למחוק או לשנות את יומן השיחות."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"מאפשרת לאפליקציה לשנות את יומן השיחות של הטלפון, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות לעשות בכך שימוש כדי למחוק או לשנות את יומן השיחות שלך."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"גישה אל חיישני גוף (כמו מוניטורים לקצב לב)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"מאפשרת לאפליקציה לגשת אל נתוני חיישנים העוקבים אחר מצבך הגופני, כמו קצב הלב."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"גישה לנתונים מחיישנים גופניים כמו דופק, חום גוף, שיעור החמצן בדם ועוד."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"גישה לחיישנים גופניים (כמו מוניטורים למדידת דופק) תוך כדי פעילות ברקע"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"גישה לנתונים מחיישנים גופניים, כמו דופק, חום גוף, שיעור החמצן בדם, תוך כדי פעילות ברקע."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"קריאה של אירועי יומן והפרטים שלהם"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"האפליקציה הזו יכולה לקרוא את כל אירועי היומן המאוחסנים בטאבלט, ולשתף או לשמור את נתוני היומן."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"‏האפליקציה הזו יכולה לקרוא את כל אירועי היומן המאוחסנים במכשיר ה-Android TV, ולשתף או לשמור את נתוני היומן."</string>
@@ -737,6 +739,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"מאפשרת לאפליקציה לקרוא ולכתוב את התצורה של התכונה \'נא לא להפריע\'."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"התחלת צפייה בהרשאות השימוש"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"מאפשרת לבעלים להפעיל את השימוש בהרשאות עבור אפליקציה מסוימת. הרשאה זו אף פעם לא נדרשת עבור אפליקציות רגילות."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"התחלת צפייה בהרשאות של אפליקציות"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"בעלי ההרשאה יוכלו להתחיל לצפות בפרטי התכונות של אפליקציות."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"גישה לנתוני חיישנים בתדירות דגימה גבוהה"</string>
@@ -1348,7 +1354,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"הוגדר רינגטון שקט"</string>
     <string name="volume_call" msgid="7625321655265747433">"עוצמת קול בשיחה"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"‏עוצמת הקול בשיחה ב-Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"עוצמת קול של התראה"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"עוצמת הקול של השעון המעורר"</string>
     <string name="volume_notification" msgid="6864412249031660057">"עוצמת הקול של ההתראות"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"עוצמת קול"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"‏עוצמת הקול של Bluetooth"</string>
@@ -2053,8 +2059,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"התראות אפליקציה בהתאמה אישית"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"האם לאפשר לאפליקציה <xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש באמצעות <xliff:g id="ACCOUNT">%2$s</xliff:g> (כבר קיים משתמש לחשבון הזה)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"לאפשר לאפליקציה <xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש באמצעות <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"הוספת משתמש בפיקוח"</string>
     <string name="language_selection_title" msgid="52674936078683285">"הוספת שפה"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"העדפת אזור"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"יש להקליד את שם השפה"</string>

@@ -31,7 +31,7 @@
     <bool name="config_use_split_notification_shade">true</bool>
 
     <!-- The number of columns in the QuickSettings -->
-    <integer name="quick_settings_num_columns">2</integer>
+    <integer name="quick_settings_num_columns">3</integer>
 
     <!-- Notifications are sized to match the width of two (of 4) qs tiles in landscape. -->
     <bool name="config_skinnyNotifsInLandscape">false</bool>

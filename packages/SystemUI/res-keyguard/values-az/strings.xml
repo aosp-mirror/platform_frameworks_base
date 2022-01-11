@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Cihaz əl ilə kilidləndi"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Tanınmır"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Tanınmır"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Üz ilə Kiliddən Açma funksiyasını istifadə etmək üçün Ayarlar &gt; Məxfilik bölməsində "<b>"Kameraya girişi"</b>" aktiv edin"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">SIM PIN-ni daxil edin. <xliff:g id="NUMBER_1">%d</xliff:g> cəhdiniz qalır.</item>
       <item quantity="one">SIM PIN-ni daxil edin. Cihazınızı kiliddən çıxarmaq üçün operatorunuzla əlaqə saxlamadan öncə <xliff:g id="NUMBER_0">%d</xliff:g> cəhdiniz qalır.</item>

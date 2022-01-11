@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Antaa sovelluksen muokata Android TV ‑laitteen puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat tyhjentää puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Antaa sovelluksen muokata puhelimesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"käyttää kehon antureita (kuten sykemittareita)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Antaa sovelluksen käyttää kehosi tilaa seuraavien anturien tietoja, esimerkiksi sykettä."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Pääsy kehon antureiden dataan, esim. sykkeeseen, ruumiinlämpöön ja veren happiprosenttiin."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"Pääsy kehon antureihin (kuten sykemittareihin) taustalla"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Pääsy kehon antureiden dataan (esim. sykkeeseen, ruumiinlämpöön ja veren happiprosenttiin) taustalla."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lue kalenterin tapahtumia ja tietoja"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Tämä sovellus voi lukea kaikkia tabletille tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Tämä sovellus voi lukea kaikkia Android TV ‑laitteeseen tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Sallii sovelluksen lukea ja muokata Älä häiritse -tilan asetuksia."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"aloita katseluoikeuksien käyttö"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Antaa luvanhaltijan käynnistää sovelluksen käyttöoikeuksien käytön. Ei tavallisten sovelluksien käyttöön."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"aloittaa sovellusominaisuuksien katselun"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Antaa luvanhaltijan aloittaa sovelluksen ominaisuustietojen katselun."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"saada pääsyn anturidataan suuremmalla näytteenottotaajuudella"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Oma sovellusilmoitus"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Saako <xliff:g id="APP">%1$s</xliff:g> luoda uuden käyttäjän (<xliff:g id="ACCOUNT">%2$s</xliff:g>) – tällä käyttäjällä on jo tili?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Saako <xliff:g id="APP">%1$s</xliff:g> luoda uuden käyttäjän (<xliff:g id="ACCOUNT">%2$s</xliff:g>)?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Lisää valvottu käyttäjä"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Lisää kieli"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Alueasetus"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Anna kielen nimi"</string>

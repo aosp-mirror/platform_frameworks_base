@@ -261,7 +261,8 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(ACTION_EVALUATE);
             filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
-            registerReceiver(mReceiver, filter);
+            registerReceiver(mReceiver, filter,
+                    Context.RECEIVER_EXPORTED_UNAUDITED);
         } else {
             unregisterReceiver(mReceiver);
         }

@@ -433,7 +433,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Umožňuje aplikácii upravovať denník hovorov zariadenia Android TV vrátane údajov o prichádzajúcich a odchádzajúcich hovoroch. Škodlivé aplikácie to môžu zneužiť na vymazanie alebo úpravu denníkov hovorov."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Umožňuje aplikácii upravovať zoznam hovorov vo vašom telefóne vrátane údajov o prichádzajúcich a odchádzajúcich hovoroch. Škodlivé aplikácie to môžu zneužiť na vymazanie alebo úpravu vášho zoznamu hovorov."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"prístup k telovým senzorom (ako sú snímače tepu)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Umožňuje aplikácii získať prístup k údajom senzorov monitorujúcich vašu fyzickú kondíciu (napríklad pulz)."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Prístup k údajom z telových senzorov, ako sú pulz, teplota, saturácia atď."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"prístup k telovým senzorom (ako sú snímače pulzu) na pozadí"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Prístup k údajom z telových senzorov, ako sú pulz, teplota, saturácia atď., na pozadí."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Čítanie udalostí kalendára a podrobností"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Táto aplikácia môže čítať všetky udalosti kalendára uložené vo vašom tablete a zdieľať alebo ukladať dáta kalendára."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Táto aplikácia môže čítať všetky udalosti kalendára uložené vo vašom zariadení Android TV a zdieľať alebo ukladať údaje kalendára."</string>
@@ -737,6 +739,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Umožňuje aplikácii čítať a zapisovať konfiguráciu režimu bez vyrušení."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"spustenie používania povolenia na zobrazenie"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Umožňuje držiteľovi spustiť používanie povolenia aplikáciou. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"spustenie zobrazenia rozhodnutí o povolení"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Umožňuje držiteľovi spustiť obrazovku a skontrolovať rozhodnutia o povoleniach. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"zobrazenie informácií o funkciách aplikácie"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Umožňuje držiteľovi zobraziť informácie o funkciách aplikácie."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"prístup k dátam senzorom s vysokou vzorkovacou frekvenciou"</string>
@@ -2053,8 +2057,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Vlastné upozornenie na aplikáciu"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Chcete povoliť aplikácii <xliff:g id="APP">%1$s</xliff:g> vytvoriť nového používateľa pomocou účtu <xliff:g id="ACCOUNT">%2$s</xliff:g> (používateľ s týmto účtom už existuje)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Chcete povoliť aplikácii <xliff:g id="APP">%1$s</xliff:g> vytvoriť nového používateľa pomocou účtu <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Pridať kontrolovaného používateľa"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Pridať jazyk"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferovaný región"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Zadajte názov jazyka"</string>

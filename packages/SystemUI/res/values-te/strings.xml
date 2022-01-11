@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"లాక్ స్క్రీన్."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"కార్యాలయ లాక్ స్క్రీన్"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"మూసివేస్తుంది"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"వైఫై ఆఫ్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"వైఫై ఆన్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"ఎయిర్‌ప్లేన్ మోడ్ ఆఫ్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"ఎయిర్‌ప్లేన్ మోడ్ ఆన్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"మొత్తం నిశ్శబ్దం"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"అలారాలు మాత్రమే"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"అంతరాయం కలిగించవద్దు."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\'అంతరాయం కలిగించవద్దు\' ఆఫ్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"బ్లూటూత్."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"బ్లూటూత్ ఆన్‌లో ఉంది."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"బ్లూటూత్ ఆఫ్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"బ్లూటూత్ ఆన్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"లొకేషన్ రిపోర్టింగ్ ఆఫ్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"లొకేషన్ రిపోర్టింగ్ ఆన్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"<xliff:g id="TIME">%s</xliff:g>కి అలారం సెట్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"ఎక్కువ సమయం."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"తక్కువ సమయం."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"ఫ్లాష్‌లైట్ ఆఫ్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"ఫ్లాష్‌లైట్ ఆన్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"రంగు విలోమం ఆఫ్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"రంగు విలోమం ఆన్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"మొబైల్ హాట్‌స్పాట్ ఆఫ్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"మొబైల్ హాట్‌స్పాట్ ఆన్ చేయబడింది."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"స్క్రీన్ ప్రసారం ఆపివేయబడింది."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"డేటా సేవర్ ఆఫ్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"డేటా సేవర్ ఆన్ చేయబడింది."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"ప్రదర్శన ప్రకాశం"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"మొబైల్ డేటా పాజ్ చేయబడింది"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"డేటా పాజ్ చేయబడింది"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi‑Fi కనెక్ట్ కాలేదు"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ప్రకాశం"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"కలర్ మార్పిడి"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"మరిన్ని సెట్టింగ్‌లు"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"యూజర్ సెట్టింగ్‌లు"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"పూర్తయింది"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"మీ కీబోర్డ్‌ను మీ టాబ్లెట్‌తో కనెక్ట్ చేయడానికి, మీరు ముందుగా బ్లూటూత్ ఆన్ చేయాలి."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ఆన్ చేయి"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"పవర్ నోటిఫికేషన్ నియంత్రణలు"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"\'ముఖం ఆధారం\'ను - ఆన్ చేయండి"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"పవర్ నోటిఫికేషన్ కంట్రోల్స్ సాయంతో, మీరు యాప్ నోటిఫికేషన్‌లకు ప్రాముఖ్యతా స్థాయిని 0 నుండి 5 వరకు సెట్ చేయవచ్చు. \n\n"<b>"స్థాయి 5"</b>" \n- నోటిఫికేషన్ లిస్ట్‌ పైభాగంలో చూపబడతాయి \n- ఫుల్-స్క్రీన్ అంతరాయం అనుమతించబడుతుంది \n- ఎల్లప్పుడూ క్విక్ వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 4"</b>\n"- ఫుల్-స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎల్లప్పుడూ క్విక్ వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 3"</b>" \n- ఫుల్-స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ క్విక్ వీక్షణ అందించబడదు \n\n"<b>"స్థాయి 2"</b>" \n- ఫుల్-స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ క్విక్ వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం మరియు వైబ్రేషన్ చేయవు \n\n"<b>"స్థాయి 1"</b>" \n- ఫుల్-స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ క్విక్ వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం లేదా వైబ్రేట్ చేయవు \n- లాక్ స్క్రీన్, స్టేటస్ బార్‌ల నుండి దాచబడతాయి \n- నోటిఫికేషన్ లిస్ట్‌ దిగువ భాగంలో చూపబడతాయి \n\n"<b>"స్థాయి 0"</b>" \n- యాప్ నుండి అన్ని నోటిఫికేషన్‌లు బ్లాక్ చేయబడతాయి"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"పూర్తయింది"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"అప్లయి చేయి"</string>
@@ -651,7 +636,7 @@
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"సెట్టింగ్‌లను తెరవండి."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"శీఘ్ర సెట్టింగ్‌లను తెరవండి."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"శీఘ్ర సెట్టింగ్‌లను మూసివేయండి."</string>
-    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> వలె సైన్ ఇన్ చేశారు"</string>
+    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> లాగా సైన్ ఇన్ చేశారు"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"యూజర్‌ను ఎంపిక చేయండి"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ఇంటర్నెట్ లేదు"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"వివరాలను తెరవండి."</string>

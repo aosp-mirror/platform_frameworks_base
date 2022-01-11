@@ -920,12 +920,6 @@ public final class SystemServer implements Dumpable {
             startBootstrapServices(t);
             startCoreServices(t);
             startOtherServices(t);
-            // Apex services must be the last category of services to start. No other service must
-            // be starting after this point. This is to prevent unnessary stability issues when
-            // these apexes are updated outside of OTA; and to avoid breaking dependencies from
-            // system into apexes.
-            // TODO(satayev): lock mSystemServiceManager.startService to stop accepting new services
-            // after this step
             startApexServices(t);
         } catch (Throwable ex) {
             Slog.e("System", "******************************************");
@@ -3051,6 +3045,10 @@ public final class SystemServer implements Dumpable {
 
     /**
      * Starts system services defined in apexes.
+     *
+     * <p>Apex services must be the last category of services to start. No other service must be
+     * starting after this point. This is to prevent unnecessary stability issues when these apexes
+     * are updated outside of OTA; and to avoid breaking dependencies from system into apexes.
      */
     private void startApexServices(@NonNull TimingsTraceAndSlog t) {
         t.traceBegin("startApexServices");
@@ -3067,6 +3065,10 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
         }
+
+        // make sure no other services are started after this point
+        mSystemServiceManager.sealStartedServices();
+
         t.traceEnd(); // startApexServices
     }
 

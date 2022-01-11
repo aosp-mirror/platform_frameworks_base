@@ -95,6 +95,9 @@ class ActivityLaunchAnimator(
      */
     var callback: Callback? = null
 
+    /** The set of [Listener] that should be notified of any animation started by this animator. */
+    private val listeners = LinkedHashSet<Listener>()
+
     /**
      * Start an intent and animate the opening window. The intent will be started by running
      * [intentStarter], which should use the provided [RemoteAnimationAdapter] and return the launch
@@ -214,6 +217,16 @@ class ActivityLaunchAnimator(
         }
     }
 
+    /** Add a [Listener] that can listen to launch animations. */
+    fun addListener(listener: Listener) {
+        listeners.add(listener)
+    }
+
+    /** Remove a [Listener]. */
+    fun removeListener(listener: Listener) {
+        listeners.remove(listener)
+    }
+
     /** Create a new animation [Runner] controlled by [controller]. */
     @VisibleForTesting
     fun createRunner(controller: Controller): Runner = Runner(controller)
@@ -234,11 +247,25 @@ class ActivityLaunchAnimator(
         /** Hide the keyguard and animate using [runner]. */
         fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner)
 
-        /** Enable/disable window blur so they don't overlap with the window launch animation **/
-        fun setBlursDisabledForAppLaunch(disabled: Boolean)
-
         /* Get the background color of [task]. */
         fun getBackgroundColor(task: TaskInfo): Int
+    }
+
+    interface Listener {
+        /** Called when an activity launch animation started. */
+        @JvmDefault
+        fun onLaunchAnimationStart() {}
+
+        /**
+         * Called when an activity launch animation is finished. This will be called if and only if
+         * [onLaunchAnimationStart] was called earlier.
+         */
+        @JvmDefault
+        fun onLaunchAnimationEnd() {}
+
+        /** Called when an activity launch animation made progress. */
+        @JvmDefault
+        fun onLaunchAnimationProgress(linearProgress: Float) {}
     }
 
     /**
@@ -396,12 +423,12 @@ class ActivityLaunchAnimator(
             val delegate = this.controller
             val controller = object : LaunchAnimator.Controller by delegate {
                 override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-                    callback.setBlursDisabledForAppLaunch(true)
+                    listeners.forEach { it.onLaunchAnimationStart() }
                     delegate.onLaunchAnimationStart(isExpandingFullyAbove)
                 }
 
                 override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                    callback.setBlursDisabledForAppLaunch(false)
+                    listeners.forEach { it.onLaunchAnimationEnd() }
                     iCallback?.invoke()
                     delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
                 }
@@ -413,6 +440,7 @@ class ActivityLaunchAnimator(
                 ) {
                     applyStateToWindow(window, state)
                     navigationBar?.let { applyStateToNavigationBar(it, state, linearProgress) }
+                    listeners.forEach { it.onLaunchAnimationProgress(linearProgress) }
                     delegate.onLaunchAnimationProgress(state, progress, linearProgress)
                 }
             }

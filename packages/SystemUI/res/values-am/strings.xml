@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ማያ ገጽ ቆልፍ።"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"የስራ ማያ ገጽ ቁልፍ"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ዝጋ"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wifi ጠፍቷል።"</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wifi በርቷል።"</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"የአውሮፕላን ሁነታ ጠፍቷል።"</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"የአውሮፕላን ሁነታ በርቷል።"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ሙሉ ለሙሉ ጸጥታ"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ማንቂያዎች ብቻ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"አትረብሽ።"</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"አትረብሽ ጠፍቷል።"</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"አትረብሽ በርቷል።"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ብሉቱዝ።"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"ብሉቱዝ በርቷል።"</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"ብሉቱዝ ጠፍቷል።"</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"ብሉቱዝ በርቷል።"</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"አካባቢን ሪፖርት ማድረግ ጠፍቷል።"</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"አካባቢን ሪፖርት ማድረግ በርቷል።"</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"ማንቂያ ለ<xliff:g id="TIME">%s</xliff:g> ተዋቅሯል።"</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"ተጨማሪ ጊዜ።"</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"ያነሰ ጊዜ።"</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"የባትሪ ብርሃን ጠፍቷል።"</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"የባትሪ ብርሃን በርቷል።"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"የቀለም ግልበጣ ጠፍቷል።"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"የቀለም ግልበጣ በርቷል።"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"የተንቀሳቃሽ ስልክ መገናኛ ነጥብ ጠፍቷል።"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"የተንቀሳቃሽ ስልክ መገናኛ ነጥብ በርቷል።"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"ማያ ገጽ መውሰድ ቆሟል።"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ውሂብ ቆጣቢ ጠፍቷል።"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"ውሂብ ቆጣቢ በርቷል።"</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"ብሩህነት ያሳዩ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"የተንቀሳቃሽ ስልክ ውሂብ ባለበት ቆሟል"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"ውሂብ ላፍታ ቆሟል"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi አልተገናኘም"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ብሩህነት"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ተቃራኒ ቀለም"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ተጨማሪ ቅንብሮች"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"የተጠቃሚ ቅንብሮች"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ተከናውኗል"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"የቁልፍ ሰሌዳዎን ከእርስዎ ጡባዊ ጋር ለማገናኘት በመጀመሪያ ብሉቱዝን ማብራት አለብዎት።"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"አብራ"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"የኃይል ማሳወቂያ መቆጣጠሪያዎች"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"በርቷል - መልክ ላይ የተመሠረተ"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"በኃይል ማሳወቂያ መቆጣጠሪያዎች አማካኝነት የአንድ መተግበሪያ ማሳወቂያዎች የአስፈላጊነት ደረጃ ከ0 እስከ 5 ድረስ ማዘጋጀት ይችላሉ። \n\n"<b>"ደረጃ 5"</b>" \n- በማሳወቂያ ዝርዝሩ አናት ላይ አሳይ \n- የሙሉ ማያ ገጽ ማቋረጥን ፍቀድ \n- ሁልጊዜ አጮልቀው ይመልከቱ \n\n"<b>"ደረጃ 4"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ከልክል \n- ሁልጊዜ አጮልቀው ይመልከቱ \n\n"<b>"ደረጃ 3"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ከልክል \n- በፍጹም አጮልቀው አይምልከቱ \n\n"<b>"ደረጃ 2"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ይከልክሉ \n- በፍጹም አጮልቀው አይመልከቱ \n- ድምፅ እና ንዝረትን በፍጹም አይኑር \n\n"<b>"ደረጃ 1"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ይከልክሉ \n- በፍጹም አጮልቀው አይመልከቱ \n- ድምፅ ወይም ንዝረትን በፍጹም አያደርጉ \n- ከመቆለፊያ ገጽ እና የሁኔታ አሞሌ ይደብቁ \n- በማሳወቂያ ዝርዝር ግርጌ ላይ አሳይ \n\n"<b>"ደረጃ 0"</b>" \n- ሁሉንም የመተግበሪያው ማሳወቂያዎች ያግዱ"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"ተከናውኗል"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"ተግብር"</string>

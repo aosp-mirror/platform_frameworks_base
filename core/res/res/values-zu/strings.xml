@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Ivumela uhlelo lokusebenza ukuthi liguqule ilogi yekholi yedivayisi yakho ye-Android TV, okufaka idatha emayelana namakholi angenayo naphumayo. Izinhlelo zokusebenza ezinobungozi zingasebenzisa lokhu ukususa noma ukuguqula ilogi yakho yekholi."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Ivumela uhlelo lokusebenza ukushintsha irekhodi lamakholi efoni yakho, kufaka phakathi idatha emayelana namakholi angenayo naphumayo. Izinhlelo zikusebenza ezingalungile zingasebenzisa lokhu ukusula noma ukushintsha irekhodi lwamakholi wakho."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"finyelela kuzinzwa zomzimba (ezifana neziqaphi zokulinganisela inhliziyo)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Ivumela uhlelo lokusebenza ukuthi lufinyelele kudatha kusukela kuzinzwa eziqapha isimo sakho somzimba, esifana nesilinganiso senhliziyo yakho."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Ukufinyelela kudatha kusuka kuzinzwa zomzimba ezifana nokushaya kwenhliziyo, izinga lokushisa, amaphesenti womoyampilo wegazi, njll."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"finyelela izinzwa zomzimba (njengeziqapha ukushaya kwenhliziyo) kuyilapho ingemuva"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Ukufinyelela kudatha evela kuzinzwa zomzimba ezinjengokushaya kwenhliziyo, izinga lokushisa, amaphesenti omoyampilo wegazi, njll. kuyilapho ingemuva."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Funda imicimbi yekhalenda nemininingwane"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Lolu hlelo lokusebenza lungafunda yonke imicimbi yekhalenda elondolozwe kuthebhulethi yakho nokwabelana noma ukulondoloza idatha yakho yekhalenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Lolu hlelo lokusebenza lungafunda yonke imicimbi yekhalenda elondolozwe kudivayisi yakho ye-Android TV nokwabelana noma ukulondoloza idatha yakho yekhalenda."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ivumela izinhlelo zokusebenza ukufunda nokubhala ukulungiswa kokuthi Ungaphazamisi."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"qala ukusetshenziswa kokubuka imvume"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Ivumela umphathi ukuthi aqale ukusetshenziswa kwemvume kohlelo lokusebenza. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"qala ukubuka izakhi ze-app"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Vumela isibambi ukuthi siqale ukubuka ulwazi lwezakhi lwe-app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"finyelela idatha yenzwa ngenani eliphezulu lokwenza isampuli"</string>
@@ -1390,7 +1396,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"I-MIDI nge-USB ivuliwe"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Insiza ye-USB ixhunyiwe"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Thepha ngezinketho eziningi."</string>
-    <string name="usb_power_notification_message" msgid="7284765627437897702">"Ishaja idivayisi exhunyiwe. Thepha ukuze uthole ezinye izinketho."</string>
+    <string name="usb_power_notification_message" msgid="7284765627437897702">"Ishaja idivayisi exhunyiwe. Thepha ukuze uthole okunye okungakhethwa."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Kutholwe isisetshenziswa se-analog yomsindo"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Idivayisi enamathiselwe kwi-imeyili ayihambisani nale foni. Thepha ukuze ufunde kabanzi."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Ukulungisa iphutha le-USB kuxhunyiwe"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Isaziso sohlelo lokusebenza olungokwezifiso"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukuthi idale umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> (Umsebenzisi onale akhawunti usevele ukhona) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukuthi idale umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Engeza umsebenzisi ogadiwe"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Engeza ulimi"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Okuncamelayo kwesifunda"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Thayipha igama lolimi"</string>

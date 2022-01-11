@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਦਾ ਕਾਲ ਲੌਗ ਸੋਧਣ ਦਿੰਦੀ ਹੈ, ਇਸ ਵਿੱਚ ਇਨਕਮਿੰਗ ਅਤੇ ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਬਾਰੇ ਡਾਟਾ ਵੀ ਸ਼ਾਮਲ ਹੈ। ਭੈੜੀਆਂ ਐਪਾਂ ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਕਾਲ ਲੌਗ ਡਾਟਾ ਮਿਟਾ ਜਾਂ ਸੋਧ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਦਾ ਕਾਲ ਲੌਗ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਇਨਕਮਿੰਗ ਅਤੇ ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਬਾਰੇ ਡਾਟਾ ਸਮੇਤ। ਖਰਾਬ ਐਪਾਂ ਇਸਦੀ ਵਰਤੋਂ ਤੁਹਾਡੇ ਕਾਲ ਲੌਗ ਨੂੰ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਲਈ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"ਸਰੀਰ ਸੰਵੇਦਕਾਂ \'ਤੇ ਪਹੁੰਚ ਕਰੋ (ਜਿਵੇਂ ਦਿਲ ਦੀ ਧੜਕਣ ਦੇ ਨਿਰੀਖਕ)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"ਐਪ ਨੂੰ ਉਹਨਾਂ ਸੰਵੇਦਕਾਂ ਦੇ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ ਜੋ ਤੁਹਾਡੀ ਸਰੀਰਕ ਸਥਿਤੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੇ ਹਨ, ਜਿਵੇਂ ਤੁਹਾਡੇ ਦਿਲ ਦੀ ਧੜਕਣ।"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰਾਂ ਜਿਵੇਂ ਕਿ ਦਿਲ ਦੀ ਧੜਕਣ, ਤਾਪਮਾਨ, ਖੂਨ ਵਿੱਚ ਮੌਜੂਦ ਆਕਸੀਜਨ ਦੀ ਫ਼ੀਸਦ ਆਦਿ ਤੋਂ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰੋ।"</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਰਹਿੰਦੇ ਹੋਏ (ਜਿਵੇਂ ਕਿ ਦਿਲ ਦੀ ਧੜਕਣ ਮਾਪਣ ਵਾਲੇ ਮਾਨੀਟਰ) ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਰਹਿੰਦੇ ਹੋਏ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰਾਂ ਜਿਵੇਂ ਕਿ ਦਿਲ ਦੀ ਧੜਕਣ, ਤਾਪਮਾਨ, ਖੂਨ ਵਿੱਚ ਮੌਜੂਦ ਆਕਸੀਜਨ ਦੀ ਫ਼ੀਸਦ ਆਦਿ ਤੋਂ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰੋ।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ਕੈਲੰਡਰ ਵਰਤਾਰਿਆਂ ਅਤੇ ਵੇਰਵਿਆਂ ਨੂੰ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡਾਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ਇਹ ਐਪ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡਾਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ਐਪ ਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਕੌਂਫਿਗਰੇਸ਼ਨ ਨੂੰ ਪੜ੍ਹਨ ਅਤੇ ਲਿਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ਇਜਾਜ਼ਤ ਵਰਤੋਂ ਦੇਖਣਾ ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ਧਾਰਕ ਨੂੰ ਕਿਸੇ ਹੋਰ ਐਪ ਲਈ ਇਜਾਜ਼ਤ ਵਰਤੋਂ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਾਂ ਲਈ ਕਦੇ ਵੀ ਲੋੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ਐਪ ਦੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਦੇਖਣਾ ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ਇਸ ਨਾਲ ਹੋਲਡਰ ਨੂੰ ਕਿਸੇ ਐਪ ਦੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਬਾਰੇ ਜਾਣਕਾਰੀ ਦੇਖਣ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ਉੱਚ ਸੈਂਪਲਿੰਗ ਰੇਟ \'ਤੇ ਸੈਂਸਰ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>

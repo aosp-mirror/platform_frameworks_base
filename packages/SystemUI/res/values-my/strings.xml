@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"မျက်နှာပြင် သော့ပိတ်ရန်"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"အလုပ်သုံး လော့ခ်မျက်နှာပြင်"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ပိတ်ရန်"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"ကြိုးမဲ့ ပိတ်ထား။"</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"ကြိုးမဲ့ ဖွင့်ထား။"</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"လေယာဉ် မုဒ်ကို ပိတ်ထားလိုက်ပြီ။"</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"လေယာဉ် မုဒ်ကို ဖွင့်ထားလိုက်ပြီ။"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"လုံးဝ အသံပိတ်ထားရန်"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"နှိုးစက်များသာ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"မနှောင့်ယှက်ရ။"</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\'မနှောင့်ယှက်ရ\' ကိုပိတ်ထားသည်။"</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"\'မနှောင့်ယှက်ရ\' ကိုဖွင့်ထားသည်။"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ဘလူးတုသ်။"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"ဘလူးတုသ် ဖွင့်ထား။"</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"ဘလူးတုသ် ပိတ်ထား။"</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"ဘလူးတုသ် ဖွင့်ထား။"</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"တည်နေရာ သတင်းပို့မှု ပိတ်ထား။"</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"တည်နေရာ သတင်းပို့မှု ဖွင့်ထား။"</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"နိုးစက်ပေးထားသော အချိန် <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"အချိန် တိုး"</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"အချိန် လျှော့"</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"ဖလက်ရှမီး ပိတ်ထားသည်။"</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"ဖလက်ရှမီး ဖွင့်ထားသည်။"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"အရောင် ပြောင်းပြန်လှန်မှု ပိတ်ထား။"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"အရောင် ပြောင်းပြန်လှန်မှု ဖွင့်ထား။"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"မိုဘိုင်း ဟော့စပေါ့ ပိတ်ထား။"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"မိုဘိုင်း ဟော့စပေါ့ ဖွင့်ထား။"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"မျက်နှာပြင် ကာစ်တင် လုပ်မှု ရပ်လိုက်ပြီ။"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"ဒေတာချွေတာမှု ပိတ်ထားသည်။"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"ဒေတာချွေတာမှု ဖွင့်ထားသည်။"</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"တောက်ပမှုကို ပြရန်"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"မိုဘိုင်းဒေတာကို ခေတ္တရပ်ထားသည်"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"ဒေတာ ခေတ္တရပ်တန့်သည်"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi ချိတ်ဆက်ထားခြင်းမရှိပါ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"အလင်းတောက်ပမှု"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"အရောင်ပြောင်းပြန်ပြုလုပ်ရန်"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"နောက်ထပ် ဆက်တင်များ"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"အသုံးပြုသူ ဆက်တင်များ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ပြီးပါပြီ"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"ကီးဘုတ်ကို တပ်ဘလက်နှင့် ချိတ်ဆက်ရန်၊ ပမထဦးစွာ ဘလူးတုသ်ကို ဖွင့်ပါ။"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ဖွင့်ပါ"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ပါဝါအကြောင်းကြားချက် ထိန်းချုပ်မှုများ"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ဖွင့် - မျက်နှာအခြေခံ"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ပါဝါအကြောင်းကြားချက် ထိန်းချုပ်မှုများကိုအသုံးပြုပြီး အက်ပ်တစ်ခု၏ အကြောင်းကြားချက် အရေးပါမှု ၀ မှ ၅ အထိသတ်မှတ်ပေးနိုင်သည်။ \n\n"<b>"အဆင့် ၅"</b>" \n- အကြောင်းကြားချက်စာရင်း၏ ထိပ်ဆုံးတွင် ပြသည် \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်းကို ခွင့်ပြုသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၄"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၃"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n\n"<b>"အဆင့် ၂"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n\n"<b>"အဆင့် ၁"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n- လော့ခ်ချထားသည့် မျက်နှာပြင်နှင့် အခြေအနေဘားတန်းတို့တွင် မပြပါ \n- အကြောင်းကြားချက်စာရင်း အောက်ဆုံးတွင်ပြသည် \n\n"<b>"အဆင့် ၀"</b>" \n- အက်ပ်မှ အကြောင်းကြားချက်များ အားလုံးကို ပိတ်ဆို့သည်"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"ပြီးပြီ"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"အသုံးပြုရန်"</string>

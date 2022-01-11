@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Pantalla de bloqueo."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Pantalla de bloqueo do perfil de traballo"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Pechar"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wifi desactivada."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wifi activada."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Desactivouse o modo avión."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Activouse o modo avión."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"silencio total"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"só alarmas"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Modo Non molestar."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"Desactivouse o modo Non molestar."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"Activouse o modo Non molestar."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth activado."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"Bluetooth desactivado."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"Bluetooth activado."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"Desactiváronse os Informes de localización."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"Activáronse os Informes de localización."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Alarma definida para as <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Máis tempo."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Menos tempo."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Desactivouse a lanterna."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Activouse a lanterna."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Desactivouse a inversión da cor."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Activouse a inversión da cor."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Desactivouse a zona wifi móbil."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Activouse a zona wifi móbil."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Detívose a emisión en pantalla."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Desactivouse o aforro de datos."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Activouse o aforro de datos."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Brillo de pantalla"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Pausáronse os datos móbiles"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Os datos están en pausa"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"A wifi non está conectada"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversión da cor"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Máis opcións"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Configuración de usuario"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Feito"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Para conectar o teu teclado coa tableta, primeiro tes que activar o Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Activar"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controis de notificacións mellorados"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Activada: baseada na cara"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Cos controis de notificacións mellorados, podes asignarlles un nivel de importancia comprendido entre 0 e 5 ás notificacións dunha aplicación determinada. \n\n"<b>"Nivel 5"</b>" \n- Mostrar na parte superior da lista de notificacións. \n- Permitir interrupcións no modo de pantalla completa. \n- Mostrar sempre. \n\n"<b>"Nivel 4"</b>" \n- Impedir interrupcións no modo de pantalla completa. \n- Mostrar sempre. \n\n"<b>"Nivel 3"</b>" \n- Impedir interrupcións no modo de pantalla completa. \n- Non mostrar nunca. \n\n"<b>"Nivel 2"</b>" \n- Impedir interrupcións no modo de pantalla completa. \n- Non mostrar nunca. \n- Non soar nin vibrar nunca. \n\n"<b>"Nivel 1"</b>" \n- Impedir interrupcións no modo de pantalla completa. \n- Non mostrar nunca. \n- Non soar nin vibrar nunca. \n- Ocultar na pantalla de bloqueo e na barra de estado. \n- Mostrar na parte inferior da lista de notificacións. \n\n"<b>"Nivel 0"</b>" \n- Bloquear todas as notificacións da aplicación."</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Feito"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Aplicar"</string>

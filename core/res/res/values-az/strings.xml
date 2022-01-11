@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Gələn və gedən zənglərlə bağlı məlumatlar daxil olmaqla tətbiqə Android TV cihazının zəng siyahısını dəyişdirmək icazəsi verir. Zərərli proqramlar zəng siyahısını silmək və ya dəyişdirmək üçün bundan istifadə edə bilər."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Tətbiqə sizin daxil olan və gedən zənglər daxil olmaqla telefon zəngi loqlarınızı redaktə etmək icazəsi verir. Zərərli tətbiqlər bundan telefon loqlarınızı silmək və ya redaktə etmək üçün istifadə edə bilər."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"bədən sensorlarına (ürək döyüntüsü monitorları kimi) giriş"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Tətbiqə ürək döyüntüsü kimi fiziki durumunuzu izləməyən sensorların datasına daxil olmağa icazə verir."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Ürək döyüntüsü, temperatur, qanda oksigen faizi kimi bədən sensorlarından əldə edilən məlumatlara giriş."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"arxa fonda işləyərkən bədən sensorlarına (ürək döyüntüsü nəzarətləri kimi) giriş"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Arxa fonda işləyərkən ürək döyüntüsü, temperatur, qanda oksigen faizi kimi bədən sensorlarından əldə edilən məlumatlara giriş."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Təqvim təqdirləri və detallarını oxuyun"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Bu tətbiq planşetdə yerləşdirilmiş və təqvim datasında yadda saxlanmış bütün təqvim tədbirlərini oxuya bilər."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Bu tətbiq Android TV cihazında saxlanılan bütün təqvim tədbirlərini oxuya, həmçinin təqvim datasını paylaşa və ya yadda saxlaya bilər."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Tətbiqə \"Narahat Etməyin\" konfiqurasiyasını oxumağa və yazmağa icazə verin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"Baxış icazəsinin istifadəsinə başlayın"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Sahibinə tətbiqin icazədən istifadəsinə başlamağa imkan verir. Adi tətbiqlər üçün heç vaxt tələb edilmir."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"tətbiqin funksiyalarını görməyə başlamaq"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"İstifadəçinin tətbiqin funksiyaları barədə məlumatları görməyə başlamasına icazə verir."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"sensor datasına yüksək ölçmə sürəti ilə giriş etmək"</string>

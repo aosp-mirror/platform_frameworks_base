@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"允许应用修改您的 Android TV 设备的通话记录，包括关于来电和去电的数据。恶意应用可能会借此清空或修改您的通话记录。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"允许该应用修改手机的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"访问身体传感器（如心率监测器）"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"允许该应用存取监测您身体状况的传感器所收集的数据，例如您的心率。"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"访问身体传感器获得的数据，例如心率、体温、血氧百分比等。"</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"在后台时访问身体传感器（如心率监测器）"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"在后台时访问身体传感器获得的数据，例如心率、体温、血氧百分比等。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"读取日历活动和详情"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"此应用可读取您平板电脑上存储的所有日历活动，并分享或保存您的日历数据。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"此应用可读取您的 Android TV 设备上存储的所有日历活动，以及分享或保存您的日历数据。"</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"允许此应用读取和写入“勿扰”模式配置。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"授权使用“查看权限”"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"允许该应用开始查看应用的权限使用情况（普通应用绝不需要此权限）。"</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"开始查看应用功能"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"允许具有该权限的应用开始查看某个应用的功能信息。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"以高采样率访问传感器数据"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"自定义应用通知"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g>（目前已有用户使用此帐号）创建新用户吗？"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 创建新用户吗？"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"添加受监管用户"</string>
     <string name="language_selection_title" msgid="52674936078683285">"添加语言"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"区域偏好设置"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"输入语言名称"</string>

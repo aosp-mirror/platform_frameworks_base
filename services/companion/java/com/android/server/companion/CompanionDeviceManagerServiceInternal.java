@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package android.app.communal;
+package com.android.server.companion;
 
 /**
- * System private API to be notified about communal mode changes.
+ * Companion Device Manager Local System Service Interface.
  *
- * @hide
+ * @hide Only for use within the system server.
  */
-oneway interface ICommunalModeListener {
-    void onCommunalModeChanged(boolean isCommunalMode);
+public abstract class CompanionDeviceManagerServiceInternal {
+    /**
+     * @see CompanionDeviceManagerService#associationCleanUp
+     */
+    public abstract void associationCleanUp(String profile);
 }

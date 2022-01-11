@@ -36,6 +36,10 @@ import java.util.Objects;
  */
 public final class AssociationInfo implements Parcelable {
     /**
+     * A String indicates the selfManaged device is not connected.
+     */
+    private static final String LAST_TIME_CONNECTED_NONE = "None";
+    /**
      * A unique ID of this Association record.
      * Disclosed to the clients (ie. companion applications) for referring to this record (eg. in
      * {@code disassociate()} API call).
@@ -52,6 +56,11 @@ public final class AssociationInfo implements Parcelable {
     private final boolean mSelfManaged;
     private boolean mNotifyOnDeviceNearby;
     private final long mTimeApprovedMs;
+    /**
+     * A long value indicates the last time connected reported by selfManaged devices
+     * Default value is Long.MAX_VALUE.
+     */
+    private long mLastTimeConnectedMs;
 
     /**
      * Creates a new Association.
@@ -62,7 +71,7 @@ public final class AssociationInfo implements Parcelable {
     public AssociationInfo(int id, @UserIdInt int userId, @NonNull String packageName,
             @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
             @Nullable String deviceProfile, boolean selfManaged, boolean notifyOnDeviceNearby,
-            long timeApprovedMs) {
+            long timeApprovedMs, long lastTimeConnectedMs) {
         if (id <= 0) {
             throw new IllegalArgumentException("Association ID should be greater than 0");
         }
@@ -83,6 +92,7 @@ public final class AssociationInfo implements Parcelable {
         mSelfManaged = selfManaged;
         mNotifyOnDeviceNearby = notifyOnDeviceNearby;
         mTimeApprovedMs = timeApprovedMs;
+        mLastTimeConnectedMs = lastTimeConnectedMs;
     }
 
     /**
@@ -151,11 +161,19 @@ public final class AssociationInfo implements Parcelable {
     }
 
     /**
-     * Should only be used by the CdmService.
+     * Should only be used by the CompanionDeviceManagerService.
      * @hide
      */
     public void setNotifyOnDeviceNearby(boolean notifyOnDeviceNearby) {
         mNotifyOnDeviceNearby = notifyOnDeviceNearby;
+    }
+
+    /**
+     * Should only be used by the CompanionDeviceManagerService.
+     * @hide
+     */
+    public void setLastTimeConnected(long lastTimeConnectedMs) {
+        mLastTimeConnectedMs = lastTimeConnectedMs;
     }
 
     /** @hide */
@@ -171,6 +189,14 @@ public final class AssociationInfo implements Parcelable {
     /** @hide */
     public boolean belongsToPackage(@UserIdInt int userId, String packageName) {
         return mUserId == userId && Objects.equals(mPackageName, packageName);
+    }
+
+    /**
+     * @return the last time self reported disconnected for selfManaged only.
+     * @hide
+     */
+    public Long getLastTimeConnectedMs() {
+        return mLastTimeConnectedMs;
     }
 
     /**
@@ -223,6 +249,9 @@ public final class AssociationInfo implements Parcelable {
                 + ", mSelfManaged=" + mSelfManaged
                 + ", mNotifyOnDeviceNearby=" + mNotifyOnDeviceNearby
                 + ", mTimeApprovedMs=" + new Date(mTimeApprovedMs)
+                + ", mLastTimeConnectedMs=" + (
+                    mLastTimeConnectedMs == Long.MAX_VALUE
+                        ? LAST_TIME_CONNECTED_NONE : new Date(mLastTimeConnectedMs))
                 + '}';
     }
 
@@ -236,6 +265,7 @@ public final class AssociationInfo implements Parcelable {
                 && mSelfManaged == that.mSelfManaged
                 && mNotifyOnDeviceNearby == that.mNotifyOnDeviceNearby
                 && mTimeApprovedMs == that.mTimeApprovedMs
+                && mLastTimeConnectedMs == that.mLastTimeConnectedMs
                 && Objects.equals(mPackageName, that.mPackageName)
                 && Objects.equals(mDeviceMacAddress, that.mDeviceMacAddress)
                 && Objects.equals(mDisplayName, that.mDisplayName)
@@ -245,7 +275,8 @@ public final class AssociationInfo implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mId, mUserId, mPackageName, mDeviceMacAddress, mDisplayName,
-                mDeviceProfile, mSelfManaged, mNotifyOnDeviceNearby, mTimeApprovedMs);
+                mDeviceProfile, mSelfManaged, mNotifyOnDeviceNearby, mTimeApprovedMs,
+                mLastTimeConnectedMs);
     }
 
     @Override
@@ -267,6 +298,7 @@ public final class AssociationInfo implements Parcelable {
         dest.writeBoolean(mSelfManaged);
         dest.writeBoolean(mNotifyOnDeviceNearby);
         dest.writeLong(mTimeApprovedMs);
+        dest.writeLong(mLastTimeConnectedMs);
     }
 
     private AssociationInfo(@NonNull Parcel in) {
@@ -282,6 +314,7 @@ public final class AssociationInfo implements Parcelable {
         mSelfManaged = in.readBoolean();
         mNotifyOnDeviceNearby = in.readBoolean();
         mTimeApprovedMs = in.readLong();
+        mLastTimeConnectedMs = in.readLong();
     }
 
     @NonNull

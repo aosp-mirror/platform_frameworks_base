@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂບັນທຶກການໂທຂອງອຸປະກອນ Android TV ທ່ານ, ຮວມທັງສາຍໂທເຂົ້າ ແລະ ໂທອອກ. ແອັບທີ່ເປັນອັນຕະລາຍສາມາດໃຊ້ຄຸນສົມບັດນີ້ເພື່ອລຶບ ຫຼື ແກ້ໄຂບັນທຶກການໂທຂອງທ່ານໄດ້."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ອະນຸຍາດໃຫ້ແອັບຯ ແກ້ໄຂລາຍການການໂທໃນໂທລະສັບຂອງທ່ານ, ຮວມທັງຂໍ້ມູນກ່ຽວກັບສາຍໂທເຂົ້າ ແລະການໂທອອກ. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອລຶບ ຫຼືແກ້ໄຂລາຍການການໂທຂອງທ່ານໄດ້."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"ເຂົ້າ​ຫາເຊັນ​ເຊີ​​ກວດຮ່າງ​ກາຍ (ເຊັ່ນ: ​ຈໍຕິດ​ຕາມ​ອັດ​ຕາ​ການ​ເຕັ້ນ​ຂອງຫົວ​ໃຈ)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າ​ເຖິງ​ຂໍ້​ມູນ​ຈາກ​ເຊັນ​ເຊີ​ທີ່​ຕິດ​ຕາມ​ສະ​ພາບ​ຮ່າງ​ການ​ຂອງ​ທ່ານ, ເຊັ່ນ: ອັດ​ຕາ​ການ​ເຕັ້ນ​ຂອງ​ຫົວ​ໃຈຂອງ​ທ່ານ."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"ເຂົ້າເຖິງຂໍ້ມູນຈາກເຊັນເຊີຮ່າງກາຍ ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ອຸນຫະພູມ, ເປີເຊັນອອກຊິເຈນໃນເລືອດ ແລະ ອື່ນໆ."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"ເຂົ້າເຖິງເຊັນເຊີຮ່າງກາຍ (ເຊັ່ນ: ເຄື່ອງວັດແທກອັດຕາການເຕັ້ນຫົວໃຈ) ໃນຂະນະທີ່ຢູ່ໃນພື້ນຫຼັງ"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"ເຂົ້າເຖິງຂໍ້ມູນຈາກເຊັນເຊີຮ່າງກາຍ ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ອຸນຫະພູມ, ເປີເຊັນອອກຊິເຈນໃນເລືອດ ແລະ ອື່ນໆໃນຂະນະທີ່ຢູ່ໃນພື້ນຫຼັງ."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Read calendar events and details"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"This app can read all calendar events stored on your tablet and share or save your calendar data."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ແອັບນີ້ສາມາດອ່ານນັດໝາຍປະຕິທິນທັງໝົດທີ່ບັນທຶກໄວ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານ ແລະ ແບ່ງປັນ ຫຼື ບັນທຶກຂໍ້ມູນປະຕິທິນຂອງທ່ານ."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ອະນຸຍາດ​​ໃຫ້​ແອັບ​ອ່ານ​ ​ແລະ​ຂຽນການກນຳ​ດຄ່າ ບໍ່​ລົບ​ກວນ."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ເລີ່ມການໃຊ້ສິດອະນຸຍາດການເບິ່ງ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ອະນຸຍາດໃຫ້ຜູ້ຖືເລີ່ມການໃຊ້ສິດອະນຸຍາດສຳລັບແອັບໃດໜຶ່ງໄດ້. ແອັບປົກກະຕິບໍ່ຄວນຕ້ອງໃຊ້."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ເລີ່ມເບິ່ງຄຸນສົມບັດແອັບ"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ອະນຸຍາດໃຫ້ຜູ້ຖືເລີ່ມການເບິ່ງຂໍ້ມູນຄຸນສົມບັດສຳລັບແອັບໃດໜຶ່ງ."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີໃນອັດຕາຕົວຢ່າງສູງ"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ການແຈ້ງເຕືອນແອັບແບບກຳນົດເອງ"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"ອະນຸຍາດໃຫ້ <xliff:g id="APP">%1$s</xliff:g> ສ້າງຜູ້ໃຊ້ໃໝ່ກັບ <xliff:g id="ACCOUNT">%2$s</xliff:g> ໄດ້ບໍ່ (ມີຜູ້ໃຊ້ທີ່ໃຊ້ບັນຊີນີ້ຢູ່ກ່ອນແລ້ວ) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"ອະນຸຍາດໃຫ້ <xliff:g id="APP">%1$s</xliff:g> ສ້າງຜູ້ໃຊ້ໃໝ່ກັບ <xliff:g id="ACCOUNT">%2$s</xliff:g> ໄດ້ບໍ?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"ເພີ່ມຜູ້ໃຊ້ທີ່ມີການເບິ່ງແຍງກວດກາ"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ເພີ່ມພາສາ"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ການຕັ້ງຄ່າພາກພື້ນ"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ພິມຊື່ພາສາ"</string>

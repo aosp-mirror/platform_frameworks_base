@@ -222,7 +222,7 @@
     <item msgid="5491266922147715962">"Nog sneller"</item>
     <item msgid="7659240015901486196">"Heel erg snel"</item>
     <item msgid="7147051179282410945">"Snelst"</item>
-    <item msgid="581904787661470707">"Allerallersnelst"</item>
+    <item msgid="581904787661470707">"Allersnelst"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Profiel kiezen"</string>
     <string name="category_personal" msgid="6236798763159385225">"Persoonlijk"</string>
@@ -552,7 +552,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Vraag altijd"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Totdat je uitzet"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Zojuist"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefoonspeaker"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Deze telefoon"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Deze telefoon"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Probleem bij verbinding maken. Zet het apparaat uit en weer aan."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Bedraad audioapparaat"</string>

@@ -2333,7 +2333,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         offloadConstants.SLOW_TIME = Integer.MAX_VALUE;
 
         mEnableOffloadQueue = SystemProperties.getBoolean(
-                "persist.device_config.activity_manager_native_boot.offload_queue_enabled", false);
+                "persist.device_config.activity_manager_native_boot.offload_queue_enabled", true);
 
         mFgBroadcastQueue = new BroadcastQueue(this, mHandler,
                 "foreground", foreConstants, false);

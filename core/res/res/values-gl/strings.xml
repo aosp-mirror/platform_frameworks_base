@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permite que a aplicación modifique o rexistro de chamadas do dispositivo Android TV, incluídos os datos acerca de chamadas entrantes e saíntes. As aplicacións maliciosas poden utilizar este permiso para borrar ou modificar o rexistro de chamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permite á aplicación modificar o rexistro de chamadas do teléfono, incluídos os datos acerca de chamadas entrantes e saíntes. É posible que aplicacións maliciosas utilicen esta acción para borrar ou modificar o teu rexistro de chamadas."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"acceder a sensores corporais (como monitores de ritmo cardíaco)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Permite que a aplicación acceda aos datos dos sensores que controlan o teu estado físico, como o ritmo cardíaco."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Acceso a datos de sensores corporais, como o ritmo cardíaco, a temperatura, a porcentaxe de osíxeno en sangue etc."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"acceso en segundo plano a sensores corporais (como monitores de ritmo cardíaco)"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Acceso en segundo plano a datos de sensores corporais, como o ritmo cardíaco, a temperatura, a porcentaxe de osíxeno en sangue etc."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ler os detalles e os eventos do calendario"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Esta aplicación pode ler todos os eventos do calendario almacenados na túa tableta e compartir ou gardar os datos do calendario."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Esta aplicación pode ler todos os eventos do calendario almacenados no dispositivo Android TV e compartir ou gardar os datos do calendario."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite á aplicación ler e escribir a configuración do modo Non molestar."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso de permiso de vista"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite ao propietario iniciar o uso de permisos dunha aplicación. As aplicacións normais non deberían precisalo nunca."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"comezar a ver as funcións da aplicación"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite que o propietario comece a ver a información das funcións dunha aplicación."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"acceder aos datos dos sensores usando unha taxa de mostraxe alta"</string>

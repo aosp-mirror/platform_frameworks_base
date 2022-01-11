@@ -522,9 +522,6 @@ applications that come with the platform
         <permission name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
         <!-- Permission required for CTS test - CtsSafetyCenterTestCases -->
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
-        <!-- Permission required for CTS test - CommunalManagerTest -->
-        <permission name="android.permission.WRITE_COMMUNAL_STATE" />
-        <permission name="android.permission.READ_COMMUNAL_STATE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

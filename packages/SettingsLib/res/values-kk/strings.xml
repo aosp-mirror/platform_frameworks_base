@@ -552,7 +552,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Әрдайым сұрау"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Өшірілгенге дейін"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Дәл қазір"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Телефон динамигі"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Осы телефон"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Осы телефон"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Байланыс орнату қатесі шығуып жатыр. Құрылғыны өшіріп, қайта қосыңыз."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Сымды аудио құрылғысы"</string>

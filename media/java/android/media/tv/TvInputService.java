@@ -592,6 +592,24 @@ public abstract class TvInputService extends Service {
             });
         }
 
+        /** @hide */
+        public void notifyTuned(@NonNull Uri channelUri) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTuned");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTuned(channelUri);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTuned", e);
+                    }
+                }
+            });
+        }
+
         /**
          * Sends the list of all audio/video/subtitle tracks. The is used by the framework to
          * maintain the track information for a given session, which in turn is used by

@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"උපාංගය හස්තීයව අගුලු දමන ලදී"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"හඳුනා නොගන්නා ලදී"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"හඳුනා නොගන්නා ලදී"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"මුහුණෙන් අගුලු හැරීම භාවිත කිරීමට, සැකසීම් &gt; පෞද්ගලිකත්වය තුළ "<b>"කැමරා ප්‍රවේශය"</b>" ක්‍රියාත්මක කරන්න"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">SIM PIN ඇතුළු කරන්න, ඔබ සතුව උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත.</item>
       <item quantity="other">SIM PIN ඇතුළු කරන්න, ඔබ සතුව උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත.</item>

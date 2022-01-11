@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Заключване на екрана."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Заключен екран на служебния профил"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Затваряне"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Функцията за Wi-Fi се изключи."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Функцията за Wi-Fi се включи."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Самолетният режим се изключи."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Самолетният режим се включи."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"пълна тишина"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"само будилници"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Не безпокойте."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"Режимът „Не безпокойте“ е изключен."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"Режимът „Не безпокойте“ е включен."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Функцията за Bluetooth е включена."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"Функцията за Bluetooth се изключи."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"Функцията за Bluetooth се включи."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"Функцията „Отчитане на местоположението“ се изключи."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"Функцията „Отчитане на местоположението“ се включи."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Будилникът е навит за <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Повече време."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"По-малко време."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Фенерчето е изключено."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Фенерчето е включено."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Функцията за инвертиране на цветовете се изключи."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Функцията за инвертиране на цветовете се включи."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Мобилната точка за достъп се изключи."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Мобилната точка за достъп се включи."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Предаването на съдържанието от екрана спря."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Функцията „Икономия на данни“ е изключена."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Функцията „Икономия на данни“ е включена."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Яркост на екрана"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Мобилните данни са поставени на пауза"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Данните са поставени на пауза"</string>
@@ -251,6 +233,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"не е установена връзка с Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркост"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инвертиране на цветовете"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Още настройки"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Потребителски настройки"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
@@ -487,6 +471,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"За да свържете клавиатурата с таблета си, първо трябва да включите Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Включване"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Контроли за известията"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Вкл. – въз основа на лицето"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"С помощта на контролите за известията можете да зададете ниво на важност от 0 до 5 за известията от дадено приложение. \n\n"<b>"Ниво 5"</b>" \n– Показване най-горе в списъка с известия. \n– Разрешаване на прекъсването на цял екран. \n– Известията винаги се показват мимолетно. \n\n"<b>"Ниво 4"</b>" \n– Предотвратяване на прекъсването на цял екран. \n– Известията винаги се показват мимолетно. \n\n"<b>"Ниво 3"</b>" \n– Предотвратяване на прекъсването на цял екран. \n– Известията никога не се показват мимолетно. \n\n"<b>"Ниво 2"</b>" \n– Предотвратяване на прекъсването на цял екран. \n– Известията никога не се показват мимолетно. \n– Без издаване на звуков сигнал и вибриране. \n\n"<b>"Ниво 1"</b>" \n– Предотвратяване на прекъсването на цял екран. \n– Известията никога не се показват мимолетно. \n– Без издаване на звуков сигнал и вибриране. \n– Скриване от заключения екран и лентата на състоянието. \n– Показване най-долу в списъка с известия. \n\n"<b>"Ниво 0"</b>" \n– Блокиране на всички известия от приложението."</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Готово"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Прилагане"</string>
