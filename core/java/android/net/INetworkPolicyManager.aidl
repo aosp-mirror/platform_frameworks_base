@@ -70,7 +70,7 @@ interface INetworkPolicyManager {
     int getMultipathPreference(in Network network);
 
     SubscriptionPlan getSubscriptionPlan(in NetworkTemplate template);
-    void onStatsProviderWarningOrLimitReached();
+    void notifyStatsProviderWarningOrLimitReached();
     SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage);
     void setSubscriptionPlans(int subId, in SubscriptionPlan[] plans, String callingPackage);
     String getSubscriptionPlansOwner(int subId);
