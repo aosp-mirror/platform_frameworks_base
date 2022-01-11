@@ -346,7 +346,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     TaskFragmentContainer getTopActiveContainer() {
         for (int i = mContainers.size() - 1; i >= 0; i--) {
             TaskFragmentContainer container = mContainers.get(i);
-            if (!container.isFinished()) {
+            if (!container.isFinished() && container.getTopNonFinishingActivity() != null) {
                 return container;
             }
         }
