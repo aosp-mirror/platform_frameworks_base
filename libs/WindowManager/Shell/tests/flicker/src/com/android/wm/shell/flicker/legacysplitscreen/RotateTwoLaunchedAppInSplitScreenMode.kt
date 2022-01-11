@@ -25,7 +25,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
@@ -37,7 +36,6 @@ import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.dockedStackSecondaryBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
-import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -93,11 +91,7 @@ class RotateTwoLaunchedAppInSplitScreenMode(
 
     @FlakyTest(bugId = 206753786)
     @Test
-    fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        testSpec.statusBarLayerRotatesScales()
-    }
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @FlakyTest
     @Test
