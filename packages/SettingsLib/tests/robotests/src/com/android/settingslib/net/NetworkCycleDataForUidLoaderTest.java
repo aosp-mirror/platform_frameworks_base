@@ -30,6 +30,7 @@ import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
+import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.text.format.DateUtils;
 
@@ -39,6 +40,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+
+import java.util.Set;
 
 @RunWith(RobolectricTestRunner.class)
 public class NetworkCycleDataForUidLoaderTest {
@@ -62,7 +65,9 @@ public class NetworkCycleDataForUidLoaderTest {
         when(mContext.getSystemService(Context.NETWORK_POLICY_SERVICE))
                 .thenReturn(mNetworkPolicyManager);
         when(mNetworkPolicyManager.getNetworkPolicies()).thenReturn(new NetworkPolicy[0]);
-        mNetworkTemplate = NetworkTemplate.buildTemplateCarrierMetered(SUB_ID);
+        mNetworkTemplate = new NetworkTemplate.Builder(NetworkTemplate.MATCH_CARRIER)
+                .setMeteredness(NetworkStats.METERED_YES)
+                .setSubscriberIds(Set.of(SUB_ID)).build();
     }
 
     @Test
