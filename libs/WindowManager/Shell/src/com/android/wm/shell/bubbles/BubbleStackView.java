@@ -1486,19 +1486,63 @@ public class BubbleStackView extends FrameLayout
     }
 
     /**
-     * Update bubbles' icon views clickable states.
+     * Update bubbles' icon views accessibility states.
      */
-    public void updateBubblesClickableStates() {
+    public void updateBubblesAcessibillityStates() {
         for (int i = 0; i < mBubbleData.getBubbles().size(); i++) {
-            final Bubble bubble = mBubbleData.getBubbles().get(i);
-            if (bubble.getIconView() != null) {
-                if (mIsExpanded) {
-                    // when stack is expanded all bubbles are clickable
-                    bubble.getIconView().setClickable(true);
-                } else {
-                    // when stack is collapsed, only the top bubble needs to be clickable,
-                    // so that a11y ignores all the inaccessible bubbles in the stack
-                    bubble.getIconView().setClickable(i == 0);
+            Bubble prevBubble = i > 0 ? mBubbleData.getBubbles().get(i - 1) : null;
+            Bubble bubble = mBubbleData.getBubbles().get(i);
+
+            View bubbleIconView = bubble.getIconView();
+            if (bubbleIconView == null) {
+                continue;
+            }
+
+            if (mIsExpanded) {
+                // when stack is expanded
+                // all bubbles are important for accessibility
+                bubbleIconView
+                        .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+
+                View prevBubbleIconView = prevBubble != null ? prevBubble.getIconView() : null;
+
+                if (prevBubbleIconView != null) {
+                    bubbleIconView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+                        @Override
+                        public void onInitializeAccessibilityNodeInfo(View v,
+                                AccessibilityNodeInfo info) {
+                            super.onInitializeAccessibilityNodeInfo(v, info);
+                            info.setTraversalAfter(prevBubbleIconView);
+                        }
+                    });
+                }
+            } else {
+                // when stack is collapsed, only the top bubble is important for accessibility,
+                bubbleIconView.setImportantForAccessibility(
+                        i == 0 ? View.IMPORTANT_FOR_ACCESSIBILITY_YES :
+                                View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+            }
+        }
+
+        if (mIsExpanded) {
+            // make the overflow bubble last in the accessibility traversal order
+
+            View bubbleOverflowIconView =
+                    mBubbleOverflow != null ? mBubbleOverflow.getIconView() : null;
+            if (bubbleOverflowIconView != null && !mBubbleData.getBubbles().isEmpty()) {
+                Bubble lastBubble =
+                        mBubbleData.getBubbles().get(mBubbleData.getBubbles().size() - 1);
+                View lastBubbleIconView = lastBubble.getIconView();
+                if (lastBubbleIconView != null) {
+                    bubbleOverflowIconView.setAccessibilityDelegate(
+                            new View.AccessibilityDelegate() {
+                                @Override
+                                public void onInitializeAccessibilityNodeInfo(View v,
+                                        AccessibilityNodeInfo info) {
+                                    super.onInitializeAccessibilityNodeInfo(v, info);
+                                    info.setTraversalAfter(lastBubbleIconView);
+                                }
+                            });
                 }
             }
         }
