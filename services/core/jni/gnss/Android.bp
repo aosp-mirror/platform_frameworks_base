@@ -25,8 +25,6 @@ cc_library_shared {
     srcs: [
         "AGnss.cpp",
         "AGnssCallback.cpp",
-        "AGnssRil.cpp",
-        "AGnssRilCallback.cpp",
         "GnssAntennaInfoCallback.cpp",
         "GnssBatching.cpp",
         "GnssBatchingCallback.cpp",
