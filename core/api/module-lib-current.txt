@@ -71,6 +71,14 @@ package android.content {
     field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 
+  public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final String ACTION_SETTING_RESTORED = "android.os.action.SETTING_RESTORED";
+    field public static final String EXTRA_SETTING_NAME = "setting_name";
+    field public static final String EXTRA_SETTING_NEW_VALUE = "new_value";
+    field public static final String EXTRA_SETTING_PREVIOUS_VALUE = "previous_value";
+    field public static final String EXTRA_SETTING_RESTORED_FROM_SDK_INT = "restored_from_sdk_int";
+  }
+
 }
 
 package android.content.pm {
