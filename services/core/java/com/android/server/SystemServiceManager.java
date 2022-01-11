@@ -26,6 +26,7 @@ import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -47,6 +48,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -94,6 +96,7 @@ public final class SystemServiceManager implements Dumpable {
 
     // Services that should receive lifecycle events.
     private List<SystemService> mServices;
+    private Set<String> mServiceClassnames;
 
     private int mCurrentPhase = -1;
 
@@ -116,6 +119,7 @@ public final class SystemServiceManager implements Dumpable {
     SystemServiceManager(Context context) {
         mContext = context;
         mServices = new ArrayList<>();
+        mServiceClassnames = new ArraySet<>();
         // Disable using the thread pool for low ram devices
         sUseLifecycleThreadPool = sUseLifecycleThreadPool
                 && !ActivityManager.isLowRamDeviceStatic();
@@ -210,8 +214,17 @@ public final class SystemServiceManager implements Dumpable {
     }
 
     public void startService(@NonNull final SystemService service) {
+        // Check if already started
+        String className = service.getClass().getName();
+        if (mServiceClassnames.contains(className)) {
+            Slog.i(TAG, "Not starting an already started service " + className);
+            return;
+        }
+        mServiceClassnames.add(className);
+
         // Register it.
         mServices.add(service);
+
         // Start it.
         long time = SystemClock.elapsedRealtime();
         try {
@@ -225,6 +238,7 @@ public final class SystemServiceManager implements Dumpable {
 
     /** Disallow starting new services after this call. */
     void sealStartedServices() {
+        mServiceClassnames = Collections.emptySet();
         mServices = Collections.unmodifiableList(mServices);
     }
 

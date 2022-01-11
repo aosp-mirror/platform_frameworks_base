@@ -3053,7 +3053,6 @@ public final class SystemServer implements Dumpable {
     private void startApexServices(@NonNull TimingsTraceAndSlog t) {
         t.traceBegin("startApexServices");
         Map<String, String> services = ApexManager.getInstance().getApexSystemServices();
-        // TODO(satayev): filter out already started services
         // TODO(satayev): introduce android:order for services coming the same apexes
         for (String name : new TreeSet<>(services.keySet())) {
             String jarPath = services.get(name);

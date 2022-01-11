@@ -23,6 +23,7 @@ import android.test.AndroidTestCase;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -32,24 +33,52 @@ public class SystemServiceManagerTest extends AndroidTestCase {
 
     private static final String TAG = "SystemServiceManagerTest";
 
+    private final SystemServiceManager mSystemServiceManager =
+            new SystemServiceManager(getContext());
+
     @Test
     public void testSealStartedServices() throws Exception {
-        SystemServiceManager manager = new SystemServiceManager(getContext());
         // must be effectively final, since it's changed from inner class below
         AtomicBoolean serviceStarted = new AtomicBoolean(false);
-        SystemService service = new SystemService(getContext()) {
+        SystemService service1 = new SystemService(getContext()) {
             @Override
             public void onStart() {
                 serviceStarted.set(true);
             }
         };
+        SystemService service2 = new SystemService(getContext()) {
+            @Override
+            public void onStart() {
+                throw new IllegalStateException("Second service must not be called");
+            }
+        };
 
         // started services have their #onStart methods called
-        manager.startService(service);
+        mSystemServiceManager.startService(service1);
         assertTrue(serviceStarted.get());
 
         // however, after locking started services, it is not possible to start a new service
-        manager.sealStartedServices();
-        assertThrows(UnsupportedOperationException.class, () -> manager.startService(service));
+        mSystemServiceManager.sealStartedServices();
+        assertThrows(UnsupportedOperationException.class,
+                () -> mSystemServiceManager.startService(service2));
     }
+
+    @Test
+    public void testDuplicateServices() throws Exception {
+        AtomicInteger counter = new AtomicInteger(0);
+        SystemService service = new SystemService(getContext()) {
+            @Override
+            public void onStart() {
+                counter.incrementAndGet();
+            }
+        };
+
+        mSystemServiceManager.startService(service);
+        assertEquals(1, counter.get());
+
+        // manager does not start the same service twice
+        mSystemServiceManager.startService(service);
+        assertEquals(1, counter.get());
+    }
+
 }
