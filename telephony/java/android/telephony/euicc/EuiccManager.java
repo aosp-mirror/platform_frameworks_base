@@ -803,6 +803,13 @@ public class EuiccManager {
      */
     public static final int ERROR_OPERATION_BUSY = 10016;
 
+    /**
+     * Failure due to target port is not supported.
+     * @see #switchToSubscription(int, int, PendingIntent)
+     */
+    public static final int ERROR_INVALID_PORT = 10017;
+
+
     private final Context mContext;
     private int mCardId;
 
@@ -1118,6 +1125,15 @@ public class EuiccManager {
      * intent to prompt the user to accept the download. The caller should also be authorized to
      * manage the subscription to be enabled.
      *
+     * <p> From Android T, devices might support MEP(Multiple Enabled Profile), the subscription
+     * can be installed on different port from the eUICC. Calling apps with carrier privilege
+     * (see {@link TelephonyManager#hasCarrierPrivileges}) over the currently active subscriptions
+     * can use {@link #switchToSubscription(int, int, PendingIntent)} to specify which port to
+     * enable the subscription. Otherwise, use this API to enable the subscription on the eUICC
+     * and the platform will internally resolve a port. If there is no available port,
+     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} might be returned in the callback
+     * intent to prompt the user to disable an already-active subscription.
+     *
      * @param subscriptionId the ID of the subscription to enable. May be
      *     {@link android.telephony.SubscriptionManager#INVALID_SUBSCRIPTION_ID} to deactivate the
      *     current profile without activating another profile to replace it. If it's a disable
@@ -1125,12 +1141,7 @@ public class EuiccManager {
      *     permission, or the calling app must be authorized to manage the active subscription on
      *     the target eUICC.
      * @param callbackIntent a PendingIntent to launch when the operation completes.
-     *
-     * @deprecated From T, callers should use
-     * {@link #switchToSubscription(int, int, PendingIntent)} instead to specify a port
-     * index on the card to switch to.
      */
-    @Deprecated
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subscriptionId, PendingIntent callbackIntent) {
         if (!isEnabled()) {
@@ -1148,20 +1159,19 @@ public class EuiccManager {
     /**
      * Switch to (enable) the given subscription.
      *
-     * <p>Requires the {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission,
-     * or the calling app must be authorized to manage both the currently-active subscription and
-     * the subscription to be enabled according to the subscription metadata. Without the former,
-     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be returned in the callback
-     * intent to prompt the user to accept the download.
+     * <p> Requires the {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission,
+     * or the caller must be having both the carrier privileges
+     * (see {@link TelephonyManager#hasCarrierPrivileges}) over any currently active subscriptions
+     * and the subscription to be enabled according to the subscription metadata.
+     * Without the former permissions, an SecurityException is thrown.
      *
-     * <p>On a multi-active SIM device, requires the
-     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission, or a calling app
-     * only if the targeted eUICC does not currently have an active subscription or the calling app
-     * is authorized to manage the active subscription on the target eUICC, and the calling app is
-     * authorized to manage any active subscription on any SIM. Without it, an
-     * {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be returned in the callback
-     * intent to prompt the user to accept the download. The caller should also be authorized to
-     * manage the subscription to be enabled.
+     * <p> If the caller is passing invalid port index,
+     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_ERROR} with detailed error code
+     * {@link #ERROR_INVALID_PORT} will be returned.
+     *
+     * <p> Depending on the target port and permission check,
+     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} might be returned to the callback
+     * intent to prompt the user to authorize before the switch.
      *
      * @param subscriptionId the ID of the subscription to enable. May be
      *     {@link android.telephony.SubscriptionManager#INVALID_SUBSCRIPTION_ID} to deactivate the
