@@ -28,6 +28,7 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.IFACE_VT;
@@ -290,6 +291,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     /** Set of any ifaces associated with mobile networks since boot. */
     private volatile String[] mMobileIfaces = new String[0];
+
+    /** Set of any ifaces associated with wifi networks since boot. */
+    private volatile String[] mWifiIfaces = new String[0];
 
     /** Set of all ifaces currently used by traffic that does not explicitly specify a Network. */
     @GuardedBy("mStatsLock")
@@ -1005,11 +1009,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public NetworkStats getDetailedUidStats(String[] requiredIfaces) {
+    public NetworkStats getUidStatsForTransport(int transport) {
         enforceAnyPermissionOf(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
         try {
+            final String[] relevantIfaces =
+                    transport == TRANSPORT_WIFI ? mWifiIfaces : mMobileIfaces;
+            // TODO(b/215633405) : mMobileIfaces and mWifiIfaces already contain the stacked
+            // interfaces, so this is not useful, remove it.
             final String[] ifacesToQuery =
-                    mStatsFactory.augmentWithStackedInterfaces(requiredIfaces);
+                    mStatsFactory.augmentWithStackedInterfaces(relevantIfaces);
             return getNetworkStatsUidDetail(ifacesToQuery);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error compiling UID stats", e);
@@ -1368,10 +1376,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         final boolean combineSubtypeEnabled = mSettings.getCombineSubtypeEnabled();
         final ArraySet<String> mobileIfaces = new ArraySet<>();
+        final ArraySet<String> wifiIfaces = new ArraySet<>();
         for (NetworkStateSnapshot snapshot : snapshots) {
             final int displayTransport =
                     getDisplayTransport(snapshot.getNetworkCapabilities().getTransportTypes());
             final boolean isMobile = (NetworkCapabilities.TRANSPORT_CELLULAR == displayTransport);
+            final boolean isWifi = (NetworkCapabilities.TRANSPORT_WIFI == displayTransport);
             final boolean isDefault = CollectionUtils.contains(
                     mDefaultNetworks, snapshot.getNetwork());
             final int ratType = combineSubtypeEnabled ? NetworkTemplate.NETWORK_TYPE_ALL
@@ -1406,6 +1416,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
                 if (isMobile) {
                     mobileIfaces.add(baseIface);
+                }
+                if (isWifi) {
+                    wifiIfaces.add(baseIface);
                 }
             }
 
@@ -1448,6 +1461,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     if (isMobile) {
                         mobileIfaces.add(iface);
                     }
+                    if (isWifi) {
+                        wifiIfaces.add(iface);
+                    }
 
                     mStatsFactory.noteStackedIface(iface, baseIface);
                 }
@@ -1455,10 +1471,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         mMobileIfaces = mobileIfaces.toArray(new String[0]);
+        mWifiIfaces = wifiIfaces.toArray(new String[0]);
         // TODO (b/192758557): Remove debug log.
         if (CollectionUtils.contains(mMobileIfaces, null)) {
             throw new NullPointerException(
                     "null element in mMobileIfaces: " + Arrays.toString(mMobileIfaces));
+        }
+        if (CollectionUtils.contains(mWifiIfaces, null)) {
+            throw new NullPointerException(
+                    "null element in mWifiIfaces: " + Arrays.toString(mWifiIfaces));
         }
     }
 
