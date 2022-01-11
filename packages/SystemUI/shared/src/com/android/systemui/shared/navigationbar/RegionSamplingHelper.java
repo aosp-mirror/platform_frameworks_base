@@ -28,6 +28,8 @@ import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 
+import androidx.annotation.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 
@@ -60,6 +62,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
     private final Rect mRegisteredSamplingBounds = new Rect();
     private final SamplingCallback mCallback;
     private final Executor mBackgroundExecutor;
+    private final SysuiCompositionSamplingListener mCompositionSamplingListener;
     private boolean mSamplingEnabled = false;
     private boolean mSamplingListenerRegistered = false;
 
@@ -91,9 +94,17 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
 
     public RegionSamplingHelper(View sampledView, SamplingCallback samplingCallback,
             Executor backgroundExecutor) {
+        this(sampledView, samplingCallback, sampledView.getContext().getMainExecutor(),
+                backgroundExecutor, new SysuiCompositionSamplingListener());
+    }
+
+    @VisibleForTesting
+    RegionSamplingHelper(View sampledView, SamplingCallback samplingCallback,
+            Executor mainExecutor, Executor backgroundExecutor,
+            SysuiCompositionSamplingListener compositionSamplingListener) {
         mBackgroundExecutor = backgroundExecutor;
-        mSamplingListener = new CompositionSamplingListener(
-                sampledView.getContext().getMainExecutor()) {
+        mCompositionSamplingListener = compositionSamplingListener;
+        mSamplingListener = new CompositionSamplingListener(mainExecutor) {
             @Override
             public void onSampleCollected(float medianLuma) {
                 if (mSamplingEnabled) {
@@ -136,7 +147,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
 
     public void stopAndDestroy() {
         stop();
-        mSamplingListener.destroy();
+        mBackgroundExecutor.execute(mSamplingListener::destroy);
         mIsDestroyed = true;
     }
 
@@ -189,13 +200,12 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
                 // We only want to re-register if something actually changed
                 unregisterSamplingListener();
                 mSamplingListenerRegistered = true;
-                SurfaceControl wrappedStopLayer = stopLayerControl == null
-                        ? null : new SurfaceControl(stopLayerControl, "regionSampling");
+                SurfaceControl wrappedStopLayer = wrap(stopLayerControl);
                 mBackgroundExecutor.execute(() -> {
                     if (wrappedStopLayer != null && !wrappedStopLayer.isValid()) {
                         return;
                     }
-                    CompositionSamplingListener.register(mSamplingListener, DEFAULT_DISPLAY,
+                    mCompositionSamplingListener.register(mSamplingListener, DEFAULT_DISPLAY,
                             wrappedStopLayer, mSamplingRequestBounds);
                 });
                 mRegisteredSamplingBounds.set(mSamplingRequestBounds);
@@ -208,14 +218,21 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         }
     }
 
+    @VisibleForTesting
+    protected SurfaceControl wrap(SurfaceControl stopLayerControl) {
+        return stopLayerControl == null ? null : new SurfaceControl(stopLayerControl,
+                "regionSampling");
+    }
+
     private void unregisterSamplingListener() {
         if (mSamplingListenerRegistered) {
             mSamplingListenerRegistered = false;
             SurfaceControl wrappedStopLayer = mWrappedStopLayer;
             mRegisteredStopLayer = null;
+            mWrappedStopLayer = null;
             mRegisteredSamplingBounds.setEmpty();
             mBackgroundExecutor.execute(() -> {
-                CompositionSamplingListener.unregister(mSamplingListener);
+                mCompositionSamplingListener.unregister(mSamplingListener);
                 if (wrappedStopLayer != null && wrappedStopLayer.isValid()) {
                     wrappedStopLayer.release();
                 }
@@ -297,6 +314,21 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
          */
         default boolean isSamplingEnabled() {
             return true;
+        }
+    }
+
+    @VisibleForTesting
+    public static class SysuiCompositionSamplingListener {
+        public void register(CompositionSamplingListener listener,
+                int displayId, SurfaceControl stopLayer, Rect samplingArea) {
+            CompositionSamplingListener.register(listener, displayId, stopLayer, samplingArea);
+        }
+
+        /**
+         * Unregisters a sampling listener.
+         */
+        public void unregister(CompositionSamplingListener listener) {
+            CompositionSamplingListener.unregister(listener);
         }
     }
 }
