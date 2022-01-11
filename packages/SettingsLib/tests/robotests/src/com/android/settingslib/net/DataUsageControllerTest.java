@@ -42,6 +42,8 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowSubscriptionManager;
 
+import java.util.Set;
+
 @RunWith(RobolectricTestRunner.class)
 public class DataUsageControllerTest {
 
@@ -75,10 +77,13 @@ public class DataUsageControllerTest {
         ShadowSubscriptionManager.setDefaultDataSubscriptionId(mDefaultSubscriptionId);
         doReturn(SUB_ID).when(mTelephonyManager).getSubscriberId();
 
-        mNetworkTemplate = NetworkTemplate.buildTemplateCarrierMetered(SUB_ID);
-        mNetworkTemplate2 = NetworkTemplate.buildTemplateCarrierMetered(SUB_ID_2);
-        mWifiNetworkTemplate = NetworkTemplate.buildTemplateWifi(
-                NetworkTemplate.WIFI_NETWORKID_ALL, null);
+        mNetworkTemplate = new NetworkTemplate.Builder(NetworkTemplate.MATCH_CARRIER)
+                .setMeteredness(android.net.NetworkStats.METERED_YES)
+                .setSubscriberIds(Set.of(SUB_ID)).build();
+        mNetworkTemplate2 = new NetworkTemplate.Builder(NetworkTemplate.MATCH_CARRIER)
+                .setMeteredness(android.net.NetworkStats.METERED_YES)
+                .setSubscriberIds(Set.of(SUB_ID_2)).build();
+        mWifiNetworkTemplate = new NetworkTemplate.Builder(NetworkTemplate.MATCH_WIFI).build();
     }
 
     @Test
