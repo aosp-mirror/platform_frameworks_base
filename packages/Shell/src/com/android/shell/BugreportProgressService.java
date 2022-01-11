@@ -199,6 +199,15 @@ public class BugreportProgressService extends Service {
      */
     private static final String BUGREPORT_DIR = "bugreports";
 
+    /**
+     * The directory in which System Trace files from the native System Tracing app are stored for
+     * Wear devices.
+     */
+    private static final String WEAR_SYSTEM_TRACES_DIRECTORY_ON_DEVICE = "data/local/traces/";
+
+    /** The directory that contains System Traces in bugreports that include System Traces. */
+    private static final String WEAR_SYSTEM_TRACES_DIRECTORY_IN_BUGREPORT = "systraces/";
+
     private static final String NOTIFICATION_CHANNEL_ID = "bugreports";
 
     /**
@@ -1456,6 +1465,16 @@ public class BugreportProgressService extends Service {
         }
     }
 
+    /** Returns an array of the system trace files collected by the System Tracing native app. */
+    private static File[] getSystemTraceFiles() {
+        try {
+            return new File(WEAR_SYSTEM_TRACES_DIRECTORY_ON_DEVICE).listFiles();
+        } catch (SecurityException e) {
+            Log.e(TAG, "Error getting system trace files.", e);
+            return new File[]{};
+        }
+    }
+
     /**
      * Adds the user-provided info into the bugreport zip file.
      * <p>
@@ -1475,8 +1494,17 @@ public class BugreportProgressService extends Service {
             Log.wtf(TAG, "addDetailsToZipFile(): no bugreportFile on " + info);
             return;
         }
-        if (TextUtils.isEmpty(info.getTitle()) && TextUtils.isEmpty(info.getDescription())) {
-            Log.d(TAG, "Not touching zip file since neither title nor description are set");
+
+        File[] systemTracesToIncludeInBugreport = new File[] {};
+        if (mIsWatch) {
+            systemTracesToIncludeInBugreport = getSystemTraceFiles();
+            Log.d(TAG, "Found " + systemTracesToIncludeInBugreport.length + " system traces.");
+        }
+
+        if (TextUtils.isEmpty(info.getTitle())
+                    && TextUtils.isEmpty(info.getDescription())
+                    && systemTracesToIncludeInBugreport.length == 0) {
+            Log.d(TAG, "Not touching zip file: no detail to add.");
             return;
         }
         if (info.addedDetailsToZip || info.addingDetailsToZip) {
@@ -1487,7 +1515,10 @@ public class BugreportProgressService extends Service {
 
         // It's not possible to add a new entry into an existing file, so we need to create a new
         // zip, copy all entries, then rename it.
-        sendBugreportBeingUpdatedNotification(mContext, info.id); // ...and that takes time
+        if (!mIsWatch) {
+            // TODO(b/184854609): re-introduce this notification for Wear.
+            sendBugreportBeingUpdatedNotification(mContext, info.id); // ...and that takes time
+        }
 
         final File dir = info.bugreportFile.getParentFile();
         final File tmpZip = new File(dir, "tmp-" + info.bugreportFile.getName());
@@ -1508,6 +1539,13 @@ public class BugreportProgressService extends Service {
             }
 
             // Then add the user-provided info.
+            if (systemTracesToIncludeInBugreport.length != 0) {
+                for (File trace : systemTracesToIncludeInBugreport) {
+                    addEntry(zos,
+                            WEAR_SYSTEM_TRACES_DIRECTORY_IN_BUGREPORT + trace.getName(),
+                            new FileInputStream(trace));
+                }
+            }
             addEntry(zos, "title.txt", info.getTitle());
             addEntry(zos, "description.txt", info.getDescription());
         } catch (IOException e) {
