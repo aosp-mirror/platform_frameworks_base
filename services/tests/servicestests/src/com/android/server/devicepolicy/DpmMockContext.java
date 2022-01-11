@@ -232,6 +232,8 @@ public class DpmMockContext extends MockContext {
                 return mMockSystemServices.crossProfileApps;
             case Context.VPN_MANAGEMENT_SERVICE:
                 return mMockSystemServices.vpnManager;
+            case Context.DEVICE_POLICY_SERVICE:
+                return mMockSystemServices.devicePolicyManager;
         }
         throw new UnsupportedOperationException();
     }

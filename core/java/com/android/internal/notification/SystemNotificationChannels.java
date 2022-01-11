@@ -14,10 +14,13 @@
 
 package com.android.internal.notification;
 
+import static android.app.admin.DevicePolicyResources.Strings.Core.NOTIFICATION_CHANNEL_DEVICE_ADMIN;
+
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
@@ -143,7 +146,7 @@ public class SystemNotificationChannels {
 
         final NotificationChannel deviceAdmin = new NotificationChannel(
                 DEVICE_ADMIN,
-                context.getString(R.string.notification_channel_device_admin),
+                getDeviceAdminNotificationChannelName(context),
                 NotificationManager.IMPORTANCE_HIGH);
         channelsList.add(deviceAdmin);
 
@@ -207,6 +210,12 @@ public class SystemNotificationChannels {
         channelsList.add(accessibilitySecurityPolicyChannel);
 
         nm.createNotificationChannels(channelsList);
+    }
+
+    private static String getDeviceAdminNotificationChannelName(Context context) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        return dpm.getString(NOTIFICATION_CHANNEL_DEVICE_ADMIN,
+                () -> context.getString(R.string.notification_channel_device_admin));
     }
 
     /** Remove notification channels which are no longer used */

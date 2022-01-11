@@ -15,7 +15,10 @@
  */
 package android.accounts;
 
+import static android.app.admin.DevicePolicyResources.Strings.Core.CANT_ADD_ACCOUNT_MESSAGE;
+
 import android.app.Activity;
+import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -199,7 +202,14 @@ public class ChooseTypeAndAccountActivity extends Activity
 
         if (mPossiblyVisibleAccounts.isEmpty() && mDisallowAddAccounts) {
             requestWindowFeature(Window.FEATURE_NO_TITLE);
+
             setContentView(R.layout.app_not_authorized);
+            TextView view = findViewById(R.id.description);
+            String text = getSystemService(DevicePolicyManager.class).getString(
+                    CANT_ADD_ACCOUNT_MESSAGE,
+                    () -> getString(R.string.error_message_change_not_allowed));
+            view.setText(text);
+
             mDontShowPicker = true;
         }
 

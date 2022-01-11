@@ -15,6 +15,9 @@
  */
 package android.content.pm;
 
+import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_PERSONAL_LABEL;
+import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_WORK_LABEL;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -22,6 +25,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.AppOpsManager.Mode;
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -241,11 +245,23 @@ public class CrossProfileApps {
     public @NonNull CharSequence getProfileSwitchingLabel(@NonNull UserHandle userHandle) {
         verifyCanAccessUser(userHandle);
 
-        final int stringRes = mUserManager.isManagedProfile(userHandle.getIdentifier())
-                ? R.string.managed_profile_label
-                : R.string.user_owner_label;
+        final boolean isManagedProfile = mUserManager.isManagedProfile(userHandle.getIdentifier());
+        final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+        return dpm.getString(
+                getUpdatableProfileSwitchingLabelId(isManagedProfile),
+                () -> getDefaultProfileSwitchingLabel(isManagedProfile));
+    }
+
+    private String getUpdatableProfileSwitchingLabelId(boolean isManagedProfile) {
+        return isManagedProfile ? SWITCH_TO_WORK_LABEL : SWITCH_TO_PERSONAL_LABEL;
+    }
+
+    private String getDefaultProfileSwitchingLabel(boolean isManagedProfile) {
+        final int stringRes = isManagedProfile
+                ? R.string.managed_profile_label : R.string.user_owner_label;
         return mResources.getString(stringRes);
     }
+
 
     /**
      * Return a drawable that calling app can show to user for the semantic of profile switching --
