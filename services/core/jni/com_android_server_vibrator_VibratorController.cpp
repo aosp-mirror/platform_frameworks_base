@@ -61,8 +61,8 @@ static struct {
 static struct {
     jfieldID startAmplitude;
     jfieldID endAmplitude;
-    jfieldID startFrequency;
-    jfieldID endFrequency;
+    jfieldID startFrequencyHz;
+    jfieldID endFrequencyHz;
     jfieldID duration;
 } sRampClassInfo;
 
@@ -157,8 +157,8 @@ static aidl::ActivePwle activePwleFromJavaPrimitive(JNIEnv* env, jobject ramp) {
             static_cast<float>(env->GetFloatField(ramp, sRampClassInfo.startAmplitude));
     pwle.endAmplitude = static_cast<float>(env->GetFloatField(ramp, sRampClassInfo.endAmplitude));
     pwle.startFrequency =
-            static_cast<float>(env->GetFloatField(ramp, sRampClassInfo.startFrequency));
-    pwle.endFrequency = static_cast<float>(env->GetFloatField(ramp, sRampClassInfo.endFrequency));
+            static_cast<float>(env->GetFloatField(ramp, sRampClassInfo.startFrequencyHz));
+    pwle.endFrequency = static_cast<float>(env->GetFloatField(ramp, sRampClassInfo.endFrequencyHz));
     pwle.duration = static_cast<int32_t>(env->GetIntField(ramp, sRampClassInfo.duration));
     return pwle;
 }
@@ -363,7 +363,7 @@ static void vibratorAlwaysOnDisable(JNIEnv* env, jclass /* clazz */, jlong ptr, 
 }
 
 static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
-                                jfloat suggestedSafeRange, jobject vibratorInfoBuilder) {
+                                jobject vibratorInfoBuilder) {
     VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
     if (wrapper == nullptr) {
         ALOGE("vibratorGetInfo failed because native wrapper was not initialized");
@@ -437,9 +437,9 @@ static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
         env->SetFloatArrayRegion(maxAmplitudes, 0, amplitudes.size(),
                                  reinterpret_cast<jfloat*>(amplitudes.data()));
     }
-    jobject frequencyMapping = env->NewObject(sFrequencyMappingClass, sFrequencyMappingCtor,
-                                              minFrequency, resonantFrequency, frequencyResolution,
-                                              suggestedSafeRange, maxAmplitudes);
+    jobject frequencyMapping =
+            env->NewObject(sFrequencyMappingClass, sFrequencyMappingCtor, resonantFrequency,
+                           minFrequency, frequencyResolution, maxAmplitudes);
     env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setFrequencyMapping,
                           frequencyMapping);
 
@@ -463,7 +463,7 @@ static const JNINativeMethod method_table[] = {
         {"setExternalControl", "(JZ)V", (void*)vibratorSetExternalControl},
         {"alwaysOnEnable", "(JJJJ)V", (void*)vibratorAlwaysOnEnable},
         {"alwaysOnDisable", "(JJ)V", (void*)vibratorAlwaysOnDisable},
-        {"getInfo", "(JFLandroid/os/VibratorInfo$Builder;)Z", (void*)vibratorGetInfo},
+        {"getInfo", "(JLandroid/os/VibratorInfo$Builder;)Z", (void*)vibratorGetInfo},
 };
 
 int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env) {
@@ -481,13 +481,13 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     jclass rampClass = FindClassOrDie(env, "android/os/vibrator/RampSegment");
     sRampClassInfo.startAmplitude = GetFieldIDOrDie(env, rampClass, "mStartAmplitude", "F");
     sRampClassInfo.endAmplitude = GetFieldIDOrDie(env, rampClass, "mEndAmplitude", "F");
-    sRampClassInfo.startFrequency = GetFieldIDOrDie(env, rampClass, "mStartFrequency", "F");
-    sRampClassInfo.endFrequency = GetFieldIDOrDie(env, rampClass, "mEndFrequency", "F");
+    sRampClassInfo.startFrequencyHz = GetFieldIDOrDie(env, rampClass, "mStartFrequencyHz", "F");
+    sRampClassInfo.endFrequencyHz = GetFieldIDOrDie(env, rampClass, "mEndFrequencyHz", "F");
     sRampClassInfo.duration = GetFieldIDOrDie(env, rampClass, "mDuration", "I");
 
     jclass frequencyMappingClass = FindClassOrDie(env, "android/os/VibratorInfo$FrequencyMapping");
     sFrequencyMappingClass = static_cast<jclass>(env->NewGlobalRef(frequencyMappingClass));
-    sFrequencyMappingCtor = GetMethodIDOrDie(env, sFrequencyMappingClass, "<init>", "(FFFF[F)V");
+    sFrequencyMappingCtor = GetMethodIDOrDie(env, sFrequencyMappingClass, "<init>", "(FFF[F)V");
 
     jclass vibratorInfoBuilderClass = FindClassOrDie(env, "android/os/VibratorInfo$Builder");
     sVibratorInfoBuilderClassInfo.setCapabilities =

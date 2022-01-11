@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Lehetővé teszi, hogy az alkalmazás módosítsa az Android TV eszköz híváslistáját, beleértve a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt felhasználhatják a híváslista törlésére vagy módosítására."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Lehetővé teszi, hogy az alkalmazás módosítsa a telefon híváslistáját, beleértve a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt arra használhatják, hogy híváslistáját töröljék vagy módosítsák."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"hozzáférés a testérzékelőkhöz (például pulzusmérők)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Engedélyezi az alkalmazásnak, hogy hozzáférjen az Ön fizikai állapotát – például a pulzusszámát – figyelő érzékelők adataihoz."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Hozzáférhet olyan, testérzékelőktől származó adatokhoz, mint a pulzusszám, a testhőmérséklet, a véroxigénszint stb."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"hozzáférés a háttérben futó testérzékelőkhöz (például pulzusmérők)"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Hozzáférhet olyan, a háttérben futó testérzékelőktől származó adatokhoz, mint a pulzusszám, a testhőmérséklet, a véroxigénszint stb."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Naptáresemények és a naptári adatok olvasása"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Az alkalmazás olvashatja a táblagépen tárolt összes naptáreseményt, és megoszthatja vagy mentheti a naptáradatokat."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Az alkalmazás olvashatja az Android TV eszközön tárolt összes naptáreseményt, és megoszthatja vagy mentheti a naptáradatokat."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Az alkalmazás olvashatja és szerkesztheti a „Ne zavarjanak” funkció beállításait."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"engedélyhasználat megtekintésének elindítása"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Lehetővé teszi a felhasználó számára, hogy elindítsa az alkalmazás engedélyhasználatát. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"alkalmazásfunkciók megtekintésének megkezdése"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Engedélyezi az alkalmazás számára, hogy megkezdje az alkalmazások funkcióira vonatkozó adatok megtekintését."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"hozzáférés a szenzoradatokhoz nagy mintavételezési gyakorisággal"</string>

@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.permission.PermissionManager.PERMISSION_GRANTED;
@@ -159,13 +160,21 @@ public final class PermissionHelper {
     }
 
     /**
+     * @see setNotificationPermission(String, int, boolean, boolean, boolean)
+     */
+    public void setNotificationPermission(String packageName, @UserIdInt int userId, boolean grant,
+            boolean userSet) {
+        setNotificationPermission(packageName, userId, grant, userSet, false);
+    }
+
+    /**
      * Grants or revokes the notification permission for a given package/user. UserSet should
      * only be true if this method is being called to migrate existing user choice, because it
      * can prevent the user from seeing the in app permission dialog. Must not be called
      * with a lock held.
      */
     public void setNotificationPermission(String packageName, @UserIdInt int userId, boolean grant,
-            boolean userSet) {
+            boolean userSet, boolean reviewRequired) {
         assertFlag();
         final long callingId = Binder.clearCallingIdentity();
         try {
@@ -177,7 +186,12 @@ public final class PermissionHelper {
             }
             if (userSet) {
                 mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        FLAG_PERMISSION_USER_SET, FLAG_PERMISSION_USER_SET, true, userId);
+                        FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_REVIEW_REQUIRED,
+                        FLAG_PERMISSION_USER_SET, true, userId);
+            } else if (reviewRequired) {
+                mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
+                        FLAG_PERMISSION_REVIEW_REQUIRED, FLAG_PERMISSION_REVIEW_REQUIRED, true,
+                        userId);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not reach system server", e);
@@ -186,15 +200,17 @@ public final class PermissionHelper {
         }
     }
 
+    /**
+     * Set the notification permission state upon phone version upgrade from S- to T+, or upon
+     * restoring a pre-T backup on a T+ device
+     */
     public void setNotificationPermission(PackagePermission pkgPerm) {
         assertFlag();
-        final long callingId = Binder.clearCallingIdentity();
-        try {
-            setNotificationPermission(
-                    pkgPerm.packageName, pkgPerm.userId, pkgPerm.granted, pkgPerm.userSet);
-        } finally {
-            Binder.restoreCallingIdentity(callingId);
+        if (pkgPerm == null || pkgPerm.packageName == null) {
+            return;
         }
+        setNotificationPermission(pkgPerm.packageName, pkgPerm.userId, pkgPerm.granted,
+                pkgPerm.userSet, !pkgPerm.userSet);
     }
 
     public boolean isPermissionFixed(String packageName, @UserIdInt int userId) {

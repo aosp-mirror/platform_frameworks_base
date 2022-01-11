@@ -552,7 +552,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Perguntar sempre"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Até desativar"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora mesmo"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altifalante do telemóvel"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Este telemóvel"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este telemóvel"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problema ao ligar. Desligue e volte a ligar o dispositivo."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo de áudio com fios"</string>

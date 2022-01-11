@@ -219,7 +219,7 @@
     <item msgid="3075292553049300105">"Normal"</item>
     <item msgid="1158955023692670059">"Ligera"</item>
     <item msgid="5664310435707146591">"Muy ligera"</item>
-    <item msgid="5491266922147715962">"A velocidad muy alta"</item>
+    <item msgid="5491266922147715962">"Muy rápida"</item>
     <item msgid="7659240015901486196">"Rápida"</item>
     <item msgid="7147051179282410945">"Muy rápida"</item>
     <item msgid="581904787661470707">"A velocidad máxima"</item>
@@ -552,7 +552,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Preguntar siempre"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Hasta que lo desactives"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Recién"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altavoz del teléfono"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Este teléfono"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Error al establecer la conexión. Apaga el dispositivo y vuelve a encenderlo."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo de audio con cable"</string>

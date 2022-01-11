@@ -17,7 +17,6 @@
 package android.os;
 
 import android.annotation.CallbackExecutor;
-import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,7 +29,6 @@ import android.content.Context;
 import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
 import android.util.Log;
-import android.util.Range;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -268,43 +266,6 @@ public abstract class Vibrator {
      */
     public float getQFactor() {
         return getInfo().getQFactor();
-    }
-
-    /**
-     * Return a range of relative frequency values supported by the vibrator.
-     *
-     * <p>These values can be used to create waveforms that controls the vibration frequency via
-     * {@link VibrationEffect.WaveformBuilder}.
-     *
-     * @return A range of relative frequency values supported. The range will always contain the
-     * value 0, representing the device resonant frequency. Devices without frequency control will
-     * return the range [0,0]. Devices with frequency control will always return a range containing
-     * the safe range [-1, 1].
-     * @hide
-     */
-    public Range<Float> getRelativeFrequencyRange() {
-        return getInfo().getFrequencyRange();
-    }
-
-    /**
-     * Return the maximum amplitude the vibrator can play at given relative frequency.
-     *
-     * <p>Devices without frequency control will return 1 for the input zero (resonant frequency),
-     * and 0 to any other input.
-     *
-     * <p>Devices with frequency control will return the supported value, for input in
-     * {@link #getRelativeFrequencyRange()}, and 0 for any other input.
-     *
-     * <p>These values can be used to create waveforms that plays vibrations outside the resonant
-     * frequency via {@link VibrationEffect.WaveformBuilder}.
-     *
-     * @return a value in [0,1] representing the maximum amplitude the device can play at given
-     * relative frequency.
-     * @hide
-     */
-    @FloatRange(from = 0, to = 1)
-    public float getMaximumAmplitude(float relativeFrequency) {
-        return getInfo().getMaxAmplitude(relativeFrequency);
     }
 
     /**

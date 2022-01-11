@@ -16,6 +16,7 @@
 
 package com.android.server.policy;
 
+import static android.Manifest.permission.POST_NOTIFICATIONS;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
@@ -25,16 +26,24 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal;
+import android.app.TaskInfo;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -43,6 +52,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PermissionInfo;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -53,6 +63,7 @@ import android.provider.Telephony;
 import android.telecom.TelecomManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.LongSparseLongArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -67,17 +78,21 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.server.wm.ActivityInterceptorCallback;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -89,10 +104,14 @@ import java.util.concurrent.ExecutionException;
  */
 public final class PermissionPolicyService extends SystemService {
     private static final String LOG_TAG = PermissionPolicyService.class.getSimpleName();
+    private static final String SYSTEM_PKG = "android";
     private static final boolean DEBUG = false;
     private static final long USER_SENSITIVE_UPDATE_DELAY_MS = 60000;
 
     private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private boolean mBootCompleted = false;
 
     private IAppOpsCallback mAppOpsCallback;
 
@@ -118,24 +137,39 @@ public final class PermissionPolicyService extends SystemService {
     @GuardedBy("mLock")
     private final SparseBooleanArray mIsUidSyncScheduled = new SparseBooleanArray();
 
+    /**
+     * This change reflects the presence of the new Notification Permission
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long NOTIFICATION_PERM_CHANGE_ID = 194833441L;
+
     private List<String> mAppOpPermissions;
+
+    private Context mContext;
+    private PackageManagerInternal mPackageManagerInternal;
+    private NotificationManagerInternal mNotificationManager;
+    private PermissionManagerServiceInternal mPermissionManagerService;
+    private final PackageManager mPackageManager;
 
     public PermissionPolicyService(@NonNull Context context) {
         super(context);
 
+        mContext = context;
+        mPackageManager = context.getPackageManager();
         LocalServices.addService(PermissionPolicyInternal.class, new Internal());
     }
 
     @Override
     public void onStart() {
-        final PackageManagerInternal packageManagerInternal = LocalServices.getService(
+        mPackageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
-        final PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
+        PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
                 PermissionManagerServiceInternal.class);
         final IAppOpsService appOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
 
-        packageManagerInternal.getPackageList(new PackageListObserver() {
+        mPackageManagerInternal.getPackageList(new PackageListObserver() {
             @Override
             public void onPackageAdded(String packageName, int uid) {
                 final int userId = UserHandle.getUserId(uid);
@@ -207,10 +241,10 @@ public final class PermissionPolicyService extends SystemService {
             final PermissionInfo appOpPermissionInfo = appOpPermissionInfos.get(i);
 
             switch (appOpPermissionInfo.name) {
-                case android.Manifest.permission.ACCESS_NOTIFICATIONS:
-                case android.Manifest.permission.MANAGE_IPSEC_TUNNELS:
+                case Manifest.permission.ACCESS_NOTIFICATIONS:
+                case Manifest.permission.MANAGE_IPSEC_TUNNELS:
                     continue;
-                case android.Manifest.permission.REQUEST_INSTALL_PACKAGES:
+                case Manifest.permission.REQUEST_INSTALL_PACKAGES:
                     // Settings allows the user to control the app op if it's not in the default
                     // mode, regardless of whether the app has requested the permission, so we
                     // should not reset it.
@@ -251,7 +285,7 @@ public final class PermissionPolicyService extends SystemService {
                 }
                 int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                 // If there is no valid package for the given UID, return immediately
-                if (packageManagerInternal.getPackage(uid) == null) {
+                if (mPackageManagerInternal.getPackage(uid) == null) {
                     return;
                 }
 
@@ -343,6 +377,18 @@ public final class PermissionPolicyService extends SystemService {
                 }
             }
         }
+
+        if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            ((Internal) LocalServices.getService(PermissionPolicyInternal.class))
+                    .onActivityManagerReady();
+        }
+
+        if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+            synchronized (mLock) {
+                mBootCompleted = true;
+            }
+        }
+
     }
 
     /**
@@ -748,10 +794,12 @@ public final class PermissionPolicyService extends SystemService {
 
             String permissionName = permissionInfo.name;
             String packageName = packageInfo.packageName;
+            UserHandle user = UserHandle.getUserHandleForUid(packageInfo.applicationInfo.uid);
             int permissionFlags = mPackageManager.getPermissionFlags(permissionName,
                     packageName, mContext.getUser());
             boolean isReviewRequired = (permissionFlags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0;
-            if (isReviewRequired) {
+            if (isReviewRequired && !CompatChanges.isChangeEnabled(
+                    NOTIFICATION_PERM_CHANGE_ID, packageName, user)) {
                 return;
             }
 
@@ -953,6 +1001,33 @@ public final class PermissionPolicyService extends SystemService {
 
     private class Internal extends PermissionPolicyInternal {
 
+        private ActivityInterceptorCallback mActivityInterceptorCallback =
+                new ActivityInterceptorCallback() {
+                    @Nullable
+                    @Override
+                    public ActivityInterceptorCallback.ActivityInterceptResult intercept(
+                            ActivityInterceptorInfo info) {
+                        return null;
+                    }
+
+                    @Override
+                    public void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo) {
+                        super.onActivityLaunched(taskInfo, activityInfo);
+                        clearNotificationReviewFlagsIfNeeded(activityInfo.packageName,
+                                UserHandle.of(taskInfo.userId));
+                        showNotificationPromptIfNeeded(activityInfo.packageName,
+                                taskInfo.userId, taskInfo.taskId);
+                    }
+                };
+
+        private void onActivityManagerReady() {
+            ActivityTaskManagerInternal atm =
+                    LocalServices.getService(ActivityTaskManagerInternal.class);
+            atm.registerActivityStartInterceptor(
+                    ActivityInterceptorCallback.PERMISSION_POLICY_ORDERED_ID,
+                    mActivityInterceptorCallback);
+        }
+
         @Override
         public boolean checkStartActivity(@NonNull Intent intent, int callingUid,
                 @Nullable String callingPackage) {
@@ -962,7 +1037,51 @@ public final class PermissionPolicyService extends SystemService {
                         + callingPackage + " (uid=" + callingUid + ")");
                 return false;
             }
+
+            if (PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(intent.getAction())
+                    && (callingUid != Process.SYSTEM_UID || !SYSTEM_PKG.equals(callingPackage))) {
+                return false;
+            }
+
             return true;
+        }
+
+        public void showNotificationPromptIfNeeded(@NonNull String packageName, int userId,
+                int taskId) {
+            UserHandle user = UserHandle.of(userId);
+            if (packageName == null || taskId == ActivityTaskManager.INVALID_TASK_ID
+                    || !shouldForceShowNotificationPermissionRequest(packageName, user)) {
+                return;
+            }
+
+            launchNotificationPermissionRequestDialog(packageName, user, taskId);
+        }
+
+        private void clearNotificationReviewFlagsIfNeeded(String packageName, UserHandle userId) {
+            if (!CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID, packageName, userId)) {
+                return;
+            }
+            mPackageManager.updatePermissionFlags(POST_NOTIFICATIONS, packageName,
+                    FLAG_PERMISSION_REVIEW_REQUIRED, 0, userId);
+        }
+
+        private void launchNotificationPermissionRequestDialog(String pkgName, UserHandle user,
+                int taskId) {
+            Intent grantPermission = mPackageManager
+                    .buildRequestPermissionsIntent(new String[] { POST_NOTIFICATIONS });
+            grantPermission.setAction(
+                    PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER);
+            grantPermission.putExtra(Intent.EXTRA_PACKAGE_NAME, pkgName);
+
+            ActivityOptions options = new ActivityOptions(new Bundle());
+            options.setTaskOverlay(true, false);
+            options.setLaunchTaskId(taskId);
+            try {
+                mContext.startActivityAsUser(grantPermission, options.toBundle(), user);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "couldn't start grant permission dialog"
+                        + "for other package " + pkgName, e);
+            }
         }
 
         @Override
@@ -975,6 +1094,12 @@ public final class PermissionPolicyService extends SystemService {
             synchronized (mLock) {
                 mOnInitializedCallback = callback;
             }
+        }
+
+        @Override
+        public boolean canShowPermissionPromptForTask(@Nullable TaskInfo taskInfo) {
+            return taskInfo != null && taskInfo.isFocused && taskInfo.isVisible
+                    && taskInfo.isRunning;
         }
 
         /**
@@ -1009,6 +1134,52 @@ public final class PermissionPolicyService extends SystemService {
                 default:
                     return false;
             }
+        }
+
+        private boolean shouldForceShowNotificationPermissionRequest(@NonNull String pkgName,
+                @NonNull UserHandle user) {
+            AndroidPackage pkg = mPackageManagerInternal.getPackage(pkgName);
+            // TODO(b/205888750): Remove platform key and permissionController lines after pregrants
+            // are in place
+            if (pkg == null || pkg.getPackageName() == null || pkg.isSignedWithPlatformKey()
+                    || pkg.getPackageName().contains("nexuslauncher")
+                    || Objects.equals(pkgName, mPackageManager.getPermissionControllerPackageName())
+                    || pkg.getTargetSdkVersion() < Build.VERSION_CODES.M) {
+                // TODO(b/205888750) add warning logs when pregrants in place
+                return false;
+            }
+
+            synchronized (mLock) {
+                if (!mBootCompleted) {
+                    return false;
+                }
+            }
+
+            try {
+                if (Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.NOTIFICATION_PERMISSION_ENABLED, UserHandle.USER_SYSTEM)
+                        == 0) {
+                    return false;
+                }
+            } catch (Settings.SettingNotFoundException e) {
+                return false;
+            }
+
+            if (!pkg.getRequestedPermissions().contains(POST_NOTIFICATIONS)
+                    || CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID,
+                    pkg.getPackageName(), user)) {
+                return false;
+            }
+
+            int uid = user.getUid(pkg.getUid());
+            if (mNotificationManager == null) {
+                mNotificationManager = LocalServices.getService(NotificationManagerInternal.class);
+            }
+            boolean hasCreatedNotificationChannels = mNotificationManager
+                    .getNumNotificationChannelsForPackage(pkg.getPackageName(), uid, true) > 0;
+            boolean needsReview = (mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, pkgName,
+                    user) & FLAG_PERMISSION_REVIEW_REQUIRED) != 0;
+            return hasCreatedNotificationChannels && needsReview;
         }
     }
 }

@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"允許應用程式修改 Android TV 裝置的通話記錄，包括來電和撥出電話相關資料。惡意應用程式可能會藉此清除或修改你的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"允許應用程式修改手機的通話記錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話記錄。"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"存取人體感應器 (例如心跳速率監測器)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"允許應用程式存取感測器所收集的資料 (這類感測器可監測你的體能狀態，例如你的心跳速率)。"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"存取人體感應器的資料，例如心跳速率、體溫、血氧比例等等。"</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"在背景存取人體感應器 (例如心跳速率監測器) 的資料"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"在背景存取人體感應器的資料，例如心跳速率、體溫、血氧比例等等。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"讀取日曆活動和詳細資訊"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"這個應用程式可讀取所有儲存在平板電腦上的日曆活動資訊，以及共用或儲存日曆資料。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"這個應用程式可讀取所有儲存在 Android TV 裝置上的日曆活動，以及共用或儲存日曆資料。"</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"允許應用程式讀取及寫入「零打擾」設定。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"啟動檢視權限用途"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"允許應用程式開始使用其他應用程式 (一般應用程式並不需要)。"</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"開始查看應用程式功能"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"允許具有這項權限的應用程式開始查看其他應用程式的功能資訊。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"以高取樣率存取感應器資料"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"自訂應用程式通知"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"要允許「<xliff:g id="APP">%1$s</xliff:g>」替 <xliff:g id="ACCOUNT">%2$s</xliff:g> (這個帳戶目前已有使用者) 建立新使用者嗎？"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"要允許「<xliff:g id="APP">%1$s</xliff:g>」替 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎？"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"新增受監管的使用者"</string>
     <string name="language_selection_title" msgid="52674936078683285">"新增語言"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"地區偏好設定"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"請輸入語言名稱"</string>

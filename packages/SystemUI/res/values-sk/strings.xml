@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Uzamknutá obrazovka"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Uzamknutá obrazovka pracovného profilu"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Zavrieť"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Pripojenie Wi‑Fi je vypnuté."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Pripojenie Wi‑Fi je zapnuté."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Režim v lietadle je vypnutý."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Režim v lietadle je zapnutý."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"úplné ticho"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"iba budíky"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Režim bez vyrušení."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"Režim bez vyrušení je vypnutý"</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"Režim bez vyrušení je zapnutý."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Rozhranie Bluetooth je zapnuté."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"Rozhranie Bluetooth je vypnuté."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"Rozhranie Bluetooth je zapnuté."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"Nahlasovanie polohy je vypnuté."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"Nahlasovanie polohy je zapnuté."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Budík nastavený na <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Dlhší čas"</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Kratší čas"</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Baterka je vypnutá."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Baterka je zapnutá."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Prevrátenie farieb je vypnuté."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Prevrátenie farieb je zapnuté."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Mobilný hotspot je vypnutý."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Mobilný hotspot je zapnutý."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Prenášanie bolo zastavené."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Šetrič dát bol vypnutý."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Šetrič dát bol zapnutý."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Jas displeja"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Mobilné dáta sú pozastavené"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Dáta sú pozastavené"</string>
@@ -253,6 +235,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Sieť Wi‑Fi nie je pripojená"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Jas"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inverzia farieb"</string>
+    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Úprava farieb"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Ďalšie nastavenia"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Používateľské nastavenia"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Hotovo"</string>
@@ -493,6 +476,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Ak chcete klávesnicu pripojiť k tabletu, najprv musíte zapnúť Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Zapnúť"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Ovládacie prvky zobrazovania upozornení"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Zapnuté – podľa tváre"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Pomocou ovládacích prvkov zobrazovania upozornení môžete nastaviť pre upozornenia aplikácie úroveň dôležitosti od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazovať v hornej časti zoznamu upozornení. \n– Povoliť prerušenia na celú obrazovku. \n– Vždy zobrazovať čiastočne. \n\n"<b>"Úroveň 4"</b>" \n– Zabrániť prerušeniam na celú obrazovku. \n– Vždy zobrazovať čiastočne. \n\n"<b>"Úroveň 3"</b>" \n– Zabrániť prerušeniam na celú obrazovku. \n– Nikdy nezobrazovať čiastočne. \n\n"<b>"Úroveň 2"</b>" \n– Zabrániť prerušeniam na celú obrazovku. \n– Nikdy nezobrazovať čiastočne. \n– Nikdy nespúšťať zvuk ani vibrácie. \n\n"<b>"Úroveň 1"</b>" \n– Zabrániť prerušeniam na celú obrazovku. \n– Nikdy nezobrazovať čiastočne. \n– Nikdy nespúšťať zvuk ani vibrácie. \n– Skryť na uzamknutej obrazovke a v stavovom riadku. \n– Zobraziť v dolnej časti zoznamu upozornení. \n\n"<b>"Úroveň 0"</b>" \n– Blokovať všetky upozornenia z aplikácie."</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Hotovo"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Použiť"</string>

@@ -433,7 +433,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Pozwala aplikacji modyfikować rejestr połączeń na urządzeniu z Androidem TV, w tym dane o połączeniach przychodzących i wychodzących. Złośliwe aplikacje mogą wykorzystać tę możliwość, by wykasować lub zmodyfikować rejestr połączeń."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Zezwala aplikacji na modyfikowanie rejestru połączeń telefonu, w tym danych o połączeniach przychodzących i wychodzących. Złośliwe aplikacje mogą wykorzystać tę możliwość, by wyczyścić lub zmodyfikować rejestr połączeń."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"dostęp do czujników ciała (np. monitorujących tętno)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Pozwala aplikacji na dostęp do danych z czujników, które monitorują Twój stan fizyczny (np. tętno)."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Dostęp do danych pochodzących z czujników na ciele, takich jak tętno, temperatura, procent tlenu we krwi itd."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"dostęp do czujników na ciele (np. monitorujących tętno) podczas pracy w tle"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Dostęp do danych pochodzących z czujników na ciele, takich jak tętno, temperatura, procent tlenu we krwi itd., gdy aplikacja pracuje w tle."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Odczytywanie wydarzeń i informacji z kalendarza"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ta aplikacja może odczytywać wszystkie zapisane na tablecie wydarzenia z kalendarza i udostępniać oraz zapisywać dane kalendarza."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ta aplikacja może odczytywać wszystkie wydarzenia z kalendarza zapisane na urządzeniu z Androidem TV oraz udostępniać i zapisywać dane z kalendarza."</string>
@@ -737,6 +739,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Pozwala aplikacji na odczyt i zmianę konfiguracji trybu Nie przeszkadzać."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"rozpocząć wyświetlanie użycia uprawnień"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Umożliwia rozpoczęcie korzystania z uprawnienia dotyczącego danej aplikacji jego posiadaczowi. Zwykłe aplikacje nie powinny potrzebować tego uprawnienia."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"rozpoczęcie wyświetlania funkcji aplikacji"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Umożliwia posiadaczowi rozpoczęcie przeglądania informacji o funkcjach aplikacji."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"dostęp do danych czujnika z wysoką częstotliwością"</string>
@@ -2053,8 +2059,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Niestandardowe powiadomienie z aplikacji"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Zezwolić aplikacji <xliff:g id="APP">%1$s</xliff:g> na utworzenie nowego użytkownika dla konta <xliff:g id="ACCOUNT">%2$s</xliff:g> (użytkownik dla tego konta już istnieje)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Zezwolić aplikacji <xliff:g id="APP">%1$s</xliff:g> na utworzenie nowego użytkownika dla konta <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Dodaj nadzorowanego użytkownika"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Dodaj język"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Ustawienie regionu"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Wpisz nazwę języka"</string>

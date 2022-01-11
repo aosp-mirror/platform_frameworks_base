@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"អនុញ្ញាតឱ្យ​កម្មវិធី​កែកំណត់ហេតុហៅ​ទូរសព្ទនៃឧបករណ៍ Android TV របស់អ្នក រួមទាំងទិន្នន័យអំពី​ការហៅចូល និងការហៅចេញផងដែរ។ កម្មវិធី​គ្រោះថ្នាក់​អាចប្រើការអនុញ្ញាត​នេះ ដើម្បី​លុប ឬកែកំណត់ហេតុ​ហៅទូរសព្ទរបស់អ្នក។"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ឲ្យ​កម្មវិធី​កែ​បញ្ជី​ហៅ​នៃ​ទូរស័ព្ទ​របស់​អ្នក រួមមាន​ទិន្នន័យ​អំពី​ការ​ហៅ​ចូល និង​ចេញ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​លុប ឬ​កែ​បញ្ជី​ការ​ហៅ​របស់​អ្នក។"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"ចូលដំណើរការឧបករណ៍ចាប់សញ្ញារាងកាយ (ដូចជាម៉ាស៊ីនវាស់ចង្វាក់បេះដូង)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​ទិន្នន័យ​ពី​ឧបករណ៍​ចាប់​សញ្ញា​ដែល​តាមដាន​លក្ខខណ្ឌ​សុខភាព​របស់​អ្នក ដូច​ជា​ចង្វាក់​បេះដូង។"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"សិទ្ធិចូលប្រើទិន្នន័យ​ពីឧបករណ៍​ចាប់សញ្ញារាងកាយដូចជា ចង្វាក់បេះដូង សីតុណ្ហភាព ភាគរយនៃ​អុកស៊ីសែន​ក្នុងឈាម។ល។"</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"ចូលប្រើឧបករណ៍ចាប់សញ្ញារាងកាយ (ដូចជាឧបករណ៍វាស់ចង្វាក់បេះដូង) ខណៈពេលនៅផ្ទៃខាងក្រោយ"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"សិទ្ធិចូលប្រើទិន្នន័យ​ពីឧបករណ៍​ចាប់សញ្ញារាងកាយដូចជា ចង្វាក់បេះដូង សីតុណ្ហភាព ភាគរយនៃ​អុកស៊ីសែន​ក្នុងឈាម។ល។ ខណៈពេល​នៅផ្ទៃខាងក្រោយ។"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"អាន​ព្រឹត្តិការណ៍​ប្រតិទិន​ និង​ព័ត៌មាន​លម្អិត"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"កម្មវិធី​នេះ​អាច​ធ្វើការ​អាន​ព្រឹត្តិការណ៍​ប្រតិទិន​ទាំងអស់​ ដែល​ផ្ទុក​នៅលើ​ថេប្លេត​របស់​អ្នក​ និង​ចែករំលែក​ ឬ​រក្សាទុក​ទិន្នន័យ​ប្រតិទិន​របស់​អ្នក​។"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"កម្មវិធីនេះ​អាចអានព្រឹត្តិការណ៍​ក្នុងប្រតិទិន​ទាំងអស់​ដែលបានរក្សាទុក​នៅក្នុងឧបករណ៍ Android TV របស់អ្នក និង​ចែករំលែក ឬរក្សាទុក​ទិន្នន័យ​ប្រតិទិន​របស់អ្នក។"</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"អនុញ្ញាតឲ្យកម្មវិធីអាន និងសរសេរការកំណត់រចនាសម្ព័ន្ធមុខងារ កុំរំខាន។"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ចាប់ផ្ដើម​មើល​ការប្រើប្រាស់​ការអនុញ្ញាត"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"អនុញ្ញាត​ឱ្យម្ចាស់​ចាប់ផ្ដើម​ការប្រើប្រាស់​ការអនុញ្ញាត​សម្រាប់កម្មវិធី។ មិនគួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ចាប់ផ្ដើមមើល​មុខងារកម្មវិធី"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"អនុញ្ញាតឱ្យកម្មវិធី​ចាប់ផ្ដើម​មើលព័ត៌មានមុខងារ​សម្រាប់កម្មវិធី។"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ចូលប្រើទិន្នន័យ​ឧបករណ៍ចាប់សញ្ញា​នៅអត្រាសំណាកខ្ពស់"</string>

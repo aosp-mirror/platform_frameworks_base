@@ -105,6 +105,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"تم حظر الجهاز يدويًا"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"لم يتم التعرف عليها."</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"لم يتم التعرّف عليه."</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"‏لاستخدام ميزة \"فتح الجهاز بالتعرف على الوجه\"، عليك منح إذن "<b>"الوصول إلى الكاميرا"</b>" في الإعدادات &gt; الخصوصية."</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="zero">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
       <item quantity="two">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>

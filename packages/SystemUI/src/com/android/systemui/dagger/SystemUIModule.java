@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
@@ -208,6 +209,7 @@ public abstract class SystemUIModule {
             NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController, NotificationLockscreenUserManager notifUserManager,
             NotificationGroupManagerLegacy groupManager, NotificationEntryManager entryManager,
+            CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline, SysUiState sysUiState,
             NotifPipelineFlags notifPipelineFlags, DumpManager dumpManager,
             @Main Executor sysuiMainExecutor) {
@@ -216,7 +218,7 @@ public abstract class SystemUIModule {
                 configurationController, statusBarService, notificationManager,
                 visibilityProvider,
                 interruptionStateProvider, zenModeController, notifUserManager,
-                groupManager, entryManager, notifPipeline, sysUiState, notifPipelineFlags,
-                dumpManager, sysuiMainExecutor));
+                groupManager, entryManager, notifCollection, notifPipeline, sysUiState,
+                notifPipelineFlags, dumpManager, sysuiMainExecutor));
     }
 }

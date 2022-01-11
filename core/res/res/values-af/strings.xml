@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Laat die program toe om jou Android TV-toestel se oproeprekord te wysig, insluitend data oor inkomende en uitgaande oproepe. Kwaadwillige programme kan dit gebruik om jou oproeprekord uit te vee of te wysig."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Laat die program toe om jou foon se oproeprekord, insluitende data oor inkomende en uitgaande oproepe, te verander. Kwaadwillige programme kan dit gebruik om jou oproeprekord uit te vee of te verander."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"verkry toegang tot liggaamsensors (soos hartklopmonitors)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Laat die program toe om toegang te verkry tot data van sensors af wat jou fisieke toestand, soos jou polsslag, monitor."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Toegang tot data vanaf liggaamsensors, soos polsslag, temperatuur, bloedsuurstofpersentasie, ens."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"gaan by liggaamsensors in (soos polsslagmonitors) terwyl dit op die agtergrond is"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Toegang tot data vanaf liggaamsensors, soos polsslag, temperatuur, bloedsuurstofpersentasie, ens. terwyl dit op die agtergrond is."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lees kalendergebeurtenisse en -besonderhede"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Hierdie program kan alle kalendergebeurtenisse lees wat op jou tablet geberg is of jou kalenderdata stoor."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Hierdie program kan alle kalendergeleenthede wat op jou Android TV-toestel geberg is, lees of jou kalenderdata stoor."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Laat die program toe om Moenie Steur Nie-opstelling te lees en skryf."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"begin kyk van toestemminggebruik"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Laat die houer toe om die toestemminggebruik vir \'n program te begin. Behoort nooit vir normale programme nodig te wees nie."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"begin Bekyk Programkenmerke"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Laat die houer toe om die kenmerke-inligting vir \'n program te begin bekyk."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"kry toegang tot sensordata teen \'n hoë monsternemingkoers"</string>

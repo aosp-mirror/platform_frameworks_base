@@ -303,21 +303,21 @@
     <string name="user_owner_label" msgid="8628726904184471211">"प्रोफ़ाइल बदलकर निजी प्रोफ़ाइल पर जाएं"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"प्रोफ़ाइल बदलकर वर्क प्रोफ़ाइल पर जाएं"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"संपर्क"</string>
-    <string name="permgroupdesc_contacts" msgid="9163927941244182567">"अपने संपर्कों को ऐक्सेस करने की"</string>
+    <string name="permgroupdesc_contacts" msgid="9163927941244182567">"अपने संपर्कों को ऐक्सेस करें"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"जगह की जानकारी"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"इस डिवाइस की जगह तक पहुंचने दें"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"कैलेंडर"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"अपने कैलेंडर को ऐक्सेस करने"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"अपने कैलेंडर को ऐक्सेस करें"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"मैसेज (एसएमएस)"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"मैसेज (एसएमएस) भेजें और देखें"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"फ़ाइलें और मीडिया"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"अपने डिवाइस पर मौजूद फ़ोटो, मीडिया और फ़ाइलें ऐक्सेस करने की"</string>
+    <string name="permgroupdesc_storage" msgid="6351503740613026600">"अपने डिवाइस पर मौजूद फ़ोटो, मीडिया, और फ़ाइलें ऐक्सेस करें"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"माइक्रोफ़ोन"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ऑडियो रिकॉर्ड करें"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"शारीरिक गतिविधि"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"शारीरिक गतिविधि की जानकारी पा सकता है"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"कैमरा"</string>
-    <string name="permgroupdesc_camera" msgid="7585150538459320326">"चित्र लेने और वीडियो रिकॉर्ड करने"</string>
+    <string name="permgroupdesc_camera" msgid="7585150538459320326">"फ़ोटो खीचें और वीडियो रिकॉर्ड करें"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"आस-पास मौजूद डिवाइस"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"आस-पास मौजूद डिवाइस खोजें और उनसे कनेक्ट करें"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"कॉल लॉग"</string>
@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"यह ऐप्लिकेशन को आपके Android TV डिवाइस के कॉल लॉग में बदलाव करने की अनुमति देता है. इसमें किसी को की गई (आउटगोइंग) कॉल और किसी से मिली (इनकमिंग) कॉल शामिल हैं. हालांकि, नुकसान पहुंचाने वाले ऐप्लिकेशन इसका इस्तेमाल करके कॉल लॉग को मिटा सकते हैं या बदल सकते हैं."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ऐप को आने वाला कॉल (इनकमिंग) और किया जाने वाला कॉल (आउटगोइंग) डेटा सहित, आपके फ़ोन के कॉल लॉग को बदलने की अनुमति देता है. धोखा देने वाले ऐप, इसका इस्तेमाल करके आपके कॉल लॉग को मिटा या बदल सकते हैं."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"शरीर के लिए बने सेंसर (जैसे हृदय गति मॉनीटर) को ऐक्सेस करें"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"ऐप को आपकी शारीरिक स्‍थिति, जैसे आपकी हृदय गति पर नज़र रखने वाले सेंसर के डेटा तक पहुंचने देती है."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"बॉडी सेंसर से मिले डेटा का ऐक्सेस, जैसे कि धड़कन की दर, तापमान, खून में मौजूद ऑक्सीजन का प्रतिशत वगैरह."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"बैकग्राउंड में काम करने वाले बॉडी सेंसर (जैसे, धड़कन की दर मापने वाले मॉनिटर) से मिले डेटा का ऐक्सेस"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"बैकग्राउंड में काम करने वाले बॉडी सेंसर से मिले डेटा का ऐक्सेस, जैसे कि धड़कन की दर, तापमान, खून में मौजूद ऑक्सीजन का प्रतिशत वगैरह."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"कैलेंडर इवेंट और विवरण पढ़ें"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यह ऐप्लिकेशन आपके टैबलेट पर संग्रहित सभी कैलेंडर इवेंट पढ़ सकता है और आपका कैलेंडर डेटा शेयर कर सकता है या सहेज सकता है."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यह ऐप्लिकेशन आपके टीवी पर सेव किए गए सभी कैलेंडर इवेंट को पढ़ सकता है. इसके अलावा यह आपके कैलेंडर का डेटा शेयर कर सकता है या सेव कर सकता है."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ऐप को परेशान न करें कॉन्फ़िगरेशन पढ़ने और लिखने देती है."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"देखने की अनुमतियां चालू करें"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"इस्तेमाल करने वाले को किसी ऐप्लिकेशन के लिए अनुमतियों का इस्तेमाल शुरू करने देता है. सामान्य ऐप्लिकेशन के लिए इसकी ज़रूरत कभी नहीं पड़ती."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ऐप्लिकेशन की सुविधाओं को देखना शुरू करें"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ऐप्लिकेशन को, किसी ऐप्लिकेशन की सुविधाओं की जानकारी देखने की अनुमति देता है."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"सेंसर डेटा को, नमूने लेने की तेज़ दर पर ऐक्सेस करें"</string>

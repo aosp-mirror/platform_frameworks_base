@@ -53,6 +53,7 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
@@ -130,6 +131,7 @@ public class UdfpsController implements DozeReceiver {
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
+    @NonNull private final ActivityLaunchAnimator mActivityLaunchAnimator;
 
     // Tracks the velocity of a touch to help filter out the touches that move too fast.
     @Nullable private VelocityTracker mVelocityTracker;
@@ -198,7 +200,8 @@ public class UdfpsController implements DozeReceiver {
                             mLockscreenShadeTransitionController, mConfigurationController,
                             mSystemClock, mKeyguardStateController,
                             mUnlockedScreenOffAnimationController, mSensorProps, mHbmProvider,
-                            reason, callback, UdfpsController.this::onTouch)));
+                            reason, callback, UdfpsController.this::onTouch,
+                            mActivityLaunchAnimator)));
         }
 
         @Override
@@ -487,7 +490,8 @@ public class UdfpsController implements DozeReceiver {
             @NonNull SystemClock systemClock,
             @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             @NonNull SystemUIDialogManager dialogManager,
-            @NonNull LatencyTracker latencyTracker) {
+            @NonNull LatencyTracker latencyTracker,
+            @NonNull ActivityLaunchAnimator activityLaunchAnimator) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -516,6 +520,7 @@ public class UdfpsController implements DozeReceiver {
         mSystemClock = systemClock;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mLatencyTracker = latencyTracker;
+        mActivityLaunchAnimator = activityLaunchAnimator;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists

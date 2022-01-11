@@ -175,33 +175,15 @@
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Экран блокировки."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Заблокировано"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Закрыть"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Модуль Wi-Fi отключен."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Модуль Wi-Fi включен."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Режим полета отключен."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Режим полета включен."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"полная тишина"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"только будильник"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Не беспокоить."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"Режим \"Не беспокоить\" выключен."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"Режим \"Не беспокоить\" включен."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Модуль Bluetooth включен."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"Модуль Bluetooth отключен."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"Модуль Bluetooth включен."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"Отправка геоданных отключена."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"Отправка геоданных включена."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Будильник установлен на <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Увеличить время."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Уменьшить время."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Фонарик отключен."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Фонарик включен."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Инверсия цвета отключена."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Инверсия цвета включена."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Точка доступа отключена."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Точка доступа включена."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Трансляция прекращена."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Режим экономии трафика отключен."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Режим экономии трафика включен."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Яркость экрана"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Передача данных остановлена"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Передача данных приостановлена"</string>
@@ -253,6 +235,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Нет подключения к сети Wi-Fi."</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркость"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инверсия цветов"</string>
+    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
+    <skip />
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Настройки"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Пользовательские настройки"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
@@ -493,6 +477,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Чтобы подключить клавиатуру к планшету, включите Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Включить"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Расширенное управление уведомлениями"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Включить (на основе распознавания лиц)"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"С помощью этой функции вы можете устанавливать уровень важности уведомлений от 0 до 5 для каждого приложения.\n\n"<b>"Уровень 5"</b>\n"‒ Помещать уведомления в начало списка.\n‒ Показывать полноэкранные уведомления.\n‒ Показывать всплывающие уведомления.\nУровень 4\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Показывать всплывающие уведомления.\nУровень 3\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Не показывать всплывающие уведомления.\nУровень 2\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Не показывать всплывающие уведомления.\n‒ Не использовать звук и вибрацию.\nУровень 1\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Не показывать всплывающие уведомления.\n‒ Не использовать звук и вибрацию.\n‒ Не показывать на экране блокировки и в строке состояния.\n‒ Помещать уведомления в конец списка.\nУровень 0\n"<b></b>\n"‒ Блокировать все уведомления приложения."</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Готово"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Применить"</string>

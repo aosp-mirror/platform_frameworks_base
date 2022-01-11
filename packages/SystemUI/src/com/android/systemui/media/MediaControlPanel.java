@@ -61,6 +61,7 @@ import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.time.SystemClock;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -479,6 +480,24 @@ public class MediaControlPanel {
         // Media action buttons
         List<MediaAction> actionIcons = data.getActions();
         List<Integer> actionsWhenCollapsed = data.getActionsToShowInCompact();
+
+        // If the session actions flag is enabled, but we're still using the regular layout, use
+        // the session actions anyways
+        if (mMediaFlags.areMediaSessionActionsEnabled() && data.getSemanticActions() != null) {
+            MediaButton semanticActions = data.getSemanticActions();
+
+            actionIcons = new ArrayList<MediaAction>();
+            actionIcons.add(semanticActions.getStartCustom());
+            actionIcons.add(semanticActions.getPrevOrCustom());
+            actionIcons.add(semanticActions.getPlayOrPause());
+            actionIcons.add(semanticActions.getNextOrCustom());
+            actionIcons.add(semanticActions.getEndCustom());
+
+            actionsWhenCollapsed = new ArrayList<Integer>();
+            actionsWhenCollapsed.add(1);
+            actionsWhenCollapsed.add(2);
+            actionsWhenCollapsed.add(3);
+        }
 
         int i = 0;
         for (; i < actionIcons.size() && i < ACTION_IDS.length; i++) {

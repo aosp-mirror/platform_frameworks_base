@@ -127,6 +127,7 @@ public final class TvIAppInfo implements Parcelable {
     /**
      * Gets supported interactive app types
      */
+    @NonNull
     public List<String> getSupportedTypes() {
         return new ArrayList<>(mTypes);
     }

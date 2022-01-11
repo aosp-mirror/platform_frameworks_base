@@ -1756,17 +1756,23 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 }
                 if (hasFrequencies) {
                     frequencies.add(Float.parseFloat(getNextArgRequired()));
-                } else {
-                    frequencies.add(0f);
                 }
             }
 
             VibrationEffect.WaveformBuilder waveform = VibrationEffect.startWaveform();
             for (int i = 0; i < durations.size(); i++) {
                 if (isContinuous) {
-                    waveform.addRamp(amplitudes.get(i), frequencies.get(i), durations.get(i));
+                    if (hasFrequencies) {
+                        waveform.addRamp(amplitudes.get(i), frequencies.get(i), durations.get(i));
+                    } else {
+                        waveform.addRamp(amplitudes.get(i), durations.get(i));
+                    }
                 } else {
-                    waveform.addStep(amplitudes.get(i), frequencies.get(i), durations.get(i));
+                    if (hasFrequencies) {
+                        waveform.addStep(amplitudes.get(i), frequencies.get(i), durations.get(i));
+                    } else {
+                        waveform.addStep(amplitudes.get(i), durations.get(i));
+                    }
                 }
             }
             composition.addEffect(waveform.build(repeat), delay);
@@ -1865,7 +1871,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 pw.println("    If -c is provided, the waveform is continuous and will ramp");
                 pw.println("    between values; otherwise each entry is a fixed step.");
                 pw.println("    Duration is in milliseconds; amplitude is a scale of 1-255;");
-                pw.println("    frequency is a relative value around resonant frequency 0;");
+                pw.println("    frequency is an absolute value in hertz;");
                 pw.println("  prebaked [-w delay] [-b] <effect-id>");
                 pw.println("    Vibrates with prebaked effect; ignored when device is on DND ");
                 pw.println("    (Do Not Disturb) mode; touch feedback strength user setting ");

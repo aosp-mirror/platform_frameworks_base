@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permet que l\'aplicació modifiqui el registre de trucades del dispositiu Android TV, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per suprimir o per modificar el teu registre de trucades."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permet que l\'aplicació modifiqui el registre de trucades del teu telèfon, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per eliminar o per modificar el teu registre de trucades."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"accedir a sensors corporals (p. ex., monitors de freqüència cardíaca)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Permet que l\'aplicació accedeixi a les dades dels sensors que supervisen el teu estat físic, com ara la freqüència cardíaca."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Accés a les dades dels sensors corporals com la freqüència cardíaca, la temperatura, el percentatge d\'oxigen a la sang, etc."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"accedir a sensors corporals (com els monitors de freqüència cardíaca) en segon pla"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Accés a les dades dels sensors corporals, com ara la freqüència cardíaca, la temperatura o el percentatge d\'oxigen a la sang, en segon pla."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Aquesta aplicació pot llegir els esdeveniments i la informació del calendari"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Aquesta aplicació pot llegir tots els esdeveniments del calendari emmagatzemats a la tauleta i compartir o desar les dades del teu calendari."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Aquesta aplicació pot llegir tots els esdeveniments del calendari emmagatzemats al dispositiu Android TV i compartir o desar les dades del calendari."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permet que l\'aplicació llegeixi la configuració No molestis i hi escrigui."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"comença a utilitzar el permís de visualització"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permet que un propietari comenci a utilitzar el permís amb una aplicació. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"iniciar la visualització de les funcions d\'una aplicació"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permet que el propietari vegi la informació de les funcions d\'una aplicació."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"accedir a les dades del sensor a una freqüència de mostratge alta"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notificació d\'aplicació personalitzada"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Concedeixes permís a <xliff:g id="APP">%1$s</xliff:g> per crear un usuari amb el compte <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Ja hi ha un usuari amb aquest compte.)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Concedeixes permís a <xliff:g id="APP">%1$s</xliff:g> per crear un usuari amb el compte <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Afegeix un usuari supervisat"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Afegeix un idioma"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferència de regió"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Escriu el nom de l\'idioma"</string>

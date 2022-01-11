@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ఇన్‌కమింగ్ మరియు అవుట్‌గోయింగ్ కాల్స్‌కు సంబంధించిన డేటాతో సహా మీ Android TV పరికరం కాల్ లాగ్‌ను సవరించడానికి యాప్‌ని అనుమతిస్తుంది. హానికరమైన యాప్‌లు మీ కాల్ లాగ్‌ను తీసివేయడానికి లేదా సవరించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ఇన్‌కమింగ్ మరియు అవుట్‌గోయింగ్ కాల్స్‌ల గురించిన డేటాతో సహా మీ ఫోన్ యొక్క కాల్ లాగ్‌ను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. హానికరమైన యాప్‌లు మీ కాల్ లాగ్‌ను ఎరేజ్ చేయడానికి లేదా సవరించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"శరీర సెన్సార్‌లను (గుండె స్పందన రేటు మానిటర్‌ల వంటివి) యాక్సెస్ చేయండి"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"మీ శారీరక పరిస్థితిని అనగా మీ గుండె స్పందన రేటు వంటి వాటిని పర్యవేక్షించే సెన్సార్‌ల నుండి డేటాను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"గుండె స్పందన రేటు, ఉష్ణోగ్రత, రక్తంలో ఆక్సిజన్ శాతం మొదలైన శరీర సెన్సార్‌ల నుండి డేటాను యాక్సెస్ చేయండి."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"బ్యాక్‌గ్రౌండ్‌లో శరీర సెన్సార్‌లను (గుండె రేటు మానిటర్స్) యాక్సెస్ చేయండి"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"బ్యాక్‌గ్రౌండ్‌లో ఉన్నప్పుడు గుండె స్పందన రేటు, ఉష్ణోగ్రత, రక్తంలో ఆక్సిజన్ శాతం మొదలైన శరీర సెన్సార్‌ల నుండి డేటాకు యాక్సెస్ చేయండి."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"క్యాలెండర్ ఈవెంట్‌లు మరియు వివరాలను చదవడం"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ఈ యాప్ మీ టాబ్లెట్‌లో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు మరియు మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ఈ యాప్‌ మీ Android TV పరికరంలో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు, మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"అంతరాయం కలిగించవద్దు ఎంపిక కాన్ఫిగరేషన్ చదవడానికి మరియు రాయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"వీక్షణ అనుమతి వినియోగాన్ని ప్రారంభించండి"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"యాప్‌నకు అనుమతి వినియోగాన్ని ప్రారంభించడానికి హోల్డర్‌‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ ఇటువంటి అనుమతి అవసరం ఉండదు."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"యాప్ ఫీచర్‌లను చూడటాన్ని ప్రారంభించండి"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"యాప్ ఫీచర్‌ల సమాచారాన్ని చూడటాన్ని ప్రారంభించడానికి హోల్డర్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"అధిక శాంపిల్ రేటు వద్ద సెన్సార్ డేటాను యాక్సెస్ చేయండి"</string>

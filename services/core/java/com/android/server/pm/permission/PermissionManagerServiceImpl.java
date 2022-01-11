@@ -198,14 +198,19 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     /** All nearby devices permissions */
     private static final List<String> NEARBY_DEVICES_PERMISSIONS = new ArrayList<>();
 
-    // TODO: This is a placeholder. Replace with actual implementation
-    private static final List<String> NOTIFICATION_PERMISSIONS = new ArrayList<>();
-
     /**
-     * All permissions that should be granted with the REVOKE_WHEN_REQUESTED flag, if they are
-     * implicitly added to a package
+     * All notification permissions.
+     * Notification permission state is treated differently from other permissions. Notification
+     * permission get the REVIEW_REQUIRED flag set for S- apps, or for T+ apps on updating to T or
+     * restoring a pre-T backup. The permission and app op remain denied. The flag will be read by
+     * the notification system, and allow apps to send notifications, until cleared.
+     * The flag is cleared for S- apps by the system showing a permission request prompt, and the
+     * user clicking "allow" or "deny" in the dialog. For T+ apps, the flag is cleared upon the
+     * first activity launch.
+     *
+     * @see PermissionPolicyInternal#showNotificationPromptIfNeeded(String, int, int)
      */
-    private static final List<String> IMPLICIT_GRANTED_PERMISSIONS = new ArrayList<>();
+    private static final List<String> NOTIFICATION_PERMISSIONS = new ArrayList<>();
 
     /** If the permission of the value is granted, so is the key */
     private static final Map<String, String> FULLER_PERMISSION_MAP = new HashMap<>();
@@ -221,7 +226,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_ADVERTISE);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
-        IMPLICIT_GRANTED_PERMISSIONS.add(Manifest.permission.POST_NOTIFICATIONS);
+        NOTIFICATION_PERMISSIONS.add(Manifest.permission.POST_NOTIFICATIONS);
     }
 
     /** Set of source package names for Privileged Permission Allowlist */
@@ -2594,9 +2599,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
                     // Cache newImplicitPermissions before modifing permissionsState as for the
                     // shared uids the original and new state are the same object
+                    // TODO(205888750): remove the line for LEGACY_REVIEW once propagated through
+                    // droidfood
                     if (!origState.hasPermissionState(permName)
                             && (pkg.getImplicitPermissions().contains(permName)
-                            || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))) {
+                            || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))
+                            || NOTIFICATION_PERMISSIONS.contains(permName)) {
                         if (pkg.getImplicitPermissions().contains(permName)) {
                             // If permName is an implicit permission, try to auto-grant
                             newImplicitPermissions.add(permName);
@@ -2754,9 +2762,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             }
 
                             // Remove review flag as it is not necessary anymore
-                            if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
-                                flags &= ~FLAG_PERMISSION_REVIEW_REQUIRED;
-                                wasChanged = true;
+                            if (!NOTIFICATION_PERMISSIONS.contains(perm)) {
+                                if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
+                                    flags &= ~FLAG_PERMISSION_REVIEW_REQUIRED;
+                                    wasChanged = true;
+                                }
                             }
 
                             if ((flags & FLAG_PERMISSION_REVOKED_COMPAT) != 0
@@ -3117,26 +3127,35 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     inheritPermissionStateToNewImplicitPermissionLocked(sourcePerms, newPerm, ps,
                             pkg);
                 }
-            } else if (IMPLICIT_GRANTED_PERMISSIONS.contains(newPerm)
-                    && !origPs.hasPermissionState(newPerm)) {
+            } else if (NOTIFICATION_PERMISSIONS.contains(newPerm)) {
+                //&& (origPs.getPermissionState(newPerm) == null) {
+                // TODO(b/205888750): add back line about origPs once propagated through droidfood
                 Permission bp = mRegistry.getPermission(newPerm);
                 if (bp == null) {
                     throw new IllegalStateException("Unknown new permission " + newPerm);
                 }
-                if ((ps.getPermissionState(newPerm).getFlags()
-                        & FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
-                    // No need to grant if review is required
-                    continue;
+                // TODO(b/205888750): remove the line for REVOKE_WHEN_REQUESTED once propagated
+                //  through droidfood
+                if (!isUserSetOrPregrantedOrFixed(ps.getPermissionFlags(newPerm))) {
+                    updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
+                    ps.updatePermissionFlags(bp, PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
+                                    | FLAG_PERMISSION_REVOKE_WHEN_REQUESTED,
+                            PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED);
+                    // TODO(b/205888750): remove revoke once propagated through droidfood
+                    if (ps.isPermissionGranted(newPerm)) {
+                        ps.revokePermission(bp);
+                    }
                 }
-                updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
-                ps.updatePermissionFlags(bp,
-                        FLAG_PERMISSION_REVOKE_WHEN_REQUESTED,
-                        FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);
-                ps.grantPermission(bp);
             }
         }
 
         return updatedUserIds;
+    }
+
+    private boolean isUserSetOrPregrantedOrFixed(int flags) {
+        return (flags & (FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_USER_FIXED
+                | FLAG_PERMISSION_POLICY_FIXED | FLAG_PERMISSION_SYSTEM_FIXED
+                | FLAG_PERMISSION_GRANTED_BY_DEFAULT | FLAG_PERMISSION_GRANTED_BY_ROLE)) != 0;
     }
 
     @NonNull
@@ -4323,9 +4342,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL, false)
         );
 
-        mSystemReady = true;
-
         synchronized (mLock) {
+            mSystemReady = true;
+
             if (mPrivappPermissionsViolations != null) {
                 throw new IllegalStateException("Signature|privileged permissions not in "
                         + "privapp-permissions allowlist: " + mPrivappPermissionsViolations);

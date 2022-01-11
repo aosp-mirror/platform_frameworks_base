@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ഉപകരണം നേരിട്ട് ലോക്കുചെയ്തു"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"തിരിച്ചറിയുന്നില്ല"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"തിരിച്ചറിയുന്നില്ല"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ഫെയ്‌സ് അൺലോക്ക് ഉപയോഗിക്കാൻ, ക്രമീകരണം &gt; സ്വകാര്യത എന്നതിൽ "<b>"ക്യാമറാ ആക്‌സസ്"</b>" ഓണാക്കുക"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">സിം പിൻ നൽകുക. നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
       <item quantity="one">സിം പിൻ നൽകുക. ഉപകരണം അൺലോക്ക് ചെയ്യാൻ കാരിയറുമായി ബന്ധപ്പെടേണ്ടിവരുന്നതിന് മുമ്പ് <xliff:g id="NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു.</item>

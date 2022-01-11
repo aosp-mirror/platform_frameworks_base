@@ -223,10 +223,10 @@ public final class AppHibernationService extends SystemService {
                 android.Manifest.permission.MANAGE_APP_HIBERNATION,
                 "Caller does not have MANAGE_APP_HIBERNATION permission.");
         userId = handleIncomingUser(userId, methodName);
-        if (!checkUserStatesExist(userId, methodName)) {
-            return false;
-        }
         synchronized (mLock) {
+            if (!checkUserStatesExist(userId, methodName)) {
+                return false;
+            }
             final Map<String, UserLevelState> packageStates = mUserStates.get(userId);
             final UserLevelState pkgState = packageStates.get(packageName);
             if (pkgState == null) {
@@ -278,10 +278,10 @@ public final class AppHibernationService extends SystemService {
                 android.Manifest.permission.MANAGE_APP_HIBERNATION,
                 "Caller does not have MANAGE_APP_HIBERNATION permission.");
         final int realUserId = handleIncomingUser(userId, methodName);
-        if (!checkUserStatesExist(realUserId, methodName)) {
-            return;
-        }
         synchronized (mLock) {
+            if (!checkUserStatesExist(realUserId, methodName)) {
+                return;
+            }
             final Map<String, UserLevelState> packageStates = mUserStates.get(realUserId);
             final UserLevelState pkgState = packageStates.get(packageName);
             if (pkgState == null) {
@@ -365,10 +365,10 @@ public final class AppHibernationService extends SystemService {
                 android.Manifest.permission.MANAGE_APP_HIBERNATION,
                 "Caller does not have MANAGE_APP_HIBERNATION permission.");
         userId = handleIncomingUser(userId, methodName);
-        if (!checkUserStatesExist(userId, methodName)) {
-            return hibernatingPackages;
-        }
         synchronized (mLock) {
+            if (!checkUserStatesExist(userId, methodName)) {
+                return hibernatingPackages;
+            }
             Map<String, UserLevelState> userStates = mUserStates.get(userId);
             for (UserLevelState state : userStates.values()) {
                 if (state.hibernated) {
@@ -658,6 +658,14 @@ public final class AppHibernationService extends SystemService {
         }
     }
 
+    /**
+     * Check that user states exist.
+     *
+     * @param userId user to check
+     * @param methodName method name that is calling. Used for logging purposes.
+     * @return true if user states exist
+     */
+    @GuardedBy("mLock")
     private boolean checkUserStatesExist(int userId, String methodName) {
         if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
             Slog.e(TAG, String.format(

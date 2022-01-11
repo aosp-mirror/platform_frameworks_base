@@ -48,6 +48,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -116,6 +117,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     @Mock
     private GlobalSettings mGlobalSettings;
     @Mock
+    private FeatureFlags mFeatureFlags;
+    @Mock
     private UserSwitcherController mUserSwitcherController;
     private Configuration mConfiguration;
 
@@ -151,7 +154,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
                 mKeyguardStateController, mKeyguardSecurityViewFlipperController,
                 mConfigurationController, mFalsingCollector, mFalsingManager,
-                mUserSwitcherController, mGlobalSettings).create(mSecurityCallback);
+                mUserSwitcherController, mFeatureFlags, mGlobalSettings).create(mSecurityCallback);
     }
 
     @Test

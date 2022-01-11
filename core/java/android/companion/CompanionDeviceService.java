@@ -28,9 +28,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-
-import com.android.internal.util.function.pooled.PooledLambda;
-
 import java.util.Objects;
 
 /**
@@ -185,31 +182,24 @@ public abstract class CompanionDeviceService extends Service {
     public void onBindCompanionDeviceService(@NonNull Intent intent) {
     }
 
-    class Stub extends ICompanionDeviceService.Stub {
+    private class Stub extends ICompanionDeviceService.Stub {
+        final Handler mMainHandler = Handler.getMain();
+        final CompanionDeviceService mService = CompanionDeviceService.this;
 
         @Override
         public void onDeviceAppeared(AssociationInfo associationInfo) {
-            Handler.getMain().post(
-                    () -> CompanionDeviceService.this.onDeviceAppeared(associationInfo));
+            mMainHandler.postAtFrontOfQueue(() -> mService.onDeviceAppeared(associationInfo));
         }
 
         @Override
         public void onDeviceDisappeared(AssociationInfo associationInfo) {
-            Handler.getMain().post(
-                    () -> CompanionDeviceService.this.onDeviceDisappeared(associationInfo));
+            mMainHandler.postAtFrontOfQueue(() -> mService.onDeviceDisappeared(associationInfo));
         }
 
+        @Override
         public void onDispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
-            Handler.getMain().sendMessage(PooledLambda.obtainMessage(
-                    CompanionDeviceService::onDispatchMessage,
-                    CompanionDeviceService.this, messageId, associationId, message));
-        }
-
-        public final void dispatchMessage(int messageId, int associationId,
-                @NonNull byte[] message) {
-            Handler.getMain().sendMessage(PooledLambda.obtainMessage(
-                    CompanionDeviceService::dispatchMessage,
-                    CompanionDeviceService.this, messageId, associationId, message));
+            mMainHandler.postAtFrontOfQueue(
+                    () -> mService.onDispatchMessage(messageId, associationId, message));
         }
     }
 }

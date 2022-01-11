@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Επιτρέπει στην εφαρμογή να τροποποιεί το αρχείο καταγραφής κλήσεων της συσκευής σας Android TV, συμπεριλαμβανομένων των δεδομένων σχετικά με τις εισερχόμενες και τις εξερχόμενες κλήσεις. Οι κακόβουλες εφαρμογές μπορεί να εκμεταλλευτούν αυτή την άδεια για να διαγράψουν ή να τροποποιήσουν το αρχείο καταγραφής κλήσεων."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Επιτρέπει στην εφαρμογή να τροποποιεί το αρχείο καταγραφής κλήσεων του τηλεφώνου σας, συμπεριλαμβανομένων των δεδομένων σχετικά με τις εισερχόμενες και τις εξερχόμενες κλήσεις. Οι κακόβουλες εφαρμογές μπορεί να το χρησιμοποιήσουν για να διαγράψουν ή να τροποποιήσουν το αρχείο καταγραφής κλήσεων."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"πρόσβαση στους αισθητήρες λειτουργιών (π.χ. παρακολούθηση καρδιακού παλμού)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Επιτρέπει στην εφαρμογή να αποκτήσει πρόσβαση στα δεδομένα των αισθητήρων που παρακολουθούν τη φυσική σας κατάσταση, όπως τον καρδιακό ρυθμό σας."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Πρόσβαση σε δεδομένα από αισθητήρες σώματος όπως καρδιακού ρυθμού, θερμοκρασίας, ποσοστού οξυγόνου στο αίμα κ.λπ."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"πρόσβαση σε αισθητήρες σώματος (π.χ. καρδιακού ρυθμού) στο παρασκήνιο"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Πρόσβαση σε δεδομένα από αισθητήρες σώματος όπως καρδιακού ρυθμού, θερμοκρασίας, ποσοστού οξυγόνου στο αίμα κ.λπ. κατά την εκτέλεση στο παρασκήνιο."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ανάγνωση συμβάντων ημερολογίου και λεπτομερειών"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Αυτή η εφαρμογή μπορεί να διαβάσει όλα τα συμβάντα ημερολογίου που είναι αποθηκευμένα στο tablet που χρησιμοποιείτε και να μοιραστεί ή να αποθηκεύσει τα δεδομένα ημερολογίου σας."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Αυτή η εφαρμογή μπορεί να διαβάσει όλα τα συμβάντα ημερολογίου που είναι αποθηκευμένα στη συσκευή Android TV και να μοιραστεί ή να αποθηκεύσει τα δεδομένα ημερολογίου σας."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Επιτρέπει στην εφαρμογή την εγγραφή και τη σύνταξη διαμόρφωσης για τη λειτουργία \"Μην ενοχλείτε\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"έναρξη χρήσης άδειας προβολής"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Επιτρέπει στον κάτοχο να ξεκινήσει τη χρήση της άδειας για μια εφαρμογή. Δεν απαιτείται ποτέ για κανονικές εφαρμογές."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"έναρξη προβολής λειτουργιών εφαρμογής"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Επιτρέπει στον κάτοχο να ξεκινήσει την προβολή των πληροφοριών για τις λειτουργίες μιας εφαρμογής."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"πρόσβαση σε δεδομένα αισθητήρα με υψηλό ρυθμό δειγματοληψίας"</string>
@@ -1989,8 +1995,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Προσαρμοσμένη ειδοποίηση εφαρμογής"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Επιτρέπετε στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> (υπάρχει ήδη χρήστης με αυτόν τον λογαριασμό);"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Επιτρέπετε στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g>;"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Προσθήκη εποπτευόμενου χρήστη"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Προσθήκη γλώσσας"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Προτίμηση περιοχής"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Εισαγ. όνομα γλώσσας"</string>

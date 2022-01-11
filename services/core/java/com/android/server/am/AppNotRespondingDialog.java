@@ -163,7 +163,9 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
 
                         synchronized (mService.mProcLock) {
                             errState.setNotResponding(false);
-                            errState.setNotRespondingReport(null);
+                            // We're not clearing the ANR report here, in case we'd need to report
+                            // it again when the ANR dialog shows again.
+                            // errState.setNotRespondingReport(null);
                             errState.getDialogController().clearAnrDialogs();
                         }
                         mService.mServices.scheduleServiceTimeoutLocked(app);

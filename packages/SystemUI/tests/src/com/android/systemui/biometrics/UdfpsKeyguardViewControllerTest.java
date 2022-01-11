@@ -36,6 +36,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -96,6 +97,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     private SystemUIDialogManager mDialogManager;
     @Mock
     private UdfpsController mUdfpsController;
+    @Mock
+    private ActivityLaunchAnimator mActivityLaunchAnimator;
     private FakeSystemClock mSystemClock = new FakeSystemClock();
 
     private UdfpsKeyguardViewController mController;
@@ -134,7 +137,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mUnlockedScreenOffAnimationController,
                 mDialogManager,
-                mUdfpsController);
+                mUdfpsController,
+                mActivityLaunchAnimator);
     }
 
     @Test

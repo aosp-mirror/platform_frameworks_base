@@ -373,7 +373,7 @@ final class Vibration {
             final long token = proto.start(fieldId);
             proto.write(StepSegmentProto.DURATION, segment.getDuration());
             proto.write(StepSegmentProto.AMPLITUDE, segment.getAmplitude());
-            proto.write(StepSegmentProto.FREQUENCY, segment.getFrequency());
+            proto.write(StepSegmentProto.FREQUENCY, segment.getFrequencyHz());
             proto.end(token);
         }
 
@@ -382,8 +382,8 @@ final class Vibration {
             proto.write(RampSegmentProto.DURATION, segment.getDuration());
             proto.write(RampSegmentProto.START_AMPLITUDE, segment.getStartAmplitude());
             proto.write(RampSegmentProto.END_AMPLITUDE, segment.getEndAmplitude());
-            proto.write(RampSegmentProto.START_FREQUENCY, segment.getStartFrequency());
-            proto.write(RampSegmentProto.END_FREQUENCY, segment.getEndFrequency());
+            proto.write(RampSegmentProto.START_FREQUENCY, segment.getStartFrequencyHz());
+            proto.write(RampSegmentProto.END_FREQUENCY, segment.getEndFrequencyHz());
             proto.end(token);
         }
 

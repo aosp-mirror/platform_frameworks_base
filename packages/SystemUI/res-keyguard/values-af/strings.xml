@@ -93,6 +93,7 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Toestel is handmatig gesluit"</string>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Nie herken nie"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nie herken nie"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Skakel "<b>"kameratoegang"</b>" in Instellings &gt; Privaatheid aan om Gesigslot te gebruik"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Voer SIM-PIN in. Jy het <xliff:g id="NUMBER_1">%d</xliff:g> pogings oor.</item>
       <item quantity="one">Voer SIM-PIN in. Jy het <xliff:g id="NUMBER_0">%d</xliff:g> poging oor voordat jy jou diensverskaffer moet kontak om jou toestel te ontsluit.</item>

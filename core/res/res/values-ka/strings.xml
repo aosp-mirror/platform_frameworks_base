@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ნებას რთავს აპს, შეცვალოს თქვენს Android TV მოწყობილობაზე ზარების ჟურნალი, შემომავალი და გამავალი ზარების მონაცემთა ჩათვლით. მავნე აპებს შეუძლიათ, ამის მეშვეობით, ამოშალონ ან შეცვალონ თქვენი ზარების ჟურნალი."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"აპს შეეძლება, შეცვალოს თქვენი ტელეფონის ზარების ჟურნალი, მათ შორის შემომავალი და გამავალი ზარების მონაცემები. მავნე აპებმა შეიძლება გამოიყენონ ეს თქვენი ზარების ჟურნალის წასაშლელად ან შესაცვლელად."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"სხეულის სენსორებზე წვდომა (მაგ., გულისცემის მონიტორები)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"აპისთვის ნების დართვა, რათა მას ჰქონდეს წვდომა თქვენი ფიზიკური მდგომარეობის მონიტორინგის სენსორების მონაცემებზე."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"წვდომა სხეულის ისეთ სენსორებზე, როგორიცაა გულისცემის სიხშირე, ტემპერატურა, სისხლში ჟანგბადის პროცენტული შემცველობა და ა.შ."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"სხეულის სენსორებზე წვდომა (მაგ., გულისცემის სიხშ. მონ.) ფონურ რეჟიმში მუშაობისას"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"წვდომა სხეულის ისეთ სენსორებზე, როგორიცაა გულისცემის სიხშირე, ტემპერატურა, სისხლში ჟანგბადის პროცენტული შემცველობა და ა.შ. ფონურ რეჟიმში მუშაობისას."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"კალენდრის მოვლენებისა და დეტალების წაკითხვა"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ამ აპს შეუძლია თქვენს ტაბლეტში შენახული კალენდრის ყველა მოვლენის წაკითხვა და თქვენი კალენდრის მონაცემების გაზიარება ან შენახვა."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ამ აპს შეუძლია თქვენს Android TV მოწყობილობაზე შენახული კალენდრის ყველა მოვლენის წაკითხვა და თქვენი კალენდრის მონაცემების გაზიარება ან შენახვა."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"საშუალებას აძლევს აპს, წაიკითხოს და დაწეროს კონფიგურაცია „არ შემაწუხოთ“."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ნახვის ნებართვის გამოყენების დაწყება"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"მფლობელს საშუალებას აძლევს, დაიწყოს აპის ნებართვის გამოყენება. ჩვეულებრივი აპებისთვის არასოდეს უნდა იყოს საჭირო."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"აპის ფუნქციების ნახვის დაწყება"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"მფლობელს საშუალებას აძლევს, დაიწყოს აპის ფუნქციების ინფორმაციის ნახვა."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"სენსორის მონაცემებზე წვდომა სემპლინგის მაღალი სიხშირით"</string>

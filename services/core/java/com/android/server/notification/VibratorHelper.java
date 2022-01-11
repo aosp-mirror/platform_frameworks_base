@@ -125,10 +125,10 @@ public final class VibratorHelper {
 
     private static VibrationEffect createChirpVibration(int rampDuration, boolean insistent) {
         VibrationEffect.WaveformBuilder waveformBuilder = VibrationEffect.startWaveform()
-                .addStep(/* amplitude= */ 0, /* frequency= */ -0.85f, /* duration= */ 0)
-                .addRamp(/* amplitude= */ 1, /* frequency= */ -0.25f, rampDuration)
-                .addStep(/* amplitude= */ 1, /* frequency= */ -0.25f, CHIRP_LEVEL_DURATION_MILLIS)
-                .addRamp(/* amplitude= */ 0, /* frequency= */ -0.85f, rampDuration);
+                .addStep(/* amplitude= */ 0, /* frequencyHz= */ 60f, /* duration= */ 0)
+                .addRamp(/* amplitude= */ 1, /* frequencyHz= */ 120f, rampDuration)
+                .addStep(/* amplitude= */ 1, /* frequencyHz= */ 120f, CHIRP_LEVEL_DURATION_MILLIS)
+                .addRamp(/* amplitude= */ 0, /* frequencyHz= */ 60f, rampDuration);
 
         if (insistent) {
             return waveformBuilder

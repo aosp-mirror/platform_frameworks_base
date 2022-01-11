@@ -319,7 +319,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"الموقع الجغرافي"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"الوصول إلى موقع هذا الجهاز"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"التقويم"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول تقويمك"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول إلى تقويمك"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"الملفات والوسائط"</string>
@@ -340,17 +340,17 @@
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"الوصول إلى بيانات المستشعر حول علاماتك الحيوية"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"الإشعارات"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"عرض الإشعارات"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"استرداد محتوى النافذة"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"فحص محتوى نافذة يتم التفاعل معها"</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"تفعيل الاستكشاف باللمس"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"استرداد محتوى النافذة:"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"فحص محتوى نافذة يتم التفاعل معها."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"تفعيل الاستكشاف باللمس:"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"سيتم قول العناصر التي تم النقر عليها بصوت عالٍ ويمكن استكشاف الشاشة باستخدام الإيماءات."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"ملاحظة النص الذي تكتبه"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"ملاحظة النص الذي تكتبه:"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"يتضمن بيانات شخصية مثل أرقام بطاقات الائتمان وكلمات المرور."</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"التحكم في تكبير الشاشة"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"التحكم في تكبير الشاشة:"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"يمكنك التحكّم في مستوى تكبير/تصغير الشاشة وتحديد الموضع."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"تنفيذ إيماءات"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"يمكن النقر والتمرير بسرعة والتصغير أو التكبير بإصبعين وتنفيذ إيماءات أخرى."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"إيماءات بصمات الإصبع"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"إيماءات بصمات الإصبع:"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على جهاز استشعار بصمة الإصبع في الجهاز."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"أخذ لقطة شاشة"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"يمكن أخذ لقطة شاشة."</string>
@@ -439,7 +439,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"‏للسماح للتطبيق بتعديل سجلّ مكالمات جهاز Android TV، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وقد تستخدم التطبيقات الضارة هذا الإعداد لمحو سجلّ المكالمات أو تعديله."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"للسماح للتطبيق بتعديل سجل مكالمات الهاتف، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمحو سجل المكالمات أو تعديله."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"الوصول إلى أجهزة استشعار الجسم (مثل شاشات معدل ضربات القلب)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"للسماح للتطبيق بالدخول إلى البيانات من أجهزة الاستشعار التي تراقب الحالة البدنية، مثل معدل نبضات القلب."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"الوصول إلى البيانات من أجهزة استشعار الجسم، مثلاً معدّل نبضات القلب ودرجة الحرارة ونسبة الأكسجين في الدم وما إلى ذلك"</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"الوصول إلى أجهزة استشعار الجسم (مثلاً شاشات معدّل ضربات القلب في الخلفية)"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"الوصول إلى البيانات من أجهزة استشعار الجسم، مثلاً معدّل نبضات القلب ودرجة الحرارة ونسبة الأكسجين في الدم وما إلى ذلك في الخلفية"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"قراءة أحداث التقويم والتفاصيل"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"يمكن لهذا التطبيق قراءة جميع أحداث التقويم المخزَّنة على الجهاز اللوحي ومشاركة بيانات التقويم أو حفظها."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"‏يمكن لهذا التطبيق قراءة جميع أحداث التقويم المخزَّنة على جهاز Android TV ومشاركة بيانات التقويم أو حفظها."</string>
@@ -743,6 +745,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"للسماح للتطبيق بقراءة إعداد \"عدم الإزعاج\" وكتابتها."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"بدء استخدام إذن العرض"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"للسماح للمالك ببدء استخدام الإذن لأحد التطبيقات. ولن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"بدء عرض ميزات التطبيق"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"للسماح للمالك ببدء عرض معلومات عن ميزات التطبيق."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"الوصول إلى بيانات جهاز الاستشعار بمعدّل مرتفع للبيانات في الملف الصوتي"</string>
@@ -2117,8 +2123,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"إشعار تطبيق مخصّص"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"هل تسمح لتطبيق <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> (يوجد مستخدم بهذا الحساب مسبقًا)؟"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"هل تسمح لتطبيق <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> ؟"</string>
-    <!-- no translation found for supervised_user_creation_label (6884904353827427515) -->
-    <skip />
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"إضافة مستخدم تحت الإشراف"</string>
     <string name="language_selection_title" msgid="52674936078683285">"إضافة لغة"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"اكتب اسم اللغة"</string>

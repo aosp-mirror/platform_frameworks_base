@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"உள்வரும், வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உட்பட உங்கள் Android TVயின் அழைப்புப் பதிவைத் திருத்த ஆப்ஸை அனுமதிக்கும். உங்கள் அழைப்புப் பதிவை அழிக்கவோ திருத்தவோ தீங்கு விளைவிக்கும் ஆப்ஸ் இதைப் பயன்படுத்தக்கூடும்."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்பட உங்கள் மொபைல் அழைப்புப் பதிவைத் திருத்துவதற்குப் ஆப்ஸை அனுமதிக்கிறது. உங்கள் அழைப்பின் பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் ஆப்ஸ் இதைப் பயன்படுத்தலாம்."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"உடல் உணர்விகளை (இதயத் துடிப்பு மானிட்டர்கள் போன்றவை) அணுகுதல்"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"உங்கள் இதயத்துடிப்பு விகிதம் போன்ற உங்கள் உடல்நிலையைக் கண்காணிக்கும் உணர்விகளில் இருந்து தரவை அணுக ஆப்ஸை அனுமதிக்கும்."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"இதயத் துடிப்பு, வெப்பநிலை, ரத்த ஆக்ஸிஜன் சதவீதம் போன்ற உடல் சென்சார்களில் இருந்து கிடைக்கும் தரவை அணுகலாம்."</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"பின்னணியில் உடல் சென்சார்களை (இதயத் துடிப்பைக் கண்காணித்தல் போன்றவை) அணுகுதல்"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"பின்னணியில் இருக்கும்போது இதயத் துடிப்பு, வெப்பநிலை, ரத்த ஆக்ஸிஜன் சதவீதம் போன்ற உடல் சென்சார்களில் இருந்து கிடைக்கும் தரவை அணுகலாம்."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"கேலெண்டர் நிகழ்வுகளையும் விவரங்களையும் படிக்கலாம்"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"இந்த ஆப்ஸ் உங்கள் டேப்லெட்டில் சேமிக்கப்பட்டுள்ள கேலெண்டர் நிகழ்வுகள் அனைத்தையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"உங்கள் Android TVயில் சேமித்துள்ள அனைத்துக் கேலெண்டர் நிகழ்வுகளையும் இந்த ஆப்ஸால் தெரிந்துகொள்ள முடியும். அத்துடன் உங்களின் கேலெண்டர் தரவைப் பகிரவும் சேமிக்கவும் முடியும்."</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"தொந்தரவு செய்ய வேண்டாம் உள்ளமைவைப் படிக்கவும் எழுதவும், ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"அனுமதி உபயோகத்தை அணுகுதல்"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ஆப்ஸிற்கான அனுமதி உபயோகத்தை ஹோல்டருக்கு வழங்கும். இயல்பான ஆப்ஸிற்கு இது எப்போதுமே தேவைப்படாது."</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ஆப்ஸின் அம்சங்களைப் பார்க்கத் தொடங்குதல்"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ஆப்ஸின் அம்சங்கள் குறித்த தகவல்களைப் பார்ப்பதற்கான அனுமதியை ஹோல்டருக்கு வழங்கும்."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"அதிகளவிலான சாம்பிளிங் ரேட்டில் சென்சார் தரவை அணுகுதல்"</string>

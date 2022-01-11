@@ -427,7 +427,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"এপ্‌টোৱে অন্তৰ্গামী আৰু বহিৰ্গামী কলৰ ডেটাকে ধৰি আপোনাৰ Android TV ডিভাইচৰ কল লগ সংশোধন কৰিবলৈ অনুমতি দিয়ে। ক্ষতিকাৰক এপ্‌সমূহে আপোনাৰ কল লগ মচিবলৈ বা সংশোধন কৰিবলৈ এইটো ব্যৱহাৰ কৰিব পাৰে।"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"অন্তৰ্গামী আৰু বহিৰ্গামী কলৰ ডেটাকে ধৰি আপোনাৰ ফ\'নৰ কল লগ সংশোধন কৰিবলৈ এপক অনুমতি দিয়ে। ক্ষতিকাৰক এপবোৰে আপোনাৰ কল লগ মচিবলৈ বা সংশোধন কৰিবলৈ ইয়াক ব্যৱহাৰ কৰিব পাৰে।"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"শৰীৰৰ ছেন্সৰসমূহ (যেনে হৃদপিণ্ডৰ গতিৰ হাৰ নিৰীক্ষক) ব্যৱহাৰ কৰিব পাৰে"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"আপোনাৰ হৃদস্পন্দনৰ দৰে শাৰীৰিক অৱস্থাক নিৰীক্ষণ কৰা ছেন্সৰৰ পৰা ডেটা লাভ কৰিবলৈ এপক অনুমতি দিয়ে।"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"শৰীৰৰ ছেন্সৰৰ পৰা হৃদস্পন্দনৰ হাৰ, উষ্ণতা, তেজত অক্সিজেনৰ শতকৰা হাৰ ইত্যাদিৰ দৰে ডেটাৰ এক্সেছ পাওক।"</string>
+    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"নেপথ্যত থকাৰ সময়ত শৰীৰৰ ছেন্সৰ (উদাহৰণস্বৰূপে, হৃদস্পন্দনৰ হাৰ নিৰীক্ষক)"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"নেপথ্যত থকাৰ সময়ত শৰীৰৰ ছেন্সৰৰ পৰা হৃদস্পন্দনৰ হাৰ, উষ্ণতা, তেজত অক্সিজেনৰ শতকৰা হাৰ ইত্যাদিৰ দৰে ডেটাৰ এক্সেছ পাওক।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"কেলেণ্ডাৰৰ কাৰ্যক্ৰম আৰু সবিশেষ পঢ়িব পাৰে"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"এই এপ্‌টোৱে আপোনাৰ টেবলেটটোত সংৰক্ষিত আটাইবোৰ কেলেণ্ডাৰ কাৰ্যক্ৰম পঢ়িব পাৰে আৰু আপোনাৰ কেলেণ্ডাৰৰ ডেটা শ্বেয়াৰ বা ছেভ কৰিব পাৰে।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"এই এপ্‌টোৱে আপোনাৰ Android TV ডিভাইচটোত ষ্ট’ৰ কৰি ৰখা আটাইবোৰ কেলেণ্ডাৰৰ অনুষ্ঠান পঢ়িব পাৰে আৰু আপোনাৰ কেলেণ্ডাৰৰ ডেটা শ্বেয়াৰ অথবা ছেভ কৰিব পাৰে।"</string>
@@ -731,6 +733,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"অসুবিধা নিদিবৰ কনফিগাৰেশ্বনক পঢ়িবলৈ আৰু সালসলনি কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"চোৱাৰ অনুমতিৰ ব্যৱহাৰ আৰম্ভ কৰক"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ধাৰকক কোনো এপৰ বাবে অনুমতিৰ ব্যৱহাৰ আৰম্ভ কৰিবলৈ দিয়ে। সাধাৰণ এপ্‌সমূহৰ বাবে কেতিয়াও প্ৰয়োজন হ’ব নালাগে।"</string>
+    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
+    <skip />
+    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
+    <skip />
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"এপৰ সুবিধাসমূহৰ সম্পর্কীয় তথ্য চোৱাটো আৰম্ভ কৰক"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ধাৰকক কোনো এপৰ সুবিধাসমূহৰ সম্পর্কীয় তথ্য চোৱাটো আৰম্ভ কৰিবলৈ দিয়ে।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"এটা উচ্চ ছেম্পলিঙৰ হাৰত ছেন্সৰৰ ডেটা এক্সেছ কৰে"</string>
