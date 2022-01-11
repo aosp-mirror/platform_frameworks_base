@@ -15,6 +15,7 @@
  */
 package android.hardware.location;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -118,13 +119,14 @@ public class ContextHubClient implements Closeable {
      * is newly generated (e.g. any regeneration of a callback client, or generation
      * of a non-equal PendingIntent client), the ID will not be the same.
      *
-     * @return The ID of this ContextHubClient.
+     * @return The ID of this ContextHubClient, in the range [0, 65535].
      */
+    @IntRange(from = 0, to = 65535)
     public int getId() {
         if (mId == null) {
             throw new IllegalStateException("ID was not set");
         }
-        return mId;
+        return (0x0000FFFF & mId);
     }
 
     /**
