@@ -9016,6 +9016,7 @@ package android.bluetooth {
     field public static final int AUDIO = 2097152; // 0x200000
     field public static final int CAPTURE = 524288; // 0x80000
     field public static final int INFORMATION = 8388608; // 0x800000
+    field public static final int LE_AUDIO = 16384; // 0x4000
     field public static final int LIMITED_DISCOVERABILITY = 8192; // 0x2000
     field public static final int NETWORKING = 131072; // 0x20000
     field public static final int OBJECT_TRANSFER = 1048576; // 0x100000
@@ -33870,6 +33871,7 @@ package android.provider {
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
+    field public static final int PRESENTATION_UNAVAILABLE = 5; // 0x5
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
     field public static final String PRIORITY = "priority";
     field public static final int PRIORITY_NORMAL = 0; // 0x0
@@ -40515,7 +40517,7 @@ package android.telecom {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts();
     method public String getDefaultDialerPackage();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.telecom.PhoneAccountHandle getDefaultOutgoingPhoneAccount(String);
-    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_SMS, android.Manifest.permission.READ_PHONE_NUMBERS}, conditional=true) public String getLine1Number(android.telecom.PhoneAccountHandle);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_SMS, android.Manifest.permission.READ_PHONE_NUMBERS}, conditional=true) public String getLine1Number(android.telecom.PhoneAccountHandle);
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telecom.PhoneAccountHandle> getSelfManagedPhoneAccounts();
     method public android.telecom.PhoneAccountHandle getSimCallManager();
@@ -40594,6 +40596,7 @@ package android.telecom {
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
+    field public static final int PRESENTATION_UNAVAILABLE = 5; // 0x5
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
     field public static final int PRIORITY_NORMAL = 0; // 0x0
     field public static final int PRIORITY_URGENT = 1; // 0x1
@@ -42580,7 +42583,7 @@ package android.telephony {
     method @Nullable public String getMccString();
     method @Deprecated public int getMnc();
     method @Nullable public String getMncString();
-    method public String getNumber();
+    method @Deprecated public String getNumber();
     method public int getPortIndex();
     method public int getSimSlotIndex();
     method public int getSubscriptionId();
@@ -42614,8 +42617,8 @@ package android.telephony {
     method @NonNull public java.util.List<android.net.Uri> getDeviceToDeviceStatusSharingContacts(int);
     method public int getDeviceToDeviceStatusSharingPreference(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getOpportunisticSubscriptions();
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public String getPhoneNumber(int, int);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public String getPhoneNumber(int);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE", "carrier privileges"}) public String getPhoneNumber(int, int);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE", "carrier privileges"}) public String getPhoneNumber(int);
     method public static int getSlotIndex(int);
     method @Nullable public int[] getSubscriptionIds(int);
     method @NonNull public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
@@ -42627,7 +42630,7 @@ package android.telephony {
     method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
     method public void removeOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void removeSubscriptionsFromGroup(@NonNull java.util.List<java.lang.Integer>, @NonNull android.os.ParcelUuid);
-    method public void setCarrierPhoneNumber(int, @NonNull String);
+    method @RequiresPermission("carrier privileges") public void setCarrierPhoneNumber(int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharingContacts(int, @NonNull java.util.List<android.net.Uri>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharingPreference(int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunistic(boolean, int);
@@ -42835,7 +42838,7 @@ package android.telephony {
     method public String getIccAuthentication(int, int, String);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getImei();
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getImei(int);
-    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_SMS, android.Manifest.permission.READ_PHONE_NUMBERS}) public String getLine1Number();
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_SMS, android.Manifest.permission.READ_PHONE_NUMBERS}) public String getLine1Number();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public String getManualNetworkSelectionPlmn();
     method @Nullable public String getManufacturerCode();
     method @Nullable public String getManufacturerCode(int);
@@ -42923,7 +42926,7 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabledForReason(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setForbiddenPlmns(@NonNull java.util.List<java.lang.String>);
-    method public boolean setLine1NumberForDisplay(String, String);
+    method @Deprecated public boolean setLine1NumberForDisplay(String, String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setNetworkSelectionModeAutomatic();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setNetworkSelectionModeManual(String, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setNetworkSelectionModeManual(@NonNull String, boolean, int);

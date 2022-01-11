@@ -169,8 +169,7 @@ public final class Outline {
     }
 
     /**
-     * Sets the Outline to the rounded rect defined by the input rect, and
-     * corner radius.
+     * Sets the Outline to the rect defined by the input coordinates.
      */
     public void setRect(int left, int top, int right, int bottom) {
         setRoundRect(left, top, right, bottom, 0.0f);
@@ -184,7 +183,7 @@ public final class Outline {
     }
 
     /**
-     * Sets the Outline to the rounded rect defined by the input rect, and corner radius.
+     * Sets the Outline to the rounded rect defined by the input coordinates and corner radius.
      * <p>
      * Passing a zero radius is equivalent to calling {@link #setRect(int, int, int, int)}
      */

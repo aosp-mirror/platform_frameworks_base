@@ -185,35 +185,35 @@
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="97587758561106269">"બંધ"</item>
-    <item msgid="7126170197336963369">"તમામ લૉગ બફર્સ"</item>
+    <item msgid="7126170197336963369">"તમામ લૉગ બફર"</item>
     <item msgid="7167543126036181392">"તમામ પરંતુ રેડિઓ લૉગ બફર્સ"</item>
     <item msgid="5135340178556563979">"ફક્ત કર્નલ લૉગ બફર"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="2675263395797191850">"એનિમેશન બંધ"</item>
-    <item msgid="5790132543372767872">"એનિમેશન સ્કેલ .5x"</item>
-    <item msgid="2529692189302148746">"એનિમેશન સ્કેલ 1x"</item>
-    <item msgid="8072785072237082286">"એનિમેશન સ્કેલ 1.5x"</item>
-    <item msgid="3531560925718232560">"એનિમેશન સ્કેલ 2x"</item>
-    <item msgid="4542853094898215187">"એનિમેશન સ્કેલ 5x"</item>
-    <item msgid="5643881346223901195">"એનિમેશન સ્કેલ 10x"</item>
+    <item msgid="5790132543372767872">"ઍનિમેશન સ્કેલ .5x"</item>
+    <item msgid="2529692189302148746">"ઍનિમેશન સ્કેલ 1x"</item>
+    <item msgid="8072785072237082286">"ઍનિમેશન સ્કેલ 1.5x"</item>
+    <item msgid="3531560925718232560">"ઍનિમેશન સ્કેલ 2x"</item>
+    <item msgid="4542853094898215187">"ઍનિમેશન સ્કેલ 5x"</item>
+    <item msgid="5643881346223901195">"ઍનિમેશન સ્કેલ 10x"</item>
   </string-array>
   <string-array name="transition_animation_scale_entries">
     <item msgid="3376676813923486384">"એનિમેશન બંધ"</item>
-    <item msgid="753422683600269114">"એનિમેશન સ્કેલ .5x"</item>
-    <item msgid="3695427132155563489">"એનિમેશન સ્કેલ 1x"</item>
-    <item msgid="9032615844198098981">"એનિમેશન સ્કેલ 1.5x"</item>
-    <item msgid="8473868962499332073">"એનિમેશન સ્કેલ 2x"</item>
-    <item msgid="4403482320438668316">"એનિમેશન સ્કેલ 5x"</item>
-    <item msgid="169579387974966641">"એનિમેશન સ્કેલ 10x"</item>
+    <item msgid="753422683600269114">"ઍનિમેશન સ્કેલ .5x"</item>
+    <item msgid="3695427132155563489">"ઍનિમેશન સ્કેલ 1x"</item>
+    <item msgid="9032615844198098981">"ઍનિમેશન સ્કેલ 1.5x"</item>
+    <item msgid="8473868962499332073">"ઍનિમેશન સ્કેલ 2x"</item>
+    <item msgid="4403482320438668316">"ઍનિમેશન સ્કેલ 5x"</item>
+    <item msgid="169579387974966641">"ઍનિમેશન સ્કેલ 10x"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
     <item msgid="6416998593844817378">"એનિમેશન બંધ"</item>
-    <item msgid="875345630014338616">"એનિમેશન સ્કેલ .5x"</item>
-    <item msgid="2753729231187104962">"એનિમેશન સ્કેલ 1x"</item>
-    <item msgid="1368370459723665338">"એનિમેશન સ્કેલ 1.5x"</item>
-    <item msgid="5768005350534383389">"એનિમેશન સ્કેલ 2x"</item>
-    <item msgid="3728265127284005444">"એનિમેશન સ્કેલ 5x"</item>
+    <item msgid="875345630014338616">"ઍનિમેશન સ્કેલ .5x"</item>
+    <item msgid="2753729231187104962">"ઍનિમેશન સ્કેલ 1x"</item>
+    <item msgid="1368370459723665338">"ઍનિમેશન સ્કેલ 1.5x"</item>
+    <item msgid="5768005350534383389">"ઍનિમેશન સ્કેલ 2x"</item>
+    <item msgid="3728265127284005444">"ઍનિમેશન સ્કેલ 5x"</item>
     <item msgid="2464080977843960236">"એનિમેશન સ્કેલ 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">

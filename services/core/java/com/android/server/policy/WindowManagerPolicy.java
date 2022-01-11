@@ -367,6 +367,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * as the top display.
          */
         void moveDisplayToTop(int displayId);
+
+        /**
+         * Return whether the app transition state is idle.
+         * @return {@code true} if app transition state is idle on the default display.
+         */
+        boolean isAppTransitionStateIdle();
     }
 
     /**
@@ -972,6 +978,14 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @return true if in keyguard is occluded, false otherwise
      */
     public boolean isKeyguardOccluded();
+
+    /**
+     * Return whether the keyguard is unoccluding.
+     * @return {@code true} if the keyguard is unoccluding.
+     */
+    default boolean isKeyguardUnoccluding() {
+        return false;
+    }
 
     /**
      * @return true if in keyguard is on.
