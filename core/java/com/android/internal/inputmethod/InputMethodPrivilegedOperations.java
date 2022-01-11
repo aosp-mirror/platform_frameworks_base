@@ -394,20 +394,4 @@ public final class InputMethodPrivilegedOperations {
             throw e.rethrowFromSystemServer();
         }
     }
-
-    /**
-     * Calls {@link IInputMethodPrivilegedOperations#onStylusHandwritingReady()}
-     */
-    @AnyThread
-    public void onStylusHandwritingReady(int requestId) {
-        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
-        if (ops == null) {
-            return;
-        }
-        try {
-            ops.onStylusHandwritingReady(requestId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
 }

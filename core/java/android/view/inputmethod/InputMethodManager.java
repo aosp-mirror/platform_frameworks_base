@@ -1761,50 +1761,6 @@ public final class InputMethodManager {
     }
 
     /**
-     * Start stylus handwriting session.
-     *
-     * If supported by the current input method, a stylus handwriting session is started on the
-     * given View, capturing all stylus input and converting it to InputConnection commands.
-     *
-     * If handwriting mode is started successfully by the IME, any currently dispatched stylus
-     * pointers will be {@code android.view.MotionEvent#FLAG_CANCELED} cancelled.
-     *
-     * If Stylus handwriting mode is not supported or cannot be fulfilled for any reason by IME,
-     * request will be ignored and Stylus touch will continue as normal touch input.
-     *
-     * @param view the View for which stylus handwriting is requested. It and
-     * {@link View#hasWindowFocus its window} must be {@link View#hasFocus focused}.
-     */
-    public void startStylusHandwriting(@NonNull View view) {
-        // Re-dispatch if there is a context mismatch.
-        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
-        if (fallbackImm != null) {
-            fallbackImm.startStylusHandwriting(view);
-        }
-
-        checkFocus();
-        synchronized (mH) {
-            if (view == null || !hasServedByInputMethodLocked(view)) {
-                Log.w(TAG,
-                        "Ignoring startStylusHandwriting() as view=" + view + " is not served.");
-                return;
-            }
-            if (view.getViewRootImpl() != mCurRootView) {
-                Log.w(TAG, "Ignoring startStylusHandwriting: View's window does not have focus.");
-                return;
-            }
-
-            try {
-                mService.startStylusHandwriting(mClient);
-                // TODO(b/210039666): do we need any extra work for supporting non-native
-                //   UI toolkits?
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
      * This method toggles the input method window display.
      * If the input window is already displayed, it gets hidden.
      * If not the input window will be displayed.

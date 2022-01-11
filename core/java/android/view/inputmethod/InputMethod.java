@@ -26,15 +26,11 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
-import android.view.InputChannel;
-import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
-
-import java.util.List;
 
 /**
  * The InputMethod interface represents an input method which can generate key
@@ -104,13 +100,11 @@ public interface InputMethod {
      *                             operations that are allowed only to the
      *                             current IME.
      * @param configChanges {@link InputMethodInfo#getConfigChanges()} declared by IME.
-     * @param stylusHwSupported {@link InputMethodInfo#supportsStylusHandwriting()} declared by IME.
      * @hide
      */
     @MainThread
     default void initializeInternal(IBinder token,
-            IInputMethodPrivilegedOperations privilegedOperations, int configChanges,
-            boolean stylusHwSupported) {
+            IInputMethodPrivilegedOperations privilegedOperations, int configChanges) {
         attachToken(token);
     }
 
@@ -389,19 +383,5 @@ public interface InputMethod {
      * @hide
      */
     public void setCurrentHideInputToken(IBinder hideInputToken);
-
-    /**
-     * Checks if IME is ready to start stylus handwriting session.
-     * If yes, {@link #startStylusHandwriting(InputChannel, List)} is called.
-     * @param requestId
-     * @hide
-     */
-    void canStartStylusHandwriting(int requestId);
-
-    /**
-     * Start stylus handwriting session.
-     * @hide
-     */
-    void startStylusHandwriting(@NonNull InputChannel channel, @Nullable List<MotionEvent> events);
 
 }
