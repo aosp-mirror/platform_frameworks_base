@@ -14822,20 +14822,64 @@ public class DevicePolicyManager {
         Objects.requireNonNull(stringId, "stringId can't be null");
         Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
 
-        if (stringId.equals(INVALID_ID)) {
+        if (stringId.equals(DevicePolicyResources.Strings.INVALID_ID)) {
             return ParcelableResource.loadDefaultString(defaultStringLoader);
         }
         if (mService != null) {
             try {
                 ParcelableResource resource = mService.getString(stringId);
                 if (resource == null) {
-                    return ParcelableResource.loadDefaultString(
-                            defaultStringLoader);
+                    return ParcelableResource.loadDefaultString(defaultStringLoader);
                 }
-                return resource.getString(
-                        mContext,
-                        defaultStringLoader);
+                return resource.getString(mContext, defaultStringLoader);
+            } catch (RemoteException e) {
+                Log.e(
+                        TAG,
+                        "Error getting the updated string from DevicePolicyManagerService.",
+                        e);
+                return ParcelableResource.loadDefaultString(defaultStringLoader);
+            }
+        }
+        return ParcelableResource.loadDefaultString(defaultStringLoader);
+    }
 
+    /**
+     * Similar to {@link #getString(String, Callable)} but accepts {@code formatArgs} and returns a
+     * localized formatted string, substituting the format arguments as defined in
+     * {@link java.util.Formatter} and {@link java.lang.String#format}, (see
+     * {@link Resources#getString(int, Object...)}).
+     *
+     * <p>{@code defaultStringLoader} must return a non {@code null} {@link String}, otherwise a
+     * {@link NullPointerException} is thrown.
+     *
+     * @param stringId The IDs to get the updated resource for.
+     * @param defaultStringLoader To get the default string if no updated string was set for
+     *         {@code stringId}.
+     * @param formatArgs The format arguments that will be used for substitution.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @SuppressLint("SamShouldBeLast")
+    public String getString(
+            @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
+            @NonNull Callable<String> defaultStringLoader,
+            @NonNull Object... formatArgs) {
+
+        Objects.requireNonNull(stringId, "stringId can't be null");
+        Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
+
+        if (stringId.equals(DevicePolicyResources.Strings.INVALID_ID)) {
+            return ParcelableResource.loadDefaultString(defaultStringLoader);
+        }
+        if (mService != null) {
+            try {
+                ParcelableResource resource = mService.getString(stringId);
+                if (resource == null) {
+                    return ParcelableResource.loadDefaultString(defaultStringLoader);
+                }
+                return resource.getString(mContext, defaultStringLoader, formatArgs);
             } catch (RemoteException e) {
                 Log.e(
                         TAG,

@@ -216,6 +216,35 @@ public final class ParcelableResource implements Parcelable {
         }
     }
 
+    /**
+     * Loads the string with id {@code mResourceId} from {@code mPackageName} using the
+     * configuration returned from {@link Resources#getConfiguration} of the provided
+     * {@code context}.
+     *
+     * <p>Returns the default string by calling  {@code defaultStringLoader} if the updated
+     * string was not found or could not be loaded.</p>
+     */
+    @Nullable
+    public String getString(
+            Context context,
+            @NonNull Callable<String> defaultStringLoader,
+            @NonNull Object... formatArgs) {
+        // TODO(b/203548565): properly handle edge case when the device manager role holder is
+        //  unavailable because it's being updated.
+        try {
+            Resources resources = getAppResourcesWithCallersConfiguration(context);
+            verifyResourceName(resources);
+            String rawString = resources.getString(mResourceId);
+            return String.format(
+                    context.getResources().getConfiguration().getLocales().get(0),
+                    rawString,
+                    formatArgs);
+        } catch (PackageManager.NameNotFoundException | RuntimeException e) {
+            Slog.e(TAG, "Unable to load string resource " + mResourceName, e);
+            return loadDefaultString(defaultStringLoader);
+        }
+    }
+
     private Resources getAppResourcesWithCallersConfiguration(Context context)
             throws PackageManager.NameNotFoundException {
         PackageManager pm = context.getPackageManager();

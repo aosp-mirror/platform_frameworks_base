@@ -30,6 +30,41 @@ import static android.app.admin.DevicePolicyResources.Strings.Launcher.WORK_PROF
 import static android.app.admin.DevicePolicyResources.Strings.Launcher.WORK_PROFILE_PAUSED_DESCRIPTION;
 import static android.app.admin.DevicePolicyResources.Strings.Launcher.WORK_PROFILE_PAUSED_TITLE;
 import static android.app.admin.DevicePolicyResources.Strings.Launcher.WORK_PROFILE_PAUSE_BUTTON;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_LOCK_FAILED_ATTEMPTS;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PASSWORD_LAST_ATTEMPT;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PATTERN_LAST_ATTEMPT;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PIN_LAST_ATTEMPT;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_MANAGEMENT_DISCLOSURE;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_NAMED_MANAGEMENT_DISCLOSURE;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.ONGOING_PRIVACY_DIALOG_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_DIALOG_MANAGEMENT;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_DIALOG_MANAGEMENT_CA_CERT;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_DIALOG_MANAGEMENT_NAMED_VPN;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_DIALOG_MANAGEMENT_NETWORK;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_DIALOG_MANAGEMENT_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_DIALOG_MANAGEMENT_TWO_NAMED_VPN;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_DIALOG_NAMED_MANAGEMENT;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_DIALOG_PERSONAL_PROFILE_NAMED_VPN;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_DIALOG_VIEW_POLICIES;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_DIALOG_WORK_PROFILE_CA_CERT;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_DIALOG_WORK_PROFILE_NAMED_VPN;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_DIALOG_WORK_PROFILE_NETWORK;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_MANAGEMENT;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_MANAGEMENT_MONITORING;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_MANAGEMENT_MULTIPLE_VPNS;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_MANAGEMENT_NAMED_VPN;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_NAMED_MANAGEMENT;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_NAMED_MANAGEMENT_MONITORING;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_NAMED_MANAGEMENT_MULTIPLE_VPNS;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_NAMED_MANAGEMENT_NAMED_VPN;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_NAMED_WORK_PROFILE_MONITORING;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_PERSONAL_PROFILE_NAMED_VPN;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_WORK_PROFILE_MONITORING;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_WORK_PROFILE_NAMED_VPN;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_WORK_PROFILE_NETWORK;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.STATUS_BAR_WORK_ICON_ACCESSIBILITY;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.WORK_LOCK_ACCESSIBILITY;
+
 
 import android.annotation.IntDef;
 import android.annotation.StringDef;
@@ -102,11 +137,30 @@ public final class DevicePolicyResources {
      */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
+            // Launcher Strings
             WORK_PROFILE_EDU, WORK_PROFILE_EDU_ACCEPT, WORK_PROFILE_PAUSED_TITLE,
             WORK_PROFILE_PAUSED_DESCRIPTION, WORK_PROFILE_PAUSE_BUTTON, WORK_PROFILE_ENABLE_BUTTON,
             ALL_APPS_WORK_TAB, ALL_APPS_PERSONAL_TAB, ALL_APPS_WORK_TAB_ACCESSIBILITY,
             ALL_APPS_PERSONAL_TAB_ACCESSIBILITY, WORK_FOLDER_NAME, WIDGETS_WORK_TAB,
-            WIDGETS_PERSONAL_TAB, DISABLED_BY_ADMIN_MESSAGE
+            WIDGETS_PERSONAL_TAB, DISABLED_BY_ADMIN_MESSAGE,
+
+            // SysUI Strings
+            QS_MSG_MANAGEMENT, QS_MSG_NAMED_MANAGEMENT, QS_MSG_MANAGEMENT_MONITORING,
+            QS_MSG_NAMED_MANAGEMENT_MONITORING, QS_MSG_MANAGEMENT_NAMED_VPN,
+            QS_MSG_NAMED_MANAGEMENT_NAMED_VPN, QS_MSG_MANAGEMENT_MULTIPLE_VPNS,
+            QS_MSG_NAMED_MANAGEMENT_MULTIPLE_VPNS, QS_MSG_WORK_PROFILE_MONITORING,
+            QS_MSG_NAMED_WORK_PROFILE_MONITORING, QS_MSG_WORK_PROFILE_NETWORK,
+            QS_MSG_WORK_PROFILE_NAMED_VPN, QS_MSG_PERSONAL_PROFILE_NAMED_VPN,
+            QS_DIALOG_MANAGEMENT_TITLE, QS_DIALOG_VIEW_POLICIES, QS_DIALOG_MANAGEMENT,
+            QS_DIALOG_NAMED_MANAGEMENT, QS_DIALOG_MANAGEMENT_CA_CERT,
+            QS_DIALOG_WORK_PROFILE_CA_CERT, QS_DIALOG_MANAGEMENT_NETWORK,
+            QS_DIALOG_WORK_PROFILE_NETWORK, QS_DIALOG_MANAGEMENT_NAMED_VPN,
+            QS_DIALOG_MANAGEMENT_TWO_NAMED_VPN, QS_DIALOG_WORK_PROFILE_NAMED_VPN,
+            QS_DIALOG_PERSONAL_PROFILE_NAMED_VPN, BIOMETRIC_DIALOG_WORK_PIN_LAST_ATTEMPT,
+            BIOMETRIC_DIALOG_WORK_PATTERN_LAST_ATTEMPT, BIOMETRIC_DIALOG_WORK_PASSWORD_LAST_ATTEMPT,
+            BIOMETRIC_DIALOG_WORK_LOCK_FAILED_ATTEMPTS, STATUS_BAR_WORK_ICON_ACCESSIBILITY,
+            ONGOING_PRIVACY_DIALOG_WORK, KEYGUARD_MANAGEMENT_DISCLOSURE,
+            KEYGUARD_NAMED_MANAGEMENT_DISCLOSURE, WORK_LOCK_ACCESSIBILITY
     })
     public @interface UpdatableStringId {
     }
@@ -296,6 +350,7 @@ public final class DevicePolicyResources {
         private static Set<String> buildStringsSet() {
             Set<String> strings = new HashSet<>();
             strings.addAll(Launcher.buildStringsSet());
+            strings.addAll(SystemUi.buildStringsSet());
             return strings;
         }
 
@@ -401,6 +456,286 @@ public final class DevicePolicyResources {
                 strings.add(WIDGETS_WORK_TAB);
                 strings.add(WIDGETS_PERSONAL_TAB);
                 strings.add(DISABLED_BY_ADMIN_MESSAGE);
+                return strings;
+            }
+        }
+
+        /**
+         * Class containing the identifiers used to update device management-related system strings
+         * in the SystemUi package.
+         *
+         * @hide
+         */
+        public static final class SystemUi {
+
+            private SystemUi() {
+            }
+
+            /**
+             * Label in quick settings for toggling work profile on/off.
+             */
+            public static final String QS_WORK_PROFILE_LABEL = "QS_WORK_PROFILE_LABEL";
+
+            /**
+             * Disclosure at the bottom of Quick Settings to indicate device management.
+             */
+            public static final String QS_MSG_MANAGEMENT = "QS_MSG_MANAGEMENT";
+
+            /**
+             * Similar to {@link #QS_MSG_MANAGEMENT} but accepts the organization name as a
+             * param.
+             */
+            public static final String QS_MSG_NAMED_MANAGEMENT = "QS_MSG_NAMED_MANAGEMENT";
+
+            /**
+             * Disclosure at the bottom of Quick Settings to indicate device management monitoring.
+             */
+            public static final String QS_MSG_MANAGEMENT_MONITORING =
+                    "QS_MSG_MANAGEMENT_MONITORING";
+
+            /**
+             * Similar to {@link #QS_MSG_MANAGEMENT_MONITORING} but accepts the
+             * organization name as a param.
+             */
+            public static final String QS_MSG_NAMED_MANAGEMENT_MONITORING =
+                    "QS_MSG_NAMED_MANAGEMENT_MONITORING";
+
+            /**
+             * Disclosure at the bottom of Quick Settings to indicate device management and the
+             * device is connected to a VPN, accepts VPN name as a param.
+             */
+            public static final String QS_MSG_MANAGEMENT_NAMED_VPN =
+                    "QS_MSG_MANAGEMENT_NAMED_VPN";
+
+            /**
+             * Similar to {@link #QS_MSG_MANAGEMENT_NAMED_VPN} but also accepts the
+             * organization name as a param.
+             */
+            public static final String QS_MSG_NAMED_MANAGEMENT_NAMED_VPN =
+                    "QS_MSG_NAMED_MANAGEMENT_NAMED_VPN";
+
+            /**
+             * Disclosure at the bottom of Quick Settings to indicate device management and the
+             * device is connected to multiple VPNs.
+             */
+            public static final String QS_MSG_MANAGEMENT_MULTIPLE_VPNS =
+                    "QS_MSG_MANAGEMENT_MULTIPLE_VPNS";
+
+            /**
+             * Similar to {@link #QS_MSG_MANAGEMENT_MULTIPLE_VPNS} but also accepts the
+             * organization name as a param.
+             */
+            public static final String QS_MSG_NAMED_MANAGEMENT_MULTIPLE_VPNS =
+                    "QS_MSG_NAMED_MANAGEMENT_MULTIPLE_VPNS";
+
+            /**
+             * Disclosure at the bottom of Quick Settings to indicate work profile monitoring.
+             */
+            public static final String QS_MSG_WORK_PROFILE_MONITORING =
+                    "QS_MSG_WORK_PROFILE_MONITORING";
+
+            /**
+             * Similar to {@link #QS_MSG_WORK_PROFILE_MONITORING} but accepts the
+             * organization name as a param.
+             */
+            public static final String QS_MSG_NAMED_WORK_PROFILE_MONITORING =
+                    "QS_MSG_NAMED_WORK_PROFILE_MONITORING";
+
+            /**
+            * Disclosure at the bottom of Quick Settings to indicate network activity is visible to
+             * admin.
+            */
+            public static final String QS_MSG_WORK_PROFILE_NETWORK = "QS_MSG_WORK_PROFILE_NETWORK";
+
+            /**
+             * Disclosure at the bottom of Quick Settings to indicate work profile is connected to a
+             * VPN, accepts VPN name as a param.
+             */
+            public static final String QS_MSG_WORK_PROFILE_NAMED_VPN =
+                    "QS_MSG_WORK_PROFILE_NAMED_VPN";
+
+            /**
+             * Disclosure at the bottom of Quick Settings to indicate personal profile is connected
+             * to a VPN, accepts VPN name as a param.
+             */
+            public static final String QS_MSG_PERSONAL_PROFILE_NAMED_VPN =
+                    "QS_MSG_PERSONAL_PROFILE_NAMED_VPN";
+
+            /**
+             * Title for dialog to indicate device management.
+             */
+            public static final String QS_DIALOG_MANAGEMENT_TITLE = "QS_DIALOG_MANAGEMENT_TITLE";
+
+            /**
+             * Label for button in the device management dialog to open a page with more information
+             * on the admin's abilities.
+             */
+            public static final String QS_DIALOG_VIEW_POLICIES = "QS_DIALOG_VIEW_POLICIES";
+
+            /**
+             * Description for device management dialog to indicate admin abilities.
+             */
+            public static final String QS_DIALOG_MANAGEMENT = "QS_DIALOG_MANAGEMENT";
+
+            /**
+             * Similar to {@link #QS_DIALOG_MANAGEMENT} but accepts the organization name as a
+             * param.
+             */
+            public static final String QS_DIALOG_NAMED_MANAGEMENT = "QS_DIALOG_NAMED_MANAGEMENT";
+
+            /**
+             * Description for the managed device certificate authorities in the device management
+             * dialog.
+             */
+            public static final String QS_DIALOG_MANAGEMENT_CA_CERT =
+                    "QS_DIALOG_MANAGEMENT_CA_CERT";
+
+            /**
+             * Description for the work profile certificate authorities in the device management
+             * dialog.
+             */
+            public static final String QS_DIALOG_WORK_PROFILE_CA_CERT =
+                    "QS_DIALOG_WORK_PROFILE_CA_CERT";
+
+            /**
+             * Description for the managed device network logging in the device management dialog.
+             */
+            public static final String QS_DIALOG_MANAGEMENT_NETWORK =
+                    "QS_DIALOG_MANAGEMENT_NETWORK";
+
+            /**
+             * Description for the work profile network logging in the device management dialog.
+             */
+            public static final String QS_DIALOG_WORK_PROFILE_NETWORK =
+                    "QS_DIALOG_WORK_PROFILE_NETWORK";
+
+            /**
+             * Description for an active VPN in the device management dialog, accepts VPN name as a
+             * param.
+             */
+            public static final String QS_DIALOG_MANAGEMENT_NAMED_VPN =
+                    "QS_DIALOG_MANAGEMENT_NAMED_VPN";
+
+            /**
+             * Description for two active VPN in the device management dialog, accepts two VPN names
+             * as params.
+             */
+            public static final String QS_DIALOG_MANAGEMENT_TWO_NAMED_VPN =
+                    "QS_DIALOG_MANAGEMENT_TWO_NAMED_VPN";
+
+            /**
+             * Description for an active work profile VPN in the device management dialog, accepts
+             * VPN name as a param.
+             */
+            public static final String QS_DIALOG_WORK_PROFILE_NAMED_VPN =
+                    "QS_DIALOG_WORK_PROFILE_NAMED_VPN";
+
+            /**
+             * Description for an active personal profile VPN in the device management dialog,
+             * accepts VPN name as a param.
+             */
+            public static final String QS_DIALOG_PERSONAL_PROFILE_NAMED_VPN =
+                    "QS_DIALOG_PERSONAL_PROFILE_NAMED_VPN";
+
+            /**
+             * Content of a dialog shown when the user only has one attempt left to provide the
+             * correct pin before the work profile is removed.
+             */
+            public static final String BIOMETRIC_DIALOG_WORK_PIN_LAST_ATTEMPT =
+                    "BIOMETRIC_DIALOG_WORK_PIN_LAST_ATTEMPT";
+
+            /**
+             * Content of a dialog shown when the user only has one attempt left to provide the
+             * correct pattern before the work profile is removed.
+             */
+            public static final String BIOMETRIC_DIALOG_WORK_PATTERN_LAST_ATTEMPT =
+                    "BIOMETRIC_DIALOG_WORK_PATTERN_LAST_ATTEMPT";
+
+            /**
+             * Content of a dialog shown when the user only has one attempt left to provide the
+             * correct password before the work profile is removed.
+             */
+            public static final String BIOMETRIC_DIALOG_WORK_PASSWORD_LAST_ATTEMPT =
+                    "BIOMETRIC_DIALOG_WORK_PASSWORD_LAST_ATTEMPT";
+
+            /**
+             * Content of a dialog shown when the user has failed to provide the work lock too many
+             * times and the work profile is removed.
+             */
+            public static final String BIOMETRIC_DIALOG_WORK_LOCK_FAILED_ATTEMPTS =
+                    "BIOMETRIC_DIALOG_WORK_LOCK_FAILED_ATTEMPTS";
+
+            /**
+             * Accessibility label for managed profile icon in the status bar
+             */
+            public static final String STATUS_BAR_WORK_ICON_ACCESSIBILITY =
+                    "STATUS_BAR_WORK_ICON_ACCESSIBILITY";
+
+            /**
+             * Text appended to privacy dialog, indicating that the application is in the work
+             * profile.
+             */
+            public static final String ONGOING_PRIVACY_DIALOG_WORK =
+                    "ONGOING_PRIVACY_DIALOG_WORK";
+
+            /**
+             * Text on keyguard screen indicating device management.
+             */
+            public static final String KEYGUARD_MANAGEMENT_DISCLOSURE =
+                    "KEYGUARD_MANAGEMENT_DISCLOSURE";
+
+            /**
+             * Similar to {@link #KEYGUARD_MANAGEMENT_DISCLOSURE} but also accepts organization name
+             * as a param.
+             */
+            public static final String KEYGUARD_NAMED_MANAGEMENT_DISCLOSURE =
+                    "KEYGUARD_NAMED_MANAGEMENT_DISCLOSURE";
+
+            /**
+             * Content description for the work profile lock screen.
+             */
+            public static final String WORK_LOCK_ACCESSIBILITY = "WORK_LOCK_ACCESSIBILITY";
+
+            /**
+             * @hide
+             */
+            static Set<String> buildStringsSet() {
+                Set<String> strings = new HashSet<>();
+                strings.add(QS_WORK_PROFILE_LABEL);
+                strings.add(QS_MSG_MANAGEMENT);
+                strings.add(QS_MSG_NAMED_MANAGEMENT);
+                strings.add(QS_MSG_MANAGEMENT_MONITORING);
+                strings.add(QS_MSG_NAMED_MANAGEMENT_MONITORING);
+                strings.add(QS_MSG_MANAGEMENT_NAMED_VPN);
+                strings.add(QS_MSG_NAMED_MANAGEMENT_NAMED_VPN);
+                strings.add(QS_MSG_MANAGEMENT_MULTIPLE_VPNS);
+                strings.add(QS_MSG_NAMED_MANAGEMENT_MULTIPLE_VPNS);
+                strings.add(QS_MSG_WORK_PROFILE_MONITORING);
+                strings.add(QS_MSG_NAMED_WORK_PROFILE_MONITORING);
+                strings.add(QS_MSG_WORK_PROFILE_NETWORK);
+                strings.add(QS_MSG_WORK_PROFILE_NAMED_VPN);
+                strings.add(QS_MSG_PERSONAL_PROFILE_NAMED_VPN);
+                strings.add(QS_DIALOG_MANAGEMENT_TITLE);
+                strings.add(QS_DIALOG_VIEW_POLICIES);
+                strings.add(QS_DIALOG_MANAGEMENT);
+                strings.add(QS_DIALOG_NAMED_MANAGEMENT);
+                strings.add(QS_DIALOG_MANAGEMENT_CA_CERT);
+                strings.add(QS_DIALOG_WORK_PROFILE_CA_CERT);
+                strings.add(QS_DIALOG_MANAGEMENT_NETWORK);
+                strings.add(QS_DIALOG_WORK_PROFILE_NETWORK);
+                strings.add(QS_DIALOG_MANAGEMENT_NAMED_VPN);
+                strings.add(QS_DIALOG_MANAGEMENT_TWO_NAMED_VPN);
+                strings.add(QS_DIALOG_WORK_PROFILE_NAMED_VPN);
+                strings.add(QS_DIALOG_PERSONAL_PROFILE_NAMED_VPN);
+                strings.add(BIOMETRIC_DIALOG_WORK_PIN_LAST_ATTEMPT);
+                strings.add(BIOMETRIC_DIALOG_WORK_PATTERN_LAST_ATTEMPT);
+                strings.add(BIOMETRIC_DIALOG_WORK_PASSWORD_LAST_ATTEMPT);
+                strings.add(BIOMETRIC_DIALOG_WORK_LOCK_FAILED_ATTEMPTS);
+                strings.add(STATUS_BAR_WORK_ICON_ACCESSIBILITY);
+                strings.add(ONGOING_PRIVACY_DIALOG_WORK);
+                strings.add(KEYGUARD_MANAGEMENT_DISCLOSURE);
+                strings.add(KEYGUARD_NAMED_MANAGEMENT_DISCLOSURE);
+                strings.add(WORK_LOCK_ACCESSIBILITY);
                 return strings;
             }
         }
