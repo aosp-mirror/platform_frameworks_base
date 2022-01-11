@@ -36,6 +36,7 @@ import com.android.systemui.media.taptotransfer.sender.MediaTttSenderService
 import com.android.systemui.media.taptotransfer.sender.MoveCloserToStartCast
 import com.android.systemui.media.taptotransfer.sender.TransferInitiated
 import com.android.systemui.media.taptotransfer.sender.TransferSucceeded
+import com.android.systemui.shared.mediattt.DeviceInfo
 import com.android.systemui.shared.mediattt.IDeviceSenderCallback
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -81,11 +82,12 @@ class MediaTttCommandLineHelper @Inject constructor(
             val mediaInfo = MediaRoute2Info.Builder("id", "Test Name")
                 .addFeature("feature")
                 .build()
+            val otherDeviceInfo = DeviceInfo(otherDeviceName)
 
             when (args[1]) {
                 MOVE_CLOSER_TO_START_CAST_COMMAND_NAME -> {
                     runOnService { senderCallback ->
-                        senderCallback.closeToReceiverToStartCast(mediaInfo)
+                        senderCallback.closeToReceiverToStartCast(mediaInfo, otherDeviceInfo)
                     }
                 }
 
