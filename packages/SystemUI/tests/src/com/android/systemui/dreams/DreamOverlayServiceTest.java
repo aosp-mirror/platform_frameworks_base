@@ -16,12 +16,15 @@
 
 package com.android.systemui.dreams;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.os.IBinder;
+import android.service.dreams.DreamService;
 import android.service.dreams.IDreamOverlay;
 import android.service.dreams.IDreamOverlayCallback;
 import android.testing.AndroidTestingRunner;
@@ -194,5 +197,23 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         verify(mDreamOverlayStateController).addCallback(callbackCapture.capture());
         mService.onDestroy();
         verify(mDreamOverlayStateController).removeCallback(callbackCapture.getValue());
+    }
+
+    @Test
+    public void testShouldShowComplicationsTrueByDefault() {
+        assertThat(mService.shouldShowComplications()).isTrue();
+
+        mService.onBind(new Intent());
+
+        assertThat(mService.shouldShowComplications()).isTrue();
+    }
+
+    @Test
+    public void testShouldShowComplicationsSetByIntentExtra() {
+        final Intent intent = new Intent();
+        intent.putExtra(DreamService.EXTRA_SHOW_COMPLICATIONS, false);
+        mService.onBind(intent);
+
+        assertThat(mService.shouldShowComplications()).isFalse();
     }
 }
