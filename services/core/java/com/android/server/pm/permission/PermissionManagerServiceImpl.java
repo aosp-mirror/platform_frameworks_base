@@ -167,6 +167,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     private static final String TAG = "PackageManager";
     private static final String LOG_TAG = PermissionManagerServiceImpl.class.getSimpleName();
 
+    private static final String SKIP_KILL_APP_REASON_NOTIFICATION_TEST = "skip permission revoke "
+            + "app kill for notification test";
+
+
     private static final long BACKUP_TIMEOUT_MILLIS = SECONDS.toMillis(60);
 
     // For automotive products, CarService enforces allow-listing of the privileged permissions
@@ -320,11 +324,15 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             mPackageManagerInt.writeSettings(true);
         }
         @Override
-        public void onPermissionRevoked(int uid, int userId, String reason) {
+        public void onPermissionRevoked(int uid, int userId, String reason, boolean overrideKill) {
             mOnPermissionChangeListeners.onPermissionsChanged(uid);
 
             // Critical; after this call the application should never have the permission
             mPackageManagerInt.writeSettings(false);
+            if (overrideKill) {
+                return;
+            }
+
             final int appId = UserHandle.getAppId(uid);
             if (reason == null) {
                 mHandler.post(() -> killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED));
@@ -1438,9 +1446,29 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 reason, mDefaultPermissionCallback);
     }
 
+    @Override
+    public void revokePostNotificationPermissionWithoutKillForTest(String packageName, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        final boolean overridePolicy =
+                checkUidPermission(callingUid, ADJUST_RUNTIME_PERMISSIONS_POLICY)
+                        == PackageManager.PERMISSION_GRANTED;
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL, "");
+        revokeRuntimePermissionInternal(packageName, Manifest.permission.POST_NOTIFICATIONS,
+                overridePolicy, true, callingUid, userId,
+                SKIP_KILL_APP_REASON_NOTIFICATION_TEST, mDefaultPermissionCallback);
+    }
+
     private void revokeRuntimePermissionInternal(String packageName, String permName,
-            boolean overridePolicy, int callingUid, final int userId, String reason,
-            PermissionCallback callback) {
+            boolean overridePolicy, int callingUid, final int userId,
+            String reason, PermissionCallback callback) {
+        revokeRuntimePermissionInternal(packageName, permName, overridePolicy, false, callingUid,
+                userId, reason, callback);
+    }
+
+    private void revokeRuntimePermissionInternal(String packageName, String permName,
+            boolean overridePolicy, boolean overrideKill, int callingUid, final int userId,
+            String reason, PermissionCallback callback) {
         if (PermissionManager.DEBUG_TRACE_PERMISSION_UPDATES
                 && PermissionManager.shouldTraceGrant(packageName, permName, userId)) {
             Log.i(TAG, "System is revoking " + packageName + " "
@@ -1552,7 +1580,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         if (callback != null) {
             if (isRuntimePermission) {
                 callback.onPermissionRevoked(UserHandle.getUid(userId, pkg.getUid()), userId,
-                        reason);
+                        reason, overrideKill);
             } else {
                 mDefaultPermissionCallback.onInstallPermissionRevoked();
             }
@@ -5197,7 +5225,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         public void onPermissionChanged() {}
         public void onPermissionGranted(int uid, @UserIdInt int userId) {}
         public void onInstallPermissionGranted() {}
-        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason) {}
+        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason) {
+            onPermissionRevoked(uid, userId, reason, false);
+        }
+        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason,
+                boolean overrideKill) {}
         public void onInstallPermissionRevoked() {}
         public void onPermissionUpdated(@UserIdInt int[] updatedUserIds, boolean sync) {}
         public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,

@@ -318,6 +318,15 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
             String reason);
 
     /**
+     * Revoke the POST_NOTIFICATIONS permission, without killing the app. This method must ONLY BE
+     * USED in CTS or local tests.
+     *
+     * @param packageName The package to be revoked
+     * @param userId The user for which to revoke
+     */
+    void revokePostNotificationPermissionWithoutKillForTest(String packageName, int userId);
+
+    /**
      * Get whether you should show UI with rationale for requesting a permission. You should do this
      * only if you do not have the permission and the context in which the permission is requested
      * does not clearly communicate to the user what would be the benefit from grating this
