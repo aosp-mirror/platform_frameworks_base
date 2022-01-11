@@ -3515,11 +3515,14 @@ static DemuxFilterSectionSettings getFilterSectionSettings(JNIEnv *env, const jo
     bool isCheckCrc = env->GetBooleanField(settings, env->GetFieldID(clazz, "mCrcEnabled", "Z"));
     bool isRepeat = env->GetBooleanField(settings, env->GetFieldID(clazz, "mIsRepeat", "Z"));
     bool isRaw = env->GetBooleanField(settings, env->GetFieldID(clazz, "mIsRaw", "Z"));
+    int32_t bitWidthOfLengthField =
+            env->GetIntField(settings, env->GetFieldID(clazz, "mBitWidthOfLengthField", "I"));
 
     DemuxFilterSectionSettings filterSectionSettings {
         .isCheckCrc = isCheckCrc,
         .isRepeat = isRepeat,
         .isRaw = isRaw,
+        .bitWidthOfLengthField = bitWidthOfLengthField,
     };
     if (env->IsInstanceOf(
             settings,
