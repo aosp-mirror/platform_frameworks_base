@@ -126,8 +126,8 @@ public class MasterClearReceiver extends BroadcastReceiver {
 
     private boolean wipeUser(Context context, @UserIdInt int userId, String wipeReason) {
         final UserManager userManager = context.getSystemService(UserManager.class);
-        final int result = userManager.removeUserOrSetEphemeral(
-                userId, /* evenWhenDisallowed= */ false);
+        final int result = userManager.removeUserWhenPossible(
+                UserHandle.of(userId), /* overrideDevicePolicy= */ false);
         if (result == UserManager.REMOVE_RESULT_ERROR) {
             Slogf.e(TAG, "Can't remove user %d", userId);
             return false;
