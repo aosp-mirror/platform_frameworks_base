@@ -163,6 +163,10 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
 
         // UnmodifiableList doesn't make a defensive copy by default.
         mAllowedAlgorithms = Collections.unmodifiableList(new ArrayList<>(allowedAlgorithms));
+        if (excludeLocalRoutes && !isBypassable) {
+            throw new IllegalArgumentException(
+                    "Vpn should be byassable if excludeLocalRoutes is set");
+        }
 
         mIsBypassable = isBypassable;
         mIsMetered = isMetered;
