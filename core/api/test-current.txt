@@ -1829,6 +1829,14 @@ package android.os {
     method @NonNull public android.os.VibrationEffect build(int);
   }
 
+  public abstract class Vibrator {
+    method public int getDefaultVibrationIntensity(int);
+    field public static final int VIBRATION_INTENSITY_HIGH = 3; // 0x3
+    field public static final int VIBRATION_INTENSITY_LOW = 1; // 0x1
+    field public static final int VIBRATION_INTENSITY_MEDIUM = 2; // 0x2
+    field public static final int VIBRATION_INTENSITY_OFF = 0; // 0x0
+  }
+
   public class VintfObject {
     method public static String[] getHalNamesAndVersions();
     method @NonNull public static String getPlatformSepolicyVersion();

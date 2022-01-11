@@ -23,11 +23,14 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
+import android.os.vibrator.VibrationConfig;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -49,6 +52,7 @@ public abstract class Vibrator {
      *
      * @hide
      */
+    @TestApi
     public static final int VIBRATION_INTENSITY_OFF = 0;
 
     /**
@@ -56,6 +60,7 @@ public abstract class Vibrator {
      *
      * @hide
      */
+    @TestApi
     public static final int VIBRATION_INTENSITY_LOW = 1;
 
     /**
@@ -63,6 +68,7 @@ public abstract class Vibrator {
      *
      * @hide
      */
+    @TestApi
     public static final int VIBRATION_INTENSITY_MEDIUM = 2;
 
     /**
@@ -70,6 +76,7 @@ public abstract class Vibrator {
      *
      * @hide
      */
+    @TestApi
     public static final int VIBRATION_INTENSITY_HIGH = 3;
 
     /**
@@ -115,16 +122,12 @@ public abstract class Vibrator {
     }
 
     private final String mPackageName;
-    // The default vibration intensity level for haptic feedback.
-    @VibrationIntensity
-    private int mDefaultHapticFeedbackIntensity;
-    // The default vibration intensity level for notifications.
-    @VibrationIntensity
-    private int mDefaultNotificationVibrationIntensity;
-    // The default vibration intensity level for ringtones.
-    @VibrationIntensity
-    private int mDefaultRingVibrationIntensity;
-    private float mHapticChannelMaxVibrationAmplitude;
+    @Nullable
+    private final Resources mResources;
+
+    // This is lazily loaded only for the few clients that need this (e. Settings app).
+    @Nullable
+    private volatile VibrationConfig mVibrationConfig;
 
     /**
      * @hide to prevent subclassing from outside of the framework
@@ -132,8 +135,7 @@ public abstract class Vibrator {
     @UnsupportedAppUsage
     public Vibrator() {
         mPackageName = ActivityThread.currentPackageName();
-        final Context ctx = ActivityThread.currentActivityThread().getSystemContext();
-        loadVibrationConfig(ctx);
+        mResources = null;
     }
 
     /**
@@ -141,26 +143,7 @@ public abstract class Vibrator {
      */
     protected Vibrator(Context context) {
         mPackageName = context.getOpPackageName();
-        loadVibrationConfig(context);
-    }
-
-    private void loadVibrationConfig(Context context) {
-        mDefaultHapticFeedbackIntensity = loadDefaultIntensity(context,
-                com.android.internal.R.integer.config_defaultHapticFeedbackIntensity);
-        mDefaultNotificationVibrationIntensity = loadDefaultIntensity(context,
-                com.android.internal.R.integer.config_defaultNotificationVibrationIntensity);
-        mDefaultRingVibrationIntensity = loadDefaultIntensity(context,
-                com.android.internal.R.integer.config_defaultRingVibrationIntensity);
-        mHapticChannelMaxVibrationAmplitude = loadFloat(context,
-                com.android.internal.R.dimen.config_hapticChannelMaxVibrationAmplitude, 0);
-    }
-
-    private int loadDefaultIntensity(Context ctx, int resId) {
-        return ctx != null ? ctx.getResources().getInteger(resId) : VIBRATION_INTENSITY_MEDIUM;
-    }
-
-    private float loadFloat(Context ctx, int resId, float defaultValue) {
-        return ctx != null ? ctx.getResources().getFloat(resId) : defaultValue;
+        mResources = context.getResources();
     }
 
     /**
@@ -172,31 +155,30 @@ public abstract class Vibrator {
         return VibratorInfo.EMPTY_VIBRATOR_INFO;
     }
 
-    /**
-     * Get the default vibration intensity for haptic feedback.
-     *
-     * @hide
-     */
-    public int getDefaultHapticFeedbackIntensity() {
-        return mDefaultHapticFeedbackIntensity;
+    /** Get the static vibrator configuration from config.xml. */
+    private VibrationConfig getConfig() {
+        if (mVibrationConfig == null) {
+            Resources resources = mResources;
+            if (resources == null) {
+                final Context ctx = ActivityThread.currentActivityThread().getSystemContext();
+                resources = ctx != null ? ctx.getResources() : null;
+            }
+            // This might be constructed more than once, but it only loads static config data from a
+            // xml file, so it would be ok.
+            mVibrationConfig = new VibrationConfig(resources);
+        }
+        return mVibrationConfig;
     }
 
     /**
-     * Get the default vibration intensity for notifications.
+     * Get the default vibration intensity for given usage.
      *
      * @hide
      */
-    public int getDefaultNotificationVibrationIntensity() {
-        return mDefaultNotificationVibrationIntensity;
-    }
-
-    /**
-     * Get the default vibration intensity for ringtones.
-     *
-     * @hide
-     */
-    public int getDefaultRingVibrationIntensity() {
-        return mDefaultRingVibrationIntensity;
+    @TestApi
+    @VibrationIntensity
+    public int getDefaultVibrationIntensity(@VibrationAttributes.Usage int usage) {
+        return getConfig().getDefaultVibrationIntensity(usage);
     }
 
     /**
@@ -280,10 +262,7 @@ public abstract class Vibrator {
      * @hide
      */
     public float getHapticChannelMaximumAmplitude() {
-        if (mHapticChannelMaxVibrationAmplitude <= 0) {
-            return Float.NaN;
-        }
-        return mHapticChannelMaxVibrationAmplitude;
+        return getConfig().getHapticChannelMaximumAmplitude();
     }
 
     /**

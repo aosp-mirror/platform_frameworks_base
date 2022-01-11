@@ -32,32 +32,30 @@ import java.util.Objects;
 public final class VibrationAttributes implements Parcelable {
     private static final String TAG = "VibrationAttributes";
 
-    /**
-     * @hide
-     */
+    /** @hide */
     @IntDef(prefix = { "USAGE_CLASS_" }, value = {
             USAGE_CLASS_UNKNOWN,
             USAGE_CLASS_ALARM,
             USAGE_CLASS_FEEDBACK,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface UsageClass{}
+    public @interface UsageClass {}
 
-    /**
-     * @hide
-     */
+    /** @hide */
     @IntDef(prefix = { "USAGE_" }, value = {
             USAGE_UNKNOWN,
+            USAGE_ACCESSIBILITY,
             USAGE_ALARM,
-            USAGE_RINGTONE,
-            USAGE_NOTIFICATION,
             USAGE_COMMUNICATION_REQUEST,
-            USAGE_TOUCH,
-            USAGE_PHYSICAL_EMULATION,
             USAGE_HARDWARE_FEEDBACK,
+            USAGE_MEDIA,
+            USAGE_NOTIFICATION,
+            USAGE_PHYSICAL_EMULATION,
+            USAGE_RINGTONE,
+            USAGE_TOUCH,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Usage{}
+    public @interface Usage {}
 
     /**
      * Vibration usage filter value to match all usages.
