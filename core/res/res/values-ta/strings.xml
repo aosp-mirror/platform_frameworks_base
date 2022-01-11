@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5626377160840915617">"TTY Mode HCOஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"TTY Mode VCOஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeOff" msgid="2420380956369226583">"TTY Mode OFFஐ இணைச் செயல்பாடு கோரியது"</string>
-    <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
+    <string name="serviceClassVoice" msgid="2065556932043454987">"குரல்"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"தரவு"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"தொலைநகல்"</string>
     <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
@@ -169,7 +169,7 @@
     <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"நெறிமுறை ஆதரிக்கப்படவில்லை."</string>
     <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"பாதுகாப்பான இணைப்பை நிறுவ முடியவில்லை."</string>
     <string name="httpErrorBadUrl" msgid="754447723314832538">"URL தவறாக உள்ளதால் பக்கத்தைத் திறக்க முடியவில்லை."</string>
-    <string name="httpErrorFile" msgid="3400658466057744084">"கோப்பை அணுக முடியவில்லை."</string>
+    <string name="httpErrorFile" msgid="3400658466057744084">"ஃபைலை அணுக முடியவில்லை."</string>
     <string name="httpErrorFileNotFound" msgid="5191433324871147386">"கோரப்பட்ட கோப்பைக் கண்டறிய முடியவில்லை."</string>
     <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"மிக அதிகமான கோரிக்கைகள் செயல்படுத்தப்படுகின்றன. பிறகு முயற்சிக்கவும்."</string>
     <string name="notification_title" msgid="5783748077084481121">"<xliff:g id="ACCOUNT">%1$s</xliff:g> க்கான உள்நுழைவு பிழை"</string>
@@ -609,6 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"தொடர, உங்கள் கைரேகையையோ திரைப் பூட்டையோ பயன்படுத்துங்கள்"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"ஏதோ தவறாகிவிட்டது. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"கைரேகை ஐகான்"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"முகம் காட்டித் திறத்தல்"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"முகம் காட்டித் திறத்தல் அம்சத்தில் சிக்கல்"</string>
@@ -661,6 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"தொடர, உங்கள் முகத்தையோ திரைப் பூட்டையோ பயன்படுத்துங்கள்"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"ஏதோ தவறாகிவிட்டது. மீண்டும் முயலவும்."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"முக ஐகான்"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ஒத்திசைவு அமைப்புகளைப் படித்தல்"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"கணக்கிற்கான ஒத்திசைவு அமைப்புகளைப் படிக்க ஆப்ஸை அனுமதிக்கிறது. எடுத்துக்காட்டாக, பீப்பிள் ஆப்ஸ் கணக்குடன் ஒத்திசைக்கப்பட்டுள்ளதா என்பதை இது தீர்மானிக்கலாம்."</string>
@@ -815,7 +817,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"பணியிட மொபைல்"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"பணியிட பேஜர்"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"உதவியாளர்"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"பிரத்தியேகம்"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"பிறந்தநாள்"</string>
@@ -848,7 +850,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"மற்றவை"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"பிரத்தியேகம்"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"பிரத்தியேகம்"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"உதவியாளர்"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"சகோதரர்"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"குழந்தை"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"வாழ்வுத் துணை"</string>
@@ -2108,7 +2110,7 @@
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"மொபைலில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"டேப்லெட்டில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"சாதனத்தில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
-    <string name="mime_type_folder" msgid="2203536499348787650">"கோப்புறை"</string>
+    <string name="mime_type_folder" msgid="2203536499348787650">"ஃபோல்டர்"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android ஆப்ஸ்"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ஃபைல்"</string>
     <string name="mime_type_generic_ext" msgid="9220220924380909486">"<xliff:g id="EXTENSION">%1$s</xliff:g> ஃபைல்"</string>

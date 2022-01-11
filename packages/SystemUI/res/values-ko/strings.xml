@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"전체화면 모드로 확대"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"전체화면 모드로 확대"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"스크린샷"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock 사용 중지됨"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"이미지 보냄"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"캡쳐화면 저장 중..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"캡쳐화면 저장 중..."</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"마이크를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"카메라를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"카메라 또는 마이크를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"기기"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"기타 기기"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"최근 사용 버튼 전환"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"충전됨"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"충전 중"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"전원 알림 컨트롤"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"사용"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"사용 안함"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"켜짐 - 얼굴 기준"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"전원 알림 컨트롤을 사용하면 앱 알림 관련 중요도를 0부터 5까지로 설정할 수 있습니다. \n\n"<b>"레벨 5"</b>" \n- 알림 목록 상단에 표시 \n- 전체 화면일 경우 알림 표시 허용 \n- 항상 엿보기 표시 \n\n"<b>"레벨 4"</b>" \n- 전체 화면에 알림 표시 금지 \n- 항상 엿보기 표시 \n\n"<b>"레벨 3"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n\n"<b>"레벨 2"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n\n"<b>"레벨 1"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n- 잠금 화면 및 상태 표시줄에서 숨김 \n- 알림 목록 하단에 표시 \n\n"<b>"레벨 0"</b>" \n- 앱의 모든 알림 차단"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"알림"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"더 이상 다음의 알림을 받지 않습니다"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"지문으로 열기"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"인증이 필요합니다. 지문 센서를 터치하여 인증하세요."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"진행 중인 전화 통화"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"모바일 데이터"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"연결됨"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"모바일 데이터가 자동으로 연결되지 않음"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"연결되지 않음"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"사용 가능한 다른 네트워크가 없음"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"사용 가능한 네트워크가 없음"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"네트워크 세부정보"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"연결하려면 네트워크를 탭하세요"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"네트워크를 보려면 잠금 해제하세요"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"네트워크 검색 중…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"네트워크에 연결하지 못했습니다."</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"지금은 Wi-Fi가 자동으로 연결되지 않습니다."</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"모두 보기"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"네트워크를 전환하려면 이더넷을 연결 해제하세요."</string>
 </resources>

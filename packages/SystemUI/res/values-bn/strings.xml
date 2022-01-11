@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"স্ক্রীণ পূরণ করতে জুম করুন"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ফুল স্ক্রিন করুন"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্রিনশট নিন"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock বন্ধ করা হয়েছে"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"একটি ছবি পাঠানো হয়েছে"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"এটার জন্য মাইক্রোফোনের অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার মাইক্রোফোন ব্যবহার করার অনুমতি দেওয়া হয়েছে।"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"এটার জন্য ক্যামেরার অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার ক্যামেরা ব্যবহারের অনুমতি দেওয়া হয়েছে।"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"এটার জন্য ক্যামেরা অথবা মাইক্রোফোনের অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার ক্যামেরা অথবা মাইক্রোফোন ব্যবহারের অনুমতি দেওয়া হয়েছে।"</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"ডিভাইস"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"অন্য ডিভাইস"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"\'এক নজরে\' বৈশিষ্ট্যটি চালু বা বন্ধ করুন"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"চার্জ হয়েছে"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"চার্জ হচ্ছে"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"পাওয়ার বিজ্ঞপ্তির নিয়ন্ত্রণগুলি"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"চালু আছে"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"বন্ধ আছে"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"চালু আছে - মুখের হিসেবে"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"পাওয়ার বিজ্ঞপ্তির নিয়ন্ত্রণগুলি ব্যহবার করে, আপনি কোনও অ্যাপ্লিকেশনের বিজ্ঞপ্তির জন্য ০ থেকে ৫ পর্যন্ত একটি গুরুত্বের লেভেলকে সেট করতে পারবেন৷ \n\n"<b>"লেভেল ৫"</b>" \n- বিজ্ঞপ্তি তালিকার শীর্ষে দেখায় \n- পূর্ণ স্ক্রিনের বাধাকে অনুমতি দেয় \n- সর্বদা স্ক্রিনে উপস্থিত হয় \n\n"<b>"লেভেল ৪"</b>" \n- পূর্ণ স্ক্রিনের বাধাকে আটকায় \n- সর্বদা স্ক্রিনে উপস্থিত হয় \n\n"<b>"লেভেল ৩"</b>" \n- পূর্ণ স্ক্রিনের বাধাকে আটকায় \n- কখনওই স্ক্রিনে উপস্থিত হয় না \n\n"<b>"লেভেল ২"</b>" \n- পূর্ণ স্ক্রিনের বাধাকে আটকায় \n- কখনওই স্ক্রিনে উপস্থিত হয় না \n- কখনওই শব্দ এবং কম্পন করে না \n\n"<b>"লেভেল ১"</b>" \n- পূর্ণ স্ক্রিনের বাধাকে আটকায় \n- কখনওই স্ক্রিনে উপস্থিত হয় না \n- কখনওই শব্দ এবং কম্পন করে না \n- লক স্ক্রিন এবং স্ট্যাটাস বার থেকে লুকায় \n- বিজ্ঞপ্তি তালিকার নীচের দিকে দেখায় \n\n"<b>"লেভেল ০"</b>" \n- অ্যাপ্লিকেশন থেকে সমস্ত বিজ্ঞপ্তিকে অবরূদ্ধ করে"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"বিজ্ঞপ্তি"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"এই বিজ্ঞপ্তিগুলি আপনাকে আর দেখানো হবে না"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"খুলতে ফিঙ্গারপ্রিন্ট ব্যবহার করুন"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"যাচাইকরণ করতে হবে। যাচাইকরণ করতে আঙুলের ছাপের সেন্সরে টাচ করুন।"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ব্যবহারকারী এখন ফোনে কথা বলছেন"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"মোবাইল ডেটা"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"কানেক্ট করা আছে"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"মোবাইল ডেটা নিজে থেকে কানেক্ট হবে না"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"কানেকশন নেই"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"অন্য কোনও নেটওয়ার্ক উপলভ্য নেই"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"কোনও নেটওয়ার্ক উপলভ্য নেই"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"ওয়াই-ফাই"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"নেটওয়ার্কের বিবরণ"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"কানেক্ট করতে একটি নেটওয়ার্কে ট্যাপ করুন"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"নেটওয়ার্ক দেখার জন্য আনলক করুন"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"নেটওয়ার্ক সার্চ করা হচ্ছে…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"নেটওয়ার্কে কানেক্ট করা যায়নি"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"এখন ওয়াই-ফাই নিজে থেকে কানেক্ট হবে না"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"সবকটি দেখুন"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"নেটওয়ার্ক বদলাতে ইথারনেট ডিসকানেক্ট করুন"</string>
 </resources>

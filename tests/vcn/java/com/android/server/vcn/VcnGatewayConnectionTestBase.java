@@ -23,7 +23,6 @@ import static com.android.server.vcn.VcnTestUtils.setupIpSecManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
@@ -301,6 +300,11 @@ public class VcnGatewayConnectionTestBase {
                 expectCanceled);
     }
 
+    protected void verifySafeModeStateAndCallbackFired(int invocationCount, boolean isInSafeMode) {
+        verify(mGatewayStatusCallback, times(invocationCount)).onSafeModeStatusChanged();
+        assertEquals(isInSafeMode, mGatewayConnection.isInSafeMode());
+    }
+
     protected void verifySafeModeTimeoutNotifiesCallbackAndUnregistersNetworkAgent(
             @NonNull State expectedState) {
         // Set a VcnNetworkAgent, and expect it to be unregistered and cleared
@@ -314,9 +318,8 @@ public class VcnGatewayConnectionTestBase {
         delayedEvent.run();
         mTestLooper.dispatchAll();
 
-        verify(mGatewayStatusCallback).onSafeModeStatusChanged();
         assertEquals(expectedState, mGatewayConnection.getCurrentState());
-        assertTrue(mGatewayConnection.isInSafeMode());
+        verifySafeModeStateAndCallbackFired(1, true);
 
         verify(mockNetworkAgent).unregister();
         assertNull(mGatewayConnection.getNetworkAgent());

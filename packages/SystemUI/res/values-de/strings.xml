@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom auf Bildschirmgröße"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Auf Bildschirmgröße anpassen"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock deaktiviert"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"Bild gesendet"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Screenshot wird gespeichert..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Screenshot wird gespeichert..."</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Dadurch wird die Blockierung des Zugriffs für alle Apps und Dienste aufgehoben, die dein Mikrofon verwenden dürfen."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Dadurch wird die Blockierung des Zugriffs für alle Apps und Dienste aufgehoben, die deine Kamera verwenden dürfen."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Dadurch wird die Blockierung des Zugriffs für alle Apps und Dienste aufgehoben, die deine Kamera oder dein Mikrofon verwenden dürfen."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Gerät"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Sonstiges Gerät"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Übersicht ein-/ausblenden"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Aufgeladen"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Wird aufgeladen"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Erweiterte Benachrichtigungseinstellungen"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"An"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Aus"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"An – gesichtsbasiert"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Mit den erweiterten Benachrichtigungseinstellungen kannst du für App-Benachrichtigungen eine Wichtigkeitsstufe von 0 bis 5 festlegen. \n\n"<b>"Stufe 5"</b>" \n- Auf der Benachrichtigungsleiste ganz oben anzeigen \n- Vollbildunterbrechung zulassen \n- Immer kurz einblenden \n\n"<b>"Stufe 4"</b>" \n- Keine Vollbildunterbrechung \n- Immer kurz einblenden \n\n"<b>"Stufe 3"</b>" \n- Keine Vollbildunterbrechung \n- Nie kurz einblenden \n\n"<b>"Stufe 2"</b>" \n- Keine Vollbildunterbrechung \n- Nie kurz einblenden \n- Weder Ton noch Vibration \n\n"<b>"Stufe 1"</b>" \n- Keine Vollbildunterbrechung \n- Nie kurz einblenden \n- Weder Ton noch Vibration \n- Auf Sperrbildschirm und Statusleiste verbergen \n- Auf der Benachrichtigungsleiste ganz unten anzeigen \n\n"<b>"Stufe 0"</b>" \n- Alle Benachrichtigungen der App sperren"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Benachrichtigungen"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Du erhältst diese Benachrichtigungen nicht mehr"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Mit Fingerabdruck öffnen"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Authentifizierung erforderlich. Tippe dazu einfach auf den Fingerabdrucksensor."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Aktiver Anruf"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobile Daten"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Verbunden"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Keine automatische Verbindung über mobile Daten"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Keine Verbindung"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Keine anderen Netzwerke verfügbar"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"Keine Netzwerke verfügbar"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"WLAN"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Netzwerkdetails"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Tippe auf ein Netzwerk, um eine Verbindung herzustellen"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Entsperren, um Netzwerke anzuzeigen"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Netzwerke werden gesucht…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Netzwerkverbindung konnte nicht hergestellt werden"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Zurzeit wird keine automatische WLAN-Verbindung hergestellt"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Alle ansehen"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Trenne das Ethernetkabel, um das Netzwerk zu wechseln"</string>
 </resources>

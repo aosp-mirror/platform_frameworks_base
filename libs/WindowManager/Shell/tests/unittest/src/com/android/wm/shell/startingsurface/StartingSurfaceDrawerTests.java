@@ -15,38 +15,53 @@
  */
 package com.android.wm.shell.startingsurface;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.ColorSpace;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.testing.TestableContext;
+import android.view.IWindowSession;
+import android.view.InsetsState;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.WindowMetrics;
 import android.window.StartingWindowInfo;
+import android.window.TaskSnapshot;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -61,6 +76,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
 
 import java.util.function.IntSupplier;
 
@@ -78,6 +94,7 @@ public class StartingSurfaceDrawerTests {
     private TransactionPool mTransactionPool;
 
     private final Handler mTestHandler = new Handler(Looper.getMainLooper());
+    private ShellExecutor mTestExecutor;
     private final TestableContext mTestContext = new TestContext(
             InstrumentationRegistry.getInstrumentation().getTargetContext());
     TestStartingSurfaceDrawer mStartingSurfaceDrawer;
@@ -138,9 +155,9 @@ public class StartingSurfaceDrawerTests {
 
         doReturn(metrics).when(mMockWindowManager).getMaximumWindowMetrics();
         doNothing().when(mMockWindowManager).addView(any(), any());
-
-        mStartingSurfaceDrawer = spy(new TestStartingSurfaceDrawer(mTestContext,
-                new HandlerExecutor(mTestHandler), mTransactionPool));
+        mTestExecutor = new HandlerExecutor(mTestHandler);
+        mStartingSurfaceDrawer = spy(
+                new TestStartingSurfaceDrawer(mTestContext, mTestExecutor, mTransactionPool));
     }
 
     @Test
@@ -205,6 +222,48 @@ public class StartingSurfaceDrawerTests {
         assertEquals(0, windowColor3.mReuseCount);
     }
 
+    @Test
+    public void testRemoveTaskSnapshotWithImeSurfaceWhenOnImeDrawn() throws Exception {
+        final int taskId = 1;
+        final StartingWindowInfo windowInfo =
+                createWindowInfo(taskId, android.R.style.Theme);
+        TaskSnapshot snapshot = createTaskSnapshot(100, 100, new Point(100, 100),
+                new Rect(0, 0, 0, 50), true /* hasImeSurface */);
+        final IWindowSession session = WindowManagerGlobal.getWindowSession();
+        spyOn(session);
+        doReturn(WindowManagerGlobal.ADD_OKAY).when(session).addToDisplay(
+                any() /* window */, any() /* attrs */,
+                anyInt() /* viewVisibility */, anyInt() /* displayId */,
+                any() /* requestedVisibility */, any() /* outInputChannel */,
+                any() /* outInsetsState */, any() /* outActiveControls */);
+        TaskSnapshotWindow mockSnapshotWindow = TaskSnapshotWindow.create(windowInfo,
+                mBinder,
+                snapshot, mTestExecutor, () -> {
+                });
+        spyOn(mockSnapshotWindow);
+        try (AutoCloseable mockTaskSnapshotSession = new AutoCloseable() {
+            MockitoSession mockSession = mockitoSession()
+                    .initMocks(this)
+                    .mockStatic(TaskSnapshotWindow.class)
+                    .startMocking();
+            @Override
+            public void close() {
+                mockSession.finishMocking();
+            }
+        }) {
+            when(TaskSnapshotWindow.create(eq(windowInfo), eq(mBinder), eq(snapshot), any(),
+                    any())).thenReturn(mockSnapshotWindow);
+            // Simulate a task snapshot window created with IME snapshot shown.
+            mStartingSurfaceDrawer.makeTaskSnapshotWindow(windowInfo, mBinder, snapshot);
+            waitHandlerIdle(mTestHandler);
+
+            // Verify the task snapshot with IME snapshot will be removed when received the real IME
+            // drawn callback.
+            mStartingSurfaceDrawer.onImeDrawnOnTask(1);
+            verify(mockSnapshotWindow).removeImmediately();
+        }
+    }
+
     private StartingWindowInfo createWindowInfo(int taskId, int themeResId) {
         StartingWindowInfo windowInfo = new StartingWindowInfo();
         final ActivityInfo info = new ActivityInfo();
@@ -216,10 +275,27 @@ public class StartingSurfaceDrawerTests {
         taskInfo.taskId = taskId;
         windowInfo.targetActivityInfo = info;
         windowInfo.taskInfo = taskInfo;
+        windowInfo.topOpaqueWindowInsetsState = new InsetsState();
+        windowInfo.mainWindowLayoutParams = new WindowManager.LayoutParams();
+        windowInfo.topOpaqueWindowLayoutParams = new WindowManager.LayoutParams();
         return windowInfo;
     }
 
     private static void waitHandlerIdle(Handler handler) {
         handler.runWithScissors(() -> { }, 0 /* timeout */);
+    }
+
+    private TaskSnapshot createTaskSnapshot(int width, int height, Point taskSize,
+            Rect contentInsets, boolean hasImeSurface) {
+        final HardwareBuffer buffer = HardwareBuffer.create(width, height, HardwareBuffer.RGBA_8888,
+                1, HardwareBuffer.USAGE_CPU_READ_RARELY);
+        return new TaskSnapshot(
+                System.currentTimeMillis(),
+                new ComponentName("", ""), buffer,
+                ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
+                Surface.ROTATION_0, taskSize, contentInsets, false,
+                true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN,
+                0 /* systemUiVisibility */, false /* isTranslucent */,
+                hasImeSurface /* hasImeSurface */);
     }
 }

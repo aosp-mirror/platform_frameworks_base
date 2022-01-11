@@ -601,7 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Aucune empreinte digitale enregistrée."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Cet appareil ne possède pas de capteur d\'empreintes digitales."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Le capteur a été désactivé temporairement."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Impossible utiliser capteur empreinte digitale. Consultez un fournisseur de services de réparation"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Impossible d\'utiliser le capteur d\'empreintes digitales. Consultez un fournisseur de services de réparation"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Doigt <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utiliser l\'empreinte digitale"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Utiliser l\'empreinte digitale ou le verrouillage de l\'écran"</string>
@@ -609,6 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Utilisez votre empreinte digitale ou le verrouillage de l\'écran pour continuer"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Un problème est survenu. Réessayez."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icône d\'empreinte digitale"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problème avec la fonctionnalité de déverrouillage par reconnaissance faciale"</string>
@@ -661,6 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Utilisez votre visage ou le verrouillage de l\'écran pour continuer"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Un problème est survenu. Réessayez."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Icône visage"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"lire les paramètres de synchronisation"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Permet à l\'application d\'accéder aux paramètres de synchronisation d\'un compte. Par exemple, cette autorisation peut permettre de déterminer si l\'application Contacts est synchronisée avec un compte ou non."</string>

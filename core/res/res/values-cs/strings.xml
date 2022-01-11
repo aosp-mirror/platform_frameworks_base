@@ -615,6 +615,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Pokračujte ověřením pomocí otisku prstu nebo zámku obrazovky"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Došlo k chybě. Zkuste to znovu."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona otisku prstů"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Odemknutí obličejem"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problém s odemykáním obličejem"</string>
@@ -667,6 +668,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Pokračujte ověřením pomocí obličeje nebo zámku obrazovky"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Došlo k chybě. Zkuste to znovu."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikona obličeje"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"čtení nastavení synchronizace"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Umožňuje aplikaci číst nastavení synchronizace v účtu. Může například určit, zda je s účtem synchronizována aplikace Lidé."</string>
@@ -1369,9 +1371,9 @@
     <string name="sms_control_message" msgid="6574313876316388239">"Aplikace &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;odesílá velký počet SMS zpráv. Chcete aplikaci povolit, aby zprávy odesílala i nadále?"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"Povolit"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Odmítnout"</string>
-    <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odeslat zprávu na adresu &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
+    <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odeslat zprávu na číslo &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"Tato akce "<b>"může vést k naúčtování poplatků"</b>" na váš účet u mobilního operátora."</string>
-    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Tato akce povede k naúčtování poplatku na váš účet u mobilního operátora."</b></string>
+    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Tato akce může vést k naúčtování ceny služby třetí strany na vrub vašeho účtu u mobilního operátora."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Odeslat"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Zrušit"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Zapamatovat moji volbu"</string>

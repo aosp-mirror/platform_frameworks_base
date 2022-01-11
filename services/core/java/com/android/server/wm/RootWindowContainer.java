@@ -2125,6 +2125,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final Task rootTask;
             if (singleActivity) {
                 rootTask = task;
+
+                // Apply the last recents animation leash transform to the task entering PIP
+                rootTask.maybeApplyLastRecentsAnimationTransaction();
             } else {
                 // In the case of multiple activities, we will create a new task for it and then
                 // move the PIP activity into the task. Note that we explicitly defer the task

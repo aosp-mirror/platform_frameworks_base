@@ -79,8 +79,8 @@ class SuspendPackagesBroadcastTest {
         mockAllowList(packageSetting1, allowList(10001, 10002, 10003))
         mockAllowList(packageSetting2, allowList(10001, 10002, 10003))
 
-        pms.sendPackagesSuspendedForUser(
-                packagesToSuspend, uidsToSuspend, TEST_USER_ID, /* suspended = */ true)
+        pms.sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_SUSPENDED,
+                packagesToSuspend, uidsToSuspend, TEST_USER_ID)
         verify(pms).sendPackageBroadcast(any(), nullable(), bundleCaptor.capture(),
                 anyInt(), nullable(), nullable(), any(), nullable(), any(), nullable())
 
@@ -97,8 +97,8 @@ class SuspendPackagesBroadcastTest {
         mockAllowList(packageSetting1, allowList(10001, 10002, 10003))
         mockAllowList(packageSetting2, allowList(10001, 10002, 10007))
 
-        pms.sendPackagesSuspendedForUser(
-                packagesToSuspend, uidsToSuspend, TEST_USER_ID, /* suspended = */ true)
+        pms.sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_SUSPENDED,
+                packagesToSuspend, uidsToSuspend, TEST_USER_ID)
         verify(pms, times(2)).sendPackageBroadcast(any(), nullable(), bundleCaptor.capture(),
                 anyInt(), nullable(), nullable(), any(), nullable(), any(), nullable())
 
@@ -118,8 +118,8 @@ class SuspendPackagesBroadcastTest {
         mockAllowList(packageSetting1, allowList(10001, 10002, 10003))
         mockAllowList(packageSetting2, null)
 
-        pms.sendPackagesSuspendedForUser(
-                packagesToSuspend, uidsToSuspend, TEST_USER_ID, /* suspended = */ true)
+        pms.sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_SUSPENDED,
+                packagesToSuspend, uidsToSuspend, TEST_USER_ID)
         verify(pms, times(2)).sendPackageBroadcast(any(), nullable(), bundleCaptor.capture(),
                 anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable())
 
@@ -131,6 +131,22 @@ class SuspendPackagesBroadcastTest {
             assertThat(changedPackages?.get(0)).isAnyOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
             assertThat(changedUids?.get(0)).isAnyOf(packageSetting1.appId, packageSetting2.appId)
         }
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun sendPackagesSuspendModifiedForUser() {
+        pms.sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_SUSPENSION_CHANGED,
+                packagesToSuspend, uidsToSuspend, TEST_USER_ID)
+        verify(pms).sendPackageBroadcast(
+                eq(Intent.ACTION_PACKAGES_SUSPENSION_CHANGED), nullable(), bundleCaptor.capture(),
+                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable())
+
+        var modifiedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
+        var modifiedUids = bundleCaptor.value.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
+        assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
+        assertThat(modifiedUids).asList().containsExactly(
+                packageSetting1.appId, packageSetting2.appId)
     }
 
     private fun allowList(vararg uids: Int) = SparseArray<IntArray>().apply {

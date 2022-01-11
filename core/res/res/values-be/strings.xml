@@ -615,6 +615,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Каб працягнуць, скарыстайце адбітак пальца ці сродак разблакіроўкі экрана"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Нешта пайшло не так. Паўтарыце спробу."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок адбіткаў пальцаў"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Распазнаванне твару"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Праблема з распазнаваннем твару"</string>
@@ -667,6 +668,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Каб працягнуць, скарыстайце распазнаванне твару ці сродак разблакіроўкі экрана"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Нешта пайшло не так. Паўтарыце спробу."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Значок твару"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"чытаць параметры сінхранізацыі"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Дазваляе прыкладанням чытаць параметры сінхранізацыі для ўліковага запісу. Напрыклад, яны могуць вызначыць, цi сiнхранiзавана з улiковым запiсам прыкладанне \"Кантакты\"."</string>
@@ -972,7 +974,7 @@
     <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"Вобласць узора."</string>
     <string name="keyguard_accessibility_slide_area" msgid="4331399051142520176">"Вобласць слайда."</string>
     <string name="password_keyboard_label_symbol_key" msgid="2716255580853511949">"123"</string>
-    <string name="password_keyboard_label_alpha_key" msgid="5294837425652726684">"ABC"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="5294837425652726684">"АБВ"</string>
     <string name="password_keyboard_label_alt_key" msgid="8528261816395508841">"Alt"</string>
     <string name="granularity_label_character" msgid="8903387663153706317">"Знак"</string>
     <string name="granularity_label_word" msgid="3686589158760620518">"слова"</string>

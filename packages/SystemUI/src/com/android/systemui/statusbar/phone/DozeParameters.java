@@ -291,6 +291,7 @@ public class DozeParameters implements TunerService.Tunable,
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.print("getAlwaysOn(): "); pw.println(getAlwaysOn());
         pw.print("getDisplayStateSupported(): "); pw.println(getDisplayStateSupported());
         pw.print("getPulseDuration(): "); pw.println(getPulseDuration());
         pw.print("getPulseInDuration(): "); pw.println(getPulseInDuration());

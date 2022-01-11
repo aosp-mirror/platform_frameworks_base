@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Handiagotu pantaila betetzeko"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Luzatu pantaila betetzeko"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Pantaila-argazkia"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Desgaitu da Smart Lock"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"erabiltzaileak irudi bat bidali du"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Pantaila-argazkia gordetzen…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Pantaila-argazkia gordetzen…"</string>
@@ -304,7 +305,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1490779000057752281">"4G datuen erabilera pausatu da"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Datu-konexioa pausatu egin da"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Datuen erabilera pausatu da"</string>
-    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Iritsi zara ezarri zenuen datu-mugara. Datu-konexioa erabiltzeari utzi diozu.\n\nDatu-konexioa erabiltzeari berrekiten badiozu, datuen erabileragatiko gastuak izango dituzu."</string>
+    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Iritsi zara ezarri zenuen datu-mugara. Datu-konexioa erabiltzeari utzi diozu.\n\nDatu-konexioa erabiltzeari berrekiten badiozu, baliteke zerbait ordaindu behar izatea datuak erabiltzeagatik."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Jarraitu erabiltzen"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"GPS seinalearen bila"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Kokapena GPS bidez ezarri da"</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Mikrofonoa atzitzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dute."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Kamera atzitzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dute."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Kamera edo mikrofonoa atzitzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dituzte."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Gailua"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Beste gailu bat"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aldatu ikuspegi orokorra"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Kargatuta"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Kargatzen"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Bateria-mailaren arabera jakinarazpenak kontrolatzeko aukerak"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Aktibatuta"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Desaktibatuta"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Aktibatuta: aurpegian oinarrituta"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Bateria-mailaren arabera jakinarazpenak kontrolatzeko aukerekin, 0 eta 5 bitarteko garrantzi-mailetan sailka ditzakezu aplikazioen jakinarazpenak. \n\n"<b>"5. maila"</b>" \n- Erakutsi jakinarazpenen zerrendaren goialdean. \n- Baimendu etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"4. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"3. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n\n"<b>"2. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n\n"<b>"1. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n- Ezkutatu pantaila blokeatutik eta egoera-barratik. \n- Erakutsi jakinarazpenen zerrendaren behealdean. \n\n"<b>"0. maila"</b>" \n- Blokeatu aplikazioaren jakinarazpen guztiak."</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Jakinarazpenak"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Aurrerantzean ez duzu ikusiko horrelako jakinarazpenik"</string>
@@ -844,7 +846,7 @@
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Arakatzailea"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Kontaktuak"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Posta"</string>
-    <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS mezuak"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMSak"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musika"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
@@ -998,7 +1000,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"Ukatu"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Sakatu bateria-aurrezlea noiz aktibatu programatzeko"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Aktibatu aurrezlea bateria agortzeko arriskua dagoenean"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"Ez"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"Ez, eskerrik asko"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Bateria-aurrezlea aktibatu da"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Bateria-aurrezlea automatikoki aktibatuko da bateriaren %% <xliff:g id="PERCENTAGE">%d</xliff:g> gelditzen denean."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Ezarpenak"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Erabili hatz-marka irekitzeko"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autentifikazioa behar da. Autentifikatzeko, ukitu hatz-marken sentsorea."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Telefono-dei bat abian da"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Datu-konexioa"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> (<xliff:g id="NETWORKMODE">%2$s</xliff:g>)"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Konektatuta"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Ez da automatikoki aktibatuko datu-konexioa"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Konexiorik gabe"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Ez dago beste sare erabilgarririk"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"Ez dago sare erabilgarririk"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wifia"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Sarearen xehetasunak"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Sakatu sare bat hartara konektatzeko"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Sareak ikusteko, desblokeatu pantaila"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Sareak bilatzen…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Ezin izan da konektatu sarera"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Oraingoz ez da automatikoki konektatuko wifira"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Ikusi guztiak"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Sarea aldatzeko, deskonektatu Ethernet-a"</string>
 </resources>

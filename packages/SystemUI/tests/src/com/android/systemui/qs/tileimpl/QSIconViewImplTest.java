@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -74,6 +75,24 @@ public class QSIconViewImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testMutateIconDrawable() {
+        SlashImageView iv = mock(SlashImageView.class);
+        Drawable originalDrawable = mock(Drawable.class);
+        Drawable otherDrawable = mock(Drawable.class);
+        State s = new State();
+        s.icon = mock(Icon.class);
+        when(s.icon.getInvisibleDrawable(eq(mContext))).thenReturn(originalDrawable);
+        when(s.icon.getDrawable(eq(mContext))).thenReturn(originalDrawable);
+        when(iv.isShown()).thenReturn(true);
+        when(originalDrawable.getConstantState()).thenReturn(fakeConstantState(otherDrawable));
+
+
+        mIconView.updateIcon(iv, s, /* allowAnimations= */true);
+
+        verify(iv).setState(any(), eq(otherDrawable));
+    }
+
+    @Test
     public void testNoFirstFade() {
         ImageView iv = mock(ImageView.class);
         State s = new State();
@@ -103,5 +122,19 @@ public class QSIconViewImplTest extends SysuiTestCase {
     @Test
     public void testIconNotSet_toString() {
         assertFalse(mIconView.toString().contains("lastIcon"));
+    }
+
+    private static Drawable.ConstantState fakeConstantState(Drawable otherDrawable) {
+        return new Drawable.ConstantState() {
+            @Override
+            public Drawable newDrawable() {
+                return otherDrawable;
+            }
+
+            @Override
+            public int getChangingConfigurations() {
+                return 1;
+            }
+        };
     }
 }

@@ -101,18 +101,23 @@ public interface ServiceProvider {
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token);
 
-    void scheduleFaceDetect(int sensorId, @NonNull IBinder token, int userId,
+    long scheduleFaceDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
             int statsClient);
 
-    void cancelFaceDetect(int sensorId, @NonNull IBinder token);
+    void cancelFaceDetect(int sensorId, @NonNull IBinder token, long requestId);
 
-    void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
+    long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled);
 
-    void cancelAuthentication(int sensorId, @NonNull IBinder token);
+    void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
+            int cookie, @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
+            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled);
+
+    void cancelAuthentication(int sensorId, @NonNull IBinder token, long requestId);
 
     void scheduleRemove(int sensorId, @NonNull IBinder token, int faceId, int userId,
             @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName);

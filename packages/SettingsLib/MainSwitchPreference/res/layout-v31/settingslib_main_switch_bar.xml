@@ -50,7 +50,7 @@
             android:tint="?android:attr/colorAccent"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="@dimen/settingslib_restricted_icon_margin_end"
-            android:src="@*android:drawable/ic_info"
+            android:src="@android:drawable/ic_info"
             android:visibility="gone" />
 
         <Switch

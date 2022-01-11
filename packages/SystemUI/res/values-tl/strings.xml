@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"I-zoom upang punan screen"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"I-stretch upang mapuno screen"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Naka-disable ang Smart Lock"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"nagpadala ng larawan"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Sine-save ang screenshot…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Sine-save ang screenshot…"</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong mikropono."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong camera."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong camera o mikropono."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Device"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Iba pang device"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"I-toggle ang Overview"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Tapos nang mag-charge"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Nagcha-charge"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Mga kontrol sa notification ng power"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Naka-on"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Naka-off"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Naka-on - Batay sa mukha"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Sa pamamagitan ng mga kontrol sa notification ng power, magagawa mong itakda ang antas ng kahalagahan ng mga notification ng isang app mula 0 hanggang 5. \n\n"<b>"Antas 5"</b>" \n- Ipakita sa itaas ng listahan ng notification \n- Payagan ang pag-istorbo kapag full screen \n- Palaging sumilip \n\n"<b>"Antas 4"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Palaging sumilip \n\n"<b>"Antas 3"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Huwag kailanman sumilip \n\n"<b>"Antas 2"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Huwag kailanman sumilip \n- Huwag kailanman tumunog o mag-vibrate \n\n"<b>"Antas 1"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Huwag kailanman sumilip \n- Huwag kailanman tumunog o mag-vibrate \n- Itago sa lock screen at status bar \n- Ipakita sa ibaba ng listahan ng notification \n\n"<b>"Antas 0"</b>" \n- I-block ang lahat ng notification mula sa app"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Mga Notification"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Hindi mo na makikita ang mga notification na ito"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Gamitin ang fingerprint para buksan"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Kailangan ng pag-authenticate. Pindutin ang sensor para sa fingerprint para mag-authenticate."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Kasalukuyang may tawag sa telepono"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobile data"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Nakakonekta"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Hindi awtomatikong kokonekta ang mobile data"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Walang koneksyon"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Walang available na iba pang network"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"Walang available na network"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi‑Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Mga detalye ng network"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Mag-tap ng network para kumonekta"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"I-unlock para tingnan ang mga network"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Naghahanap ng mga network…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Hind nakakonekta sa network"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Hindi awtomatikong kokonekta ang Wi-Fi sa ngayon"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Tingnan lahat"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para lumipat ng network, idiskonekta ang ethernet"</string>
 </resources>

@@ -36,7 +36,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/screenshot_action_container_margin_horizontal"
-        android:layout_marginBottom="@dimen/screenshot_action_container_offset_y"
         android:paddingEnd="@dimen/screenshot_action_container_padding_right"
         android:paddingVertical="@dimen/screenshot_action_container_padding_vertical"
         android:elevation="1dp"

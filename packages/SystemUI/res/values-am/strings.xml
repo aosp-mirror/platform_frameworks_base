@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"ማያ እንዲሞላ አጉላ"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ማያ ለመሙለት ሳብ"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ቅጽበታዊ ገጽ እይታ"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock ተሰናክሏል"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ምስል ተልኳል"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ይህ የእርስዎን ማይክሮፎን እንዲጠቀሙ የተፈቀደላቸው የሁሉም መተግበሪያዎች እና አገልግሎቶች መዳረሻ እገዳን ያነሳል።"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ይህ ካሜራዎን እንዲጠቀሙ ለተፈቀደላቸው ሁሉም መተግበሪያዎች እና አገልግሎቶች መዳረሻን እገዳ ያነሳል።"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ይህ የእርስዎን ካሜራ ወይም ማይክሮፎን እንዲጠቀሙ የተፈቀደላቸው የሁሉም መተግበሪያዎች እና አገልግሎቶች መዳረሻ እገዳን ያነሳል።"</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"መሣሪያ"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"ሌላ መሣሪያ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"አጠቃላይ እይታን ቀያይር"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"ባትሪ ሞልቷል"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"ኃይል በመሙላት ላይ"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"የኃይል ማሳወቂያ መቆጣጠሪያዎች"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"በርቷል"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ጠፍቷል"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"በርቷል - መልክ ላይ የተመሠረተ"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"በኃይል ማሳወቂያ መቆጣጠሪያዎች አማካኝነት የአንድ መተግበሪያ ማሳወቂያዎች የአስፈላጊነት ደረጃ ከ0 እስከ 5 ድረስ ማዘጋጀት ይችላሉ። \n\n"<b>"ደረጃ 5"</b>" \n- በማሳወቂያ ዝርዝሩ አናት ላይ አሳይ \n- የሙሉ ማያ ገጽ ማቋረጥን ፍቀድ \n- ሁልጊዜ አጮልቀው ይመልከቱ \n\n"<b>"ደረጃ 4"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ከልክል \n- ሁልጊዜ አጮልቀው ይመልከቱ \n\n"<b>"ደረጃ 3"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ከልክል \n- በፍጹም አጮልቀው አይምልከቱ \n\n"<b>"ደረጃ 2"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ይከልክሉ \n- በፍጹም አጮልቀው አይመልከቱ \n- ድምፅ እና ንዝረትን በፍጹም አይኑር \n\n"<b>"ደረጃ 1"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ይከልክሉ \n- በፍጹም አጮልቀው አይመልከቱ \n- ድምፅ ወይም ንዝረትን በፍጹም አያደርጉ \n- ከመቆለፊያ ገጽ እና የሁኔታ አሞሌ ይደብቁ \n- በማሳወቂያ ዝርዝር ግርጌ ላይ አሳይ \n\n"<b>"ደረጃ 0"</b>" \n- ሁሉንም የመተግበሪያው ማሳወቂያዎች ያግዱ"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"ማሳወቂያዎች"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"እነዚህን ማሳወቂያዎችን ከእንግዲህ አይመለከቷቸውም"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ለመክፈት የጣት አሻራ ይጠቀሙ"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ማረጋገጥ ያስፈልጋል። ለማረጋገጥ የጣት አሻራ ዳሳሹን ይንኩ።"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"በመካሄድ ላይ የስልክ ጥሪ"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"ተገናኝቷል"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"የተንቀሳቃሽ ስልክ ውሂብ በራስ-ሰር አይገናኝም"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"ግንኙነት የለም"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"ሌላ አውታረ መረብ የሉም"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"ምንም አውታረ መረቦች የሉም"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi‑Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"የአውታረ መረብ ዝርዝሮች"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"ለመገናኘት አንድ አውታረ መረብ መታ ያድርጉ"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"አውታረ መረቦችን ለመመልከት ይክፈቱ"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"አውታረ መረቦችን በመፈለግ ላይ…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ከአውታረ መረቡ ጋር መገናኘት አልተሳካም"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wifi ለአሁን በራስ-ሰር አይገናኝም"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"ሁሉንም ይመልከቱ"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"አውታረ መረቦችን ለመቀየር፣ የኢተርኔት ግንኙነት ያቋርጡ"</string>
 </resources>

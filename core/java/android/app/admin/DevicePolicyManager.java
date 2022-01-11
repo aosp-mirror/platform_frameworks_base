@@ -9734,6 +9734,27 @@ public class DevicePolicyManager {
     }
 
     /**
+     * @param userId      The user for whom to retrieve information.
+     * @param restriction The restriction enforced by admin. It could be any user restriction or
+     *                    policy like {@link DevicePolicyManager#POLICY_DISABLE_CAMERA} and
+     *                    {@link DevicePolicyManager#POLICY_DISABLE_SCREEN_CAPTURE}.
+     * @return Details of admin and user which enforced the restriction for the userId. If
+     * restriction is null, profile owner for the user or device owner info is returned.
+     * @hide
+     */
+    public @Nullable Bundle getEnforcingAdminAndUserDetails(int userId,
+            @Nullable String restriction) {
+        if (mService != null) {
+            try {
+                return mService.getEnforcingAdminAndUserDetails(userId, restriction);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Hide or unhide packages. When a package is hidden it is unavailable for use, but the data and
      * actual package file remain. This function can be called by a device owner, profile owner, or
      * by a delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
