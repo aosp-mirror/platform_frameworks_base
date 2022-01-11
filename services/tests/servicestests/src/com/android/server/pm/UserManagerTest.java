@@ -375,7 +375,7 @@ public final class UserManagerTest {
         switchUser(user1.id, null, /* ignoreHandle= */ true);
 
         assertThat(mUserManager.removeUserOrSetEphemeral(user1.id, /* evenWhenDisallowed= */ false))
-                .isEqualTo(UserManager.REMOVE_RESULT_SET_EPHEMERAL);
+                .isEqualTo(UserManager.REMOVE_RESULT_DEFERRED);
 
         assertThat(hasUser(user1.id)).isTrue();
         assertThat(getUser(user1.id).isEphemeral()).isTrue();
