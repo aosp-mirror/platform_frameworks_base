@@ -16886,6 +16886,7 @@ package android.hardware {
     field public static final String STRING_TYPE_GYROSCOPE_LIMITED_AXES = "android.sensor.gyroscope_limited_axes";
     field public static final String STRING_TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED = "android.sensor.gyroscope_limited_axes_uncalibrated";
     field public static final String STRING_TYPE_GYROSCOPE_UNCALIBRATED = "android.sensor.gyroscope_uncalibrated";
+    field public static final String STRING_TYPE_HEADING = "android.sensor.heading";
     field public static final String STRING_TYPE_HEAD_TRACKER = "android.sensor.head_tracker";
     field public static final String STRING_TYPE_HEART_BEAT = "android.sensor.heart_beat";
     field public static final String STRING_TYPE_HEART_RATE = "android.sensor.heart_rate";
@@ -16921,6 +16922,7 @@ package android.hardware {
     field public static final int TYPE_GYROSCOPE_LIMITED_AXES = 39; // 0x27
     field public static final int TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED = 41; // 0x29
     field public static final int TYPE_GYROSCOPE_UNCALIBRATED = 16; // 0x10
+    field public static final int TYPE_HEADING = 42; // 0x2a
     field public static final int TYPE_HEAD_TRACKER = 37; // 0x25
     field public static final int TYPE_HEART_BEAT = 31; // 0x1f
     field public static final int TYPE_HEART_RATE = 21; // 0x15
