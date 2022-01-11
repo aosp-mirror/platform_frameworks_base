@@ -54,6 +54,7 @@ import static android.view.WindowInsets.Type.statusBars;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.annotation.AnyThread;
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
@@ -83,6 +84,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.provider.Settings;
 import android.text.InputType;
@@ -300,6 +302,44 @@ import java.util.Objects;
 public class InputMethodService extends AbstractInputMethodService {
     static final String TAG = "InputMethodService";
     static final boolean DEBUG = false;
+
+    /**
+     * Key for a boolean value that tells whether {@link InputMethodService} is responsible for
+     * rendering the back button and the IME switcher button or not when the gestural navigation is
+     * enabled.
+     *
+     * <p>This sysprop is just ignored when the gestural navigation mode is not enabled.</p>
+     *
+     * <p>
+     * To avoid complexity that is not necessary for production, you always need to reboot the
+     * device after modifying this flag as follows:
+     * <pre>
+     * $ adb root
+     * $ adb shell setprop persist.sys.ime.can_render_gestural_nav_buttons true
+     * $ adb reboot
+     * </pre>
+     * </p>
+     */
+    private static final String PROP_CAN_RENDER_GESTURAL_NAV_BUTTONS =
+            "persist.sys.ime.can_render_gestural_nav_buttons";
+
+    /**
+     * Returns whether {@link InputMethodService} is responsible for rendering the back button and
+     * the IME switcher button or not when the gestural navigation is enabled.
+     *
+     * <p>This method is supposed to be used with an assumption that the same value is returned in
+     * other processes. It is developers' responsibility for rebooting the device when the sysprop
+     * is modified.</p>
+     *
+     * @return {@code true} if {@link InputMethodService} is responsible for rendering the back
+     * button and the IME switcher button when the gestural navigation is enabled.
+     *
+     * @hide
+     */
+    @AnyThread
+    public static boolean canImeRenderGesturalNavButtons() {
+        return SystemProperties.getBoolean(PROP_CAN_RENDER_GESTURAL_NAV_BUTTONS, false);
+    }
 
     /**
      * Allows the system to optimize the back button affordance based on the presence of software
