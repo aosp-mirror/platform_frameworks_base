@@ -11862,6 +11862,7 @@ package android.content.pm {
     field public static final String FEATURE_SENSOR_GYROSCOPE = "android.hardware.sensor.gyroscope";
     field public static final String FEATURE_SENSOR_GYROSCOPE_LIMITED_AXES = "android.hardware.sensor.gyroscope_limited_axes";
     field public static final String FEATURE_SENSOR_GYROSCOPE_LIMITED_AXES_UNCALIBRATED = "android.hardware.sensor.gyroscope_limited_axes_uncalibrated";
+    field public static final String FEATURE_SENSOR_HEADING = "android.hardware.sensor.heading";
     field public static final String FEATURE_SENSOR_HEART_RATE = "android.hardware.sensor.heartrate";
     field public static final String FEATURE_SENSOR_HEART_RATE_ECG = "android.hardware.sensor.heartrate.ecg";
     field public static final String FEATURE_SENSOR_HINGE_ANGLE = "android.hardware.sensor.hinge_angle";

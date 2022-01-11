@@ -3185,6 +3185,13 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_SENSOR_HINGE_ANGLE = "android.hardware.sensor.hinge_angle";
 
+     /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a heading sensor.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_HEADING = "android.hardware.sensor.heading";
+
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports exposing head tracker sensors from peripheral
