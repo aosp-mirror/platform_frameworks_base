@@ -19,6 +19,7 @@ package com.android.internal.view;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.view.InputChannel;
+import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
@@ -36,7 +37,7 @@ import com.android.internal.view.InlineSuggestionsRequestInfo;
  */
 oneway interface IInputMethod {
     void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
-             int configChanges);
+             int configChanges, boolean stylusHwSupported);
 
     void onCreateInlineSuggestionsRequest(in InlineSuggestionsRequestInfo requestInfo,
             in IInlineSuggestionsRequestCallback cb);
@@ -59,4 +60,8 @@ oneway interface IInputMethod {
     void hideSoftInput(in IBinder hideInputToken, int flags, in ResultReceiver resultReceiver);
 
     void changeInputMethodSubtype(in InputMethodSubtype subtype);
+
+    void canStartStylusHandwriting(int requestId);
+
+    void startStylusHandwriting(in InputChannel channel, in List<MotionEvent> events);
 }
