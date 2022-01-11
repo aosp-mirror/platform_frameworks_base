@@ -173,7 +173,7 @@
     <item msgid="409235464399258501">"បិទ"</item>
     <item msgid="4195153527464162486">"64K per log buffer"</item>
     <item msgid="7464037639415220106">"256K per log buffer"</item>
-    <item msgid="8539423820514360724">"1M per log buffer"</item>
+    <item msgid="8539423820514360724">"1M ក្នុងមួយ​ឡុកបាហ្វើ"</item>
     <item msgid="1984761927103140651">"4M per log buffer"</item>
     <item msgid="2983219471251787208">"8M ក្នុងកន្លែងផ្ទុក​កំណត់ហេតុ​នីមួយៗ"</item>
   </string-array>
@@ -185,7 +185,7 @@
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="97587758561106269">"បិទ"</item>
-    <item msgid="7126170197336963369">"អង្គចងចាំកំណត់ហេតុបណ្តោះអាសន្នទាំងអស់"</item>
+    <item msgid="7126170197336963369">"ឡុកបាហ្វើទាំងអស់"</item>
     <item msgid="7167543126036181392">"ទាំងអស់ក្រៅពីអង្គចងចាំកំណត់ហេតុវិទ្យុបណ្តោះអាសន្ន"</item>
     <item msgid="5135340178556563979">"អង្គចងចាំបណ្ដោះអាសន្នកំណត់ហេតុ kernel តែប៉ុណ្ណោះ"</item>
   </string-array>
