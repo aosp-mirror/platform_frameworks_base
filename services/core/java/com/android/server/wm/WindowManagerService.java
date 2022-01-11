@@ -55,7 +55,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -1762,10 +1761,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 activity.attachStartingWindow(win);
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "addWindow: %s startingWindow=%s",
                         activity, win);
-            } else if (type == TYPE_INPUT_METHOD
-                    // IME window is always touchable.
-                    // Ignore non-touchable windows e.g. Stylus InkWindow.java.
-                    && (win.getAttrs().flags & FLAG_NOT_TOUCHABLE) == 0) {
+            } else if (type == TYPE_INPUT_METHOD) {
                 displayContent.setInputMethodWindowLocked(win);
                 imMayMove = false;
             } else if (type == TYPE_INPUT_METHOD_DIALOG) {
@@ -8292,7 +8288,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         flags = sanitizeFlagSlippery(flags, name, callingUid, callingPid);
 
-        final int sanitizedFlags = flags & (FLAG_NOT_TOUCHABLE
+        final int sanitizedFlags = flags & (LayoutParams.FLAG_NOT_TOUCHABLE
                 | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE);
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
         h.layoutParamsType = type;

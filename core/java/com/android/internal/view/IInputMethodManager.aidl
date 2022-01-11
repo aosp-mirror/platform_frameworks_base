@@ -81,7 +81,4 @@ interface IInputMethodManager {
     void startImeTrace();
     // Stops an ime trace.
     void stopImeTrace();
-
-    /** Start Stylus handwriting session **/
-    void startStylusHandwriting(in IInputMethodClient client);
 }
