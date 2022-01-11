@@ -4165,10 +4165,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final SurfaceControl newParent = computeImeParent();
         if (newParent != null && newParent != mInputMethodSurfaceParent) {
             mInputMethodSurfaceParent = newParent;
-            getPendingTransaction().reparent(mImeWindowsContainer.mSurfaceControl, newParent);
+            getSyncTransaction().reparent(mImeWindowsContainer.mSurfaceControl, newParent);
             // When surface parent is removed, the relative layer will also be removed. We need to
             // do a force update to make sure there is a layer set for the new parent.
-            assignRelativeLayerForIme(getPendingTransaction(), true /* forceUpdate */);
+            assignRelativeLayerForIme(getSyncTransaction(), true /* forceUpdate */);
             scheduleAnimation();
         }
     }
@@ -5009,8 +5009,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // exists so it get's layered above the starting window.
         if (imeTarget != null && !(imeTarget.mActivityRecord != null
                 && imeTarget.mActivityRecord.hasStartingWindow())) {
+            final WindowToken imeControlTargetToken =
+                    mImeControlTarget != null && mImeControlTarget.getWindow() != null
+                            ? mImeControlTarget.getWindow().mToken : null;
             final boolean canImeTargetSetRelativeLayer = imeTarget.getSurfaceControl() != null
-                    && imeTarget == mImeControlTarget
+                    && imeTarget.mToken == imeControlTargetToken
                     && !imeTarget.inMultiWindowMode()
                     && imeTarget.mToken.getActivity(app -> app.isAnimating(TRANSITION | PARENTS,
                             ANIMATION_TYPE_ALL & ~ANIMATION_TYPE_RECENTS)) == null;
