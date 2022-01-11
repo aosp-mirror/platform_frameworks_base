@@ -33,6 +33,8 @@ import android.view.DisplayAddress;
 import com.android.internal.R;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.config.BrightnessThresholds;
+import com.android.server.display.config.BrightnessThrottlingMap;
+import com.android.server.display.config.BrightnessThrottlingPoint;
 import com.android.server.display.config.Density;
 import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
@@ -43,6 +45,7 @@ import com.android.server.display.config.Point;
 import com.android.server.display.config.RefreshRateRange;
 import com.android.server.display.config.SensorDetails;
 import com.android.server.display.config.ThermalStatus;
+import com.android.server.display.config.ThermalThrottling;
 import com.android.server.display.config.Thresholds;
 import com.android.server.display.config.XmlParser;
 
@@ -144,6 +147,8 @@ public class DisplayDeviceConfig {
     private HighBrightnessModeData mHbmData;
     private DensityMap mDensityMap;
     private String mLoadedFrom = null;
+
+    private BrightnessThrottlingData mBrightnessThrottlingData;
 
     private DisplayDeviceConfig(Context context) {
         mContext = context;
@@ -424,6 +429,13 @@ public class DisplayDeviceConfig {
         return mDensityMap;
     }
 
+    /**
+     * @return brightness throttling data configuration data for the display.
+     */
+    public BrightnessThrottlingData getBrightnessThrottlingData() {
+        return BrightnessThrottlingData.create(mBrightnessThrottlingData);
+    }
+
     @Override
     public String toString() {
         return "DisplayDeviceConfig{"
@@ -441,6 +453,7 @@ public class DisplayDeviceConfig {
                 + ", mQuirks=" + mQuirks
                 + ", isHbmEnabled=" + mIsHighBrightnessModeEnabled
                 + ", mHbmData=" + mHbmData
+                + ", mBrightnessThrottlingData=" + mBrightnessThrottlingData
                 + ", mBrightnessRampFastDecrease=" + mBrightnessRampFastDecrease
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
                 + ", mBrightnessRampSlowDecrease=" + mBrightnessRampSlowDecrease
@@ -502,6 +515,7 @@ public class DisplayDeviceConfig {
                 loadBrightnessDefaultFromDdcXml(config);
                 loadBrightnessConstraintsFromConfigXml();
                 loadBrightnessMap(config);
+                loadBrightnessThrottlingMap(config);
                 loadHighBrightnessModeData(config);
                 loadQuirks(config);
                 loadBrightnessRamps(config);
@@ -662,6 +676,41 @@ public class DisplayDeviceConfig {
         mRawNits = nits;
         mRawBacklight = backlight;
         constrainNitsAndBacklightArrays();
+    }
+
+    private void loadBrightnessThrottlingMap(DisplayConfiguration config) {
+        final ThermalThrottling throttlingConfig = config.getThermalThrottling();
+        if (throttlingConfig == null) {
+            Slog.i(TAG, "no thermal throttling config found");
+            return;
+        }
+
+        final BrightnessThrottlingMap map = throttlingConfig.getBrightnessThrottlingMap();
+        if (map == null) {
+            Slog.i(TAG, "no brightness throttling map found");
+            return;
+        }
+
+        final List<BrightnessThrottlingPoint> points = map.getBrightnessThrottlingPoint();
+        // At least 1 point is guaranteed by the display device config schema
+        List<BrightnessThrottlingData.ThrottlingLevel> throttlingLevels =
+            new ArrayList<>(points.size());
+
+        boolean badConfig = false;
+        for (BrightnessThrottlingPoint point : points) {
+            ThermalStatus status = point.getThermalStatus();
+            if (!thermalStatusIsValid(status)) {
+                badConfig = true;
+                break;
+            }
+
+            throttlingLevels.add(new BrightnessThrottlingData.ThrottlingLevel(
+                convertThermalStatus(status), point.getBrightness().floatValue()));
+        }
+
+        if (!badConfig) {
+            mBrightnessThrottlingData = BrightnessThrottlingData.create(throttlingLevels);
+        }
     }
 
     private void loadBrightnessMapFromConfigXml() {
@@ -931,6 +980,25 @@ public class DisplayDeviceConfig {
         }
     }
 
+    private boolean thermalStatusIsValid(ThermalStatus value) {
+        if (value == null) {
+            return false;
+        }
+
+        switch (value) {
+            case none:
+            case light:
+            case moderate:
+            case severe:
+            case critical:
+            case emergency:
+            case shutdown:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private @PowerManager.ThermalStatus int convertThermalStatus(ThermalStatus value) {
         if (value == null) {
             return PowerManager.THERMAL_STATUS_NONE;
@@ -1060,5 +1128,92 @@ public class DisplayDeviceConfig {
                     + ", allowInLowPowerMode: " + allowInLowPowerMode
                     + "} ";
         }
+    }
+
+    /**
+     * Container for brightness throttling data.
+     */
+    static class BrightnessThrottlingData {
+        static class ThrottlingLevel {
+            public @PowerManager.ThermalStatus int thermalStatus;
+            public float brightness;
+
+            ThrottlingLevel(@PowerManager.ThermalStatus int thermalStatus, float brightness) {
+                this.thermalStatus = thermalStatus;
+                this.brightness = brightness;
+            }
+
+            @Override
+            public String toString() {
+                return "[" + thermalStatus + "," + brightness + "]";
+            }
+        }
+
+        public List<ThrottlingLevel> throttlingLevels;
+
+        static public BrightnessThrottlingData create(List<ThrottlingLevel> throttlingLevels)
+        {
+            if (throttlingLevels == null || throttlingLevels.size() == 0) {
+                Slog.e(TAG, "BrightnessThrottlingData received null or empty throttling levels");
+                return null;
+            }
+
+            ThrottlingLevel prevLevel = throttlingLevels.get(0);
+            final int numLevels = throttlingLevels.size();
+            for (int i = 1; i < numLevels; i++) {
+                ThrottlingLevel thisLevel = throttlingLevels.get(i);
+
+                if (thisLevel.thermalStatus <= prevLevel.thermalStatus) {
+                    Slog.e(TAG, "brightnessThrottlingMap must be strictly increasing, ignoring "
+                            + "configuration. ThermalStatus " + thisLevel.thermalStatus + " <= "
+                            + prevLevel.thermalStatus);
+                    return null;
+                }
+
+                if (thisLevel.brightness >= prevLevel.brightness) {
+                    Slog.e(TAG, "brightnessThrottlingMap must be strictly decreasing, ignoring "
+                            + "configuration. Brightness " + thisLevel.brightness + " >= "
+                            + thisLevel.brightness);
+                    return null;
+                }
+
+                prevLevel = thisLevel;
+            }
+
+            for (ThrottlingLevel level : throttlingLevels) {
+                // Non-negative brightness values are enforced by device config schema
+                if (level.brightness > PowerManager.BRIGHTNESS_MAX) {
+                    Slog.e(TAG, "brightnessThrottlingMap contains a brightness value exceeding "
+                            + "system max. Brightness " + level.brightness + " > "
+                            + PowerManager.BRIGHTNESS_MAX);
+                    return null;
+                }
+            }
+
+            return new BrightnessThrottlingData(throttlingLevels);
+        }
+
+        static public BrightnessThrottlingData create(BrightnessThrottlingData other) {
+            if (other == null)
+                return null;
+
+            return BrightnessThrottlingData.create(other.throttlingLevels);
+        }
+
+
+        @Override
+        public String toString() {
+            return "BrightnessThrottlingData{"
+                + "throttlingLevels:" + throttlingLevels
+                + "} ";
+        }
+
+        private BrightnessThrottlingData(List<ThrottlingLevel> inLevels) {
+            throttlingLevels = new ArrayList<>(inLevels.size());
+            for (ThrottlingLevel level : inLevels) {
+                throttlingLevels.add(new ThrottlingLevel(level.thermalStatus, level.brightness));
+            }
+        }
+
     }
 }
