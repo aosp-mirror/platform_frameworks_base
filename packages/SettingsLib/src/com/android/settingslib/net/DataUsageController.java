@@ -16,8 +16,6 @@
 
 package com.android.settingslib.net;
 
-import static android.net.NetworkStatsHistory.FIELD_RX_BYTES;
-import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.telephony.TelephonyManager.SIM_STATE_READY;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
@@ -27,12 +25,9 @@ import android.app.usage.NetworkStats.Bucket;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.INetworkStatsService;
-import android.net.INetworkStatsSession;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkTemplate;
-import android.os.ServiceManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
@@ -51,25 +46,20 @@ public class DataUsageController {
 
     private static final String TAG = "DataUsageController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final int FIELDS = FIELD_RX_BYTES | FIELD_TX_BYTES;
     private static final StringBuilder PERIOD_BUILDER = new StringBuilder(50);
     private static final java.util.Formatter PERIOD_FORMATTER = new java.util.Formatter(
             PERIOD_BUILDER, Locale.getDefault());
 
     private final Context mContext;
-    private final INetworkStatsService mStatsService;
     private final NetworkPolicyManager mPolicyManager;
     private final NetworkStatsManager mNetworkStatsManager;
 
-    private INetworkStatsSession mSession;
     private Callback mCallback;
     private NetworkNameProvider mNetworkController;
     private int mSubscriptionId;
 
     public DataUsageController(Context context) {
         mContext = context;
-        mStatsService = INetworkStatsService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         mPolicyManager = NetworkPolicyManager.from(mContext);
         mNetworkStatsManager = context.getSystemService(NetworkStatsManager.class);
         mSubscriptionId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
