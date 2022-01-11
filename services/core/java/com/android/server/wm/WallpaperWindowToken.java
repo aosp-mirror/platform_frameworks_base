@@ -107,7 +107,7 @@ class WallpaperWindowToken extends WindowToken {
     /** Returns {@code true} if visibility is changed. */
     boolean updateWallpaperWindows(boolean visible) {
         boolean changed = false;
-        if (isVisible() != visible) {
+        if (mVisibleRequested != visible) {
             ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper token %s visible=%b",
                     token, visible);
             setVisibility(visible);
