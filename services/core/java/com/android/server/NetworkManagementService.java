@@ -20,12 +20,12 @@ import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
 import static android.Manifest.permission.SHUTDOWN;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
 import static android.net.INetd.FIREWALL_ALLOWLIST;
-import static android.net.INetd.FIREWALL_CHAIN_DOZABLE;
 import static android.net.INetd.FIREWALL_CHAIN_NONE;
-import static android.net.INetd.FIREWALL_CHAIN_POWERSAVE;
-import static android.net.INetd.FIREWALL_CHAIN_RESTRICTED;
-import static android.net.INetd.FIREWALL_CHAIN_STANDBY;
 import static android.net.INetd.FIREWALL_DENYLIST;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
@@ -44,6 +44,7 @@ import static com.android.net.module.util.NetworkStatsUtils.LIMIT_GLOBAL_ALERT;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.INetdUnsolicitedEventListener;
 import android.net.INetworkManagementEventObserver;
@@ -1158,19 +1159,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             }
 
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "inetd bandwidth");
+            final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             try {
                 if (allowlist) {
-                    if (enable) {
-                        mNetdService.bandwidthAddNiceApp(uid);
-                    } else {
-                        mNetdService.bandwidthRemoveNiceApp(uid);
-                    }
+                    cm.updateMeteredNetworkAllowList(uid, enable);
                 } else {
-                    if (enable) {
-                        mNetdService.bandwidthAddNaughtyApp(uid);
-                    } else {
-                        mNetdService.bandwidthRemoveNaughtyApp(uid);
-                    }
+                    cm.updateMeteredNetworkDenyList(uid, enable);
                 }
                 synchronized (mRulesLock) {
                     if (enable) {
@@ -1179,7 +1173,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                         quotaList.delete(uid);
                     }
                 }
-            } catch (RemoteException | ServiceSpecificException e) {
+            } catch (RuntimeException e) {
                 throw new IllegalStateException(e);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
@@ -1464,9 +1458,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 throw new IllegalArgumentException("Bad child chain: " + chainName);
             }
 
+            final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             try {
-                mNetdService.firewallEnableChildChain(chain, enable);
-            } catch (RemoteException | ServiceSpecificException e) {
+                cm.setFirewallChainEnabled(chain, enable);
+            } catch (RuntimeException e) {
                 throw new IllegalStateException(e);
             }
 
@@ -1538,25 +1533,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                     updateFirewallUidRuleLocked(chain, uid, FIREWALL_RULE_DEFAULT);
                 }
             }
+            final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             try {
-                switch (chain) {
-                    case FIREWALL_CHAIN_DOZABLE:
-                        mNetdService.firewallReplaceUidChain("fw_dozable", true, uids);
-                        break;
-                    case FIREWALL_CHAIN_STANDBY:
-                        mNetdService.firewallReplaceUidChain("fw_standby", false, uids);
-                        break;
-                    case FIREWALL_CHAIN_POWERSAVE:
-                        mNetdService.firewallReplaceUidChain("fw_powersave", true, uids);
-                        break;
-                    case FIREWALL_CHAIN_RESTRICTED:
-                        mNetdService.firewallReplaceUidChain("fw_restricted", true, uids);
-                        break;
-                    case FIREWALL_CHAIN_NONE:
-                    default:
-                        Slog.d(TAG, "setFirewallUidRules() called on invalid chain: " + chain);
-                }
-            } catch (RemoteException e) {
+                cm.replaceFirewallChain(chain, uids);
+            } catch (RuntimeException e) {
                 Slog.w(TAG, "Error flushing firewall chain " + chain, e);
             }
         }
@@ -1572,10 +1552,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     private void setFirewallUidRuleLocked(int chain, int uid, int rule) {
         if (updateFirewallUidRuleLocked(chain, uid, rule)) {
-            final int ruleType = getFirewallRuleType(chain, rule);
+            final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             try {
-                mNetdService.firewallSetUidRule(chain, uid, ruleType);
-            } catch (RemoteException | ServiceSpecificException e) {
+                cm.updateFirewallRule(chain, uid, isFirewallRuleAllow(chain, rule));
+            } catch (RuntimeException e) {
                 throw new IllegalStateException(e);
             }
         }
@@ -1645,12 +1625,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
-    private int getFirewallRuleType(int chain, int rule) {
+    // There are only two type of firewall rule: FIREWALL_RULE_ALLOW or FIREWALL_RULE_DENY.
+    private boolean isFirewallRuleAllow(int chain, int rule) {
         if (rule == NetworkPolicyManager.FIREWALL_RULE_DEFAULT) {
-            return getFirewallType(chain) == FIREWALL_ALLOWLIST
-                    ? INetd.FIREWALL_RULE_DENY : INetd.FIREWALL_RULE_ALLOW;
+            return getFirewallType(chain) == FIREWALL_DENYLIST;
         }
-        return rule;
+        return rule == INetd.FIREWALL_RULE_ALLOW;
     }
 
     private void enforceSystemUid() {
