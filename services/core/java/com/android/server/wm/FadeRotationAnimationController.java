@@ -256,7 +256,7 @@ public class FadeRotationAnimationController extends FadeAnimationController {
                     false /* applyFixedTransformationHint */);
             for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
                 final SurfaceControl leash = mTargetWindowTokens.valueAt(i);
-                if (leash != null) {
+                if (leash != null && leash.isValid()) {
                     rotator.applyTransform(t, leash);
                 }
             }
@@ -265,7 +265,7 @@ public class FadeRotationAnimationController extends FadeAnimationController {
         // Hide the windows immediately because a screenshot layer should cover the screen.
         for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
             final SurfaceControl leash = mTargetWindowTokens.valueAt(i);
-            if (leash != null) {
+            if (leash != null && leash.isValid()) {
                 t.setAlpha(leash, 0f);
             }
         }
