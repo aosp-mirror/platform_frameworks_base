@@ -66,9 +66,11 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.HotwordDetectionServiceProvider;
 
@@ -678,8 +680,23 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @Override
         public void onPackageInstalled(@NonNull AndroidPackage pkg, int previousAppId,
-                @NonNull PackageInstalledParams params, @UserIdInt int userId) {
-            mPermissionManagerServiceImpl.onPackageInstalled(pkg, previousAppId, params, userId);
+                @NonNull PackageInstalledParams params, @UserIdInt int rawUserId) {
+            Objects.requireNonNull(pkg, "pkg");
+            Objects.requireNonNull(params, "params");
+            Preconditions.checkArgument(rawUserId >= UserHandle.USER_SYSTEM
+                    || rawUserId == UserHandle.USER_ALL, "userId");
+
+            mPermissionManagerServiceImpl.onPackageInstalled(pkg, previousAppId, params, rawUserId);
+            final int[] userIds = rawUserId == UserHandle.USER_ALL ? getAllUserIds()
+                    : new int[] { rawUserId };
+            for (final int userId : userIds) {
+                final int autoRevokePermissionsMode = params.getAutoRevokePermissionsMode();
+                if (autoRevokePermissionsMode == AppOpsManager.MODE_ALLOWED
+                        || autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED) {
+                    setAutoRevokeExemptedInternal(pkg,
+                            autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED, userId);
+                }
+            }
         }
 
         @Override
@@ -777,6 +794,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         /* End of delegate methods to PermissionManagerServiceInterface */
+    }
+
+    /**
+     * Returns all relevant user ids.  This list include the current set of created user ids as well
+     * as pre-created user ids.
+     * @return user ids for created users and pre-created users
+     */
+    private int[] getAllUserIds() {
+        return UserManagerService.getInstance().getUserIdsIncludingPreCreated();
     }
 
     /**
