@@ -1351,7 +1351,7 @@ public class AudioSystem
             return DEVICE_OUT_BLE_SPEAKER_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
-            return Integer.toString(device);
+            return "0x" + Integer.toHexString(device);
         }
     }
 
