@@ -362,6 +362,13 @@ public abstract class TvIAppService extends Service {
         }
 
         /**
+         * To toggle Digital Teletext Application if there is one in AIT app list.
+         * @param enable
+         */
+        public void onSetTeletextAppEnabled(boolean enable) {
+        }
+
+        /**
          * Receives current channel URI.
          * @hide
          */
@@ -862,6 +869,10 @@ public abstract class TvIAppService extends Service {
             onDestroyBiInteractiveApp(biIAppId);
         }
 
+        void setTeletextAppEnabled(boolean enable) {
+            onSetTeletextAppEnabled(enable);
+        }
+
         void sendCurrentChannelUri(@Nullable Uri channelUri) {
             onCurrentChannelUri(channelUri);
         }
@@ -1020,6 +1031,30 @@ public abstract class TvIAppService extends Service {
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyBiInteractiveAppCreated", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Notifies when the digital teletext app state is changed.
+         * @param state the current state.
+         */
+        public final void notifyTeletextAppStateChanged(@TvIAppManager.TeletextAppState int state) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "notifyTeletextAppState (state="
+                                    + state + ")");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTeletextAppStateChanged(state);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTeletextAppState", e);
                     }
                 }
             });
@@ -1276,6 +1311,11 @@ public abstract class TvIAppService extends Service {
         @Override
         public void createBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
             mSessionImpl.createBiInteractiveApp(biIAppUri, params);
+        }
+
+        @Override
+        public void setTeletextAppEnabled(boolean enable) {
+            mSessionImpl.setTeletextAppEnabled(enable);
         }
 
         @Override

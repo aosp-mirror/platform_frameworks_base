@@ -92,6 +92,30 @@ public final class TvIAppManager {
      */
     public static final int TV_INTERACTIVE_APP_RTE_STATE_ERROR = 4;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, prefix = "TELETEXT_APP_STATE_", value = {
+            TELETEXT_APP_STATE_SHOW,
+            TELETEXT_APP_STATE_HIDE,
+            TELETEXT_APP_STATE_ERROR})
+    public @interface TeletextAppState {}
+
+    /**
+     * Show state of Teletext app.
+     * @hide
+     */
+    public static final int TELETEXT_APP_STATE_SHOW = 1;
+    /**
+     * Hide state of Teletext app.
+     * @hide
+     */
+    public static final int TELETEXT_APP_STATE_HIDE = 2;
+    /**
+     * Error state of Teletext app.
+     * @hide
+     */
+    public static final int TELETEXT_APP_STATE_ERROR = 3;
+
     /**
      * Key for package name in app link.
      * <p>Type: String
@@ -379,6 +403,18 @@ public final class TvIAppManager {
                         return;
                     }
                     record.postBiInteractiveAppCreated(biIAppUri, biIAppId);
+                }
+            }
+
+            @Override
+            public void onTeletextAppStateChanged(int state, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postTeletextAppStateChanged(state);
                 }
             }
         };
@@ -796,6 +832,18 @@ public final class TvIAppManager {
             }
             try {
                 mService.destroyBiInteractiveApp(mToken, biIAppId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void setTeletextAppEnabled(boolean enable) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.setTeletextAppEnabled(mToken, enable, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1522,6 +1570,15 @@ public final class TvIAppManager {
                 }
             });
         }
+
+        void postTeletextAppStateChanged(int state) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onTeletextAppStateChanged(mSession, state);
+                }
+            });
+        }
     }
 
     /**
@@ -1646,6 +1703,17 @@ public final class TvIAppManager {
          *                 app.
          */
         public void onBiInteractiveAppCreated(Session session, Uri biIAppUri, String biIAppId) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#notifyTeletextAppStateChanged} is
+         * called.
+         *
+         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param state the current state.
+         */
+        public void onTeletextAppStateChanged(
+                Session session, @TvIAppManager.TeletextAppState int state) {
         }
     }
 }

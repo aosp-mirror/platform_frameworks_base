@@ -1193,6 +1193,31 @@ public class TvIAppManagerService extends SystemService {
         }
 
         @Override
+        public void setTeletextAppEnabled(IBinder sessionToken, boolean enable, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "setTeletextAppEnabled(enable=%d)", enable);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "setTeletextAppEnabled");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).setTeletextAppEnabled(enable);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in setTeletextAppEnabled", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void sendCurrentChannelUri(IBinder sessionToken, Uri channelUri, int userId) {
             if (DEBUG) {
                 Slogf.d(TAG, "sendCurrentChannelUri(channelUri=%s)", channelUri.toString());
@@ -2216,6 +2241,23 @@ public class TvIAppManagerService extends SystemService {
                             biIAppUri, biIAppId, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onBiInteractiveAppCreated", e);
+                }
+            }
+        }
+
+        @Override
+        public void onTeletextAppStateChanged(int state) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onTeletextAppStateChanged (state=" + state + ")");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onTeletextAppStateChanged(state, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onTeletextAppStateChanged", e);
                 }
             }
         }

@@ -35,6 +35,7 @@ oneway interface ITvInteractiveAppSessionCallback {
     void onRemoveBroadcastInfo(int id);
     void onSessionStateChanged(int state);
     void onBiInteractiveAppCreated(in Uri biIAppUri, in String biIAppId);
+    void onTeletextAppStateChanged(int state);
     void onCommandRequest(in String cmdType, in Bundle parameters);
     void onSetVideoBounds(in Rect rect);
     void onRequestCurrentChannelUri();
