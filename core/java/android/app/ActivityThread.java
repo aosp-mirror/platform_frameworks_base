@@ -4535,6 +4535,12 @@ public final class ActivityThread extends ClientTransactionHandler
         // we are back active so skip it.
         unscheduleGcIdler();
 
+        // To investigate "duplciate Application objects" bug (b/185177290)
+        if (UserHandle.myUserId() != UserHandle.getUserId(data.info.applicationInfo.uid)) {
+            Slog.wtf(TAG, "handleCreateService called with wrong appinfo UID: myUserId="
+                    + UserHandle.myUserId() + " appinfo.uid=" + data.info.applicationInfo.uid);
+        }
+
         LoadedApk packageInfo = getPackageInfoNoCheck(
                 data.info.applicationInfo, data.compatInfo);
         Service service = null;
