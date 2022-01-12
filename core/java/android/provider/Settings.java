@@ -9057,6 +9057,16 @@ public final class Settings {
         public static final String SCREENSAVER_DEFAULT_COMPONENT = "screensaver_default_component";
 
         /**
+         * The complications that are enabled to be shown over the screensaver by the user. Holds
+         * a comma separated list of
+         * {@link com.android.settingslib.dream.DreamBackend.ComplicationType}.
+         *
+         * @hide
+         */
+        public static final String SCREENSAVER_ENABLED_COMPLICATIONS =
+                "screensaver_enabled_complications";
+
+        /**
          * The default NFC payment component
          * @hide
          */
