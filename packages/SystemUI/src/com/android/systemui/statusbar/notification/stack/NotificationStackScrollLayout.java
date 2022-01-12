@@ -707,6 +707,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @VisibleForTesting
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void updateFooter() {
+        if (mFooterView == null) {
+            return;
+        }
         boolean showDismissView = mClearAllEnabled && hasActiveClearableNotifications(ROWS_ALL);
         boolean showFooterView = (showDismissView ||
                 mEntryManager.getNotificationData().getActiveNotifications().size() != 0)
