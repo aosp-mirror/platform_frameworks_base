@@ -235,7 +235,6 @@ public class PowerExemptionManager {
     public static final int REASON_LOCKED_BOOT_COMPLETED = 202;
     /**
      * All Bluetooth broadcasts.
-     * @hide
      */
     public static final int REASON_BLUETOOTH_BROADCAST = 203;
     /**
