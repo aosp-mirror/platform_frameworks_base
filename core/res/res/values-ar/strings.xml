@@ -319,7 +319,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"الموقع الجغرافي"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"الوصول إلى موقع هذا الجهاز"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"التقويم"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول تقويمك"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول إلى تقويمك"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"الملفات والوسائط"</string>
@@ -338,17 +338,17 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"إجراء مكالمات هاتفية وإدارتها"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"أجهزة استشعار الجسم"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"الوصول إلى بيانات المستشعر حول علاماتك الحيوية"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"استرداد محتوى النافذة"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"فحص محتوى نافذة يتم التفاعل معها"</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"تفعيل الاستكشاف باللمس"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"استرداد محتوى النافذة:"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"فحص محتوى نافذة يتم التفاعل معها."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"تفعيل الاستكشاف باللمس:"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"سيتم قول العناصر التي تم النقر عليها بصوت عالٍ ويمكن استكشاف الشاشة باستخدام الإيماءات."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"ملاحظة النص الذي تكتبه"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"ملاحظة النص الذي تكتبه:"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"يتضمن بيانات شخصية مثل أرقام بطاقات الائتمان وكلمات المرور."</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"التحكم في تكبير الشاشة"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"التحكم في تكبير الشاشة:"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"يمكنك التحكّم في مستوى تكبير/تصغير الشاشة وتحديد الموضع."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"تنفيذ إيماءات"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"يمكن النقر والتمرير بسرعة والتصغير أو التكبير بإصبعين وتنفيذ إيماءات أخرى."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"إيماءات بصمات الإصبع"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"إيماءات بصمات الإصبع:"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على جهاز استشعار بصمة الإصبع في الجهاز."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"أخذ لقطة شاشة"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"يمكن أخذ لقطة شاشة."</string>
