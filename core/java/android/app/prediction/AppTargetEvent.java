@@ -72,7 +72,7 @@ public final class AppTargetEvent implements Parcelable {
     }
 
     private AppTargetEvent(Parcel parcel) {
-        mTarget = parcel.readParcelable(null, android.app.prediction.AppTarget.class);
+        mTarget = parcel.readParcelable(null);
         mLocation = parcel.readString();
         mAction = parcel.readInt();
     }

@@ -75,7 +75,7 @@ public final class DataUsageRequest implements Parcelable {
                 @Override
                 public DataUsageRequest createFromParcel(Parcel in) {
                     int requestId = in.readInt();
-                    NetworkTemplate template = in.readParcelable(null, android.net.NetworkTemplate.class);
+                    NetworkTemplate template = in.readParcelable(null);
                     long thresholdInBytes = in.readLong();
                     DataUsageRequest result = new DataUsageRequest(requestId, template,
                             thresholdInBytes);

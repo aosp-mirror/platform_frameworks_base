@@ -65,7 +65,7 @@ public class PromptInfo implements Parcelable {
         mAuthenticators = in.readInt();
         mDisallowBiometricsIfPolicyExists = in.readBoolean();
         mReceiveSystemEvents = in.readBoolean();
-        mAllowedSensorIds = in.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class);
+        mAllowedSensorIds = in.readArrayList(Integer.class.getClassLoader());
         mAllowBackgroundAuthentication = in.readBoolean();
         mIgnoreEnrollmentState = in.readBoolean();
     }

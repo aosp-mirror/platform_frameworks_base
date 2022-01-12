@@ -55,7 +55,7 @@ public final class BufferConstraints implements Parcelable {
     BufferConstraints(Parcel in) {
         mBufferConstraintList = new ArrayList<BufferConstraint>();
         mBufferConstraints = new HashMap<Integer, BufferConstraint>();
-        in.readList(mBufferConstraintList, BufferConstraint.class.getClassLoader(), android.bluetooth.BufferConstraint.class);
+        in.readList(mBufferConstraintList, BufferConstraint.class.getClassLoader());
         for (int i = 0; i < mBufferConstraintList.size(); i++) {
             mBufferConstraints.put(i, mBufferConstraintList.get(i));
         }
