@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.usage.NetworkStatsManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
@@ -40,12 +41,15 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class MobileRadioPowerCalculatorTest {
     private static final double PRECISION = 0.00001;
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
+    @Mock
+    NetworkStatsManager mNetworkStatsManager;
 
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
@@ -90,7 +94,8 @@ public class MobileRadioPowerCalculatorTest {
 
         ModemActivityInfo mai = new ModemActivityInfo(10000, 2000, 3000,
                 new int[] {100, 200, 300, 400, 500}, 600);
-        stats.noteModemControllerActivity(mai, POWER_DATA_UNAVAILABLE, 10000, 10000);
+        stats.noteModemControllerActivity(mai, POWER_DATA_UNAVAILABLE, 10000, 10000,
+                mNetworkStatsManager);
 
         mStatsRule.setTime(12_000_000, 12_000_000);
 
@@ -150,7 +155,7 @@ public class MobileRadioPowerCalculatorTest {
 
         ModemActivityInfo mai = new ModemActivityInfo(10000, 2000, 3000,
                 new int[] {100, 200, 300, 400, 500}, 600);
-        stats.noteModemControllerActivity(mai, 10_000_000, 10000, 10000);
+        stats.noteModemControllerActivity(mai, 10_000_000, 10000, 10000, mNetworkStatsManager);
 
         mStatsRule.setTime(12_000_000, 12_000_000);
 

@@ -21,6 +21,7 @@ import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.usage.NetworkStatsManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
@@ -35,6 +36,7 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -42,6 +44,9 @@ public class WifiPowerCalculatorTest {
     private static final double PRECISION = 0.00001;
 
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
+
+    @Mock
+    NetworkStatsManager mNetworkStatsManager;
 
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
@@ -80,7 +85,8 @@ public class WifiPowerCalculatorTest {
         final BatteryStatsImpl batteryStats = setupTestNetworkNumbers();
         final WifiActivityEnergyInfo energyInfo = setupPowerControllerBasedModelEnergyNumbersInfo();
 
-        batteryStats.updateWifiState(energyInfo, POWER_DATA_UNAVAILABLE, 1000, 1000);
+        batteryStats.updateWifiState(energyInfo, POWER_DATA_UNAVAILABLE, 1000, 1000,
+                mNetworkStatsManager);
 
         WifiPowerCalculator calculator = new WifiPowerCalculator(mStatsRule.getPowerProfile());
         mStatsRule.apply(BatteryUsageStatsRule.POWER_PROFILE_MODEL_ONLY, calculator);
@@ -113,7 +119,7 @@ public class WifiPowerCalculatorTest {
         final BatteryStatsImpl batteryStats = setupTestNetworkNumbers();
         final WifiActivityEnergyInfo energyInfo = setupPowerControllerBasedModelEnergyNumbersInfo();
 
-        batteryStats.updateWifiState(energyInfo, 1_000_000, 1000, 1000);
+        batteryStats.updateWifiState(energyInfo, 1_000_000, 1000, 1000, mNetworkStatsManager);
 
         WifiPowerCalculator calculator = new WifiPowerCalculator(mStatsRule.getPowerProfile());
         mStatsRule.apply(calculator);
@@ -160,7 +166,8 @@ public class WifiPowerCalculatorTest {
 
         // Don't pass WifiActivityEnergyInfo, making WifiPowerCalculator rely exclusively
         // on the packet counts.
-        batteryStats.updateWifiState(/* energyInfo */ null, POWER_DATA_UNAVAILABLE, 1000, 1000);
+        batteryStats.updateWifiState(/* energyInfo */ null, POWER_DATA_UNAVAILABLE, 1000, 1000,
+                mNetworkStatsManager);
 
         WifiPowerCalculator calculator = new WifiPowerCalculator(mStatsRule.getPowerProfile());
         mStatsRule.apply(BatteryUsageStatsRule.POWER_PROFILE_MODEL_ONLY, calculator);
@@ -180,7 +187,8 @@ public class WifiPowerCalculatorTest {
 
         // Don't pass WifiActivityEnergyInfo, making WifiPowerCalculator rely exclusively
         // on the packet counts.
-        batteryStats.updateWifiState(/* energyInfo */ null, 1_000_000, 1000, 1000);
+        batteryStats.updateWifiState(/* energyInfo */ null, 1_000_000, 1000, 1000,
+                mNetworkStatsManager);
 
         WifiPowerCalculator calculator = new WifiPowerCalculator(mStatsRule.getPowerProfile());
         mStatsRule.apply(calculator);
