@@ -28,6 +28,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -410,7 +411,7 @@ public final class NetworkStats implements Parcelable {
                         && roaming == e.roaming && defaultNetwork == e.defaultNetwork
                         && rxBytes == e.rxBytes && rxPackets == e.rxPackets
                         && txBytes == e.txBytes && txPackets == e.txPackets
-                        && operations == e.operations && iface.equals(e.iface);
+                        && operations == e.operations && TextUtils.equals(iface, e.iface);
             }
             return false;
         }
