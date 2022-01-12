@@ -131,6 +131,7 @@ public class TelephonyRegistryManager {
                     mContext.getAttributionTag(), callback);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -152,6 +153,7 @@ public class TelephonyRegistryManager {
             mSubscriptionChangedListenerMap.remove(listener);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -194,6 +196,7 @@ public class TelephonyRegistryManager {
                     mContext.getAttributionTag(), callback);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -216,6 +219,7 @@ public class TelephonyRegistryManager {
             mOpportunisticSubscriptionChangedListenerMap.remove(listener);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -304,6 +308,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyCarrierNetworkChange(active);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -329,6 +334,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyCarrierNetworkChangeWithSubId(subscriptionId, active);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -347,6 +353,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyCallState(slotIndex, subId, state, incomingNumber);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -364,6 +371,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyCallStateForAllSubs(state, incomingNumber);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -376,6 +384,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifySubscriptionInfoChanged();
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -388,6 +397,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyOpportunisticSubscriptionInfoChanged();
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -404,6 +414,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyServiceStateForPhoneId(slotIndex, subId, state);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -421,6 +432,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifySignalStrengthForPhoneId(slotIndex, subId, signalStrength);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -439,6 +451,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyMessageWaitingChangedForPhoneId(slotIndex, subId, msgWaitingInd);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -454,6 +467,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyCallForwardingChangedForSubscriber(subId, callForwardInd);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -469,6 +483,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyDataActivityForSubscriber(subId, dataActivityType);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -490,6 +505,7 @@ public class TelephonyRegistryManager {
                     slotIndex, subId, preciseState);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -508,6 +524,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyCallQualityChanged(callQuality, slotIndex, subId, networkType);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -523,6 +540,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyEmergencyNumberList(slotIndex, subId);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -538,6 +556,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyOutgoingEmergencyCall(phoneId, subId, emergencyNumber);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -553,6 +572,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyOutgoingEmergencySms(phoneId, subId, emergencyNumber);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -570,6 +590,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyRadioPowerStateChanged(slotIndex, subId, radioPowerState);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -583,6 +604,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyPhoneCapabilityChanged(phoneCapability);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -615,6 +637,7 @@ public class TelephonyRegistryManager {
                     SIM_ACTIVATION_TYPE_DATA, activationState);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -634,6 +657,7 @@ public class TelephonyRegistryManager {
                     SIM_ACTIVATION_TYPE_VOICE, activationState);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -651,6 +675,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyUserMobileDataStateChangedForPhoneId(slotIndex, subId, state);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -669,6 +694,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyDisplayInfoChanged(slotIndex, subscriptionId, telephonyDisplayInfo);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -683,6 +709,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyImsDisconnectCause(subId, imsReasonInfo);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -698,6 +725,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifySrvccStateChanged(subId, state);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -721,6 +749,7 @@ public class TelephonyRegistryManager {
                 foregroundCallPreciseState, backgroundCallPreciseState);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -741,6 +770,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyDisconnectCause(slotIndex, subId, cause, preciseCause);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -755,6 +785,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyCellLocationForSubscriber(subId, cellLocation);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -769,7 +800,7 @@ public class TelephonyRegistryManager {
         try {
             sRegistry.notifyCellInfoForSubscriber(subId, cellInfo);
         } catch (RemoteException ex) {
-
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -781,7 +812,7 @@ public class TelephonyRegistryManager {
         try {
             sRegistry.notifyActiveDataSubIdChanged(activeDataSubId);
         } catch (RemoteException ex) {
-
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -814,6 +845,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyRegistrationFailed(slotIndex, subId, cellIdentity,
                     chosenPlmn, domain, causeCode, additionalCauseCode);
         } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -830,6 +862,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyBarringInfoChanged(slotIndex, subId, barringInfo);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -846,6 +879,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyPhysicalChannelConfigForSubscriber(slotIndex, subId, configs);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -862,6 +896,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyDataEnabled(slotIndex, subId, enabled, reason);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -880,6 +915,7 @@ public class TelephonyRegistryManager {
                     allowedNetworkType);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -895,6 +931,7 @@ public class TelephonyRegistryManager {
             sRegistry.notifyLinkCapacityEstimateChanged(slotIndex, subId, linkCapacityEstimateList);
         } catch (RemoteException ex) {
             // system server crash
+            throw ex.rethrowFromSystemServer();
         }
     }
 
