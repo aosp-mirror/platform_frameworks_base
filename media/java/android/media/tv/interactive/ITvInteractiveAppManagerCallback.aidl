@@ -27,5 +27,5 @@ interface ITvInteractiveAppManagerCallback {
     void onInteractiveAppServiceRemoved(in String iAppServiceId);
     void onInteractiveAppServiceUpdated(in String iAppServiceId);
     void onTvInteractiveAppInfoUpdated(in TvInteractiveAppInfo tvIAppInfo);
-    void onStateChanged(in String iAppServiceId, int type, int state);
+    void onStateChanged(in String iAppServiceId, int type, int state, int err);
 }

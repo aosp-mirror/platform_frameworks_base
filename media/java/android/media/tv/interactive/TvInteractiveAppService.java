@@ -196,8 +196,7 @@ public abstract class TvInteractiveAppService extends Service {
      * Prepares TV Interactive App service for the given type.
      * @hide
      */
-    public void onPrepare(int type) {
-        // TODO: make it abstract when unhide
+    public void onPrepare(@TvInteractiveAppInfo.InteractiveAppType int type) {
     }
 
     /**
@@ -236,20 +235,32 @@ public abstract class TvInteractiveAppService extends Service {
      * @hide
      */
     @Nullable
-    public Session onCreateSession(@NonNull String iAppServiceId, int type) {
-        // TODO: make it abstract when unhide
+    public Session onCreateSession(
+            @NonNull String iAppServiceId,
+            @TvInteractiveAppInfo.InteractiveAppType int type) {
         return null;
     }
 
     /**
-     * Notifies the system when the state of the interactive app has been changed.
-     * @param state the current state
+     * Notifies the system when the state of the interactive app RTE has been changed.
+     *
+     * @param type the interactive app type
+     * @param state the current state of the service of the given type
+     * @param error the error code for error state. {@link TvInteractiveAppManager#ERROR_NONE} is
+     *              used when the state is not
+     *              {@link TvInteractiveAppManager#SERVICE_STATE_ERROR}.
      * @hide
      */
     public final void notifyStateChanged(
-            int type, @TvInteractiveAppManager.TvInteractiveAppRteState int state) {
-        mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_RTE_STATE_CHANGED,
-                type, state).sendToTarget();
+            @TvInteractiveAppInfo.InteractiveAppType int type,
+            @TvInteractiveAppManager.ServiceState int state,
+            @TvInteractiveAppManager.ErrorCode int error) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = type;
+        args.arg2 = state;
+        args.arg3 = error;
+        mServiceHandler
+                .obtainMessage(ServiceHandler.DO_NOTIFY_RTE_STATE_CHANGED, args).sendToTarget();
     }
 
     /**
@@ -298,6 +309,7 @@ public abstract class TvInteractiveAppService extends Service {
          *
          * @param enable {@code true} if you want to enable the media view. {@code false}
          *            otherwise.
+         * @hide
          */
         public void setMediaViewEnabled(final boolean enable) {
             mHandler.post(new Runnable() {
@@ -320,14 +332,12 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Starts TvInteractiveAppService session.
-         * @hide
          */
         public void onStartInteractiveApp() {
         }
 
         /**
          * Stops TvInteractiveAppService session.
-         * @hide
          */
         public void onStopInteractiveApp() {
         }
@@ -439,6 +449,7 @@ public abstract class TvInteractiveAppService extends Service {
          *
          * @param width The width of the media view.
          * @param height The height of the media view.
+         * @hide
          */
         public void onMediaViewSizeChanged(int width, int height) {
         }
@@ -448,6 +459,7 @@ public abstract class TvInteractiveAppService extends Service {
          * implementation can override this method and return its own view.
          *
          * @return a view attached to the media window
+         * @hide
          */
         @Nullable
         public View onCreateMediaView() {
@@ -621,6 +633,7 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Requests broadcast related information from the related TV input.
          * @param request the request for broadcast info
+         * @hide
          */
         public void requestBroadcastInfo(@NonNull final BroadcastInfoRequest request) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -645,6 +658,7 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Remove broadcast information request from the related TV input.
          * @param requestId the ID of the request
+         * @hide
          */
         public void removeBroadcastInfo(final int requestId) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -670,6 +684,7 @@ public abstract class TvInteractiveAppService extends Service {
          * requests a specific command to be processed by the related TV input.
          * @param cmdType type of the specific command
          * @param parameters parameters of the specific command
+         * @hide
          */
         public void requestCommand(
                 @InteractiveAppServiceCommandType String cmdType, Bundle parameters) {
@@ -694,6 +709,7 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Sets broadcast video bounds.
+         * @hide
          */
         public void setVideoBounds(Rect rect) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -716,6 +732,7 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Requests the URI of the current channel.
+         * @hide
          */
         public void requestCurrentChannelUri() {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -738,6 +755,7 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Requests the logic channel number (LCN) of the current channel.
+         * @hide
          */
         public void requestCurrentChannelLcn() {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -760,6 +778,7 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Requests stream volume.
+         * @hide
          */
         public void requestStreamVolume() {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -782,6 +801,7 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Requests the list of {@link TvTrackInfo}.
+         * @hide
          */
         public void requestTrackInfoList() {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -830,6 +850,7 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * requests an advertisement request to be processed by the related TV input.
          * @param request advertisement request
+         * @hide
          */
         public void requestAd(@NonNull final AdRequest request) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -988,10 +1009,15 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Notifies when the session state is changed.
-         * @param state the current state.
+         *
+         * @param state the current session state.
+         * @param err the error code for error state. {@link TvInteractiveAppManager#ERROR_NONE} is
+         *            used when the state is not
+         *            {@link TvInteractiveAppManager#INTERACTIVE_APP_STATE_ERROR}.
          */
-        public final void notifySessionStateChanged(
-                @TvInteractiveAppManager.TvInteractiveAppRteState int state) {
+        public void notifySessionStateChanged(
+                @TvInteractiveAppManager.InteractiveAppState int state,
+                @TvInteractiveAppManager.ErrorCode int err) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -999,10 +1025,10 @@ public abstract class TvInteractiveAppService extends Service {
                     try {
                         if (DEBUG) {
                             Log.d(TAG, "notifySessionStateChanged (state="
-                                    + state + ")");
+                                    + state + "; err=" + err + ")");
                         }
                         if (mSessionCallback != null) {
-                            mSessionCallback.onSessionStateChanged(state);
+                            mSessionCallback.onSessionStateChanged(state, err);
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifySessionStateChanged", e);
@@ -1460,11 +1486,11 @@ public abstract class TvInteractiveAppService extends Service {
         private static final int DO_NOTIFY_SESSION_CREATED = 2;
         private static final int DO_NOTIFY_RTE_STATE_CHANGED = 3;
 
-        private void broadcastRteStateChanged(int type, int state) {
+        private void broadcastRteStateChanged(int type, int state, int error) {
             int n = mCallbacks.beginBroadcast();
             for (int i = 0; i < n; ++i) {
                 try {
-                    mCallbacks.getBroadcastItem(i).onStateChanged(type, state);
+                    mCallbacks.getBroadcastItem(i).onStateChanged(type, state, error);
                 } catch (RemoteException e) {
                     Log.e(TAG, "error in broadcastRteStateChanged", e);
                 }
@@ -1522,9 +1548,11 @@ public abstract class TvInteractiveAppService extends Service {
                     return;
                 }
                 case DO_NOTIFY_RTE_STATE_CHANGED: {
-                    int type = msg.arg1;
-                    int state = msg.arg2;
-                    broadcastRteStateChanged(type, state);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    int type = (int) args.arg1;
+                    int state = (int) args.arg2;
+                    int error = (int) args.arg3;
+                    broadcastRteStateChanged(type, state, error);
                     return;
                 }
                 default: {

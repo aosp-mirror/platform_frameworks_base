@@ -380,9 +380,16 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Prepares the interactive application.
+     *
+     * @param iAppServiceId the interactive app service ID, which can be found in
+     *                      {@link TvInteractiveAppInfo#getId()}.
+     *
+     * @see android.media.tv.interactive.TvInteractiveAppManager#getTvInteractiveAppServiceList()
      * @hide
      */
-    public void prepareInteractiveApp(@NonNull String iAppServiceId, int type) {
+    public void prepareInteractiveApp(
+            @NonNull String iAppServiceId,
+            @TvInteractiveAppInfo.InteractiveAppType int type) {
         // TODO: document and handle the cases that this method is called multiple times.
         if (DEBUG) {
             Log.d(TAG, "prepareInteractiveApp");
@@ -554,7 +561,7 @@ public class TvInteractiveAppView extends ViewGroup {
      * TvInteractiveAppManager to TvInputManager session, so the TIAS can get the TIS events.
      *
      * @param tvView the TvView to be linked to this TvInteractiveAppView via linking of Sessions.
-     * @return to be added
+     * @return The result of the operation.
      * @hide
      */
     public int setTvView(@Nullable TvView tvView) {
@@ -617,10 +624,16 @@ public class TvInteractiveAppView extends ViewGroup {
          * This is called when the session state is changed.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @param state current session state.
+         * @param state the current state.
+         * @param err the error code for error state. {@link TvInteractiveAppManager#ERROR_NONE}
+         *              is used when the state is not
+         *              {@link TvInteractiveAppManager#INTERACTIVE_APP_STATE_ERROR}.
          * @hide
          */
-        public void onSessionStateChanged(@NonNull String iAppServiceId, int state) {
+        public void onStateChanged(
+                @NonNull String iAppServiceId,
+                @TvInteractiveAppManager.InteractiveAppState int state,
+                @TvInteractiveAppManager.ErrorCode int err) {
         }
 
         /**
@@ -828,9 +841,12 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         @Override
-        public void onSessionStateChanged(Session session, int state) {
+        public void onSessionStateChanged(
+                Session session,
+                @TvInteractiveAppManager.InteractiveAppState int state,
+                @TvInteractiveAppManager.ErrorCode int err) {
             if (DEBUG) {
-                Log.d(TAG, "onSessionStateChanged (state=" + state +  ")");
+                Log.d(TAG, "onSessionStateChanged (state=" + state + "; err=" + err + ")");
             }
             if (this != mSessionCallback) {
                 Log.w(TAG, "onSessionStateChanged - session not created");
@@ -841,7 +857,7 @@ public class TvInteractiveAppView extends ViewGroup {
                     mCallbackExecutor.execute(() -> {
                         synchronized (mCallbackLock) {
                             if (mCallback != null) {
-                                mCallback.onSessionStateChanged(mIAppServiceId, state);
+                                mCallback.onStateChanged(mIAppServiceId, state, err);
                             }
                         }
                     });

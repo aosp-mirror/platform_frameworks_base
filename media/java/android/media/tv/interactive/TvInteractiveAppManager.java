@@ -16,6 +16,7 @@
 
 package android.media.tv.interactive;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -52,6 +53,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Central system API to the overall TV interactive application framework (TIAF) architecture, which
@@ -64,33 +66,115 @@ public final class TvInteractiveAppManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = false, prefix = "TV_INTERACTIVE_APP_RTE_STATE_", value = {
-            TV_INTERACTIVE_APP_RTE_STATE_UNREALIZED,
-            TV_INTERACTIVE_APP_RTE_STATE_PREPARING,
-            TV_INTERACTIVE_APP_RTE_STATE_READY,
-            TV_INTERACTIVE_APP_RTE_STATE_ERROR})
-    public @interface TvInteractiveAppRteState {}
+    @IntDef(flag = false, prefix = "SERVICE_STATE_", value = {
+            SERVICE_STATE_UNREALIZED,
+            SERVICE_STATE_PREPARING,
+            SERVICE_STATE_READY,
+            SERVICE_STATE_ERROR})
+    public @interface ServiceState {}
 
     /**
-     * Unrealized state of interactive app RTE.
+     * Unrealized state of interactive app service.
      * @hide
      */
-    public static final int TV_INTERACTIVE_APP_RTE_STATE_UNREALIZED = 1;
+    public static final int SERVICE_STATE_UNREALIZED = 1;
     /**
-     * Preparing state of interactive app RTE.
+     * Preparing state of interactive app service.
      * @hide
      */
-    public static final int TV_INTERACTIVE_APP_RTE_STATE_PREPARING = 2;
+    public static final int SERVICE_STATE_PREPARING = 2;
     /**
-     * Ready state of interactive app RTE.
+     * Ready state of interactive app service.
      * @hide
      */
-    public static final int TV_INTERACTIVE_APP_RTE_STATE_READY = 3;
+    public static final int SERVICE_STATE_READY = 3;
     /**
-     * Error state of interactive app RTE.
+     * Error state of interactive app service.
      * @hide
      */
-    public static final int TV_INTERACTIVE_APP_RTE_STATE_ERROR = 4;
+    public static final int SERVICE_STATE_ERROR = 4;
+
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, prefix = "INTERACTIVE_APP_STATE_", value = {
+            INTERACTIVE_APP_STATE_STOPPED,
+            INTERACTIVE_APP_STATE_RUNNING,
+            INTERACTIVE_APP_STATE_ERROR})
+    public @interface InteractiveAppState {}
+
+    /**
+     * Stopped (or not started) state of interactive application.
+     * @hide
+     */
+    public static final int INTERACTIVE_APP_STATE_STOPPED = 1;
+    /**
+     * Running state of interactive application.
+     * @hide
+     */
+    public static final int INTERACTIVE_APP_STATE_RUNNING = 2;
+    /**
+     * Error state of interactive application.
+     * @hide
+     */
+    public static final int INTERACTIVE_APP_STATE_ERROR = 3;
+
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, prefix = "ERROR_", value = {
+            ERROR_NONE,
+            ERROR_UNKNOWN,
+            ERROR_NOT_SUPPORTED,
+            ERROR_WEAK_SIGNAL,
+            ERROR_RESOURCE_UNAVAILABLE,
+            ERROR_BLOCKED,
+            ERROR_ENCRYPTED,
+            ERROR_UNKNOWN_CHANNEL,
+    })
+    public @interface ErrorCode {}
+
+    /**
+     * No error.
+     * @hide
+     */
+    public static final int ERROR_NONE = 0;
+    /**
+     * Unknown error code.
+     * @hide
+     */
+    public static final int ERROR_UNKNOWN = 1;
+    /**
+     * Error code for an unsupported channel.
+     * @hide
+     */
+    public static final int ERROR_NOT_SUPPORTED = 2;
+    /**
+     * Error code for weak signal.
+     * @hide
+     */
+    public static final int ERROR_WEAK_SIGNAL = 3;
+    /**
+     * Error code when resource (e.g. tuner) is unavailable.
+     * @hide
+     */
+    public static final int ERROR_RESOURCE_UNAVAILABLE = 4;
+    /**
+     * Error code for blocked contents.
+     * @hide
+     */
+    public static final int ERROR_BLOCKED = 5;
+    /**
+     * Error code when the key or module is missing for the encrypted channel.
+     * @hide
+     */
+    public static final int ERROR_ENCRYPTED = 6;
+    /**
+     * Error code when the current channel is an unknown channel.
+     * @hide
+     */
+    public static final int ERROR_UNKNOWN_CHANNEL = 7;
+
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -383,14 +467,14 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
-            public void onSessionStateChanged(int state, int seq) {
+            public void onSessionStateChanged(int state, int err, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
                         Log.e(TAG, "Callback not found for seq " + seq);
                         return;
                     }
-                    record.postSessionStateChanged(state);
+                    record.postSessionStateChanged(state, err);
                 }
             }
 
@@ -458,10 +542,10 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
-            public void onStateChanged(String iAppServiceId, int type, int state) {
+            public void onStateChanged(String iAppServiceId, int type, int state, int err) {
                 synchronized (mLock) {
                     for (TvInteractiveAppCallbackRecord record : mCallbackRecords) {
-                        record.postStateChanged(iAppServiceId, type, state);
+                        record.postStateChanged(iAppServiceId, type, state, err);
                     }
                 }
             }
@@ -487,6 +571,7 @@ public final class TvInteractiveAppManager {
          * that implements {@link TvInteractiveAppService} interface.
          *
          * @param iAppServiceId The ID of the TV Interactive App service.
+         * @hide
          */
         public void onInteractiveAppServiceAdded(@NonNull String iAppServiceId) {
         }
@@ -498,6 +583,7 @@ public final class TvInteractiveAppManager {
          * App service package.
          *
          * @param iAppServiceId The ID of the TV Interactive App service.
+         * @hide
          */
         public void onInteractiveAppServiceRemoved(@NonNull String iAppServiceId) {
         }
@@ -509,6 +595,7 @@ public final class TvInteractiveAppManager {
          * re-installed or a newer version of the package exists becomes available/unavailable.
          *
          * @param iAppServiceId The ID of the TV Interactive App service.
+         * @hide
          */
         public void onInteractiveAppServiceUpdated(@NonNull String iAppServiceId) {
         }
@@ -524,26 +611,34 @@ public final class TvInteractiveAppManager {
          *
          * @param iAppInfo The <code>TvInteractiveAppInfo</code> object that contains new
          *                 information.
+         * @hide
          */
         public void onTvInteractiveAppInfoUpdated(@NonNull TvInteractiveAppInfo iAppInfo) {
         }
 
         /**
          * This is called when the state of the interactive app service is changed.
-         * @hide
+         *
+         * @param type the interactive app type
+         * @param state the current state of the service of the given type
+         * @param err the error code for error state. {@link #ERROR_NONE} is used when the state is
+         *            not {@link #SERVICE_STATE_ERROR}.
          */
         public void onTvInteractiveAppServiceStateChanged(
-                @NonNull String iAppServiceId, int type, @TvInteractiveAppRteState int state) {
+                @NonNull String iAppServiceId,
+                @TvInteractiveAppInfo.InteractiveAppType int type,
+                @ServiceState int state,
+                @ErrorCode int err) {
         }
     }
 
     private static final class TvInteractiveAppCallbackRecord {
         private final TvInteractiveAppCallback mCallback;
-        private final Handler mHandler;
+        private final Executor mExecutor;
 
-        TvInteractiveAppCallbackRecord(TvInteractiveAppCallback callback, Handler handler) {
+        TvInteractiveAppCallbackRecord(TvInteractiveAppCallback callback, Executor executor) {
             mCallback = callback;
-            mHandler = handler;
+            mExecutor = executor;
         }
 
         public TvInteractiveAppCallback getCallback() {
@@ -551,7 +646,7 @@ public final class TvInteractiveAppManager {
         }
 
         public void postInteractiveAppServiceAdded(final String iAppServiceId) {
-            mHandler.post(new Runnable() {
+            mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     mCallback.onInteractiveAppServiceAdded(iAppServiceId);
@@ -560,7 +655,7 @@ public final class TvInteractiveAppManager {
         }
 
         public void postInteractiveAppServiceRemoved(final String iAppServiceId) {
-            mHandler.post(new Runnable() {
+            mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     mCallback.onInteractiveAppServiceRemoved(iAppServiceId);
@@ -569,7 +664,7 @@ public final class TvInteractiveAppManager {
         }
 
         public void postInteractiveAppServiceUpdated(final String iAppServiceId) {
-            mHandler.post(new Runnable() {
+            mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     mCallback.onInteractiveAppServiceUpdated(iAppServiceId);
@@ -578,7 +673,7 @@ public final class TvInteractiveAppManager {
         }
 
         public void postTvInteractiveAppInfoUpdated(final TvInteractiveAppInfo iAppInfo) {
-            mHandler.post(new Runnable() {
+            mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     mCallback.onTvInteractiveAppInfoUpdated(iAppInfo);
@@ -586,11 +681,12 @@ public final class TvInteractiveAppManager {
             });
         }
 
-        public void postStateChanged(String iAppServiceId, int type, int state) {
-            mHandler.post(new Runnable() {
+        public void postStateChanged(String iAppServiceId, int type, int state, int err) {
+            mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onTvInteractiveAppServiceStateChanged(iAppServiceId, type, state);
+                    mCallback.onTvInteractiveAppServiceStateChanged(
+                            iAppServiceId, type, state, err);
                 }
             });
         }
@@ -698,15 +794,16 @@ public final class TvInteractiveAppManager {
      * Registers a {@link TvInteractiveAppCallback}.
      *
      * @param callback A callback used to monitor status of the TV Interactive App services.
-     * @param handler A {@link Handler} that the status change will be delivered to.
+     * @param executor A {@link Executor} that the status change will be delivered to.
      * @hide
      */
     public void registerCallback(
-            @NonNull TvInteractiveAppCallback callback, @NonNull Handler handler) {
+            @NonNull TvInteractiveAppCallback callback,
+            @CallbackExecutor @NonNull Executor executor) {
         Preconditions.checkNotNull(callback);
-        Preconditions.checkNotNull(handler);
+        Preconditions.checkNotNull(executor);
         synchronized (mLock) {
-            mCallbackRecords.add(new TvInteractiveAppCallbackRecord(callback, handler));
+            mCallbackRecords.add(new TvInteractiveAppCallbackRecord(callback, executor));
         }
     }
 
@@ -1552,11 +1649,11 @@ public final class TvInteractiveAppManager {
             });
         }
 
-        void postSessionStateChanged(int state) {
+        void postSessionStateChanged(int state, int err) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSessionCallback.onSessionStateChanged(mSession, state);
+                    mSessionCallback.onSessionStateChanged(mSession, state, err);
                 }
             });
         }
@@ -1690,7 +1787,10 @@ public final class TvInteractiveAppManager {
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          * @param state the current state.
          */
-        public void onSessionStateChanged(Session session, int state) {
+        public void onSessionStateChanged(
+                Session session,
+                @InteractiveAppState int state,
+                @ErrorCode int err) {
         }
 
         /**
