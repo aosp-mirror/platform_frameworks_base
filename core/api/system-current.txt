@@ -2264,6 +2264,25 @@ package android.bluetooth {
 
 package android.bluetooth.le {
 
+  public final class AdvertiseSettings implements android.os.Parcelable {
+    method public int getOwnAddressType();
+  }
+
+  public static final class AdvertiseSettings.Builder {
+    method @NonNull public android.bluetooth.le.AdvertiseSettings.Builder setOwnAddressType(int);
+  }
+
+  public final class AdvertisingSetParameters implements android.os.Parcelable {
+    method public int getOwnAddressType();
+    field public static final int ADDRESS_TYPE_DEFAULT = -1; // 0xffffffff
+    field public static final int ADDRESS_TYPE_PUBLIC = 0; // 0x0
+    field public static final int ADDRESS_TYPE_RANDOM = 1; // 0x1
+  }
+
+  public static final class AdvertisingSetParameters.Builder {
+    method @NonNull public android.bluetooth.le.AdvertisingSetParameters.Builder setOwnAddressType(int);
+  }
+
   public final class BluetoothLeScanner {
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.UPDATE_DEVICE_STATS}) public void startScanFromSource(android.os.WorkSource, android.bluetooth.le.ScanCallback);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.UPDATE_DEVICE_STATS}) public void startScanFromSource(java.util.List<android.bluetooth.le.ScanFilter>, android.bluetooth.le.ScanSettings, android.os.WorkSource, android.bluetooth.le.ScanCallback);
