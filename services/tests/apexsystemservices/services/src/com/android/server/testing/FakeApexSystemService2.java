@@ -14,27 +14,28 @@
  * limitations under the License.
  */
 
-package android.content.pm.parsing.component;
+package com.android.server.testing;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.os.Parcelable;
+import android.content.Context;
+import android.util.Log;
 
-/** @hide */
-public interface ParsedApexSystemService extends Parcelable {
+import androidx.annotation.NonNull;
 
-    @NonNull
-    String getName();
+import com.android.server.SystemService;
 
-    @Nullable
-    String getJarPath();
+/**
+ * A fake system service that just logs when it is started.
+ */
+public class FakeApexSystemService2 extends SystemService {
 
-    @Nullable
-    String getMinSdkVersion();
+    private static final String TAG = "FakeApexSystemService";
 
-    @Nullable
-    String getMaxSdkVersion();
+    public FakeApexSystemService2(@NonNull Context context) {
+        super(context);
+    }
 
-    int getInitOrder();
-
+    @Override
+    public void onStart() {
+        Log.d(TAG, "FakeApexSystemService2 onStart");
+    }
 }
