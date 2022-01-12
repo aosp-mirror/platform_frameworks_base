@@ -654,6 +654,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private final Rect mTmpRect = new Rect();
     private final Point mTmpPoint = new Point();
+    private final Region mTmpRegion = new Region();
 
     private final Transaction mTmpTransaction;
 
@@ -2773,6 +2774,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 region.set(-dw, -dh, dw + dw, dh + dh);
             }
             subtractTouchExcludeRegionIfNeeded(region);
+
         } else {
             // Not modal
             getTouchableRegion(region);
@@ -2782,6 +2784,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final Rect frame = mWindowFrames.mFrame;
         if (frame.left != 0 || frame.top != 0) {
             region.translate(-frame.left, -frame.top);
+        }
+        if (modal && mTouchableInsets == TOUCHABLE_INSETS_REGION) {
+            // The client gave us a touchable region and so first
+            // we calculate the untouchable region, then punch that out of our
+            // expanded modal region.
+            mTmpRegion.set(0, 0, frame.right, frame.bottom);
+            mTmpRegion.op(mGivenTouchableRegion, Region.Op.DIFFERENCE);
+            region.op(mTmpRegion, Region.Op.DIFFERENCE);
         }
 
         // TODO(b/139804591): sizecompat layout needs to be reworked. Currently mFrame is post-
@@ -6061,5 +6071,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     true /* includingParents */);
         }
         mWmService.handleTaskFocusChange(getTask(), mActivityRecord);
+    }
+
+    void clearClientTouchableRegion() {
+        mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
+        mGivenTouchableRegion.setEmpty();
     }
 }

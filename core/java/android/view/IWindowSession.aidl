@@ -342,4 +342,9 @@ interface IWindowSession {
      * @param callback The {@link IOnBackInvokedCallback} to set.
      */
     oneway void setOnBackInvokedCallback(IWindow window, IOnBackInvokedCallback callback);
+
+    /**
+     * Clears a touchable region set by {@link #setInsets}.
+     */
+    void clearTouchableRegion(IWindow window);
 }

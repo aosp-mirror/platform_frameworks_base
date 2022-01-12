@@ -335,6 +335,11 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
+    public void clearTouchableRegion(android.view.IWindow window) {
+        setTouchRegion(window.asBinder(), null);
+    }
+
+    @Override
     public void finishDrawing(android.view.IWindow window,
             android.view.SurfaceControl.Transaction postDrawTransaction) {
         synchronized (this) {
