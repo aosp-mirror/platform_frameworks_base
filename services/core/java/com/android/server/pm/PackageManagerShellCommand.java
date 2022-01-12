@@ -230,6 +230,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runDexoptJob();
                 case "cancel-bg-dexopt-job":
                     return cancelBgDexOptJob();
+                case "delete-dexopt":
+                    return runDeleteDexOpt();
                 case "dump-profiles":
                     return runDumpProfiles();
                 case "snapshot-profile":
@@ -1914,6 +1916,24 @@ class PackageManagerShellCommand extends ShellCommand {
     private int cancelBgDexOptJob() throws RemoteException {
         BackgroundDexOptService.getService().cancelBackgroundDexoptJob();
         getOutPrintWriter().println("Success");
+        return 0;
+    }
+
+    private int runDeleteDexOpt() throws RemoteException {
+        PrintWriter pw = getOutPrintWriter();
+        String packageName = getNextArg();
+        if (TextUtils.isEmpty(packageName)) {
+            pw.println("Error: no package name");
+            return 1;
+        }
+        long freedBytes = LocalServices.getService(
+                PackageManagerInternal.class).deleteOatArtifactsOfPackage(packageName);
+        if (freedBytes < 0) {
+            pw.println("Error: delete failed");
+            return 1;
+        }
+        pw.println("Success: freed " + freedBytes + " bytes");
+        Slog.i(TAG, "delete-dexopt " + packageName + " ,freed " + freedBytes + " bytes");
         return 0;
     }
 
@@ -3999,6 +4019,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  force-dex-opt PACKAGE");
         pw.println("    Force immediate execution of dex opt for the given PACKAGE.");
+        pw.println("");
+        pw.println("  delete-dexopt PACKAGE");
+        pw.println("    Delete dex optimization results for the given PACKAGE.");
         pw.println("");
         pw.println("  bg-dexopt-job");
         pw.println("    Execute the background optimizations immediately.");
