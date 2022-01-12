@@ -115,14 +115,6 @@ public final class Display {
     private int mCachedAppHeightCompat;
 
     /**
-     * Indicates that the application is started in a different rotation than the real display, so
-     * the display information may be adjusted. That ensures the methods {@link #getRotation},
-     * {@link #getRealSize}, {@link #getRealMetrics}, and {@link #getCutout} are consistent with how
-     * the application window is laid out.
-     */
-    private boolean mMayAdjustByFixedRotation;
-
-    /**
      * Cache if the application is the recents component.
      * TODO(b/179308296) Remove once Launcher addresses issue
      */
@@ -916,14 +908,15 @@ public final class Display {
      * degrees counter-clockwise, to compensate rendering will be rotated by
      * 90 degrees clockwise and thus the returned value here will be
      * {@link Surface#ROTATION_90 Surface.ROTATION_90}.
+     *
+     * This rotation value will match the results of {@link #getMetrics}: this means that the
+     * rotation value will correspond to the activity if accessed through the activity.
      */
     @Surface.Rotation
     public int getRotation() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            return mMayAdjustByFixedRotation
-                    ? getDisplayAdjustments().getRotation(mDisplayInfo.rotation)
-                    : mDisplayInfo.rotation;
+            return getLocalRotation();
         }
     }
 
@@ -959,9 +952,15 @@ public final class Display {
     public DisplayCutout getCutout() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            return mMayAdjustByFixedRotation
-                    ? getDisplayAdjustments().getDisplayCutout(mDisplayInfo.displayCutout)
-                    : mDisplayInfo.displayCutout;
+            if (mResources == null) return mDisplayInfo.displayCutout;
+            final DisplayCutout localCutout = mDisplayInfo.displayCutout;
+            if (localCutout == null) return null;
+            int rotation = getLocalRotation();
+            if (rotation != mDisplayInfo.rotation) {
+                return localCutout.getRotated(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight,
+                        mDisplayInfo.rotation, rotation);
+            }
+            return localCutout;
         }
     }
 
@@ -977,15 +976,11 @@ public final class Display {
     public RoundedCorner getRoundedCorner(@RoundedCorner.Position int position) {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            RoundedCorners roundedCorners;
-            if (mMayAdjustByFixedRotation) {
-                roundedCorners = getDisplayAdjustments().adjustRoundedCorner(
-                        mDisplayInfo.roundedCorners,
-                        mDisplayInfo.rotation,
-                        mDisplayInfo.logicalWidth,
-                        mDisplayInfo.logicalHeight);
-            } else {
-                roundedCorners = mDisplayInfo.roundedCorners;
+            final RoundedCorners roundedCorners = mDisplayInfo.roundedCorners;
+            final @Surface.Rotation int rotation = getLocalRotation();
+            if (roundedCorners != null && rotation != mDisplayInfo.rotation) {
+                roundedCorners.rotate(rotation,
+                        mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
             }
             return roundedCorners == null ? null : roundedCorners.getRoundedCorner(position);
         }
@@ -1468,8 +1463,9 @@ public final class Display {
             }
             outSize.x = mDisplayInfo.logicalWidth;
             outSize.y = mDisplayInfo.logicalHeight;
-            if (mMayAdjustByFixedRotation) {
-                getDisplayAdjustments().adjustSize(outSize, mDisplayInfo.rotation);
+            final @Surface.Rotation int rotation = getLocalRotation();
+            if (rotation != mDisplayInfo.rotation) {
+                adjustSize(outSize, mDisplayInfo.rotation, rotation);
             }
         }
     }
@@ -1537,8 +1533,9 @@ public final class Display {
             }
             mDisplayInfo.getLogicalMetrics(outMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
-            if (mMayAdjustByFixedRotation) {
-                getDisplayAdjustments().adjustMetrics(outMetrics, mDisplayInfo.rotation);
+            final @Surface.Rotation int rotation = getLocalRotation();
+            if (rotation != mDisplayInfo.rotation) {
+                adjustMetrics(outMetrics, mDisplayInfo.rotation, rotation);
             }
         }
     }
@@ -1663,9 +1660,6 @@ public final class Display {
                 }
             }
         }
-
-        mMayAdjustByFixedRotation = mResources != null
-                && mResources.hasOverrideDisplayAdjustments();
     }
 
     private void updateCachedAppSizeIfNeededLocked() {
@@ -1679,6 +1673,49 @@ public final class Display {
         }
     }
 
+    /** Returns {@code false} if the width and height of display should swap. */
+    private static boolean noFlip(@Surface.Rotation int realRotation,
+            @Surface.Rotation int localRotation) {
+        // Check if the delta is rotated by 90 degrees.
+        return (realRotation - localRotation + 4) % 2 == 0;
+    }
+
+    /**
+     * Adjusts the given size by a rotation offset if necessary.
+     * @hide
+     */
+    private void adjustSize(@NonNull Point size, @Surface.Rotation int realRotation,
+            @Surface.Rotation int localRotation) {
+        if (noFlip(realRotation, localRotation)) return;
+        final int w = size.x;
+        size.x = size.y;
+        size.y = w;
+    }
+
+    /**
+     * Adjusts the given metrics by a rotation offset if necessary.
+     * @hide
+     */
+    private void adjustMetrics(@NonNull DisplayMetrics metrics,
+            @Surface.Rotation int realRotation, @Surface.Rotation int localRotation) {
+        if (noFlip(realRotation, localRotation)) return;
+        int w = metrics.widthPixels;
+        metrics.widthPixels = metrics.heightPixels;
+        metrics.heightPixels = w;
+
+        w = metrics.noncompatWidthPixels;
+        metrics.noncompatWidthPixels = metrics.noncompatHeightPixels;
+        metrics.noncompatHeightPixels = w;
+    }
+
+    private @Surface.Rotation int getLocalRotation() {
+        if (mResources == null) return mDisplayInfo.rotation;
+        final @Surface.Rotation int localRotation =
+                mResources.getConfiguration().windowConfiguration.getDisplayRotation();
+        if (localRotation != WindowConfiguration.ROTATION_UNDEFINED) return localRotation;
+        return mDisplayInfo.rotation;
+    }
+
     // For debugging purposes
     @Override
     public String toString() {
@@ -1686,9 +1723,7 @@ public final class Display {
             updateDisplayInfoLocked();
             final DisplayAdjustments adjustments = getDisplayAdjustments();
             mDisplayInfo.getAppMetrics(mTempMetrics, adjustments);
-            return "Display id " + mDisplayId + ": " + mDisplayInfo
-                    + (mMayAdjustByFixedRotation
-                            ? (", " + adjustments.getFixedRotationAdjustments() + ", ") : ", ")
+            return "Display id " + mDisplayId + ": " + mDisplayInfo + ", "
                     + mTempMetrics + ", isValid=" + mIsValid;
         }
     }
