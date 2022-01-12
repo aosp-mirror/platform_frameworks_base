@@ -130,6 +130,12 @@ class ControlsProviderLifecycleManager(
             wrapper = null
             bindService(false)
         }
+
+        override fun onNullBinding(name: ComponentName?) {
+            if (DEBUG) Log.d(TAG, "onNullBinding $name")
+            wrapper = null
+            context.unbindService(this)
+        }
     }
 
     private fun handlePendingServiceMethods() {
