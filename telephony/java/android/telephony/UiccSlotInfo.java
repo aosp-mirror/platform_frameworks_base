@@ -271,16 +271,13 @@ public class UiccSlotInfo implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        return "UiccSlotInfo (mIsActive="
-                + mIsActive
+        return "UiccSlotInfo ("
                 + ", mIsEuicc="
                 + mIsEuicc
                 + ", mCardId="
                 + mCardId
                 + ", cardState="
                 + mCardStateInfo
-                + ", phoneId="
-                + mLogicalSlotIdx
                 + ", mIsExtendedApduSupported="
                 + mIsExtendedApduSupported
                 + ", mIsRemovable="

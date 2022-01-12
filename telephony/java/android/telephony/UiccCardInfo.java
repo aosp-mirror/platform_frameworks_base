@@ -257,8 +257,6 @@ public final class UiccCardInfo implements Parcelable {
                 + mCardId
                 + ", mEid="
                 + mEid
-                + ", mIccId="
-                + SubscriptionInfo.givePrintableIccid(getIccId())
                 + ", mPhysicalSlotIndex="
                 + mPhysicalSlotIndex
                 + ", mIsRemovable="
