@@ -376,6 +376,9 @@ package android.os {
   }
 
   public class Process {
+    method public static final boolean isSupplemental(int);
+    method public static final int toAppUid(int);
+    method public static final int toSupplementalUid(int);
     field public static final int NFC_UID = 1027; // 0x403
     field public static final int VPN_UID = 1016; // 0x3f8
   }
