@@ -2010,6 +2010,19 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testIsGroupBlocked_appCannotCreateAsBlocked() throws Exception {
+        NotificationChannelGroup group = new NotificationChannelGroup("id", "name");
+        group.setBlocked(true);
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, group, true);
+        assertFalse(mHelper.isGroupBlocked(PKG_N_MR1, UID_N_MR1, group.getId()));
+
+        NotificationChannelGroup group3 = group.clone();
+        group3.setBlocked(false);
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, group3, true);
+        assertFalse(mHelper.isGroupBlocked(PKG_N_MR1, UID_N_MR1, group.getId()));
+    }
+
+    @Test
     public void testIsGroup_appCannotResetBlock() throws Exception {
         NotificationChannelGroup group = new NotificationChannelGroup("id", "name");
         mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, group, true);
