@@ -70,6 +70,7 @@ import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.ExceptionUtils;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -121,7 +122,7 @@ import java.util.function.Supplier;
 public class PackageInstallerService extends IPackageInstaller.Stub implements
         PackageSessionProvider {
     private static final String TAG = "PackageInstaller";
-    private static final boolean LOGD = false;
+    private static final boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
@@ -510,6 +511,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 valid = true;
             }
             if (!valid) {
+                Slog.w(TAG, "Remove old session: " + session.sessionId);
                 // Remove expired sessions as well as child sessions if any
                 mSessions.remove(session.sessionId);
                 // Since this is early during boot we don't send
@@ -850,6 +852,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mCallbacks.notifySessionCreated(session.sessionId, session.userId);
 
         mSettingsWriteRequest.schedule();
+        if (LOGD) {
+            Slog.d(TAG, "Created session id=" + sessionId + " staged=" + params.isStaged);
+        }
         return sessionId;
     }
 
