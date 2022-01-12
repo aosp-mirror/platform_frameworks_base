@@ -3083,6 +3083,9 @@ public final class BluetoothAdapter {
             BluetoothCsipSetCoordinator csipSetCoordinator =
                     new BluetoothCsipSetCoordinator(context, listener, this);
             return true;
+        } else if (profile == BluetoothProfile.LE_CALL_CONTROL) {
+            BluetoothLeCallControl tbs = new BluetoothLeCallControl(context, listener);
+            return true;
         } else {
             return false;
         }
@@ -3180,6 +3183,10 @@ public final class BluetoothAdapter {
                 BluetoothCsipSetCoordinator csipSetCoordinator =
                         (BluetoothCsipSetCoordinator) proxy;
                 csipSetCoordinator.close();
+                break;
+            case BluetoothProfile.LE_CALL_CONTROL:
+                BluetoothLeCallControl tbs = (BluetoothLeCallControl) proxy;
+                tbs.close();
                 break;
         }
     }
