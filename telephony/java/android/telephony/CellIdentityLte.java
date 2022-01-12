@@ -379,7 +379,7 @@ public final class CellIdentityLte extends CellIdentity {
         mBands = in.createIntArray();
         mBandwidth = in.readInt();
         mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
-        mCsgInfo = in.readParcelable(null, android.telephony.ClosedSubscriberGroupInfo.class);
+        mCsgInfo = in.readParcelable(null);
 
         updateGlobalCellId();
         if (DBG) log(toString());

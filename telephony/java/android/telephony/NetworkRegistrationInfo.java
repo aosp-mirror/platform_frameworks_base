@@ -311,12 +311,12 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mRejectCause = source.readInt();
         mEmergencyOnly = source.readBoolean();
         mAvailableServices = new ArrayList<>();
-        source.readList(mAvailableServices, Integer.class.getClassLoader(), java.lang.Integer.class);
-        mCellIdentity = source.readParcelable(CellIdentity.class.getClassLoader(), android.telephony.CellIdentity.class);
+        source.readList(mAvailableServices, Integer.class.getClassLoader());
+        mCellIdentity = source.readParcelable(CellIdentity.class.getClassLoader());
         mVoiceSpecificInfo = source.readParcelable(
-                VoiceSpecificRegistrationInfo.class.getClassLoader(), android.telephony.VoiceSpecificRegistrationInfo.class);
+                VoiceSpecificRegistrationInfo.class.getClassLoader());
         mDataSpecificInfo = source.readParcelable(
-                DataSpecificRegistrationInfo.class.getClassLoader(), android.telephony.DataSpecificRegistrationInfo.class);
+                DataSpecificRegistrationInfo.class.getClassLoader());
         mNrState = source.readInt();
         mRplmn = source.readString();
         mIsUsingCarrierAggregation = source.readBoolean();

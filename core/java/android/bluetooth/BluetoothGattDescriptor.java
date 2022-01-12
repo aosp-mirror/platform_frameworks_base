@@ -187,7 +187,7 @@ public class BluetoothGattDescriptor implements Parcelable {
     };
 
     private BluetoothGattDescriptor(Parcel in) {
-        mUuid = ((ParcelUuid) in.readParcelable(null, android.os.ParcelUuid.class)).getUuid();
+        mUuid = ((ParcelUuid) in.readParcelable(null)).getUuid();
         mInstance = in.readInt();
         mPermissions = in.readInt();
     }
