@@ -301,6 +301,13 @@ public class RemoteViews implements Parcelable, Filter {
     public static final int FLAG_USE_LIGHT_BACKGROUND_LAYOUT = 4;
 
     /**
+     * This mask determines which flags are propagated to nested RemoteViews (either added by
+     * addView, or set as portrait/landscape/sized RemoteViews).
+     */
+    static final int FLAG_MASK_TO_PROPAGATE =
+            FLAG_WIDGET_IS_COLLECTION_CHILD | FLAG_USE_LIGHT_BACKGROUND_LAYOUT;
+
+    /**
      * A ReadWriteHelper which has the same behavior as ReadWriteHelper.DEFAULT, but which is
      * intentionally a different instance in order to trick Bundle reader so that it doesn't allow
      * lazy initialization.
@@ -467,6 +474,18 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void addFlags(@ApplyFlags int flags) {
         mApplyFlags = mApplyFlags | flags;
+
+        int flagsToPropagate = flags & FLAG_MASK_TO_PROPAGATE;
+        if (flagsToPropagate != 0) {
+            if (hasSizedRemoteViews()) {
+                for (RemoteViews remoteView : mSizedRemoteViews) {
+                    remoteView.addFlags(flagsToPropagate);
+                }
+            } else if (hasLandscapeAndPortraitLayouts()) {
+                mLandscape.addFlags(flagsToPropagate);
+                mPortrait.addFlags(flagsToPropagate);
+            }
+        }
     }
 
     /**
@@ -2407,6 +2426,10 @@ public class RemoteViews implements Parcelable, Filter {
             // will return -1.
             final int nextChild = getNextRecyclableChild(target);
             RemoteViews rvToApply = mNestedViews.getRemoteViewsToApply(context);
+
+            int flagsToPropagate = mApplyFlags & FLAG_MASK_TO_PROPAGATE;
+            if (flagsToPropagate != 0) rvToApply.addFlags(flagsToPropagate);
+
             if (nextChild >= 0 && mStableId != NO_ID) {
                 // At that point, the views starting at index nextChild are the ones recyclable but
                 // not yet recycled. All views added on that round of application are placed before.

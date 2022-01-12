@@ -16,9 +16,12 @@
 
 package android.widget;
 
+import static com.android.internal.R.id.pending_intent_tag;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -34,6 +37,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.Parcel;
+import android.util.SizeF;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +56,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -311,6 +316,99 @@ public class RemoteViewsTest {
         top.reapply(mContext, view);
         listView = (ListView) view.findViewById(R.id.list);
         assertNotNull(listView.getAdapter());
+    }
+
+    @Test
+    public void nestedViews_collectionChildFlag() throws Exception {
+        RemoteViews nested = new RemoteViews(mPackage, R.layout.remote_views_text);
+        nested.setOnClickPendingIntent(
+                R.id.text,
+                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE)
+        );
+
+        RemoteViews listItem = new RemoteViews(mPackage, R.layout.remote_view_host);
+        listItem.addView(R.id.container, nested);
+        listItem.addFlags(RemoteViews.FLAG_WIDGET_IS_COLLECTION_CHILD);
+
+        View view = listItem.apply(mContext, mContainer);
+        TextView text = (TextView) view.findViewById(R.id.text);
+        assertNull(text.getTag(pending_intent_tag));
+    }
+
+    @Test
+    public void landscapePortraitViews_collectionChildFlag() throws Exception {
+        RemoteViews inner = new RemoteViews(mPackage, R.layout.remote_views_text);
+        inner.setOnClickPendingIntent(
+                R.id.text,
+                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE)
+        );
+
+        RemoteViews listItem = new RemoteViews(inner, inner);
+        listItem.addFlags(RemoteViews.FLAG_WIDGET_IS_COLLECTION_CHILD);
+
+        View view = listItem.apply(mContext, mContainer);
+        TextView text = (TextView) view.findViewById(R.id.text);
+        assertNull(text.getTag(pending_intent_tag));
+    }
+
+    @Test
+    public void sizedViews_collectionChildFlag() throws Exception {
+        RemoteViews inner = new RemoteViews(mPackage, R.layout.remote_views_text);
+        inner.setOnClickPendingIntent(
+                R.id.text,
+                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE)
+        );
+
+        RemoteViews listItem = new RemoteViews(
+                Map.of(new SizeF(0, 0), inner, new SizeF(100, 100), inner));
+        listItem.addFlags(RemoteViews.FLAG_WIDGET_IS_COLLECTION_CHILD);
+
+        View view = listItem.apply(mContext, mContainer);
+        TextView text = (TextView) view.findViewById(R.id.text);
+        assertNull(text.getTag(pending_intent_tag));
+    }
+
+    @Test
+    public void nestedViews_lightBackgroundLayoutFlag() {
+        RemoteViews nested = new RemoteViews(mPackage, R.layout.remote_views_text);
+        nested.setLightBackgroundLayoutId(R.layout.remote_views_light_background_text);
+
+        RemoteViews parent = new RemoteViews(mPackage, R.layout.remote_view_host);
+        parent.addView(R.id.container, nested);
+        parent.setLightBackgroundLayoutId(R.layout.remote_view_host);
+        parent.addFlags(RemoteViews.FLAG_USE_LIGHT_BACKGROUND_LAYOUT);
+
+        View view = parent.apply(mContext, mContainer);
+        assertNull(view.findViewById(R.id.text));
+        assertNotNull(view.findViewById(R.id.light_background_text));
+    }
+
+
+    @Test
+    public void landscapePortraitViews_lightBackgroundLayoutFlag() {
+        RemoteViews inner = new RemoteViews(mPackage, R.layout.remote_views_text);
+        inner.setLightBackgroundLayoutId(R.layout.remote_views_light_background_text);
+
+        RemoteViews parent = new RemoteViews(inner, inner);
+        parent.addFlags(RemoteViews.FLAG_USE_LIGHT_BACKGROUND_LAYOUT);
+
+        View view = parent.apply(mContext, mContainer);
+        assertNull(view.findViewById(R.id.text));
+        assertNotNull(view.findViewById(R.id.light_background_text));
+    }
+
+    @Test
+    public void sizedViews_lightBackgroundLayoutFlag() {
+        RemoteViews inner = new RemoteViews(mPackage, R.layout.remote_views_text);
+        inner.setLightBackgroundLayoutId(R.layout.remote_views_light_background_text);
+
+        RemoteViews parent = new RemoteViews(
+                Map.of(new SizeF(0, 0), inner, new SizeF(100, 100), inner));
+        parent.addFlags(RemoteViews.FLAG_USE_LIGHT_BACKGROUND_LAYOUT);
+
+        View view = parent.apply(mContext, mContainer);
+        assertNull(view.findViewById(R.id.text));
+        assertNotNull(view.findViewById(R.id.light_background_text));
     }
 
     private RemoteViews createViewChained(int depth, String... texts) {
