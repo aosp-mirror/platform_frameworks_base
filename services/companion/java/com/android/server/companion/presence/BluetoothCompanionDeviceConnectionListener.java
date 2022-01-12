@@ -16,6 +16,8 @@
 
 package com.android.server.companion.presence;
 
+import static com.android.server.companion.presence.Utils.btDeviceToString;
+
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
@@ -71,11 +73,11 @@ class BluetoothCompanionDeviceConnectionListener
      */
     @Override
     public void onDeviceConnected(@NonNull BluetoothDevice device) {
-        if (DEBUG) Log.i(TAG, "onDevice_Connected() " + toString(device));
+        if (DEBUG) Log.i(TAG, "onDevice_Connected() " + btDeviceToString(device));
 
         final MacAddress macAddress = MacAddress.fromString(device.getAddress());
         if (mAllConnectedDevices.put(macAddress, device) != null) {
-            if (DEBUG) Log.w(TAG, "Device " + toString(device) + " is already connected.");
+            if (DEBUG) Log.w(TAG, "Device " + btDeviceToString(device) + " is already connected.");
             return;
         }
 
@@ -91,13 +93,15 @@ class BluetoothCompanionDeviceConnectionListener
     public void onDeviceDisconnected(@NonNull BluetoothDevice device,
             @DisconnectReason int reason) {
         if (DEBUG) {
-            Log.i(TAG, "onDevice_Disconnected() " + toString(device));
+            Log.i(TAG, "onDevice_Disconnected() " + btDeviceToString(device));
             Log.d(TAG, "  reason=" + disconnectReasonText(reason));
         }
 
         final MacAddress macAddress = MacAddress.fromString(device.getAddress());
         if (mAllConnectedDevices.remove(macAddress) == null) {
-            if (DEBUG) Log.w(TAG, "The device wasn't tracked as connected " + toString(device));
+            if (DEBUG) {
+                Log.w(TAG, "The device wasn't tracked as connected " + btDeviceToString(device));
+            }
             return;
         }
 
@@ -109,7 +113,7 @@ class BluetoothCompanionDeviceConnectionListener
                 mAssociationStore.getAssociationsByAddress(device.getAddress());
 
         if (DEBUG) {
-            Log.d(TAG, "onDevice_ConnectivityChanged() " + toString(device)
+            Log.d(TAG, "onDevice_ConnectivityChanged() " + btDeviceToString(device)
                     + " connected=" + connected);
             if (associations.isEmpty()) {
                 Log.d(TAG, "  > No CDM associations");
@@ -138,6 +142,12 @@ class BluetoothCompanionDeviceConnectionListener
     }
 
     @Override
+    public void onAssociationRemoved(AssociationInfo association) {
+        // Intentionally do nothing: CompanionDevicePresenceMonitor will do all the bookkeeping
+        // required.
+    }
+
+    @Override
     public void onAssociationUpdated(AssociationInfo association, boolean addressChanged) {
         if (DEBUG) {
             Log.d(TAG, "onAssociation_Updated() addrChange=" + addressChanged
@@ -152,24 +162,5 @@ class BluetoothCompanionDeviceConnectionListener
         // At the moment CDM does allow changing association addresses, so we will never come here.
         // This will be implemented when CDM support updating addresses.
         throw new IllegalArgumentException("Address changes are not supported.");
-    }
-
-    private static String toString(@NonNull BluetoothDevice btDevice) {
-        final StringBuilder sb = new StringBuilder(btDevice.getAddress());
-
-        sb.append(" [name=");
-        final String name = btDevice.getName();
-        if (name != null) {
-            sb.append('\'').append(name).append('\'');
-        } else {
-            sb.append("null");
-        }
-
-        final String alias = btDevice.getAlias();
-        if (alias != null) {
-            sb.append(", alias='").append(alias).append("'");
-        }
-
-        return sb.append(']').toString();
     }
 }
