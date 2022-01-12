@@ -571,6 +571,31 @@ public abstract class AccessibilityService extends Service {
      */
     public static final int GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE = 15;
 
+    /**
+     * Action to trigger dpad up keyevent.
+     */
+    public static final int GLOBAL_ACTION_DPAD_UP = 16;
+
+    /**
+     * Action to trigger dpad down keyevent.
+     */
+    public static final int GLOBAL_ACTION_DPAD_DOWN = 17;
+
+    /**
+     * Action to trigger dpad left keyevent.
+     */
+    public static final int GLOBAL_ACTION_DPAD_LEFT = 18;
+
+    /**
+     * Action to trigger dpad right keyevent.
+     */
+    public static final int GLOBAL_ACTION_DPAD_RIGHT = 19;
+
+    /**
+     * Action to trigger dpad center keyevent.
+     */
+    public static final int GLOBAL_ACTION_DPAD_CENTER = 20;
+
     private static final String LOG_TAG = "AccessibilityService";
 
     /**
@@ -2328,10 +2353,16 @@ public abstract class AccessibilityService extends Service {
      * @param action The action to perform.
      * @return Whether the action was successfully performed.
      *
+     * Perform actions using ids like the id constants referenced below:
      * @see #GLOBAL_ACTION_BACK
      * @see #GLOBAL_ACTION_HOME
      * @see #GLOBAL_ACTION_NOTIFICATIONS
      * @see #GLOBAL_ACTION_RECENTS
+     * @see #GLOBAL_ACTION_DPAD_UP
+     * @see #GLOBAL_ACTION_DPAD_DOWN
+     * @see #GLOBAL_ACTION_DPAD_LEFT
+     * @see #GLOBAL_ACTION_DPAD_RIGHT
+     * @see #GLOBAL_ACTION_DPAD_CENTER
      */
     public final boolean performGlobalAction(int action) {
         IAccessibilityServiceConnection connection =
