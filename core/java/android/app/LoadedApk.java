@@ -1341,14 +1341,42 @@ public final class LoadedApk {
         return mResources;
     }
 
+    /**
+     * Used to investigate "duplicate app objects" bug (b/185177290).
+     * makeApplication() should only be called on the main thread, so no synchronization should
+     * be needed, but syncing anyway just in case.
+     */
+    @GuardedBy("sApplicationCache")
+    private static final ArrayMap<String, Application> sApplicationCache = new ArrayMap<>(4);
+
     @UnsupportedAppUsage
     public Application makeApplication(boolean forceDefaultAppClass,
             Instrumentation instrumentation) {
         if (mApplication != null) {
             return mApplication;
         }
-
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "makeApplication");
+
+        // For b/185177290.
+        final boolean wrongUser =
+                UserHandle.myUserId() != UserHandle.getUserId(mApplicationInfo.uid);
+        if (wrongUser) {
+            Slog.wtf(TAG, "makeApplication called with wrong appinfo UID: myUserId="
+                    + UserHandle.myUserId() + " appinfo.uid=" + mApplicationInfo.uid);
+        }
+        synchronized (sApplicationCache) {
+            final Application cached = sApplicationCache.get(mPackageName);
+            if (cached != null) {
+                // Looks like this is always happening for the system server, because
+                // the LoadedApk created in systemMain() -> attach() isn't cached properly?
+                if (!"android".equals(mPackageName)) {
+                    Slog.wtf(TAG, "App instance already created for package=" + mPackageName
+                            + " instance=" + cached);
+                }
+                // TODO Return the cached one, unles it's for the wrong user?
+                // For now, we just add WTF checks.
+            }
+        }
 
         Application app = null;
 
@@ -1397,6 +1425,9 @@ public final class LoadedApk {
         }
         mActivityThread.mAllApplications.add(app);
         mApplication = app;
+        synchronized (sApplicationCache) {
+            sApplicationCache.put(mPackageName, app);
+        }
 
         if (instrumentation != null) {
             try {
