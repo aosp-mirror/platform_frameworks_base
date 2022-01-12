@@ -57,6 +57,7 @@ LANG_TO_SCRIPT = {
     'sk': 'Latn',
     'sl': 'Latn',
     'sq': 'Latn',
+    'sv': 'Latn',
     'ta': 'Taml',
     'te': 'Telu',
     'tk': 'Latn',
