@@ -67,6 +67,8 @@ interface IPermissionManager {
     void revokeRuntimePermission(String packageName, String permissionName, int userId,
             String reason);
 
+    void revokePostNotificationPermissionWithoutKillForTest(String packageName, int userId);
+
     boolean shouldShowRequestPermissionRationale(String packageName, String permissionName,
             int userId);
 

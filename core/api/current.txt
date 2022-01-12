@@ -1312,6 +1312,7 @@ package android {
     field public static final int shouldDisableView = 16843246; // 0x10101ee
     field public static final int shouldUseDefaultUnfoldTransition = 16844364; // 0x101064c
     field public static final int showAsAction = 16843481; // 0x10102d9
+    field public static final int showClockAndComplications;
     field public static final int showDefault = 16843258; // 0x10101fa
     field public static final int showDividers = 16843561; // 0x1010329
     field public static final int showForAllUsers = 16844015; // 0x10104ef
@@ -40265,6 +40266,7 @@ package android.telecom {
     field public static final int PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL = 2048; // 0x800
     field public static final int PROPERTY_RTT = 1024; // 0x400
     field public static final int PROPERTY_SELF_MANAGED = 256; // 0x100
+    field public static final int PROPERTY_TETHERED_CALL = 32768; // 0x8000
     field public static final int PROPERTY_VOIP_AUDIO_MODE = 4096; // 0x1000
     field public static final int PROPERTY_WIFI = 8; // 0x8
   }
@@ -40293,6 +40295,7 @@ package android.telecom {
     field @NonNull public static final android.os.Parcelable.Creator<android.telecom.CallAudioState> CREATOR;
     field public static final int ROUTE_BLUETOOTH = 2; // 0x2
     field public static final int ROUTE_EARPIECE = 1; // 0x1
+    field public static final int ROUTE_EXTERNAL = 16; // 0x10
     field public static final int ROUTE_SPEAKER = 8; // 0x8
     field public static final int ROUTE_WIRED_HEADSET = 4; // 0x4
     field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
@@ -40567,6 +40570,7 @@ package android.telecom {
     field public static final int PROPERTY_IS_RTT = 256; // 0x100
     field public static final int PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL = 1024; // 0x400
     field public static final int PROPERTY_SELF_MANAGED = 128; // 0x80
+    field public static final int PROPERTY_TETHERED_CALL = 16384; // 0x4000
     field public static final int PROPERTY_WIFI = 8; // 0x8
     field public static final int STATE_ACTIVE = 4; // 0x4
     field public static final int STATE_DIALING = 3; // 0x3
@@ -52181,6 +52185,7 @@ package android.view.accessibility {
     field public static final int TYPE_ACCESSIBILITY_OVERLAY = 4; // 0x4
     field public static final int TYPE_APPLICATION = 1; // 0x1
     field public static final int TYPE_INPUT_METHOD = 2; // 0x2
+    field public static final int TYPE_MAGNIFICATION_OVERLAY = 6; // 0x6
     field public static final int TYPE_SPLIT_SCREEN_DIVIDER = 5; // 0x5
     field public static final int TYPE_SYSTEM = 3; // 0x3
   }

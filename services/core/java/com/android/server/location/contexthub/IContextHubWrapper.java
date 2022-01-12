@@ -35,6 +35,7 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 import android.util.Pair;
 
@@ -435,7 +436,7 @@ public abstract class IContextHubWrapper {
         public void onHostEndpointConnected(HostEndpointInfo info) {
             try {
                 mHub.onHostEndpointConnected(info);
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 Log.e(TAG, "RemoteException in onHostEndpointConnected");
             }
         }
@@ -444,7 +445,7 @@ public abstract class IContextHubWrapper {
         public void onHostEndpointDisconnected(short hostEndpointId) {
             try {
                 mHub.onHostEndpointDisconnected((char) hostEndpointId);
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 Log.e(TAG, "RemoteException in onHostEndpointDisconnected");
             }
         }
@@ -457,7 +458,7 @@ public abstract class IContextHubWrapper {
                 mHub.sendMessageToHub(contextHubId,
                         ContextHubServiceUtil.createAidlContextHubMessage(hostEndpointId, message));
                 return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
             }
         }
@@ -470,7 +471,7 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.loadNanoapp(contextHubId, aidlNanoAppBinary, transactionId);
                 return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
             }
         }
@@ -481,7 +482,7 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.unloadNanoapp(contextHubId, nanoappId, transactionId);
                 return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
             }
         }
@@ -492,7 +493,7 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.enableNanoapp(contextHubId, nanoappId, transactionId);
                 return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
             }
         }
@@ -503,7 +504,7 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.disableNanoapp(contextHubId, nanoappId, transactionId);
                 return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
             }
         }
@@ -513,21 +514,25 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.queryNanoapps(contextHubId);
                 return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
             }
         }
 
         public void registerCallback(int contextHubId, ICallback callback) throws RemoteException {
             mAidlCallbackMap.put(contextHubId, new ContextHubAidlCallback(contextHubId, callback));
-            mHub.registerCallback(contextHubId, mAidlCallbackMap.get(contextHubId));
+            try {
+                mHub.registerCallback(contextHubId, mAidlCallbackMap.get(contextHubId));
+            } catch (RemoteException | ServiceSpecificException e) {
+                Log.e(TAG, "Exception while registering callback: " + e.getMessage());
+            }
         }
 
         private void onSettingChanged(byte setting, boolean enabled) {
             try {
                 mHub.onSettingChanged(setting, enabled);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while sending setting update");
+            } catch (RemoteException | ServiceSpecificException e) {
+                Log.e(TAG, "Exception while sending setting update: " + e.getMessage());
             }
         }
     }

@@ -24,16 +24,18 @@ import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.util.traceSection
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
 /**
  * Responsible for building and applying the "shade node spec": the list (tree) of things that
  * currently populate the notification shade.
  */
-class ShadeViewManager constructor(
+class ShadeViewManager @AssistedInject constructor(
     context: Context,
-    listContainer: NotificationListContainer,
-    private val stackController: NotifStackController,
+    @Assisted listContainer: NotificationListContainer,
+    @Assisted private val stackController: NotifStackController,
     mediaContainerController: MediaContainerController,
     featureManager: NotificationSectionsFeatureManager,
     logger: ShadeViewDifferLogger,
@@ -68,20 +70,10 @@ class ShadeViewManager constructor(
     }
 }
 
-class ShadeViewManagerFactory @Inject constructor(
-    private val context: Context,
-    private val logger: ShadeViewDifferLogger,
-    private val mediaContainerController: MediaContainerController,
-    private val sectionsFeatureManager: NotificationSectionsFeatureManager,
-    private val viewBarn: NotifViewBarn
-) {
-    fun create(listContainer: NotificationListContainer, stackController: NotifStackController) =
-        ShadeViewManager(
-            context,
-            listContainer,
-            stackController,
-            mediaContainerController,
-            sectionsFeatureManager,
-            logger,
-            viewBarn)
+@AssistedFactory
+interface ShadeViewManagerFactory {
+    fun create(
+        listContainer: NotificationListContainer,
+        stackController: NotifStackController
+    ): ShadeViewManager
 }

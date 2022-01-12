@@ -626,8 +626,12 @@ public class Filter implements AutoCloseable {
      * be a no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
      *
      * @param delayInMs specifies the duration of the delay in milliseconds.
+     * @return one of the following results: {@link Tuner#RESULT_SUCCESS},
+     * {@link Tuner#RESULT_UNAVAILABLE}, {@link Tuner#RESULT_NOT_INITIALIZED},
+     * {@link Tuner#RESULT_INVALID_STATE}, {@link Tuner#RESULT_INVALID_ARGUMENT},
+     * {@link Tuner#RESULT_OUT_OF_MEMORY}, or {@link Tuner#RESULT_UNKNOWN_ERROR}.
      */
-    public int delayCallbackUntilTimeMillis(long delayInMs) {
+    public int delayCallbackUntilMillisElapsed(long delayInMs) {
         if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
                   TunerVersionChecker.TUNER_VERSION_2_0, "setTimeDelayHint")) {
             return Tuner.RESULT_UNAVAILABLE;
@@ -652,8 +656,12 @@ public class Filter implements AutoCloseable {
      * be a no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
      *
      * @param delayInBytes specifies the duration of the delay in bytes.
+     * @return one of the following results: {@link Tuner#RESULT_SUCCESS},
+     * {@link Tuner#RESULT_UNAVAILABLE}, {@link Tuner#RESULT_NOT_INITIALIZED},
+     * {@link Tuner#RESULT_INVALID_STATE}, {@link Tuner#RESULT_INVALID_ARGUMENT},
+     * {@link Tuner#RESULT_OUT_OF_MEMORY}, or {@link Tuner#RESULT_UNKNOWN_ERROR}.
      */
-    public int delayCallbackUntilBufferFilled(int delayInBytes) {
+    public int delayCallbackUntilBytesAccumulated(int delayInBytes) {
         if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
                   TunerVersionChecker.TUNER_VERSION_2_0, "setTimeDelayHint")) {
             return Tuner.RESULT_UNAVAILABLE;

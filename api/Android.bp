@@ -24,6 +24,19 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+bootstrap_go_package {
+    name: "soong-api",
+    pkgPath: "android/soong/api",
+    deps: [
+        "blueprint",
+        "soong",
+        "soong-android",
+        "soong-genrule",
+    ],
+    srcs: ["api.go"],
+    pluginFor: ["soong_build"],
+}
+
 python_defaults {
     name: "python3_version_defaults",
     version: {

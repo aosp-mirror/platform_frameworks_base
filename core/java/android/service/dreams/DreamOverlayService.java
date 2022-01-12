@@ -35,6 +35,7 @@ import android.view.WindowManager;
 public abstract class DreamOverlayService extends Service {
     private static final String TAG = "DreamOverlayService";
     private static final boolean DEBUG = false;
+    private boolean mShowComplications;
 
     private IDreamOverlay mDreamOverlay = new IDreamOverlay.Stub() {
         @Override
@@ -53,6 +54,8 @@ public abstract class DreamOverlayService extends Service {
     @Nullable
     @Override
     public final IBinder onBind(@NonNull Intent intent) {
+        mShowComplications = intent.getBooleanExtra(DreamService.EXTRA_SHOW_COMPLICATIONS,
+                DreamService.DEFAULT_SHOW_COMPLICATIONS);
         return mDreamOverlay.asBinder();
     }
 
@@ -73,5 +76,12 @@ public abstract class DreamOverlayService extends Service {
         } catch (RemoteException e) {
             Log.e(TAG, "Could not request exit:" + e);
         }
+    }
+
+    /**
+     * Returns whether to show complications on the dream overlay.
+     */
+    public final boolean shouldShowComplications() {
+        return mShowComplications;
     }
 }
