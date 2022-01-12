@@ -15,6 +15,8 @@
 package api
 
 import (
+	"sort"
+
 	"github.com/google/blueprint/proptools"
 
 	"android/soong/android"
@@ -32,6 +34,8 @@ import (
 type CombinedApisProperties struct {
 	// Module libraries in the bootclasspath
 	Bootclasspath []string
+	// Module libraries on the bootclasspath if include_nonpublic_framework_api is true.
+	Conditional_bootclasspath []string
 	// Module libraries in system server
 	System_server_classpath []string
 }
@@ -169,10 +173,10 @@ func remove(s []string, v string) []string {
 	return s2
 }
 
-func createMergedTxts(ctx android.LoadHookContext, props CombinedApisProperties) {
+func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string) {
 	var textFiles []MergedTxtDefinition
 	// Two module libraries currently do not support @SystemApi so only have the public scope.
-	bcpWithSystemApi := props.Bootclasspath
+	bcpWithSystemApi := bootclasspath
 	bcpWithSystemApi = remove(bcpWithSystemApi, "conscrypt.module.public.api")
 	bcpWithSystemApi = remove(bcpWithSystemApi, "i18n.module.public.api")
 
@@ -181,7 +185,7 @@ func createMergedTxts(ctx android.LoadHookContext, props CombinedApisProperties)
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename: f,
 			BaseTxt:     ":non-updatable-" + f,
-			Modules:     props.Bootclasspath,
+			Modules:     bootclasspath,
 			ModuleTag:   "{.public" + tagSuffix[i],
 			Scope:       "public",
 		})
@@ -202,7 +206,7 @@ func createMergedTxts(ctx android.LoadHookContext, props CombinedApisProperties)
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename: f,
 			BaseTxt:     ":non-updatable-system-server-" + f,
-			Modules:     props.System_server_classpath,
+			Modules:     system_server_classpath,
 			ModuleTag:   "{.system-server" + tagSuffix[i],
 			Scope:       "system-server",
 		})
@@ -213,12 +217,17 @@ func createMergedTxts(ctx android.LoadHookContext, props CombinedApisProperties)
 }
 
 func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
-	createMergedTxts(ctx, a.properties)
+	bootclasspath := a.properties.Bootclasspath
+	if ctx.Config().VendorConfig("ANDROID").Bool("include_nonpublic_framework_api") {
+		bootclasspath = append(bootclasspath, a.properties.Conditional_bootclasspath...)
+		sort.Strings(bootclasspath)
+	}
+	createMergedTxts(ctx, bootclasspath, a.properties.System_server_classpath)
 
-	createMergedStubsSrcjar(ctx, a.properties.Bootclasspath)
+	createMergedStubsSrcjar(ctx, bootclasspath)
 
 	// Conscrypt and i18n currently do not enable annotations
-	annotationModules := a.properties.Bootclasspath
+	annotationModules := bootclasspath
 	annotationModules = remove(annotationModules, "conscrypt.module.public.api")
 	annotationModules = remove(annotationModules, "i18n.module.public.api")
 	createMergedAnnotations(ctx, annotationModules)
@@ -230,7 +239,7 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	// 3) It's a compromise. Ideally we wouldn't be filtering out any module APIs, and have
 	//    per-module lint databases that excludes just that module's APIs. Alas, that's more
 	//    difficult to achieve.
-	filteredModules := a.properties.Bootclasspath
+	filteredModules := bootclasspath
 	filteredModules = remove(filteredModules, "art.module.public.api")
 	createFilteredApiVersions(ctx, filteredModules)
 }
