@@ -1437,11 +1437,11 @@ public class ResolverActivity extends Activity implements
         try {
             // TODO: Once this is a small springboard activity, it can move off the UI process
             // and we can move the request method to ActivityManagerInternal.
-            IBinder permissionToken = ActivityTaskManager.getService()
-                    .requestStartActivityPermissionToken(getActivityToken());
             final Intent chooserIntent = new Intent();
             final ComponentName delegateActivity = ComponentName.unflattenFromString(
                     Resources.getSystem().getString(R.string.config_chooserActivity));
+            IBinder permissionToken = ActivityTaskManager.getService()
+                    .requestStartActivityPermissionToken(delegateActivity);
             chooserIntent.setClassName(delegateActivity.getPackageName(),
                     delegateActivity.getClassName());
             chooserIntent.putExtra(ActivityTaskManager.EXTRA_PERMISSION_TOKEN, permissionToken);
