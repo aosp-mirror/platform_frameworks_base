@@ -15,12 +15,13 @@
  */
 package android.net.vcn;
 
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_ANY;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_FORBIDDEN;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_REQUIRED;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_ANY;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_OK;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -32,26 +33,26 @@ public class VcnCellUnderlyingNetworkTemplateTest {
     private static final Set<Integer> ALLOWED_CARRIER_IDS = new HashSet<>();
 
     // Package private for use in VcnGatewayConnectionConfigTest
-    static VcnCellUnderlyingNetworkTemplate getTestNetworkPriority() {
+    static VcnCellUnderlyingNetworkTemplate getTestNetworkTemplate() {
         return new VcnCellUnderlyingNetworkTemplate.Builder()
                 .setNetworkQuality(NETWORK_QUALITY_OK)
-                .setAllowMetered(true /* allowMetered */)
-                .setAllowedOperatorPlmnIds(ALLOWED_PLMN_IDS)
-                .setAllowedSpecificCarrierIds(ALLOWED_CARRIER_IDS)
-                .setAllowRoaming(true /* allowRoaming */)
-                .setRequireOpportunistic(true /* requireOpportunistic */)
+                .setMetered(MATCH_FORBIDDEN)
+                .setOperatorPlmnIds(ALLOWED_PLMN_IDS)
+                .setSimSpecificCarrierIds(ALLOWED_CARRIER_IDS)
+                .setRoaming(MATCH_FORBIDDEN)
+                .setOpportunistic(MATCH_REQUIRED)
                 .build();
     }
 
     @Test
     public void testBuilderAndGetters() {
-        final VcnCellUnderlyingNetworkTemplate networkPriority = getTestNetworkPriority();
+        final VcnCellUnderlyingNetworkTemplate networkPriority = getTestNetworkTemplate();
         assertEquals(NETWORK_QUALITY_OK, networkPriority.getNetworkQuality());
-        assertTrue(networkPriority.allowMetered());
-        assertEquals(ALLOWED_PLMN_IDS, networkPriority.getAllowedOperatorPlmnIds());
-        assertEquals(ALLOWED_CARRIER_IDS, networkPriority.getAllowedSpecificCarrierIds());
-        assertTrue(networkPriority.allowRoaming());
-        assertTrue(networkPriority.requireOpportunistic());
+        assertEquals(MATCH_FORBIDDEN, networkPriority.getMetered());
+        assertEquals(ALLOWED_PLMN_IDS, networkPriority.getOperatorPlmnIds());
+        assertEquals(ALLOWED_CARRIER_IDS, networkPriority.getSimSpecificCarrierIds());
+        assertEquals(MATCH_FORBIDDEN, networkPriority.getRoaming());
+        assertEquals(MATCH_REQUIRED, networkPriority.getOpportunistic());
     }
 
     @Test
@@ -59,16 +60,16 @@ public class VcnCellUnderlyingNetworkTemplateTest {
         final VcnCellUnderlyingNetworkTemplate networkPriority =
                 new VcnCellUnderlyingNetworkTemplate.Builder().build();
         assertEquals(NETWORK_QUALITY_ANY, networkPriority.getNetworkQuality());
-        assertFalse(networkPriority.allowMetered());
-        assertEquals(new HashSet<String>(), networkPriority.getAllowedOperatorPlmnIds());
-        assertEquals(new HashSet<Integer>(), networkPriority.getAllowedSpecificCarrierIds());
-        assertFalse(networkPriority.allowRoaming());
-        assertFalse(networkPriority.requireOpportunistic());
+        assertEquals(MATCH_ANY, networkPriority.getMetered());
+        assertEquals(new HashSet<String>(), networkPriority.getOperatorPlmnIds());
+        assertEquals(new HashSet<Integer>(), networkPriority.getSimSpecificCarrierIds());
+        assertEquals(MATCH_ANY, networkPriority.getRoaming());
+        assertEquals(MATCH_ANY, networkPriority.getOpportunistic());
     }
 
     @Test
     public void testPersistableBundle() {
-        final VcnCellUnderlyingNetworkTemplate networkPriority = getTestNetworkPriority();
+        final VcnCellUnderlyingNetworkTemplate networkPriority = getTestNetworkTemplate();
         assertEquals(
                 networkPriority,
                 VcnUnderlyingNetworkTemplate.fromPersistableBundle(
