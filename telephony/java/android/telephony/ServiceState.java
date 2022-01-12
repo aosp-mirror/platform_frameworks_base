@@ -479,7 +479,7 @@ public class ServiceState implements Parcelable {
         mIsEmergencyOnly = in.readInt() != 0;
         mArfcnRsrpBoost = in.readInt();
         synchronized (mNetworkRegistrationInfos) {
-            in.readList(mNetworkRegistrationInfos, NetworkRegistrationInfo.class.getClassLoader(), android.telephony.NetworkRegistrationInfo.class);
+            in.readList(mNetworkRegistrationInfos, NetworkRegistrationInfo.class.getClassLoader());
         }
         mChannelNumber = in.readInt();
         mCellBandwidths = in.createIntArray();
