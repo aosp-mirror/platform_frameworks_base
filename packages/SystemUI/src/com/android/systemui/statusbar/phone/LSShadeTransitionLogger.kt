@@ -34,7 +34,7 @@ class LSShadeTransitionLogger @Inject constructor(
     private val displayMetrics: DisplayMetrics
 ) {
     fun logUnSuccessfulDragDown(startingChild: View?) {
-        val entry = (startingChild as ExpandableNotificationRow?)?.entry
+        val entry = (startingChild as? ExpandableNotificationRow)?.entry
         buffer.log(TAG, LogLevel.INFO, {
             str1 = entry?.key ?: "no entry"
         }, {
@@ -49,7 +49,7 @@ class LSShadeTransitionLogger @Inject constructor(
     }
 
     fun logDragDownStarted(startingChild: ExpandableView?) {
-        val entry = (startingChild as ExpandableNotificationRow?)?.entry
+        val entry = (startingChild as? ExpandableNotificationRow)?.entry
         buffer.log(TAG, LogLevel.INFO, {
             str1 = entry?.key ?: "no entry"
         }, {
@@ -58,7 +58,7 @@ class LSShadeTransitionLogger @Inject constructor(
     }
 
     fun logDraggedDownLockDownShade(startingChild: View?) {
-        val entry = (startingChild as ExpandableNotificationRow?)?.entry
+        val entry = (startingChild as? ExpandableNotificationRow)?.entry
         buffer.log(TAG, LogLevel.INFO, {
             str1 = entry?.key ?: "no entry"
         }, {
@@ -67,7 +67,7 @@ class LSShadeTransitionLogger @Inject constructor(
     }
 
     fun logDraggedDown(startingChild: View?, dragLengthY: Int) {
-        val entry = (startingChild as ExpandableNotificationRow?)?.entry
+        val entry = (startingChild as? ExpandableNotificationRow)?.entry
         buffer.log(TAG, LogLevel.INFO, {
             str1 = entry?.key ?: "no entry"
         }, {
