@@ -35,6 +35,7 @@ import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_FIRST_MATCH;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_MATCH_LOST;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER;
 
+import static com.android.server.companion.presence.CompanionDevicePresenceMonitor.DEBUG;
 import static com.android.server.companion.presence.Utils.btDeviceToString;
 
 import static java.util.Objects.requireNonNull;
@@ -72,7 +73,6 @@ import java.util.Set;
 
 @SuppressLint("LongLogTag")
 class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
-    private static final boolean DEBUG = false;
     private static final String TAG = "CompanionDevice_PresenceMonitor_BLE";
 
     /**
