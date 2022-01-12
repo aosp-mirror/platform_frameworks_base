@@ -1754,11 +1754,11 @@ public class PackageInstaller {
             installScenario = source.readInt();
             sizeBytes = source.readLong();
             appPackageName = source.readString();
-            appIcon = source.readParcelable(null, android.graphics.Bitmap.class);
+            appIcon = source.readParcelable(null);
             appLabel = source.readString();
-            originatingUri = source.readParcelable(null, android.net.Uri.class);
+            originatingUri = source.readParcelable(null);
             originatingUid = source.readInt();
-            referrerUri = source.readParcelable(null, android.net.Uri.class);
+            referrerUri = source.readParcelable(null);
             abiOverride = source.readString();
             volumeUuid = source.readString();
             grantedRuntimePermissions = source.readStringArray();
@@ -1770,7 +1770,7 @@ public class PackageInstaller {
             forceQueryableOverride = source.readBoolean();
             requiredInstalledVersionCode = source.readLong();
             DataLoaderParamsParcel dataLoaderParamsParcel = source.readParcelable(
-                    DataLoaderParamsParcel.class.getClassLoader(), android.content.pm.DataLoaderParamsParcel.class);
+                    DataLoaderParamsParcel.class.getClassLoader());
             if (dataLoaderParamsParcel != null) {
                 dataLoaderParams = new DataLoaderParams(dataLoaderParamsParcel);
             }
@@ -2533,13 +2533,13 @@ public class PackageInstaller {
             installScenario = source.readInt();
             sizeBytes = source.readLong();
             appPackageName = source.readString();
-            appIcon = source.readParcelable(null, android.graphics.Bitmap.class);
+            appIcon = source.readParcelable(null);
             appLabel = source.readString();
 
             installLocation = source.readInt();
-            originatingUri = source.readParcelable(null, android.net.Uri.class);
+            originatingUri = source.readParcelable(null);
             originatingUid = source.readInt();
-            referrerUri = source.readParcelable(null, android.net.Uri.class);
+            referrerUri = source.readParcelable(null);
             grantedRuntimePermissions = source.readStringArray();
             whitelistedRestrictedPermissions = source.createStringArrayList();
             autoRevokePermissionsMode = source.readInt();

@@ -881,7 +881,6 @@ public class JobInfo implements Parcelable {
         return hashCode;
     }
 
-    @SuppressWarnings("UnsafeParcelApi")
     private JobInfo(Parcel in) {
         jobId = in.readInt();
         extras = in.readPersistableBundle();

@@ -1482,7 +1482,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         SetRippleDrawableColor(Parcel parcel) {
             viewId = parcel.readInt();
-            mColorStateList = parcel.readParcelable(null, android.content.res.ColorStateList.class);
+            mColorStateList = parcel.readParcelable(null);
         }
 
         public void writeToParcel(Parcel dest, int flags) {

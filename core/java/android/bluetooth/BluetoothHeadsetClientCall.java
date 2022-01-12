@@ -293,7 +293,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable, Attributabl
             new Parcelable.Creator<BluetoothHeadsetClientCall>() {
                 @Override
                 public BluetoothHeadsetClientCall createFromParcel(Parcel in) {
-                    return new BluetoothHeadsetClientCall((BluetoothDevice) in.readParcelable(null, android.bluetooth.BluetoothDevice.class),
+                    return new BluetoothHeadsetClientCall((BluetoothDevice) in.readParcelable(null),
                             in.readInt(), UUID.fromString(in.readString()), in.readInt(),
                             in.readString(), in.readInt() == 1, in.readInt() == 1,
                             in.readInt() == 1);

@@ -3511,7 +3511,7 @@ public class ParsingPackageUtils {
 
             ArraySet<PublicKey> keys = new ArraySet<>(M);
             for (int j = 0; j < M; ++j) {
-                PublicKey pk = (PublicKey) in.readSerializable(java.security.PublicKey.class.getClassLoader(), java.security.PublicKey.class);
+                PublicKey pk = (PublicKey) in.readSerializable();
                 keys.add(pk);
             }
 

@@ -248,10 +248,10 @@ public final class CallAudioState implements Parcelable {
             int route = source.readInt();
             int supportedRouteMask = source.readInt();
             BluetoothDevice activeBluetoothDevice = source.readParcelable(
-                    ClassLoader.getSystemClassLoader(), android.bluetooth.BluetoothDevice.class);
+                    ClassLoader.getSystemClassLoader());
             List<BluetoothDevice> supportedBluetoothDevices = new ArrayList<>();
             source.readParcelableList(supportedBluetoothDevices,
-                    ClassLoader.getSystemClassLoader(), android.bluetooth.BluetoothDevice.class);
+                    ClassLoader.getSystemClassLoader());
             return new CallAudioState(isMuted, route,
                     supportedRouteMask, activeBluetoothDevice, supportedBluetoothDevices);
         }

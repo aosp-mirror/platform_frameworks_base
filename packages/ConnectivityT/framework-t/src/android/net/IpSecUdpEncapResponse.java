@@ -80,7 +80,7 @@ public final class IpSecUdpEncapResponse implements Parcelable {
         status = in.readInt();
         resourceId = in.readInt();
         port = in.readInt();
-        fileDescriptor = in.readParcelable(ParcelFileDescriptor.class.getClassLoader(), android.os.ParcelFileDescriptor.class);
+        fileDescriptor = in.readParcelable(ParcelFileDescriptor.class.getClassLoader());
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<IpSecUdpEncapResponse> CREATOR =

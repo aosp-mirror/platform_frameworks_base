@@ -2143,7 +2143,7 @@ public final class ShortcutInfo implements Parcelable {
         mUserId = source.readInt();
         mId = source.readString8();
         mPackageName = source.readString8();
-        mActivity = source.readParcelable(cl, android.content.ComponentName.class);
+        mActivity = source.readParcelable(cl);
         mFlags = source.readInt();
         mIconResId = source.readInt();
         mLastChangedTimestamp = source.readLong();
@@ -2153,7 +2153,7 @@ public final class ShortcutInfo implements Parcelable {
             return; // key information only.
         }
 
-        mIcon = source.readParcelable(cl, android.graphics.drawable.Icon.class);
+        mIcon = source.readParcelable(cl);
         mTitle = source.readCharSequence();
         mTitleResId = source.readInt();
         mText = source.readCharSequence();
@@ -2163,7 +2163,7 @@ public final class ShortcutInfo implements Parcelable {
         mIntents = source.readParcelableArray(cl, Intent.class);
         mIntentPersistableExtrases = source.readParcelableArray(cl, PersistableBundle.class);
         mRank = source.readInt();
-        mExtras = source.readParcelable(cl, android.os.PersistableBundle.class);
+        mExtras = source.readParcelable(cl);
         mBitmapPath = source.readString8();
 
         mIconResName = source.readString8();
@@ -2182,7 +2182,7 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         mPersons = source.readParcelableArray(cl, Person.class);
-        mLocusId = source.readParcelable(cl, android.content.LocusId.class);
+        mLocusId = source.readParcelable(cl);
         mIconUri = source.readString8();
         mStartingThemeResName = source.readString8();
     }
