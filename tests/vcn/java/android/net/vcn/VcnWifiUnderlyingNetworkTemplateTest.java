@@ -15,36 +15,38 @@
  */
 package android.net.vcn;
 
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_ANY;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_FORBIDDEN;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_ANY;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_OK;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+
+import java.util.Set;
 
 public class VcnWifiUnderlyingNetworkTemplateTest {
     private static final String SSID = "TestWifi";
     private static final int INVALID_NETWORK_QUALITY = -1;
 
     // Package private for use in VcnGatewayConnectionConfigTest
-    static VcnWifiUnderlyingNetworkTemplate getTestNetworkPriority() {
+    static VcnWifiUnderlyingNetworkTemplate getTestNetworkTemplate() {
         return new VcnWifiUnderlyingNetworkTemplate.Builder()
                 .setNetworkQuality(NETWORK_QUALITY_OK)
-                .setAllowMetered(true /* allowMetered */)
-                .setSsid(SSID)
+                .setMetered(MATCH_FORBIDDEN)
+                .setSsids(Set.of(SSID))
                 .build();
     }
 
     @Test
     public void testBuilderAndGetters() {
-        final VcnWifiUnderlyingNetworkTemplate networkPriority = getTestNetworkPriority();
+        final VcnWifiUnderlyingNetworkTemplate networkPriority = getTestNetworkTemplate();
         assertEquals(NETWORK_QUALITY_OK, networkPriority.getNetworkQuality());
-        assertTrue(networkPriority.allowMetered());
-        assertEquals(SSID, networkPriority.getSsid());
+        assertEquals(MATCH_FORBIDDEN, networkPriority.getMetered());
+        assertEquals(Set.of(SSID), networkPriority.getSsids());
     }
 
     @Test
@@ -52,8 +54,8 @@ public class VcnWifiUnderlyingNetworkTemplateTest {
         final VcnWifiUnderlyingNetworkTemplate networkPriority =
                 new VcnWifiUnderlyingNetworkTemplate.Builder().build();
         assertEquals(NETWORK_QUALITY_ANY, networkPriority.getNetworkQuality());
-        assertFalse(networkPriority.allowMetered());
-        assertNull(SSID, networkPriority.getSsid());
+        assertEquals(MATCH_ANY, networkPriority.getMetered());
+        assertTrue(networkPriority.getSsids().isEmpty());
     }
 
     @Test
@@ -68,7 +70,7 @@ public class VcnWifiUnderlyingNetworkTemplateTest {
 
     @Test
     public void testPersistableBundle() {
-        final VcnWifiUnderlyingNetworkTemplate networkPriority = getTestNetworkPriority();
+        final VcnWifiUnderlyingNetworkTemplate networkPriority = getTestNetworkTemplate();
         assertEquals(
                 networkPriority,
                 VcnUnderlyingNetworkTemplate.fromPersistableBundle(
