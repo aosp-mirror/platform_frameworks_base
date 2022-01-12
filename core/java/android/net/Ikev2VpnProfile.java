@@ -916,9 +916,23 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         }
 
         /**
-         *  Sets whether the local traffic is exempted from the VPN.
+         * Sets whether the local traffic is exempted from the VPN.
          *
-         *  @hide TODO(184750836): unhide once the implementation is completed
+         * When this is set, the system will not use the VPN network when an app
+         * tries to send traffic for an IP address that is on a local network.
+         *
+         * Note that there are important security implications. In particular, the
+         * networks that the device connects to typically decides what IP addresses
+         * are part of the local network. This means that for VPNs setting this
+         * flag, it is possible for anybody to set up a public network in such a
+         * way that traffic to arbitrary IP addresses will bypass the VPN, including
+         * traffic to services like DNS. When using this API, please consider the
+         * security implications for your particular case.
+         *
+         * Note that because the local traffic will always bypass the VPN,
+         * it is not possible to set this flag on a non-bypassable VPN.
+         *
+         * @hide TODO(184750836): unhide once the implementation is completed
          */
         @NonNull
         @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
