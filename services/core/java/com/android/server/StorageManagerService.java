@@ -160,8 +160,6 @@ import com.android.server.storage.StorageSessionController.ExternalStorageServic
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal.ScreenObserver;
 
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
@@ -173,6 +171,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -4973,19 +4973,17 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public boolean hasExternalStorageAccess(int uid, String packageName) {
             try {
-                if (mIPackageManager.checkUidPermission(
-                                MANAGE_EXTERNAL_STORAGE, uid) == PERMISSION_GRANTED) {
-                    return true;
+                final int opMode = mIAppOpsService.checkOperation(
+                        OP_MANAGE_EXTERNAL_STORAGE, uid, packageName);
+                if (opMode == AppOpsManager.MODE_DEFAULT) {
+                    return mIPackageManager.checkUidPermission(
+                            MANAGE_EXTERNAL_STORAGE, uid) == PERMISSION_GRANTED;
                 }
 
-                if (mIAppOpsService.checkOperation(
-                                OP_MANAGE_EXTERNAL_STORAGE, uid, packageName) == MODE_ALLOWED) {
-                    return true;
-                }
+                return opMode == AppOpsManager.MODE_ALLOWED;
             } catch (RemoteException e) {
                 Slog.w("Failed to check MANAGE_EXTERNAL_STORAGE access for " + packageName, e);
             }
-
             return false;
         }
 
