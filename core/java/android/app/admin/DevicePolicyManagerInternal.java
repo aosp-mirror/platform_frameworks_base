@@ -16,7 +16,6 @@
 
 package android.app.admin;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
@@ -76,13 +75,6 @@ public abstract class DevicePolicyManagerInternal {
      */
     public abstract void addOnCrossProfileWidgetProvidersChangeListener(
             OnCrossProfileWidgetProvidersChangeListener listener);
-
-    /**
-     * @param userHandle the handle of the user whose profile owner is being fetched.
-     * @return the configured supervision app if it exists and is the device owner or policy owner.
-     */
-    public abstract @Nullable ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent(
-            @NonNull UserHandle userHandle);
 
     /**
      * Checks if an app with given uid is an active device admin of its user and has the policy
