@@ -25,6 +25,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -36,7 +37,6 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.hardware.usb.UsbManager;
 import android.location.GnssSignalQuality;
-import android.net.INetworkStatsService;
 import android.net.NetworkStats;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -136,7 +136,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -11871,19 +11873,11 @@ public class BatteryStatsImpl extends BatteryStats {
     private NetworkStats mLastModemNetworkStats = new NetworkStats(0, -1);
 
     @VisibleForTesting
-    protected NetworkStats readNetworkStatsLocked(String[] ifaces) {
-        try {
-            if (!ArrayUtils.isEmpty(ifaces)) {
-                INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
-                        ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
-                if (statsService != null) {
-                    return statsService.getDetailedUidStats(ifaces);
-                } else {
-                    Slog.e(TAG, "Failed to get networkStatsService ");
-                }
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "failed to read network stats for ifaces: " + Arrays.toString(ifaces) + e);
+    protected NetworkStats readNetworkStatsLocked(@NonNull NetworkStatsManager networkStatsManager,
+            String[] ifaces) {
+        Objects.requireNonNull(networkStatsManager);
+        if (!ArrayUtils.isEmpty(ifaces)) {
+            return networkStatsManager.getDetailedUidStats(Set.of(ifaces));
         }
         return null;
     }
@@ -11893,7 +11887,8 @@ public class BatteryStatsImpl extends BatteryStats {
      * @param info The energy information from the WiFi controller.
      */
     public void updateWifiState(@Nullable final WifiActivityEnergyInfo info,
-            final long consumedChargeUC, long elapsedRealtimeMs, long uptimeMs) {
+            final long consumedChargeUC, long elapsedRealtimeMs, long uptimeMs,
+            @NonNull NetworkStatsManager networkStatsManager) {
         if (DEBUG_ENERGY) {
             Slog.d(TAG, "Updating wifi stats: " + Arrays.toString(mWifiIfaces));
         }
@@ -11901,7 +11896,8 @@ public class BatteryStatsImpl extends BatteryStats {
         // Grab a separate lock to acquire the network stats, which may do I/O.
         NetworkStats delta = null;
         synchronized (mWifiNetworkLock) {
-            final NetworkStats latestStats = readNetworkStatsLocked(mWifiIfaces);
+            final NetworkStats latestStats = readNetworkStatsLocked(networkStatsManager,
+                    mWifiIfaces);
             if (latestStats != null) {
                 delta = NetworkStats.subtract(latestStats, mLastWifiNetworkStats, null, null,
                         mNetworkStatsPool.acquire());
@@ -12253,7 +12249,8 @@ public class BatteryStatsImpl extends BatteryStats {
      * Distribute Cell radio energy info and network traffic to apps.
      */
     public void noteModemControllerActivity(@Nullable final ModemActivityInfo activityInfo,
-            final long consumedChargeUC, long elapsedRealtimeMs, long uptimeMs) {
+            final long consumedChargeUC, long elapsedRealtimeMs, long uptimeMs,
+            @NonNull NetworkStatsManager networkStatsManager) {
         if (DEBUG_ENERGY) {
             Slog.d(TAG, "Updating mobile radio stats with " + activityInfo);
         }
@@ -12267,7 +12264,8 @@ public class BatteryStatsImpl extends BatteryStats {
         // Grab a separate lock to acquire the network stats, which may do I/O.
         NetworkStats delta = null;
         synchronized (mModemNetworkLock) {
-            final NetworkStats latestStats = readNetworkStatsLocked(mModemIfaces);
+            final NetworkStats latestStats = readNetworkStatsLocked(networkStatsManager,
+                    mModemIfaces);
             if (latestStats != null) {
                 delta = NetworkStats.subtract(latestStats, mLastModemNetworkStats, null, null,
                         mNetworkStatsPool.acquire());

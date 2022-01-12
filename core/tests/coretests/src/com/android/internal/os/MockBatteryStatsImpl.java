@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import android.annotation.NonNull;
+import android.app.usage.NetworkStatsManager;
 import android.net.NetworkStats;
 import android.os.Handler;
 import android.os.Looper;
@@ -106,7 +108,8 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     @Override
-    protected NetworkStats readNetworkStatsLocked(String[] ifaces) {
+    protected NetworkStats readNetworkStatsLocked(@NonNull NetworkStatsManager networkStatsManager,
+            String[] ifaces) {
         return mNetworkStats;
     }
 

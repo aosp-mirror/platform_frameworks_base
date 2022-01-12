@@ -16,6 +16,7 @@
 package com.android.server.am;
 
 import android.annotation.Nullable;
+import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -711,8 +712,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             if (wifiInfo.isValid()) {
                 final long wifiChargeUC = measuredEnergyDeltas != null ?
                         measuredEnergyDeltas.wifiChargeUC : MeasuredEnergySnapshot.UNAVAILABLE;
-                mStats.updateWifiState(
-                        extractDeltaLocked(wifiInfo), wifiChargeUC, elapsedRealtime, uptime);
+                final NetworkStatsManager networkStatsManager = mInjector.getSystemService(
+                        NetworkStatsManager.class);
+                mStats.updateWifiState(extractDeltaLocked(wifiInfo),
+                        wifiChargeUC, elapsedRealtime, uptime, networkStatsManager);
             } else {
                 Slog.w(TAG, "wifi info is invalid: " + wifiInfo);
             }
@@ -721,8 +724,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         if (modemInfo != null) {
             final long mobileRadioChargeUC = measuredEnergyDeltas != null
                     ? measuredEnergyDeltas.mobileRadioChargeUC : MeasuredEnergySnapshot.UNAVAILABLE;
+            final NetworkStatsManager networkStatsManager = mInjector.getSystemService(
+                    NetworkStatsManager.class);
             mStats.noteModemControllerActivity(modemInfo, mobileRadioChargeUC, elapsedRealtime,
-                    uptime);
+                    uptime, networkStatsManager);
         }
 
         if (updateFlags == UPDATE_ALL) {

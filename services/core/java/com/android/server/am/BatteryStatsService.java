@@ -22,6 +22,7 @@ import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
 import android.annotation.NonNull;
 import android.app.StatsManager;
+import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -2025,8 +2026,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
+            final NetworkStatsManager networkStatsManager = mContext.getSystemService(
+                    NetworkStatsManager.class);
             mHandler.post(() -> {
-                mStats.updateWifiState(info, POWER_DATA_UNAVAILABLE, elapsedRealtime, uptime);
+                mStats.updateWifiState(info, POWER_DATA_UNAVAILABLE, elapsedRealtime, uptime,
+                        networkStatsManager);
             });
         }
     }
@@ -2063,9 +2067,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
+            final NetworkStatsManager networkStatsManager = mContext.getSystemService(
+                    NetworkStatsManager.class);
             mHandler.post(() -> {
                 mStats.noteModemControllerActivity(info, POWER_DATA_UNAVAILABLE, elapsedRealtime,
-                        uptime);
+                        uptime, networkStatsManager);
             });
         }
     }
