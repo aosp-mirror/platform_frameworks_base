@@ -947,12 +947,11 @@ public abstract class TvInputService extends Service {
         /**
          * Informs the app that the AIT (Application Information Table) is updated.
          *
-         * <p>This method should also be call when
+         * <p>This method should also be called when
          * {@link #onSetInteractiveAppNotificationEnabled(boolean)} is called to send the first AIT
          * info.
          *
          * @see #onSetInteractiveAppNotificationEnabled(boolean)
-         * @hide
          */
         public void notifyAitInfoUpdated(@NonNull final AitInfo aitInfo) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1214,7 +1213,6 @@ public abstract class TvInputService extends Service {
          *
          * @see TvView#setInteractiveAppNotificationEnabled(boolean)
          * @see Session#notifyAitInfoUpdated(android.media.tv.AitInfo)
-         * @hide
          */
         public void onSetInteractiveAppNotificationEnabled(boolean enabled) {
         }

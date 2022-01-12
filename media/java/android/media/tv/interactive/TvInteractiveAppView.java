@@ -387,7 +387,6 @@ public class TvInteractiveAppView extends ViewGroup {
      *                      {@link TvInteractiveAppInfo#getId()}.
      *
      * @see android.media.tv.interactive.TvInteractiveAppManager#getTvInteractiveAppServiceList()
-     * @hide
      */
     public void prepareInteractiveApp(
             @NonNull String iAppServiceId,
@@ -416,7 +415,6 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Stops the interactive application.
-     * @hide
      */
     public void stopInteractiveApp() {
         if (DEBUG) {
@@ -564,7 +562,6 @@ public class TvInteractiveAppView extends ViewGroup {
      *
      * @param tvView the TvView to be linked to this TvInteractiveAppView via linking of Sessions.
      * @return The result of the operation.
-     * @hide
      */
     public int setTvView(@Nullable TvView tvView) {
         if (tvView == null) {
@@ -623,14 +620,13 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         /**
-         * This is called when the session state is changed.
+         * This is called when the state of corresponding interactive app is changed.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param state the current state.
          * @param err the error code for error state. {@link TvInteractiveAppManager#ERROR_NONE}
          *              is used when the state is not
          *              {@link TvInteractiveAppManager#INTERACTIVE_APP_STATE_ERROR}.
-         * @hide
          */
         public void onStateChanged(
                 @NonNull String iAppServiceId,

@@ -34,6 +34,7 @@ import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.TvView;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -65,7 +66,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The TvInteractiveAppService class represents a TV interactive applications RTE.
+ * A TV interactive application service is a service that provides runtime environment and runs TV
+ * interactive applications.
  */
 public abstract class TvInteractiveAppService extends Service {
     private static final boolean DEBUG = false;
@@ -201,10 +203,8 @@ public abstract class TvInteractiveAppService extends Service {
 
     /**
      * Prepares TV Interactive App service for the given type.
-     * @hide
      */
-    public void onPrepare(@TvInteractiveAppInfo.InteractiveAppType int type) {
-    }
+    public abstract void onPrepare(@TvInteractiveAppInfo.InteractiveAppType int type);
 
     /**
      * Registers App link info.
@@ -239,14 +239,11 @@ public abstract class TvInteractiveAppService extends Service {
      *
      * @param iAppServiceId The ID of the TV Interactive App associated with the session.
      * @param type The type of the TV Interactive App associated with the session.
-     * @hide
      */
     @Nullable
-    public Session onCreateSession(
+    public abstract Session onCreateSession(
             @NonNull String iAppServiceId,
-            @TvInteractiveAppInfo.InteractiveAppType int type) {
-        return null;
-    }
+            @TvInteractiveAppInfo.InteractiveAppType int type);
 
     /**
      * Notifies the system when the state of the interactive app RTE has been changed.
@@ -256,7 +253,6 @@ public abstract class TvInteractiveAppService extends Service {
      * @param error the error code for error state. {@link TvInteractiveAppManager#ERROR_NONE} is
      *              used when the state is not
      *              {@link TvInteractiveAppManager#SERVICE_STATE_ERROR}.
-     * @hide
      */
     public final void notifyStateChanged(
             @TvInteractiveAppInfo.InteractiveAppType int type,
@@ -272,7 +268,12 @@ public abstract class TvInteractiveAppService extends Service {
 
     /**
      * Base class for derived classes to implement to provide a TV interactive app session.
-     * @hide
+     *
+     * <p>A session is associated with a {@link TvInteractiveAppView} instance and handles
+     * corresponding communications. It also handles the communications with
+     * {@link android.media.tv.TvInputService.Session} if connected.
+     *
+     * @see TvInteractiveAppView#setTvView(TvView)
      */
     public abstract static class Session implements KeyEvent.Callback {
         private final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();

@@ -26177,6 +26177,15 @@ package android.media.session {
 
 package android.media.tv {
 
+  public final class AitInfo implements android.os.Parcelable {
+    ctor public AitInfo(int, int);
+    method public int describeContents();
+    method public int getType();
+    method public int getVersion();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.AitInfo> CREATOR;
+  }
+
   public final class TvContentRating {
     method public boolean contains(@NonNull android.media.tv.TvContentRating);
     method public static android.media.tv.TvContentRating createRating(String, String, String, java.lang.String...);
@@ -26747,6 +26756,7 @@ package android.media.tv {
   public abstract static class TvInputService.Session implements android.view.KeyEvent.Callback {
     ctor public TvInputService.Session(android.content.Context);
     method public void layoutSurface(int, int, int, int);
+    method public void notifyAitInfoUpdated(@NonNull android.media.tv.AitInfo);
     method public void notifyChannelRetuned(android.net.Uri);
     method public void notifyContentAllowed();
     method public void notifyContentBlocked(@NonNull android.media.tv.TvContentRating);
@@ -26766,6 +26776,7 @@ package android.media.tv {
     method public abstract void onRelease();
     method public boolean onSelectTrack(int, @Nullable String);
     method public abstract void onSetCaptionEnabled(boolean);
+    method public void onSetInteractiveAppNotificationEnabled(boolean);
     method public abstract void onSetStreamVolume(@FloatRange(from=0.0, to=1.0) float);
     method public abstract boolean onSetSurface(@Nullable android.view.Surface);
     method public void onSurfaceChanged(int, int, int);
@@ -26867,6 +26878,7 @@ package android.media.tv {
     method public void sendAppPrivateCommand(@NonNull String, android.os.Bundle);
     method public void setCallback(@Nullable android.media.tv.TvView.TvInputCallback);
     method public void setCaptionEnabled(boolean);
+    method public void setInteractiveAppNotificationEnabled(boolean);
     method public void setOnUnhandledInputEventListener(android.media.tv.TvView.OnUnhandledInputEventListener);
     method public void setStreamVolume(@FloatRange(from=0.0, to=1.0) float);
     method public void setTimeShiftPositionCallback(@Nullable android.media.tv.TvView.TimeShiftPositionCallback);
@@ -26893,6 +26905,7 @@ package android.media.tv {
 
   public abstract static class TvView.TvInputCallback {
     ctor public TvView.TvInputCallback();
+    method public void onAitInfoUpdated(@NonNull String, @NonNull android.media.tv.AitInfo);
     method public void onChannelRetuned(String, android.net.Uri);
     method public void onConnectionFailed(String);
     method public void onContentAllowed(String);
@@ -26925,13 +26938,52 @@ package android.media.tv.interactive {
 
   public final class TvInteractiveAppManager {
     method @NonNull public java.util.List<android.media.tv.interactive.TvInteractiveAppInfo> getTvInteractiveAppServiceList();
+    method public void registerCallback(@NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback, @NonNull java.util.concurrent.Executor);
+    method public void unregisterCallback(@NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback);
+    field public static final int ERROR_BLOCKED = 5; // 0x5
+    field public static final int ERROR_ENCRYPTED = 6; // 0x6
+    field public static final int ERROR_NONE = 0; // 0x0
+    field public static final int ERROR_NOT_SUPPORTED = 2; // 0x2
+    field public static final int ERROR_RESOURCE_UNAVAILABLE = 4; // 0x4
+    field public static final int ERROR_UNKNOWN = 1; // 0x1
+    field public static final int ERROR_UNKNOWN_CHANNEL = 7; // 0x7
+    field public static final int ERROR_WEAK_SIGNAL = 3; // 0x3
+    field public static final int INTERACTIVE_APP_STATE_ERROR = 3; // 0x3
+    field public static final int INTERACTIVE_APP_STATE_RUNNING = 2; // 0x2
+    field public static final int INTERACTIVE_APP_STATE_STOPPED = 1; // 0x1
+    field public static final int SERVICE_STATE_ERROR = 4; // 0x4
+    field public static final int SERVICE_STATE_PREPARING = 2; // 0x2
+    field public static final int SERVICE_STATE_READY = 3; // 0x3
+    field public static final int SERVICE_STATE_UNREALIZED = 1; // 0x1
+  }
+
+  public abstract static class TvInteractiveAppManager.TvInteractiveAppCallback {
+    ctor public TvInteractiveAppManager.TvInteractiveAppCallback();
+    method public void onTvInteractiveAppServiceStateChanged(@NonNull String, int, int, int);
   }
 
   public abstract class TvInteractiveAppService extends android.app.Service {
     ctor public TvInteractiveAppService();
+    method public final void notifyStateChanged(int, int, int);
     method public final android.os.IBinder onBind(android.content.Intent);
+    method @Nullable public abstract android.media.tv.interactive.TvInteractiveAppService.Session onCreateSession(@NonNull String, int);
+    method public abstract void onPrepare(int);
     field public static final String SERVICE_INTERFACE = "android.media.tv.interactive.TvInteractiveAppService";
     field public static final String SERVICE_META_DATA = "android.media.tv.interactive.app";
+  }
+
+  public abstract static class TvInteractiveAppService.Session implements android.view.KeyEvent.Callback {
+    ctor public TvInteractiveAppService.Session(@NonNull android.content.Context);
+    method public void layoutSurface(int, int, int, int);
+    method public void notifySessionStateChanged(int, int);
+    method public boolean onKeyDown(int, @NonNull android.view.KeyEvent);
+    method public boolean onKeyLongPress(int, @NonNull android.view.KeyEvent);
+    method public boolean onKeyMultiple(int, int, @NonNull android.view.KeyEvent);
+    method public boolean onKeyUp(int, @NonNull android.view.KeyEvent);
+    method public abstract boolean onSetSurface(@Nullable android.view.Surface);
+    method public void onStartInteractiveApp();
+    method public void onStopInteractiveApp();
+    method public void onSurfaceChanged(int, int, int);
   }
 
   public class TvInteractiveAppView extends android.view.ViewGroup {
@@ -26939,12 +26991,16 @@ package android.media.tv.interactive {
     ctor public TvInteractiveAppView(@NonNull android.content.Context, @Nullable android.util.AttributeSet);
     ctor public TvInteractiveAppView(@NonNull android.content.Context, @Nullable android.util.AttributeSet, int);
     method public void clearCallback();
+    method public void prepareInteractiveApp(@NonNull String, int);
     method public void setCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppView.TvInteractiveAppCallback);
+    method public int setTvView(@Nullable android.media.tv.TvView);
     method public void startInteractiveApp();
+    method public void stopInteractiveApp();
   }
 
   public abstract static class TvInteractiveAppView.TvInteractiveAppCallback {
     ctor public TvInteractiveAppView.TvInteractiveAppCallback();
+    method public void onStateChanged(@NonNull String, int, int);
   }
 
 }
