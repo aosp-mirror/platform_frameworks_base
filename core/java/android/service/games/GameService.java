@@ -103,7 +103,7 @@ public class GameService extends Service {
 
     @Override
     @Nullable
-    public IBinder onBind(@Nullable Intent intent) {
+    public final IBinder onBind(@Nullable Intent intent) {
         if (ACTION_GAME_SERVICE.equals(intent.getAction())) {
             return mInterface.asBinder();
         }
