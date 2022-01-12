@@ -55,8 +55,8 @@ public class QuickStepContract {
     // See IStartingWindow.aidl
     public static final String KEY_EXTRA_SHELL_STARTING_WINDOW =
             "extra_shell_starting_window";
-    // See ISmartspaceTransitionController.aidl
-    public static final String KEY_EXTRA_SMARTSPACE_TRANSITION_CONTROLLER = "smartspace_transition";
+    // See ISysuiUnlockAnimationController.aidl
+    public static final String KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER = "unlock_animation";
     // See IRecentTasks.aidl
     public static final String KEY_EXTRA_RECENT_TASKS = "recent_tasks";
 

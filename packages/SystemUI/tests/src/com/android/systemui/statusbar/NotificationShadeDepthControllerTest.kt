@@ -302,6 +302,40 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun ignoreBlurForUnlock_ignores() {
+        notificationShadeDepthController.onPanelExpansionChanged(
+            rawFraction = 1f, expanded = true, tracking = false
+        )
+        `when`(shadeAnimation.radius).thenReturn(maxBlur.toFloat())
+
+        notificationShadeDepthController.blursDisabledForAppLaunch = false
+        notificationShadeDepthController.blursDisabledForUnlock = true
+
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+
+        // Since we are ignoring blurs for unlock, we should be applying blur = 0 despite setting it
+        // to maxBlur above.
+        verify(blurUtils).applyBlur(any(), eq(0), eq(false))
+    }
+
+    @Test
+    fun ignoreBlurForUnlock_doesNotIgnore() {
+        notificationShadeDepthController.onPanelExpansionChanged(
+            rawFraction = 1f, expanded = true, tracking = false
+        )
+        `when`(shadeAnimation.radius).thenReturn(maxBlur.toFloat())
+
+        notificationShadeDepthController.blursDisabledForAppLaunch = false
+        notificationShadeDepthController.blursDisabledForUnlock = false
+
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+
+        // Since we are not ignoring blurs for unlock (or app launch), we should apply the blur we
+        // returned above (maxBlur).
+        verify(blurUtils).applyBlur(any(), eq(maxBlur), eq(false))
+    }
+
+    @Test
     fun brightnessMirrorVisible_whenVisible() {
         notificationShadeDepthController.brightnessMirrorVisible = true
         verify(brightnessSpring).animateTo(eq(maxBlur), any())

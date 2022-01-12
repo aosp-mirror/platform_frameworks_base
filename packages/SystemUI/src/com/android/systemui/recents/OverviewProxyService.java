@@ -31,9 +31,9 @@ import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHE
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_SPLIT_SCREEN;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_STARTING_WINDOW;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SMARTSPACE_TRANSITION_CONTROLLER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
+import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DOZING;
@@ -83,6 +83,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBar;
@@ -97,7 +98,6 @@ import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
@@ -161,7 +161,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final CommandQueue mCommandQueue;
     private final ShellTransitions mShellTransitions;
     private final Optional<StartingSurface> mStartingSurface;
-    private final SmartspaceTransitionController mSmartspaceTransitionController;
+    private final KeyguardUnlockAnimationController mSysuiUnlockAnimationController;
     private final Optional<RecentTasks> mRecentTasks;
     private final UiEventLogger mUiEventLogger;
 
@@ -503,8 +503,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
                     KEY_EXTRA_SHELL_STARTING_WINDOW,
                     startingwindow.createExternalInterface().asBinder()));
             params.putBinder(
-                    KEY_EXTRA_SMARTSPACE_TRANSITION_CONTROLLER,
-                    mSmartspaceTransitionController.createExternalInterface().asBinder());
+                    KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER,
+                    mSysuiUnlockAnimationController.asBinder());
             mRecentTasks.ifPresent(recentTasks -> params.putBinder(
                     KEY_EXTRA_RECENT_TASKS,
                     recentTasks.createExternalInterface().asBinder()));
@@ -570,8 +570,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
             BroadcastDispatcher broadcastDispatcher,
             ShellTransitions shellTransitions,
             ScreenLifecycle screenLifecycle,
-            SmartspaceTransitionController smartspaceTransitionController,
             UiEventLogger uiEventLogger,
+            KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             DumpManager dumpManager) {
         super(broadcastDispatcher);
         mContext = context;
@@ -644,7 +644,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         updateEnabledState();
         startConnectionToCurrentUser();
         mStartingSurface = startingSurface;
-        mSmartspaceTransitionController = smartspaceTransitionController;
+        mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
     }
 
     @Override

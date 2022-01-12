@@ -775,6 +775,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                     : ScrimState.SHADE_LOCKED.getBehindTint();
             behindTint = ColorUtils.blendARGB(behindTint, stateTint, mQsExpansion);
         }
+
+        // If the keyguard is going away, we should not be opaque.
+        if (mKeyguardStateController.isKeyguardGoingAway()) {
+            behindAlpha = 0f;
+        }
+
         return new Pair<>(behindTint, behindAlpha);
     }
 
@@ -1299,9 +1305,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
     public void setExpansionAffectsAlpha(boolean expansionAffectsAlpha) {
         mExpansionAffectsAlpha = expansionAffectsAlpha;
-        if (expansionAffectsAlpha) {
-            applyAndDispatchState();
-        }
     }
 
     public void setKeyguardOccluded(boolean keyguardOccluded) {

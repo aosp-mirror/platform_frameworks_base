@@ -48,7 +48,6 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -96,9 +95,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
     @Mock
     Resources mResources;
-    KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock
-    SmartspaceTransitionController mSmartSpaceTransitionController;
+    KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock
     private ClockPlugin mClockPlugin;
     @Mock
@@ -154,7 +152,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mBypassController,
                 mSmartspaceController,
                 mKeyguardUnlockAnimationController,
-                mSmartSpaceTransitionController,
                 mSecureSettings,
                 mExecutor,
                 mResources
