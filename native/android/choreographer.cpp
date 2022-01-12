@@ -67,7 +67,7 @@ size_t AChoreographerFrameCallbackData_getPreferredFrameTimelineIndex(
         const AChoreographerFrameCallbackData* data) {
     return AChoreographerFrameCallbackData_routeGetPreferredFrameTimelineIndex(data);
 }
-int64_t AChoreographerFrameCallbackData_getFrameTimelineVsyncId(
+AVsyncId AChoreographerFrameCallbackData_getFrameTimelineVsyncId(
         const AChoreographerFrameCallbackData* data, size_t index) {
     return AChoreographerFrameCallbackData_routeGetFrameTimelineVsyncId(data, index);
 }
