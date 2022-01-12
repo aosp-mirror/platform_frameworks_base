@@ -34,9 +34,9 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.util.Compile;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.io.FileDescriptor;
@@ -69,8 +69,8 @@ public class NotificationGroupManagerLegacy implements
         Dumpable {
 
     private static final String TAG = "NotifGroupManager";
-    private static final boolean DEBUG = StatusBar.DEBUG;
-    private static final boolean SPEW = StatusBar.SPEW;
+    private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean SPEW = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
     /**
      * The maximum amount of time (in ms) between the posting of notifications that can be
      * considered part of the same update batch.

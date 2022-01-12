@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.util.Compile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +55,8 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
 
     private static final long ALERT_TRANSFER_TIMEOUT = 300;
     private static final String TAG = "NotifGroupAlertTransfer";
-    private static final boolean DEBUG = StatusBar.DEBUG;
-    private static final boolean SPEW = StatusBar.SPEW;
+    private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean SPEW = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
 
     /**
      * The list of entries containing group alert metadata for each group. Keyed by group key.
