@@ -138,6 +138,7 @@ public final class BluetoothLeAdvertiser {
             parameters.setLegacyMode(true);
             parameters.setConnectable(isConnectable);
             parameters.setScannable(true); // legacy advertisements we support are always scannable
+            parameters.setOwnAddressType(settings.getOwnAddressType());
             if (settings.getMode() == AdvertiseSettings.ADVERTISE_MODE_LOW_POWER) {
                 parameters.setInterval(1600); // 1s
             } else if (settings.getMode() == AdvertiseSettings.ADVERTISE_MODE_BALANCED) {
