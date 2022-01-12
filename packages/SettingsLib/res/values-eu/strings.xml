@@ -524,7 +524,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Oraintxe"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonoaren bozgorailua"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Telefono hau"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Arazoren bat izan da konektatzean. Itzali gailua eta pitz ezazu berriro."</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Arazo bat izan da konektatzean. Itzali gailua eta pitz ezazu berriro."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio-gailu kableduna"</string>
     <string name="help_label" msgid="3528360748637781274">"Laguntza eta iritziak"</string>
     <string name="storage_category" msgid="2287342585424631813">"Biltegiratzea"</string>
