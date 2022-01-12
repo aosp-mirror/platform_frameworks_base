@@ -18,6 +18,7 @@ package android.service.games;
 
 import android.annotation.Hide;
 import android.annotation.IntDef;
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
@@ -25,6 +26,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.SurfaceControlViewHost;
@@ -47,21 +49,65 @@ import java.util.concurrent.Executor;
  * which is then returned when a game session is created via
  * {@link GameSessionService#onNewSession(CreateGameSessionRequest)}.
  *
+ * This class exposes various lifecycle methods which are guaranteed to be called in the following
+ * fashion:
+ *
+ * {@link #onCreate()}: Will always be the first lifecycle method to be called, once the game
+ * session is created.
+ *
+ * {@link #onGameTaskFocusChanged(boolean)}: Will be called after {@link #onCreate()} with
+ * focused=true when the game task first comes into focus (if it does). If the game task is focused
+ * when the game session is created, this method will be called immediately after
+ * {@link #onCreate()} with focused=true. After this method is called with focused=true, it will be
+ * called again with focused=false when the task goes out of focus. If this method is ever called
+ * with focused=true, it is guaranteed to be called again with focused=false before
+ * {@link #onDestroy()} is called. If the game task never comes into focus during the session
+ * lifetime, this method will never be called.
+ *
+ * {@link #onDestroy()}: Will always be called after {@link #onCreate()}. If the game task ever
+ * comes into focus before the game session is destroyed, then this method will be called after one
+ * or more pairs of calls to {@link #onGameTaskFocusChanged(boolean)}.
+ *
  * @hide
  */
 @SystemApi
 public abstract class GameSession {
-
     private static final String TAG = "GameSession";
+    private static final boolean DEBUG = false;
 
     final IGameSession mInterface = new IGameSession.Stub() {
         @Override
-        public void destroy() {
+        public void onDestroyed() {
             Handler.getMain().executeOrSendMessage(PooledLambda.obtainMessage(
                     GameSession::doDestroy, GameSession.this));
         }
+
+        @Override
+        public void onTaskFocusChanged(boolean focused) {
+            Handler.getMain().executeOrSendMessage(PooledLambda.obtainMessage(
+                    GameSession::moveToState, GameSession.this,
+                    focused ? LifecycleState.TASK_FOCUSED : LifecycleState.TASK_UNFOCUSED));
+        }
     };
 
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public enum LifecycleState {
+        // Initial state; may transition to CREATED.
+        INITIALIZED,
+        // May transition to TASK_FOCUSED or DESTROYED.
+        CREATED,
+        // May transition to TASK_UNFOCUSED.
+        TASK_FOCUSED,
+        // May transition to TASK_FOCUSED or DESTROYED.
+        TASK_UNFOCUSED,
+        // May not transition once reached.
+        DESTROYED
+    }
+
+    private LifecycleState mLifecycleState = LifecycleState.INITIALIZED;
     private IGameSessionController mGameSessionController;
     private int mTaskId;
     private GameSessionRootView mGameSessionRootView;
@@ -87,13 +133,93 @@ public abstract class GameSession {
 
     @Hide
     void doCreate() {
-        onCreate();
+        moveToState(LifecycleState.CREATED);
     }
 
     @Hide
     void doDestroy() {
-        onDestroy();
         mSurfaceControlViewHost.release();
+        moveToState(LifecycleState.DESTROYED);
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    @MainThread
+    public void moveToState(LifecycleState newLifecycleState) {
+        if (DEBUG) {
+            Slog.d(TAG, "moveToState: " + mLifecycleState + " -> " + newLifecycleState);
+        }
+
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new RuntimeException("moveToState should be used only from the main thread");
+        }
+
+        if (mLifecycleState == newLifecycleState) {
+            // Nothing to do.
+            return;
+        }
+
+        switch (mLifecycleState) {
+            case INITIALIZED:
+                if (newLifecycleState == LifecycleState.CREATED) {
+                    onCreate();
+                } else if (newLifecycleState == LifecycleState.DESTROYED) {
+                    onCreate();
+                    onDestroy();
+                } else {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Ignoring moveToState: INITIALIZED -> " + newLifecycleState);
+                    }
+                    return;
+                }
+                break;
+            case CREATED:
+                if (newLifecycleState == LifecycleState.TASK_FOCUSED) {
+                    onGameTaskFocusChanged(/*focused=*/ true);
+                } else if (newLifecycleState == LifecycleState.DESTROYED) {
+                    onDestroy();
+                } else {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Ignoring moveToState: CREATED -> " + newLifecycleState);
+                    }
+                    return;
+                }
+                break;
+            case TASK_FOCUSED:
+                if (newLifecycleState == LifecycleState.TASK_UNFOCUSED) {
+                    onGameTaskFocusChanged(/*focused=*/ false);
+                } else if (newLifecycleState == LifecycleState.DESTROYED) {
+                    onGameTaskFocusChanged(/*focused=*/ false);
+                    onDestroy();
+                } else {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Ignoring moveToState: TASK_FOCUSED -> " + newLifecycleState);
+                    }
+                    return;
+                }
+                break;
+            case TASK_UNFOCUSED:
+                if (newLifecycleState == LifecycleState.TASK_FOCUSED) {
+                    onGameTaskFocusChanged(/*focused=*/ true);
+                } else if (newLifecycleState == LifecycleState.DESTROYED) {
+                    onDestroy();
+                } else {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Ignoring moveToState: TASK_UNFOCUSED -> " + newLifecycleState);
+                    }
+                    return;
+                }
+                break;
+            case DESTROYED:
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring moveToState: DESTROYED -> " + newLifecycleState);
+                }
+                return;
+        }
+
+        mLifecycleState = newLifecycleState;
     }
 
     /**
@@ -105,13 +231,27 @@ public abstract class GameSession {
     }
 
     /**
-     * Finalizer called when the game session is ending.
+     * Finalizer called when the game session is ending. This method will always be called after a
+     * call to {@link #onCreate()}. If the game task is ever in focus, this method will be called
+     * after one or more pairs of calls to {@link #onGameTaskFocusChanged(boolean)}.
      *
      * This should be used to perform any cleanup before the game session is destroyed.
      */
     public void onDestroy() {
     }
 
+    /**
+     * Called when the game task for this session is or unfocused. The initial call to this method
+     * will always come after a call to {@link #onCreate()} with focused=true (when the game task
+     * first comes into focus after the session is created, or immediately after the session is
+     * created if the game task is already focused).
+     *
+     * This should be used to perform any setup required when the game task comes into focus or any
+     * cleanup that is required when the game task goes out of focus.
+     *
+     * @param focused True if the game task is focused, false if the game task is unfocused.
+     */
+    public void onGameTaskFocusChanged(boolean focused) {}
 
     /**
      * Sets the task overlay content to an explicit view. This view is placed directly into the game
