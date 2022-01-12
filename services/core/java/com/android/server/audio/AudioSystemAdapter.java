@@ -524,11 +524,28 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
      * @param pw
      */
     public void dump(PrintWriter pw) {
+        pw.println("\nAudioSystemAdapter:");
+        pw.println(" mDevicesForStreamCache:");
+        if (mDevicesForStreamCache != null) {
+            for (Integer stream : mDevicesForStreamCache.keySet()) {
+                pw.println("\t stream:" + stream + " device:"
+                        + AudioSystem.getOutputDeviceName(mDevicesForStreamCache.get(stream)));
+            }
+        }
+        pw.println(" mDevicesForAttrCache:");
+        if (mDevicesForAttrCache != null) {
+            for (AudioAttributes attr : mDevicesForAttrCache.keySet()) {
+                pw.println("\t" + attr);
+                for (AudioDeviceAttributes devAttr : mDevicesForAttrCache.get(attr)) {
+                    pw.println("\t\t" + devAttr);
+                }
+            }
+        }
+
         if (!ENABLE_GETDEVICES_STATS) {
-            // only stats in this dump
+            // only stats in the rest of this dump
             return;
         }
-        pw.println("\nAudioSystemAdapter:");
         for (int i = 0; i < NB_MEASUREMENTS; i++) {
             pw.println(mMethodNames[i]
                     + ": counter=" + mMethodCallCounter[i]

@@ -140,6 +140,7 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
         });
 
         mMagnetizedPip = mMotionHelper.getMagnetizedPip();
+        mMagnetizedPip.clearAllTargets();
         mMagneticTarget = mMagnetizedPip.addTarget(mTargetView, 0);
         updateMagneticTargetSize();
 

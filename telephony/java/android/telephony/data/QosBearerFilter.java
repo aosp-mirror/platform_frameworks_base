@@ -18,6 +18,7 @@ package android.telephony.data;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.net.InetAddresses;
 import android.net.LinkAddress;
 import android.os.Parcel;
@@ -38,11 +39,10 @@ import java.util.Objects;
  * @hide
  */
 public final class QosBearerFilter implements Parcelable {
-
-    private List<LinkAddress> localAddresses;
-    private List<LinkAddress> remoteAddresses;
-    private PortRange localPort;
-    private PortRange remotePort;
+    private @NonNull List<LinkAddress> localAddresses;
+    private @NonNull List<LinkAddress> remoteAddresses;
+    private @Nullable PortRange localPort;
+    private @Nullable PortRange remotePort;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -59,13 +59,12 @@ public final class QosBearerFilter implements Parcelable {
     public static final int QOS_PROTOCOL_AH = android.hardware.radio.V1_6.QosProtocol.AH;
     public static final int QOS_MIN_PORT = android.hardware.radio.V1_6.QosPortRange.MIN;
     /**
-     * Hardcoded inplace of android.hardware.radio.V1_6.QosPortRange.MAX as it
+     * Hardcoded in place of android.hardware.radio.V1_6.QosPortRange.MAX as it
      * returns -1 due to uint16_t to int conversion in java. (TODO: Fix the HAL)
      */
     public static final int QOS_MAX_PORT = 65535; // android.hardware.radio.V1_6.QosPortRange.MIN;
 
-    @QosProtocol
-    private int protocol;
+    private @QosProtocol int protocol;
 
     private int typeOfServiceMask;
 
@@ -88,8 +87,7 @@ public final class QosBearerFilter implements Parcelable {
     public static final int QOS_FILTER_DIRECTION_BIDIRECTIONAL =
             android.hardware.radio.V1_6.QosFilterDirection.BIDIRECTIONAL;
 
-    @QosBearerFilterDirection
-    private int filterDirection;
+    private @QosBearerFilterDirection int filterDirection;
 
     /**
      * Specified the order in which the filter needs to be matched.
@@ -106,9 +104,10 @@ public final class QosBearerFilter implements Parcelable {
         filterDirection = QOS_FILTER_DIRECTION_BIDIRECTIONAL;
     }
 
-    public QosBearerFilter(List<LinkAddress> localAddresses, List<LinkAddress> remoteAddresses,
-            PortRange localPort, PortRange remotePort, int protocol, int tos,
-            long flowLabel, long spi, int direction, int precedence) {
+    public QosBearerFilter(@NonNull List<LinkAddress> localAddresses,
+            @NonNull List<LinkAddress> remoteAddresses, @Nullable PortRange localPort,
+            @Nullable PortRange remotePort, @QosProtocol int protocol, int tos, long flowLabel,
+            long spi, @QosBearerFilterDirection int direction, int precedence) {
         this.localAddresses = localAddresses;
         this.remoteAddresses = remoteAddresses;
         this.localPort = localPort;
@@ -121,19 +120,19 @@ public final class QosBearerFilter implements Parcelable {
         this.precedence = precedence;
     }
 
-    public List<LinkAddress> getLocalAddresses() {
+    public @NonNull List<LinkAddress> getLocalAddresses() {
         return localAddresses;
     }
 
-    public List<LinkAddress> getRemoteAddresses() {
+    public @NonNull List<LinkAddress> getRemoteAddresses() {
         return remoteAddresses;
     }
 
-    public PortRange getLocalPortRange() {
+    public @Nullable PortRange getLocalPortRange() {
         return localPort;
     }
 
-    public PortRange getRemotePortRange() {
+    public @Nullable PortRange getRemotePortRange() {
         return remotePort;
     }
 
@@ -327,8 +326,8 @@ public final class QosBearerFilter implements Parcelable {
                 && localAddresses.containsAll(other.localAddresses)
                 && remoteAddresses.size() == other.remoteAddresses.size()
                 && remoteAddresses.containsAll(other.remoteAddresses)
-                && localPort.equals(other.localPort)
-                && remotePort.equals(other.remotePort)
+                && Objects.equals(localPort, other.localPort)
+                && Objects.equals(remotePort, other.remotePort)
                 && protocol == other.protocol
                 && typeOfServiceMask == other.typeOfServiceMask
                 && flowLabel == other.flowLabel
