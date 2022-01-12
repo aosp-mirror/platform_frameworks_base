@@ -78,6 +78,18 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
+    fun moveCloserToEndCast_appIcon_chipTextContainsDeviceName_noLoadingIcon_noUndo() {
+        controllerSender.displayChip(moveCloserToEndCast())
+
+        val chipView = getChipView()
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
+        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
+        assertThat(chipView.getChipText()).contains(DEVICE_NAME)
+        assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
+        assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
+    }
+
+    @Test
     fun transferInitiated_futureNotResolvedYet_appIcon_loadingIcon_noUndo() {
         val future: SettableFuture<Runnable?> = SettableFuture.create()
         controllerSender.displayChip(transferInitiated(future))
@@ -242,6 +254,10 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun moveCloserToStartCast() =
         MoveCloserToStartCast(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
+
+    /** Helper method providing default parameters to not clutter up the tests. */
+    private fun moveCloserToEndCast() =
+        MoveCloserToEndCast(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferInitiated(

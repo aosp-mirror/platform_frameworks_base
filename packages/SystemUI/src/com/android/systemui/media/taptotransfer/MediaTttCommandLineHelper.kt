@@ -33,6 +33,7 @@ import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerR
 import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderService
+import com.android.systemui.media.taptotransfer.sender.MoveCloserToEndCast
 import com.android.systemui.media.taptotransfer.sender.MoveCloserToStartCast
 import com.android.systemui.media.taptotransfer.sender.TransferInitiated
 import com.android.systemui.media.taptotransfer.sender.TransferSucceeded
@@ -90,6 +91,11 @@ class MediaTttCommandLineHelper @Inject constructor(
                         senderCallback.closeToReceiverToStartCast(mediaInfo, otherDeviceInfo)
                     }
                 }
+                MOVE_CLOSER_TO_END_CAST_COMMAND_NAME -> {
+                    runOnService { senderCallback ->
+                        senderCallback.closeToReceiverToEndCast(mediaInfo, otherDeviceInfo)
+                    }
+                }
 
                 // TODO(b/203800643): Migrate other commands to invoke the service instead of the
                 //   controller.
@@ -119,6 +125,7 @@ class MediaTttCommandLineHelper @Inject constructor(
                 else -> {
                     pw.println("Chip type must be one of " +
                             "$MOVE_CLOSER_TO_START_CAST_COMMAND_NAME, " +
+                            "$MOVE_CLOSER_TO_END_CAST_COMMAND_NAME, " +
                             "$TRANSFER_INITIATED_COMMAND_NAME, " +
                             TRANSFER_SUCCEEDED_COMMAND_NAME
                     )
@@ -225,6 +232,8 @@ const val ADD_CHIP_COMMAND_RECEIVER_TAG = "media-ttt-chip-add-receiver"
 const val REMOVE_CHIP_COMMAND_RECEIVER_TAG = "media-ttt-chip-remove-receiver"
 @VisibleForTesting
 val MOVE_CLOSER_TO_START_CAST_COMMAND_NAME = MoveCloserToStartCast::class.simpleName!!
+@VisibleForTesting
+val MOVE_CLOSER_TO_END_CAST_COMMAND_NAME = MoveCloserToEndCast::class.simpleName!!
 @VisibleForTesting
 val TRANSFER_INITIATED_COMMAND_NAME = TransferInitiated::class.simpleName!!
 @VisibleForTesting

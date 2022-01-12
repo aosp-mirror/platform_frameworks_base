@@ -45,4 +45,16 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
         val chipState = chipStateCaptor.value!!
         assertThat(chipState.otherDeviceName).isEqualTo(name)
     }
+
+    @Test
+    fun closeToReceiverToEndCast_controllerTriggeredWithMoveCloserToEndCastState() {
+        val name = "Fake name"
+        callback.closeToReceiverToEndCast(mediaInfo, DeviceInfo(name))
+
+        val chipStateCaptor = argumentCaptor<MoveCloserToEndCast>()
+        verify(controller).displayChip(capture(chipStateCaptor))
+
+        val chipState = chipStateCaptor.value!!
+        assertThat(chipState.otherDeviceName).isEqualTo(name)
+    }
 }

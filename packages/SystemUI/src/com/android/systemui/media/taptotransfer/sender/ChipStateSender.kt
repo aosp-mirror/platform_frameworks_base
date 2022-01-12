@@ -56,6 +56,22 @@ class MoveCloserToStartCast(
 )
 
 /**
+ * A state representing that the two devices are close but not close enough to *end* a cast that's
+ * currently occurring the receiver device. The chip will instruct the user to move closer in order
+ * to initiate the transfer from the receiver and back onto this device (the original sender).
+ */
+class MoveCloserToEndCast(
+    appIconDrawable: Drawable,
+    appIconContentDescription: String,
+    otherDeviceName: String,
+) : ChipStateSender(
+    appIconDrawable,
+    appIconContentDescription,
+    R.string.media_move_closer_to_end_cast,
+    otherDeviceName
+)
+
+/**
  * A state representing that a transfer has been initiated (but not completed).
  *
  * @property future a future that will be resolved when the transfer has either succeeded or failed.

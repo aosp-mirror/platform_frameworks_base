@@ -127,6 +127,17 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     }
 
     @Test
+    fun sender_moveCloserToEndCast_serviceCallbackCalled() {
+        commandRegistry.onShellCommand(pw, getMoveCloserToEndCastCommand())
+
+        assertThat(context.isBound(mediaSenderServiceComponentName)).isTrue()
+
+        val deviceInfoCaptor = argumentCaptor<DeviceInfo>()
+        verify(mediaSenderService).closeToReceiverToEndCast(any(), capture(deviceInfoCaptor))
+        assertThat(deviceInfoCaptor.value!!.name).isEqualTo(DEVICE_NAME)
+    }
+
+    @Test
     fun sender_transferInitiated_chipDisplayWithCorrectState() {
         commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
 
@@ -166,6 +177,13 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
             ADD_CHIP_COMMAND_SENDER_TAG,
             DEVICE_NAME,
             MOVE_CLOSER_TO_START_CAST_COMMAND_NAME
+        )
+
+    private fun getMoveCloserToEndCastCommand(): Array<String> =
+        arrayOf(
+            ADD_CHIP_COMMAND_SENDER_TAG,
+            DEVICE_NAME,
+            MOVE_CLOSER_TO_END_CAST_COMMAND_NAME
         )
 
     private fun getTransferInitiatedCommand(): Array<String> =
