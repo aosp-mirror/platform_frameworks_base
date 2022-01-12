@@ -174,6 +174,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean mFgsNotificationWasDeferred;
     // FGS notification was shown before the FGS finishes, or it wasn't deferred in the first place.
     boolean mFgsNotificationShown;
+    // Whether FGS package has permissions to show notifications.
+    // TODO(b/194833441): Output this field to logs in ActiveServices#logFGSStateChangeLocked.
+    boolean mFgsHasNotificationPermission;
 
     // allow the service becomes foreground service? Service started from background may not be
     // allowed to become a foreground service.
@@ -968,6 +971,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                     if (nm == null) {
                         return;
                     }
+                    // Record whether the package has permission to notify the user
+                    mFgsHasNotificationPermission = nm.areNotificationsEnabledForPackage(
+                            localPackageName, appUid);
                     Notification localForegroundNoti = _foregroundNoti;
                     try {
                         if (localForegroundNoti.getSmallIcon() == null) {

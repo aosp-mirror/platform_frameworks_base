@@ -6205,6 +6205,11 @@ public class NotificationManagerService extends SystemService {
             return NotificationManagerService.this
                     .getNumNotificationChannelsForPackage(pkg, uid, includeDeleted);
         }
+
+        @Override
+        public boolean areNotificationsEnabledForPackage(String pkg, int uid) {
+            return areNotificationsEnabledForPackageInt(pkg, uid);
+        }
     };
 
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted) {
