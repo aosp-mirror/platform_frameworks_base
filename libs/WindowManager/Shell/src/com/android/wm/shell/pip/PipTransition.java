@@ -155,7 +155,8 @@ public class PipTransition extends PipTransitionController {
 
             switch (type) {
                 case TRANSIT_EXIT_PIP:
-                    startExitAnimation(info, startTransaction, finishCallback, exitPipChange);
+                    startExitAnimation(info, startTransaction, finishTransaction, finishCallback,
+                            exitPipChange);
                     break;
                 case TRANSIT_EXIT_PIP_TO_SPLIT:
                     startExitToSplitAnimation(info, startTransaction, finishTransaction,
@@ -283,6 +284,7 @@ public class PipTransition extends PipTransitionController {
 
     private void startExitAnimation(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull TransitionInfo.Change pipChange) {
         TransitionInfo.Change displayRotationChange = null;
@@ -298,8 +300,8 @@ public class PipTransition extends PipTransitionController {
 
         if (displayRotationChange != null) {
             // Exiting PIP to fullscreen with orientation change.
-            startExpandAndRotationAnimation(info, startTransaction, finishCallback,
-                    displayRotationChange, pipChange);
+            startExpandAndRotationAnimation(info, startTransaction, finishTransaction,
+                    finishCallback, displayRotationChange, pipChange);
             return;
         }
 
@@ -322,6 +324,7 @@ public class PipTransition extends PipTransitionController {
 
     private void startExpandAndRotationAnimation(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull TransitionInfo.Change displayRotationChange,
             @NonNull TransitionInfo.Change pipChange) {
@@ -335,7 +338,6 @@ public class PipTransition extends PipTransitionController {
         rotator.handleClosingChanges(info, startTransaction, rotateDelta, displayW, displayH);
 
         mFinishCallback = (wct, wctCB) -> {
-            rotator.cleanUp();
             mPipOrganizer.onExitPipFinished(pipChange.getTaskInfo());
             finishCallback.onTransitionFinished(wct, wctCB);
         };
@@ -366,6 +368,7 @@ public class PipTransition extends PipTransitionController {
                 endBounds, startBounds, new Rect(), degree, x, y, true /* isExpanding */,
                 pipRotateDelta == ROTATION_270 /* clockwise */);
         startTransaction.apply();
+        rotator.cleanUp(finishTransaction);
 
         // Expand and rotate the pip window to fullscreen.
         final PipAnimationController.PipTransitionAnimator animator =
