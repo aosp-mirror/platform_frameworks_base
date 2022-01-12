@@ -1362,6 +1362,26 @@ public final class PermissionManager {
         return false;
     }
 
+    /**
+     * Revoke the POST_NOTIFICATIONS permission, without killing the app. This method must ONLY BE
+     * USED in CTS or local tests.
+     *
+     * @param packageName The package to be revoked
+     * @param userId The user for which to revoke
+     *
+     * @hide
+     */
+    @TestApi
+    public void revokePostNotificationPermissionWithoutKillForTest(@NonNull String packageName,
+            int userId) {
+        try {
+            mPermissionManager.revokePostNotificationPermissionWithoutKillForTest(packageName,
+                    userId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     /* @hide */
     private static int checkPermissionUncached(@Nullable String permission, int pid, int uid) {
         final IActivityManager am = ActivityManager.getService();

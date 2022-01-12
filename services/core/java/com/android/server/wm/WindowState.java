@@ -4809,9 +4809,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (isAnimating()) {
             return;
         }
-        if (mWmService.mAccessibilityController.hasCallbacks()) {
-            mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(getDisplayId());
-        }
 
         if (!isSelfOrAncestorWindowAnimatingExit()) {
             return;
@@ -4838,13 +4835,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (hasSurface) {
                 mWmService.mDestroySurface.add(this);
             }
-            if (mRemoveOnExit) {
-                mWmService.mPendingRemove.add(this);
-                mRemoveOnExit = false;
-            }
         }
         mAnimatingExit = false;
         getDisplayContent().mWallpaperController.hideWallpapers(this);
+    }
+
+    @Override
+    boolean handleCompleteDeferredRemoval() {
+        if (mRemoveOnExit) {
+            mRemoveOnExit = false;
+            removeImmediately();
+        }
+        return super.handleCompleteDeferredRemoval();
     }
 
     boolean clearAnimatingFlags() {

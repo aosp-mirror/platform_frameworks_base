@@ -4603,6 +4603,43 @@ public final class Settings {
         public static final String VIBRATE_INPUT_DEVICES = "vibrate_input_devices";
 
         /**
+         * The intensity of alarm vibrations, if configurable.
+         *
+         * Not all devices are capable of changing their vibration intensity; on these devices
+         * there will likely be no difference between the various vibration intensities except for
+         * intensity 0 (off) and the rest.
+         *
+         * <b>Values:</b><br/>
+         * 0 - Vibration is disabled<br/>
+         * 1 - Weak vibrations<br/>
+         * 2 - Medium vibrations<br/>
+         * 3 - Strong vibrations
+         * @hide
+         */
+        public static final String ALARM_VIBRATION_INTENSITY =
+                "alarm_vibration_intensity";
+
+        /**
+         * The intensity of media vibrations, if configurable.
+         *
+         * This includes any vibration that is part of media, such as music, movie, soundtrack,
+         * game or animations.
+         *
+         * Not all devices are capable of changing their vibration intensity; on these devices
+         * there will likely be no difference between the various vibration intensities except for
+         * intensity 0 (off) and the rest.
+         *
+         * <b>Values:</b><br/>
+         * 0 - Vibration is disabled<br/>
+         * 1 - Weak vibrations<br/>
+         * 2 - Medium vibrations<br/>
+         * 3 - Strong vibrations
+         * @hide
+         */
+        public static final String MEDIA_VIBRATION_INTENSITY =
+                "media_vibration_intensity";
+
+        /**
          * The intensity of notification vibrations, if configurable.
          *
          * Not all devices are capable of changing their vibration intensity; on these devices
@@ -4619,6 +4656,7 @@ public final class Settings {
         @Readable
         public static final String NOTIFICATION_VIBRATION_INTENSITY =
                 "notification_vibration_intensity";
+
         /**
          * The intensity of ringtone vibrations, if configurable.
          *
@@ -4670,7 +4708,6 @@ public final class Settings {
          * 3 - Strong vibrations
          * @hide
          */
-        @Readable
         public static final String HARDWARE_HAPTIC_FEEDBACK_INTENSITY =
                 "hardware_haptic_feedback_intensity";
 

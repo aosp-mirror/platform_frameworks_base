@@ -239,7 +239,8 @@ public class DisplayResolveInfo implements TargetInfo, Parcelable {
         mExtendedInfo = in.readCharSequence();
         mResolvedIntent = in.readParcelable(null /* ClassLoader */, android.content.Intent.class);
         mSourceIntents.addAll(
-                Arrays.asList((Intent[]) in.readParcelableArray(null /* ClassLoader */)));
+                Arrays.asList((Intent[]) in.readParcelableArray(null /* ClassLoader */,
+                        Intent.class)));
         mIsSuspended = in.readBoolean();
         mPinned = in.readBoolean();
         mResolveInfo = in.readParcelable(null /* ClassLoader */, android.content.pm.ResolveInfo.class);

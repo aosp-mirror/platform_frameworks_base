@@ -2816,7 +2816,7 @@ class PackageManagerShellCommand extends ShellCommand {
             case UserManager.REMOVE_RESULT_REMOVED:
                 getOutPrintWriter().printf("Success: user %d removed\n", userId);
                 return 0;
-            case UserManager.REMOVE_RESULT_SET_EPHEMERAL:
+            case UserManager.REMOVE_RESULT_DEFERRED:
                 getOutPrintWriter().printf("Success: user %d set as ephemeral\n", userId);
                 return 0;
             case UserManager.REMOVE_RESULT_ALREADY_BEING_REMOVED:

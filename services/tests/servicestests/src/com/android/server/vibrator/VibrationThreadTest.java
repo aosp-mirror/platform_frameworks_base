@@ -44,11 +44,13 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
+import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
 import android.platform.test.annotations.LargeTest;
 import android.platform.test.annotations.Presubmit;
@@ -101,6 +103,8 @@ public class VibrationThreadTest {
     private IBinder mVibrationToken;
     @Mock
     private IBatteryStats mIBatteryStatsMock;
+    @Mock
+    private VibrationConfig mVibrationConfigMock;
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
     private VibrationSettings mVibrationSettings;
@@ -113,9 +117,13 @@ public class VibrationThreadTest {
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
 
+        when(mVibrationConfigMock.getDefaultVibrationIntensity(anyInt()))
+                .thenReturn(Vibrator.VIBRATION_INTENSITY_MEDIUM);
+        when(mVibrationConfigMock.getRampStepDurationMs()).thenReturn(TEST_RAMP_STEP_DURATION);
+
         Context context = InstrumentationRegistry.getContext();
         mVibrationSettings = new VibrationSettings(context, new Handler(mTestLooper.getLooper()),
-                /* rampDownDuration= */ 0, TEST_RAMP_STEP_DURATION);
+                mVibrationConfigMock);
         mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         mWakeLock = context.getSystemService(
                 PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*vibrator*");
@@ -1111,9 +1119,7 @@ public class VibrationThreadTest {
 
     @Test
     public void vibrate_waveformWithRampDown_addsRampDownAfterVibrationCompleted() {
-        int rampDownDuration = 15;
-        mVibrationSettings = new VibrationSettings(InstrumentationRegistry.getContext(),
-                new Handler(mTestLooper.getLooper()), rampDownDuration, TEST_RAMP_STEP_DURATION);
+        when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
         mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
 
@@ -1139,9 +1145,7 @@ public class VibrationThreadTest {
 
     @Test
     public void vibrate_waveformWithRampDown_triggersCallbackWhenOriginalVibrationEnds() {
-        int rampDownDuration = 10_000;
-        mVibrationSettings = new VibrationSettings(InstrumentationRegistry.getContext(),
-                new Handler(mTestLooper.getLooper()), rampDownDuration, TEST_RAMP_STEP_DURATION);
+        when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(10_000);
         mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
 
@@ -1174,9 +1178,7 @@ public class VibrationThreadTest {
     @Test
     public void vibrate_waveformCancelledWithRampDown_addsRampDownAfterVibrationCancelled()
             throws Exception {
-        int rampDownDuration = 15;
-        mVibrationSettings = new VibrationSettings(InstrumentationRegistry.getContext(),
-                new Handler(mTestLooper.getLooper()), rampDownDuration, TEST_RAMP_STEP_DURATION);
+        when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
         mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
 
@@ -1202,9 +1204,7 @@ public class VibrationThreadTest {
 
     @Test
     public void vibrate_predefinedWithRampDown_doesNotAddRampDown() {
-        int rampDownDuration = 15;
-        mVibrationSettings = new VibrationSettings(InstrumentationRegistry.getContext(),
-                new Handler(mTestLooper.getLooper()), rampDownDuration, TEST_RAMP_STEP_DURATION);
+        when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
         mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
         mVibratorProviders.get(VIBRATOR_ID).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
@@ -1224,9 +1224,7 @@ public class VibrationThreadTest {
 
     @Test
     public void vibrate_composedWithRampDown_doesNotAddRampDown() {
-        int rampDownDuration = 15;
-        mVibrationSettings = new VibrationSettings(InstrumentationRegistry.getContext(),
-                new Handler(mTestLooper.getLooper()), rampDownDuration, TEST_RAMP_STEP_DURATION);
+        when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
         mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL,
                 IVibrator.CAP_COMPOSE_EFFECTS);
@@ -1251,9 +1249,7 @@ public class VibrationThreadTest {
 
     @Test
     public void vibrate_pwleWithRampDown_doesNotAddRampDown() {
-        int rampDownDuration = 15;
-        mVibrationSettings = new VibrationSettings(InstrumentationRegistry.getContext(),
-                new Handler(mTestLooper.getLooper()), rampDownDuration, TEST_RAMP_STEP_DURATION);
+        when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
         mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
         fakeVibrator.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL,

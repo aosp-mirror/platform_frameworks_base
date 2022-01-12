@@ -4064,6 +4064,15 @@ public abstract class PackageManager {
     @TestApi
     public static final String FEATURE_COMMUNAL_MODE = "android.software.communal_mode";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports dream overlay feature, which is an informational layer shown on top of dreams.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_DREAM_OVERLAY = "android.software.dream_overlay";
+
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 

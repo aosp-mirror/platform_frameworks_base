@@ -27,7 +27,6 @@ import android.os.Parcelable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +41,8 @@ import java.util.stream.Collectors;
 public final class CallAudioState implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value={ROUTE_EARPIECE, ROUTE_BLUETOOTH, ROUTE_WIRED_HEADSET, ROUTE_SPEAKER},
+    @IntDef(value = {ROUTE_EARPIECE, ROUTE_BLUETOOTH, ROUTE_WIRED_HEADSET, ROUTE_SPEAKER,
+            ROUTE_EXTERNAL},
             flag=true)
     public @interface CallAudioRoute {}
 
@@ -58,6 +58,9 @@ public final class CallAudioState implements Parcelable {
     /** Direct the audio stream through the device's speakerphone. */
     public static final int ROUTE_SPEAKER       = 0x00000008;
 
+    /** Direct the audio stream through another device. */
+    public static final int ROUTE_EXTERNAL       = 0x00000010;
+
     /**
      * Direct the audio stream through the device's earpiece or wired headset if one is
      * connected.
@@ -70,7 +73,7 @@ public final class CallAudioState implements Parcelable {
      * @hide
      **/
     public static final int ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
-            ROUTE_SPEAKER;
+            ROUTE_SPEAKER | ROUTE_EXTERNAL;
 
     private final boolean isMuted;
     private final int route;
@@ -189,7 +192,11 @@ public final class CallAudioState implements Parcelable {
      */
     @CallAudioRoute
     public int getSupportedRouteMask() {
-        return supportedRouteMask;
+        if (route == ROUTE_EXTERNAL) {
+            return ROUTE_EXTERNAL;
+        } else {
+            return supportedRouteMask;
+        }
     }
 
     /**
@@ -231,6 +238,10 @@ public final class CallAudioState implements Parcelable {
         }
         if ((route & ROUTE_SPEAKER) == ROUTE_SPEAKER) {
             listAppend(buffer, "SPEAKER");
+        }
+
+        if ((route & ROUTE_EXTERNAL) == ROUTE_EXTERNAL) {
+            listAppend(buffer, "EXTERNAL");
         }
 
         return buffer.toString();
