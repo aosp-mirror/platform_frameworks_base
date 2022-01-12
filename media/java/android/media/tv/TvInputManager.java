@@ -1798,6 +1798,29 @@ public final class TvInputManager {
     };
 
     /**
+     * Returns a priority for the given use case type and the client's foreground or background
+     * status.
+     *
+     * @param useCase the use case type of the client. When the given use case type is invalid,
+     *        the default use case type will be used. {@see TvInputService#PriorityHintUseCaseType}.
+     * @param sessionId the unique id of the session owned by the client. When {@code null},
+     *        the caller will be used as a client. When the session is invalid, background status
+     *        will be used as a client's status. Otherwise, TV app corresponding to the given
+     *        session id will be used as a client.
+     *        {@see TvInputService#onCreateSession(String, String)}.
+     *
+     * @return the use case priority value for the given use case type and the client's foreground
+     *         or background status.
+     *
+     * @hide
+     */
+    @SystemApi
+    public int getClientPriority(@TvInputService.PriorityHintUseCaseType int useCase,
+            @Nullable String sessionId) {
+        return getClientPriorityInternal(useCase, sessionId);
+    };
+
+    /**
      * Creates a recording {@link Session} for a given TV input.
      *
      * <p>The number of sessions that can be created at the same time is limited by the capability
@@ -1839,6 +1862,14 @@ public final class TvInputManager {
             throw e.rethrowFromSystemServer();
         }
         return clientPid;
+    }
+
+    private int getClientPriorityInternal(int useCase, String sessionId) {
+        try {
+            return mService.getClientPriority(useCase, sessionId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

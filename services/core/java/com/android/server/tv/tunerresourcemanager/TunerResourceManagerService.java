@@ -619,6 +619,21 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             }
         }
 
+        @Override
+        public int getClientPriority(int useCase, int pid) throws RemoteException {
+            enforceTrmAccessPermission("getClientPriority");
+            synchronized (mLock) {
+                return TunerResourceManagerService.this.getClientPriority(
+                        useCase, checkIsForeground(pid));
+            }
+        }
+        @Override
+        public int getConfigPriority(int useCase, boolean isForeground) throws RemoteException {
+            enforceTrmAccessPermission("getConfigPriority");
+            synchronized (mLock) {
+                return TunerResourceManagerService.this.getClientPriority(useCase, isForeground);
+            }
+        }
     }
 
     /**
