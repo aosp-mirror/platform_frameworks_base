@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.dagger;
 
+import android.app.Service;
 import android.content.Context;
 import android.view.WindowManager;
 
@@ -30,6 +31,7 @@ import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
+import com.android.systemui.media.taptotransfer.sender.MediaTttSenderService;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -38,8 +40,11 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 /** Dagger module for the media package. */
 @Module
@@ -128,4 +133,10 @@ public interface MediaModule {
                         mediaTttChipControllerReceiver,
                         mainExecutor));
     }
+
+    /** Inject into MediaTttSenderService. */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaTttSenderService.class)
+    Service bindMediaTttSenderService(MediaTttSenderService service);
 }
