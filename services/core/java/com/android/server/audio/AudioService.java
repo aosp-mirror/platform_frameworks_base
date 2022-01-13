@@ -8541,7 +8541,7 @@ public class AudioService extends IAudioService.Stub
 
     /** @see Spatializer#getSpatializerCompatibleAudioDevices() */
     public @NonNull List<AudioDeviceAttributes> getSpatializerCompatibleAudioDevices() {
-        enforceModifyAudioRoutingPermission();
+        enforceModifyDefaultAudioEffectsPermission();
         return mSpatializerHelper.getCompatibleAudioDevices();
     }
 
