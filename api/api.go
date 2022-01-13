@@ -30,22 +30,10 @@ import (
 
 // The properties of the combined_apis module type.
 type CombinedApisProperties struct {
-	// Module libraries that have public APIs
-	Public []string
-	// Module libraries that have system APIs
-	System []string
-	// Module libraries that have module_library APIs
-	Module_lib []string
-	// Module libraries that have system_server APIs
-	System_server []string
-	// ART module library. The only API library not removed from the filtered api database, because
-	// 1) ART apis are available by default to all modules, while other module-to-module deps are
-	//    explicit and probably receive more scrutiny anyway
-	// 2) The number of ART/libcore APIs is large, so not linting them would create a large gap
-	// 3) It's a compromise. Ideally we wouldn't be filtering out any module APIs, and have
-	//    per-module lint databases that excludes just that module's APIs. Alas, that's more
-	//    difficult to achieve.
-	Art_module string
+	// Module libraries in the bootclasspath
+	Bootclasspath []string
+	// Module libraries in system server
+	System_server_classpath []string
 }
 
 type CombinedApis struct {
@@ -105,7 +93,7 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 	props := genruleProps{}
 	props.Name = proptools.StringPtr(ctx.ModuleName() + "-" + filename)
 	props.Tools = []string{"metalava"}
-	props.Out = []string{txt.TxtFilename}
+	props.Out = []string{filename}
 	props.Cmd = proptools.StringPtr(metalavaCmd + "$(in) --api $(out)")
 	props.Srcs = createSrcs(txt.BaseTxt, txt.Modules, txt.ModuleTag)
 	props.Dists = []android.Dist{
@@ -170,33 +158,38 @@ func remove(s []string, v string) []string {
 
 func createMergedTxts(ctx android.LoadHookContext, props CombinedApisProperties) {
 	var textFiles []MergedTxtDefinition
+	// Two module libraries currently do not support @SystemApi so only have the public scope.
+	bcpWithSystemApi := props.Bootclasspath
+	bcpWithSystemApi = remove(bcpWithSystemApi, "conscrypt.module.public.api")
+	bcpWithSystemApi = remove(bcpWithSystemApi, "i18n.module.public.api")
+
 	tagSuffix := []string{".api.txt}", ".removed-api.txt}"}
 	for i, f := range []string{"current.txt", "removed.txt"} {
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename: f,
 			BaseTxt:     ":non-updatable-" + f,
-			Modules:     props.Public,
+			Modules:     props.Bootclasspath,
 			ModuleTag:   "{.public" + tagSuffix[i],
 			Scope:       "public",
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename: f,
 			BaseTxt:     ":non-updatable-system-" + f,
-			Modules:     props.System,
+			Modules:     bcpWithSystemApi,
 			ModuleTag:   "{.system" + tagSuffix[i],
 			Scope:       "system",
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename: f,
 			BaseTxt:     ":non-updatable-module-lib-" + f,
-			Modules:     props.Module_lib,
+			Modules:     bcpWithSystemApi,
 			ModuleTag:   "{.module-lib" + tagSuffix[i],
 			Scope:       "module-lib",
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename: f,
 			BaseTxt:     ":non-updatable-system-server-" + f,
-			Modules:     props.System_server,
+			Modules:     props.System_server_classpath,
 			ModuleTag:   "{.system-server" + tagSuffix[i],
 			Scope:       "system-server",
 		})
@@ -209,10 +202,18 @@ func createMergedTxts(ctx android.LoadHookContext, props CombinedApisProperties)
 func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedTxts(ctx, a.properties)
 
-	createMergedStubsSrcjar(ctx, a.properties.Public)
+	createMergedStubsSrcjar(ctx, a.properties.Bootclasspath)
 
-	// For the filtered api versions, we prune all APIs except art module's APIs.
-	createFilteredApiVersions(ctx, remove(a.properties.Public, a.properties.Art_module))
+	// For the filtered api versions, we prune all APIs except art module's APIs. because
+	// 1) ART apis are available by default to all modules, while other module-to-module deps are
+	//    explicit and probably receive more scrutiny anyway
+	// 2) The number of ART/libcore APIs is large, so not linting them would create a large gap
+	// 3) It's a compromise. Ideally we wouldn't be filtering out any module APIs, and have
+	//    per-module lint databases that excludes just that module's APIs. Alas, that's more
+	//    difficult to achieve.
+	filteredModules := a.properties.Bootclasspath
+	filteredModules = remove(filteredModules, "art.module.public.api")
+	createFilteredApiVersions(ctx, filteredModules)
 }
 
 func combinedApisModuleFactory() android.Module {
