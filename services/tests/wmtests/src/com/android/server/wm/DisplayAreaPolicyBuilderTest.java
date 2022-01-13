@@ -30,7 +30,6 @@ import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER
 import static android.window.DisplayAreaOrganizer.FEATURE_FULLSCREEN_MAGNIFICATION;
 import static android.window.DisplayAreaOrganizer.FEATURE_IME_PLACEHOLDER;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
-import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED_BACKGROUND_PANEL;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_LAST;
@@ -193,25 +192,6 @@ public class DisplayAreaPolicyBuilderTest {
             }
 
             assertThat(hasOneHandedFeature).isTrue();
-        }
-    }
-
-    @Test
-    public void testBuilder_defaultPolicy_hasOneHandedBackgroundFeature() {
-        final DisplayAreaPolicy.Provider defaultProvider = DisplayAreaPolicy.Provider.fromResources(
-                resourcesWithProvider(""));
-        final DisplayAreaPolicyBuilder.Result defaultPolicy =
-                (DisplayAreaPolicyBuilder.Result) defaultProvider.instantiate(mWms, mDisplayContent,
-                        mRoot, mImeContainer);
-        if (mDisplayContent.isDefaultDisplay) {
-            final List<Feature> features = defaultPolicy.getFeatures();
-            boolean hasOneHandedBackgroundFeature = false;
-            for (Feature feature : features) {
-                hasOneHandedBackgroundFeature |=
-                        feature.getId() == FEATURE_ONE_HANDED_BACKGROUND_PANEL;
-            }
-
-            assertThat(hasOneHandedBackgroundFeature).isTrue();
         }
     }
 

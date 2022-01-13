@@ -16,6 +16,7 @@
 
 package com.android.systemui.dagger;
 
+import com.android.keyguard.KeyguardBiometricLockoutLogger;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.LatencyTester;
 import com.android.systemui.ScreenDecorations;
@@ -89,6 +90,13 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(KeyguardViewMediator.class)
     public abstract CoreStartable bindKeyguardViewMediator(KeyguardViewMediator sysui);
+
+    /** Inject into KeyguardBiometricLockoutLogger. */
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardBiometricLockoutLogger.class)
+    public abstract CoreStartable bindKeyguardBiometricLockoutLogger(
+            KeyguardBiometricLockoutLogger sysui);
 
     /** Inject into LatencyTests. */
     @Binds

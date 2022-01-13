@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.usage.NetworkStatsManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
@@ -44,6 +45,7 @@ import com.google.common.collect.Range;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -51,6 +53,8 @@ import org.junit.runner.RunWith;
 public class MobileRadioPowerCalculatorTest {
     private static final double PRECISION = 0.00001;
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
+    @Mock
+    NetworkStatsManager mNetworkStatsManager;
 
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
@@ -95,7 +99,8 @@ public class MobileRadioPowerCalculatorTest {
 
         ModemActivityInfo mai = new ModemActivityInfo(10000, 2000, 3000,
                 new int[]{100, 200, 300, 400, 500}, 600);
-        stats.noteModemControllerActivity(mai, POWER_DATA_UNAVAILABLE, 10000, 10000);
+        stats.noteModemControllerActivity(mai, POWER_DATA_UNAVAILABLE, 10000, 10000,
+                mNetworkStatsManager);
 
         mStatsRule.setTime(12_000_000, 12_000_000);
 
@@ -157,7 +162,8 @@ public class MobileRadioPowerCalculatorTest {
         mStatsRule.setNetworkStats(new NetworkStats(10000, 1)
                 .insertEntry("cellular", APP_UID, 0, 0, 1000, 100, 2000, 20, 100));
 
-        stats.noteModemControllerActivity(null, POWER_DATA_UNAVAILABLE, 10000, 10000);
+        stats.noteModemControllerActivity(null, POWER_DATA_UNAVAILABLE, 10000, 10000,
+                mNetworkStatsManager);
 
         uid.setProcessStateForTest(
                 BatteryStats.Uid.PROCESS_STATE_BACKGROUND, 11000);
@@ -165,7 +171,8 @@ public class MobileRadioPowerCalculatorTest {
         mStatsRule.setNetworkStats(new NetworkStats(12000, 1)
                 .insertEntry("cellular", APP_UID, 0, 0, 1000, 250, 2000, 80, 200));
 
-        stats.noteModemControllerActivity(null, POWER_DATA_UNAVAILABLE, 12000, 12000);
+        stats.noteModemControllerActivity(null, POWER_DATA_UNAVAILABLE, 12000, 12000,
+                mNetworkStatsManager);
 
         assertThat(uid.getMobileRadioMeasuredBatteryConsumptionUC()).isAtMost(0);
         // 12000-8000 = 4000 ms == 4_000_000 us
@@ -239,7 +246,7 @@ public class MobileRadioPowerCalculatorTest {
 
         ModemActivityInfo mai = new ModemActivityInfo(10000, 2000, 3000,
                 new int[]{100, 200, 300, 400, 500}, 600);
-        stats.noteModemControllerActivity(mai, 10_000_000, 10000, 10000);
+        stats.noteModemControllerActivity(mai, 10_000_000, 10000, 10000, mNetworkStatsManager);
 
         mStatsRule.setTime(12_000_000, 12_000_000);
 
@@ -301,7 +308,7 @@ public class MobileRadioPowerCalculatorTest {
         mStatsRule.setNetworkStats(new NetworkStats(10000, 1)
                 .insertEntry("cellular", APP_UID, 0, 0, 1000, 100, 2000, 20, 100));
 
-        stats.noteModemControllerActivity(null, 10_000_000, 10000, 10000);
+        stats.noteModemControllerActivity(null, 10_000_000, 10000, 10000, mNetworkStatsManager);
 
         uid.setProcessStateForTest(
                 BatteryStats.Uid.PROCESS_STATE_BACKGROUND, 11000);
@@ -309,7 +316,7 @@ public class MobileRadioPowerCalculatorTest {
         mStatsRule.setNetworkStats(new NetworkStats(12000, 1)
                 .insertEntry("cellular", APP_UID, 0, 0, 1000, 250, 2000, 80, 200));
 
-        stats.noteModemControllerActivity(null, 15_000_000, 12000, 12000);
+        stats.noteModemControllerActivity(null, 15_000_000, 12000, 12000, mNetworkStatsManager);
 
         mStatsRule.setTime(20000, 20000);
 

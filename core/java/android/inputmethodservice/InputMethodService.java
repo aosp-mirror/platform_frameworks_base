@@ -523,6 +523,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private Handler mHandler;
     private boolean mImeSurfaceScheduledForRemoval;
     private ImsConfigurationTracker mConfigTracker = new ImsConfigurationTracker();
+    private boolean mDestroyed;
 
     /**
      * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#showSoftInput}
@@ -599,6 +600,11 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public final void initializeInternal(@NonNull IBinder token,
                 IInputMethodPrivilegedOperations privilegedOperations, int configChanges) {
+            if (mDestroyed) {
+                Log.i(TAG, "The InputMethodService has already onDestroyed()."
+                    + "Ignore the initialization.");
+                return;
+            }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.initializeInternal");
             mConfigTracker.onInitialize(configChanges);
             mPrivOps.set(privilegedOperations);
@@ -1435,6 +1441,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     @Override public void onDestroy() {
+        mDestroyed = true;
         super.onDestroy();
         mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
                 mInsetsComputer);
@@ -1811,15 +1818,19 @@ public class InputMethodService extends AbstractInputMethodService {
     
     void updateExtractFrameVisibility() {
         final int vis;
+        updateCandidatesVisibility(mCandidatesVisibility == View.VISIBLE);
+
         if (isFullscreenMode()) {
             vis = mExtractViewHidden ? View.INVISIBLE : View.VISIBLE;
             // "vis" should be applied for the extract frame as well in the fullscreen mode.
             mExtractFrame.setVisibility(vis);
         } else {
-            vis = View.VISIBLE;
+            // mFullscreenArea visibility will according the candidate frame visibility once the
+            // extract frame is gone.
+            vis = mCandidatesVisibility;
             mExtractFrame.setVisibility(View.GONE);
         }
-        updateCandidatesVisibility(mCandidatesVisibility == View.VISIBLE);
+
         if (mDecorViewWasVisible && mFullscreenArea.getVisibility() != vis) {
             int animRes = mThemeAttrs.getResourceId(vis == View.VISIBLE
                     ? com.android.internal.R.styleable.InputMethodService_imeExtractEnterAnimation

@@ -21,6 +21,7 @@
 #include <aidl/android/media/tv/tuner/BnTunerFilterCallback.h>
 #include <aidl/android/media/tv/tuner/ITunerFilter.h>
 #include <fmq/AidlMessageQueue.h>
+#include <utils/Mutex.h>
 
 #include "ClientHelper.h"
 #include "FilterClientCallback.h"
@@ -37,6 +38,7 @@ using ::aidl::android::hardware::tv::tuner::FilterDelayHint;
 using ::aidl::android::media::tv::tuner::BnTunerFilterCallback;
 using ::aidl::android::media::tv::tuner::ITunerFilter;
 using ::android::hardware::EventFlag;
+using ::android::Mutex;
 
 using namespace std;
 
@@ -179,6 +181,7 @@ private:
     uint64_t mAvSharedMemSize;
     bool mIsMediaFilter;
     bool mIsPassthroughFilter;
+    Mutex mLock;
 };
 }  // namespace android
 

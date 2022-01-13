@@ -103,4 +103,30 @@ public class WifiEnterpriseRestrictionUtilsTest {
 
         assertThat(WifiEnterpriseRestrictionUtils.isWifiDirectAllowed(mContext)).isTrue();
     }
+
+    @Test
+    public void isAddWifiConfigAllowed_setSDKForS_shouldReturnTrue() {
+        ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", Build.VERSION_CODES.S);
+        when(mBundle.getBoolean(UserManager.DISALLOW_ADD_WIFI_CONFIG)).thenReturn(true);
+
+        assertThat(WifiEnterpriseRestrictionUtils.isAddWifiConfigAllowed(mContext)).isTrue();
+    }
+
+    @Test
+    public void isAddWifiConfigAllowed_setSDKForTAndDisallowForRestriction_shouldReturnFalse() {
+        ReflectionHelpers.setStaticField(
+            Build.VERSION.class, "SDK_INT", Build.VERSION_CODES.TIRAMISU);
+        when(mBundle.getBoolean(UserManager.DISALLOW_ADD_WIFI_CONFIG)).thenReturn(true);
+
+        assertThat(WifiEnterpriseRestrictionUtils.isAddWifiConfigAllowed(mContext)).isFalse();
+    }
+
+    @Test
+    public void isAddWifiConfigAllowed_setSDKForTAndAllowForRestriction_shouldReturnTrue() {
+        ReflectionHelpers.setStaticField(
+            Build.VERSION.class, "SDK_INT", Build.VERSION_CODES.TIRAMISU);
+        when(mBundle.getBoolean(UserManager.DISALLOW_ADD_WIFI_CONFIG)).thenReturn(false);
+
+        assertThat(WifiEnterpriseRestrictionUtils.isAddWifiConfigAllowed(mContext)).isTrue();
+    }
 }

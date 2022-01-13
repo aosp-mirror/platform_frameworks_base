@@ -764,6 +764,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onVideoAvailable(mSession);
+                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
+                        mSession.getIAppSession().notifyVideoAvailable();
+                    }
                 }
             });
         }
@@ -773,6 +776,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onVideoUnavailable(mSession, reason);
+                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
+                        mSession.getIAppSession().notifyVideoUnavailable(reason);
+                    }
                 }
             });
         }
@@ -782,6 +788,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onContentAllowed(mSession);
+                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
+                        mSession.getIAppSession().notifyContentAllowed();
+                    }
                 }
             });
         }
@@ -791,6 +800,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onContentBlocked(mSession, rating);
+                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
+                        mSession.getIAppSession().notifyContentBlocked(rating);
+                    }
                 }
             });
         }

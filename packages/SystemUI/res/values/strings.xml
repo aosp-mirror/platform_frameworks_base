@@ -1165,7 +1165,7 @@
     <string name="wallet_lockscreen_settings_label">Lock screen settings</string>
 
     <!-- QR Code Scanner label, title [CHAR LIMIT=32] -->
-    <string name="qr_code_scanner_title">QR Code</string>
+    <string name="qr_code_scanner_title">QR code</string>
 
     <!-- QR Code Scanner description [CHAR LIMIT=NONE] -->
     <string name="qr_code_scanner_description">Tap to scan</string>

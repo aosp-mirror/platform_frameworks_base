@@ -759,11 +759,11 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         try {
-            IBinder permissionToken = ActivityTaskManager.getService()
-                    .requestStartActivityPermissionToken(getActivityToken());
             Intent delegationIntent = new Intent();
             final ComponentName delegateActivity = ComponentName.unflattenFromString(
                     Resources.getSystem().getString(R.string.config_chooserActivity));
+            IBinder permissionToken = ActivityTaskManager.getService()
+                    .requestStartActivityPermissionToken(delegateActivity);
             delegationIntent.setComponent(delegateActivity);
             delegationIntent.putExtra(Intent.EXTRA_INTENT, getIntent());
             delegationIntent.putExtra(ActivityTaskManager.EXTRA_PERMISSION_TOKEN, permissionToken);

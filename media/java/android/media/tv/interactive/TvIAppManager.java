@@ -26,6 +26,7 @@ import android.media.tv.AdRequest;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
+import android.media.tv.TvContentRating;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
 import android.net.Uri;
@@ -1032,6 +1033,66 @@ public final class TvIAppManager {
             }
             try {
                 mService.notifyTracksChanged(mToken, tracks, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Notifies IAPP session when video is available.
+         */
+        public void notifyVideoAvailable() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyVideoAvailable(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Notifies IAPP session when video is unavailable.
+         */
+        public void notifyVideoUnavailable(int reason) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyVideoUnavailable(mToken, reason, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Notifies IAPP session when content is allowed.
+         */
+        public void notifyContentAllowed() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyContentAllowed(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Notifies IAPP session when content is blocked.
+         */
+        public void notifyContentBlocked(TvContentRating rating) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyContentBlocked(mToken, rating.flattenToString(), mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

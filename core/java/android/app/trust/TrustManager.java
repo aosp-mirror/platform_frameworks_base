@@ -156,7 +156,7 @@ public class TrustManager {
 
                 @Override
                 public void onTrustError(CharSequence message) {
-                    Message m = mHandler.obtainMessage(MSG_TRUST_ERROR);
+                    Message m = mHandler.obtainMessage(MSG_TRUST_ERROR, trustListener);
                     m.getData().putCharSequence(DATA_MESSAGE, message);
                     m.sendToTarget();
                 }

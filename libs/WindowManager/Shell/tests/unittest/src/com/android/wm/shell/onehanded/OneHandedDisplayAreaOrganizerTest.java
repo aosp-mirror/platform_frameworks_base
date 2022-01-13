@@ -95,8 +95,6 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     @Mock
     WindowContainerTransaction mMockWindowContainerTransaction;
     @Mock
-    OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
-    @Mock
     ShellExecutor mMockShellMainExecutor;
     @Mock
     OneHandedSettingsUtil mMockSettingsUitl;
@@ -143,7 +141,6 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                 mMockSettingsUitl,
                 mMockAnimationController,
                 mTutorialHandler,
-                mMockBackgroundOrganizer,
                 mJankMonitor,
                 mMockShellMainExecutor));
 
@@ -431,7 +428,6 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                         mMockSettingsUitl,
                         mMockAnimationController,
                         mTutorialHandler,
-                        mMockBackgroundOrganizer,
                         mJankMonitor,
                         mMockShellMainExecutor));
 
