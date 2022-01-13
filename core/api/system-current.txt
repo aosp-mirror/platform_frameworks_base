@@ -299,6 +299,7 @@ package android {
     field public static final String SIGNAL_REBOOT_READINESS = "android.permission.SIGNAL_REBOOT_READINESS";
     field public static final String SOUND_TRIGGER_RUN_IN_BATTERY_SAVER = "android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER";
     field public static final String START_ACTIVITIES_FROM_BACKGROUND = "android.permission.START_ACTIVITIES_FROM_BACKGROUND";
+    field public static final String START_CROSS_PROFILE_ACTIVITIES = "android.permission.START_CROSS_PROFILE_ACTIVITIES";
     field public static final String START_REVIEW_PERMISSION_DECISIONS = "android.permission.START_REVIEW_PERMISSION_DECISIONS";
     field public static final String STATUS_BAR_SERVICE = "android.permission.STATUS_BAR_SERVICE";
     field public static final String STOP_APP_SWITCHES = "android.permission.STOP_APP_SWITCHES";
@@ -2844,7 +2845,7 @@ package android.content.pm {
   }
 
   public class CrossProfileApps {
-    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES) public void startActivity(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={android.Manifest.permission.INTERACT_ACROSS_PROFILES, android.Manifest.permission.START_CROSS_PROFILE_ACTIVITIES}) public void startActivity(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
   }
 
   public class DataLoaderParams {

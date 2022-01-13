@@ -180,6 +180,7 @@ public class CrossProfileApps {
      * {@link #startMainActivity}, this can start any activity of the caller package, not just
      * the main activity.
      * The caller must have the {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES}
+     * or {@link android.Manifest.permission#START_CROSS_PROFILE_ACTIVITIES}
      * permission and both the caller and target user profiles must be in the same profile group.
      *
      * @param component The ComponentName of the activity to launch. It must be exported.
@@ -189,7 +190,9 @@ public class CrossProfileApps {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES,
+            android.Manifest.permission.START_CROSS_PROFILE_ACTIVITIES})
     public void startActivity(@NonNull ComponentName component, @NonNull UserHandle targetUser) {
         try {
             mService.startActivityAsUser(mContext.getIApplicationThread(),
