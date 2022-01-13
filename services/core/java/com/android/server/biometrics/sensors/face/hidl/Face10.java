@@ -363,7 +363,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         final Handler handler = new Handler(Looper.getMainLooper());
         return new Face10(context, sensorProps, lockoutResetDispatcher, handler,
-                new BiometricScheduler(TAG, handler, BiometricScheduler.SENSOR_TYPE_FACE,
+                new BiometricScheduler(TAG, BiometricScheduler.SENSOR_TYPE_FACE,
                         null /* gestureAvailabilityTracker */));
     }
 
@@ -896,6 +896,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                     boolean success) {
                 if (success) {
                     mCurrentUserId = targetUserId;
+                } else {
+                    Slog.w(TAG, "Failed to change user, still: " + mCurrentUserId);
                 }
             }
         });

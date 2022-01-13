@@ -360,7 +360,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         final BiometricScheduler scheduler =
-                new BiometricScheduler(TAG, handler,
+                new BiometricScheduler(TAG,
                         BiometricScheduler.sensorTypeFromFingerprintProperties(sensorProps),
                         gestureAvailabilityDispatcher);
         final HalResultController controller = new HalResultController(sensorProps.sensorId,
@@ -490,17 +490,23 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                 !getEnrolledFingerprints(mSensorProperties.sensorId, targetUserId).isEmpty();
         final FingerprintUpdateActiveUserClient client =
                 new FingerprintUpdateActiveUserClient(mContext, mLazyDaemon, targetUserId,
-                        mContext.getOpPackageName(), mSensorProperties.sensorId, mCurrentUserId,
-                        hasEnrolled, mAuthenticatorIds, force);
+                        mContext.getOpPackageName(), mSensorProperties.sensorId,
+                        this::getCurrentUser, hasEnrolled, mAuthenticatorIds, force);
         mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
             @Override
             public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                     boolean success) {
                 if (success) {
                     mCurrentUserId = targetUserId;
+                } else {
+                    Slog.w(TAG, "Failed to change user, still: " + mCurrentUserId);
                 }
             }
         });
+    }
+
+    private int getCurrentUser() {
+        return mCurrentUserId;
     }
 
     @Override

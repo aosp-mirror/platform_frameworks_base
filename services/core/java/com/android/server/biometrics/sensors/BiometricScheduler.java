@@ -25,6 +25,7 @@ import android.hardware.biometrics.IBiometricService;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
@@ -232,17 +233,14 @@ public class BiometricScheduler {
      * Creates a new scheduler.
      *
      * @param tag for the specific instance of the scheduler. Should be unique.
-     * @param handler handler for callbacks (all methods of this class must be called on the
-     *                thread associated with this handler)
      * @param sensorType the sensorType that this scheduler is handling.
      * @param gestureAvailabilityDispatcher may be null if the sensor does not support gestures
      *                                      (such as fingerprint swipe).
      */
     public BiometricScheduler(@NonNull String tag,
-            @NonNull Handler handler,
             @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
-        this(tag, handler, sensorType, gestureAvailabilityDispatcher,
+        this(tag, new Handler(Looper.getMainLooper()), sensorType, gestureAvailabilityDispatcher,
                 IBiometricService.Stub.asInterface(
                         ServiceManager.getService(Context.BIOMETRIC_SERVICE)),
                 LOG_NUM_RECENT_OPERATIONS, CoexCoordinator.getInstance());
@@ -376,8 +374,9 @@ public class BiometricScheduler {
         // send ERROR_CANCELED and skip the operation.
         if (clientMonitor.interruptsPrecedingClients()) {
             for (BiometricSchedulerOperation operation : mPendingOperations) {
-                Slog.d(getTag(), "New client, marking pending op as canceling: " + operation);
-                operation.markCanceling();
+                if (operation.markCanceling()) {
+                    Slog.d(getTag(), "New client, marking pending op as canceling: " + operation);
+                }
             }
         }
 
