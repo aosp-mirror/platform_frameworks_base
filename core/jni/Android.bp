@@ -247,6 +247,7 @@ cc_library_shared {
                 "spatializer-aidl-cpp",
                 "av-types-aidl-cpp",
                 "android.hardware.camera.device@3.2",
+                "libandroid_net",
                 "libandroidicu",
                 "libbpf_android",
                 "libnetdbpf",
