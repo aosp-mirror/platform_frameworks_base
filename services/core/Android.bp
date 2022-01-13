@@ -100,7 +100,7 @@ java_library_static {
     name: "services.core.unboosted",
     defaults: ["platform_service_defaults"],
     srcs: [
-        ":android.hardware.biometrics.face-V1-java-source",
+        ":android.hardware.biometrics.face-V2-java-source",
         ":statslog-art-java-gen",
         ":statslog-contexthub-java-gen",
         ":services.core-sources",
