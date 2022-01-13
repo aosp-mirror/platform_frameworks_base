@@ -25,6 +25,7 @@ import android.service.trust.ITrustAgentServiceCallback;
  */
 interface ITrustAgentService {
     oneway void onUnlockAttempt(boolean successful);
+    oneway void onUserRequestedUnlock();
     oneway void onUnlockLockout(int timeoutMs);
     oneway void onTrustTimeout();
     oneway void onDeviceLocked();

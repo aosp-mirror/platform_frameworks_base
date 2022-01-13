@@ -85,6 +85,19 @@ public class TrustManager {
     }
 
     /**
+     * Reports that the user {@code userId} is likely interested in unlocking the device.
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     */
+    public void reportUserRequestedUnlock(int userId) {
+        try {
+            mService.reportUserRequestedUnlock(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Reports that user {@param userId} has entered a temporary device lockout.
      *
      * This generally occurs when  the user has unsuccessfully tried to unlock the device too many

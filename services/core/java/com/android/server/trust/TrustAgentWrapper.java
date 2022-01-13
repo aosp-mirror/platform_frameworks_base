@@ -461,6 +461,19 @@ public class TrustAgentWrapper {
     }
 
     /**
+     * @see android.service.trust.TrustAgentService#onUserRequestedUnlock()
+     */
+    public void onUserRequestedUnlock() {
+        try {
+            if (mTrustAgentService != null) {
+                mTrustAgentService.onUserRequestedUnlock();
+            }
+        } catch (RemoteException e) {
+            onError(e);
+        }
+    }
+
+    /**
      * @see android.service.trust.TrustAgentService#onUnlockLockout(int)
      */
     public void onUnlockLockout(int timeoutMs) {
