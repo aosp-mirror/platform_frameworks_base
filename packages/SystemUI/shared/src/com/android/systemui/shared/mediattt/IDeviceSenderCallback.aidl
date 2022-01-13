@@ -17,6 +17,7 @@
 package com.android.systemui.shared.mediattt;
 
 import android.media.MediaRoute2Info;
+import com.android.systemui.shared.mediattt.DeviceInfo;
 
 /**
  * A callback interface that can be invoked to trigger media transfer events on System UI.
@@ -40,6 +41,6 @@ interface IDeviceSenderCallback {
      *     playing media locally and the media should be transferred to be played on the receiver
      *     device instead.
      */
-     // TODO(b/203800643): Add the otherDeviceInfo parameter.
-    oneway void closeToReceiverToStartCast(in MediaRoute2Info mediaInfo);
+    oneway void closeToReceiverToStartCast(
+        in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
 }

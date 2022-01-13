@@ -3,8 +3,11 @@ package com.android.systemui.media.taptotransfer.sender
 import android.media.MediaRoute2Info
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.shared.mediattt.DeviceInfo
 import com.android.systemui.shared.mediattt.IDeviceSenderCallback
-import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -33,8 +36,13 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
 
     @Test
     fun closeToReceiverToStartCast_controllerTriggeredWithMoveCloserToStartCastState() {
-        callback.closeToReceiverToStartCast(mediaInfo)
+        val name = "Fake name"
+        callback.closeToReceiverToStartCast(mediaInfo, DeviceInfo(name))
 
-        verify(controller).displayChip(any<MoveCloserToStartCast>())
+        val chipStateCaptor = argumentCaptor<MoveCloserToStartCast>()
+        verify(controller).displayChip(capture(chipStateCaptor))
+
+        val chipState = chipStateCaptor.value!!
+        assertThat(chipState.otherDeviceName).isEqualTo(name)
     }
 }
