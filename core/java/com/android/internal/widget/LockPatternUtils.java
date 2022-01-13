@@ -1236,6 +1236,28 @@ public class LockPatternUtils {
         }
     }
 
+    /** Register the given WeakEscrowTokenRemovedListener. */
+    public boolean registerWeakEscrowTokenRemovedListener(
+            @NonNull final IWeakEscrowTokenRemovedListener listener) {
+        try {
+            return getLockSettings().registerWeakEscrowTokenRemovedListener(listener);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not register WeakEscrowTokenRemovedListener.");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Unregister the given WeakEscrowTokenRemovedListener. */
+    public boolean unregisterWeakEscrowTokenRemovedListener(
+            @NonNull final IWeakEscrowTokenRemovedListener listener) {
+        try {
+            return getLockSettings().unregisterWeakEscrowTokenRemovedListener(listener);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not register WeakEscrowTokenRemovedListener.");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     public void reportSuccessfulBiometricUnlock(boolean isStrongBiometric, int userId) {
         try {
             getLockSettings().reportSuccessfulBiometricUnlock(isStrongBiometric, userId);
@@ -1355,15 +1377,38 @@ public class LockPatternUtils {
     }
 
     /**
+     * Create a weak escrow token for the current user, which can later be used to unlock FBE
+     * or change user password.
+     *
+     * After adding, if the user currently has lockscreen password, they will need to perform a
+     * confirm credential operation in order to activate the token for future use. If the user
+     * has no secure lockscreen, then the token is activated immediately.
+     *
+     * If the user changes or removes lockscreen password, activated weak escrow tokens will be
+     * removed.
+     *
+     * @return a unique 64-bit token handle which is needed to refer to this token later.
+     */
+    public long addWeakEscrowToken(byte[] token, int userId,
+            @NonNull IWeakEscrowTokenActivatedListener callback) {
+        try {
+            return getLockSettings().addWeakEscrowToken(token, userId, callback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not add weak token.");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Callback interface to notify when an added escrow token has been activated.
      */
     public interface EscrowTokenStateChangeCallback {
         /**
          * The method to be called when the token is activated.
          * @param handle 64 bit handle corresponding to the escrow token
-         * @param userid user for whom the escrow token has been added
+         * @param userId user for whom the escrow token has been added
          */
-        void onEscrowTokenActivated(long handle, int userid);
+        void onEscrowTokenActivated(long handle, int userId);
     }
 
     /**
@@ -1379,6 +1424,21 @@ public class LockPatternUtils {
     }
 
     /**
+     * Remove a weak escrow token.
+     *
+     * @return true if the given handle refers to a valid weak token previously returned from
+     * {@link #addWeakEscrowToken}, whether it's active or not. return false otherwise.
+     */
+    public boolean removeWeakEscrowToken(long handle, int userId) {
+        try {
+            return getLockSettings().removeWeakEscrowToken(handle, userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not remove the weak token.");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Check if the given escrow token is active or not. Only active token can be used to call
      * {@link #setLockCredentialWithToken} and {@link #unlockUserWithToken}
      *
@@ -1386,6 +1446,29 @@ public class LockPatternUtils {
      */
     public boolean isEscrowTokenActive(long handle, int userId) {
         return getLockSettingsInternal().isEscrowTokenActive(handle, userId);
+    }
+
+    /**
+     * Check if the given weak escrow token is active or not. Only active token can be used to call
+     * {@link #setLockCredentialWithToken} and {@link #unlockUserWithToken}
+     */
+    public boolean isWeakEscrowTokenActive(long handle, int userId) {
+        try {
+            return getLockSettings().isWeakEscrowTokenActive(handle, userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not check the weak token.");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Check if the given weak escrow token is valid. */
+    public boolean isWeakEscrowTokenValid(long handle, byte[] token, int userId) {
+        try {
+            return getLockSettings().isWeakEscrowTokenValid(handle, token, userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not validate the weak token.");
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

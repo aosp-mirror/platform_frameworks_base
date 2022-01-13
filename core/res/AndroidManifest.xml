@@ -5334,6 +5334,12 @@
     <permission android:name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to manage weak escrow token on the device. This permission
+         is not available to third party applications.
+         @hide -->
+    <permission android:name="android.permission.MANAGE_WEAK_ESCROW_TOKEN"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows an application to listen to trust changes.  Only allowed for system processes.
         @hide -->
     <permission android:name="android.permission.TRUST_LISTENER"
