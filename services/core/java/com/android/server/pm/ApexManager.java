@@ -799,7 +799,7 @@ public abstract class ApexManager {
                 throw new RuntimeException(re);
             } catch (Exception e) {
                 throw new PackageManagerException(
-                        PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        PackageInstaller.SessionInfo.SESSION_VERIFICATION_FAILED,
                         "apexd verification failed : " + e.getMessage());
             }
         }
@@ -826,7 +826,7 @@ public abstract class ApexManager {
                 throw new RuntimeException(re);
             } catch (Exception e) {
                 throw new PackageManagerException(
-                        PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        PackageInstaller.SessionInfo.SESSION_VERIFICATION_FAILED,
                         "Failed to mark apexd session as ready : " + e.getMessage());
             }
         }

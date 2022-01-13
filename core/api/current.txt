@@ -12765,11 +12765,16 @@ package android.content.pm {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.pm.PackageInstaller.SessionInfo> CREATOR;
     field public static final int INVALID_ID = -1; // 0xffffffff
-    field public static final int STAGED_SESSION_ACTIVATION_FAILED = 2; // 0x2
-    field public static final int STAGED_SESSION_CONFLICT = 4; // 0x4
-    field public static final int STAGED_SESSION_NO_ERROR = 0; // 0x0
-    field public static final int STAGED_SESSION_UNKNOWN = 3; // 0x3
-    field public static final int STAGED_SESSION_VERIFICATION_FAILED = 1; // 0x1
+    field public static final int SESSION_ACTIVATION_FAILED = 2; // 0x2
+    field public static final int SESSION_CONFLICT = 4; // 0x4
+    field public static final int SESSION_NO_ERROR = 0; // 0x0
+    field public static final int SESSION_UNKNOWN_ERROR = 3; // 0x3
+    field public static final int SESSION_VERIFICATION_FAILED = 1; // 0x1
+    field @Deprecated public static final int STAGED_SESSION_ACTIVATION_FAILED = 2; // 0x2
+    field @Deprecated public static final int STAGED_SESSION_CONFLICT = 4; // 0x4
+    field @Deprecated public static final int STAGED_SESSION_NO_ERROR = 0; // 0x0
+    field @Deprecated public static final int STAGED_SESSION_UNKNOWN = 3; // 0x3
+    field @Deprecated public static final int STAGED_SESSION_VERIFICATION_FAILED = 1; // 0x1
   }
 
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
