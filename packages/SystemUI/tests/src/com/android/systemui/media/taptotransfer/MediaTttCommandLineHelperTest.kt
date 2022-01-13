@@ -26,11 +26,9 @@ import com.android.systemui.shared.mediattt.DeviceInfo
 import com.android.systemui.shared.mediattt.IDeviceSenderCallback
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
-import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -75,7 +73,6 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
                 context,
                 mediaTttChipControllerSender,
                 mediaTttChipControllerReceiver,
-                FakeExecutor(FakeSystemClock())
             )
     }
 

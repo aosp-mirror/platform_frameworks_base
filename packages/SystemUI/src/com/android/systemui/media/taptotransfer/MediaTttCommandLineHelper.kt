@@ -28,7 +28,6 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
 import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender
@@ -42,9 +41,7 @@ import com.android.systemui.shared.mediattt.DeviceInfo
 import com.android.systemui.shared.mediattt.IDeviceSenderCallback
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
-import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.PrintWriter
-import java.util.concurrent.FutureTask
 import javax.inject.Inject
 
 /**
@@ -57,7 +54,6 @@ class MediaTttCommandLineHelper @Inject constructor(
     private val context: Context,
     private val mediaTttChipControllerSender: MediaTttChipControllerSender,
     private val mediaTttChipControllerReceiver: MediaTttChipControllerReceiver,
-    @Main private val mainExecutor: DelayableExecutor,
 ) {
     private var senderCallback: IDeviceSenderCallback? = null
     private val senderServiceConnection = SenderServiceConnection()
@@ -101,17 +97,13 @@ class MediaTttCommandLineHelper @Inject constructor(
                 // TODO(b/203800643): Migrate other commands to invoke the service instead of the
                 //   controller.
                 TRANSFER_INITIATED_COMMAND_NAME -> {
-                    val futureTask = FutureTask { fakeUndoRunnable }
                     mediaTttChipControllerSender.displayChip(
                         TransferInitiated(
                             appIconDrawable,
                             APP_ICON_CONTENT_DESCRIPTION,
-                            otherDeviceName,
-                            futureTask
+                            otherDeviceName
                         )
                     )
-                    mainExecutor.executeDelayed({ futureTask.run() }, FUTURE_WAIT_TIME)
-
                 }
                 TRANSFER_SUCCEEDED_COMMAND_NAME -> {
                     mediaTttChipControllerSender.displayChip(
@@ -248,6 +240,5 @@ val TRANSFER_SUCCEEDED_COMMAND_NAME = TransferSucceeded::class.simpleName!!
 @VisibleForTesting
 val TRANSFER_FAILED_COMMAND_NAME = TransferFailed::class.simpleName!!
 
-private const val FUTURE_WAIT_TIME = 2000L
 private const val APP_ICON_CONTENT_DESCRIPTION = "Fake media app icon"
 private const val TAG = "MediaTapToTransferCli"

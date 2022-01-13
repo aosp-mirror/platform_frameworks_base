@@ -26,26 +26,18 @@ import android.widget.TextView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.SettableFuture
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.Future
 
 @SmallTest
 class MediaTttChipControllerSenderTest : SysuiTestCase() {
     private lateinit var appIconDrawable: Drawable
-    private lateinit var fakeMainClock: FakeSystemClock
-    private lateinit var fakeMainExecutor: FakeExecutor
-    private lateinit var fakeBackgroundClock: FakeSystemClock
-    private lateinit var fakeBackgroundExecutor: FakeExecutor
 
     private lateinit var controllerSender: MediaTttChipControllerSender
 
@@ -56,13 +48,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         appIconDrawable = Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
-        fakeMainClock = FakeSystemClock()
-        fakeMainExecutor = FakeExecutor(fakeMainClock)
-        fakeBackgroundClock = FakeSystemClock()
-        fakeBackgroundExecutor = FakeExecutor(fakeBackgroundClock)
-        controllerSender = MediaTttChipControllerSender(
-            context, windowManager, fakeMainExecutor, fakeBackgroundExecutor
-        )
+        controllerSender = MediaTttChipControllerSender(context, windowManager)
     }
 
     @Test
@@ -92,13 +78,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
-    fun transferInitiated_futureNotResolvedYet_appIcon_loadingIcon_noUndo_noFailureIcon() {
-        val future: SettableFuture<Runnable?> = SettableFuture.create()
-        controllerSender.displayChip(transferInitiated(future))
+    fun transferInitiated_appIcon_loadingIcon_noUndo_noFailureIcon() {
+        controllerSender.displayChip(transferInitiated())
 
-        // Don't resolve the future in any way and don't run our executors
-
-        // Assert we're still in the loading state
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
@@ -106,71 +88,6 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
         assertThat(chipView.getFailureIcon().visibility).isEqualTo(View.GONE)
-    }
-
-    @Test
-    fun transferInitiated_futureResolvedSuccessfully_switchesToTransferSucceeded() {
-        val future: SettableFuture<Runnable?> = SettableFuture.create()
-        val undoRunnable = Runnable { }
-
-        controllerSender.displayChip(transferInitiated(future))
-
-        future.set(undoRunnable)
-        fakeBackgroundExecutor.advanceClockToLast()
-        fakeBackgroundExecutor.runAllReady()
-        fakeMainExecutor.advanceClockToLast()
-        val numRun = fakeMainExecutor.runAllReady()
-
-        // Assert we ran the future callback
-        assertThat(numRun).isEqualTo(1)
-        // Assert that we've moved to the successful state
-        val chipView = getChipView()
-        assertThat(chipView.getChipText()).contains(DEVICE_NAME)
-        assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
-        assertThat(chipView.getUndoButton().visibility).isEqualTo(View.VISIBLE)
-    }
-
-    @Test
-    fun transferInitiated_futureCancelled_switchesToTransferFailed() {
-        val future: SettableFuture<Runnable?> = SettableFuture.create()
-
-        controllerSender.displayChip(transferInitiated(future))
-
-        future.cancel(true)
-        fakeBackgroundExecutor.advanceClockToLast()
-        fakeBackgroundExecutor.runAllReady()
-        fakeMainExecutor.advanceClockToLast()
-        val numRun = fakeMainExecutor.runAllReady()
-
-        // Assert we ran the future callback
-        assertThat(numRun).isEqualTo(1)
-        // Assert that we've moved to the failed state
-        val chipView = getChipView()
-        assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
-        assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
-        assertThat(chipView.getFailureIcon().visibility).isEqualTo(View.VISIBLE)
-    }
-
-    @Test
-    fun transferInitiated_futureNotResolvedAfterTimeout_switchesToTransferFailed() {
-        val future: SettableFuture<Runnable?> = SettableFuture.create()
-        controllerSender.displayChip(transferInitiated(future))
-
-        // We won't set anything on the future, but we will still run the executors so that we're
-        // waiting on the future resolving. If we have a bug in our code, then this test will time
-        // out because we're waiting on the future indefinitely.
-        fakeBackgroundExecutor.advanceClockToLast()
-        fakeBackgroundExecutor.runAllReady()
-        fakeMainExecutor.advanceClockToLast()
-        val numRun = fakeMainExecutor.runAllReady()
-
-        // Assert we eventually decide to not wait for the future anymore
-        assertThat(numRun).isEqualTo(1)
-        // Assert that we've moved to the failed state
-        val chipView = getChipView()
-        assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
-        assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
-        assertThat(chipView.getFailureIcon().visibility).isEqualTo(View.VISIBLE)
     }
 
     @Test
@@ -293,9 +210,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         MoveCloserToEndCast(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
-    private fun transferInitiated(
-        future: Future<Runnable?> = TEST_FUTURE
-    ) = TransferInitiated(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME, future)
+    private fun transferInitiated() =
+        TransferInitiated(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferSucceeded(
@@ -309,6 +225,3 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
 private const val DEVICE_NAME = "My Tablet"
 private const val APP_ICON_CONTENT_DESC = "Content description"
-// Use a settable future that hasn't yet been set so that we don't immediately switch to the success
-// state.
-private val TEST_FUTURE: SettableFuture<Runnable?> = SettableFuture.create()

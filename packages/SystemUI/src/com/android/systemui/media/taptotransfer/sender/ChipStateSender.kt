@@ -20,7 +20,6 @@ import android.graphics.drawable.Drawable
 import androidx.annotation.StringRes
 import com.android.systemui.R
 import com.android.systemui.media.taptotransfer.common.MediaTttChipState
-import java.util.concurrent.Future
 
 /**
  * A class that stores all the information necessary to display the media tap-to-transfer chip on
@@ -71,19 +70,11 @@ class MoveCloserToEndCast(
     otherDeviceName
 )
 
-/**
- * A state representing that a transfer has been initiated (but not completed).
- *
- * @property future a future that will be resolved when the transfer has either succeeded or failed.
- *   If the transfer succeeded, the future can optionally return an undo runnable (see
- *   [TransferSucceeded.undoRunnable]). [MediaTttChipControllerSender] is responsible for transitioning
- *   the chip to the [TransferSucceeded] state if the future resolves successfully.
- */
+/** A state representing that a transfer has been initiated (but not completed). */
 class TransferInitiated(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
-    otherDeviceName: String,
-    val future: Future<Runnable?>
+    otherDeviceName: String
 ) : ChipStateSender(
     appIconDrawable,
     appIconContentDescription,
