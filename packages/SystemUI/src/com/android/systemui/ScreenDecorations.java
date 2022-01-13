@@ -342,7 +342,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable {
             mDisplayManager.getDisplay(DEFAULT_DISPLAY).getMetrics(metrics);
             mDensity = metrics.density;
 
-            mExecutor.execute(() -> mTunerService.addTunable(this, SIZE));
+            mMainExecutor.execute(() -> mTunerService.addTunable(this, SIZE));
 
             // Watch color inversion and invert the overlay as needed.
             if (mColorInversionSetting == null) {
