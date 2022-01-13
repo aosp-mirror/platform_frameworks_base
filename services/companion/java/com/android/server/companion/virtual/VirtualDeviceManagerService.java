@@ -24,6 +24,7 @@ import android.companion.CompanionDeviceManager;
 import android.companion.CompanionDeviceManager.OnAssociationsChangedListener;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceManager;
+import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -131,7 +132,10 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override // Binder call
         public IVirtualDevice createVirtualDevice(
-                IBinder token, String packageName, int associationId) {
+                IBinder token,
+                String packageName,
+                int associationId,
+                @NonNull VirtualDeviceParams params) {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                     "createVirtualDevice");
@@ -160,7 +164,7 @@ public class VirtualDeviceManagerService extends SystemService {
                                     mVirtualDevices.remove(associationId);
                                 }
                             }
-                        });
+                        }, params);
                 mVirtualDevices.put(associationInfo.getId(), virtualDevice);
                 return virtualDevice;
             }
@@ -235,6 +239,11 @@ public class VirtualDeviceManagerService extends SystemService {
             synchronized (mVirtualDeviceManagerLock) {
                 ((VirtualDeviceImpl) virtualDevice).onVirtualDisplayRemovedLocked(displayId);
             }
+        }
+
+        @Override
+        public int getBaseVirtualDisplayFlags(IVirtualDevice virtualDevice) {
+            return ((VirtualDeviceImpl) virtualDevice).getBaseVirtualDisplayFlags();
         }
 
         @Override
