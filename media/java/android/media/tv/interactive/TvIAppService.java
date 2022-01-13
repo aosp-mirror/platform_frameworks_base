@@ -31,6 +31,7 @@ import android.media.tv.AdRequest;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
+import android.media.tv.TvContentRating;
 import android.media.tv.TvTrackInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -442,6 +443,34 @@ public abstract class TvIAppService extends Service {
         }
 
         /**
+         * Called when video is available.
+         * @hide
+         */
+        public void onVideoAvailable() {
+        }
+
+        /**
+         * Called when video is unavailable.
+         * @hide
+         */
+        public void onVideoUnavailable(int reason) {
+        }
+
+        /**
+         * Called when content is allowed.
+         * @hide
+         */
+        public void onContentAllowed() {
+        }
+
+        /**
+         * Called when content is blocked.
+         * @hide
+         */
+        public void onContentBlocked(TvContentRating rating) {
+        }
+
+        /**
          * Called when a broadcast info response is received.
          * @hide
          */
@@ -816,6 +845,33 @@ public abstract class TvIAppService extends Service {
             onTracksChanged(tracks);
         }
 
+        void notifyVideoAvailable() {
+            if (DEBUG) {
+                Log.d(TAG, "notifyVideoAvailable");
+            }
+            onVideoAvailable();
+        }
+
+        void notifyVideoUnavailable(int reason) {
+            if (DEBUG) {
+                Log.d(TAG, "notifyVideoAvailable (reason=" + reason + ")");
+            }
+            onVideoUnavailable(reason);
+        }
+
+        void notifyContentAllowed() {
+            if (DEBUG) {
+                Log.d(TAG, "notifyContentAllowed");
+            }
+            notifyContentAllowed();
+        }
+
+        void notifyContentBlocked(TvContentRating rating) {
+            if (DEBUG) {
+                Log.d(TAG, "notifyContentBlocked (rating=" + rating.flattenToString() + ")");
+            }
+            onContentBlocked(rating);
+        }
 
         /**
          * Calls {@link #onBroadcastInfoResponse}.
@@ -1179,6 +1235,26 @@ public abstract class TvIAppService extends Service {
         @Override
         public void notifyTracksChanged(List<TvTrackInfo> tracks) {
             mSessionImpl.notifyTracksChanged(tracks);
+        }
+
+        @Override
+        public void notifyVideoAvailable() {
+            mSessionImpl.notifyVideoAvailable();
+        }
+
+        @Override
+        public void notifyVideoUnavailable(int reason) {
+            mSessionImpl.notifyVideoUnavailable(reason);
+        }
+
+        @Override
+        public void notifyContentAllowed() {
+            mSessionImpl.notifyContentAllowed();
+        }
+
+        @Override
+        public void notifyContentBlocked(String rating) {
+            mSessionImpl.notifyContentBlocked(TvContentRating.unflattenFromString(rating));
         }
 
         @Override

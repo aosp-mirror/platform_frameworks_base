@@ -536,6 +536,12 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testAreNotificationsEnabledForPackage_viaInternalService() {
+        mInternalService.areNotificationsEnabledForPackage(mContext.getPackageName(), mUid);
+        verify(mPermissionHelper).hasPermission(mUid);
+    }
+
+    @Test
     public void testGetPackageImportance() throws Exception {
         when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
         assertThat(mBinderService.getPackageImportance(mContext.getPackageName()))

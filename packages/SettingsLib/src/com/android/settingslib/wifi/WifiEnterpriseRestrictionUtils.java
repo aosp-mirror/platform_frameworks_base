@@ -60,6 +60,22 @@ public class WifiEnterpriseRestrictionUtils {
         return true;
     }
 
+    /**
+     * Confirm Wi-Fi Config is allowed to add according to whether user restriction is set
+     *
+     * @param context A context
+     * @return whether the device is permitted to add new Wi-Fi config
+     */
+    public static boolean isAddWifiConfigAllowed(Context context) {
+        final UserManager userManager = context.getSystemService(UserManager.class);
+        final Bundle restrictions = userManager.getUserRestrictions();
+        if (isAtLeastT() && restrictions.getBoolean(UserManager.DISALLOW_ADD_WIFI_CONFIG)) {
+            Log.i(TAG, "Wi-Fi Add network isn't available due to user restriction.");
+            return false;
+        }
+        return true;
+    }
+
     @ChecksSdkIntAtLeast(api=Build.VERSION_CODES.TIRAMISU)
     private static boolean isAtLeastT() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU;

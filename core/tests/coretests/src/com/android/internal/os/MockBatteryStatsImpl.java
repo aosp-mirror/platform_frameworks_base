@@ -20,6 +20,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
+import android.app.usage.NetworkStatsManager;
 import android.net.NetworkStats;
 import android.os.Handler;
 import android.os.Looper;
@@ -116,7 +118,8 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     @Override
-    protected NetworkStats readNetworkStatsLocked(String[] ifaces) {
+    protected NetworkStats readNetworkStatsLocked(@NonNull NetworkStatsManager networkStatsManager,
+            String[] ifaces) {
         return mNetworkStats;
     }
 

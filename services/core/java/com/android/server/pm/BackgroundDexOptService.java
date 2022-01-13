@@ -896,10 +896,10 @@ public final class BackgroundDexOptService {
         synchronized (mLock) {
             if (!mFinishedPostBootUpdate) {
                 mFinishedPostBootUpdate = true;
-                JobScheduler js = mInjector.getJobScheduler();
-                js.cancel(JOB_POST_BOOT_UPDATE);
             }
         }
+        // Safe to do this outside lock.
+        mInjector.getJobScheduler().cancel(JOB_POST_BOOT_UPDATE);
     }
 
     private void notifyPinService(ArraySet<String> updatedPackages) {

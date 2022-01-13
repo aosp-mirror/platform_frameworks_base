@@ -1047,6 +1047,7 @@ package android.app.admin {
     field @Deprecated public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL";
     field public static final String EXTRA_PROVISIONING_ORGANIZATION_NAME = "android.app.extra.PROVISIONING_ORGANIZATION_NAME";
     field public static final String EXTRA_PROVISIONING_RETURN_BEFORE_POLICY_COMPLIANCE = "android.app.extra.PROVISIONING_RETURN_BEFORE_POLICY_COMPLIANCE";
+    field public static final String EXTRA_PROVISIONING_ROLE_HOLDER_CUSTOM_USER_CONSENT_INTENT = "android.app.extra.PROVISIONING_ROLE_HOLDER_CUSTOM_USER_CONSENT_INTENT";
     field public static final String EXTRA_PROVISIONING_SKIP_OWNERSHIP_DISCLAIMER = "android.app.extra.PROVISIONING_SKIP_OWNERSHIP_DISCLAIMER";
     field public static final String EXTRA_PROVISIONING_SUPPORTED_MODES = "android.app.extra.PROVISIONING_SUPPORTED_MODES";
     field public static final String EXTRA_PROVISIONING_SUPPORT_URL = "android.app.extra.PROVISIONING_SUPPORT_URL";
@@ -2429,6 +2430,25 @@ package android.bluetooth {
 }
 
 package android.bluetooth.le {
+
+  public final class AdvertiseSettings implements android.os.Parcelable {
+    method public int getOwnAddressType();
+  }
+
+  public static final class AdvertiseSettings.Builder {
+    method @NonNull public android.bluetooth.le.AdvertiseSettings.Builder setOwnAddressType(int);
+  }
+
+  public final class AdvertisingSetParameters implements android.os.Parcelable {
+    method public int getOwnAddressType();
+    field public static final int ADDRESS_TYPE_DEFAULT = -1; // 0xffffffff
+    field public static final int ADDRESS_TYPE_PUBLIC = 0; // 0x0
+    field public static final int ADDRESS_TYPE_RANDOM = 1; // 0x1
+  }
+
+  public static final class AdvertisingSetParameters.Builder {
+    method @NonNull public android.bluetooth.le.AdvertisingSetParameters.Builder setOwnAddressType(int);
+  }
 
   public final class BluetoothLeScanner {
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.UPDATE_DEVICE_STATS}) public void startScanFromSource(android.os.WorkSource, android.bluetooth.le.ScanCallback);
@@ -10799,7 +10819,7 @@ package android.service.games {
 
   public class GameService extends android.app.Service {
     ctor public GameService();
-    method @Nullable public android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method public void onConnected();
     method public void onDisconnected();
     field public static final String ACTION_GAME_SERVICE = "android.service.games.action.GAME_SERVICE";
@@ -10814,7 +10834,7 @@ package android.service.games {
 
   public abstract class GameSessionService extends android.app.Service {
     ctor public GameSessionService();
-    method @Nullable public android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method @NonNull public abstract android.service.games.GameSession onNewSession(@NonNull android.service.games.CreateGameSessionRequest);
     field public static final String ACTION_GAME_SESSION_SERVICE = "android.service.games.action.GAME_SESSION_SERVICE";
   }

@@ -73,7 +73,7 @@ public abstract class GameSessionService extends Service {
 
     @Override
     @Nullable
-    public IBinder onBind(@Nullable Intent intent) {
+    public final IBinder onBind(@Nullable Intent intent) {
         if (intent == null) {
             return null;
         }

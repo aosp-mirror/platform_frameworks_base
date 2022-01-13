@@ -1896,7 +1896,7 @@ public class ViewDebug {
 
         private Canvas mCanvas;
         private Bitmap mBitmap;
-        private boolean mEnabledHwBitmapsInSwMode;
+        private boolean mEnabledHwFeaturesInSwMode;
 
         @Override
         public Canvas getCanvas(View view, int width, int height) {
@@ -1913,7 +1913,7 @@ public class ViewDebug {
             if (mCanvas == null) {
                 mCanvas = new Canvas();
             }
-            mEnabledHwBitmapsInSwMode = mCanvas.isHwBitmapsInSwModeEnabled();
+            mEnabledHwFeaturesInSwMode = mCanvas.isHwFeaturesInSwModeEnabled();
             mCanvas.setBitmap(mBitmap);
             return mCanvas;
         }
@@ -1921,7 +1921,7 @@ public class ViewDebug {
         @Override
         public Bitmap createBitmap() {
             mCanvas.setBitmap(null);
-            mCanvas.setHwBitmapsInSwModeEnabled(mEnabledHwBitmapsInSwMode);
+            mCanvas.setHwFeaturesInSwModeEnabled(mEnabledHwFeaturesInSwMode);
             return mBitmap;
         }
     }

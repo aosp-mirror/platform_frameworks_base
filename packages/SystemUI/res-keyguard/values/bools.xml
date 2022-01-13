@@ -17,4 +17,5 @@
 <resources>
     <bool name="kg_show_ime_at_screen_on">true</bool>
     <bool name="kg_use_all_caps">true</bool>
+    <bool name="flag_active_unlock">false</bool>
 </resources>

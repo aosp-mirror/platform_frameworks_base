@@ -99,7 +99,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
 
     private OneHandedEventCallback mEventCallback;
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
-    private OneHandedBackgroundPanelOrganizer mBackgroundPanelOrganizer;
     private OneHandedUiEventLogger mOneHandedUiEventLogger;
 
     private final DisplayController.OnDisplaysChangedListener mDisplaysChangedListener =
@@ -163,7 +162,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
                 public void onStopFinished(Rect bounds) {
                     mState.setState(STATE_NONE);
                     notifyShortcutStateChanged(STATE_NONE);
-                    mBackgroundPanelOrganizer.onStopFinished();
                 }
             };
 
@@ -201,32 +199,28 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         OneHandedAccessibilityUtil accessibilityUtil = new OneHandedAccessibilityUtil(context);
         OneHandedTimeoutHandler timeoutHandler = new OneHandedTimeoutHandler(mainExecutor);
         OneHandedState oneHandedState = new OneHandedState();
+        BackgroundWindowManager backgroundWindowManager = new BackgroundWindowManager(context);
         OneHandedTutorialHandler tutorialHandler = new OneHandedTutorialHandler(context,
-                settingsUtil, windowManager);
+                settingsUtil, windowManager, backgroundWindowManager);
         OneHandedAnimationController animationController =
                 new OneHandedAnimationController(context);
         OneHandedTouchHandler touchHandler = new OneHandedTouchHandler(timeoutHandler,
                 mainExecutor);
-        OneHandedBackgroundPanelOrganizer oneHandedBackgroundPanelOrganizer =
-                new OneHandedBackgroundPanelOrganizer(context, displayLayout, settingsUtil,
-                        mainExecutor);
         OneHandedDisplayAreaOrganizer organizer = new OneHandedDisplayAreaOrganizer(
                 context, displayLayout, settingsUtil, animationController, tutorialHandler,
-                oneHandedBackgroundPanelOrganizer, jankMonitor, mainExecutor);
+                jankMonitor, mainExecutor);
         OneHandedUiEventLogger oneHandedUiEventsLogger = new OneHandedUiEventLogger(uiEventLogger);
         IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
-        return new OneHandedController(context, displayController,
-                oneHandedBackgroundPanelOrganizer, organizer, touchHandler, tutorialHandler,
-                settingsUtil, accessibilityUtil, timeoutHandler, oneHandedState, jankMonitor,
-                oneHandedUiEventsLogger, overlayManager, taskStackListener, mainExecutor,
-                mainHandler);
+        return new OneHandedController(context, displayController, organizer, touchHandler,
+                tutorialHandler, settingsUtil, accessibilityUtil, timeoutHandler, oneHandedState,
+                jankMonitor, oneHandedUiEventsLogger, overlayManager, taskStackListener,
+                mainExecutor, mainHandler);
     }
 
     @VisibleForTesting
     OneHandedController(Context context,
             DisplayController displayController,
-            OneHandedBackgroundPanelOrganizer backgroundPanelOrganizer,
             OneHandedDisplayAreaOrganizer displayAreaOrganizer,
             OneHandedTouchHandler touchHandler,
             OneHandedTutorialHandler tutorialHandler,
@@ -243,7 +237,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         mContext = context;
         mOneHandedSettingsUtil = settingsUtil;
         mOneHandedAccessibilityUtil = oneHandedAccessibilityUtil;
-        mBackgroundPanelOrganizer = backgroundPanelOrganizer;
         mDisplayAreaOrganizer = displayAreaOrganizer;
         mDisplayController = displayController;
         mTouchHandler = touchHandler;
@@ -286,7 +279,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         mAccessibilityManager.addAccessibilityStateChangeListener(
                 mAccessibilityStateChangeListener);
 
-        mState.addSListeners(mBackgroundPanelOrganizer);
         mState.addSListeners(mTutorialHandler);
     }
 
@@ -368,7 +360,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
                 mDisplayAreaOrganizer.getDisplayLayout().height() * mOffSetFraction);
         mOneHandedAccessibilityUtil.announcementForScreenReader(
                 mOneHandedAccessibilityUtil.getOneHandedStartDescription());
-        mBackgroundPanelOrganizer.onStart();
         mDisplayAreaOrganizer.scheduleOffset(0, yOffSet);
         mTimeoutHandler.resetTimer();
         mOneHandedUiEventLogger.writeEvent(
@@ -461,7 +452,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         }
         mDisplayAreaOrganizer.setDisplayLayout(newDisplayLayout);
         mTutorialHandler.onDisplayChanged(newDisplayLayout);
-        mBackgroundPanelOrganizer.onDisplayChanged(newDisplayLayout);
     }
 
     private ContentObserver getObserver(Runnable onChangeRunnable) {
@@ -585,7 +575,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
 
         if (!mIsOneHandedEnabled) {
             mDisplayAreaOrganizer.unregisterOrganizer();
-            mBackgroundPanelOrganizer.unregisterOrganizer();
             // Do NOT register + unRegister DA in the same call
             return;
         }
@@ -593,11 +582,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         if (mDisplayAreaOrganizer.getDisplayAreaTokenMap().isEmpty()) {
             mDisplayAreaOrganizer.registerOrganizer(
                     OneHandedDisplayAreaOrganizer.FEATURE_ONE_HANDED);
-        }
-
-        if (!mBackgroundPanelOrganizer.isRegistered()) {
-            mBackgroundPanelOrganizer.registerOrganizer(
-                    OneHandedBackgroundPanelOrganizer.FEATURE_ONE_HANDED_BACKGROUND_PANEL);
         }
     }
 
@@ -613,13 +597,12 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
     }
 
     private void onConfigChanged(Configuration newConfig) {
-        if (mTutorialHandler == null || mBackgroundPanelOrganizer == null) {
+        if (mTutorialHandler == null) {
             return;
         }
         if (!mIsOneHandedEnabled || newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             return;
         }
-        mBackgroundPanelOrganizer.onConfigurationChanged();
         mTutorialHandler.onConfigurationChanged();
     }
 
@@ -649,10 +632,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         pw.println(isShortcutEnabled());
         pw.print(innerPrefix + "mIsSwipeToNotificationEnabled=");
         pw.println(mIsSwipeToNotificationEnabled);
-
-        if (mBackgroundPanelOrganizer != null) {
-            mBackgroundPanelOrganizer.dump(pw);
-        }
 
         if (mDisplayAreaOrganizer != null) {
             mDisplayAreaOrganizer.dump(pw);

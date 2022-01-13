@@ -294,6 +294,7 @@
     <string-array name="config_systemUIServiceComponents" translatable="false">
         <item>com.android.systemui.util.NotificationChannels</item>
         <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
+        <item>com.android.keyguard.KeyguardBiometricLockoutLogger</item>
         <item>com.android.systemui.recents.Recents</item>
         <item>com.android.systemui.volume.VolumeUI</item>
         <item>com.android.systemui.statusbar.phone.StatusBar</item>

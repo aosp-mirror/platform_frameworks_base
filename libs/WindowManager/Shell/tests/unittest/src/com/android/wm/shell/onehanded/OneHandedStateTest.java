@@ -67,8 +67,6 @@ public class OneHandedStateTest extends OneHandedTestCase {
     @Mock
     DisplayController mMockDisplayController;
     @Mock
-    OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
-    @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
     @Mock
     OneHandedTouchHandler mMockTouchHandler;
@@ -105,7 +103,6 @@ public class OneHandedStateTest extends OneHandedTestCase {
 
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
         when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
-        when(mMockBackgroundOrganizer.isRegistered()).thenReturn(true);
         when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any(), anyInt())).thenReturn(
                 mDefaultEnabled);
         when(mMockSettingsUitl.getSettingsOneHandedModeTimeout(any(), anyInt())).thenReturn(
@@ -123,7 +120,6 @@ public class OneHandedStateTest extends OneHandedTestCase {
         mSpiedOneHandedController = spy(new OneHandedController(
                 mContext,
                 mMockDisplayController,
-                mMockBackgroundOrganizer,
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
                 mMockTutorialHandler,
