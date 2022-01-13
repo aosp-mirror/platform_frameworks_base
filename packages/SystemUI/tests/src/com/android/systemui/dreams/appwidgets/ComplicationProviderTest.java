@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams;
+package com.android.systemui.dreams.appwidgets;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.isNull;
@@ -33,8 +33,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
-import com.android.systemui.dreams.appwidgets.AppWidgetProvider;
-import com.android.systemui.dreams.appwidgets.ComplicationProvider;
+import com.android.systemui.dreams.ComplicationHost;
+import com.android.systemui.dreams.ComplicationHostView;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
