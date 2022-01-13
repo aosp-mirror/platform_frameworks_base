@@ -1842,7 +1842,7 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartNetworkStatsService");
             try {
-                networkStats = NetworkStatsService.create(context, networkManagement);
+                networkStats = NetworkStatsService.create(context);
                 ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
             } catch (Throwable e) {
                 reportWtf("starting NetworkStats Service", e);
