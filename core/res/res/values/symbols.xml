@@ -2338,6 +2338,7 @@
   <java-symbol type="string" name="nas_upgrade_notification_disable_action" />
   <java-symbol type="string" name="nas_upgrade_notification_learn_more_action" />
   <java-symbol type="string" name="nas_upgrade_notification_learn_more_content" />
+  <java-symbol type="bool" name="config_settingsHelpLinksEnabled" />
 
   <!-- ImfTest -->
   <java-symbol type="layout" name="auto_complete_list" />
