@@ -60,6 +60,13 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
     }
 
     @Test
+    fun transferToThisDeviceTriggered_controllerTriggeredWithCorrectState() {
+        callback.transferToThisDeviceTriggered(mediaInfo, DeviceInfo("Fake name"))
+
+        verify(controller).displayChip(any<TransferToThisDeviceTriggered>())
+    }
+
+    @Test
     fun transferToReceiverTriggered_controllerTriggeredWithCorrectState() {
         val name = "Fake name"
         callback.transferToReceiverTriggered(mediaInfo, DeviceInfo(name))

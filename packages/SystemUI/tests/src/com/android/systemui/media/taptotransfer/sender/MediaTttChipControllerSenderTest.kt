@@ -94,6 +94,20 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
+    fun transferToThisDeviceTriggered_appIcon_loadingIcon_noUndo_noFailureIcon() {
+        val state = transferToThisDeviceTriggered()
+        controllerSender.displayChip(state)
+
+        val chipView = getChipView()
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
+        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
+        assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
+        assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
+        assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
+        assertThat(chipView.getFailureIcon().visibility).isEqualTo(View.GONE)
+    }
+
+    @Test
     fun transferSucceeded_appIcon_deviceName_noLoadingIcon_noFailureIcon() {
         val state = transferSucceeded()
         controllerSender.displayChip(state)
@@ -217,6 +231,10 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferToReceiverTriggered() =
         TransferToReceiverTriggered(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
+
+    /** Helper method providing default parameters to not clutter up the tests. */
+    private fun transferToThisDeviceTriggered() =
+        TransferToThisDeviceTriggered(appIconDrawable, APP_ICON_CONTENT_DESC)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferSucceeded(

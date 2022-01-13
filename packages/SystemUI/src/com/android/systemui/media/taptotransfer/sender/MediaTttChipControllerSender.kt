@@ -49,9 +49,8 @@ class MediaTttChipControllerSender @Inject constructor(
         }
 
         // Loading
-        val showLoading = chipState is TransferToReceiverTriggered
         currentChipView.requireViewById<View>(R.id.loading).visibility =
-            if (showLoading) { View.VISIBLE } else { View.GONE }
+            if (chipState.showLoading()) { View.VISIBLE } else { View.GONE }
 
         // Undo
         val undoClickListener: View.OnClickListener? =

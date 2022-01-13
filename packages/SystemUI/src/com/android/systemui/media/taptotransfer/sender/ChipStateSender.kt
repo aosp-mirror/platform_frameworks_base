@@ -34,6 +34,9 @@ sealed class ChipStateSender(
 ) : MediaTttChipState(appIconDrawable, appIconContentDescription) {
     /** Returns a fully-formed string with the text that the chip should display. */
     abstract fun getChipTextString(context: Context): String
+
+    /** Returns true if the loading icon should be displayed and false otherwise. */
+    abstract fun showLoading(): Boolean
 }
 
 /**
@@ -51,6 +54,8 @@ class MoveCloserToStartCast(
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_move_closer_to_start_cast, otherDeviceName)
     }
+
+    override fun showLoading() = false
 }
 
 /**
@@ -68,6 +73,8 @@ class MoveCloserToEndCast(
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_move_closer_to_end_cast, otherDeviceName)
     }
+
+    override fun showLoading() = false
 }
 
 /**
@@ -82,8 +89,25 @@ class TransferToReceiverTriggered(
     private val otherDeviceName: String
 ) : ChipStateSender(appIconDrawable, appIconContentDescription) {
     override fun getChipTextString(context: Context): String {
-        return context.getString(R.string.media_transfer_playing, otherDeviceName)
+        return context.getString(R.string.media_transfer_playing_different_device, otherDeviceName)
     }
+
+    override fun showLoading() = true
+}
+
+/**
+ * A state representing that a transfer from the receiver device and back to this device (the
+ * sender) has been initiated (but not completed).
+ */
+class TransferToThisDeviceTriggered(
+    appIconDrawable: Drawable,
+    appIconContentDescription: String
+) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+    override fun getChipTextString(context: Context): String {
+        return context.getString(R.string.media_transfer_playing_this_device)
+    }
+
+    override fun showLoading() = true
 }
 
 /**
@@ -100,8 +124,10 @@ class TransferSucceeded(
     val undoRunnable: Runnable? = null
 ) : ChipStateSender(appIconDrawable, appIconContentDescription) {
     override fun getChipTextString(context: Context): String {
-        return context.getString(R.string.media_transfer_playing, otherDeviceName)
+        return context.getString(R.string.media_transfer_playing_different_device, otherDeviceName)
     }
+
+    override fun showLoading() = false
 }
 
 /** A state representing that a transfer has failed. */
@@ -112,4 +138,6 @@ class TransferFailed(
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_transfer_failed)
     }
+
+    override fun showLoading() = false
 }

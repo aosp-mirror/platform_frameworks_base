@@ -146,6 +146,14 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     }
 
     @Test
+    fun sender_transferToThisDeviceTriggered_chipDisplayWithCorrectState() {
+        commandRegistry.onShellCommand(pw, getTransferToThisDeviceTriggeredCommand())
+
+        assertThat(context.isBound(mediaSenderServiceComponentName)).isTrue()
+        verify(mediaSenderService).transferToThisDeviceTriggered(any(), any())
+    }
+
+    @Test
     fun sender_transferSucceeded_chipDisplayWithCorrectState() {
         commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
 
@@ -200,6 +208,13 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
             ADD_CHIP_COMMAND_SENDER_TAG,
             DEVICE_NAME,
             TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME
+        )
+
+    private fun getTransferToThisDeviceTriggeredCommand(): Array<String> =
+        arrayOf(
+            ADD_CHIP_COMMAND_SENDER_TAG,
+            DEVICE_NAME,
+            TRANSFER_TO_THIS_DEVICE_TRIGGERED_COMMAND_NAME
         )
 
     private fun getTransferSucceededCommand(): Array<String> =

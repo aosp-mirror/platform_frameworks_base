@@ -36,6 +36,7 @@ import com.android.systemui.media.taptotransfer.sender.MoveCloserToEndCast
 import com.android.systemui.media.taptotransfer.sender.MoveCloserToStartCast
 import com.android.systemui.media.taptotransfer.sender.TransferFailed
 import com.android.systemui.media.taptotransfer.sender.TransferToReceiverTriggered
+import com.android.systemui.media.taptotransfer.sender.TransferToThisDeviceTriggered
 import com.android.systemui.media.taptotransfer.sender.TransferSucceeded
 import com.android.systemui.shared.mediattt.DeviceInfo
 import com.android.systemui.shared.mediattt.IDeviceSenderCallback
@@ -98,6 +99,11 @@ class MediaTttCommandLineHelper @Inject constructor(
                         senderCallback.transferToReceiverTriggered(mediaInfo, otherDeviceInfo)
                     }
                 }
+                TRANSFER_TO_THIS_DEVICE_TRIGGERED_COMMAND_NAME -> {
+                    runOnService { senderCallback ->
+                        senderCallback.transferToThisDeviceTriggered(mediaInfo, otherDeviceInfo)
+                    }
+                }
                 // TODO(b/203800643): Migrate this command to invoke the service instead of the
                 //   controller.
                 TRANSFER_SUCCEEDED_COMMAND_NAME -> {
@@ -120,6 +126,7 @@ class MediaTttCommandLineHelper @Inject constructor(
                             "$MOVE_CLOSER_TO_START_CAST_COMMAND_NAME, " +
                             "$MOVE_CLOSER_TO_END_CAST_COMMAND_NAME, " +
                             "$TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME, " +
+                            "$TRANSFER_TO_THIS_DEVICE_TRIGGERED_COMMAND_NAME, " +
                             "$TRANSFER_SUCCEEDED_COMMAND_NAME, " +
                             TRANSFER_FAILED_COMMAND_NAME
                     )
@@ -230,6 +237,9 @@ val MOVE_CLOSER_TO_START_CAST_COMMAND_NAME = MoveCloserToStartCast::class.simple
 val MOVE_CLOSER_TO_END_CAST_COMMAND_NAME = MoveCloserToEndCast::class.simpleName!!
 @VisibleForTesting
 val TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME = TransferToReceiverTriggered::class.simpleName!!
+@VisibleForTesting
+val TRANSFER_TO_THIS_DEVICE_TRIGGERED_COMMAND_NAME =
+    TransferToThisDeviceTriggered::class.simpleName!!
 @VisibleForTesting
 val TRANSFER_SUCCEEDED_COMMAND_NAME = TransferSucceeded::class.simpleName!!
 @VisibleForTesting
