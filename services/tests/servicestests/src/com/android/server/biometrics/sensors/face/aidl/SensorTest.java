@@ -79,6 +79,7 @@ public class SensorTest {
         when(mContext.getSystemService(Context.BIOMETRIC_SERVICE)).thenReturn(mBiometricService);
 
         mScheduler = new UserAwareBiometricScheduler(TAG,
+                new Handler(mLooper.getLooper()),
                 BiometricScheduler.SENSOR_TYPE_FACE,
                 null /* gestureAvailabilityDispatcher */,
                 () -> USER_ID,
