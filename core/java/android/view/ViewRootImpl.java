@@ -89,7 +89,6 @@ import android.annotation.Nullable;
 import android.annotation.UiContext;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
-import android.app.ICompatCameraControlCallback;
 import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
@@ -330,7 +329,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final ArrayList<ConfigChangedCallback> sConfigCallbacks = new ArrayList<>();
 
     /**
-     * Callback for notifying activities.
+     * Callback for notifying activities about override configuration changes.
      */
     public interface ActivityConfigCallback {
 
@@ -340,23 +339,11 @@ public final class ViewRootImpl implements ViewParent,
          * @param newDisplayId New display id, {@link Display#INVALID_DISPLAY} if not changed.
          */
         void onConfigurationChanged(Configuration overrideConfig, int newDisplayId);
-
-        /**
-         * Notify the corresponding activity about the request to show or hide a camera compat
-         * control for stretched issues in the viewfinder.
-         *
-         * @param showControl Whether the control should be shown or hidden.
-         * @param transformationApplied Whether the treatment is already applied.
-         * @param callback The callback executed when the user clicks on a control.
-         */
-        void requestCompatCameraControl(boolean showControl, boolean transformationApplied,
-                ICompatCameraControlCallback callback);
     }
 
     /**
-     * Callback used to notify corresponding activity about camera compat control changes, override
-     * configuration change and make sure that all resources are set correctly before updating the
-     * ViewRootImpl's internal state.
+     * Callback used to notify corresponding activity about override configuration change and make
+     * sure that all resources are set correctly before updating the ViewRootImpl's internal state.
      */
     private ActivityConfigCallback mActivityConfigCallback;
 
@@ -908,10 +895,7 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    /**
-     * Add activity config callback to be notified about override config changes and camera
-     * compat control state updates.
-     */
+    /** Add activity config callback to be notified about override config changes. */
     public void setActivityConfigCallback(ActivityConfigCallback callback) {
         mActivityConfigCallback = callback;
     }
@@ -10613,20 +10597,6 @@ public final class ViewRootImpl implements ViewParent,
             OnBufferTransformHintChangedListener listener = listeners.get(i);
             listener.onBufferTransformHintChanged(hint);
         }
-    }
-
-    /**
-     * Shows or hides a Camera app compat toggle for stretched issues with the requested state
-     * for the corresponding activity.
-     *
-     * @param showControl Whether the control should be shown or hidden.
-     * @param transformationApplied Whether the treatment is already applied.
-     * @param callback The callback executed when the user clicks on a control.
-    */
-    public void requestCompatCameraControl(boolean showControl, boolean transformationApplied,
-                ICompatCameraControlCallback callback) {
-        mActivityConfigCallback.requestCompatCameraControl(
-                showControl, transformationApplied, callback);
     }
 
     /**
