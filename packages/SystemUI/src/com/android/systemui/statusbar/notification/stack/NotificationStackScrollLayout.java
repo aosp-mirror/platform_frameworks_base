@@ -130,6 +130,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
+    private static final boolean SPEW = Log.isLoggable(TAG, Log.VERBOSE);
 
     // Usage:
     // adb shell setprop persist.debug.nssl true && adb reboot
@@ -3156,6 +3157,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             AnimationEvent event = new AnimationEvent(row, type);
             event.headsUpFromBottom = onBottom;
             mAnimationEvents.add(event);
+            if (SPEW) {
+                Log.v(TAG, "Generating HUN animation event: "
+                        + " isHeadsUp=" + isHeadsUp
+                        + " type=" + type
+                        + " onBottom=" + onBottom
+                        + " row=" + row.getEntry().getKey());
+            }
         }
         mHeadsUpChangeAnimations.clear();
         mAddedHeadsUpChildren.clear();
@@ -4679,7 +4687,22 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {
-        if (mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed)) {
+        final boolean add = mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed);
+        if (SPEW) {
+            Log.v(TAG, "generateHeadsUpAnimation:"
+                    + " willAdd=" + add
+                    + " isHeadsUp=" + isHeadsUp
+                    + " row=" + row.getEntry().getKey());
+        }
+        if (add) {
+            // If we're hiding a HUN we just started showing THIS FRAME, then remove that event,
+            // and do not add the disappear event either.
+            if (!isHeadsUp && mHeadsUpChangeAnimations.remove(new Pair<>(row, true))) {
+                if (SPEW) {
+                    Log.v(TAG, "generateHeadsUpAnimation: previous hun appear animation cancelled");
+                }
+                return;
+            }
             mHeadsUpChangeAnimations.add(new Pair<>(row, isHeadsUp));
             mNeedsAnimation = true;
             if (!mIsExpanded && !mWillExpand && !isHeadsUp) {
