@@ -7465,7 +7465,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+        Preconditions.checkCallAuthorization(
+                hasFullCrossUsersPermission(caller, userHandle) && isSystemUid(caller));
 
         synchronized (getLockObject()) {
             DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
