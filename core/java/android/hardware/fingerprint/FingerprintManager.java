@@ -183,16 +183,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     private class OnEnrollCancelListener implements OnCancelListener {
-        private final long mAuthRequestId;
-
-        private OnEnrollCancelListener(long id) {
-            mAuthRequestId = id;
-        }
-
         @Override
         public void onCancel() {
-            Slog.d(TAG, "Cancel fingerprint enrollment requested for: " + mAuthRequestId);
-            cancelEnrollment(mAuthRequestId);
+            cancelEnrollment();
         }
     }
 
@@ -653,19 +646,20 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             throw new IllegalArgumentException("Must supply an enrollment callback");
         }
 
-        if (cancel != null && cancel.isCanceled()) {
-            Slog.w(TAG, "enrollment already canceled");
-            return;
+        if (cancel != null) {
+            if (cancel.isCanceled()) {
+                Slog.w(TAG, "enrollment already canceled");
+                return;
+            } else {
+                cancel.setOnCancelListener(new OnEnrollCancelListener());
+            }
         }
 
         if (mService != null) {
             try {
                 mEnrollmentCallback = callback;
-                final long enrollId = mService.enroll(mToken, hardwareAuthToken, userId,
-                        mServiceReceiver, mContext.getOpPackageName(), enrollReason);
-                if (cancel != null) {
-                    cancel.setOnCancelListener(new OnEnrollCancelListener(enrollId));
-                }
+                mService.enroll(mToken, hardwareAuthToken, userId, mServiceReceiver,
+                        mContext.getOpPackageName(), enrollReason);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception in enroll: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or try
@@ -1308,9 +1302,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         return allSensors.isEmpty() ? null : allSensors.get(0);
     }
 
-    private void cancelEnrollment(long requestId) {
+    private void cancelEnrollment() {
         if (mService != null) try {
-            mService.cancelEnrollment(mToken, requestId);
+            mService.cancelEnrollment(mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

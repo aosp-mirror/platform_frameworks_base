@@ -94,12 +94,12 @@ public interface ServiceProvider {
     void scheduleRevokeChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull String opPackageName, long challenge);
 
-    long scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
+    void scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
             int userId, @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName,
             @NonNull int[] disabledFeatures, @Nullable Surface previewSurface,
             boolean debugConsent);
 
-    void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId);
+    void cancelEnrollment(int sensorId, @NonNull IBinder token);
 
     long scheduleFaceDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
