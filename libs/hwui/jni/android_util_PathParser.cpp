@@ -61,7 +61,7 @@ static jlong createPathDataFromStringPath(JNIEnv* env, jobject, jstring inputStr
     } else {
         delete pathData;
         doThrowIAE(env, result.failureMessage.c_str());
-        return NULL;
+        return 0;
     }
 }
 
