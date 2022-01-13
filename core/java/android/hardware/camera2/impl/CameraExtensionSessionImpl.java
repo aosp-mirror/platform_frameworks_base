@@ -16,10 +16,14 @@
 
 package android.hardware.camera2.impl;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.HardwareBuffer;
+import android.hardware.SyncFence;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -30,6 +34,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.extension.CaptureBundle;
 import android.hardware.camera2.extension.CaptureStageImpl;
 import android.hardware.camera2.extension.ICaptureProcessorImpl;
@@ -38,7 +43,6 @@ import android.hardware.camera2.extension.IInitializeSessionCallback;
 import android.hardware.camera2.extension.IPreviewExtenderImpl;
 import android.hardware.camera2.extension.IRequestUpdateProcessorImpl;
 import android.hardware.camera2.extension.ParcelImage;
-import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
@@ -50,11 +54,7 @@ import android.media.ImageWriter;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
@@ -1656,12 +1656,13 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private static ParcelImage initializeParcelImage(Image img) {
         ParcelImage parcelImage = new ParcelImage();
         parcelImage.buffer = img.getHardwareBuffer();
-        if (img.getFenceFd() >= 0) {
-            try {
-                parcelImage.fence = ParcelFileDescriptor.fromFd(img.getFenceFd());
-            } catch (IOException e) {
-                Log.e(TAG,"Failed to parcel buffer fence!");
+        try {
+            SyncFence fd = img.getFence();
+            if (fd.isValid()) {
+                parcelImage.fence = fd.getFdDup();
             }
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to parcel buffer fence!");
         }
         parcelImage.width = img.getWidth();
         parcelImage.height = img.getHeight();

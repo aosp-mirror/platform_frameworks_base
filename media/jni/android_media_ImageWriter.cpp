@@ -42,7 +42,6 @@
 #include <deque>
 
 #define IMAGE_BUFFER_JNI_ID           "mNativeBuffer"
-#define IMAGE_FORMAT_UNKNOWN          0 // This is the same value as ImageFormat#UNKNOWN.
 // ----------------------------------------------------------------------------
 
 using namespace android;
@@ -991,6 +990,11 @@ static jobject Image_getHardwareBuffer(JNIEnv* env, jobject thiz) {
 
 static void Image_setFenceFd(JNIEnv* env, jobject thiz, int fenceFd) {
     ALOGV("%s:", __FUNCTION__);
+    int curtFenceFd = reinterpret_cast<jint>(
+        env->GetIntField(thiz,gSurfaceImageClassInfo.mNativeFenceFd));
+    if (curtFenceFd != -1) {
+        close(curtFenceFd);
+    }
     env->SetIntField(thiz, gSurfaceImageClassInfo.mNativeFenceFd, reinterpret_cast<jint>(fenceFd));
 }
 
@@ -1120,6 +1124,7 @@ static JNINativeMethod gImageMethods[] = {
     {"nativeGetWidth",          "()I",                         (void*)Image_getWidth },
     {"nativeGetHeight",         "()I",                         (void*)Image_getHeight },
     {"nativeGetFormat",         "(J)I",                        (void*)Image_getFormat },
+    {"nativeSetFenceFd",        "(I)V",                        (void*)Image_setFenceFd },
     {"nativeGetHardwareBuffer", "()Landroid/hardware/HardwareBuffer;",
                                                                (void*)Image_getHardwareBuffer },
 };
