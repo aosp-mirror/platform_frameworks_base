@@ -2974,6 +2974,9 @@ public class Intent implements Parcelable, Cloneable {
      * Broadcast Action: A uid has been removed from the system.  The uid
      * number is stored in the extra data under {@link #EXTRA_UID}.
      *
+     * In certain instances, {@link #EXTRA_REPLACING} is set to true if the UID is not being
+     * fully removed.
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
