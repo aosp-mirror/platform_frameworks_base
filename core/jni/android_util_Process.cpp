@@ -991,7 +991,7 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
             end = i;
             i++;
         } else if ((mode&PROC_QUOTES) != 0) {
-            while (buffer[i] != '"' && i < endIndex) {
+            while (i < endIndex && buffer[i] != '"') {
                 i++;
             }
             end = i;
