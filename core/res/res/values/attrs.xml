@@ -3638,7 +3638,22 @@
              to re-retrieve all resources (including view layouts, drawables, etc)
              to correctly handle any configuration change.-->
         <attr name="configChanges" />
-        <!-- Specifies whether the IME supports Handwriting using stylus. Defaults to false. -->
+        <!-- Specifies whether the IME supports Handwriting using stylus. Defaults to false.
+            When IME implements support for stylus handwriting, on every ACTION_DOWN with stylus
+            on an editor,
+            {@link android.inputmethodservice.InputMethodService#onStartStylusHandwriting()}
+            is called.
+            If IME is ready for stylus input, it must return {@code true} for Handwriting sessions
+            to start. IME should attach it's View that renders Ink on screen to stylus handwriting
+            inking window
+            {@link android.inputmethodservice.InputMethodService#getStylusHandwritingWindow()}.
+            IME will then receive Stylus MotionEvent(s) on DecorView i.e. the Inking view
+            {@link android.view.View#onTouchEvent(MotionEvent)} attached by IME to Ink window.
+            Handwriting mode can be finished by calling
+            {@link android.inputmethodservice.InputMethodService#finishStylusHandwriting()} or will
+            be finished by framework on next
+            {@link android.inputmethodservice.InputMethodService#onFinishInput()}.
+        -->
         <attr name="supportsStylusHandwriting" format="boolean" />
 
     </declare-styleable>
