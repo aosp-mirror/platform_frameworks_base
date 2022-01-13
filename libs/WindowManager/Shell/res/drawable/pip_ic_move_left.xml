@@ -14,11 +14,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<resources>
-    <color name="tv_pip_menu_icon_focused">#0E0E0F</color>
-    <color name="tv_pip_menu_icon_unfocused">#E8EAED</color>
-    <color name="tv_pip_menu_icon_disabled">#80868B</color>
-    <color name="tv_pip_menu_icon_bg_focused">#E8EAED</color>
-    <color name="tv_pip_menu_icon_bg_unfocused">#990E0E0F</color>
-    <color name="tv_pip_menu_focus_border">#E8EAED</color>
-</resources>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24"
+        android:viewportHeight="24">
+    <path
+        android:fillColor="@color/tv_pip_menu_focus_border"
+        android:pathData="M14,7l-5,5 5,5V7z"/>
+</vector>

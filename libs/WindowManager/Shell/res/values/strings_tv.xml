@@ -30,5 +30,8 @@
 
     <!-- Button to move picture-in-picture (PIP) screen to the fullscreen in PIP menu [CHAR LIMIT=30] -->
     <string name="pip_fullscreen">Full screen</string>
+
+    <!-- Button to move picture-in-picture (PIP) via DPAD in the PIP menu [CHAR LIMIT=30] -->
+    <string name="pip_move">Move PIP</string>
 </resources>
 
