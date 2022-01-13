@@ -53,12 +53,13 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun moveCloserToStartCast_appIcon_deviceName_noLoadingIcon_noUndo_noFailureIcon() {
-        controllerSender.displayChip(moveCloserToStartCast())
+        val state = moveCloserToStartCast()
+        controllerSender.displayChip(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
-        assertThat(chipView.getChipText()).contains(DEVICE_NAME)
+        assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
         assertThat(chipView.getFailureIcon().visibility).isEqualTo(View.GONE)
@@ -66,12 +67,13 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun moveCloserToEndCast_appIcon_deviceName_noLoadingIcon_noUndo_noFailureIcon() {
-        controllerSender.displayChip(moveCloserToEndCast())
+        val state = moveCloserToEndCast()
+        controllerSender.displayChip(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
-        assertThat(chipView.getChipText()).contains(DEVICE_NAME)
+        assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
         assertThat(chipView.getFailureIcon().visibility).isEqualTo(View.GONE)
@@ -79,12 +81,13 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverTriggered_appIcon_loadingIcon_noUndo_noFailureIcon() {
-        controllerSender.displayChip(transferToReceiverTriggered())
+        val state = transferToReceiverTriggered()
+        controllerSender.displayChip(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
-        assertThat(chipView.getChipText()).contains(DEVICE_NAME)
+        assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
         assertThat(chipView.getFailureIcon().visibility).isEqualTo(View.GONE)
@@ -92,12 +95,13 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferSucceeded_appIcon_deviceName_noLoadingIcon_noFailureIcon() {
-        controllerSender.displayChip(transferSucceeded())
+        val state = transferSucceeded()
+        controllerSender.displayChip(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
-        assertThat(chipView.getChipText()).contains(DEVICE_NAME)
+        assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
         assertThat(chipView.getFailureIcon().visibility).isEqualTo(View.GONE)
     }
@@ -132,12 +136,13 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferFailed_appIcon_noDeviceName_noLoadingIcon_noUndo_failureIcon() {
-        controllerSender.displayChip(transferFailed())
+        val state = transferFailed()
+        controllerSender.displayChip(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
-        assertThat(chipView.getChipText()).doesNotContain(DEVICE_NAME)
+        assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
         assertThat(chipView.getFailureIcon().visibility).isEqualTo(View.VISIBLE)
@@ -219,8 +224,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     ) = TransferSucceeded(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoRunnable)
 
     /** Helper method providing default parameters to not clutter up the tests. */
-    private fun transferFailed() =
-        TransferFailed(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
+    private fun transferFailed() = TransferFailed(appIconDrawable, APP_ICON_CONTENT_DESC)
 }
 
 private const val DEVICE_NAME = "My Tablet"

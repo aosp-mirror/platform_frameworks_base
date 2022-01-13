@@ -53,7 +53,7 @@ class MediaTttSenderService @Inject constructor(
         override fun transferFailed(
             mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
         ) {
-            this@MediaTttSenderService.transferFailed(mediaInfo, otherDeviceInfo)
+            this@MediaTttSenderService.transferFailed(mediaInfo)
         }
 
         override fun transferToReceiverTriggered(
@@ -91,11 +91,10 @@ class MediaTttSenderService @Inject constructor(
         controller.displayChip(chipState)
     }
 
-    private fun transferFailed(mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo) {
+    private fun transferFailed(mediaInfo: MediaRoute2Info) {
         val chipState = TransferFailed(
             appIconDrawable = fakeAppIconDrawable,
-            appIconContentDescription = mediaInfo.name.toString(),
-            otherDeviceName = otherDeviceInfo.name
+            appIconContentDescription = mediaInfo.name.toString()
         )
         controller.displayChip(chipState)
     }

@@ -45,7 +45,7 @@ class MediaTttChipControllerSender @Inject constructor(
 
         // Text
         currentChipView.requireViewById<TextView>(R.id.text).apply {
-            text = context.getString(chipState.chipText, chipState.otherDeviceName)
+            text = chipState.getChipTextString(context)
         }
 
         // Loading

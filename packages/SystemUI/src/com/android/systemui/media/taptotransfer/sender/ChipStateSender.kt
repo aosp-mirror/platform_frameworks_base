@@ -16,8 +16,8 @@
 
 package com.android.systemui.media.taptotransfer.sender
 
+import android.content.Context
 import android.graphics.drawable.Drawable
-import androidx.annotation.StringRes
 import com.android.systemui.R
 import com.android.systemui.media.taptotransfer.common.MediaTttChipState
 
@@ -27,91 +27,89 @@ import com.android.systemui.media.taptotransfer.common.MediaTttChipState
  *
  * This is a sealed class where each subclass represents a specific chip state. Each subclass can
  * contain additional information that is necessary for only that state.
- *
- * @property chipText a string resource for the text that the chip should display.
- * @property otherDeviceName the name of the other device involved in the transfer.
  */
 sealed class ChipStateSender(
     appIconDrawable: Drawable,
-    appIconContentDescription: String,
-    @StringRes internal val chipText: Int,
-    internal val otherDeviceName: String,
-) : MediaTttChipState(appIconDrawable, appIconContentDescription)
+    appIconContentDescription: String
+) : MediaTttChipState(appIconDrawable, appIconContentDescription) {
+    /** Returns a fully-formed string with the text that the chip should display. */
+    abstract fun getChipTextString(context: Context): String
+}
 
 /**
  * A state representing that the two devices are close but not close enough to *start* a cast to
  * the receiver device. The chip will instruct the user to move closer in order to initiate the
  * transfer to the receiver.
+ *
+ * @property otherDeviceName the name of the other device involved in the transfer.
  */
 class MoveCloserToStartCast(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
-    otherDeviceName: String,
-) : ChipStateSender(
-    appIconDrawable,
-    appIconContentDescription,
-    R.string.media_move_closer_to_start_cast,
-    otherDeviceName
-)
+    private val otherDeviceName: String,
+) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+    override fun getChipTextString(context: Context): String {
+        return context.getString(R.string.media_move_closer_to_start_cast, otherDeviceName)
+    }
+}
 
 /**
  * A state representing that the two devices are close but not close enough to *end* a cast that's
  * currently occurring the receiver device. The chip will instruct the user to move closer in order
  * to initiate the transfer from the receiver and back onto this device (the original sender).
+ *
+ * @property otherDeviceName the name of the other device involved in the transfer.
  */
 class MoveCloserToEndCast(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
-    otherDeviceName: String,
-) : ChipStateSender(
-    appIconDrawable,
-    appIconContentDescription,
-    R.string.media_move_closer_to_end_cast,
-    otherDeviceName
-)
+    private val otherDeviceName: String,
+) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+    override fun getChipTextString(context: Context): String {
+        return context.getString(R.string.media_move_closer_to_end_cast, otherDeviceName)
+    }
+}
 
 /**
  * A state representing that a transfer to the receiver device has been initiated (but not
  * completed).
+ *
+ * @property otherDeviceName the name of the other device involved in the transfer.
  */
 class TransferToReceiverTriggered(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
-    otherDeviceName: String
-) : ChipStateSender(
-    appIconDrawable,
-    appIconContentDescription,
-    R.string.media_transfer_playing,
-    otherDeviceName
-)
+    private val otherDeviceName: String
+) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+    override fun getChipTextString(context: Context): String {
+        return context.getString(R.string.media_transfer_playing, otherDeviceName)
+    }
+}
 
 /**
  * A state representing that a transfer has been successfully completed.
  *
+ * @property otherDeviceName the name of the other device involved in the transfer.
  * @property undoRunnable if present, the runnable that should be run to undo the transfer. We will
  *   show an Undo button on the chip if this runnable is present.
  */
 class TransferSucceeded(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
-    otherDeviceName: String,
+    private val otherDeviceName: String,
     val undoRunnable: Runnable? = null
-) : ChipStateSender(appIconDrawable,
-    appIconContentDescription,
-    R.string.media_transfer_playing,
-    otherDeviceName
-)
+) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+    override fun getChipTextString(context: Context): String {
+        return context.getString(R.string.media_transfer_playing, otherDeviceName)
+    }
+}
 
 /** A state representing that a transfer has failed. */
 class TransferFailed(
     appIconDrawable: Drawable,
-    appIconContentDescription: String,
-    // TODO(b/211493953): The failed chip doesn't need [otherDeviceName] so we may want to remove
-    //   [otherDeviceName] from the superclass [ChipStateSender].
-    otherDeviceName: String,
-) : ChipStateSender(
-    appIconDrawable,
-    appIconContentDescription,
-    R.string.media_transfer_failed,
-    otherDeviceName
-)
+    appIconContentDescription: String
+) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+    override fun getChipTextString(context: Context): String {
+        return context.getString(R.string.media_transfer_failed)
+    }
+}

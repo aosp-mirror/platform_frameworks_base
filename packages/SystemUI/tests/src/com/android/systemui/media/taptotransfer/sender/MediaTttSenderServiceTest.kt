@@ -44,7 +44,7 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
         verify(controller).displayChip(capture(chipStateCaptor))
 
         val chipState = chipStateCaptor.value!!
-        assertThat(chipState.otherDeviceName).isEqualTo(name)
+        assertThat(chipState.getChipTextString(context)).contains(name)
     }
 
     @Test
@@ -56,7 +56,7 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
         verify(controller).displayChip(capture(chipStateCaptor))
 
         val chipState = chipStateCaptor.value!!
-        assertThat(chipState.otherDeviceName).isEqualTo(name)
+        assertThat(chipState.getChipTextString(context)).contains(name)
     }
 
     @Test
@@ -68,7 +68,7 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
         verify(controller).displayChip(capture(chipStateCaptor))
 
         val chipState = chipStateCaptor.value!!
-        assertThat(chipState.otherDeviceName).isEqualTo(name)
+        assertThat(chipState.getChipTextString(context)).contains(name)
     }
 
     @Test
