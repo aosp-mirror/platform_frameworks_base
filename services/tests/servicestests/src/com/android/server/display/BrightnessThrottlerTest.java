@@ -18,21 +18,40 @@ package com.android.server.display;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.hardware.display.BrightnessInfo;
+import android.os.Handler;
+import android.os.IThermalEventListener;
+import android.os.IThermalService;
+import android.os.Message;
 import android.os.PowerManager;
+import android.os.Temperature.ThrottlingStatus;
+import android.os.Temperature;
+import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.display.BrightnessThrottler.Injector;
 import com.android.server.display.DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel;
 import com.android.server.display.DisplayDeviceConfig.BrightnessThrottlingData;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -43,10 +62,28 @@ import java.util.List;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class BrightnessThrottlerTest {
+    private static final float EPSILON = 0.000001f;
+
+    private Handler mHandler;
+    private TestLooper mTestLooper;
+
+    @Mock IThermalService mThermalServiceMock;
+    @Mock Injector mInjectorMock;
+
+    @Captor ArgumentCaptor<IThermalEventListener> mThermalEventListenerCaptor;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(mInjectorMock.getThermalService()).thenReturn(mThermalServiceMock);
+        mTestLooper = new TestLooper();
+        mHandler = new Handler(mTestLooper.getLooper(), new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                return true;
+            }
+        });
+
     }
 
     /////////////////
@@ -62,19 +99,23 @@ public class BrightnessThrottlerTest {
         validLevels.add(new ThrottlingLevel(PowerManager.THERMAL_STATUS_MODERATE, 0.62f));
         validLevels.add(new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL, 0.25f));
 
-        List<ThrottlingLevel> invalidThermalLevels = new ArrayList<>();
-        invalidThermalLevels.add(new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL, 0.62f));
-        invalidThermalLevels.add(new ThrottlingLevel(PowerManager.THERMAL_STATUS_MODERATE, 0.25f));
+        List<ThrottlingLevel> unsortedThermalLevels = new ArrayList<>();
+        unsortedThermalLevels.add(new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL, 0.62f));
+        unsortedThermalLevels.add(new ThrottlingLevel(PowerManager.THERMAL_STATUS_MODERATE, 0.25f));
 
-        List<ThrottlingLevel> invalidBrightnessLevels = new ArrayList<>();
-        invalidBrightnessLevels.add(
+        List<ThrottlingLevel> unsortedBrightnessLevels = new ArrayList<>();
+        unsortedBrightnessLevels.add(
                 new ThrottlingLevel(PowerManager.THERMAL_STATUS_MODERATE, 0.25f));
-        invalidBrightnessLevels.add(
+        unsortedBrightnessLevels.add(
                 new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL, 0.62f));
 
-        List<ThrottlingLevel> invalidLevels = new ArrayList<>();
-        invalidLevels.add(new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL, 0.25f));
-        invalidLevels.add(new ThrottlingLevel(PowerManager.THERMAL_STATUS_MODERATE, 0.62f));
+        List<ThrottlingLevel> unsortedLevels = new ArrayList<>();
+        unsortedLevels.add(new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL, 0.25f));
+        unsortedLevels.add(new ThrottlingLevel(PowerManager.THERMAL_STATUS_MODERATE, 0.62f));
+
+        List<ThrottlingLevel> invalidLevel = new ArrayList<>();
+        invalidLevel.add(new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL,
+                PowerManager.BRIGHTNESS_MAX + EPSILON));
 
         // Test invalid data
         BrightnessThrottlingData data;
@@ -84,11 +125,13 @@ public class BrightnessThrottlerTest {
         assertEquals(data, null);
         data = BrightnessThrottlingData.create(new ArrayList<ThrottlingLevel>());
         assertEquals(data, null);
-        data = BrightnessThrottlingData.create(invalidThermalLevels);
+        data = BrightnessThrottlingData.create(unsortedThermalLevels);
         assertEquals(data, null);
-        data = BrightnessThrottlingData.create(invalidBrightnessLevels);
+        data = BrightnessThrottlingData.create(unsortedBrightnessLevels);
         assertEquals(data, null);
-        data = BrightnessThrottlingData.create(invalidLevels);
+        data = BrightnessThrottlingData.create(unsortedLevels);
+        assertEquals(data, null);
+        data = BrightnessThrottlingData.create(invalidLevel);
         assertEquals(data, null);
 
         // Test valid data
@@ -99,6 +142,154 @@ public class BrightnessThrottlerTest {
         data = BrightnessThrottlingData.create(validLevels);
         assertNotEquals(data, null);
         assertThrottlingLevelsEquals(validLevels, data.throttlingLevels);
+    }
+
+    @Test
+    public void testThrottlingUnsupported() throws Exception {
+        final BrightnessThrottler throttler = createThrottlerUnsupported();
+        assertFalse(throttler.deviceSupportsThrottling());
+
+        // Thermal listener shouldn't be registered if throttling is unsupported
+        verify(mInjectorMock, never()).getThermalService();
+
+        // Ensure that brightness is uncapped when the device doesn't support throttling
+        assertEquals(PowerManager.BRIGHTNESS_MAX, throttler.getBrightnessCap(), 0f);
+    }
+
+    @Test
+    public void testThrottlingSingleLevel() throws Exception {
+        final ThrottlingLevel level = new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL,
+            0.25f);
+
+        List<ThrottlingLevel> levels = new ArrayList<>();
+        levels.add(level);
+        final BrightnessThrottlingData data = BrightnessThrottlingData.create(levels);
+        final BrightnessThrottler throttler = createThrottlerSupported(data);
+        assertTrue(throttler.deviceSupportsThrottling());
+
+        verify(mThermalServiceMock).registerThermalEventListenerWithType(
+                mThermalEventListenerCaptor.capture(), eq(Temperature.TYPE_SKIN));
+        final IThermalEventListener listener = mThermalEventListenerCaptor.getValue();
+
+        // Set status too low to trigger throttling
+        listener.notifyThrottling(getSkinTemp(level.thermalStatus - 1));
+        mTestLooper.dispatchAll();
+        assertEquals(PowerManager.BRIGHTNESS_MAX, throttler.getBrightnessCap(), 0f);
+        assertFalse(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE, throttler.getBrightnessMaxReason());
+
+        // Set status just high enough to trigger throttling
+        listener.notifyThrottling(getSkinTemp(level.thermalStatus));
+        mTestLooper.dispatchAll();
+        assertEquals(level.brightness, throttler.getBrightnessCap(), 0f);
+        assertTrue(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL,
+            throttler.getBrightnessMaxReason());
+
+        // Set status more than high enough to trigger throttling
+        listener.notifyThrottling(getSkinTemp(level.thermalStatus + 1));
+        mTestLooper.dispatchAll();
+        assertEquals(level.brightness, throttler.getBrightnessCap(), 0f);
+        assertTrue(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL,
+           throttler.getBrightnessMaxReason());
+
+        // Return to the lower throttling level
+        listener.notifyThrottling(getSkinTemp(level.thermalStatus));
+        mTestLooper.dispatchAll();
+        assertEquals(level.brightness, throttler.getBrightnessCap(), 0f);
+        assertTrue(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL,
+            throttler.getBrightnessMaxReason());
+
+        // Cool down
+        listener.notifyThrottling(getSkinTemp(level.thermalStatus - 1));
+        mTestLooper.dispatchAll();
+        assertEquals(PowerManager.BRIGHTNESS_MAX, throttler.getBrightnessCap(), 0f);
+        assertFalse(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE,
+            throttler.getBrightnessMaxReason());
+    }
+
+    @Test
+    public void testThrottlingMultiLevel() throws Exception {
+        final ThrottlingLevel levelLo = new ThrottlingLevel(PowerManager.THERMAL_STATUS_MODERATE,
+            0.62f);
+        final ThrottlingLevel levelHi = new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL,
+            0.25f);
+
+        List<ThrottlingLevel> levels = new ArrayList<>();
+        levels.add(levelLo);
+        levels.add(levelHi);
+        final BrightnessThrottlingData data = BrightnessThrottlingData.create(levels);
+        final BrightnessThrottler throttler = createThrottlerSupported(data);
+        assertTrue(throttler.deviceSupportsThrottling());
+
+        verify(mThermalServiceMock).registerThermalEventListenerWithType(
+                mThermalEventListenerCaptor.capture(), eq(Temperature.TYPE_SKIN));
+        final IThermalEventListener listener = mThermalEventListenerCaptor.getValue();
+
+        // Set status too low to trigger throttling
+        listener.notifyThrottling(getSkinTemp(levelLo.thermalStatus - 1));
+        mTestLooper.dispatchAll();
+        assertEquals(PowerManager.BRIGHTNESS_MAX, throttler.getBrightnessCap(), 0f);
+        assertFalse(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE, throttler.getBrightnessMaxReason());
+
+        // Set status just high enough to trigger throttling
+        listener.notifyThrottling(getSkinTemp(levelLo.thermalStatus));
+        mTestLooper.dispatchAll();
+        assertEquals(levelLo.brightness, throttler.getBrightnessCap(), 0f);
+        assertTrue(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL,
+            throttler.getBrightnessMaxReason());
+
+        // Set status to an intermediate throttling level
+        listener.notifyThrottling(getSkinTemp(levelLo.thermalStatus + 1));
+        mTestLooper.dispatchAll();
+        assertEquals(levelLo.brightness, throttler.getBrightnessCap(), 0f);
+        assertTrue(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL,
+            throttler.getBrightnessMaxReason());
+
+        // Set status to the highest configured throttling level
+        listener.notifyThrottling(getSkinTemp(levelHi.thermalStatus));
+        mTestLooper.dispatchAll();
+        assertEquals(levelHi.brightness, throttler.getBrightnessCap(), 0f);
+        assertTrue(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL,
+            throttler.getBrightnessMaxReason());
+
+        // Set status to exceed the highest configured throttling level
+        listener.notifyThrottling(getSkinTemp(levelHi.thermalStatus + 1));
+        mTestLooper.dispatchAll();
+        assertEquals(levelHi.brightness, throttler.getBrightnessCap(), 0f);
+        assertTrue(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL,
+            throttler.getBrightnessMaxReason());
+
+        // Return to an intermediate throttling level
+        listener.notifyThrottling(getSkinTemp(levelLo.thermalStatus + 1));
+        mTestLooper.dispatchAll();
+        assertEquals(levelLo.brightness, throttler.getBrightnessCap(), 0f);
+        assertTrue(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL,
+            throttler.getBrightnessMaxReason());
+
+        // Return to the lowest configured throttling level
+        listener.notifyThrottling(getSkinTemp(levelLo.thermalStatus));
+        mTestLooper.dispatchAll();
+        assertEquals(levelLo.brightness, throttler.getBrightnessCap(), 0f);
+        assertTrue(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL,
+            throttler.getBrightnessMaxReason());
+
+        // Cool down
+        listener.notifyThrottling(getSkinTemp(levelLo.thermalStatus - 1));
+        mTestLooper.dispatchAll();
+        assertEquals(PowerManager.BRIGHTNESS_MAX, throttler.getBrightnessCap(), 0f);
+        assertFalse(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE, throttler.getBrightnessMaxReason());
     }
 
     private void assertThrottlingLevelsEquals(
@@ -115,4 +306,16 @@ public class BrightnessThrottlerTest {
         }
     }
 
+    private BrightnessThrottler createThrottlerUnsupported() {
+        return new BrightnessThrottler(mInjectorMock, mHandler, null, () -> {});
+    }
+
+    private BrightnessThrottler createThrottlerSupported(BrightnessThrottlingData data) {
+        assertNotNull(data);
+        return new BrightnessThrottler(mInjectorMock, mHandler, data, () -> {});
+    }
+
+    private Temperature getSkinTemp(@ThrottlingStatus int status) {
+        return new Temperature(30.0f, Temperature.TYPE_SKIN, "test_skin_temp", status);
+    }
 }
