@@ -7426,7 +7426,7 @@ public class CarrierConfigManager {
         /**
          * A priority list of ePDG addresses to be used. Possible values are {@link
          * #EPDG_ADDRESS_STATIC}, {@link #EPDG_ADDRESS_PLMN}, {@link #EPDG_ADDRESS_PCO}, {@link
-         * #EPDG_ADDRESS_CELLULAR_LOC}
+         * #EPDG_ADDRESS_CELLULAR_LOC}, {@link #EPDG_ADDRESS_VISITED_COUNTRY}
          */
         public static final String KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY =
                 KEY_PREFIX + "epdg_address_priority_int_array";
@@ -7605,7 +7605,8 @@ public class CarrierConfigManager {
             EPDG_ADDRESS_STATIC,
             EPDG_ADDRESS_PLMN,
             EPDG_ADDRESS_PCO,
-            EPDG_ADDRESS_CELLULAR_LOC
+            EPDG_ADDRESS_CELLULAR_LOC,
+            EPDG_ADDRESS_VISITED_COUNTRY
         })
         public @interface EpdgAddressType {}
 
@@ -7619,6 +7620,8 @@ public class CarrierConfigManager {
         public static final int EPDG_ADDRESS_PCO = 2;
         /** Use cellular location to chose epdg server */
         public static final int EPDG_ADDRESS_CELLULAR_LOC = 3;
+        /* Use Visited Country FQDN rule*/
+        public static final int EPDG_ADDRESS_VISITED_COUNTRY = 4;
 
         /** @hide */
         @IntDef({ID_TYPE_FQDN, ID_TYPE_RFC822_ADDR, ID_TYPE_KEY_ID})
