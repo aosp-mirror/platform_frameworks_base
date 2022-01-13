@@ -155,38 +155,6 @@ filegroup {
 }
 
 java_library_with_nonpublic_deps {
-    name: "framework-updatable-stubs-module_libs_api",
-    static_libs: [
-        "android.net.ipsec.ike.stubs.module_lib",
-        "framework-appsearch.stubs.module_lib",
-        "framework-connectivity.stubs.module_lib",
-        "framework-connectivity-tiramisu.stubs.module_lib",
-        "framework-graphics.stubs.module_lib",
-        "framework-media.stubs.module_lib",
-        "framework-mediaprovider.stubs.module_lib",
-        "framework-permission.stubs.module_lib",
-        "framework-permission-s.stubs.module_lib",
-        "framework-scheduling.stubs.module_lib",
-        "framework-sdkextensions.stubs.module_lib",
-        "framework-statsd.stubs.module_lib",
-        "framework-supplementalprocess.stubs.module_lib",
-        "framework-tethering.stubs.module_lib",
-        "framework-uwb.stubs.module_lib",
-        "framework-nearby.stubs.module_lib",
-        "framework-wifi.stubs.module_lib",
-    ],
-    soong_config_variables: {
-        include_nonpublic_framework_api: {
-            static_libs: [
-                "framework-supplementalapi.stubs.module_lib",
-            ],
-        },
-    },
-    sdk_version: "module_current",
-    visibility: ["//visibility:private"],
-}
-
-java_library_with_nonpublic_deps {
     name: "framework-all",
     installable: false,
     static_libs: [
