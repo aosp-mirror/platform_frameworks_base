@@ -16,6 +16,7 @@
 
 package com.android.keyguard
 
+import android.app.StatusBarManager.SESSION_KEYGUARD
 import android.content.Context
 import android.hardware.biometrics.BiometricSourceType
 import com.android.internal.annotations.VisibleForTesting
@@ -28,7 +29,7 @@ import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUT
 import com.android.keyguard.KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEvent
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.SessionTracker
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -44,7 +45,7 @@ class KeyguardBiometricLockoutLogger @Inject constructor(
     context: Context?,
     private val uiEventLogger: UiEventLogger,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val dumpManager: DumpManager
+    private val sessionTracker: SessionTracker
 ) : CoreStartable(context) {
     private var fingerprintLockedOut = false
     private var faceLockedOut = false
@@ -53,7 +54,6 @@ class KeyguardBiometricLockoutLogger @Inject constructor(
     private var timeout = false
 
     override fun start() {
-        dumpManager.registerDumpable(this)
         mKeyguardUpdateMonitorCallback.onStrongAuthStateChanged(
                 KeyguardUpdateMonitor.getCurrentUser())
         keyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback)
@@ -65,22 +65,17 @@ class KeyguardBiometricLockoutLogger @Inject constructor(
             if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
                 val lockedOut = keyguardUpdateMonitor.isFingerprintLockedOut
                 if (lockedOut && !fingerprintLockedOut) {
-                    uiEventLogger.log(
-                            PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_FINGERPRINT_LOCKED_OUT)
+                    log(PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_FINGERPRINT_LOCKED_OUT)
                 } else if (!lockedOut && fingerprintLockedOut) {
-                    uiEventLogger.log(
-                            PrimaryAuthRequiredEvent
-                                    .PRIMARY_AUTH_REQUIRED_FINGERPRINT_LOCKED_OUT_RESET)
+                    log(PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_FINGERPRINT_LOCKED_OUT_RESET)
                 }
                 fingerprintLockedOut = lockedOut
             } else if (biometricSourceType == BiometricSourceType.FACE) {
                 val lockedOut = keyguardUpdateMonitor.isFaceLockedOut
                 if (lockedOut && !faceLockedOut) {
-                    uiEventLogger.log(
-                            PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_FACE_LOCKED_OUT)
+                    log(PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_FACE_LOCKED_OUT)
                 } else if (!lockedOut && faceLockedOut) {
-                    uiEventLogger.log(
-                            PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_FACE_LOCKED_OUT_RESET)
+                    log(PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_FACE_LOCKED_OUT_RESET)
                 }
                 faceLockedOut = lockedOut
             }
@@ -95,20 +90,19 @@ class KeyguardBiometricLockoutLogger @Inject constructor(
 
             val newEncryptedOrLockdown = keyguardUpdateMonitor.isEncryptedOrLockdown(userId)
             if (newEncryptedOrLockdown && !encryptedOrLockdown) {
-                uiEventLogger.log(
-                        PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_ENCRYPTED_OR_LOCKDOWN)
+                log(PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_ENCRYPTED_OR_LOCKDOWN)
             }
             encryptedOrLockdown = newEncryptedOrLockdown
 
             val newUnattendedUpdate = isUnattendedUpdate(strongAuthFlags)
             if (newUnattendedUpdate && !unattendedUpdate) {
-                uiEventLogger.log(PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_UNATTENDED_UPDATE)
+                log(PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_UNATTENDED_UPDATE)
             }
             unattendedUpdate = newUnattendedUpdate
 
             val newTimeout = isStrongAuthTimeout(strongAuthFlags)
             if (newTimeout && !timeout) {
-                uiEventLogger.log(PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_TIMEOUT)
+                log(PrimaryAuthRequiredEvent.PRIMARY_AUTH_REQUIRED_TIMEOUT)
             }
             timeout = newTimeout
         }
@@ -122,6 +116,9 @@ class KeyguardBiometricLockoutLogger @Inject constructor(
         @LockPatternUtils.StrongAuthTracker.StrongAuthFlags flags: Int
     ) = containsFlag(flags, STRONG_AUTH_REQUIRED_AFTER_TIMEOUT) ||
             containsFlag(flags, STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT)
+
+    private fun log(event: PrimaryAuthRequiredEvent) =
+            uiEventLogger.log(event, sessionTracker.getSessionId(SESSION_KEYGUARD))
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
         pw.println("  mFingerprintLockedOut=$fingerprintLockedOut")
