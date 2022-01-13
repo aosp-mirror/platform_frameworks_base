@@ -54,6 +54,8 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
+import android.os.BatteryManager;
+import android.os.BatteryManagerInternal;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
@@ -250,8 +252,6 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     private final List<RestrictingController> mRestrictiveControllers;
     /** Need direct access to this for testing. */
-    private final BatteryController mBatteryController;
-    /** Need direct access to this for testing. */
     private final StorageController mStorageController;
     /** Need directly for sending uid state changes */
     private final DeviceIdleJobsController mDeviceIdleJobsController;
@@ -267,6 +267,9 @@ public class JobSchedulerService extends com.android.server.SystemService
      * do not synchronize access to this list.
      */
     private final List<JobRestriction> mJobRestrictions;
+
+    @GuardedBy("mLock")
+    private final BatteryStateTracker mBatteryStateTracker;
 
     @NonNull
     private final String mSystemGalleryPackage;
@@ -1697,6 +1700,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         // Initialize the job store and set up any persisted jobs
         mJobs = JobStore.initAndGet(this);
 
+        mBatteryStateTracker = new BatteryStateTracker();
+        mBatteryStateTracker.startTracking();
+
         // Create the controllers.
         mControllers = new ArrayList<StateController>();
         final ConnectivityController connectivityController = new ConnectivityController(this);
@@ -1704,8 +1710,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(new TimeController(this));
         final IdleController idleController = new IdleController(this);
         mControllers.add(idleController);
-        mBatteryController = new BatteryController(this);
-        mControllers.add(mBatteryController);
+        final BatteryController batteryController = new BatteryController(this);
+        mControllers.add(batteryController);
         mStorageController = new StorageController(this);
         mControllers.add(mStorageController);
         final BackgroundJobsController backgroundJobsController =
@@ -1725,7 +1731,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(mTareController);
 
         mRestrictiveControllers = new ArrayList<>();
-        mRestrictiveControllers.add(mBatteryController);
+        mRestrictiveControllers.add(batteryController);
         mRestrictiveControllers.add(connectivityController);
         mRestrictiveControllers.add(idleController);
 
@@ -2818,6 +2824,129 @@ public class JobSchedulerService extends com.android.server.SystemService
         return adjustJobBias(bias, job);
     }
 
+    private final class BatteryStateTracker extends BroadcastReceiver {
+        /**
+         * Track whether we're "charging", where charging means that we're ready to commit to
+         * doing work.
+         */
+        private boolean mCharging;
+        /** Keep track of whether the battery is charged enough that we want to do work. */
+        private boolean mBatteryNotLow;
+        /** Sequence number of last broadcast. */
+        private int mLastBatterySeq = -1;
+
+        private BroadcastReceiver mMonitor;
+
+        BatteryStateTracker() {
+        }
+
+        public void startTracking() {
+            IntentFilter filter = new IntentFilter();
+
+            // Battery health.
+            filter.addAction(Intent.ACTION_BATTERY_LOW);
+            filter.addAction(Intent.ACTION_BATTERY_OKAY);
+            // Charging/not charging.
+            filter.addAction(BatteryManager.ACTION_CHARGING);
+            filter.addAction(BatteryManager.ACTION_DISCHARGING);
+            getTestableContext().registerReceiver(this, filter);
+
+            // Initialise tracker state.
+            BatteryManagerInternal batteryManagerInternal =
+                    LocalServices.getService(BatteryManagerInternal.class);
+            mBatteryNotLow = !batteryManagerInternal.getBatteryLevelLow();
+            mCharging = batteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
+        }
+
+        public void setMonitorBatteryLocked(boolean enabled) {
+            if (enabled) {
+                if (mMonitor == null) {
+                    mMonitor = new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            onReceiveInternal(intent);
+                        }
+                    };
+                    IntentFilter filter = new IntentFilter();
+                    filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+                    getTestableContext().registerReceiver(mMonitor, filter);
+                }
+            } else if (mMonitor != null) {
+                getTestableContext().unregisterReceiver(mMonitor);
+                mMonitor = null;
+            }
+        }
+
+        public boolean isCharging() {
+            return mCharging;
+        }
+
+        public boolean isBatteryNotLow() {
+            return mBatteryNotLow;
+        }
+
+        public boolean isMonitoring() {
+            return mMonitor != null;
+        }
+
+        public int getSeq() {
+            return mLastBatterySeq;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onReceiveInternal(intent);
+        }
+
+        @VisibleForTesting
+        public void onReceiveInternal(Intent intent) {
+            synchronized (mLock) {
+                final String action = intent.getAction();
+                boolean changed = false;
+                if (Intent.ACTION_BATTERY_LOW.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Battery life too low @ " + sElapsedRealtimeClock.millis());
+                    }
+                    if (mBatteryNotLow) {
+                        mBatteryNotLow = false;
+                        changed = true;
+                    }
+                } else if (Intent.ACTION_BATTERY_OKAY.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Battery high enough @ " + sElapsedRealtimeClock.millis());
+                    }
+                    if (!mBatteryNotLow) {
+                        mBatteryNotLow = true;
+                        changed = true;
+                    }
+                } else if (BatteryManager.ACTION_CHARGING.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Battery charging @ " + sElapsedRealtimeClock.millis());
+                    }
+                    if (!mCharging) {
+                        mCharging = true;
+                        changed = true;
+                    }
+                } else if (BatteryManager.ACTION_DISCHARGING.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Disconnected from power @ " + sElapsedRealtimeClock.millis());
+                    }
+                    if (mCharging) {
+                        mCharging = false;
+                        changed = true;
+                    }
+                }
+                mLastBatterySeq =
+                        intent.getIntExtra(BatteryManager.EXTRA_SEQUENCE, mLastBatterySeq);
+                if (changed) {
+                    for (int c = mControllers.size() - 1; c >= 0; --c) {
+                        mControllers.get(c).onBatteryStateChangedLocked();
+                    }
+                }
+            }
+        }
+    }
+
     final class LocalService implements JobSchedulerInternal {
 
         /**
@@ -3417,29 +3546,27 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     void setMonitorBattery(boolean enabled) {
         synchronized (mLock) {
-            if (mBatteryController != null) {
-                mBatteryController.getTracker().setMonitorBatteryLocked(enabled);
-            }
+            mBatteryStateTracker.setMonitorBatteryLocked(enabled);
         }
     }
 
     int getBatterySeq() {
         synchronized (mLock) {
-            return mBatteryController != null ? mBatteryController.getTracker().getSeq() : -1;
+            return mBatteryStateTracker.getSeq();
         }
     }
 
-    boolean getBatteryCharging() {
+    /** Return {@code true} if the device is currently charging. */
+    public boolean isBatteryCharging() {
         synchronized (mLock) {
-            return mBatteryController != null
-                    ? mBatteryController.getTracker().isOnStablePower() : false;
+            return mBatteryStateTracker.isCharging();
         }
     }
 
-    boolean getBatteryNotLow() {
+    /** Return {@code true} if the battery is not low. */
+    public boolean isBatteryNotLow() {
         synchronized (mLock) {
-            return mBatteryController != null
-                    ? mBatteryController.getTracker().isBatteryNotLow() : false;
+            return mBatteryStateTracker.isBatteryNotLow();
         }
     }
 
@@ -3612,6 +3739,16 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println();
 
             mQuotaTracker.dump(pw);
+            pw.println();
+
+            pw.print("Battery charging: ");
+            pw.println(mBatteryStateTracker.isCharging());
+            pw.print("Battery not low: ");
+            pw.println(mBatteryStateTracker.isBatteryNotLow());
+            if (mBatteryStateTracker.isMonitoring()) {
+                pw.print("MONITORING: seq=");
+                pw.println(mBatteryStateTracker.getSeq());
+            }
             pw.println();
 
             pw.println("Started users: " + Arrays.toString(mStartedUsers));

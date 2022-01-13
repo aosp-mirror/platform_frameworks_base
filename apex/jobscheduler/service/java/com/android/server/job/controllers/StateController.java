@@ -133,6 +133,13 @@ public abstract class StateController {
     }
 
     /**
+     * Called when the battery status changes.
+     */
+    @GuardedBy("mLock")
+    public void onBatteryStateChangedLocked() {
+    }
+
+    /**
      * Called when a UID's base bias has changed. The more positive the bias, the more
      * important the UID is.
      */

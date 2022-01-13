@@ -39,15 +39,11 @@ import android.app.IUidObserver;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.BatteryManager;
-import android.os.BatteryManagerInternal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -319,7 +315,6 @@ public final class QuotaController extends StateController {
     private final SparseLongArray mTopAppGraceCache = new SparseLongArray();
 
     private final AlarmManager mAlarmManager;
-    private final ChargingTracker mChargeTracker;
     private final QcHandler mHandler;
     private final QcConstants mQcConstants;
 
@@ -542,8 +537,6 @@ public final class QuotaController extends StateController {
             @NonNull ConnectivityController connectivityController) {
         super(service);
         mHandler = new QcHandler(mContext.getMainLooper());
-        mChargeTracker = new ChargingTracker();
-        mChargeTracker.startTracking();
         mAlarmManager = mContext.getSystemService(AlarmManager.class);
         mQcConstants = new QcConstants();
         mBackgroundJobsController = backgroundJobsController;
@@ -705,6 +698,11 @@ public final class QuotaController extends StateController {
         mTopAppTrackers.delete(userId);
     }
 
+    @Override
+    public void onBatteryStateChangedLocked() {
+        handleNewChargingStateLocked();
+    }
+
     /** Drop all historical stats and stop tracking any active sessions for the specified app. */
     public void clearAppStatsLocked(int userId, @NonNull String packageName) {
         mTrackedJobs.delete(userId, packageName);
@@ -766,7 +764,7 @@ public final class QuotaController extends StateController {
         if (!jobStatus.shouldTreatAsExpeditedJob()) {
             // If quota is currently "free", then the job can run for the full amount of time,
             // regardless of bucket (hence using charging instead of isQuotaFreeLocked()).
-            if (mChargeTracker.isChargingLocked()
+            if (mService.isBatteryCharging()
                     || mTopAppCache.get(jobStatus.getSourceUid())
                     || isTopStartedJobLocked(jobStatus)
                     || isUidInForeground(jobStatus.getSourceUid())) {
@@ -777,7 +775,7 @@ public final class QuotaController extends StateController {
         }
 
         // Expedited job.
-        if (mChargeTracker.isChargingLocked()) {
+        if (mService.isBatteryCharging()) {
             return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
         }
         if (mTopAppCache.get(jobStatus.getSourceUid()) || isTopStartedJobLocked(jobStatus)) {
@@ -864,7 +862,7 @@ public final class QuotaController extends StateController {
     @GuardedBy("mLock")
     private boolean isQuotaFreeLocked(final int standbyBucket) {
         // Quota constraint is not enforced while charging.
-        if (mChargeTracker.isChargingLocked()) {
+        if (mService.isBatteryCharging()) {
             // Restricted jobs require additional constraints when charging, so don't immediately
             // mark quota as free when charging.
             return standbyBucket != RESTRICTED_INDEX;
@@ -1538,15 +1536,19 @@ public final class QuotaController extends StateController {
 
     private void handleNewChargingStateLocked() {
         mTimerChargingUpdateFunctor.setStatus(sElapsedRealtimeClock.millis(),
-                mChargeTracker.isChargingLocked());
+                mService.isBatteryCharging());
         if (DEBUG) {
-            Slog.d(TAG, "handleNewChargingStateLocked: " + mChargeTracker.isChargingLocked());
+            Slog.d(TAG, "handleNewChargingStateLocked: " + mService.isBatteryCharging());
         }
         // Deal with Timers first.
         mEJPkgTimers.forEach(mTimerChargingUpdateFunctor);
         mPkgTimers.forEach(mTimerChargingUpdateFunctor);
-        // Now update jobs.
-        maybeUpdateAllConstraintsLocked();
+        // Now update jobs out of band so broadcast processing can proceed.
+        JobSchedulerBackgroundThread.getHandler().post(() -> {
+            synchronized (mLock) {
+                maybeUpdateAllConstraintsLocked();
+            }
+        });
     }
 
     private void maybeUpdateAllConstraintsLocked() {
@@ -1809,58 +1811,6 @@ public final class QuotaController extends StateController {
             return true;
         }
         return false;
-    }
-
-    private final class ChargingTracker extends BroadcastReceiver {
-        /**
-         * Track whether we're charging. This has a slightly different definition than that of
-         * BatteryController.
-         */
-        @GuardedBy("mLock")
-        private boolean mCharging;
-
-        ChargingTracker() {
-        }
-
-        public void startTracking() {
-            IntentFilter filter = new IntentFilter();
-
-            // Charging/not charging.
-            filter.addAction(BatteryManager.ACTION_CHARGING);
-            filter.addAction(BatteryManager.ACTION_DISCHARGING);
-            mContext.registerReceiver(this, filter);
-
-            // Initialise tracker state.
-            BatteryManagerInternal batteryManagerInternal =
-                    LocalServices.getService(BatteryManagerInternal.class);
-            mCharging = batteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
-        }
-
-        @GuardedBy("mLock")
-        public boolean isChargingLocked() {
-            return mCharging;
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            synchronized (mLock) {
-                final String action = intent.getAction();
-                if (BatteryManager.ACTION_CHARGING.equals(action)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Received charging intent, fired @ "
-                                + sElapsedRealtimeClock.millis());
-                    }
-                    mCharging = true;
-                    handleNewChargingStateLocked();
-                } else if (BatteryManager.ACTION_DISCHARGING.equals(action)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Disconnected from power.");
-                    }
-                    mCharging = false;
-                    handleNewChargingStateLocked();
-                }
-            }
-        }
     }
 
     @VisibleForTesting
@@ -2127,6 +2077,12 @@ public final class QuotaController extends StateController {
             final long topAppGracePeriodEndElapsed = mTopAppGraceCache.get(mUid);
             final boolean hasTopAppExemption = !mRegularJobTimer
                     && (mTopAppCache.get(mUid) || nowElapsed < topAppGracePeriodEndElapsed);
+            if (DEBUG) {
+                Slog.d(TAG, "quotaFree=" + isQuotaFreeLocked(standbyBucket)
+                        + " isFG=" + mForegroundUids.get(mUid)
+                        + " tempEx=" + hasTempAllowlistExemption
+                        + " topEx=" + hasTopAppExemption);
+            }
             return !isQuotaFreeLocked(standbyBucket)
                     && !mForegroundUids.get(mUid) && !hasTempAllowlistExemption
                     && !hasTopAppExemption;
@@ -3938,7 +3894,6 @@ public final class QuotaController extends StateController {
     public void dumpControllerStateLocked(final IndentingPrintWriter pw,
             final Predicate<JobStatus> predicate) {
         pw.println("Is enabled: " + mIsEnabled);
-        pw.println("Is charging: " + mChargeTracker.isChargingLocked());
         pw.println("Current elapsed time: " + sElapsedRealtimeClock.millis());
         pw.println();
 
@@ -4116,7 +4071,7 @@ public final class QuotaController extends StateController {
         final long mToken = proto.start(StateControllerProto.QUOTA);
 
         proto.write(StateControllerProto.QuotaController.IS_CHARGING,
-                mChargeTracker.isChargingLocked());
+                mService.isBatteryCharging());
         proto.write(StateControllerProto.QuotaController.ELAPSED_REALTIME,
                 sElapsedRealtimeClock.millis());
 

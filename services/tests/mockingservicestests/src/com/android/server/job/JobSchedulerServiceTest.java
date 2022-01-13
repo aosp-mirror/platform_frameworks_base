@@ -122,15 +122,14 @@ public class JobSchedulerServiceTest {
                 .when(() -> LocalServices.getService(ActivityManagerInternal.class));
         doReturn(mock(AppStandbyInternal.class))
                 .when(() -> LocalServices.getService(AppStandbyInternal.class));
+        doReturn(mock(BatteryManagerInternal.class))
+                .when(() -> LocalServices.getService(BatteryManagerInternal.class));
         doReturn(mock(UsageStatsManagerInternal.class))
                 .when(() -> LocalServices.getService(UsageStatsManagerInternal.class));
         when(mContext.getString(anyInt())).thenReturn("some_test_string");
         // Called in BackgroundJobsController constructor.
         doReturn(mock(AppStateTrackerImpl.class))
                 .when(() -> LocalServices.getService(AppStateTracker.class));
-        // Called in BatteryController constructor.
-        doReturn(mock(BatteryManagerInternal.class))
-                .when(() -> LocalServices.getService(BatteryManagerInternal.class));
         // Called in ConnectivityController constructor.
         when(mContext.getSystemService(ConnectivityManager.class))
                 .thenReturn(mock(ConnectivityManager.class));

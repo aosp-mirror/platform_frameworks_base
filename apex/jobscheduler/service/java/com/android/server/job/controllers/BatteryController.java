@@ -18,12 +18,6 @@ package com.android.server.job.controllers;
 
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.BatteryManager;
-import android.os.BatteryManagerInternal;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
@@ -31,8 +25,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.LocalServices;
+import com.android.internal.annotations.GuardedBy;
+import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
 
@@ -49,17 +43,9 @@ public final class BatteryController extends RestrictingController {
             || Log.isLoggable(TAG, Log.DEBUG);
 
     private final ArraySet<JobStatus> mTrackedTasks = new ArraySet<>();
-    private ChargingTracker mChargeTracker;
-
-    @VisibleForTesting
-    public ChargingTracker getTracker() {
-        return mChargeTracker;
-    }
 
     public BatteryController(JobSchedulerService service) {
         super(service);
-        mChargeTracker = new ChargingTracker();
-        mChargeTracker.startTracking();
     }
 
     @Override
@@ -68,9 +54,9 @@ public final class BatteryController extends RestrictingController {
             final long nowElapsed = sElapsedRealtimeClock.millis();
             mTrackedTasks.add(taskStatus);
             taskStatus.setTrackingController(JobStatus.TRACKING_BATTERY);
-            taskStatus.setChargingConstraintSatisfied(nowElapsed, mChargeTracker.isOnStablePower());
-            taskStatus.setBatteryNotLowConstraintSatisfied(
-                    nowElapsed, mChargeTracker.isBatteryNotLow());
+            taskStatus.setChargingConstraintSatisfied(nowElapsed,
+                    mService.isBatteryCharging() && mService.isBatteryNotLow());
+            taskStatus.setBatteryNotLowConstraintSatisfied(nowElapsed, mService.isBatteryNotLow());
         }
     }
 
@@ -93,9 +79,21 @@ public final class BatteryController extends RestrictingController {
         }
     }
 
+    @Override
+    @GuardedBy("mLock")
+    public void onBatteryStateChangedLocked() {
+        // Update job bookkeeping out of band.
+        JobSchedulerBackgroundThread.getHandler().post(() -> {
+            synchronized (mLock) {
+                maybeReportNewChargingStateLocked();
+            }
+        });
+    }
+
+    @GuardedBy("mLock")
     private void maybeReportNewChargingStateLocked() {
-        final boolean stablePower = mChargeTracker.isOnStablePower();
-        final boolean batteryNotLow = mChargeTracker.isBatteryNotLow();
+        final boolean stablePower = mService.isBatteryCharging() && mService.isBatteryNotLow();
+        final boolean batteryNotLow = mService.isBatteryNotLow();
         if (DEBUG) {
             Slog.d(TAG, "maybeReportNewChargingStateLocked: " + stablePower);
         }
@@ -116,133 +114,11 @@ public final class BatteryController extends RestrictingController {
         }
     }
 
-    public final class ChargingTracker extends BroadcastReceiver {
-        /**
-         * Track whether we're "charging", where charging means that we're ready to commit to
-         * doing work.
-         */
-        private boolean mCharging;
-        /** Keep track of whether the battery is charged enough that we want to do work. */
-        private boolean mBatteryHealthy;
-        /** Sequence number of last broadcast. */
-        private int mLastBatterySeq = -1;
-
-        private BroadcastReceiver mMonitor;
-
-        public ChargingTracker() {
-        }
-
-        public void startTracking() {
-            IntentFilter filter = new IntentFilter();
-
-            // Battery health.
-            filter.addAction(Intent.ACTION_BATTERY_LOW);
-            filter.addAction(Intent.ACTION_BATTERY_OKAY);
-            // Charging/not charging.
-            filter.addAction(BatteryManager.ACTION_CHARGING);
-            filter.addAction(BatteryManager.ACTION_DISCHARGING);
-            mContext.registerReceiver(this, filter);
-
-            // Initialise tracker state.
-            BatteryManagerInternal batteryManagerInternal =
-                    LocalServices.getService(BatteryManagerInternal.class);
-            mBatteryHealthy = !batteryManagerInternal.getBatteryLevelLow();
-            mCharging = batteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
-        }
-
-        public void setMonitorBatteryLocked(boolean enabled) {
-            if (enabled) {
-                if (mMonitor == null) {
-                    mMonitor = new BroadcastReceiver() {
-                        @Override public void onReceive(Context context, Intent intent) {
-                            ChargingTracker.this.onReceive(context, intent);
-                        }
-                    };
-                    IntentFilter filter = new IntentFilter();
-                    filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-                    mContext.registerReceiver(mMonitor, filter);
-                }
-            } else {
-                if (mMonitor != null) {
-                    mContext.unregisterReceiver(mMonitor);
-                    mMonitor = null;
-                }
-            }
-        }
-
-        public boolean isOnStablePower() {
-            return mCharging && mBatteryHealthy;
-        }
-
-        public boolean isBatteryNotLow() {
-            return mBatteryHealthy;
-        }
-
-        public boolean isMonitoring() {
-            return mMonitor != null;
-        }
-
-        public int getSeq() {
-            return mLastBatterySeq;
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            onReceiveInternal(intent);
-        }
-
-        @VisibleForTesting
-        public void onReceiveInternal(Intent intent) {
-            synchronized (mLock) {
-                final String action = intent.getAction();
-                if (Intent.ACTION_BATTERY_LOW.equals(action)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Battery life too low to do work. @ "
-                                + sElapsedRealtimeClock.millis());
-                    }
-                    // If we get this action, the battery is discharging => it isn't plugged in so
-                    // there's no work to cancel. We track this variable for the case where it is
-                    // charging, but hasn't been for long enough to be healthy.
-                    mBatteryHealthy = false;
-                    maybeReportNewChargingStateLocked();
-                } else if (Intent.ACTION_BATTERY_OKAY.equals(action)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Battery life healthy enough to do work. @ "
-                                + sElapsedRealtimeClock.millis());
-                    }
-                    mBatteryHealthy = true;
-                    maybeReportNewChargingStateLocked();
-                } else if (BatteryManager.ACTION_CHARGING.equals(action)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Received charging intent, fired @ "
-                                + sElapsedRealtimeClock.millis());
-                    }
-                    mCharging = true;
-                    maybeReportNewChargingStateLocked();
-                } else if (BatteryManager.ACTION_DISCHARGING.equals(action)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Disconnected from power.");
-                    }
-                    mCharging = false;
-                    maybeReportNewChargingStateLocked();
-                }
-                mLastBatterySeq = intent.getIntExtra(BatteryManager.EXTRA_SEQUENCE,
-                        mLastBatterySeq);
-            }
-        }
-    }
-
     @Override
     public void dumpControllerStateLocked(IndentingPrintWriter pw,
             Predicate<JobStatus> predicate) {
-        pw.println("Stable power: " + mChargeTracker.isOnStablePower());
-        pw.println("Not low: " + mChargeTracker.isBatteryNotLow());
-
-        if (mChargeTracker.isMonitoring()) {
-            pw.print("MONITORING: seq=");
-            pw.println(mChargeTracker.getSeq());
-        }
-        pw.println();
+        pw.println("Stable power: " + (mService.isBatteryCharging() && mService.isBatteryNotLow()));
+        pw.println("Not low: " + mService.isBatteryNotLow());
 
         for (int i = 0; i < mTrackedTasks.size(); i++) {
             final JobStatus js = mTrackedTasks.valueAt(i);
@@ -264,14 +140,9 @@ public final class BatteryController extends RestrictingController {
         final long mToken = proto.start(StateControllerProto.BATTERY);
 
         proto.write(StateControllerProto.BatteryController.IS_ON_STABLE_POWER,
-                mChargeTracker.isOnStablePower());
+                mService.isBatteryCharging() && mService.isBatteryNotLow());
         proto.write(StateControllerProto.BatteryController.IS_BATTERY_NOT_LOW,
-                mChargeTracker.isBatteryNotLow());
-
-        proto.write(StateControllerProto.BatteryController.IS_MONITORING,
-                mChargeTracker.isMonitoring());
-        proto.write(StateControllerProto.BatteryController.LAST_BROADCAST_SEQUENCE_NUMBER,
-                mChargeTracker.getSeq());
+                mService.isBatteryNotLow());
 
         for (int i = 0; i < mTrackedTasks.size(); i++) {
             final JobStatus js = mTrackedTasks.valueAt(i);
