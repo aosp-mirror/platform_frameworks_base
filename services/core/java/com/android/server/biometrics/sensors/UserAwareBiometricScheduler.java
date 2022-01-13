@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.IBiometricService;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -85,7 +86,7 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
     }
 
     @VisibleForTesting
-    UserAwareBiometricScheduler(@NonNull String tag,
+    public UserAwareBiometricScheduler(@NonNull String tag,
             @NonNull Handler handler,
             @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
@@ -101,12 +102,11 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
     }
 
     public UserAwareBiometricScheduler(@NonNull String tag,
-            @NonNull Handler handler,
             @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull CurrentUserRetriever currentUserRetriever,
             @NonNull UserSwitchCallback userSwitchCallback) {
-        this(tag, handler, sensorType, gestureAvailabilityDispatcher,
+        this(tag, new Handler(Looper.getMainLooper()), sensorType, gestureAvailabilityDispatcher,
                 IBiometricService.Stub.asInterface(
                         ServiceManager.getService(Context.BIOMETRIC_SERVICE)),
                 currentUserRetriever, userSwitchCallback, CoexCoordinator.getInstance());

@@ -449,7 +449,7 @@ class Sensor {
         mHandler = handler;
         mSensorProperties = sensorProperties;
         mLockoutCache = new LockoutCache();
-        mScheduler = new UserAwareBiometricScheduler(tag, handler,
+        mScheduler = new UserAwareBiometricScheduler(tag,
                 BiometricScheduler.sensorTypeFromFingerprintProperties(mSensorProperties),
                 gestureAvailabilityDispatcher,
                 () -> mCurrentSession != null ? mCurrentSession.mUserId : UserHandle.USER_NULL,
