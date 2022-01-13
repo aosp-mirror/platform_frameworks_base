@@ -545,6 +545,15 @@ public final class NetworkStats implements AutoCloseable {
     }
 
     /**
+     * Collects tagged summary results and sets summary enumeration mode.
+     * @throws RemoteException
+     */
+    void startTaggedSummaryEnumeration() throws RemoteException {
+        mSummary = mSession.getTaggedSummaryForAllUid(mTemplate, mStartTimeStamp, mEndTimeStamp);
+        mEnumerationIndex = 0;
+    }
+
+    /**
      * Collects history results for uid and resets history enumeration index.
      */
     void startHistoryEnumeration(int uid, int tag, int state) {
