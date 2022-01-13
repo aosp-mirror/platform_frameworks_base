@@ -789,8 +789,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     }
                     return stats;
                 } catch (NullPointerException e) {
-                    // TODO: Track down and fix the cause of this crash and remove this catch block.
-                    Log.wtf(TAG, "NullPointerException in getSummaryForAllUid", e);
+                    throw e;
+                }
+            }
+
+            @Override
+            public NetworkStats getTaggedSummaryForAllUid(
+                    NetworkTemplate template, long start, long end) {
+                try {
+                    final NetworkStats tagStats = getUidTagComplete()
+                            .getSummary(template, start, end, mAccessLevel, mCallingUid);
+                    return tagStats;
+                } catch (NullPointerException e) {
                     throw e;
                 }
             }
