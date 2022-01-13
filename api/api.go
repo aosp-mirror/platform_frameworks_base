@@ -123,6 +123,19 @@ func createMergedStubsSrcjar(ctx android.LoadHookContext, modules []string) {
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
 
+// This produces the same annotations.zip as framework-doc-stubs, but by using
+// outputs from individual modules instead of all the source code.
+func createMergedAnnotations(ctx android.LoadHookContext, modules []string) {
+	props := genruleProps{}
+	props.Name = proptools.StringPtr("sdk-annotations.zip")
+	props.Tools = []string{"merge_annotation_zips", "soong_zip"}
+	props.Out = []string{"annotations.zip"}
+	props.Cmd = proptools.StringPtr("$(location merge_annotation_zips) $(genDir)/out $(in) && " +
+		"$(location soong_zip) -o $(out) -C $(genDir)/out -D $(genDir)/out")
+	props.Srcs = createSrcs(":android-non-updatable-doc-stubs{.annotations.zip}", modules, "{.public.annotations.zip}")
+	ctx.CreateModule(genrule.GenRuleFactory, &props)
+}
+
 func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
 	props := genruleProps{}
 	props.Name = proptools.StringPtr("api-versions-xml-public-filtered")
@@ -203,6 +216,12 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedTxts(ctx, a.properties)
 
 	createMergedStubsSrcjar(ctx, a.properties.Bootclasspath)
+
+	// Conscrypt and i18n currently do not enable annotations
+	annotationModules := a.properties.Bootclasspath
+	annotationModules = remove(annotationModules, "conscrypt.module.public.api")
+	annotationModules = remove(annotationModules, "i18n.module.public.api")
+	createMergedAnnotations(ctx, annotationModules)
 
 	// For the filtered api versions, we prune all APIs except art module's APIs. because
 	// 1) ART apis are available by default to all modules, while other module-to-module deps are
