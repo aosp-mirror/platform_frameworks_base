@@ -76,16 +76,15 @@ interface IFaceService {
     void cancelAuthenticationFromService(int sensorId, IBinder token, String opPackageName, long requestId);
 
     // Start face enrollment
-    long enroll(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
-            String opPackageName, in int [] disabledFeatures,
-            in Surface previewSurface, boolean debugConsent);
+    void enroll(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
+            String opPackageName, in int [] disabledFeatures, in Surface previewSurface, boolean debugConsent);
 
     // Start remote face enrollment
-    long enrollRemotely(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
+    void enrollRemotely(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
             String opPackageName, in int [] disabledFeatures);
 
     // Cancel enrollment in progress
-    void cancelEnrollment(IBinder token, long requestId);
+    void cancelEnrollment(IBinder token);
 
     // Removes the specified face enrollment for the specified userId.
     void remove(IBinder token, int faceId, int userId, IFaceServiceReceiver receiver,
