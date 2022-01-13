@@ -4801,7 +4801,10 @@ public class TelephonyManager {
      *     for any API level.
      *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      *     for apps targeting SDK API level 29 and below.
+     *
+     * @deprecated use {@link SubscriptionManager#getPhoneNumber(int)} instead.
      */
+    @Deprecated
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges or default SMS app
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PHONE_STATE,
@@ -4874,7 +4877,9 @@ public class TelephonyManager {
      * @param alphaTag alpha-tagging of the dailing nubmer
      * @param number The dialing number
      * @return true if the operation was executed correctly.
+     * @deprecated use {@link SubscriptionManager#setCarrierPhoneNumber(int, String)} instead.
      */
+    @Deprecated
     public boolean setLine1NumberForDisplay(String alphaTag, String number) {
         return setLine1NumberForDisplay(getSubId(), alphaTag, number);
     }
@@ -4895,6 +4900,10 @@ public class TelephonyManager {
      */
     public boolean setLine1NumberForDisplay(int subId, String alphaTag, String number) {
         try {
+            // This API is deprecated; call the new API to allow smooth migartion.
+            // The new API doesn't accept null so convert null to empty string.
+            mSubscriptionManager.setCarrierPhoneNumber(subId, (number == null ? "" : number));
+
             ITelephony telephony = getITelephony();
             if (telephony != null)
                 return telephony.setLine1NumberForDisplayForSubscriber(subId, alphaTag, number);

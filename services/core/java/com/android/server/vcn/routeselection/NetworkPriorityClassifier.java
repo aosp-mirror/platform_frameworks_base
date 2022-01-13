@@ -20,8 +20,10 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
-import static android.net.vcn.VcnUnderlyingNetworkPriority.NETWORK_QUALITY_ANY;
-import static android.net.vcn.VcnUnderlyingNetworkPriority.NETWORK_QUALITY_OK;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_FORBIDDEN;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_REQUIRED;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_ANY;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_OK;
 
 import static com.android.server.VcnManagementService.LOCAL_LOG;
 
@@ -29,10 +31,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.NetworkCapabilities;
 import android.net.TelephonyNetworkSpecifier;
-import android.net.vcn.VcnCellUnderlyingNetworkPriority;
+import android.net.vcn.VcnCellUnderlyingNetworkTemplate;
 import android.net.vcn.VcnManager;
-import android.net.vcn.VcnUnderlyingNetworkPriority;
-import android.net.vcn.VcnWifiUnderlyingNetworkPriority;
+import android.net.vcn.VcnUnderlyingNetworkTemplate;
+import android.net.vcn.VcnWifiUnderlyingNetworkTemplate;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
 import android.telephony.SubscriptionManager;
@@ -44,7 +46,7 @@ import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.VcnContext;
 
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /** @hide */
@@ -76,7 +78,7 @@ class NetworkPriorityClassifier {
     public static int calculatePriorityClass(
             VcnContext vcnContext,
             UnderlyingNetworkRecord networkRecord,
-            LinkedHashSet<VcnUnderlyingNetworkPriority> underlyingNetworkPriorities,
+            List<VcnUnderlyingNetworkTemplate> underlyingNetworkTemplates,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
@@ -94,7 +96,7 @@ class NetworkPriorityClassifier {
         }
 
         int priorityIndex = 0;
-        for (VcnUnderlyingNetworkPriority nwPriority : underlyingNetworkPriorities) {
+        for (VcnUnderlyingNetworkTemplate nwPriority : underlyingNetworkTemplates) {
             if (checkMatchesPriorityRule(
                     vcnContext,
                     nwPriority,
@@ -113,7 +115,7 @@ class NetworkPriorityClassifier {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public static boolean checkMatchesPriorityRule(
             VcnContext vcnContext,
-            VcnUnderlyingNetworkPriority networkPriority,
+            VcnUnderlyingNetworkTemplate networkPriority,
             UnderlyingNetworkRecord networkRecord,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
@@ -122,7 +124,11 @@ class NetworkPriorityClassifier {
         // TODO: Check Network Quality reported by metric monitors/probers.
 
         final NetworkCapabilities caps = networkRecord.networkCapabilities;
-        if (!networkPriority.allowMetered() && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)) {
+
+        final int meteredMatch = networkPriority.getMetered();
+        final boolean isMetered = !caps.hasCapability(NET_CAPABILITY_NOT_METERED);
+        if (meteredMatch == MATCH_REQUIRED && !isMetered
+                || meteredMatch == MATCH_FORBIDDEN && isMetered) {
             return false;
         }
 
@@ -130,32 +136,32 @@ class NetworkPriorityClassifier {
             return true;
         }
 
-        if (networkPriority instanceof VcnWifiUnderlyingNetworkPriority) {
+        if (networkPriority instanceof VcnWifiUnderlyingNetworkTemplate) {
             return checkMatchesWifiPriorityRule(
-                    (VcnWifiUnderlyingNetworkPriority) networkPriority,
+                    (VcnWifiUnderlyingNetworkTemplate) networkPriority,
                     networkRecord,
                     currentlySelected,
                     carrierConfig);
         }
 
-        if (networkPriority instanceof VcnCellUnderlyingNetworkPriority) {
+        if (networkPriority instanceof VcnCellUnderlyingNetworkTemplate) {
             return checkMatchesCellPriorityRule(
                     vcnContext,
-                    (VcnCellUnderlyingNetworkPriority) networkPriority,
+                    (VcnCellUnderlyingNetworkTemplate) networkPriority,
                     networkRecord,
                     subscriptionGroup,
                     snapshot);
         }
 
         logWtf(
-                "Got unknown VcnUnderlyingNetworkPriority class: "
+                "Got unknown VcnUnderlyingNetworkTemplate class: "
                         + networkPriority.getClass().getSimpleName());
         return false;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public static boolean checkMatchesWifiPriorityRule(
-            VcnWifiUnderlyingNetworkPriority networkPriority,
+            VcnWifiUnderlyingNetworkTemplate networkPriority,
             UnderlyingNetworkRecord networkRecord,
             UnderlyingNetworkRecord currentlySelected,
             PersistableBundle carrierConfig) {
@@ -171,7 +177,8 @@ class NetworkPriorityClassifier {
             return false;
         }
 
-        if (networkPriority.getSsid() != null && networkPriority.getSsid() != caps.getSsid()) {
+        if (!networkPriority.getSsids().isEmpty()
+                && !networkPriority.getSsids().contains(caps.getSsid())) {
             return false;
         }
 
@@ -202,7 +209,7 @@ class NetworkPriorityClassifier {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public static boolean checkMatchesCellPriorityRule(
             VcnContext vcnContext,
-            VcnCellUnderlyingNetworkPriority networkPriority,
+            VcnCellUnderlyingNetworkTemplate networkPriority,
             UnderlyingNetworkRecord networkRecord,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot) {
@@ -226,26 +233,31 @@ class NetworkPriorityClassifier {
                         .getSystemService(TelephonyManager.class)
                         .createForSubscriptionId(subId);
 
-        if (!networkPriority.getAllowedOperatorPlmnIds().isEmpty()) {
+        if (!networkPriority.getOperatorPlmnIds().isEmpty()) {
             final String plmnId = subIdSpecificTelephonyMgr.getNetworkOperator();
-            if (!networkPriority.getAllowedOperatorPlmnIds().contains(plmnId)) {
+            if (!networkPriority.getOperatorPlmnIds().contains(plmnId)) {
                 return false;
             }
         }
 
-        if (!networkPriority.getAllowedSpecificCarrierIds().isEmpty()) {
+        if (!networkPriority.getSimSpecificCarrierIds().isEmpty()) {
             final int carrierId = subIdSpecificTelephonyMgr.getSimSpecificCarrierId();
-            if (!networkPriority.getAllowedSpecificCarrierIds().contains(carrierId)) {
+            if (!networkPriority.getSimSpecificCarrierIds().contains(carrierId)) {
                 return false;
             }
         }
 
-        if (!networkPriority.allowRoaming() && !caps.hasCapability(NET_CAPABILITY_NOT_ROAMING)) {
+        final int roamingMatch = networkPriority.getRoaming();
+        final boolean isRoaming = !caps.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+        if (roamingMatch == MATCH_REQUIRED && !isRoaming
+                || roamingMatch == MATCH_FORBIDDEN && isRoaming) {
             return false;
         }
 
-        if (networkPriority.requireOpportunistic()) {
-            if (!isOpportunistic(snapshot, caps.getSubscriptionIds())) {
+        final int opportunisticMatch = networkPriority.getOpportunistic();
+        final boolean isOpportunistic = isOpportunistic(snapshot, caps.getSubscriptionIds());
+        if (opportunisticMatch == MATCH_REQUIRED) {
+            if (!isOpportunistic) {
                 return false;
             }
 
@@ -265,6 +277,8 @@ class NetworkPriorityClassifier {
                             .contains(SubscriptionManager.getActiveDataSubscriptionId())) {
                 return false;
             }
+        } else if (opportunisticMatch == MATCH_FORBIDDEN && !isOpportunistic) {
+            return false;
         }
 
         return true;

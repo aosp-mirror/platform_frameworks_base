@@ -312,14 +312,11 @@ public final class BluetoothLeCallControl implements BluetoothProfile {
 
         @Override
         public void onBearerRegistered(int ccid) {
-            synchronized (mServerIfLock) {
-                if (mCallback != null) {
-                    mCcid = ccid;
-                    mServerIfLock.notifyAll();
-                } else {
-                    // registration timeout
-                    Log.e(TAG, "onBearerRegistered: mCallback is null");
-                }
+            if (mCallback != null) {
+                mCcid = ccid;
+            } else {
+                // registration timeout
+                Log.e(TAG, "onBearerRegistered: mCallback is null");
             }
         }
 
@@ -396,7 +393,6 @@ public final class BluetoothLeCallControl implements BluetoothProfile {
     private int mCcid = 0;
     private String mToken;
     private Callback mCallback = null;
-    private Object mServerIfLock = new Object();
 
     private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
         new IBluetoothStateChangeCallback.Stub() {
@@ -573,38 +569,30 @@ public final class BluetoothLeCallControl implements BluetoothProfile {
 
         final IBluetoothLeCallControl service = getService();
         if (service != null) {
-            synchronized (mServerIfLock) {
-                if (mCallback != null) {
-                    Log.e(TAG, "Bearer can be opened only once");
-                    return false;
-                }
-
-                mCallback = callback;
-                try {
-                    CallbackWrapper callbackWrapper = new CallbackWrapper(executor, callback);
-                    service.registerBearer(mToken, callbackWrapper, uci, uriSchemes, capabilities,
-                                            provider, technology);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "", e);
-                    mCallback = null;
-                    return false;
-                }
-
-                try {
-                    mServerIfLock.wait(REG_TIMEOUT);
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "" + e);
-                    mCallback = null;
-                }
-
-                if (mCcid == 0) {
-                    mCallback = null;
-                    return false;
-                }
-
-                return true;
+            if (mCallback != null) {
+                Log.e(TAG, "Bearer can be opened only once");
+                return false;
             }
+
+            mCallback = callback;
+            try {
+                CallbackWrapper callbackWrapper = new CallbackWrapper(executor, callback);
+                service.registerBearer(mToken, callbackWrapper, uci, uriSchemes, capabilities,
+                                        provider, technology);
+            } catch (RemoteException e) {
+                Log.e(TAG, "", e);
+                mCallback = null;
+                return false;
+            }
+
+            if (mCcid == 0) {
+                mCallback = null;
+                return false;
+            }
+
+            return true;
         }
+
         if (service == null) {
             Log.w(TAG, "Proxy not attached to service");
         }

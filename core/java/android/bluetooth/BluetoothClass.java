@@ -119,6 +119,7 @@ public final class BluetoothClass implements Parcelable {
         private static final int BITMASK = 0xFFE000;
 
         public static final int LIMITED_DISCOVERABILITY = 0x002000;
+        public static final int LE_AUDIO = 0x004000;
         public static final int POSITIONING = 0x010000;
         public static final int NETWORKING = 0x020000;
         public static final int RENDER = 0x040000;

@@ -17,7 +17,6 @@
 package android.net;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,7 +26,7 @@ import java.util.Objects;
 public final class InternalNetworkUpdateRequest implements Parcelable {
     @NonNull
     private final StaticIpConfiguration mIpConfig;
-    @Nullable
+    @NonNull
     private final NetworkCapabilities mNetworkCapabilities;
 
     @NonNull
@@ -37,20 +36,16 @@ public final class InternalNetworkUpdateRequest implements Parcelable {
 
     @NonNull
     public NetworkCapabilities getNetworkCapabilities() {
-        return mNetworkCapabilities == null
-                ? null : new NetworkCapabilities(mNetworkCapabilities);
+        return new NetworkCapabilities(mNetworkCapabilities);
     }
 
     /** @hide */
     public InternalNetworkUpdateRequest(@NonNull final StaticIpConfiguration ipConfig,
-            @Nullable final NetworkCapabilities networkCapabilities) {
+            @NonNull final NetworkCapabilities networkCapabilities) {
         Objects.requireNonNull(ipConfig);
+        Objects.requireNonNull(networkCapabilities);
         mIpConfig = new StaticIpConfiguration(ipConfig);
-        if (null == networkCapabilities) {
-            mNetworkCapabilities = null;
-        } else {
-            mNetworkCapabilities = new NetworkCapabilities(networkCapabilities);
-        }
+        mNetworkCapabilities = new NetworkCapabilities(networkCapabilities);
     }
 
     private InternalNetworkUpdateRequest(@NonNull final Parcel source) {
