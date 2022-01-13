@@ -244,6 +244,10 @@ class DisplayWindowSettings {
     }
 
     void applySettingsToDisplayLocked(DisplayContent dc) {
+        applySettingsToDisplayLocked(dc, /* includeRotationSettings */ true);
+    }
+
+    void applySettingsToDisplayLocked(DisplayContent dc, boolean includeRotationSettings) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
 
@@ -282,6 +286,8 @@ class DisplayWindowSettings {
         boolean dontMoveToTop = settings.mDontMoveToTop != null
                 ? settings.mDontMoveToTop : false;
         dc.mDontMoveToTop = dontMoveToTop;
+
+        if (includeRotationSettings) applyRotationSettingsToDisplayLocked(dc);
     }
 
     void applyRotationSettingsToDisplayLocked(DisplayContent dc) {
