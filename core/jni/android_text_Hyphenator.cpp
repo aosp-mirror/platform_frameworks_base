@@ -130,6 +130,7 @@ static void init() {
     addHyphenator("sk", 2, 2);  // Slovak
     addHyphenator("sl", 2, 2);  // Slovenian
     addHyphenator("sq", 2, 2);  // Albanian
+    addHyphenator("sv", 1, 2);  // Swedish
     addHyphenator("ta", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Tamil
     addHyphenator("te", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Telugu
     addHyphenator("tk", 2, 2);  // Turkmen
