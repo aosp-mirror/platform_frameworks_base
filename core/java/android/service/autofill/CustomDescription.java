@@ -437,7 +437,7 @@ public final class CustomDescription implements Parcelable {
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
-            final RemoteViews parentPresentation = parcel.readParcelable(null, android.widget.RemoteViews.class);
+            final RemoteViews parentPresentation = parcel.readParcelable(null);
             if (parentPresentation == null) return null;
 
             final Builder builder = new Builder(parentPresentation);

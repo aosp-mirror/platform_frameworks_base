@@ -40,10 +40,10 @@ public final class ConversationChannelWrapper implements Parcelable {
     public ConversationChannelWrapper() {}
 
     protected ConversationChannelWrapper(Parcel in) {
-        mNotificationChannel = in.readParcelable(NotificationChannel.class.getClassLoader(), android.app.NotificationChannel.class);
+        mNotificationChannel = in.readParcelable(NotificationChannel.class.getClassLoader());
         mGroupLabel = in.readCharSequence();
         mParentChannelLabel = in.readCharSequence();
-        mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader(), android.content.pm.ShortcutInfo.class);
+        mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader());
         mPkg = in.readStringNoHelper();
         mUid = in.readInt();
     }

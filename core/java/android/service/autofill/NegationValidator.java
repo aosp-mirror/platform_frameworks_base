@@ -68,7 +68,7 @@ final class NegationValidator extends InternalValidator {
             new Parcelable.Creator<NegationValidator>() {
         @Override
         public NegationValidator createFromParcel(Parcel parcel) {
-            return new NegationValidator(parcel.readParcelable(null, android.service.autofill.InternalValidator.class));
+            return new NegationValidator(parcel.readParcelable(null));
         }
 
         @Override

@@ -326,7 +326,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mCsiRsrq = in.readInt();
         mCsiSinr = in.readInt();
         mCsiCqiTableIndex = in.readInt();
-        mCsiCqiReport = in.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class);
+        mCsiCqiReport = in.readArrayList(Integer.class.getClassLoader());
         mSsRsrp = in.readInt();
         mSsRsrq = in.readInt();
         mSsSinr = in.readInt();

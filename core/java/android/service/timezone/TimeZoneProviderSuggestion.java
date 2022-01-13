@@ -100,7 +100,7 @@ public final class TimeZoneProviderSuggestion implements Parcelable {
                 public TimeZoneProviderSuggestion createFromParcel(Parcel in) {
                     @SuppressWarnings("unchecked")
                     ArrayList<String> timeZoneIds =
-                            (ArrayList<String>) in.readArrayList(null /* classLoader */, java.lang.String.class);
+                            (ArrayList<String>) in.readArrayList(null /* classLoader */);
                     long elapsedRealtimeMillis = in.readLong();
                     return new TimeZoneProviderSuggestion(timeZoneIds, elapsedRealtimeMillis);
                 }
