@@ -22,7 +22,7 @@ import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.hardware.radio.V1_5.ApnTypes;
+import android.hardware.radio.data.ApnTypes;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -116,12 +116,11 @@ public class ApnSetting implements Parcelable {
     /** APN type for XCAP. */
     public static final int TYPE_XCAP = ApnTypes.XCAP;
     /** APN type for VSIM. */
-    public static final int TYPE_VSIM = 1 << 12;  // TODO: Refer to ApnTypes.VSIM
+    public static final int TYPE_VSIM = ApnTypes.VSIM;
     /** APN type for BIP. */
-    public static final int TYPE_BIP = 1 << 13;   // TODO: Refer to ApnTypes.BIP
+    public static final int TYPE_BIP = ApnTypes.BIP;
     /** APN type for ENTERPRISE. */
-    public static final int TYPE_ENTERPRISE = 1 << 14; //TODO: In future should be referenced from
-    // hardware.interfaces.radio.data.ApnTypes
+    public static final int TYPE_ENTERPRISE = ApnTypes.ENTERPRISE;
 
     /** @hide */
     @IntDef(flag = true, prefix = {"TYPE_"}, value = {

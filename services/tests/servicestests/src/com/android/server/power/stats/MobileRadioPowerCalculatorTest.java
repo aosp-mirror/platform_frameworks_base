@@ -27,7 +27,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.usage.NetworkStatsManager;
-import android.hardware.radio.V1_5.AccessNetwork;
 import android.net.NetworkCapabilities;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
@@ -35,6 +34,7 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.ActivityStatsTechSpecificInfo;
 import android.telephony.CellSignalStrength;
 import android.telephony.DataConnectionRealTimeInfo;
@@ -248,22 +248,24 @@ public class MobileRadioPowerCalculatorTest {
         mStatsRule.setNetworkStats(networkStats);
 
         ActivityStatsTechSpecificInfo cdmaInfo = new ActivityStatsTechSpecificInfo(
-                AccessNetwork.CDMA2000, ServiceState.FREQUENCY_RANGE_UNKNOWN,
+                AccessNetworkConstants.AccessNetworkType.CDMA2000,
+                ServiceState.FREQUENCY_RANGE_UNKNOWN,
                 new int[]{10, 11, 12, 13, 14}, 15);
         ActivityStatsTechSpecificInfo lteInfo = new ActivityStatsTechSpecificInfo(
-                AccessNetwork.EUTRAN, ServiceState.FREQUENCY_RANGE_UNKNOWN,
+                AccessNetworkConstants.AccessNetworkType.EUTRAN,
+                ServiceState.FREQUENCY_RANGE_UNKNOWN,
                 new int[]{20, 21, 22, 23, 24}, 25);
         ActivityStatsTechSpecificInfo nrLowFreqInfo = new ActivityStatsTechSpecificInfo(
-                AccessNetwork.NGRAN, ServiceState.FREQUENCY_RANGE_LOW,
+                AccessNetworkConstants.AccessNetworkType.NGRAN, ServiceState.FREQUENCY_RANGE_LOW,
                 new int[]{30, 31, 32, 33, 34}, 35);
         ActivityStatsTechSpecificInfo nrMidFreqInfo = new ActivityStatsTechSpecificInfo(
-                AccessNetwork.NGRAN, ServiceState.FREQUENCY_RANGE_MID,
+                AccessNetworkConstants.AccessNetworkType.NGRAN, ServiceState.FREQUENCY_RANGE_MID,
                 new int[]{40, 41, 42, 43, 44}, 45);
         ActivityStatsTechSpecificInfo nrHighFreqInfo = new ActivityStatsTechSpecificInfo(
-                AccessNetwork.NGRAN, ServiceState.FREQUENCY_RANGE_HIGH,
+                AccessNetworkConstants.AccessNetworkType.NGRAN, ServiceState.FREQUENCY_RANGE_HIGH,
                 new int[]{50, 51, 52, 53, 54}, 55);
         ActivityStatsTechSpecificInfo nrMmwaveFreqInfo = new ActivityStatsTechSpecificInfo(
-                AccessNetwork.NGRAN, ServiceState.FREQUENCY_RANGE_MMWAVE,
+                AccessNetworkConstants.AccessNetworkType.NGRAN, ServiceState.FREQUENCY_RANGE_MMWAVE,
                 new int[]{60, 61, 62, 63, 64}, 65);
 
         ActivityStatsTechSpecificInfo[] ratInfos =
@@ -719,22 +721,24 @@ public class MobileRadioPowerCalculatorTest {
         mStatsRule.setNetworkStats(networkStats);
 
         ActivityStatsTechSpecificInfo cdmaInfo = new ActivityStatsTechSpecificInfo(
-                AccessNetwork.CDMA2000, ServiceState.FREQUENCY_RANGE_UNKNOWN,
+                AccessNetworkConstants.AccessNetworkType.CDMA2000,
+                ServiceState.FREQUENCY_RANGE_UNKNOWN,
                 new int[]{10, 11, 12, 13, 14}, 15);
         ActivityStatsTechSpecificInfo lteInfo = new ActivityStatsTechSpecificInfo(
-                AccessNetwork.EUTRAN, ServiceState.FREQUENCY_RANGE_UNKNOWN,
+                AccessNetworkConstants.AccessNetworkType.EUTRAN,
+                ServiceState.FREQUENCY_RANGE_UNKNOWN,
                 new int[]{20, 21, 22, 23, 24}, 25);
         ActivityStatsTechSpecificInfo nrLowFreqInfo = new ActivityStatsTechSpecificInfo(
-                AccessNetwork.NGRAN, ServiceState.FREQUENCY_RANGE_LOW,
+                AccessNetworkConstants.AccessNetworkType.NGRAN, ServiceState.FREQUENCY_RANGE_LOW,
                 new int[]{30, 31, 32, 33, 34}, 35);
         ActivityStatsTechSpecificInfo nrMidFreqInfo = new ActivityStatsTechSpecificInfo(
-                AccessNetwork.NGRAN, ServiceState.FREQUENCY_RANGE_MID,
+                AccessNetworkConstants.AccessNetworkType.NGRAN, ServiceState.FREQUENCY_RANGE_MID,
                 new int[]{40, 41, 42, 43, 44}, 45);
         ActivityStatsTechSpecificInfo nrHighFreqInfo = new ActivityStatsTechSpecificInfo(
-                AccessNetwork.NGRAN, ServiceState.FREQUENCY_RANGE_HIGH,
+                AccessNetworkConstants.AccessNetworkType.NGRAN, ServiceState.FREQUENCY_RANGE_HIGH,
                 new int[]{50, 51, 52, 53, 54}, 55);
         ActivityStatsTechSpecificInfo nrMmwaveFreqInfo = new ActivityStatsTechSpecificInfo(
-                AccessNetwork.NGRAN, ServiceState.FREQUENCY_RANGE_MMWAVE,
+                AccessNetworkConstants.AccessNetworkType.NGRAN, ServiceState.FREQUENCY_RANGE_MMWAVE,
                 new int[]{60, 61, 62, 63, 64}, 65);
 
         ActivityStatsTechSpecificInfo[] ratInfos =

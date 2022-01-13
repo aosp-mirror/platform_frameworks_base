@@ -63,9 +63,9 @@ public final class NetworkRegistrationInfo implements Parcelable {
     /** Unknown / Unspecified domain */
     public static final int DOMAIN_UNKNOWN = 0;
     /** Circuit switched domain */
-    public static final int DOMAIN_CS = android.hardware.radio.V1_5.Domain.CS;
+    public static final int DOMAIN_CS = android.hardware.radio.network.Domain.CS;
     /** Packet switched domain */
-    public static final int DOMAIN_PS = android.hardware.radio.V1_5.Domain.PS;
+    public static final int DOMAIN_PS = android.hardware.radio.network.Domain.PS;
     /** Applicable to both CS and PS Domain */
     public static final int DOMAIN_CS_PS = DOMAIN_CS | DOMAIN_PS;
 
