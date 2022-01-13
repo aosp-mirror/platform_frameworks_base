@@ -38,7 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଦ୍ରୁତ ଭାବେ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଧୀରେ ଚାର୍ଜ ହେଉଛି"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ବ୍ୟାଟେରୀ ହେଲ୍ଥ ପାଇଁ ଅପ୍ଟିମାଇଜ୍ ହେଉଛି"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜିଂ ଅସ୍ଥାୟୀ ଭାବେ ସୀମିତ କରାଯାଇଛି"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"ଆପଣଙ୍କ ଚାର୍ଜର୍‍ ସଂଯୋଗ କରନ୍ତୁ।"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ଅନଲକ୍‌ କରିବା ପାଇଁ ମେନୁକୁ ଦବାନ୍ତୁ।"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ନେଟୱର୍କକୁ ଲକ୍‌ କରାଯାଇଛି"</string>

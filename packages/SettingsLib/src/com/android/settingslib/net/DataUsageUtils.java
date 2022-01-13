@@ -17,6 +17,7 @@
 package com.android.settingslib.net;
 
 import android.content.Context;
+import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -26,6 +27,7 @@ import android.util.Log;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Utils class for data usage
@@ -73,10 +75,15 @@ public class DataUsageUtils {
 
     private static NetworkTemplate getMobileTemplateForSubId(
             TelephonyManager telephonyManager, int subId) {
-        // The null subscriberId means that no any mobile/carrier network will be matched.
-        // Using old API: buildTemplateMobileAll for the null subscriberId to avoid NPE.
+        // Create template that matches any mobile network when the subscriberId is null.
         String subscriberId = telephonyManager.getSubscriberId(subId);
-        return subscriberId != null ? NetworkTemplate.buildTemplateCarrierMetered(subscriberId)
-                : NetworkTemplate.buildTemplateMobileAll(subscriberId);
+        return subscriberId != null
+                ? new NetworkTemplate.Builder(NetworkTemplate.MATCH_CARRIER)
+                .setSubscriberIds(Set.of(subscriberId))
+                .setMeteredness(NetworkStats.METERED_YES)
+                .build()
+                : new NetworkTemplate.Builder(NetworkTemplate.MATCH_MOBILE)
+                        .setMeteredness(NetworkStats.METERED_YES)
+                        .build();
     }
 }

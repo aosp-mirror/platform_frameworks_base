@@ -2,11 +2,7 @@
 per-file BrightnessLimit.java = michaelwr@google.com, santoscordon@google.com
 
 # Haptics
-per-file CombinedVibrationEffectTest.java = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file ExternalVibrationTest.java = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file VibrationEffectTest.java = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file VibratorInfoTest.java = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file VibratorTest.java = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file *Vibrat*.java = file:/services/core/java/com/android/server/vibrator/OWNERS
 
 # Power
 per-file PowerManager*.java = michaelwr@google.com, santoscordon@google.com

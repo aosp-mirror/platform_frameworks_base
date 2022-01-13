@@ -16,10 +16,16 @@
 
 package android.bluetooth.le;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * The {@link AdvertisingSetParameters} provide a way to adjust advertising
@@ -97,6 +103,39 @@ public final class AdvertisingSetParameters implements Parcelable {
      */
     private static final int LIMITED_ADVERTISING_MAX_MILLIS = 180 * 1000;
 
+    /** @hide */
+    @IntDef(prefix = "ADDRESS_TYPE_", value = {
+        ADDRESS_TYPE_DEFAULT,
+        ADDRESS_TYPE_PUBLIC,
+        ADDRESS_TYPE_RANDOM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AddressTypeStatus {}
+
+    /**
+     * Advertise own address type that corresponds privacy settings of the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ADDRESS_TYPE_DEFAULT = -1;
+
+    /**
+     * Advertise own public address type.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ADDRESS_TYPE_PUBLIC = 0;
+
+    /**
+     * Generate and adverise own resolvable private address.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ADDRESS_TYPE_RANDOM = 1;
+
     private final boolean mIsLegacy;
     private final boolean mIsAnonymous;
     private final boolean mIncludeTxPower;
@@ -106,11 +145,12 @@ public final class AdvertisingSetParameters implements Parcelable {
     private final boolean mScannable;
     private final int mInterval;
     private final int mTxPowerLevel;
+    private final int mOwnAddressType;
 
     private AdvertisingSetParameters(boolean connectable, boolean scannable, boolean isLegacy,
             boolean isAnonymous, boolean includeTxPower,
             int primaryPhy, int secondaryPhy,
-            int interval, int txPowerLevel) {
+            int interval, int txPowerLevel, @AddressTypeStatus int ownAddressType) {
         mConnectable = connectable;
         mScannable = scannable;
         mIsLegacy = isLegacy;
@@ -120,6 +160,7 @@ public final class AdvertisingSetParameters implements Parcelable {
         mSecondaryPhy = secondaryPhy;
         mInterval = interval;
         mTxPowerLevel = txPowerLevel;
+        mOwnAddressType = ownAddressType;
     }
 
     private AdvertisingSetParameters(Parcel in) {
@@ -132,6 +173,7 @@ public final class AdvertisingSetParameters implements Parcelable {
         mSecondaryPhy = in.readInt();
         mInterval = in.readInt();
         mTxPowerLevel = in.readInt();
+        mOwnAddressType = in.readInt();
     }
 
     /**
@@ -197,6 +239,16 @@ public final class AdvertisingSetParameters implements Parcelable {
         return mTxPowerLevel;
     }
 
+    /**
+     * @return the own address type for advertising
+     *
+     * @hide
+     */
+    @SystemApi
+    public @AddressTypeStatus int getOwnAddressType() {
+        return mOwnAddressType;
+    }
+
     @Override
     public String toString() {
         return "AdvertisingSetParameters [connectable=" + mConnectable
@@ -206,7 +258,8 @@ public final class AdvertisingSetParameters implements Parcelable {
                 + ", primaryPhy=" + mPrimaryPhy
                 + ", secondaryPhy=" + mSecondaryPhy
                 + ", interval=" + mInterval
-                + ", txPowerLevel=" + mTxPowerLevel + "]";
+                + ", txPowerLevel=" + mTxPowerLevel
+                + ", ownAddressType=" + mOwnAddressType + "]";
     }
 
     @Override
@@ -225,6 +278,7 @@ public final class AdvertisingSetParameters implements Parcelable {
         dest.writeInt(mSecondaryPhy);
         dest.writeInt(mInterval);
         dest.writeInt(mTxPowerLevel);
+        dest.writeInt(mOwnAddressType);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<AdvertisingSetParameters> CREATOR =
@@ -253,6 +307,7 @@ public final class AdvertisingSetParameters implements Parcelable {
         private int mSecondaryPhy = BluetoothDevice.PHY_LE_1M;
         private int mInterval = INTERVAL_LOW;
         private int mTxPowerLevel = TX_POWER_MEDIUM;
+        private int mOwnAddressType = ADDRESS_TYPE_DEFAULT;
 
         /**
          * Set whether the advertisement type should be connectable or
@@ -399,6 +454,26 @@ public final class AdvertisingSetParameters implements Parcelable {
         }
 
         /**
+         * Set own address type for advertising to control public or privacy mode. If used to set
+         * address type anything other than {@link AdvertisingSetParameters#ADDRESS_TYPE_DEFAULT},
+         * then it will require BLUETOOTH_PRIVILEGED permission and will be checked at the
+         * time of starting advertising.
+         *
+         * @throws IllegalArgumentException If the {@code ownAddressType} is invalid
+         *
+         * @hide
+         */
+        @SystemApi
+        public @NonNull Builder setOwnAddressType(@AddressTypeStatus int ownAddressType) {
+            if (ownAddressType < AdvertisingSetParameters.ADDRESS_TYPE_DEFAULT
+                    ||  ownAddressType > AdvertisingSetParameters.ADDRESS_TYPE_RANDOM) {
+                throw new IllegalArgumentException("unknown address type " + ownAddressType);
+            }
+            mOwnAddressType = ownAddressType;
+            return this;
+        }
+
+        /**
          * Build the {@link AdvertisingSetParameters} object.
          *
          * @throws IllegalStateException if invalid combination of parameters is used.
@@ -431,7 +506,8 @@ public final class AdvertisingSetParameters implements Parcelable {
             }
 
             return new AdvertisingSetParameters(mConnectable, mScannable, mIsLegacy, mIsAnonymous,
-                    mIncludeTxPower, mPrimaryPhy, mSecondaryPhy, mInterval, mTxPowerLevel);
+                    mIncludeTxPower, mPrimaryPhy, mSecondaryPhy, mInterval, mTxPowerLevel,
+                    mOwnAddressType);
         }
     }
 }

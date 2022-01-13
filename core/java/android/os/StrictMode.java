@@ -15,10 +15,13 @@
  */
 package android.os;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -2692,6 +2695,12 @@ public final class StrictMode {
             return;
         }
         ((AndroidBlockGuardPolicy) policy).onCustomSlowCall(name);
+    }
+
+    /** @hide */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void noteUntaggedSocket() {
+        if (vmUntaggedSocketEnabled()) onUntaggedSocket();
     }
 
     /**
