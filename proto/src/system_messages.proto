@@ -276,6 +276,9 @@ message SystemMessage {
     // Package: android
     NOTE_UNBLOCK_CAM_TOGGLE = 66;
 
+    // Notify the user that a CA certificate is pending for the wifi connection.
+    NOTE_SERVER_CA_CERTIFICATE = 67;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
