@@ -327,18 +327,17 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public long scheduleEnroll(int sensorId, @NonNull IBinder token,
+    public void scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId, @NonNull IFaceServiceReceiver receiver,
             @NonNull String opPackageName, @NonNull int[] disabledFeatures,
             @Nullable Surface previewSurface, boolean debugConsent) {
-        final long id = mRequestCounter.incrementAndGet();
         mHandler.post(() -> {
             final int maxTemplatesPerUser = mSensors.get(
                     sensorId).getSensorProperties().maxEnrollmentsPerUser;
             final FaceEnrollClient client = new FaceEnrollClient(mContext,
                     mSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
-                    opPackageName, id, FaceUtils.getInstance(sensorId), disabledFeatures,
+                    opPackageName, FaceUtils.getInstance(sensorId), disabledFeatures,
                     ENROLL_TIMEOUT_SEC, previewSurface, sensorId, maxTemplatesPerUser,
                     debugConsent);
             scheduleForSensor(sensorId, client, new BaseClientMonitor.Callback() {
@@ -352,13 +351,11 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                 }
             });
         });
-        return id;
     }
 
     @Override
-    public void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId) {
-        mHandler.post(() ->
-                mSensors.get(sensorId).getScheduler().cancelEnrollment(token, requestId));
+    public void cancelEnrollment(int sensorId, @NonNull IBinder token) {
+        mHandler.post(() -> mSensors.get(sensorId).getScheduler().cancelEnrollment(token));
     }
 
     @Override

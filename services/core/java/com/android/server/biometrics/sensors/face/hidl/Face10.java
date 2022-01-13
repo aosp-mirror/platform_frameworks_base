@@ -333,13 +333,12 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     Face10(@NonNull Context context,
             @NonNull FaceSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull Handler handler,
             @NonNull BiometricScheduler scheduler) {
         mSensorProperties = sensorProps;
         mContext = context;
         mSensorId = sensorProps.sensorId;
         mScheduler = scheduler;
-        mHandler = handler;
+        mHandler = new Handler(Looper.getMainLooper());
         mUsageStats = new UsageStats(context);
         mAuthenticatorIds = new HashMap<>();
         mLazyDaemon = Face10.this::getDaemon;
@@ -358,12 +357,10 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         }
     }
 
-    public static Face10 newInstance(@NonNull Context context,
-            @NonNull FaceSensorPropertiesInternal sensorProps,
+    public Face10(@NonNull Context context, @NonNull FaceSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
-        final Handler handler = new Handler(Looper.getMainLooper());
-        return new Face10(context, sensorProps, lockoutResetDispatcher, handler,
-                new BiometricScheduler(TAG, handler, BiometricScheduler.SENSOR_TYPE_FACE,
+        this(context, sensorProps, lockoutResetDispatcher,
+                new BiometricScheduler(TAG, BiometricScheduler.SENSOR_TYPE_FACE,
                         null /* gestureAvailabilityTracker */));
     }
 
@@ -576,11 +573,10 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public long scheduleEnroll(int sensorId, @NonNull IBinder token,
+    public void scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId, @NonNull IFaceServiceReceiver receiver,
             @NonNull String opPackageName, @NonNull int[] disabledFeatures,
             @Nullable Surface previewSurface, boolean debugConsent) {
-        final long id = mRequestCounter.incrementAndGet();
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -588,7 +584,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             final FaceEnrollClient client = new FaceEnrollClient(mContext, mLazyDaemon, token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
-                    opPackageName, id, FaceUtils.getLegacyInstance(mSensorId), disabledFeatures,
+                    opPackageName, FaceUtils.getLegacyInstance(mSensorId), disabledFeatures,
                     ENROLL_TIMEOUT_SEC, previewSurface, mSensorId);
 
             mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
@@ -602,12 +598,13 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                 }
             });
         });
-        return id;
     }
 
     @Override
-    public void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId) {
-        mHandler.post(() -> mScheduler.cancelEnrollment(token, requestId));
+    public void cancelEnrollment(int sensorId, @NonNull IBinder token) {
+        mHandler.post(() -> {
+            mScheduler.cancelEnrollment(token);
+        });
     }
 
     @Override
