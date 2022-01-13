@@ -318,6 +318,12 @@ public final class DisplayInfo implements Parcelable {
     @Nullable
     public RoundedCorners roundedCorners;
 
+    /**
+     * Install orientation of the display relative to its natural orientation.
+     */
+    @Surface.Rotation
+    public int installOrientation;
+
     public static final @android.annotation.NonNull Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
         @Override
         public DisplayInfo createFromParcel(Parcel source) {
@@ -389,7 +395,8 @@ public final class DisplayInfo implements Parcelable {
                 && brightnessMaximum == other.brightnessMaximum
                 && brightnessDefault == other.brightnessDefault
                 && Objects.equals(roundedCorners, other.roundedCorners)
-                && shouldConstrainMetricsForLauncher == other.shouldConstrainMetricsForLauncher;
+                && shouldConstrainMetricsForLauncher == other.shouldConstrainMetricsForLauncher
+                && installOrientation == other.installOrientation;
     }
 
     @Override
@@ -441,6 +448,7 @@ public final class DisplayInfo implements Parcelable {
         brightnessDefault = other.brightnessDefault;
         roundedCorners = other.roundedCorners;
         shouldConstrainMetricsForLauncher = other.shouldConstrainMetricsForLauncher;
+        installOrientation = other.installOrientation;
     }
 
     public void readFromParcel(Parcel source) {
@@ -498,6 +506,7 @@ public final class DisplayInfo implements Parcelable {
             userDisabledHdrTypes[i] = source.readInt();
         }
         shouldConstrainMetricsForLauncher = source.readBoolean();
+        installOrientation = source.readInt();
     }
 
     @Override
@@ -553,6 +562,7 @@ public final class DisplayInfo implements Parcelable {
             dest.writeInt(userDisabledHdrTypes[i]);
         }
         dest.writeBoolean(shouldConstrainMetricsForLauncher);
+        dest.writeInt(installOrientation);
     }
 
     @Override
@@ -809,6 +819,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(brightnessDefault);
         sb.append(", shouldConstrainMetricsForLauncher ");
         sb.append(shouldConstrainMetricsForLauncher);
+        sb.append(", installOrientation ");
+        sb.append(Surface.rotationToString(installOrientation));
         sb.append("}");
         return sb.toString();
     }

@@ -358,6 +358,12 @@ final class DisplayDeviceInfo {
     public float brightnessMaximum;
     public float brightnessDefault;
 
+    /**
+     * Install orientation of display panel relative to its natural orientation.
+     */
+    @Surface.Rotation
+    public int installOrientation = Surface.ROTATION_0;
+
     public void setAssumedDensityForExternalDisplay(int width, int height) {
         densityDpi = Math.min(width, height) * DisplayMetrics.DENSITY_XHIGH / 1080;
         // Technically, these values should be smaller than the apparent density
@@ -417,7 +423,8 @@ final class DisplayDeviceInfo {
                 || !BrightnessSynchronizer.floatEquals(brightnessMaximum, other.brightnessMaximum)
                 || !BrightnessSynchronizer.floatEquals(brightnessDefault,
                 other.brightnessDefault)
-                || !Objects.equals(roundedCorners, other.roundedCorners)) {
+                || !Objects.equals(roundedCorners, other.roundedCorners)
+                || installOrientation != other.installOrientation) {
             diff |= DIFF_OTHER;
         }
         return diff;
@@ -461,6 +468,7 @@ final class DisplayDeviceInfo {
         brightnessMaximum = other.brightnessMaximum;
         brightnessDefault = other.brightnessDefault;
         roundedCorners = other.roundedCorners;
+        installOrientation = other.installOrientation;
     }
 
     // For debugging purposes
@@ -508,6 +516,7 @@ final class DisplayDeviceInfo {
             sb.append(", roundedCorners ").append(roundedCorners);
         }
         sb.append(flagsToString(flags));
+        sb.append(", installOrientation ").append(installOrientation);
         sb.append("}");
         return sb.toString();
     }

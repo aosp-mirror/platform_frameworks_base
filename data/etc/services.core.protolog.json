@@ -103,18 +103,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
     },
-    "-2002500255": {
-      "message": "Defer removing snapshot surface in %dms",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/TaskSnapshotSurface.java"
-    },
-    "-1991255017": {
-      "message": "Drawing snapshot surface sizeMismatch=%b",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/TaskSnapshotSurface.java"
-    },
     "-1980468143": {
       "message": "DisplayArea appeared name=%s",
       "level": "VERBOSE",
@@ -505,12 +493,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "-1556507536": {
-      "message": "Passing transform hint %d for window %s%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-1554521902": {
       "message": "showInsets(ime) was requested by different window: %s ",
       "level": "WARN",
@@ -822,6 +804,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
+    "-1248290210": {
+      "message": "Passing transform hint %d for window %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-1228653755": {
       "message": "Launch on display check: displayId=%d callingPid=%d callingUid=%d",
@@ -1597,12 +1585,6 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
-    "-405536909": {
-      "message": "Removing snapshot surface",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/TaskSnapshotSurface.java"
-    },
     "-401282500": {
       "message": "destroyIfPossible: r=%s destroy returned removed=%s",
       "level": "DEBUG",
@@ -2004,12 +1986,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "44438983": {
-      "message": "performLayout: Activity exiting now removed %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "45285419": {
       "message": "startingWindow was set but startingSurface==null, couldn't remove",
@@ -3270,12 +3246,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_LAYER_MIRRORING",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
-    "1417601133": {
-      "message": "Enqueueing ADD_STARTING",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1422781269": {
       "message": "Resuming rotation after re-position",
