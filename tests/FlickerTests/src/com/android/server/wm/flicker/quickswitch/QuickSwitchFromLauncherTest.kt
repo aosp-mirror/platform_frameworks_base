@@ -261,7 +261,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
         testSpec.assertWm {
             this.isAppWindowOnTop(LAUNCHER_COMPONENT)
                     .then()
-                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT)
+                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
                     .isAppWindowVisible(testApp.component)
         }
