@@ -83,7 +83,7 @@ public class TakeScreenshotService extends Service {
 
     /** Informs about coarse grained state of the Controller. */
     interface RequestCallback {
-        /** Respond to the current request indicating the screenshot request failed.*/
+        /** Respond to the current request indicating the screenshot request failed. */
         void reportError();
 
         /** The controller has completed handling this request UI has been removed */
@@ -230,7 +230,7 @@ public class TakeScreenshotService extends Service {
                 return false;
         }
         return true;
-    };
+    }
 
     private static void sendComplete(Messenger target) {
         try {
