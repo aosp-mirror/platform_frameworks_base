@@ -18,14 +18,11 @@ package com.android.wm.shell.util;
 
 import android.view.SurfaceControl;
 
-import java.util.ArrayList;
-
 /**
  * Utility class that takes care of counter-rotating surfaces during a transition animation.
  */
 public class CounterRotator {
-    SurfaceControl mSurface = null;
-    ArrayList<SurfaceControl> mRotateChildren = null;
+    private SurfaceControl mSurface = null;
 
     /** Gets the surface with the counter-rotation. */
     public SurfaceControl getSurface() {
@@ -41,7 +38,6 @@ public class CounterRotator {
     public void setup(SurfaceControl.Transaction t, SurfaceControl parent, int rotateDelta,
             float displayW, float displayH) {
         if (rotateDelta == 0) return;
-        mRotateChildren = new ArrayList<>();
         // We want to counter-rotate, so subtract from 4
         rotateDelta = 4 - (rotateDelta + 4) % 4;
         mSurface = new SurfaceControl.Builder()
@@ -64,24 +60,19 @@ public class CounterRotator {
     }
 
     /**
-     * Add a surface that needs to be counter-rotate.
+     * Adds a surface that needs to be counter-rotate.
      */
     public void addChild(SurfaceControl.Transaction t, SurfaceControl child) {
         if (mSurface == null) return;
         t.reparent(child, mSurface);
-        mRotateChildren.add(child);
     }
 
     /**
-     * Clean-up. This undoes any reparenting and effectively stops the counter-rotation.
+     * Clean-up. Since finishTransaction should reset all change leashes, we only need to remove the
+     * counter rotation surface.
      */
-    public void cleanUp(SurfaceControl rootLeash) {
+    public void cleanUp(SurfaceControl.Transaction finishTransaction) {
         if (mSurface == null) return;
-        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        for (int i = mRotateChildren.size() - 1; i >= 0; --i) {
-            t.reparent(mRotateChildren.get(i), rootLeash);
-        }
-        t.remove(mSurface);
-        t.apply();
+        finishTransaction.remove(mSurface);
     }
 }
