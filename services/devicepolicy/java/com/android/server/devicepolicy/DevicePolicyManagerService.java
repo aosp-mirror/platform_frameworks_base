@@ -4003,6 +4003,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+        // System caller can query policy for a particular admin.
+        Preconditions.checkCallAuthorization(
+                who == null || isCallingFromPackage(who.getPackageName(), caller.getUid())
+                        || isSystemUid(caller));
 
         synchronized (getLockObject()) {
             int mode = PASSWORD_QUALITY_UNSPECIFIED;
@@ -4218,7 +4222,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
@@ -4368,7 +4372,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
@@ -4581,7 +4585,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
@@ -4999,6 +5003,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+        // System caller can query policy for a particular admin.
+        Preconditions.checkCallAuthorization(
+                who == null || isCallingFromPackage(who.getPackageName(), caller.getUid())
+                        || isSystemUid(caller));
 
         synchronized (getLockObject()) {
             ActiveAdmin admin = (who != null)
@@ -5310,6 +5318,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+        // System caller can query policy for a particular admin.
+        Preconditions.checkCallAuthorization(
+                who == null || isCallingFromPackage(who.getPackageName(), caller.getUid())
+                        || isSystemUid(caller));
 
         synchronized (getLockObject()) {
             if (who != null) {
@@ -5387,7 +5399,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
 
         if (!mLockPatternUtils.hasSecureLockScreen()) {
@@ -7730,6 +7742,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return false;
         }
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+
         if (parent) {
             Preconditions.checkCallAuthorization(
                     isProfileOwnerOfOrganizationOwnedDevice(getCallerIdentity().getUserId()));
@@ -9950,7 +9966,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(agent, "agent null");
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity(admin);
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
