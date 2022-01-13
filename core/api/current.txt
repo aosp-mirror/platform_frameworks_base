@@ -21897,14 +21897,27 @@ package android.media {
     method public android.media.Image acquireNextImage();
     method public void close();
     method public void discardFreeBuffers();
+    method public long getDataSpace();
+    method public int getHardwareBufferFormat();
     method public int getHeight();
     method public int getImageFormat();
     method public int getMaxImages();
     method public android.view.Surface getSurface();
+    method public long getUsage();
     method public int getWidth();
     method @NonNull public static android.media.ImageReader newInstance(@IntRange(from=1) int, @IntRange(from=1) int, int, @IntRange(from=1) int);
     method @NonNull public static android.media.ImageReader newInstance(@IntRange(from=1) int, @IntRange(from=1) int, int, @IntRange(from=1) int, long);
     method public void setOnImageAvailableListener(android.media.ImageReader.OnImageAvailableListener, android.os.Handler);
+  }
+
+  public static final class ImageReader.Builder {
+    ctor public ImageReader.Builder(@IntRange(from=1) int, @IntRange(from=1) int);
+    method @NonNull public android.media.ImageReader build();
+    method @NonNull public android.media.ImageReader.Builder setDefaultDataSpace(long);
+    method @NonNull public android.media.ImageReader.Builder setDefaultHardwareBufferFormat(int);
+    method @NonNull public android.media.ImageReader.Builder setImageFormat(int);
+    method @NonNull public android.media.ImageReader.Builder setMaxImages(int);
+    method @NonNull public android.media.ImageReader.Builder setUsage(long);
   }
 
   public static interface ImageReader.OnImageAvailableListener {
