@@ -61,6 +61,7 @@ import android.os.storage.CrateMetadata;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -70,6 +71,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseLongArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
@@ -128,6 +130,12 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     private final CopyOnWriteArrayList<Pair<String, StorageStatsAugmenter>>
             mStorageStatsAugmenters = new CopyOnWriteArrayList<>();
 
+    @GuardedBy("mLock")
+    private int
+            mStorageThresholdPercentHigh = StorageManager.DEFAULT_STORAGE_THRESHOLD_PERCENT_HIGH;
+
+    private final Object mLock = new Object();
+
     public StorageStatsService(Context context) {
         mContext = Preconditions.checkNotNull(context);
         mAppOps = Preconditions.checkNotNull(context.getSystemService(AppOpsManager.class));
@@ -173,6 +181,19 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 }
             }
         }, prFilter);
+
+        updateConfig();
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                mContext.getMainExecutor(), properties -> updateConfig());
+    }
+
+    private void updateConfig() {
+        synchronized (mLock) {
+            mStorageThresholdPercentHigh = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                    StorageManager.STORAGE_THRESHOLD_PERCENT_HIGH_KEY,
+                    StorageManager.DEFAULT_STORAGE_THRESHOLD_PERCENT_HIGH);
+        }
     }
 
     private void invalidateMounts() {
@@ -554,7 +575,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
          * By only triggering a re-calculation after the storage has changed sizes, we can avoid
          * recalculating quotas too often. Minimum change delta high and low define the
          * percentage of change we need to see before we recalculate quotas when the device has
-         * enough storage space (more than StorageManager.STORAGE_THRESHOLD_PERCENT_HIGH of total
+         * enough storage space (more than mStorageThresholdPercentHigh of total
          * free) and in low storage condition respectively.
          */
         private static final long MINIMUM_CHANGE_DELTA_PERCENT_HIGH = 5;
@@ -588,11 +609,15 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                     mStats.restat(Environment.getDataDirectory().getAbsolutePath());
                     long bytesDelta = Math.abs(mPreviousBytes - mStats.getAvailableBytes());
                     long bytesDeltaThreshold;
-                    if (mStats.getAvailableBytes() >  mTotalBytes
-                            * StorageManager.STORAGE_THRESHOLD_PERCENT_HIGH / 100) {
-                        bytesDeltaThreshold = mTotalBytes * MINIMUM_CHANGE_DELTA_PERCENT_HIGH / 100;
-                    } else {
-                        bytesDeltaThreshold = mTotalBytes * MINIMUM_CHANGE_DELTA_PERCENT_LOW / 100;
+                    synchronized (mLock) {
+                        if (mStats.getAvailableBytes() >  mTotalBytes
+                                * mStorageThresholdPercentHigh / 100) {
+                            bytesDeltaThreshold = mTotalBytes
+                                    * MINIMUM_CHANGE_DELTA_PERCENT_HIGH / 100;
+                        } else {
+                            bytesDeltaThreshold = mTotalBytes
+                                    * MINIMUM_CHANGE_DELTA_PERCENT_LOW / 100;
+                        }
                     }
                     if (bytesDelta > bytesDeltaThreshold) {
                         mPreviousBytes = mStats.getAvailableBytes();
