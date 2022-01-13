@@ -3964,6 +3964,8 @@
   <java-symbol type="dimen" name="config_displayWhiteBalanceHighLightAmbientColorTemperature" />
   <java-symbol type="array" name="config_displayWhiteBalanceAmbientColorTemperatures" />
   <java-symbol type="array" name="config_displayWhiteBalanceDisplayColorTemperatures" />
+  <java-symbol type="array" name="config_displayWhiteBalanceStrongAmbientColorTemperatures" />
+  <java-symbol type="array" name="config_displayWhiteBalanceStrongDisplayColorTemperatures" />
   <java-symbol type="drawable" name="ic_action_open" />
   <java-symbol type="drawable" name="ic_menu_copy_material" />
 
