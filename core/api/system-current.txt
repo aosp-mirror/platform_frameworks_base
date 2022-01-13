@@ -7688,6 +7688,7 @@ package android.media.tv.tuner.frontend {
 
   public class FrontendStatus {
     method public int getAgc();
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3PlpInfo[] getAllAtsc3PlpInfo();
     method @NonNull public android.media.tv.tuner.frontend.FrontendStatus.Atsc3PlpTuningInfo[] getAtsc3PlpTuningInfo();
     method public int getBandwidth();
     method public int getBer();
@@ -7730,6 +7731,7 @@ package android.media.tv.tuner.frontend {
     method public boolean isRfLocked();
     method public boolean isShortFramesEnabled();
     field public static final int FRONTEND_STATUS_TYPE_AGC = 14; // 0xe
+    field public static final int FRONTEND_STATUS_TYPE_ATSC3_ALL_PLP_INFO = 41; // 0x29
     field public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO = 21; // 0x15
     field public static final int FRONTEND_STATUS_TYPE_BANDWIDTH = 25; // 0x19
     field public static final int FRONTEND_STATUS_TYPE_BER = 2; // 0x2
