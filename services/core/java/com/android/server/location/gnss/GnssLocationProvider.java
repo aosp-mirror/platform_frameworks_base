@@ -1147,7 +1147,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (DEBUG) {
             Log.d(TAG, "startBatching " + mFixInterval + " " + batchLengthMs);
         }
-        if (mGnssNative.startBatch(MILLISECONDS.toNanos(mFixInterval), true)) {
+        if (mGnssNative.startBatch(MILLISECONDS.toNanos(mFixInterval), 0, true)) {
             mBatchingStarted = true;
 
             if (batchSize < getBatchSize()) {

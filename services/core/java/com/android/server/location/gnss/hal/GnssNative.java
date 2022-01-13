@@ -817,9 +817,10 @@ public class GnssNative {
     /**
      * Start batching.
      */
-    public boolean startBatch(long periodNanos, boolean wakeOnFifoFull) {
+    public boolean startBatch(long periodNanos, float minUpdateDistanceMeters,
+            boolean wakeOnFifoFull) {
         Preconditions.checkState(mRegistered);
-        return mGnssHal.startBatch(periodNanos, wakeOnFifoFull);
+        return mGnssHal.startBatch(periodNanos, minUpdateDistanceMeters, wakeOnFifoFull);
     }
 
     /**
@@ -1380,8 +1381,9 @@ public class GnssNative {
             native_cleanup_batching();
         }
 
-        protected boolean startBatch(long periodNanos, boolean wakeOnFifoFull) {
-            return native_start_batch(periodNanos, wakeOnFifoFull);
+        protected boolean startBatch(long periodNanos, float minUpdateDistanceMeters,
+                boolean wakeOnFifoFull) {
+            return native_start_batch(periodNanos, minUpdateDistanceMeters, wakeOnFifoFull);
         }
 
         protected void flushBatch() {
@@ -1539,7 +1541,8 @@ public class GnssNative {
 
     private static native void native_cleanup_batching();
 
-    private static native boolean native_start_batch(long periodNanos, boolean wakeOnFifoFull);
+    private static native boolean native_start_batch(long periodNanos,
+            float minUpdateDistanceMeters, boolean wakeOnFifoFull);
 
     private static native void native_flush_batch();
 

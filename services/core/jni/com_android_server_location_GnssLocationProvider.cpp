@@ -2273,11 +2273,12 @@ static void android_location_gnss_hal_GnssNative_cleanup_batching(JNIEnv*, jclas
 }
 
 static jboolean android_location_gnss_hal_GnssNative_start_batch(JNIEnv*, jclass, jlong periodNanos,
+                                                                 jfloat minUpdateDistanceMeters,
                                                                  jboolean wakeOnFifoFull) {
     if (gnssBatchingIface == nullptr) {
         return JNI_FALSE; // batching not supported
     }
-    return gnssBatchingIface->start(periodNanos, wakeOnFifoFull);
+    return gnssBatchingIface->start(periodNanos, minUpdateDistanceMeters, wakeOnFifoFull);
 }
 
 static void android_location_gnss_hal_GnssNative_flush_batch(JNIEnv*, jclass) {
@@ -2367,7 +2368,7 @@ static const JNINativeMethod sBatchingMethods[] = {
         /* name, signature, funcPtr */
         {"native_get_batch_size", "()I",
          reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_get_batch_size)},
-        {"native_start_batch", "(JZ)Z",
+        {"native_start_batch", "(JFZ)Z",
          reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_start_batch)},
         {"native_flush_batch", "()V",
          reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_flush_batch)},
