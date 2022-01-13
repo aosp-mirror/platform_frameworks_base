@@ -180,7 +180,7 @@ public class OptionsSipResponse implements Parcelable {
         mRequestId = source.readInt();
         mSipResponseCode = source.readInt();
         mReasonPhrase = source.readString();
-        mCmdId = source.readParcelable(OptionsCmdId.class.getClassLoader(), com.android.ims.internal.uce.options.OptionsCmdId.class);
+        mCmdId = source.readParcelable(OptionsCmdId.class.getClassLoader());
         mRetryAfter = source.readInt();
         mReasonHeader = source.readString();
     }

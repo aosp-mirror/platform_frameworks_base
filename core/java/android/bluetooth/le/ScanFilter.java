@@ -200,28 +200,28 @@ public final class ScanFilter implements Parcelable {
                 address = in.readString();
             }
             if (in.readInt() == 1) {
-                ParcelUuid uuid = in.readParcelable(ParcelUuid.class.getClassLoader(), android.os.ParcelUuid.class);
+                ParcelUuid uuid = in.readParcelable(ParcelUuid.class.getClassLoader());
                 builder.setServiceUuid(uuid);
                 if (in.readInt() == 1) {
                     ParcelUuid uuidMask = in.readParcelable(
-                            ParcelUuid.class.getClassLoader(), android.os.ParcelUuid.class);
+                            ParcelUuid.class.getClassLoader());
                     builder.setServiceUuid(uuid, uuidMask);
                 }
             }
             if (in.readInt() == 1) {
                 ParcelUuid solicitationUuid = in.readParcelable(
-                        ParcelUuid.class.getClassLoader(), android.os.ParcelUuid.class);
+                        ParcelUuid.class.getClassLoader());
                 builder.setServiceSolicitationUuid(solicitationUuid);
                 if (in.readInt() == 1) {
                     ParcelUuid solicitationUuidMask = in.readParcelable(
-                            ParcelUuid.class.getClassLoader(), android.os.ParcelUuid.class);
+                            ParcelUuid.class.getClassLoader());
                     builder.setServiceSolicitationUuid(solicitationUuid,
                             solicitationUuidMask);
                 }
             }
             if (in.readInt() == 1) {
                 ParcelUuid servcieDataUuid =
-                        in.readParcelable(ParcelUuid.class.getClassLoader(), android.os.ParcelUuid.class);
+                        in.readParcelable(ParcelUuid.class.getClassLoader());
                 if (in.readInt() == 1) {
                     int serviceDataLength = in.readInt();
                     byte[] serviceData = new byte[serviceDataLength];

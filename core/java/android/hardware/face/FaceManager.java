@@ -306,21 +306,22 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             throw new IllegalArgumentException("Must supply an enrollment callback");
         }
 
-        if (cancel != null && cancel.isCanceled()) {
-            Slog.w(TAG, "enrollment already canceled");
-            return;
+        if (cancel != null) {
+            if (cancel.isCanceled()) {
+                Slog.w(TAG, "enrollment already canceled");
+                return;
+            } else {
+                cancel.setOnCancelListener(new OnEnrollCancelListener());
+            }
         }
 
         if (mService != null) {
             try {
                 mEnrollmentCallback = callback;
                 Trace.beginSection("FaceManager#enroll");
-                final long enrollId = mService.enroll(userId, mToken, hardwareAuthToken,
-                        mServiceReceiver, mContext.getOpPackageName(), disabledFeatures,
-                        previewSurface, debugConsent);
-                if (cancel != null) {
-                    cancel.setOnCancelListener(new OnEnrollCancelListener(enrollId));
-                }
+                mService.enroll(userId, mToken, hardwareAuthToken, mServiceReceiver,
+                        mContext.getOpPackageName(), disabledFeatures, previewSurface,
+                        debugConsent);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception in enroll: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or
@@ -358,20 +359,21 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             throw new IllegalArgumentException("Must supply an enrollment callback");
         }
 
-        if (cancel != null && cancel.isCanceled()) {
-            Slog.w(TAG, "enrollRemotely is already canceled.");
-            return;
+        if (cancel != null) {
+            if (cancel.isCanceled()) {
+                Slog.w(TAG, "enrollRemotely is already canceled.");
+                return;
+            } else {
+                cancel.setOnCancelListener(new OnEnrollCancelListener());
+            }
         }
 
         if (mService != null) {
             try {
                 mEnrollmentCallback = callback;
                 Trace.beginSection("FaceManager#enrollRemotely");
-                final long enrolId = mService.enrollRemotely(userId, mToken, hardwareAuthToken,
-                        mServiceReceiver, mContext.getOpPackageName(), disabledFeatures);
-                if (cancel != null) {
-                    cancel.setOnCancelListener(new OnEnrollCancelListener(enrolId));
-                }
+                mService.enrollRemotely(userId, mToken, hardwareAuthToken, mServiceReceiver,
+                        mContext.getOpPackageName(), disabledFeatures);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception in enrollRemotely: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or
@@ -711,10 +713,10 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
     }
 
-    private void cancelEnrollment(long requestId) {
+    private void cancelEnrollment() {
         if (mService != null) {
             try {
-                mService.cancelEnrollment(mToken, requestId);
+                mService.cancelEnrollment(mToken);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1098,16 +1100,9 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     private class OnEnrollCancelListener implements OnCancelListener {
-        private final long mAuthRequestId;
-
-        private OnEnrollCancelListener(long id) {
-            mAuthRequestId = id;
-        }
-
         @Override
         public void onCancel() {
-            Slog.d(TAG, "Cancel face enrollment requested for: " + mAuthRequestId);
-            cancelEnrollment(mAuthRequestId);
+            cancelEnrollment();
         }
     }
 

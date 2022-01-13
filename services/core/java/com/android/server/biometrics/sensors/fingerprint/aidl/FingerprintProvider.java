@@ -347,16 +347,15 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
-    public long scheduleEnroll(int sensorId, @NonNull IBinder token,
+    public void scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId,
             @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
             @FingerprintManager.EnrollReason int enrollReason) {
-        final long id = mRequestCounter.incrementAndGet();
         mHandler.post(() -> {
             final int maxTemplatesPerUser = mSensors.get(sensorId).getSensorProperties()
                     .maxEnrollmentsPerUser;
             final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
-                    mSensors.get(sensorId).getLazySession(), token, id,
+                    mSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
                     opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
                     mSensors.get(sensorId).getSensorProperties(),
@@ -379,13 +378,11 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                 }
             });
         });
-        return id;
     }
 
     @Override
-    public void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId) {
-        mHandler.post(() ->
-                mSensors.get(sensorId).getScheduler().cancelEnrollment(token, requestId));
+    public void cancelEnrollment(int sensorId, @NonNull IBinder token) {
+        mHandler.post(() -> mSensors.get(sensorId).getScheduler().cancelEnrollment(token));
     }
 
     @Override

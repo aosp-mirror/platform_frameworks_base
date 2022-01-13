@@ -3546,9 +3546,9 @@ public abstract class Connection extends Conferenceable {
             mIsBlocked = in.readByte() != 0;
             mIsInContacts = in.readByte() != 0;
             CallScreeningService.ParcelableCallResponse response
-                    = in.readParcelable(CallScreeningService.class.getClassLoader(), android.telecom.CallScreeningService.ParcelableCallResponse.class);
+                    = in.readParcelable(CallScreeningService.class.getClassLoader());
             mCallResponse = response == null ? null : response.toCallResponse();
-            mCallScreeningComponent = in.readParcelable(ComponentName.class.getClassLoader(), android.content.ComponentName.class);
+            mCallScreeningComponent = in.readParcelable(ComponentName.class.getClassLoader());
         }
 
         @NonNull

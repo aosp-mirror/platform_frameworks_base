@@ -287,7 +287,7 @@ public final class DisconnectCause implements Parcelable {
             int tone = source.readInt();
             int telephonyDisconnectCause = source.readInt();
             int telephonyPreciseDisconnectCause = source.readInt();
-            ImsReasonInfo imsReasonInfo = source.readParcelable(null, android.telephony.ims.ImsReasonInfo.class);
+            ImsReasonInfo imsReasonInfo = source.readParcelable(null);
             return new DisconnectCause(code, label, description, reason, tone,
                     telephonyDisconnectCause, telephonyPreciseDisconnectCause, imsReasonInfo);
         }

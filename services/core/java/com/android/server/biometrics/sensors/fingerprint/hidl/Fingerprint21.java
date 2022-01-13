@@ -42,6 +42,7 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IHwBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -319,8 +320,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     Fingerprint21(@NonNull Context context,
             @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
-            @NonNull BiometricScheduler scheduler,
-            @NonNull Handler handler,
+            @NonNull BiometricScheduler scheduler, @NonNull Handler handler,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull HalResultController controller) {
         mContext = context;
@@ -356,15 +356,16 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     public static Fingerprint21 newInstance(@NonNull Context context,
             @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
-            @NonNull Handler handler,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
+        final Handler handler = new Handler(Looper.getMainLooper());
         final BiometricScheduler scheduler =
-                new BiometricScheduler(TAG, handler,
+                new BiometricScheduler(TAG,
                         BiometricScheduler.sensorTypeFromFingerprintProperties(sensorProps),
                         gestureAvailabilityDispatcher);
         final HalResultController controller = new HalResultController(sensorProps.sensorId,
-                context, handler, scheduler);
+                context, handler,
+                scheduler);
         return new Fingerprint21(context, fingerprintStateCallback, sensorProps, scheduler, handler,
                 lockoutResetDispatcher, controller);
     }
@@ -557,20 +558,18 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     }
 
     @Override
-    public long scheduleEnroll(int sensorId, @NonNull IBinder token,
+    public void scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId,
             @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
             @FingerprintManager.EnrollReason int enrollReason) {
-        final long id = mRequestCounter.incrementAndGet();
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
             final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
-                    mLazyDaemon, token, id, new ClientMonitorCallbackConverter(receiver),
-                    userId, hardwareAuthToken, opPackageName,
-                    FingerprintUtils.getLegacyInstance(mSensorId), ENROLL_TIMEOUT_SEC,
-                    mSensorProperties.sensorId, mUdfpsOverlayController, mSidefpsController,
-                    enrollReason);
+                    mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
+                    hardwareAuthToken, opPackageName, FingerprintUtils.getLegacyInstance(mSensorId),
+                    ENROLL_TIMEOUT_SEC, mSensorProperties.sensorId, mUdfpsOverlayController,
+                    mSidefpsController, enrollReason);
             mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
                 @Override
                 public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
@@ -589,12 +588,13 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                 }
             });
         });
-        return id;
     }
 
     @Override
-    public void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId) {
-        mHandler.post(() -> mScheduler.cancelEnrollment(token, requestId));
+    public void cancelEnrollment(int sensorId, @NonNull IBinder token) {
+        mHandler.post(() -> {
+            mScheduler.cancelEnrollment(token);
+        });
     }
 
     @Override

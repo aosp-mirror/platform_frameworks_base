@@ -88,11 +88,11 @@ public interface ServiceProvider {
     /**
      * Schedules fingerprint enrollment.
      */
-    long scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
+    void scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
             int userId, @NonNull IFingerprintServiceReceiver receiver,
             @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason);
 
-    void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId);
+    void cancelEnrollment(int sensorId, @NonNull IBinder token);
 
     long scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
