@@ -70,8 +70,11 @@ class MoveCloserToEndCast(
     otherDeviceName
 )
 
-/** A state representing that a transfer has been initiated (but not completed). */
-class TransferInitiated(
+/**
+ * A state representing that a transfer to the receiver device has been initiated (but not
+ * completed).
+ */
+class TransferToReceiverTriggered(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
     otherDeviceName: String

@@ -78,8 +78,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
-    fun transferInitiated_appIcon_loadingIcon_noUndo_noFailureIcon() {
-        controllerSender.displayChip(transferInitiated())
+    fun transferToReceiverTriggered_appIcon_loadingIcon_noUndo_noFailureIcon() {
+        controllerSender.displayChip(transferToReceiverTriggered())
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
@@ -144,24 +144,24 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
-    fun changeFromCloserToStartToTransferInitiated_loadingIconAppears() {
+    fun changeFromCloserToStartToTransferTriggered_loadingIconAppears() {
         controllerSender.displayChip(moveCloserToStartCast())
-        controllerSender.displayChip(transferInitiated())
+        controllerSender.displayChip(transferToReceiverTriggered())
 
         assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
     }
 
     @Test
-    fun changeFromTransferInitiatedToTransferSucceeded_loadingIconDisappears() {
-        controllerSender.displayChip(transferInitiated())
+    fun changeFromTransferTriggeredToTransferSucceeded_loadingIconDisappears() {
+        controllerSender.displayChip(transferToReceiverTriggered())
         controllerSender.displayChip(transferSucceeded())
 
         assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.GONE)
     }
 
     @Test
-    fun changeFromTransferInitiatedToTransferSucceeded_undoButtonAppears() {
-        controllerSender.displayChip(transferInitiated())
+    fun changeFromTransferTriggeredToTransferSucceeded_undoButtonAppears() {
+        controllerSender.displayChip(transferToReceiverTriggered())
         controllerSender.displayChip(transferSucceeded { })
 
         assertThat(getChipView().getUndoButton().visibility).isEqualTo(View.VISIBLE)
@@ -176,8 +176,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
-    fun changeFromTransferInitiatedToTransferFailed_failureIconAppears() {
-        controllerSender.displayChip(transferInitiated())
+    fun changeFromTransferTriggeredToTransferFailed_failureIconAppears() {
+        controllerSender.displayChip(transferToReceiverTriggered())
         controllerSender.displayChip(transferFailed())
 
         assertThat(getChipView().getFailureIcon().visibility).isEqualTo(View.VISIBLE)
@@ -210,8 +210,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         MoveCloserToEndCast(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
-    private fun transferInitiated() =
-        TransferInitiated(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
+    private fun transferToReceiverTriggered() =
+        TransferToReceiverTriggered(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferSucceeded(

@@ -49,7 +49,7 @@ class MediaTttChipControllerSender @Inject constructor(
         }
 
         // Loading
-        val showLoading = chipState is TransferInitiated
+        val showLoading = chipState is TransferToReceiverTriggered
         currentChipView.requireViewById<View>(R.id.loading).visibility =
             if (showLoading) { View.VISIBLE } else { View.GONE }
 

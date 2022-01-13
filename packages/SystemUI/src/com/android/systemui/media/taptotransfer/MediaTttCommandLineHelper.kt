@@ -35,7 +35,7 @@ import com.android.systemui.media.taptotransfer.sender.MediaTttSenderService
 import com.android.systemui.media.taptotransfer.sender.MoveCloserToEndCast
 import com.android.systemui.media.taptotransfer.sender.MoveCloserToStartCast
 import com.android.systemui.media.taptotransfer.sender.TransferFailed
-import com.android.systemui.media.taptotransfer.sender.TransferInitiated
+import com.android.systemui.media.taptotransfer.sender.TransferToReceiverTriggered
 import com.android.systemui.media.taptotransfer.sender.TransferSucceeded
 import com.android.systemui.shared.mediattt.DeviceInfo
 import com.android.systemui.shared.mediattt.IDeviceSenderCallback
@@ -93,18 +93,13 @@ class MediaTttCommandLineHelper @Inject constructor(
                         senderCallback.closeToReceiverToEndCast(mediaInfo, otherDeviceInfo)
                     }
                 }
-
-                // TODO(b/203800643): Migrate other commands to invoke the service instead of the
-                //   controller.
-                TRANSFER_INITIATED_COMMAND_NAME -> {
-                    mediaTttChipControllerSender.displayChip(
-                        TransferInitiated(
-                            appIconDrawable,
-                            APP_ICON_CONTENT_DESCRIPTION,
-                            otherDeviceName
-                        )
-                    )
+                TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME -> {
+                    runOnService { senderCallback ->
+                        senderCallback.transferToReceiverTriggered(mediaInfo, otherDeviceInfo)
+                    }
                 }
+                // TODO(b/203800643): Migrate this command to invoke the service instead of the
+                //   controller.
                 TRANSFER_SUCCEEDED_COMMAND_NAME -> {
                     mediaTttChipControllerSender.displayChip(
                         TransferSucceeded(
@@ -124,7 +119,7 @@ class MediaTttCommandLineHelper @Inject constructor(
                     pw.println("Chip type must be one of " +
                             "$MOVE_CLOSER_TO_START_CAST_COMMAND_NAME, " +
                             "$MOVE_CLOSER_TO_END_CAST_COMMAND_NAME, " +
-                            "$TRANSFER_INITIATED_COMMAND_NAME, " +
+                            "$TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME, " +
                             "$TRANSFER_SUCCEEDED_COMMAND_NAME, " +
                             TRANSFER_FAILED_COMMAND_NAME
                     )
@@ -234,7 +229,7 @@ val MOVE_CLOSER_TO_START_CAST_COMMAND_NAME = MoveCloserToStartCast::class.simple
 @VisibleForTesting
 val MOVE_CLOSER_TO_END_CAST_COMMAND_NAME = MoveCloserToEndCast::class.simpleName!!
 @VisibleForTesting
-val TRANSFER_INITIATED_COMMAND_NAME = TransferInitiated::class.simpleName!!
+val TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME = TransferToReceiverTriggered::class.simpleName!!
 @VisibleForTesting
 val TRANSFER_SUCCEEDED_COMMAND_NAME = TransferSucceeded::class.simpleName!!
 @VisibleForTesting
