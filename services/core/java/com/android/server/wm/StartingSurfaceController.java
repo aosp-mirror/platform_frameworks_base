@@ -34,6 +34,7 @@ import android.content.pm.ApplicationInfo;
 import android.util.Slog;
 import android.window.TaskSnapshot;
 
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 /**
@@ -44,6 +45,14 @@ public class StartingSurfaceController {
             ? StartingSurfaceController.class.getSimpleName() : TAG_WM;
     private final WindowManagerService mService;
     private final SplashScreenExceptionList mSplashScreenExceptionsList;
+
+    // Cache status while deferring add starting window
+    boolean mInitProcessRunning;
+    boolean mInitNewTask;
+    boolean mInitTaskSwitch;
+    private final ArrayList<DeferringStartingWindowRecord> mDeferringAddStartActivities =
+            new ArrayList<>();
+    private boolean mDeferringAddStartingWindow;
 
     public StartingSurfaceController(WindowManagerService wm) {
         mService = wm;
@@ -70,7 +79,7 @@ public class StartingSurfaceController {
         return mSplashScreenExceptionsList.isException(packageName, targetSdk, infoProvider);
     }
 
-    int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
+    static int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
             boolean processRunning, boolean allowTaskSnapshot, boolean activityCreated,
             boolean useEmpty, boolean useLegacy, boolean activityDrawn) {
         int parameter = 0;
@@ -142,6 +151,82 @@ public class StartingSurfaceController {
         }
     }
 
+    private static final class DeferringStartingWindowRecord {
+        final ActivityRecord mDeferring;
+        final ActivityRecord mPrev;
+        final ActivityRecord mSource;
+
+        DeferringStartingWindowRecord(ActivityRecord deferring, ActivityRecord prev,
+                ActivityRecord source) {
+            mDeferring = deferring;
+            mPrev = prev;
+            mSource = source;
+        }
+    }
+
+    /**
+     * Shows a starting window while starting a new activity. Do not use this method to create a
+     * starting window for an existing activity.
+     */
+    void showStartingWindow(ActivityRecord target, ActivityRecord prev,
+            boolean newTask, boolean isTaskSwitch, ActivityRecord source) {
+        if (mDeferringAddStartingWindow) {
+            addDeferringRecord(target, prev, newTask, isTaskSwitch, source);
+        } else {
+            target.showStartingWindow(prev, newTask, isTaskSwitch, true /* startActivity */,
+                    source);
+        }
+    }
+
+    /**
+     * Queueing the starting activity status while deferring add starting window.
+     * @see Task#startActivityLocked
+     */
+    private void addDeferringRecord(ActivityRecord deferring, ActivityRecord prev,
+            boolean newTask, boolean isTaskSwitch, ActivityRecord source) {
+        // Set newTask, taskSwitch, processRunning form first activity because those can change
+        // after first activity started.
+        if (mDeferringAddStartActivities.isEmpty()) {
+            mInitProcessRunning = deferring.isProcessRunning();
+            mInitNewTask = newTask;
+            mInitTaskSwitch = isTaskSwitch;
+        }
+        mDeferringAddStartActivities.add(new DeferringStartingWindowRecord(
+                deferring, prev, source));
+    }
+
+    private void showStartingWindowFromDeferringActivities() {
+        // Attempt to add starting window from the top-most activity.
+        for (int i = mDeferringAddStartActivities.size() - 1; i >= 0; --i) {
+            final DeferringStartingWindowRecord next = mDeferringAddStartActivities.get(i);
+            next.mDeferring.showStartingWindow(next.mPrev, mInitNewTask, mInitTaskSwitch,
+                    mInitProcessRunning, true /* startActivity */, next.mSource);
+            // If one succeeds, it is done.
+            if (next.mDeferring.mStartingData != null) {
+                break;
+            }
+        }
+        mDeferringAddStartActivities.clear();
+    }
+
+    /**
+     * Begin deferring add starting window in one pass.
+     * This is used to deferring add starting window while starting multiples activities because
+     * system only need to provide a starting window to the top-visible activity.
+     * Most call {@link #endDeferAddStartingWindow} when starting activities process finished.
+     * @see #endDeferAddStartingWindow()
+     */
+    void beginDeferAddStartingWindow() {
+        mDeferringAddStartingWindow = true;
+    }
+
+    /**
+     * End deferring add starting window.
+     */
+    void endDeferAddStartingWindow() {
+        mDeferringAddStartingWindow = false;
+        showStartingWindowFromDeferringActivities();
+    }
 
     final class StartingSurface {
         private final Task mTask;
