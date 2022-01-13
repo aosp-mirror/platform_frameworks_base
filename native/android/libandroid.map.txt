@@ -34,8 +34,8 @@ LIBANDROID {
     AChoreographerFrameCallbackData_getFrameTimelinesLength;  # introduced=33
     AChoreographerFrameCallbackData_getPreferredFrameTimelineIndex;  # introduced=33
     AChoreographerFrameCallbackData_getFrameTimelineVsyncId;  # introduced=33
-    AChoreographerFrameCallbackData_getFrameTimelineExpectedPresentTime;  # introduced=33
-    AChoreographerFrameCallbackData_getFrameTimelineDeadline;  # introduced=33
+    AChoreographerFrameCallbackData_getFrameTimelineExpectedPresentTimeNanos;  # introduced=33
+    AChoreographerFrameCallbackData_getFrameTimelineDeadlineNanos;  # introduced=33
     AConfiguration_copy;
     AConfiguration_delete;
     AConfiguration_diff;

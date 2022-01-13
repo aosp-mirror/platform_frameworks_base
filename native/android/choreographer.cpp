@@ -71,11 +71,12 @@ int64_t AChoreographerFrameCallbackData_getFrameTimelineVsyncId(
         const AChoreographerFrameCallbackData* data, size_t index) {
     return AChoreographerFrameCallbackData_routeGetFrameTimelineVsyncId(data, index);
 }
-int64_t AChoreographerFrameCallbackData_getFrameTimelineExpectedPresentTime(
+int64_t AChoreographerFrameCallbackData_getFrameTimelineExpectedPresentTimeNanos(
         const AChoreographerFrameCallbackData* data, size_t index) {
-    return AChoreographerFrameCallbackData_routeGetFrameTimelineExpectedPresentTime(data, index);
+    return AChoreographerFrameCallbackData_routeGetFrameTimelineExpectedPresentTimeNanos(data,
+                                                                                         index);
 }
-int64_t AChoreographerFrameCallbackData_getFrameTimelineDeadline(
+int64_t AChoreographerFrameCallbackData_getFrameTimelineDeadlineNanos(
         const AChoreographerFrameCallbackData* data, size_t index) {
-    return AChoreographerFrameCallbackData_routeGetFrameTimelineDeadline(data, index);
+    return AChoreographerFrameCallbackData_routeGetFrameTimelineDeadlineNanos(data, index);
 }
