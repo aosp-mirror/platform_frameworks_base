@@ -527,17 +527,28 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                     callback.onFailure();
                     return;
                 }
-                textClassifierServiceConsumer.accept(serviceState.mService);
+                consumeServiceNoExceptLocked(textClassifierServiceConsumer, serviceState.mService);
             } else {
                 serviceState.mPendingRequests.add(
                         new PendingRequest(
                                 methodName,
-                                () -> textClassifierServiceConsumer.accept(serviceState.mService),
+                                () -> consumeServiceNoExceptLocked(
+                                        textClassifierServiceConsumer, serviceState.mService),
                                 callback::onFailure, callback.asBinder(),
                                 this,
                                 serviceState,
                                 Binder.getCallingUid()));
             }
+        }
+    }
+
+    private static void consumeServiceNoExceptLocked(
+            @NonNull ThrowingConsumer<ITextClassifierService> textClassifierServiceConsumer,
+            @Nullable ITextClassifierService service) {
+        try {
+            textClassifierServiceConsumer.accept(service);
+        } catch (RuntimeException | Error e) {
+            Slog.e(LOG_TAG, "Exception when consume textClassifierService: " + e);
         }
     }
 
