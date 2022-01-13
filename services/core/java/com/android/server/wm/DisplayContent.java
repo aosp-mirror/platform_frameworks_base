@@ -1424,7 +1424,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mWaitingForConfig = true;
             if (mTransitionController.isShellTransitionsEnabled()) {
                 requestChangeTransitionIfNeeded(changes, null /* displayChange */);
-            } else {
+            } else if (mLastHasContent) {
                 mWmService.startFreezingDisplay(0 /* exitAnim */, 0 /* enterAnim */, this);
             }
             sendNewConfiguration();
@@ -3220,6 +3220,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     void requestChangeTransitionIfNeeded(@ActivityInfo.Config int changes,
             @Nullable TransitionRequestInfo.DisplayChange displayChange) {
+        if (!mLastHasContent) return;
         final TransitionController controller = mTransitionController;
         if (controller.isCollecting()) {
             if (displayChange != null) {
@@ -5086,6 +5087,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     boolean getLastHasContent() {
         return mLastHasContent;
+    }
+
+    @VisibleForTesting
+    void setLastHasContent() {
+        mLastHasContent = true;
     }
 
     void registerPointerEventListener(@NonNull PointerEventListener listener) {
