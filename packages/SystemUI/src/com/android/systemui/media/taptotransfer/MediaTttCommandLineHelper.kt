@@ -35,6 +35,7 @@ import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSen
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderService
 import com.android.systemui.media.taptotransfer.sender.MoveCloserToEndCast
 import com.android.systemui.media.taptotransfer.sender.MoveCloserToStartCast
+import com.android.systemui.media.taptotransfer.sender.TransferFailed
 import com.android.systemui.media.taptotransfer.sender.TransferInitiated
 import com.android.systemui.media.taptotransfer.sender.TransferSucceeded
 import com.android.systemui.shared.mediattt.DeviceInfo
@@ -122,12 +123,18 @@ class MediaTttCommandLineHelper @Inject constructor(
                         )
                     )
                 }
+                TRANSFER_FAILED_COMMAND_NAME -> {
+                    runOnService { senderCallback ->
+                        senderCallback.transferFailed(mediaInfo, otherDeviceInfo)
+                    }
+                }
                 else -> {
                     pw.println("Chip type must be one of " +
                             "$MOVE_CLOSER_TO_START_CAST_COMMAND_NAME, " +
                             "$MOVE_CLOSER_TO_END_CAST_COMMAND_NAME, " +
                             "$TRANSFER_INITIATED_COMMAND_NAME, " +
-                            TRANSFER_SUCCEEDED_COMMAND_NAME
+                            "$TRANSFER_SUCCEEDED_COMMAND_NAME, " +
+                            TRANSFER_FAILED_COMMAND_NAME
                     )
                 }
             }
@@ -238,6 +245,8 @@ val MOVE_CLOSER_TO_END_CAST_COMMAND_NAME = MoveCloserToEndCast::class.simpleName
 val TRANSFER_INITIATED_COMMAND_NAME = TransferInitiated::class.simpleName!!
 @VisibleForTesting
 val TRANSFER_SUCCEEDED_COMMAND_NAME = TransferSucceeded::class.simpleName!!
+@VisibleForTesting
+val TRANSFER_FAILED_COMMAND_NAME = TransferFailed::class.simpleName!!
 
 private const val FUTURE_WAIT_TIME = 2000L
 private const val APP_ICON_CONTENT_DESCRIPTION = "Fake media app icon"

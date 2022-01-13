@@ -59,4 +59,12 @@ interface IDeviceSenderCallback {
      */
     oneway void closeToReceiverToEndCast(
         in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
+
+    /**
+     * Invoke to notify System UI that the attempted transfer has failed.
+     *
+     * This callback will be used for both the transfer that should've *started* playing the media
+     * on the receiver and the transfer that should've *ended* the playing on the receiver.
+     */
+    oneway void transferFailed(in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
 }

@@ -28,8 +28,8 @@
 
     <com.android.internal.widget.CachingIconView
         android:id="@+id/app_icon"
-        android:layout_width="@dimen/media_ttt_icon_size"
-        android:layout_height="@dimen/media_ttt_icon_size"
+        android:layout_width="@dimen/media_ttt_app_icon_size"
+        android:layout_height="@dimen/media_ttt_app_icon_size"
         android:layout_marginEnd="12dp"
         />
 
@@ -41,14 +41,25 @@
         android:textColor="?android:attr/textColorPrimary"
         />
 
+    <!-- At most one of [loading, failure_icon, undo] will be visible at a time. -->
+
     <ProgressBar
         android:id="@+id/loading"
         android:indeterminate="true"
-        android:layout_width="@dimen/media_ttt_loading_size"
-        android:layout_height="@dimen/media_ttt_loading_size"
-        android:layout_marginStart="12dp"
+        android:layout_width="@dimen/media_ttt_status_icon_size"
+        android:layout_height="@dimen/media_ttt_status_icon_size"
+        android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
         android:indeterminateTint="?androidprv:attr/colorAccentPrimaryVariant"
         style="?android:attr/progressBarStyleSmall"
+        />
+
+    <ImageView
+        android:id="@+id/failure_icon"
+        android:layout_width="@dimen/media_ttt_status_icon_size"
+        android:layout_height="@dimen/media_ttt_status_icon_size"
+        android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
+        android:src="@drawable/ic_warning"
+        android:tint="@color/GM2_red_500"
         />
 
     <TextView
@@ -57,7 +68,7 @@
         android:layout_height="wrap_content"
         android:text="@string/media_transfer_undo"
         android:textColor="?androidprv:attr/textColorOnAccent"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
         android:textSize="@dimen/media_ttt_text_size"
         android:paddingStart="@dimen/media_ttt_chip_outer_padding"
         android:paddingEnd="@dimen/media_ttt_chip_outer_padding"

@@ -152,6 +152,14 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     }
 
     @Test
+    fun sender_transferFailed_serviceCallbackCalled() {
+        commandRegistry.onShellCommand(pw, getTransferFailedCommand())
+
+        assertThat(context.isBound(mediaSenderServiceComponentName)).isTrue()
+        verify(mediaSenderService).transferFailed(any(), any())
+    }
+
+    @Test
     fun sender_removeCommand_chipRemoved() {
         commandRegistry.onShellCommand(pw, arrayOf(REMOVE_CHIP_COMMAND_SENDER_TAG))
 
@@ -198,6 +206,13 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
             ADD_CHIP_COMMAND_SENDER_TAG,
             DEVICE_NAME,
             TRANSFER_SUCCEEDED_COMMAND_NAME
+        )
+
+    private fun getTransferFailedCommand(): Array<String> =
+        arrayOf(
+            ADD_CHIP_COMMAND_SENDER_TAG,
+            DEVICE_NAME,
+            TRANSFER_FAILED_COMMAND_NAME
         )
 
     class EmptyCommand : Command {

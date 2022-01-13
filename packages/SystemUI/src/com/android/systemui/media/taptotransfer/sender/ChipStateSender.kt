@@ -107,3 +107,17 @@ class TransferSucceeded(
     R.string.media_transfer_playing,
     otherDeviceName
 )
+
+/** A state representing that a transfer has failed. */
+class TransferFailed(
+    appIconDrawable: Drawable,
+    appIconContentDescription: String,
+    // TODO(b/211493953): The failed chip doesn't need [otherDeviceName] so we may want to remove
+    //   [otherDeviceName] from the superclass [ChipStateSender].
+    otherDeviceName: String,
+) : ChipStateSender(
+    appIconDrawable,
+    appIconContentDescription,
+    R.string.media_transfer_failed,
+    otherDeviceName
+)

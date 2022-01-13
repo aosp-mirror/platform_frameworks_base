@@ -980,10 +980,11 @@
     <!-- Media tap-to-transfer chip for sender device -->
     <dimen name="media_ttt_chip_outer_padding">16dp</dimen>
     <dimen name="media_ttt_text_size">16sp</dimen>
-    <dimen name="media_ttt_icon_size">24dp</dimen>
-    <dimen name="media_ttt_loading_size">20dp</dimen>
+    <dimen name="media_ttt_app_icon_size">24dp</dimen>
+    <dimen name="media_ttt_status_icon_size">20dp</dimen>
     <dimen name="media_ttt_undo_button_vertical_padding">8dp</dimen>
     <dimen name="media_ttt_undo_button_vertical_negative_margin">-8dp</dimen>
+    <dimen name="media_ttt_last_item_start_margin">12dp</dimen>
 
     <!-- Media tap-to-transfer chip for receiver device -->
     <dimen name="media_ttt_chip_size_receiver">100dp</dimen>

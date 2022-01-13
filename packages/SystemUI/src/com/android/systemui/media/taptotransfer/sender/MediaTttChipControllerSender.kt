@@ -73,6 +73,11 @@ class MediaTttChipControllerSender @Inject constructor(
         }
         undoView.setOnClickListener(undoClickListener)
 
+        // Failure
+        val showFailure = chipState is TransferFailed
+        currentChipView.requireViewById<View>(R.id.failure_icon).visibility =
+            if (showFailure) { View.VISIBLE } else { View.GONE }
+
         // Future handling
         if (chipState is TransferInitiated) {
             addFutureCallback(chipState)
@@ -101,9 +106,14 @@ class MediaTttChipControllerSender @Inject constructor(
                     )
                 }
             } catch (ex: Exception) {
-                // TODO(b/203800327): Maybe show a failure chip here if UX decides we need one.
                 mainExecutor.execute {
-                    removeChip()
+                    displayChip(
+                        TransferFailed(
+                            chipState.appIconDrawable,
+                            chipState.appIconContentDescription,
+                            chipState.otherDeviceName,
+                        )
+                    )
                 }
             }
         }
