@@ -2094,7 +2094,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private void verifyAdvisePersistThreshold() throws Exception {
-        verify(mStatsManager).advisePersistThreshold(anyLong());
+        verify(mStatsManager).setDefaultGlobalAlert(anyLong());
     }
 
     private static class TestAbstractFuture<T> extends AbstractFuture<T> {
