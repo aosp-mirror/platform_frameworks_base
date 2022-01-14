@@ -150,7 +150,7 @@ public final class PhoneCapability implements Parcelable {
         mMaxActiveDataSubscriptions = in.readInt();
         mNetworkValidationBeforeSwitchSupported = in.readBoolean();
         mLogicalModemList = new ArrayList<>();
-        in.readList(mLogicalModemList, ModemInfo.class.getClassLoader());
+        in.readList(mLogicalModemList, ModemInfo.class.getClassLoader(), android.telephony.ModemInfo.class);
         mDeviceNrCapabilities = in.createIntArray();
     }
 

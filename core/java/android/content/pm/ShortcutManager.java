@@ -704,8 +704,8 @@ public class ShortcutManager {
         }
 
         private ShareShortcutInfo(@NonNull Parcel in) {
-            mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader());
-            mTargetComponent = in.readParcelable(ComponentName.class.getClassLoader());
+            mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader(), android.content.pm.ShortcutInfo.class);
+            mTargetComponent = in.readParcelable(ComponentName.class.getClassLoader(), android.content.ComponentName.class);
         }
 
         @NonNull

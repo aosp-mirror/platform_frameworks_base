@@ -205,7 +205,7 @@ public final class BatchUpdates implements Parcelable {
                     builder.transformChild(ids[i], values[i]);
                 }
             }
-            final RemoteViews updates = parcel.readParcelable(null);
+            final RemoteViews updates = parcel.readParcelable(null, android.widget.RemoteViews.class);
             if (updates != null) {
                 builder.updateTemplate(updates);
             }

@@ -132,8 +132,8 @@ public final class StatusHints implements Parcelable {
 
     private StatusHints(Parcel in) {
         mLabel = in.readCharSequence();
-        mIcon = in.readParcelable(getClass().getClassLoader());
-        mExtras = in.readParcelable(getClass().getClassLoader());
+        mIcon = in.readParcelable(getClass().getClassLoader(), android.graphics.drawable.Icon.class);
+        mExtras = in.readParcelable(getClass().getClassLoader(), android.os.Bundle.class);
     }
 
     @Override

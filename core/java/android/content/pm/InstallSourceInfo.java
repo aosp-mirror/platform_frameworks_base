@@ -61,7 +61,7 @@ public final class InstallSourceInfo implements Parcelable {
 
     private InstallSourceInfo(Parcel source) {
         mInitiatingPackageName = source.readString();
-        mInitiatingPackageSigningInfo = source.readParcelable(SigningInfo.class.getClassLoader());
+        mInitiatingPackageSigningInfo = source.readParcelable(SigningInfo.class.getClassLoader(), android.content.pm.SigningInfo.class);
         mOriginatingPackageName = source.readString();
         mInstallingPackageName = source.readString();
     }

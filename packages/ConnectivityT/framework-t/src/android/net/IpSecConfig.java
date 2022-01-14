@@ -267,14 +267,14 @@ public final class IpSecConfig implements Parcelable {
         mMode = in.readInt();
         mSourceAddress = in.readString();
         mDestinationAddress = in.readString();
-        mNetwork = (Network) in.readParcelable(Network.class.getClassLoader());
+        mNetwork = (Network) in.readParcelable(Network.class.getClassLoader(), android.net.Network.class);
         mSpiResourceId = in.readInt();
         mEncryption =
-                (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
+                (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader(), android.net.IpSecAlgorithm.class);
         mAuthentication =
-                (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
+                (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader(), android.net.IpSecAlgorithm.class);
         mAuthenticatedEncryption =
-                (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
+                (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader(), android.net.IpSecAlgorithm.class);
         mEncapType = in.readInt();
         mEncapSocketResourceId = in.readInt();
         mEncapRemotePort = in.readInt();

@@ -197,8 +197,8 @@ public final class CompositeUserData implements FieldClassificationUserData, Par
                     // Always go through the builder to ensure the data ingested by
                     // the system obeys the contract of the builder to avoid attacks
                     // using specially crafted parcels.
-                    final UserData genericUserData = parcel.readParcelable(null);
-                    final UserData packageUserData = parcel.readParcelable(null);
+                    final UserData genericUserData = parcel.readParcelable(null, android.service.autofill.UserData.class);
+                    final UserData packageUserData = parcel.readParcelable(null, android.service.autofill.UserData.class);
                     return new CompositeUserData(genericUserData, packageUserData);
                 }
 
