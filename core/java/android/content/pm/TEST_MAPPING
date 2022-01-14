@@ -25,6 +25,9 @@
       "path": "cts/hostsidetests/packagemanager"
     },
     {
+      "path": "cts/hostsidetests/os/test_mappings/packagemanager"
+    },
+    {
       "path": "system/apex/tests"
     }
   ],
