@@ -12767,6 +12767,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
             SparseLongArray rxPackets = new SparseLongArray();
             SparseLongArray txPackets = new SparseLongArray();
+            SparseLongArray rxTimesMs = new SparseLongArray();
+            SparseLongArray txTimesMs = new SparseLongArray();
             long totalTxPackets = 0;
             long totalRxPackets = 0;
             if (delta != null) {
@@ -12800,7 +12802,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         mNetworkPacketActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
                                 entry.rxPackets);
 
-                        add(rxPackets, uid, entry.rxPackets);
+                        rxPackets.incrementValue(uid, entry.rxPackets);
 
                         // Sum the total number of packets so that the Rx Power can
                         // be evenly distributed amongst the apps.
@@ -12819,7 +12821,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         mNetworkPacketActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
                                 entry.txPackets);
 
-                        add(txPackets, uid, entry.txPackets);
+                        txPackets.incrementValue(uid, entry.txPackets);
 
                         // Sum the total number of packets so that the Tx Power can
                         // be evenly distributed amongst the apps.
@@ -12944,12 +12946,9 @@ public class BatteryStatsImpl extends BatteryStats {
                                     + scanTxTimeSinceMarkMs + " ms)");
                         }
 
-                        ControllerActivityCounterImpl activityCounter =
-                                uid.getOrCreateWifiControllerActivityLocked();
-                        activityCounter.getOrCreateRxTimeCounter()
-                                .increment(scanRxTimeSinceMarkMs, elapsedRealtimeMs);
-                        activityCounter.getOrCreateTxTimeCounters()[0]
-                                .increment(scanTxTimeSinceMarkMs, elapsedRealtimeMs);
+                        rxTimesMs.incrementValue(uid.getUid(), scanRxTimeSinceMarkMs);
+                        txTimesMs.incrementValue(uid.getUid(), scanTxTimeSinceMarkMs);
+
                         leftOverRxTimeMs -= scanRxTimeSinceMarkMs;
                         leftOverTxTimeMs -= scanTxTimeSinceMarkMs;
                     }
@@ -12988,43 +12987,57 @@ public class BatteryStatsImpl extends BatteryStats {
                 // Distribute the remaining Tx power appropriately between all apps that transmitted
                 // packets.
                 for (int i = 0; i < txPackets.size(); i++) {
-                    final Uid uid = getUidStatsLocked(txPackets.keyAt(i),
-                            elapsedRealtimeMs, uptimeMs);
+                    final int uid = txPackets.keyAt(i);
                     final long myTxTimeMs = (txPackets.valueAt(i) * leftOverTxTimeMs)
                             / totalTxPackets;
-                    if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "  TxTime for UID " + uid.getUid() + ": " + myTxTimeMs + " ms");
-                    }
-                    uid.getOrCreateWifiControllerActivityLocked().getOrCreateTxTimeCounters()[0]
-                            .increment(myTxTimeMs, elapsedRealtimeMs);
-                    if (uidEstimatedConsumptionMah != null) {
-                        uidEstimatedConsumptionMah.incrementValue(uid.getUid(),
-                                mWifiPowerCalculator.calcPowerFromControllerDataMah(
-                                        0, myTxTimeMs, 0));
-                    }
+                    txTimesMs.incrementValue(uid, myTxTimeMs);
                 }
 
                 // Distribute the remaining Rx power appropriately between all apps that received
                 // packets.
                 for (int i = 0; i < rxPackets.size(); i++) {
-                    final Uid uid = getUidStatsLocked(rxPackets.keyAt(i),
-                            elapsedRealtimeMs, uptimeMs);
+                    final int uid = rxPackets.keyAt(i);
                     final long myRxTimeMs = (rxPackets.valueAt(i) * leftOverRxTimeMs)
                             / totalRxPackets;
+                    rxTimesMs.incrementValue(uid, myRxTimeMs);
+                }
+
+                for (int i = 0; i < txTimesMs.size(); i++) {
+                    final int uid = txTimesMs.keyAt(i);
+                    final long myTxTimeMs = txTimesMs.valueAt(i);
                     if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "  RxTime for UID " + uid.getUid() + ": " + myRxTimeMs + " ms");
+                        Slog.d(TAG, "  TxTime for UID " + uid + ": " + myTxTimeMs + " ms");
                     }
-                    uid.getOrCreateWifiControllerActivityLocked().getOrCreateRxTimeCounter()
+                    getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
+                            .getOrCreateWifiControllerActivityLocked()
+                            .getOrCreateTxTimeCounters()[0]
+                            .increment(myTxTimeMs, elapsedRealtimeMs);
+                    if (uidEstimatedConsumptionMah != null) {
+                        uidEstimatedConsumptionMah.incrementValue(uid,
+                                mWifiPowerCalculator.calcPowerFromControllerDataMah(
+                                        0, myTxTimeMs, 0));
+                    }
+                }
+
+                for (int i = 0; i < rxTimesMs.size(); i++) {
+                    final int uid = rxTimesMs.keyAt(i);
+                    final long myRxTimeMs = rxTimesMs.valueAt(i);
+                    if (DEBUG_ENERGY) {
+                        Slog.d(TAG, "  RxTime for UID " + uid + ": " + myRxTimeMs + " ms");
+                    }
+
+                    getUidStatsLocked(rxTimesMs.keyAt(i), elapsedRealtimeMs, uptimeMs)
+                            .getOrCreateWifiControllerActivityLocked()
+                            .getOrCreateRxTimeCounter()
                             .increment(myRxTimeMs, elapsedRealtimeMs);
                     if (uidEstimatedConsumptionMah != null) {
-                        uidEstimatedConsumptionMah.incrementValue(uid.getUid(),
+                        uidEstimatedConsumptionMah.incrementValue(uid,
                                 mWifiPowerCalculator.calcPowerFromControllerDataMah(
                                         myRxTimeMs, 0, 0));
                     }
                 }
 
                 // Any left over power use will be picked up by the WiFi category in BatteryStatsHelper.
-
 
                 // Update WiFi controller stats.
                 mWifiActivity.getOrCreateRxTimeCounter().increment(
@@ -13370,8 +13383,8 @@ public class BatteryStatsImpl extends BatteryStats {
             energy = info.getControllerEnergyUsed();
             if (!info.getUidTraffic().isEmpty()) {
                 for (UidTraffic traffic : info.getUidTraffic()) {
-                    add(uidRxBytes, traffic.getUid(), traffic.getRxBytes());
-                    add(uidTxBytes, traffic.getUid(), traffic.getTxBytes());
+                    uidRxBytes.incrementValue(traffic.getUid(), traffic.getRxBytes());
+                    uidTxBytes.incrementValue(traffic.getUid(), traffic.getTxBytes());
                 }
             }
         }
@@ -13463,6 +13476,9 @@ public class BatteryStatsImpl extends BatteryStats {
         long leftOverRxTimeMs = rxTimeMs;
         long leftOverTxTimeMs = txTimeMs;
 
+        final SparseLongArray rxTimesMs = new SparseLongArray(uidCount);
+        final SparseLongArray txTimesMs = new SparseLongArray(uidCount);
+
         for (int i = 0; i < uidCount; i++) {
             final Uid u = mUidStats.valueAt(i);
             if (u.mBluetoothScanTimer == null) {
@@ -13492,12 +13508,8 @@ public class BatteryStatsImpl extends BatteryStats {
                     scanTimeTxSinceMarkMs = (txTimeMs * scanTimeTxSinceMarkMs) / totalScanTimeMs;
                 }
 
-                final ControllerActivityCounterImpl counter =
-                        u.getOrCreateBluetoothControllerActivityLocked();
-                counter.getOrCreateRxTimeCounter()
-                        .increment(scanTimeRxSinceMarkMs, elapsedRealtimeMs);
-                counter.getOrCreateTxTimeCounters()[0]
-                        .increment(scanTimeTxSinceMarkMs, elapsedRealtimeMs);
+                rxTimesMs.incrementValue(u.getUid(), scanTimeRxSinceMarkMs);
+                txTimesMs.incrementValue(u.getUid(), scanTimeTxSinceMarkMs);
 
                 if (uidEstimatedConsumptionMah != null) {
                     uidEstimatedConsumptionMah.incrementValue(u.getUid(),
@@ -13561,29 +13573,45 @@ public class BatteryStatsImpl extends BatteryStats {
 
                 if (totalRxBytes > 0 && rxBytes > 0) {
                     final long timeRxMs = (leftOverRxTimeMs * rxBytes) / totalRxBytes;
-                    if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "UID=" + uid + " rx_bytes=" + rxBytes + " rx_time=" + timeRxMs);
-                    }
-                    counter.getOrCreateRxTimeCounter().increment(timeRxMs, elapsedRealtimeMs);
-
-                    if (uidEstimatedConsumptionMah != null) {
-                        uidEstimatedConsumptionMah.incrementValue(u.getUid(),
-                                mBluetoothPowerCalculator.calculatePowerMah(timeRxMs, 0, 0));
-                    }
+                    rxTimesMs.incrementValue(uid, timeRxMs);
                 }
 
                 if (totalTxBytes > 0 && txBytes > 0) {
                     final long timeTxMs = (leftOverTxTimeMs * txBytes) / totalTxBytes;
-                    if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "UID=" + uid + " tx_bytes=" + txBytes + " tx_time=" + timeTxMs);
-                    }
-                    counter.getOrCreateTxTimeCounters()[0]
-                            .increment(timeTxMs, elapsedRealtimeMs);
+                    txTimesMs.incrementValue(uid, timeTxMs);
+                }
+            }
 
-                    if (uidEstimatedConsumptionMah != null) {
-                        uidEstimatedConsumptionMah.incrementValue(u.getUid(),
-                                mBluetoothPowerCalculator.calculatePowerMah(0, timeTxMs, 0));
-                    }
+            for (int i = 0; i < txTimesMs.size(); i++) {
+                final int uid = txTimesMs.keyAt(i);
+                final long myTxTimeMs = txTimesMs.valueAt(i);
+                if (DEBUG_ENERGY) {
+                    Slog.d(TAG, "  TxTime for UID " + uid + ": " + myTxTimeMs + " ms");
+                }
+                getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
+                        .getOrCreateBluetoothControllerActivityLocked()
+                        .getOrCreateTxTimeCounters()[0]
+                        .increment(myTxTimeMs, elapsedRealtimeMs);
+                if (uidEstimatedConsumptionMah != null) {
+                    uidEstimatedConsumptionMah.incrementValue(uid,
+                            mBluetoothPowerCalculator.calculatePowerMah(0, myTxTimeMs, 0));
+                }
+            }
+
+            for (int i = 0; i < rxTimesMs.size(); i++) {
+                final int uid = rxTimesMs.keyAt(i);
+                final long myRxTimeMs = rxTimesMs.valueAt(i);
+                if (DEBUG_ENERGY) {
+                    Slog.d(TAG, "  RxTime for UID " + uid + ": " + myRxTimeMs + " ms");
+                }
+
+                getUidStatsLocked(rxTimesMs.keyAt(i), elapsedRealtimeMs, uptimeMs)
+                        .getOrCreateBluetoothControllerActivityLocked()
+                        .getOrCreateRxTimeCounter()
+                        .increment(myRxTimeMs, elapsedRealtimeMs);
+                if (uidEstimatedConsumptionMah != null) {
+                    uidEstimatedConsumptionMah.incrementValue(uid,
+                            mBluetoothPowerCalculator.calculatePowerMah(myRxTimeMs, 0, 0));
                 }
             }
         }
@@ -18160,9 +18188,5 @@ public class BatteryStatsImpl extends BatteryStats {
 
         pw.println();
         dumpMeasuredEnergyStatsLocked(pw);
-    }
-
-    private static void add(SparseLongArray array, int key, long delta) {
-        array.put(key, array.get(key) + delta);
     }
 }
