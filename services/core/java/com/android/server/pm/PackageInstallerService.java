@@ -330,7 +330,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 if (age >= MAX_SESSION_AGE_ON_LOW_STORAGE_MILLIS) {
                     // Aggressively close old sessions because we are running low on storage
                     // Their staging dirs will be removed too
-                    session.abandon();
+                    PackageInstallerSession root = !session.hasParentSessionId()
+                            ? session : mSessions.get(session.getParentSessionId());
+                    if (!root.isDestroyed() && 
+                            (!root.isStaged() || (root.isStaged() && root.isStagedSessionReady()))) 
+                    {
+                        root.abandon();
+                    }
                 } else {
                     // Session is new enough, so it deserves to be kept even on low storage
                     unclaimedStagingDirsOnVolume.remove(session.stageDir);
@@ -653,7 +659,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
                 mInstallThread.getLooper(), mStagingManager, sessionId, userId,
                 installerPackageName, callingUid, params, createdMillis, stageDir, stageCid, false,
-                false, false, null, SessionInfo.INVALID_ID, false, false, false,
+                false, false, false, null, SessionInfo.INVALID_ID, false, false, false,
                 SessionInfo.STAGED_SESSION_NO_ERROR, "");
 
         synchronized (mSessions) {
@@ -803,7 +809,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mSessions) {
             final PackageInstallerSession session = mSessions.get(sessionId);
 
-            return session != null
+            return (session != null && !(session.isStaged() && session.isDestroyed()))
                     ? session.generateInfoForCaller(true /*withIcon*/, Binder.getCallingUid())
                     : null;
         }
@@ -824,7 +830,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mSessions) {
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
-                if (session.userId == userId && !session.hasParentSessionId()) {
+                if (session.userId == userId && !session.hasParentSessionId()
+                        && !(session.isStaged() && session.isDestroyed())) {
                     result.add(session.generateInfoForCaller(false, callingUid));
                 }
             }
