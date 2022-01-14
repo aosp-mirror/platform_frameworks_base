@@ -310,53 +310,48 @@ public class RemoteTransitionCompat implements Parcelable {
                 return;
             }
             if (mWrapped != null) mWrapped.finish(toHome, sendUserLeaveHint);
-            try {
-                if (!toHome && mPausingTasks != null && mOpeningLeashes == null) {
-                    // The gesture went back to opening the app rather than continuing with
-                    // recents, so end the transition by moving the app back to the top (and also
-                    // re-showing it's task).
-                    final WindowContainerTransaction wct = new WindowContainerTransaction();
-                    final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                    for (int i = mPausingTasks.size() - 1; i >= 0; --i) {
-                        // reverse order so that index 0 ends up on top
-                        wct.reorder(mPausingTasks.get(i), true /* onTop */);
-                        t.show(mInfo.getChange(mPausingTasks.get(i)).getLeash());
-                    }
-                    mFinishCB.onTransitionFinished(wct, t);
-                } else {
-                    if (mOpeningLeashes != null) {
-                        // TODO: the launcher animation should handle this
-                        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                        for (int i = 0; i < mOpeningLeashes.size(); ++i) {
-                            t.show(mOpeningLeashes.get(i));
-                            t.setAlpha(mOpeningLeashes.get(i), 1.f);
-                        }
-                        t.apply();
-                    }
-                    if (mPipTask != null && mPipTransaction != null) {
-                        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                        t.show(mInfo.getChange(mPipTask).getLeash());
-                        PictureInPictureSurfaceTransaction.apply(mPipTransaction,
-                                mInfo.getChange(mPipTask).getLeash(), t);
-                        mPipTask = null;
-                        mPipTransaction = null;
-                        mFinishCB.onTransitionFinished(null /* wct */, t);
-                    } else {
-                        mFinishCB.onTransitionFinished(null /* wct */, null /* sct */);
-                    }
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            final WindowContainerTransaction wct;
 
+            if (!toHome && mPausingTasks != null && mOpeningLeashes == null) {
+                // The gesture went back to opening the app rather than continuing with
+                // recents, so end the transition by moving the app back to the top (and also
+                // re-showing it's task).
+                wct = new WindowContainerTransaction();
+                for (int i = mPausingTasks.size() - 1; i >= 0; --i) {
+                    // reverse order so that index 0 ends up on top
+                    wct.reorder(mPausingTasks.get(i), true /* onTop */);
+                    t.show(mInfo.getChange(mPausingTasks.get(i)).getLeash());
                 }
-            } catch (RemoteException e) {
-                Log.e("RemoteTransitionCompat", "Failed to call animation finish callback", e);
+            } else {
+                wct = null;
+                if (mOpeningLeashes != null) {
+                    // TODO: the launcher animation should handle this
+                    for (int i = 0; i < mOpeningLeashes.size(); ++i) {
+                        t.show(mOpeningLeashes.get(i));
+                        t.setAlpha(mOpeningLeashes.get(i), 1.f);
+                    }
+                }
+                if (mPipTask != null && mPipTransaction != null) {
+                    t.show(mInfo.getChange(mPipTask).getLeash());
+                    PictureInPictureSurfaceTransaction.apply(mPipTransaction,
+                            mInfo.getChange(mPipTask).getLeash(), t);
+                    mPipTask = null;
+                    mPipTransaction = null;
+                }
             }
             // Release surface references now. This is apparently to free GPU
             // memory while doing quick operations (eg. during CTS).
-            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
             for (int i = 0; i < mLeashMap.size(); ++i) {
                 if (mLeashMap.keyAt(i) == mLeashMap.valueAt(i)) continue;
                 t.remove(mLeashMap.valueAt(i));
             }
-            t.apply();
+            try {
+                mFinishCB.onTransitionFinished(wct, t);
+            } catch (RemoteException e) {
+                Log.e("RemoteTransitionCompat", "Failed to call animation finish callback", e);
+                t.apply();
+            }
             for (int i = 0; i < mInfo.getChanges().size(); ++i) {
                 mInfo.getChanges().get(i).getLeash().release();
             }
