@@ -31,6 +31,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -98,6 +99,7 @@ public class PreparationCoordinator implements Coordinator {
 
     /** How long we can delay a group while waiting for all children to inflate */
     private final long mMaxGroupInflationDelay;
+    private final ConversationNotificationManager mConversationManager;
 
     @Inject
     public PreparationCoordinator(
@@ -106,7 +108,8 @@ public class PreparationCoordinator implements Coordinator {
             NotifInflationErrorManager errorManager,
             NotifViewBarn viewBarn,
             NotifUiAdjustmentProvider adjustmentProvider,
-            IStatusBarService service) {
+            IStatusBarService service,
+            ConversationNotificationManager conversationManager) {
         this(
                 logger,
                 notifInflater,
@@ -114,6 +117,7 @@ public class PreparationCoordinator implements Coordinator {
                 viewBarn,
                 adjustmentProvider,
                 service,
+                conversationManager,
                 CHILD_BIND_CUTOFF,
                 MAX_GROUP_INFLATION_DELAY);
     }
@@ -126,6 +130,7 @@ public class PreparationCoordinator implements Coordinator {
             NotifViewBarn viewBarn,
             NotifUiAdjustmentProvider adjustmentProvider,
             IStatusBarService service,
+            ConversationNotificationManager conversationManager,
             int childBindCutoff,
             long maxGroupInflationDelay) {
         mLogger = logger;
@@ -136,6 +141,7 @@ public class PreparationCoordinator implements Coordinator {
         mStatusBarService = service;
         mChildBindCutoff = childBindCutoff;
         mMaxGroupInflationDelay = maxGroupInflationDelay;
+        mConversationManager = conversationManager;
     }
 
     @Override
@@ -363,6 +369,9 @@ public class PreparationCoordinator implements Coordinator {
         mInflatingNotifs.remove(entry);
         mViewBarn.registerViewForEntry(entry, controller);
         mInflationStates.put(entry, STATE_INFLATED);
+        // NOTE: under the new pipeline there's no way to register for an inflation callback,
+        // so this one method is called by the PreparationCoordinator directly.
+        mConversationManager.onEntryViewBound(entry);
         mNotifInflatingFilter.invalidateList();
     }
 
