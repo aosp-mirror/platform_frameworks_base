@@ -17,6 +17,9 @@
 package com.android.systemui.controls.controller
 
 import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.UserHandle
 import android.service.controls.IControlsActionCallback
 import android.service.controls.IControlsProvider
@@ -43,6 +46,8 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -57,8 +62,6 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
     private lateinit var subscriberService: IControlsSubscriber.Stub
     @Mock
     private lateinit var service: IControlsProvider.Stub
-    @Mock
-    private lateinit var loadCallback: ControlsBindingController.LoadCallback
 
     @Captor
     private lateinit var wrapperCaptor: ArgumentCaptor<ControlActionWrapper>
@@ -75,7 +78,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        mContext.addMockService(componentName, service)
+        context.addMockService(componentName, service)
         executor = FakeExecutor(FakeSystemClock())
         `when`(service.asBinder()).thenCallRealMethod()
         `when`(service.queryLocalInterface(ArgumentMatchers.anyString())).thenReturn(service)
@@ -98,7 +101,36 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
     fun testBindService() {
         manager.bindService()
         executor.runAllReady()
-        assertTrue(mContext.isBound(componentName))
+        assertTrue(context.isBound(componentName))
+    }
+
+    @Test
+    fun testNullBinding() {
+        val mockContext = mock(Context::class.java)
+        lateinit var serviceConnection: ServiceConnection
+        `when`(mockContext.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer {
+            val component = (it.arguments[0] as Intent).component
+            if (component == componentName) {
+                serviceConnection = it.arguments[1] as ServiceConnection
+                serviceConnection.onNullBinding(component)
+                true
+            } else {
+                false
+            }
+        }
+
+        val nullManager = ControlsProviderLifecycleManager(
+                mockContext,
+                executor,
+                actionCallbackService,
+                UserHandle.of(0),
+                componentName
+        )
+
+        nullManager.bindService()
+        executor.runAllReady()
+
+        verify(mockContext).unbindService(serviceConnection)
     }
 
     @Test
@@ -109,7 +141,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
         manager.unbindService()
         executor.runAllReady()
 
-        assertFalse(mContext.isBound(componentName))
+        assertFalse(context.isBound(componentName))
     }
 
     @Test
@@ -119,7 +151,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
 
         verify(service).load(subscriberService)
 
-        assertTrue(mContext.isBound(componentName))
+        assertTrue(context.isBound(componentName))
     }
 
     @Test
@@ -129,7 +161,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
 
         manager.unbindService()
         executor.runAllReady()
-        assertFalse(mContext.isBound(componentName))
+        assertFalse(context.isBound(componentName))
     }
 
     @Test
@@ -162,7 +194,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
         manager.maybeBindAndSubscribe(list, subscriberService)
         executor.runAllReady()
 
-        assertTrue(mContext.isBound(componentName))
+        assertTrue(context.isBound(componentName))
         verify(service).subscribe(list, subscriberService)
     }
 
@@ -173,7 +205,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
         manager.maybeBindAndSendAction(controlId, action)
         executor.runAllReady()
 
-        assertTrue(mContext.isBound(componentName))
+        assertTrue(context.isBound(componentName))
         verify(service).action(eq(controlId), capture(wrapperCaptor),
                 eq(actionCallbackService))
         assertEquals(action, wrapperCaptor.getValue().getWrappedAction())

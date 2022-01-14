@@ -409,6 +409,8 @@ public final class BasePermission {
         }
         if (bp.perm != null && Objects.equals(bp.perm.getPackageName(), p.getPackageName())
                 && Objects.equals(bp.perm.getName(), p.getName())) {
+            bp.perm.setFlags(bp.perm.getFlags() & ~PermissionInfo.FLAG_INSTALLED);
+            bp.perm = p.setFlags(p.getFlags() | PermissionInfo.FLAG_INSTALLED);
             bp.protectionLevel = p.getProtectionLevel();
         }
         if (bp.isRuntime() && (ownerChanged || wasNonRuntime)) {
