@@ -3255,6 +3255,10 @@
     <public name="showClockAndComplications" />
     <!-- @hide @SystemApi -->
     <public name="gameSessionService" />
+    <public name="supportsBatteryGameMode" />
+    <public name="supportsPerformanceGameMode" />
+    <public name="allowGameAngleDriver" />
+    <public name="allowGameDownscaling" />
     <public name="localeConfig" />
     <public name="showBackground" />
     <public name="inheritKeyStoreKeys" />

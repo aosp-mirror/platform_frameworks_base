@@ -326,6 +326,8 @@ package android {
     field public static final int allowClearUserData = 16842757; // 0x1010005
     field public static final int allowClickWhenDisabled = 16844312; // 0x1010618
     field public static final int allowEmbedded = 16843765; // 0x10103f5
+    field public static final int allowGameAngleDriver;
+    field public static final int allowGameDownscaling;
     field public static final int allowNativeHeapPointerTagging = 16844306; // 0x1010612
     field public static final int allowParallelSyncs = 16843570; // 0x1010332
     field public static final int allowSingleTap = 16843353; // 0x1010259
@@ -1435,10 +1437,12 @@ package android {
     field public static final int summaryOn = 16843247; // 0x10101ef
     field public static final int supportedTypes;
     field public static final int supportsAssist = 16844016; // 0x10104f0
+    field public static final int supportsBatteryGameMode;
     field public static final int supportsInlineSuggestions = 16844301; // 0x101060d
     field public static final int supportsLaunchVoiceAssistFromKeyguard = 16844017; // 0x10104f1
     field public static final int supportsLocalInteraction = 16844047; // 0x101050f
     field public static final int supportsMultipleDisplays = 16844182; // 0x1010596
+    field public static final int supportsPerformanceGameMode;
     field public static final int supportsPictureInPicture = 16844023; // 0x10104f7
     field public static final int supportsRtl = 16843695; // 0x10103af
     field public static final int supportsStylusHandwriting;

@@ -8875,6 +8875,20 @@
         <attr name="gameSessionService" format="string" />
     </declare-styleable>
 
+    <!-- Use <code>game-mode-config</code> as the root tag of the XML resource that
+         describes a GameModeConfig.
+         Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="GameModeConfig">
+        <!-- Set true to opt in BATTERY mode. -->
+        <attr name="supportsBatteryGameMode" format="boolean" />
+        <!-- Set true to opt in PERFORMANCE mode. -->
+        <attr name="supportsPerformanceGameMode" format="boolean" />
+        <!-- Set true to enable ANGLE. -->
+        <attr name="allowGameAngleDriver" format="boolean" />
+        <!-- Set true to allow resolution downscaling intervention. -->
+        <attr name="allowGameDownscaling" format="boolean" />
+    </declare-styleable>
+
     <!-- Use <code>voice-enrollment-application</code>
          as the root tag of the XML resource that escribes the supported keyphrases (hotwords)
          by the enrollment application.

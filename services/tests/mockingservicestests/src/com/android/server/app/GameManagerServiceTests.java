@@ -511,8 +511,8 @@ public class GameManagerServiceTests {
                 gameManagerService.getConfig(mPackageName);
         assertEquals(config.getGameModeConfiguration(gameMode).getUseAngle(), angleEnabled);
 
-        // Validate GameManagerService.getAngleEnabled() returns the correct value.
-        assertEquals(gameManagerService.getAngleEnabled(mPackageName, USER_ID_1), angleEnabled);
+        // Validate GameManagerService.isAngleEnabled() returns the correct value.
+        assertEquals(gameManagerService.isAngleEnabled(mPackageName, USER_ID_1), angleEnabled);
     }
 
     private void checkFps(GameManagerService gameManagerService, int gameMode, int fps) {

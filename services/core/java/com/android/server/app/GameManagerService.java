@@ -20,6 +20,10 @@ import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_PACKAGE_CHANGED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 
+import static com.android.internal.R.styleable.GameModeConfig_allowGameAngleDriver;
+import static com.android.internal.R.styleable.GameModeConfig_allowGameDownscaling;
+import static com.android.internal.R.styleable.GameModeConfig_supportsBatteryGameMode;
+import static com.android.internal.R.styleable.GameModeConfig_supportsPerformanceGameMode;
 import static com.android.server.wm.CompatModePackages.DOWNSCALED;
 import static com.android.server.wm.CompatModePackages.DOWNSCALE_30;
 import static com.android.server.wm.CompatModePackages.DOWNSCALE_35;
@@ -54,6 +58,10 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.hardware.power.Mode;
 import android.net.Uri;
 import android.os.Binder;
@@ -71,8 +79,10 @@ import android.os.ShellCallback;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.util.ArrayMap;
+import android.util.AttributeSet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
+import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -84,7 +94,11 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.SystemService.TargetUser;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -425,6 +439,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
         public static final String METADATA_BATTERY_MODE_ENABLE =
                 "com.android.app.gamemode.battery.enabled";
 
+        /**
+         * Metadata that allows a game to specify all intervention information with an XML file in
+         * the application field.
+         */
+        public static final String METADATA_GAME_MODE_CONFIG = "android.game_mode_config";
+
+        private static final String GAME_MODE_CONFIG_NODE_NAME = "game-mode-config";
         private final String mPackageName;
         private final ArrayMap<Integer, GameModeConfiguration> mModeConfigs;
         private boolean mPerfModeOptedIn;
@@ -438,18 +459,20 @@ public final class GameManagerService extends IGameManagerService.Stub {
             try {
                 final ApplicationInfo ai = mPackageManager.getApplicationInfoAsUser(packageName,
                         PackageManager.GET_META_DATA, userId);
-                if (ai.metaData != null) {
-                    mPerfModeOptedIn = ai.metaData.getBoolean(METADATA_PERFORMANCE_MODE_ENABLE);
-                    mBatteryModeOptedIn = ai.metaData.getBoolean(METADATA_BATTERY_MODE_ENABLE);
-                    mAllowDownscale = ai.metaData.getBoolean(METADATA_WM_ALLOW_DOWNSCALE, true);
-                    mAllowAngle = ai.metaData.getBoolean(METADATA_ANGLE_ALLOW_ANGLE, true);
-                } else {
-                    mPerfModeOptedIn = false;
-                    mBatteryModeOptedIn = false;
-                    mAllowDownscale = true;
-                    mAllowAngle = true;
+                if (!parseInterventionFromXml(ai, packageName)) {
+                    if (ai.metaData != null) {
+                        mPerfModeOptedIn = ai.metaData.getBoolean(METADATA_PERFORMANCE_MODE_ENABLE);
+                        mBatteryModeOptedIn = ai.metaData.getBoolean(METADATA_BATTERY_MODE_ENABLE);
+                        mAllowDownscale = ai.metaData.getBoolean(METADATA_WM_ALLOW_DOWNSCALE, true);
+                        mAllowAngle = ai.metaData.getBoolean(METADATA_ANGLE_ALLOW_ANGLE, true);
+                    } else {
+                        mPerfModeOptedIn = false;
+                        mBatteryModeOptedIn = false;
+                        mAllowDownscale = true;
+                        mAllowAngle = true;
+                    }
                 }
-            } catch (PackageManager.NameNotFoundException e) {
+            } catch (NameNotFoundException e) {
                 // Not all packages are installed, hence ignore those that are not installed yet.
                 Slog.v(TAG, "Failed to get package metadata");
             }
@@ -467,6 +490,51 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     }
                 }
             }
+        }
+
+        private boolean parseInterventionFromXml(ApplicationInfo ai, String packageName) {
+            boolean xmlFound = false;
+            try (XmlResourceParser parser = ai.loadXmlMetaData(mPackageManager,
+                    METADATA_GAME_MODE_CONFIG)) {
+                if (parser == null) {
+                    Slog.v(TAG, "No " + METADATA_GAME_MODE_CONFIG
+                            + " meta-data found for package " + mPackageName);
+                } else {
+                    xmlFound = true;
+                    final Resources resources = mPackageManager.getResourcesForApplication(
+                            packageName);
+                    final AttributeSet attributeSet = Xml.asAttributeSet(parser);
+                    int type;
+                    while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                            && type != XmlPullParser.START_TAG) {
+                        // Do nothing
+                    }
+
+                    boolean isStartingTagGameModeConfig =
+                            GAME_MODE_CONFIG_NODE_NAME.equals(parser.getName());
+                    if (!isStartingTagGameModeConfig) {
+                        Slog.w(TAG, "Meta-data does not start with "
+                                + GAME_MODE_CONFIG_NODE_NAME
+                                + " tag");
+                    } else {
+                        final TypedArray array = resources.obtainAttributes(attributeSet,
+                                com.android.internal.R.styleable.GameModeConfig);
+                        mPerfModeOptedIn = array.getBoolean(
+                                GameModeConfig_supportsPerformanceGameMode, false);
+                        mBatteryModeOptedIn = array.getBoolean(
+                                GameModeConfig_supportsBatteryGameMode,
+                                false);
+                        mAllowDownscale = array.getBoolean(GameModeConfig_allowGameDownscaling,
+                                true);
+                        mAllowAngle = array.getBoolean(GameModeConfig_allowGameAngleDriver, true);
+                        array.recycle();
+                    }
+                }
+            } catch (NameNotFoundException | XmlPullParserException | IOException ex) {
+                Slog.e(TAG, "Error while parsing XML meta-data for "
+                        + METADATA_GAME_MODE_CONFIG);
+            }
+            return xmlFound;
         }
 
         /**
@@ -691,7 +759,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         try {
             return mPackageManager.getPackageUidAsUser(packageName, userId)
                     == Binder.getCallingUid();
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (NameNotFoundException e) {
             return false;
         }
     }
@@ -855,7 +923,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
      */
     @Override
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
-    public @GameMode boolean getAngleEnabled(String packageName, int userId)
+    public @GameMode boolean isAngleEnabled(String packageName, int userId)
             throws SecurityException {
         final int gameMode = getGameMode(packageName, userId);
         if (gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
@@ -1413,7 +1481,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         if (applicationInfo.category != ApplicationInfo.CATEGORY_GAME) {
                             return;
                         }
-                    } catch (PackageManager.NameNotFoundException e) {
+                    } catch (NameNotFoundException e) {
                         // Ignore the exception.
                     }
                     switch (intent.getAction()) {
