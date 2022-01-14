@@ -7,7 +7,6 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
 import android.os.SystemClock
-import android.util.DisplayMetrics
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import android.view.MotionEvent
@@ -24,6 +23,7 @@ import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.MediaHierarchyManager
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.FalsingManager
@@ -64,6 +64,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     private val scrimController: ScrimController,
     private val depthController: NotificationShadeDepthController,
     private val context: Context,
+    wakefulnessLifecycle: WakefulnessLifecycle,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager,
     dumpManager: DumpManager,
@@ -120,6 +121,12 @@ class LockscreenShadeTransitionController @Inject constructor(
     private var nextHideKeyguardNeedsNoAnimation = false
 
     /**
+     * Are we currently waking up to the shade locked
+     */
+    var isWakingToShadeLocked: Boolean = false
+        private set
+
+    /**
      * The distance until we're showing the notifications when pulsing
      */
     val distanceUntilShowingPulsingNotifications
@@ -158,6 +165,13 @@ class LockscreenShadeTransitionController @Inject constructor(
                         setPulseHeight(0f, animate = false)
                     }
                 }
+            }
+        })
+        wakefulnessLifecycle.addObserver(object : WakefulnessLifecycle.Observer {
+            override fun onPostFinishedWakingUp() {
+                // when finishing waking up, the UnlockedScreenOffAnimation has another attempt
+                // to reset keyguard. Let's do it in post
+                isWakingToShadeLocked = false
             }
         })
     }
@@ -488,6 +502,10 @@ class LockscreenShadeTransitionController @Inject constructor(
             draggedDownEntry = entry
         } else {
             logger.logGoingToLockedShade(animationHandler != null)
+            if (statusBarStateController.isDozing) {
+                // Make sure we don't go back to keyguard immediately again after waking up
+                isWakingToShadeLocked = true
+            }
             statusBarStateController.setState(StatusBarState.SHADE_LOCKED)
             // This call needs to be after updating the shade state since otherwise
             // the scrimstate resets too early
@@ -598,6 +616,7 @@ class LockscreenShadeTransitionController @Inject constructor(
             it.println("dragDownAmount: $dragDownAmount")
             it.println("isDragDownAnywhereEnabled: $isDragDownAnywhereEnabled")
             it.println("isFalsingCheckNeeded: $isFalsingCheckNeeded")
+            it.println("isWakingToShadeLocked: $isWakingToShadeLocked")
             it.println("hasPendingHandlerOnKeyguardDismiss: " +
                 "${animationHandlerOnKeyguardDismiss != null}")
         }
