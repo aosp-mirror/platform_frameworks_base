@@ -123,6 +123,7 @@ public class TrustAgentWrapper {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_GRANT_TRUST:
+                    // TODO(b/213631675): Respect FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE
                     if (!isConnected()) {
                         Log.w(TAG, "Agent is not connected, cannot grant trust: "
                                 + mName.flattenToShortString());
