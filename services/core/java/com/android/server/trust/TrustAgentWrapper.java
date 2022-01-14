@@ -100,6 +100,8 @@ public class TrustAgentWrapper {
 
     // Trust state
     private boolean mTrusted;
+    private boolean mWaitingForTrustableDowngrade = false;
+    private boolean mTrustable;
     private CharSequence mMessage;
     private boolean mDisplayTrustGrantedMessage;
     private boolean mTrustDisabledByDpm;
@@ -108,6 +110,25 @@ public class TrustAgentWrapper {
     private AlarmManager mAlarmManager;
     private final Intent mAlarmIntent;
     private PendingIntent mAlarmPendingIntent;
+    private final BroadcastReceiver mTrustableDowngradeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!TrustManagerService.ENABLE_ACTIVE_UNLOCK_FLAG) {
+                return;
+            }
+            if (!mWaitingForTrustableDowngrade) {
+                return;
+            }
+            // are these the broadcasts we want to listen to
+            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())
+                    || Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
+                mTrusted = false;
+                mTrustable = true;
+                mWaitingForTrustableDowngrade = false;
+                mTrustManagerService.updateTrust(mUserId, 0);
+            }
+        }
+    };
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -126,16 +147,21 @@ public class TrustAgentWrapper {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_GRANT_TRUST:
-                    // TODO(b/213631675): Respect FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE
                     if (!isConnected()) {
                         Log.w(TAG, "Agent is not connected, cannot grant trust: "
                                 + mName.flattenToShortString());
                         return;
                     }
                     mTrusted = true;
+                    mTrustable = false;
                     mMessage = (CharSequence) msg.obj;
                     int flags = msg.arg1;
                     mDisplayTrustGrantedMessage = (flags & FLAG_GRANT_TRUST_DISPLAY_MESSAGE) != 0;
+                    if ((flags & TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0) {
+                        mWaitingForTrustableDowngrade = true;
+                    } else {
+                        mWaitingForTrustableDowngrade = false;
+                    }
                     long durationMs = msg.getData().getLong(DATA_DURATION);
                     if (durationMs > 0) {
                         final long duration;
@@ -427,6 +453,9 @@ public class TrustAgentWrapper {
         final String pathUri = mAlarmIntent.toUri(Intent.URI_INTENT_SCHEME);
         alarmFilter.addDataPath(pathUri, PatternMatcher.PATTERN_LITERAL);
 
+        IntentFilter trustableFilter = new IntentFilter(Intent.ACTION_USER_PRESENT);
+        trustableFilter.addAction(Intent.ACTION_SCREEN_OFF);
+
         // Schedules a restart for when connecting times out. If the connection succeeds,
         // the restart is canceled in mCallback's onConnected.
         scheduleRestart();
@@ -435,6 +464,7 @@ public class TrustAgentWrapper {
         if (mBound) {
             mContext.registerReceiver(mBroadcastReceiver, alarmFilter, PERMISSION, null,
                     Context.RECEIVER_EXPORTED);
+            mContext.registerReceiver(mTrustableDowngradeReceiver, trustableFilter);
         } else {
             Log.e(TAG, "Can't bind to TrustAgent " + mName.flattenToShortString());
         }
@@ -589,6 +619,10 @@ public class TrustAgentWrapper {
 
     public boolean isTrusted() {
         return mTrusted && mManagingTrust && !mTrustDisabledByDpm;
+    }
+
+    public boolean isTrustable() {
+        return mTrustable && mManagingTrust && !mTrustDisabledByDpm;
     }
 
     public boolean isManagingTrust() {

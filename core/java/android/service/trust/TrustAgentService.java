@@ -126,9 +126,6 @@ public class TrustAgentService extends Service {
      * <p>When the platform internally removes the agent's trust in this manner, an agent can
      * re-grant it (via a call to grantTrust) without the user having to unlock the device through
      * another method (e.g. PIN). This renewable state only persists for a limited time.
-     *
-     * TODO(b/213631675): Remove @hide
-     * @hide
      */
     public static final int FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE = 1 << 2;
 
