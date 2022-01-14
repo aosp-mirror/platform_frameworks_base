@@ -34,8 +34,6 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -72,7 +70,6 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -149,6 +146,7 @@ public class KeyguardIndicationController {
     private CharSequence mBiometricMessage;
     protected ColorStateList mInitialTextColorState;
     private boolean mVisible;
+    private boolean mOrganizationOwnedDevice;
 
     private boolean mPowerPluggedIn;
     private boolean mPowerPluggedInWired;
@@ -256,13 +254,13 @@ public class KeyguardIndicationController {
             mExecutor,
             mStatusBarStateController);
         updateIndication(false /* animate */);
-        updateDisclosure();
+        updateOrganizedOwnedDevice();
         if (mBroadcastReceiver == null) {
             // Update the disclosure proactively to avoid IPC on the critical path.
             mBroadcastReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    updateDisclosure();
+                    updateOrganizedOwnedDevice();
                 }
             };
             IntentFilter intentFilter = new IntentFilter();
@@ -305,12 +303,11 @@ public class KeyguardIndicationController {
     }
 
     /**
-     * Doesn't include disclosure (also a persistent indication) which gets triggered separately.
-     *
      * This method also doesn't update transient messages like biometrics since those messages
      * are also updated separately.
      */
     private void updatePersistentIndications(boolean animate, int userId) {
+        updateDisclosure();
         updateOwnerInfo();
         updateBattery(animate);
         updateUserLocked(userId);
@@ -320,9 +317,14 @@ public class KeyguardIndicationController {
         updateResting();
     }
 
-    private void updateDisclosure() {
+    private void updateOrganizedOwnedDevice() {
         // avoid calling this method since it has an IPC
-        if (whitelistIpcs(this::isOrganizationOwnedDevice)) {
+        mOrganizationOwnedDevice = whitelistIpcs(this::isOrganizationOwnedDevice);
+        updatePersistentIndications(false, KeyguardUpdateMonitor.getCurrentUser());
+    }
+
+    private void updateDisclosure() {
+        if (mOrganizationOwnedDevice) {
             final CharSequence organizationName = getOrganizationOwnedDeviceOrganizationName();
             final CharSequence disclosure = getDisclosureText(organizationName);
             mRotateTextViewController.updateIndication(
@@ -335,8 +337,6 @@ public class KeyguardIndicationController {
         } else {
             mRotateTextViewController.hideIndication(INDICATION_TYPE_DISCLOSURE);
         }
-
-        updateResting();
     }
 
     private CharSequence getDisclosureText(@Nullable CharSequence organizationName) {
@@ -753,60 +753,6 @@ public class KeyguardIndicationController {
         updatePersistentIndications(animate, KeyguardUpdateMonitor.getCurrentUser());
     }
 
-    // animates textView - textView moves up and bounces down
-    private void animateText(KeyguardIndicationTextView textView, String indication) {
-        int yTranslation = mContext.getResources().getInteger(
-                R.integer.wired_charging_keyguard_text_animation_distance);
-        int animateUpDuration = mContext.getResources().getInteger(
-                R.integer.wired_charging_keyguard_text_animation_duration_up);
-        int animateDownDuration = mContext.getResources().getInteger(
-                R.integer.wired_charging_keyguard_text_animation_duration_down);
-        textView.animate().cancel();
-        ViewClippingUtil.setClippingDeactivated(textView, true, mClippingParams);
-        textView.animate()
-                .translationYBy(yTranslation)
-                .setInterpolator(Interpolators.LINEAR)
-                .setDuration(animateUpDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    private boolean mCancelled;
-
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        textView.switchIndication(indication, null);
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-                        textView.setTranslationY(BOUNCE_ANIMATION_FINAL_Y);
-                        mCancelled = true;
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        if (mCancelled) {
-                            ViewClippingUtil.setClippingDeactivated(textView, false,
-                                    mClippingParams);
-                            return;
-                        }
-                        textView.animate()
-                                .setDuration(animateDownDuration)
-                                .setInterpolator(Interpolators.BOUNCE)
-                                .translationY(BOUNCE_ANIMATION_FINAL_Y)
-                                .setListener(new AnimatorListenerAdapter() {
-                                    @Override
-                                    public void onAnimationEnd(Animator animation) {
-                                        textView.setTranslationY(BOUNCE_ANIMATION_FINAL_Y);
-                                        ViewClippingUtil.setClippingDeactivated(textView, false,
-                                                mClippingParams);
-                                        // Unset the listener, otherwise this may persist for
-                                        // another view property animation
-                                        textView.animate().setListener(null);
-                                    }
-                                });
-                    }
-                });
-    }
-
     protected String computePowerIndication() {
         int chargingId;
         if (mBatteryOverheated) {
@@ -1182,9 +1128,12 @@ public class KeyguardIndicationController {
 
         @Override
         public void onKeyguardShowingChanged() {
+            // All transient messages are gone the next time keyguard is shown
             if (!mKeyguardStateController.isShowing()) {
                 mTopIndicationView.clearMessages();
                 mRotateTextViewController.clearMessages();
+            } else {
+                updatePersistentIndications(false, KeyguardUpdateMonitor.getCurrentUser());
             }
         }
     };
