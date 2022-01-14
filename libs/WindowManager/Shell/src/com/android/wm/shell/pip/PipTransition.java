@@ -330,12 +330,10 @@ public class PipTransition extends PipTransitionController {
             @NonNull TransitionInfo.Change pipChange) {
         final int rotateDelta = deltaRotation(displayRotationChange.getStartRotation(),
                 displayRotationChange.getEndRotation());
-        final int displayW = displayRotationChange.getEndAbsBounds().width();
-        final int displayH = displayRotationChange.getEndAbsBounds().height();
 
         // Counter-rotate all "going-away" things since they are still in the old orientation.
         final CounterRotatorHelper rotator = new CounterRotatorHelper();
-        rotator.handleClosingChanges(info, startTransaction, rotateDelta, displayW, displayH);
+        rotator.handleClosingChanges(info, startTransaction, displayRotationChange);
 
         mFinishCallback = (wct, wctCB) -> {
             mPipOrganizer.onExitPipFinished(pipChange.getTaskInfo());
