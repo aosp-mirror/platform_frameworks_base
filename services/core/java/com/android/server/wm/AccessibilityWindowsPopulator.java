@@ -48,14 +48,6 @@ import java.util.List;
 public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
     private static final String TAG = AccessibilityWindowsPopulator.class.getSimpleName();
-    // If the surface flinger callback is not coming within in 2 frames time, i.e. about
-    // 35ms, then assuming the windows become stable.
-    private static final int SURFACE_FLINGER_CALLBACK_WINDOWS_STABLE_TIMES_MS = 35;
-    // To avoid the surface flinger callbacks always comes within in 2 frames, then no windows
-    // are reported to the A11y framework, and the animation duration time is 500ms, so setting
-    // this value as the max timeout value to force computing changed windows.
-    private static final int WINDOWS_CHANGED_NOTIFICATION_MAX_DURATION_TIMES_MS = 500;
-
     private static final float[] sTempFloats = new float[9];
 
     private final WindowManagerService mService;
@@ -122,12 +114,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                 }
             }
             if (mWindowsNotificationEnabled) {
-                if (!mHandler.hasMessages(
-                        MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT)) {
-                    mHandler.sendEmptyMessageDelayed(
-                            MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT,
-                            WINDOWS_CHANGED_NOTIFICATION_MAX_DURATION_TIMES_MS);
-                }
                 populateVisibleWindowHandlesAndNotifyWindowsChangeIfNeededLocked();
             }
         }
@@ -179,18 +165,11 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             final int displayId = tempWindowHandleList.keyAt(i);
             mInputWindowHandlesOnDisplays.put(displayId, tempWindowHandleList.get(displayId));
         }
-
-        if (displayIdsForWindowsChanged.size() > 0) {
-            if (!mHandler.hasMessages(MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED)) {
-                mHandler.obtainMessage(MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED,
-                        displayIdsForWindowsChanged).sendToTarget();
-            }
-
-            return;
+        if (displayIdsForWindowsChanged.size() > 0
+                && !mHandler.hasMessages(MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED)) {
+            mHandler.obtainMessage(MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED,
+                    displayIdsForWindowsChanged).sendToTarget();
         }
-        mHandler.removeMessages(MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_UI_STABLE);
-        mHandler.sendEmptyMessageDelayed(MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_UI_STABLE,
-                SURFACE_FLINGER_CALLBACK_WINDOWS_STABLE_TIMES_MS);
     }
 
     private void getDisplaysForWindowsChangedLocked(List<Integer> outDisplayIdsForWindowsChanged,
@@ -259,24 +238,10 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
     }
 
     private void notifyWindowsChanged(@NonNull List<Integer> displayIdsForWindowsChanged) {
-        mHandler.removeMessages(MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT);
-
         for (int i = 0; i < displayIdsForWindowsChanged.size(); i++) {
             mAccessibilityController.performComputeChangedWindowsNot(
                     displayIdsForWindowsChanged.get(i), false);
         }
-    }
-
-    private void forceUpdateWindows() {
-        final List<Integer> displayIdsForWindowsChanged = new ArrayList<>();
-
-        synchronized (mLock) {
-            for (int i = 0; i < mInputWindowHandlesOnDisplays.size(); i++) {
-                final int displayId = mInputWindowHandlesOnDisplays.keyAt(i);
-                displayIdsForWindowsChanged.add(displayId);
-            }
-        }
-        notifyWindowsChanged(displayIdsForWindowsChanged);
     }
 
     @GuardedBy("mLock")
@@ -285,13 +250,10 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         mMagnificationSpecInverseMatrix.clear();
         mVisibleWindows.clear();
         mWindowsNotificationEnabled = false;
-        mHandler.removeCallbacksAndMessages(null);
     }
 
     private class MyHandler extends Handler {
         public static final int MESSAGE_NOTIFY_WINDOWS_CHANGED = 1;
-        public static final int MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_UI_STABLE = 2;
-        public static final int MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT = 3;
 
         MyHandler(Looper looper) {
             super(looper, null, false);
@@ -299,24 +261,9 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
         @Override
         public void handleMessage(Message message) {
-            switch (message.what) {
-                case MESSAGE_NOTIFY_WINDOWS_CHANGED: {
-                    final List<Integer> displayIdsForWindowsChanged = (List<Integer>) message.obj;
-                    notifyWindowsChanged(displayIdsForWindowsChanged);
-                } break;
-
-                case MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_UI_STABLE: {
-                    forceUpdateWindows();
-                } break;
-
-                case MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT: {
-                    Slog.w(TAG, "Windows change within in 2 frames continuously over 500 ms "
-                            + "and notify windows changed immediately");
-                    mHandler.removeMessages(
-                            MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_UI_STABLE);
-
-                    forceUpdateWindows();
-                } break;
+            if (message.what == MESSAGE_NOTIFY_WINDOWS_CHANGED) {
+                final List<Integer> displayIdsForWindowsChanged = (List<Integer>) message.obj;
+                notifyWindowsChanged(displayIdsForWindowsChanged);
             }
         }
     }
