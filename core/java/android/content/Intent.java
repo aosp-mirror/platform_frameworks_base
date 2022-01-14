@@ -2385,6 +2385,10 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.Manifest.permission#START_VIEW_APP_FEATURES} permission to ensure that
      * only the system can launch this activity. The system will not launch activities
      * that are not properly protected.
+     *
+     * An optional <meta-data> tag in the activity's manifest with
+     * android:name=app_features_preference_summary and android:resource=@string/<string name> will
+     * be used to add a summary line for the "All Services" preference in settings.
      * </p>
      * @hide
      */
