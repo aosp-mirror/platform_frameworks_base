@@ -26,7 +26,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Slog;
@@ -105,14 +104,9 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             inverseMatrix.set(mMagnificationSpecInverseMatrix.get(displayId));
         }
 
-        final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
-        final ShellRoot shellroot = dc.mShellRoots.get(WindowManager.SHELL_ROOT_LAYER_PIP);
-        final IBinder pipMenuIBinder =
-                shellroot != null ? shellroot.getAccessibilityWindowToken() : null;
         for (final InputWindowHandle windowHandle : inputWindowHandles) {
             final AccessibilityWindow accessibilityWindow =
-                    AccessibilityWindow.initializeData(mService, windowHandle, inverseMatrix,
-                            pipMenuIBinder);
+                    AccessibilityWindow.initializeData(mService, windowHandle, inverseMatrix);
 
             outWindows.add(accessibilityWindow);
         }
@@ -340,7 +334,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         private int mFlags;
         private int mType;
         private int mPrivateFlags;
-        private boolean mIsPIPMenu;
         private boolean mIsFocused;
         private boolean mShouldMagnify;
         private boolean mIgnoreDuetoRecentsAnimation;
@@ -357,7 +350,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
          * @param inverseMatrix The magnification spec inverse matrix.
          */
         public static AccessibilityWindow initializeData(WindowManagerService service,
-                InputWindowHandle inputWindowHandle, Matrix inverseMatrix, IBinder pipIBinder) {
+                InputWindowHandle inputWindowHandle, Matrix inverseMatrix) {
             final IWindow window = inputWindowHandle.getWindow();
             final WindowState windowState = window != null ? service.mWindowMap.get(
                     window.asBinder()) : null;
@@ -368,7 +361,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             instance.mDisplayId = inputWindowHandle.displayId;
             instance.mFlags = inputWindowHandle.layoutParamsFlags;
             instance.mType = inputWindowHandle.layoutParamsType;
-            instance.mIsPIPMenu = inputWindowHandle.getWindow().asBinder().equals(pipIBinder);
 
             // TODO (b/199357848): gets the private flag of the window from other way.
             instance.mPrivateFlags = windowState != null ? windowState.mAttrs.privateFlags : 0;
@@ -499,13 +491,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             return mTouchableRegionInScreen.isEmpty();
         }
 
-        /**
-         * @return true if this window is PIP menu.
-         */
-        public boolean isPIPMenu() {
-            return mIsPIPMenu;
-        }
-
         private static void getTouchableRegionInWindow(boolean shouldMagnify, Region inRegion,
                 Region outRegion, Rect frame, Matrix inverseMatrix) {
             // Some modal windows, like the activity with Theme.dialog, has the full screen
@@ -562,9 +547,10 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             // one is PIP.
             if (windowInfo.type == TYPE_DOCK_DIVIDER) {
                 windowInfo.title = "Splitscreen Divider";
-            } else if (window.mIsPIPMenu) {
+            } else {
                 windowInfo.title = "Picture-in-Picture menu";
             }
+
             return windowInfo;
         }
 
@@ -579,19 +565,18 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
         @Override
         public String toString() {
-            String builder = "A11yWindow=[" + mWindow.asBinder()
+            String builder = "A11yWindow=[" + mWindow
                     + ", displayId=" + mDisplayId
                     + ", flag=0x" + Integer.toHexString(mFlags)
                     + ", type=" + mType
                     + ", privateFlag=0x" + Integer.toHexString(mPrivateFlags)
                     + ", focused=" + mIsFocused
-                    + ", mShouldMagnify=" + mShouldMagnify
+                    + ", magnify=" + mShouldMagnify
                     + ", ignoreDuetoRecentsAnimation=" + mIgnoreDuetoRecentsAnimation
                     + ", mIsTrustedOverlay=" + mIsTrustedOverlay
                     + ", regionInScreen=" + mTouchableRegionInScreen
                     + ", touchableRegion=" + mTouchableRegionInWindow
                     + ", letterBoxBounds=" + mLetterBoxBounds
-                    + ", isPIPMenu=" + mIsPIPMenu
                     + ", windowInfo=" + mWindowInfo
                     + "]";
 
