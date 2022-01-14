@@ -2136,6 +2136,9 @@
     <!-- The name of the package that will hold the system calendar sync manager role. -->
     <string name="config_systemAutomotiveCalendarSyncManager" translatable="false"></string>
 
+    <!-- The name of the package that will handle updating the device management role. -->
+    <string name="config_deviceManagerUpdater" translatable="false"></string>
+
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>
 
