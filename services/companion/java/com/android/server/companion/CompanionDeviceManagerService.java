@@ -600,11 +600,13 @@ public class CompanionDeviceManagerService extends SystemService
                 return;
             }
 
-            association.setLastTimeConnected(System.currentTimeMillis());
-            mAssociationStore.updateAssociation(association);
+            AssociationInfo updatedAssociationInfo = AssociationInfo.builder(association)
+                    .setLastTimeConnected(System.currentTimeMillis())
+                    .build();
+            mAssociationStore.updateAssociation(updatedAssociationInfo);
 
             mCompanionDevicePresenceController.onDeviceNotifyAppeared(
-                    association, getContext(), mMainHandler);
+                    updatedAssociationInfo, getContext(), mMainHandler);
         }
 
         @Override
@@ -651,8 +653,10 @@ public class CompanionDeviceManagerService extends SystemService
                         + " for user " + userId));
             }
 
-            association.setNotifyOnDeviceNearby(active);
-            mAssociationStore.updateAssociation(association);
+            AssociationInfo updatedAssociationInfo = AssociationInfo.builder(association)
+                    .setNotifyOnDeviceNearby(active)
+                    .build();
+            mAssociationStore.updateAssociation(updatedAssociationInfo);
         }
 
         @Override
