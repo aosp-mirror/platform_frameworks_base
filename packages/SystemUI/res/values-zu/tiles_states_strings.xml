@@ -86,9 +86,11 @@
     <item msgid="5715725170633593906">"Valiwe"</item>
     <item msgid="2075645297847971154">"Vuliwe"</item>
   </string-array>
-    <!-- no translation found for tile_states_color_correction:0 (2840507878437297682) -->
-    <!-- no translation found for tile_states_color_correction:1 (1909756493418256167) -->
-    <!-- no translation found for tile_states_color_correction:2 (4531508423703413340) -->
+  <string-array name="tile_states_color_correction">
+    <item msgid="2840507878437297682">"Akutholakali"</item>
+    <item msgid="1909756493418256167">"Valiwe"</item>
+    <item msgid="4531508423703413340">"Vuliwe"</item>
+  </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Akutholakali"</item>
     <item msgid="9103697205127645916">"Valiwe"</item>
