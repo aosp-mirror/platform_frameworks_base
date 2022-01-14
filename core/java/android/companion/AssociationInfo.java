@@ -54,13 +54,13 @@ public final class AssociationInfo implements Parcelable {
     private final @Nullable String mDeviceProfile;
 
     private final boolean mSelfManaged;
-    private boolean mNotifyOnDeviceNearby;
+    private final boolean mNotifyOnDeviceNearby;
     private final long mTimeApprovedMs;
     /**
      * A long value indicates the last time connected reported by selfManaged devices
      * Default value is Long.MAX_VALUE.
      */
-    private long mLastTimeConnectedMs;
+    private final long mLastTimeConnectedMs;
 
     /**
      * Creates a new Association.
@@ -158,22 +158,6 @@ public final class AssociationInfo implements Parcelable {
     @SystemApi
     public boolean isSelfManaged() {
         return mSelfManaged;
-    }
-
-    /**
-     * Should only be used by the CompanionDeviceManagerService.
-     * @hide
-     */
-    public void setNotifyOnDeviceNearby(boolean notifyOnDeviceNearby) {
-        mNotifyOnDeviceNearby = notifyOnDeviceNearby;
-    }
-
-    /**
-     * Should only be used by the CompanionDeviceManagerService.
-     * @hide
-     */
-    public void setLastTimeConnected(long lastTimeConnectedMs) {
-        mLastTimeConnectedMs = lastTimeConnectedMs;
     }
 
     /** @hide */
@@ -330,4 +314,112 @@ public final class AssociationInfo implements Parcelable {
             return new AssociationInfo(in);
         }
     };
+
+    /**
+     * Use this method to obtain a builder that you can use to create a copy of the
+     * given {@link AssociationInfo} with modified values of {@code mLastTimeConnected}
+     * or {@code mNotifyOnDeviceNearby}.
+     * <p>
+     *     Note that you <b>must</b> call either {@link Builder#setLastTimeConnected(long)
+     *     setLastTimeConnected} or {@link Builder#setNotifyOnDeviceNearby(boolean)
+     *     setNotifyOnDeviceNearby} before you will be able to call {@link Builder#build() build}.
+     *
+     *     This is ensured statically at compile time.
+     *
+     * @hide
+     */
+    @NonNull
+    public static NonActionableBuilder builder(@NonNull AssociationInfo info) {
+        return new Builder(info);
+    }
+
+    /**
+     * @hide
+     */
+    public static final class Builder implements NonActionableBuilder {
+        @NonNull
+        private final AssociationInfo mOriginalInfo;
+        private boolean mNotifyOnDeviceNearby;
+        private long mLastTimeConnectedMs;
+
+        private Builder(@NonNull AssociationInfo info) {
+            mOriginalInfo = info;
+            mNotifyOnDeviceNearby = info.mNotifyOnDeviceNearby;
+            mLastTimeConnectedMs = info.mLastTimeConnectedMs;
+        }
+
+        /**
+         * Should only be used by the CompanionDeviceManagerService.
+         * @hide
+         */
+        @Override
+        @NonNull
+        public Builder setLastTimeConnected(long lastTimeConnectedMs) {
+            if (lastTimeConnectedMs < 0) {
+                throw new IllegalArgumentException(
+                        "lastTimeConnectedMs must not be negative! (Given " + lastTimeConnectedMs
+                                + " )");
+            }
+            mLastTimeConnectedMs = lastTimeConnectedMs;
+            return this;
+        }
+
+        /**
+         * Should only be used by the CompanionDeviceManagerService.
+         * @hide
+         */
+        @Override
+        @NonNull
+        public Builder setNotifyOnDeviceNearby(boolean notifyOnDeviceNearby) {
+            mNotifyOnDeviceNearby = notifyOnDeviceNearby;
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public AssociationInfo build() {
+            return new AssociationInfo(
+                    mOriginalInfo.mId,
+                    mOriginalInfo.mUserId,
+                    mOriginalInfo.mPackageName,
+                    mOriginalInfo.mDeviceMacAddress,
+                    mOriginalInfo.mDisplayName,
+                    mOriginalInfo.mDeviceProfile,
+                    mOriginalInfo.mSelfManaged,
+                    mNotifyOnDeviceNearby,
+                    mOriginalInfo.mTimeApprovedMs,
+                    mLastTimeConnectedMs
+            );
+        }
+    }
+
+    /**
+     * This interface is returned from the
+     * {@link AssociationInfo#builder(android.companion.AssociationInfo) builder} entry point
+     * to indicate that this builder is not yet in a state that can produce a meaningful
+     * {@link AssociationInfo} object that is different from the one originally passed in.
+     *
+     * <p>
+     * Only by calling one of the setter methods is this builder turned into one where calling
+     * {@link Builder#build() build()} makes sense.
+     *
+     * @hide
+     */
+    public interface NonActionableBuilder {
+        /**
+         * Should only be used by the CompanionDeviceManagerService.
+         * @hide
+         */
+        @NonNull
+        Builder setNotifyOnDeviceNearby(boolean notifyOnDeviceNearby);
+
+        /**
+         * Should only be used by the CompanionDeviceManagerService.
+         * @hide
+         */
+        @NonNull
+        Builder setLastTimeConnected(long lastTimeConnectedMs);
+    }
 }
