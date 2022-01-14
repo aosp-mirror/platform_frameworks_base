@@ -66,6 +66,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.LocalServices;
@@ -560,7 +561,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @Override
     public void revokeOwnPermissionsOnKill(@NonNull String packageName,
             @NonNull List<String> permissions) {
-        mPermissionManagerServiceImpl.revokeOwnPermissionsOnKill(packageName, permissions);
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        AndroidFuture<Void> future = new AndroidFuture<>();
+        future.whenComplete((result, err) -> {
+            if (err == null) {
+                getOneTimePermissionUserManager(callingUserId)
+                        .setSelfRevokedPermissionSession(callingUid);
+            }
+        });
+        mPermissionManagerServiceImpl.revokeOwnPermissionsOnKill(packageName, permissions, future);
     }
 
     @Override
