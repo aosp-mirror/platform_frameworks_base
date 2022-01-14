@@ -85,6 +85,18 @@ interface IDeviceSenderCallback {
         in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
 
     /**
+     * Invoke to notify System UI that a media transfer from this device (the sender) to a receiver
+     * device has finished successfully.
+     *
+     * Important notes:
+     *   - This callback is for *starting* a cast. It should be used when this device had previously
+     *     been playing media locally and the media has successfully been transferred to the
+     *     receiver device instead.
+     */
+    oneway void transferToReceiverSucceeded(
+        in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
+
+    /**
      * Invoke to notify System UI that the attempted transfer has failed.
      *
      * This callback will be used for both the transfer that should've *started* playing the media

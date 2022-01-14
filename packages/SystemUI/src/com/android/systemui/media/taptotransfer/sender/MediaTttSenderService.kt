@@ -67,6 +67,12 @@ class MediaTttSenderService @Inject constructor(
         ) {
             this@MediaTttSenderService.transferToThisDeviceTriggered(mediaInfo)
         }
+
+        override fun transferToReceiverSucceeded(
+            mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
+        ) {
+            this@MediaTttSenderService.transferToReceiverSucceeded(mediaInfo, otherDeviceInfo)
+        }
     }
 
     // TODO(b/203800643): Use the app icon from the media info instead of a fake one.
@@ -120,6 +126,19 @@ class MediaTttSenderService @Inject constructor(
         val chipState = TransferToThisDeviceTriggered(
             appIconDrawable = fakeAppIconDrawable,
             appIconContentDescription = mediaInfo.name.toString()
+        )
+        controller.displayChip(chipState)
+    }
+
+    private fun transferToReceiverSucceeded(
+        mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
+    ) {
+        val chipState = TransferToReceiverSucceeded(
+            appIconDrawable = fakeAppIconDrawable,
+            appIconContentDescription = mediaInfo.name.toString(),
+            otherDeviceName = otherDeviceInfo.name
+            // TODO(b/203800643): Implement the undo API correctly so we can provide an undo
+            //   callback here.
         )
         controller.displayChip(chipState)
     }

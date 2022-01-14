@@ -111,13 +111,13 @@ class TransferToThisDeviceTriggered(
 }
 
 /**
- * A state representing that a transfer has been successfully completed.
+ * A state representing that a transfer to the receiver device has been successfully completed.
  *
  * @property otherDeviceName the name of the other device involved in the transfer.
  * @property undoRunnable if present, the runnable that should be run to undo the transfer. We will
  *   show an Undo button on the chip if this runnable is present.
  */
-class TransferSucceeded(
+class TransferToReceiverSucceeded(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
     private val otherDeviceName: String,

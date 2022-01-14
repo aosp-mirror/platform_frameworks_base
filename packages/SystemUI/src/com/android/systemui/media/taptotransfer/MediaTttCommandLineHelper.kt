@@ -37,7 +37,7 @@ import com.android.systemui.media.taptotransfer.sender.MoveCloserToStartCast
 import com.android.systemui.media.taptotransfer.sender.TransferFailed
 import com.android.systemui.media.taptotransfer.sender.TransferToReceiverTriggered
 import com.android.systemui.media.taptotransfer.sender.TransferToThisDeviceTriggered
-import com.android.systemui.media.taptotransfer.sender.TransferSucceeded
+import com.android.systemui.media.taptotransfer.sender.TransferToReceiverSucceeded
 import com.android.systemui.shared.mediattt.DeviceInfo
 import com.android.systemui.shared.mediattt.IDeviceSenderCallback
 import com.android.systemui.statusbar.commandline.Command
@@ -104,17 +104,10 @@ class MediaTttCommandLineHelper @Inject constructor(
                         senderCallback.transferToThisDeviceTriggered(mediaInfo, otherDeviceInfo)
                     }
                 }
-                // TODO(b/203800643): Migrate this command to invoke the service instead of the
-                //   controller.
-                TRANSFER_SUCCEEDED_COMMAND_NAME -> {
-                    mediaTttChipControllerSender.displayChip(
-                        TransferSucceeded(
-                            appIconDrawable,
-                            APP_ICON_CONTENT_DESCRIPTION,
-                            otherDeviceName,
-                            fakeUndoRunnable
-                        )
-                    )
+                TRANSFER_TO_RECEIVER_SUCCEEDED_COMMAND_NAME -> {
+                    runOnService { senderCallback ->
+                        senderCallback.transferToReceiverSucceeded(mediaInfo, otherDeviceInfo)
+                    }
                 }
                 TRANSFER_FAILED_COMMAND_NAME -> {
                     runOnService { senderCallback ->
@@ -127,7 +120,7 @@ class MediaTttCommandLineHelper @Inject constructor(
                             "$MOVE_CLOSER_TO_END_CAST_COMMAND_NAME, " +
                             "$TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME, " +
                             "$TRANSFER_TO_THIS_DEVICE_TRIGGERED_COMMAND_NAME, " +
-                            "$TRANSFER_SUCCEEDED_COMMAND_NAME, " +
+                            "$TRANSFER_TO_RECEIVER_SUCCEEDED_COMMAND_NAME, " +
                             TRANSFER_FAILED_COMMAND_NAME
                     )
                 }
@@ -217,10 +210,6 @@ class MediaTttCommandLineHelper @Inject constructor(
         /** Runs the command on the provided [senderCallback]. */
         fun run(senderCallback: IDeviceSenderCallback)
     }
-
-    private val fakeUndoRunnable = Runnable {
-        Log.i(TAG, "Undo runnable triggered")
-    }
 }
 
 @VisibleForTesting
@@ -241,7 +230,7 @@ val TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME = TransferToReceiverTriggered::c
 val TRANSFER_TO_THIS_DEVICE_TRIGGERED_COMMAND_NAME =
     TransferToThisDeviceTriggered::class.simpleName!!
 @VisibleForTesting
-val TRANSFER_SUCCEEDED_COMMAND_NAME = TransferSucceeded::class.simpleName!!
+val TRANSFER_TO_RECEIVER_SUCCEEDED_COMMAND_NAME = TransferToReceiverSucceeded::class.simpleName!!
 @VisibleForTesting
 val TRANSFER_FAILED_COMMAND_NAME = TransferFailed::class.simpleName!!
 

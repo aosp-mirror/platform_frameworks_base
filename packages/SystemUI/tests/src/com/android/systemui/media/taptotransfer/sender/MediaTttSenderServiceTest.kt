@@ -79,6 +79,18 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
     }
 
     @Test
+    fun transferToReceiverSucceeded_controllerTriggeredWithCorrectState() {
+        val name = "Fake name"
+        callback.transferToReceiverSucceeded(mediaInfo, DeviceInfo(name))
+
+        val chipStateCaptor = argumentCaptor<TransferToReceiverSucceeded>()
+        verify(controller).displayChip(capture(chipStateCaptor))
+
+        val chipState = chipStateCaptor.value!!
+        assertThat(chipState.getChipTextString(context)).contains(name)
+    }
+
+    @Test
     fun transferFailed_controllerTriggeredWithTransferFailedState() {
         callback.transferFailed(mediaInfo, DeviceInfo("Fake name"))
 

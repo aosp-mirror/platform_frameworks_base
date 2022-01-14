@@ -54,7 +54,7 @@ class MediaTttChipControllerSender @Inject constructor(
 
         // Undo
         val undoClickListener: View.OnClickListener? =
-            if (chipState is TransferSucceeded && chipState.undoRunnable != null)
+            if (chipState is TransferToReceiverSucceeded && chipState.undoRunnable != null)
                 View.OnClickListener { chipState.undoRunnable.run() }
             else
                 null
