@@ -2446,20 +2446,25 @@ public class UserManagerService extends IUserManager.Stub {
                 return false;
             }
 
-            // Limit the number of profiles that can be created
-            final int maxUsersOfType = getMaxUsersOfTypePerParent(type);
-            if (maxUsersOfType != UserTypeDetails.UNLIMITED_NUMBER_OF_USERS) {
-                final int userTypeCount = getProfileIds(userId, userType, false).length;
-                final int profilesRemovedCount = userTypeCount > 0 && allowedToRemoveOne ? 1 : 0;
-                if (userTypeCount - profilesRemovedCount >= maxUsersOfType) {
+            final int userTypeCount = getProfileIds(userId, userType, false).length;
+            final int profilesRemovedCount = userTypeCount > 0 && allowedToRemoveOne ? 1 : 0;
+            final int usersCountAfterRemoving = getAliveUsersExcludingGuestsCountLU()
+                    - profilesRemovedCount;
+
+            // Limit total number of users that can be created
+            if (usersCountAfterRemoving >= UserManager.getMaxSupportedUsers()) {
+                // Special case: Allow creating a managed profile anyway if there's only 1 user
+                // Otherwise, disallow.
+                if (!(isManagedProfile && usersCountAfterRemoving == 1)) {
                     return false;
                 }
-                // Allow creating a managed profile in the special case where there is only one user
-                if (isManagedProfile) {
-                    int usersCountAfterRemoving = getAliveUsersExcludingGuestsCountLU()
-                            - profilesRemovedCount;
-                    return usersCountAfterRemoving == 1
-                            || usersCountAfterRemoving < UserManager.getMaxSupportedUsers();
+            }
+
+            // Limit the number of profiles of this type that can be created.
+            final int maxUsersOfType = getMaxUsersOfTypePerParent(type);
+            if (maxUsersOfType != UserTypeDetails.UNLIMITED_NUMBER_OF_USERS) {
+                if (userTypeCount - profilesRemovedCount >= maxUsersOfType) {
+                    return false;
                 }
             }
         }
@@ -3655,6 +3660,7 @@ public class UserManagerService extends IUserManager.Stub {
         final boolean isGuest = UserManager.isUserTypeGuest(userType);
         final boolean isRestricted = UserManager.isUserTypeRestricted(userType);
         final boolean isDemo = UserManager.isUserTypeDemo(userType);
+        final boolean isManagedProfile = UserManager.isUserTypeManagedProfile(userType);
 
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo;
@@ -3678,18 +3684,19 @@ public class UserManagerService extends IUserManager.Stub {
                                     + ". Maximum number of that type already exists.",
                             UserManager.USER_OPERATION_ERROR_MAX_USERS);
                 }
+                if (!isGuest && !isManagedProfile && !isDemo && isUserLimitReached()) {
+                    // If the user limit has been reached, we cannot add a user (except guest/demo).
+                    // Note that managed profiles can bypass it in certain circumstances (taken
+                    // into account in the profile check below).
+                    throwCheckedUserOperationException(
+                            "Cannot add user. Maximum user limit is reached.",
+                            UserManager.USER_OPERATION_ERROR_MAX_USERS);
+                }
                 // TODO(b/142482943): Perhaps let the following code apply to restricted users too.
                 if (isProfile && !canAddMoreProfilesToUser(userType, parentId, false)) {
                     throwCheckedUserOperationException(
                             "Cannot add more profiles of type " + userType
                                     + " for user " + parentId,
-                            UserManager.USER_OPERATION_ERROR_MAX_USERS);
-                }
-                if (!isGuest && !isProfile && !isDemo && isUserLimitReached()) {
-                    // If we're not adding a guest/demo user or a profile and the 'user limit' has
-                    // been reached, cannot add a user.
-                    throwCheckedUserOperationException(
-                            "Cannot add user. Maximum user limit is reached.",
                             UserManager.USER_OPERATION_ERROR_MAX_USERS);
                 }
                 // In legacy mode, restricted profile's parent can only be the owner user
