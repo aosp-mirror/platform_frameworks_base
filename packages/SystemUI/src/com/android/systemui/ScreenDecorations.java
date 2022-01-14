@@ -96,6 +96,8 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.settings.SecureSettings;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -107,7 +109,7 @@ import javax.inject.Inject;
  * for antialiasing and emulation purposes.
  */
 @SysUISingleton
-public class ScreenDecorations extends CoreStartable implements Tunable {
+public class ScreenDecorations extends CoreStartable implements Tunable , Dumpable{
     private static final boolean DEBUG = false;
     private static final String TAG = "ScreenDecorations";
 
@@ -675,6 +677,20 @@ public class ScreenDecorations extends CoreStartable implements Tunable {
                 updateLayoutParams();
             }
         });
+    }
+
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("ScreenDecorations state:");
+        pw.println("  DEBUG_DISABLE_SCREEN_DECORATIONS:" + DEBUG_DISABLE_SCREEN_DECORATIONS);
+        pw.println("  mIsRoundedCornerMultipleRadius:" + mIsRoundedCornerMultipleRadius);
+        pw.println("  mIsPrivacyDotEnabled:" + mIsPrivacyDotEnabled);
+        pw.println("  mPendingRotationChange:" + mPendingRotationChange);
+        pw.println("  mRoundedDefault(x,y)=(" + mRoundedDefault.x + "," + mRoundedDefault.y + ")");
+        pw.println("  mRoundedDefaultTop(x,y)=(" + mRoundedDefaultTop.x + "," + mRoundedDefaultTop.y
+                + ")");
+        pw.println("  mRoundedDefaultBottom(x,y)=(" + mRoundedDefaultBottom.x + ","
+                + mRoundedDefaultBottom.y + ")");
     }
 
     private void updateOrientation() {
