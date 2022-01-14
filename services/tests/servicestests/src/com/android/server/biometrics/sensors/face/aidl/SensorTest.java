@@ -33,6 +33,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.sensors.BiometricScheduler;
+import com.android.server.biometrics.sensors.CoexCoordinator;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -79,10 +80,13 @@ public class SensorTest {
         when(mContext.getSystemService(Context.BIOMETRIC_SERVICE)).thenReturn(mBiometricService);
 
         mScheduler = new UserAwareBiometricScheduler(TAG,
+                new Handler(mLooper.getLooper()),
                 BiometricScheduler.SENSOR_TYPE_FACE,
                 null /* gestureAvailabilityDispatcher */,
+                mBiometricService,
                 () -> USER_ID,
-                mUserSwitchCallback);
+                mUserSwitchCallback,
+                CoexCoordinator.getInstance());
         mHalCallback = new Sensor.HalSessionCallback(mContext, new Handler(mLooper.getLooper()),
                 TAG, mScheduler, SENSOR_ID,
                 USER_ID, mLockoutCache, mLockoutResetDispatcher, mHalSessionCallback);
