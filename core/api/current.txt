@@ -17980,10 +17980,12 @@ package android.hardware.biometrics {
     ctor public BiometricPrompt.CryptoObject(@NonNull java.security.Signature);
     ctor public BiometricPrompt.CryptoObject(@NonNull javax.crypto.Cipher);
     ctor public BiometricPrompt.CryptoObject(@NonNull javax.crypto.Mac);
-    ctor public BiometricPrompt.CryptoObject(@NonNull android.security.identity.IdentityCredential);
+    ctor @Deprecated public BiometricPrompt.CryptoObject(@NonNull android.security.identity.IdentityCredential);
+    ctor public BiometricPrompt.CryptoObject(@NonNull android.security.identity.PresentationSession);
     method public javax.crypto.Cipher getCipher();
-    method @Nullable public android.security.identity.IdentityCredential getIdentityCredential();
+    method @Deprecated @Nullable public android.security.identity.IdentityCredential getIdentityCredential();
     method public javax.crypto.Mac getMac();
+    method @Nullable public android.security.identity.PresentationSession getPresentationSession();
     method public java.security.Signature getSignature();
   }
 
@@ -37550,6 +37552,51 @@ package android.security.identity {
     ctor public CipherSuiteNotSupportedException(@NonNull String, @NonNull Throwable);
   }
 
+  public class CredentialDataRequest {
+    method @NonNull public java.util.Map<java.lang.String,java.util.Collection<java.lang.String>> getDeviceSignedEntriesToRequest();
+    method @NonNull public java.util.Map<java.lang.String,java.util.Collection<java.lang.String>> getIssuerSignedEntriesToRequest();
+    method @Nullable public byte[] getReaderSignature();
+    method @Nullable public byte[] getRequestMessage();
+    method public boolean isAllowUsingExhaustedKeys();
+    method public boolean isAllowUsingExpiredKeys();
+    method public boolean isIncrementUseCount();
+  }
+
+  public static final class CredentialDataRequest.Builder {
+    ctor public CredentialDataRequest.Builder();
+    method @NonNull public android.security.identity.CredentialDataRequest build();
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setAllowUsingExhaustedKeys(boolean);
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setAllowUsingExpiredKeys(boolean);
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setDeviceSignedEntriesToRequest(@NonNull java.util.Map<java.lang.String,java.util.Collection<java.lang.String>>);
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setIncrementUseCount(boolean);
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setIssuerSignedEntriesToRequest(@NonNull java.util.Map<java.lang.String,java.util.Collection<java.lang.String>>);
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setReaderSignature(@NonNull byte[]);
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setRequestMessage(@NonNull byte[]);
+  }
+
+  public abstract class CredentialDataResult {
+    method @Nullable public abstract byte[] getDeviceMac();
+    method @NonNull public abstract byte[] getDeviceNameSpaces();
+    method @NonNull public abstract android.security.identity.CredentialDataResult.Entries getDeviceSignedEntries();
+    method @NonNull public abstract android.security.identity.CredentialDataResult.Entries getIssuerSignedEntries();
+    method @NonNull public abstract byte[] getStaticAuthenticationData();
+  }
+
+  public static interface CredentialDataResult.Entries {
+    method @Nullable public byte[] getEntry(@NonNull String, @NonNull String);
+    method @NonNull public java.util.Collection<java.lang.String> getEntryNames(@NonNull String);
+    method @NonNull public java.util.Collection<java.lang.String> getNamespaces();
+    method @NonNull public java.util.Collection<java.lang.String> getRetrievedEntryNames(@NonNull String);
+    method public int getStatus(@NonNull String, @NonNull String);
+    field public static final int STATUS_NOT_IN_REQUEST_MESSAGE = 3; // 0x3
+    field public static final int STATUS_NOT_REQUESTED = 2; // 0x2
+    field public static final int STATUS_NO_ACCESS_CONTROL_PROFILES = 6; // 0x6
+    field public static final int STATUS_NO_SUCH_ENTRY = 1; // 0x1
+    field public static final int STATUS_OK = 0; // 0x0
+    field public static final int STATUS_READER_AUTHENTICATION_FAILED = 5; // 0x5
+    field public static final int STATUS_USER_AUTHENTICATION_FAILED = 4; // 0x4
+  }
+
   public class DocTypeNotSupportedException extends android.security.identity.IdentityCredentialException {
     ctor public DocTypeNotSupportedException(@NonNull String);
     ctor public DocTypeNotSupportedException(@NonNull String, @NonNull Throwable);
@@ -37561,19 +37608,19 @@ package android.security.identity {
   }
 
   public abstract class IdentityCredential {
-    method @NonNull public abstract java.security.KeyPair createEphemeralKeyPair();
-    method @NonNull public abstract byte[] decryptMessageFromReader(@NonNull byte[]) throws android.security.identity.MessageDecryptionException;
+    method @Deprecated @NonNull public abstract java.security.KeyPair createEphemeralKeyPair();
+    method @Deprecated @NonNull public abstract byte[] decryptMessageFromReader(@NonNull byte[]) throws android.security.identity.MessageDecryptionException;
     method @NonNull public byte[] delete(@NonNull byte[]);
-    method @NonNull public abstract byte[] encryptMessageToReader(@NonNull byte[]);
+    method @Deprecated @NonNull public abstract byte[] encryptMessageToReader(@NonNull byte[]);
     method @NonNull public abstract java.util.Collection<java.security.cert.X509Certificate> getAuthKeysNeedingCertification();
     method @NonNull public abstract int[] getAuthenticationDataUsageCount();
     method @NonNull public abstract java.util.Collection<java.security.cert.X509Certificate> getCredentialKeyCertificateChain();
-    method @NonNull public abstract android.security.identity.ResultData getEntries(@Nullable byte[], @NonNull java.util.Map<java.lang.String,java.util.Collection<java.lang.String>>, @Nullable byte[], @Nullable byte[]) throws android.security.identity.EphemeralPublicKeyNotFoundException, android.security.identity.InvalidReaderSignatureException, android.security.identity.InvalidRequestMessageException, android.security.identity.NoAuthenticationKeyAvailableException, android.security.identity.SessionTranscriptMismatchException;
+    method @Deprecated @NonNull public abstract android.security.identity.ResultData getEntries(@Nullable byte[], @NonNull java.util.Map<java.lang.String,java.util.Collection<java.lang.String>>, @Nullable byte[], @Nullable byte[]) throws android.security.identity.EphemeralPublicKeyNotFoundException, android.security.identity.InvalidReaderSignatureException, android.security.identity.InvalidRequestMessageException, android.security.identity.NoAuthenticationKeyAvailableException, android.security.identity.SessionTranscriptMismatchException;
     method @NonNull public byte[] proveOwnership(@NonNull byte[]);
-    method public abstract void setAllowUsingExhaustedKeys(boolean);
-    method public void setAllowUsingExpiredKeys(boolean);
+    method @Deprecated public abstract void setAllowUsingExhaustedKeys(boolean);
+    method @Deprecated public void setAllowUsingExpiredKeys(boolean);
     method public abstract void setAvailableAuthenticationKeys(int, int);
-    method public abstract void setReaderEphemeralPublicKey(@NonNull java.security.PublicKey) throws java.security.InvalidKeyException;
+    method @Deprecated public abstract void setReaderEphemeralPublicKey(@NonNull java.security.PublicKey) throws java.security.InvalidKeyException;
     method @Deprecated public abstract void storeStaticAuthenticationData(@NonNull java.security.cert.X509Certificate, @NonNull byte[]) throws android.security.identity.UnknownAuthenticationKeyException;
     method public void storeStaticAuthenticationData(@NonNull java.security.cert.X509Certificate, @NonNull java.time.Instant, @NonNull byte[]) throws android.security.identity.UnknownAuthenticationKeyException;
     method @NonNull public byte[] update(@NonNull android.security.identity.PersonalizationData);
@@ -37586,6 +37633,7 @@ package android.security.identity {
 
   public abstract class IdentityCredentialStore {
     method @NonNull public abstract android.security.identity.WritableIdentityCredential createCredential(@NonNull String, @NonNull String) throws android.security.identity.AlreadyPersonalizedException, android.security.identity.DocTypeNotSupportedException;
+    method @NonNull public android.security.identity.PresentationSession createPresentationSession(int) throws android.security.identity.CipherSuiteNotSupportedException;
     method @Deprecated @Nullable public abstract byte[] deleteCredentialByName(@NonNull String);
     method @Nullable public abstract android.security.identity.IdentityCredential getCredentialByName(@NonNull String, int) throws android.security.identity.CipherSuiteNotSupportedException;
     method @Nullable public static android.security.identity.IdentityCredentialStore getDirectAccessInstance(@NonNull android.content.Context);
@@ -37624,22 +37672,29 @@ package android.security.identity {
     method @NonNull public android.security.identity.PersonalizationData.Builder putEntry(@NonNull String, @NonNull String, @NonNull java.util.Collection<android.security.identity.AccessControlProfileId>, @NonNull byte[]);
   }
 
-  public abstract class ResultData {
-    method @NonNull public abstract byte[] getAuthenticatedData();
-    method @Nullable public abstract byte[] getEntry(@NonNull String, @NonNull String);
-    method @Nullable public abstract java.util.Collection<java.lang.String> getEntryNames(@NonNull String);
-    method @Nullable public abstract byte[] getMessageAuthenticationCode();
-    method @NonNull public abstract java.util.Collection<java.lang.String> getNamespaces();
-    method @Nullable public abstract java.util.Collection<java.lang.String> getRetrievedEntryNames(@NonNull String);
-    method @NonNull public abstract byte[] getStaticAuthenticationData();
-    method public abstract int getStatus(@NonNull String, @NonNull String);
-    field public static final int STATUS_NOT_IN_REQUEST_MESSAGE = 3; // 0x3
-    field public static final int STATUS_NOT_REQUESTED = 2; // 0x2
-    field public static final int STATUS_NO_ACCESS_CONTROL_PROFILES = 6; // 0x6
-    field public static final int STATUS_NO_SUCH_ENTRY = 1; // 0x1
-    field public static final int STATUS_OK = 0; // 0x0
-    field public static final int STATUS_READER_AUTHENTICATION_FAILED = 5; // 0x5
-    field public static final int STATUS_USER_AUTHENTICATION_FAILED = 4; // 0x4
+  public abstract class PresentationSession {
+    method @Nullable public abstract android.security.identity.CredentialDataResult getCredentialData(@NonNull String, @NonNull android.security.identity.CredentialDataRequest) throws android.security.identity.EphemeralPublicKeyNotFoundException, android.security.identity.InvalidReaderSignatureException, android.security.identity.InvalidRequestMessageException, android.security.identity.NoAuthenticationKeyAvailableException;
+    method @NonNull public abstract java.security.KeyPair getEphemeralKeyPair();
+    method public abstract void setReaderEphemeralPublicKey(@NonNull java.security.PublicKey) throws java.security.InvalidKeyException;
+    method public abstract void setSessionTranscript(@NonNull byte[]);
+  }
+
+  @Deprecated public abstract class ResultData {
+    method @Deprecated @NonNull public abstract byte[] getAuthenticatedData();
+    method @Deprecated @Nullable public abstract byte[] getEntry(@NonNull String, @NonNull String);
+    method @Deprecated @Nullable public abstract java.util.Collection<java.lang.String> getEntryNames(@NonNull String);
+    method @Deprecated @Nullable public abstract byte[] getMessageAuthenticationCode();
+    method @Deprecated @NonNull public abstract java.util.Collection<java.lang.String> getNamespaces();
+    method @Deprecated @Nullable public abstract java.util.Collection<java.lang.String> getRetrievedEntryNames(@NonNull String);
+    method @Deprecated @NonNull public abstract byte[] getStaticAuthenticationData();
+    method @Deprecated public abstract int getStatus(@NonNull String, @NonNull String);
+    field @Deprecated public static final int STATUS_NOT_IN_REQUEST_MESSAGE = 3; // 0x3
+    field @Deprecated public static final int STATUS_NOT_REQUESTED = 2; // 0x2
+    field @Deprecated public static final int STATUS_NO_ACCESS_CONTROL_PROFILES = 6; // 0x6
+    field @Deprecated public static final int STATUS_NO_SUCH_ENTRY = 1; // 0x1
+    field @Deprecated public static final int STATUS_OK = 0; // 0x0
+    field @Deprecated public static final int STATUS_READER_AUTHENTICATION_FAILED = 5; // 0x5
+    field @Deprecated public static final int STATUS_USER_AUTHENTICATION_FAILED = 4; // 0x4
   }
 
   public class SessionTranscriptMismatchException extends android.security.identity.IdentityCredentialException {
