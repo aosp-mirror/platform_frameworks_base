@@ -449,8 +449,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Unlock to use"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"There was a problem getting your cards. Please try again later."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Lock screen settings"</string>
-    <string name="qr_code_scanner_title" msgid="1598912458255252498">"Scan QR"</string>
-    <string name="qr_code_scanner_description" msgid="7452098243938659945">"Click to scan a QR code"</string>
+    <string name="qr_code_scanner_title" msgid="5660820608548306581">"QR code"</string>
+    <string name="qr_code_scanner_description" msgid="7937603775306661863">"Tap to scan"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Work profile"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Aeroplane mode"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"You won\'t hear your next alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -791,7 +791,8 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Play <xliff:g id="SONG_NAME">%1$s</xliff:g> by <xliff:g id="ARTIST_NAME">%2$s</xliff:g> from <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Play <xliff:g id="SONG_NAME">%1$s</xliff:g> from <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Undo"</string>
-    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"Move closer to play on <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for media_move_closer_to_start_cast (2673104707465013176) -->
+    <skip />
     <string name="media_transfer_playing" msgid="3760048096352107789">"Playing on <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactive, check app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Not found"</string>
@@ -879,4 +880,8 @@
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Select user"</string>
     <string name="fgs_manager_dialog_title" msgid="656091833603337197">"Apps running in the background"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stop"</string>
+    <!-- no translation found for clipboard_edit_text_copy (770856373439969178) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_text_copied (1872624400464891363) -->
+    <skip />
 </resources>

@@ -235,8 +235,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Няма падключэння да Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркасць"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Інверсія колераў"</string>
-    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
-    <skip />
+    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Карэкцыя колераў"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Дадатковыя налады"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Налады карыстальніка"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Гатова"</string>
@@ -354,7 +353,7 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Паказ апавяшчэнняў прыпынены ў рэжыме \"Не турбаваць\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Пачаць зараз"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Апавяшчэнняў няма"</string>
-    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Гэта прылада знаходзіцца пад кантролем вашых бацькоў"</string>
+    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Гэта прылада знаходзіцца пад кантролем бацькоў"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ваша арганізацыя валодае гэтай прыладай і можа кантраляваць сеткавы трафік"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> валодае гэтай прыладай і можа кантраляваць сеткавы трафік"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Гэта прылада належыць арганізацыі \"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>\""</string>
@@ -393,7 +392,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Ваш асабісты профіль падключаны да праграмы <xliff:g id="VPN_APP">%1$s</xliff:g>, якая можа сачыць за вашай сеткавай актыўнасцю, уключаючы электронную пошту, праграмы і вэб-сайты."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" ,"</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Адкрыйце налады VPN"</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Гэта прылада знаходзіцца пад кантролем вашых бацькоў. Бацькі могуць праглядаць і кантраляваць вашу інфармацыю, напрыклад пра праграмы, якія вы выкарыстоўваеце, даныя пра ваша месцазнаходжанне і час карыстання прыладай."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Гэта прылада знаходзіцца пад кантролем бацькоў. Бацькі могуць праглядаць і кантраляваць тваю інфармацыю, напрыклад пра праграмы, якія ты выкарыстоўваеш, даныя пра тваё месцазнаходжанне і час карыстання прыладай."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Разблакіравана з дапамогай TrustAgent"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -456,8 +455,10 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблакіраваць для выкарыстання"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Узнікла праблема з загрузкай вашых карт. Паўтарыце спробу пазней"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Налады экрана блакіроўкі"</string>
-    <string name="qr_code_scanner_title" msgid="1598912458255252498">"Адсканіраваць QR-код"</string>
-    <string name="qr_code_scanner_description" msgid="7452098243938659945">"Націсніце, каб адсканіраваць QR-код"</string>
+    <!-- no translation found for qr_code_scanner_title (5660820608548306581) -->
+    <skip />
+    <!-- no translation found for qr_code_scanner_description (7937603775306661863) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Працоўны профіль"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Рэжым палёту"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Вы не пачуеце наступны будзільнік <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -804,7 +805,8 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Прайграйце кампазіцыю \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" (выканаўца – <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) з дапамогай праграмы \"<xliff:g id="APP_LABEL">%3$s</xliff:g>\""</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Прайграйце кампазіцыю \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" з дапамогай праграмы \"<xliff:g id="APP_LABEL">%2$s</xliff:g>\""</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Адрабіць"</string>
-    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"Наблізьцеся, каб прайграць музыку на прыладзе \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\""</string>
+    <!-- no translation found for media_move_closer_to_start_cast (2673104707465013176) -->
+    <skip />
     <string name="media_transfer_playing" msgid="3760048096352107789">"Прайграецца на прыладзе \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\""</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактыўна, праверце праграму"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не знойдзена"</string>
@@ -892,4 +894,8 @@
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Выбар карыстальніка"</string>
     <string name="fgs_manager_dialog_title" msgid="656091833603337197">"Праграмы працуюць у фонавым рэжыме"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Спыніць"</string>
+    <!-- no translation found for clipboard_edit_text_copy (770856373439969178) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_text_copied (1872624400464891363) -->
+    <skip />
 </resources>
