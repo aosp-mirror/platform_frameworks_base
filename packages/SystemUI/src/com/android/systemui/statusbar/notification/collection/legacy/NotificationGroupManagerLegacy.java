@@ -384,9 +384,9 @@ public class NotificationGroupManagerLegacy implements
         // * Only necessary when all notifications in the group use GROUP_ALERT_SUMMARY
         // * Only necessary when at least one notification in the group is on a priority channel
         if (group.summary.getSbn().getNotification().getGroupAlertBehavior()
-                != Notification.GROUP_ALERT_SUMMARY) {
+                == Notification.GROUP_ALERT_CHILDREN) {
             if (SPEW) {
-                Log.d(TAG, "getPriorityConversationAlertOverride: summary != GROUP_ALERT_SUMMARY");
+                Log.d(TAG, "getPriorityConversationAlertOverride: summary == GROUP_ALERT_CHILDREN");
             }
             return null;
         }
