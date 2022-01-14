@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"앱에서 방해 금지 모드 설정을 읽고 작성하도록 허용합니다."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"권한 사용 보기 시작"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"앱의 권한 사용을 시작하려면 보유자를 허용하세요. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"권한 결정 보기 시작"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"권한 결정 검토를 위해 기기 보유자가 화면을 시작할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"앱 기능 보기"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"권한을 보유한 앱에서 앱의 기능 정보를 보도록 허용합니다."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"더 높은 샘플링 레이트로 센서 데이터 액세스"</string>

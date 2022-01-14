@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"به برنامه امکان می‌دهد پیکربندی «مزاحم نشوید» را بخواند و بنویسد."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"شروع مشاهده استفاده از مجوز"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"به دارنده اجازه شروع استفاده از مجوز را برای برنامه می‌دهد. هرگز برای برنامه‌های معمول نیاز نیست."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"شروع مشاهده تصمیم‌های مربوط به اجازه‌ها"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"به دارنده امکان می‌دهد صفحه را برای مرور تصمیم‌های مربوط به اجازه‌ها شروع کند. هرگز نباید برای برنامه‌های عادی لازم باشد."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"مشاهده ویژگی‌های برنامه"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"به دارنده اجازه می‌دهد اطلاعات مربوط به ویژگی‌های برنامه را مشاهده کند."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"دسترسی به داده‌های حسگر با نرخ نمونه‌برداری بالا"</string>

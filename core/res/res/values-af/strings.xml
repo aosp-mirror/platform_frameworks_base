@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Laat die program toe om Moenie Steur Nie-opstelling te lees en skryf."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"begin kyk van toestemminggebruik"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Laat die houer toe om die toestemminggebruik vir \'n program te begin. Behoort nooit vir normale programme nodig te wees nie."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"begin Bekyk Toestemmingbesluite"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Laat die houer toe om skerm te begin om toestemmingbesluite na te gaan. Behoort nooit vir normale programme nodig te wees nie."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"begin Bekyk Programkenmerke"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Laat die houer toe om die kenmerke-inligting vir \'n program te begin bekyk."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"kry toegang tot sensordata teen \'n hoë monsternemingkoers"</string>

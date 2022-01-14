@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Nagbibigay-daan sa app na basahin at isulat ang configuration ng Huwag Istorbohin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"simulan ang paggamit sa pahintulot sa pagtingin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Binibigyang-daan ang may hawak na simulan ang paggamit ng pahintulot para sa isang app. Hindi dapat kailanganin kailanman para sa mga normal na app."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"simulan ang mga desisyon sa pahintulot na tumingin"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Nagbibigay-daan sa may hawak na simulan ang screen para masuri ang mga desisyon sa pahintulot. Hindi dapat kailanman kailanganin para sa mga karaniwang app."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"simulang tingnan ang mga feature ng app"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Nagbibigay-daan sa may hawak na simulang tingnan ang impormasyon ng mga feature para sa isang app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mag-access ng data ng sensor sa mataas na rate ng pag-sample"</string>

@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Επιτρέπει στην εφαρμογή την εγγραφή και τη σύνταξη διαμόρφωσης για τη λειτουργία \"Μην ενοχλείτε\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"έναρξη χρήσης άδειας προβολής"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Επιτρέπει στον κάτοχο να ξεκινήσει τη χρήση της άδειας για μια εφαρμογή. Δεν απαιτείται ποτέ για κανονικές εφαρμογές."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"έναρξη προβολής αποφάσεων για άδειες"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Επιτρέπει στον κάτοχο να ξεκινήσει την προβολή για τον έλεγχο των αποφάσεων για τις άδειες. Δεν χρειάζεται ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"έναρξη προβολής λειτουργιών εφαρμογής"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Επιτρέπει στον κάτοχο να ξεκινήσει την προβολή των πληροφοριών για τις λειτουργίες μιας εφαρμογής."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"πρόσβαση σε δεδομένα αισθητήρα με υψηλό ρυθμό δειγματοληψίας"</string>

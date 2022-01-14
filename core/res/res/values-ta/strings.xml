@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"தொந்தரவு செய்ய வேண்டாம் உள்ளமைவைப் படிக்கவும் எழுதவும், ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"அனுமதி உபயோகத்தை அணுகுதல்"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ஆப்ஸிற்கான அனுமதி உபயோகத்தை ஹோல்டருக்கு வழங்கும். இயல்பான ஆப்ஸிற்கு இது எப்போதுமே தேவைப்படாது."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"அனுமதி முடிவுகளைப் பார்க்கத் தொடங்குதல்"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"அனுமதி தொடர்பான முடிவுகளை மதிப்பாய்வு செய்ய, திரையைத் தொடங்குவதற்கான அனுமதியை ஹோல்டருக்கு வழங்கும். இயல்பான ஆப்ஸிற்கு இது எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ஆப்ஸின் அம்சங்களைப் பார்க்கத் தொடங்குதல்"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ஆப்ஸின் அம்சங்கள் குறித்த தகவல்களைப் பார்ப்பதற்கான அனுமதியை ஹோல்டருக்கு வழங்கும்."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"அதிகளவிலான சாம்பிளிங் ரேட்டில் சென்சார் தரவை அணுகுதல்"</string>

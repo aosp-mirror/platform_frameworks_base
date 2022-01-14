@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Sallii sovelluksen lukea ja muokata Älä häiritse -tilan asetuksia."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"aloita katseluoikeuksien käyttö"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Antaa luvanhaltijan käynnistää sovelluksen käyttöoikeuksien käytön. Ei tavallisten sovelluksien käyttöön."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"aloita lupapäätösten tarkistaminen"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Antaa luvanhaltijan käynnistää näytön lupapäätösten tarkistamiseksi. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"aloittaa sovellusominaisuuksien katselun"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Antaa luvanhaltijan aloittaa sovelluksen ominaisuustietojen katselun."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"saada pääsyn anturidataan suuremmalla näytteenottotaajuudella"</string>
@@ -1647,7 +1645,7 @@
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Vain kerran"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s ei tue työprofiilia"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tabletti"</string>
-    <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Televisio"</string>
+    <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Puhelin"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Telineen kaiuttimet"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>

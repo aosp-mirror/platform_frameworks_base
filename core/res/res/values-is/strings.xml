@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Leyfir forriti að lesa og skrifa í grunnstillingu „Ónáðið ekki“."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"heimildanotkun upphafsyfirlits"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Leyfir handhafa að byrja heimildanotkun fyrir forrit. Ætti aldrei að þurfa fyrir venjuleg forrit."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"opna ákvarðanir um skoðunarheimildir"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Gerir notandanum kleift að opna skjá til að fara yfir ákvarðanir um heimildir. Þetta ætti aldrei að þurfa fyrir venjuleg forrit."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"byrja að skoða eiginleika forrits"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Leyfir handhafa að skoða upplýsingar um eiginleika tiltekins forrits."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"aðgangur að skynjaragögnum með hárri upptökutíðni"</string>

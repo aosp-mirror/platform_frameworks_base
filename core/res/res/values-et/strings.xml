@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Võimaldab rakendusel lugeda ja kirjutada funktsiooni Mitte segada seadistusi."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"vaatamisloa kasutamise alustamine"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Võimaldab omanikul rakenduse puhul alustada loa kasutamist. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"Alustada lubade otsuste vaatamist."</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Võimaldab omanikul ekraani käivitada, et lubade otsused üle vaadata. Tavaliste rakenduste puhul ei tohiks seda kunagi vaja minna."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"rakenduse funktsioonide vaatamise alustamine"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Võimaldab omanikul alustada rakenduse funktsioonide teabe vaatamist."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"juurdepääs anduri andmetele kõrgel diskreetimissagedusel"</string>

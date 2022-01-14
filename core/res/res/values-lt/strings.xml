@@ -739,10 +739,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Leidžiama programai skaityti ir rašyti „Do Not Disturb“ konfigūraciją."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"pradėti peržiūrėti leidimo naudojimą"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Leidžia savininkui pradėti naudoti programos leidimą. Įprastoms programoms to neturėtų prireikti."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"pradėti sprendimų dėl leidimų peržiūrą"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Savininkui leidžiama atidaryti ekraną ir peržiūrėti sprendimus dėl leidimų. Neturėtų prireikti naudojant įprastas programas."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"pradėti programos funkcijų peržiūrą"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Savininkui leidžiama pradėti programos funkcijų informacijos peržiūrą."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"pasiekti jutiklių duomenis dideliu skaitmeninimo dažniu"</string>

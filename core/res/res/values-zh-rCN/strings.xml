@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"允许此应用读取和写入“勿扰”模式配置。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"授权使用“查看权限”"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"允许该应用开始查看应用的权限使用情况（普通应用绝不需要此权限）。"</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"开始查看权限决策"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"允许具有该权限的应用启动屏幕以查看权限决策。普通应用绝不需要此权限。"</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"开始查看应用功能"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"允许具有该权限的应用开始查看某个应用的功能信息。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"以高采样率访问传感器数据"</string>

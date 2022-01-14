@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ອະນຸຍາດ​​ໃຫ້​ແອັບ​ອ່ານ​ ​ແລະ​ຂຽນການກນຳ​ດຄ່າ ບໍ່​ລົບ​ກວນ."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ເລີ່ມການໃຊ້ສິດອະນຸຍາດການເບິ່ງ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ອະນຸຍາດໃຫ້ຜູ້ຖືເລີ່ມການໃຊ້ສິດອະນຸຍາດສຳລັບແອັບໃດໜຶ່ງໄດ້. ແອັບປົກກະຕິບໍ່ຄວນຕ້ອງໃຊ້."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ເລີ່ມເບິ່ງການຕັດສິນໃຈການອະນຸຍາດ"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"ອະນຸຍາດໃຫ້ຜູ້ຖືເລີ່ມໜ້າຈໍເພື່ອກວດສອບການຕັດສິນໃຈການອະນຸຍາດ. ແອັບປົກກະຕິບໍ່ຄວນຈຳເປັນຕ້ອງໃຊ້."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ເລີ່ມເບິ່ງຄຸນສົມບັດແອັບ"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ອະນຸຍາດໃຫ້ຜູ້ຖືເລີ່ມການເບິ່ງຂໍ້ມູນຄຸນສົມບັດສຳລັບແອັບໃດໜຶ່ງ."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີໃນອັດຕາຕົວຢ່າງສູງ"</string>
