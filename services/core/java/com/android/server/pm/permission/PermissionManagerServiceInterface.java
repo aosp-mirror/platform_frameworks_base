@@ -344,7 +344,7 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * @param packageName The name of the package for which the permissions will be revoked.
      * @param permissions List of permissions to be revoked.
      */
-    void selfRevokePermissions(String packageName, List<String> permissions);
+    void revokeOwnPermissionsOnKill(String packageName, List<String> permissions);
 
     /**
      * Get whether you should show UI with rationale for requesting a permission. You should do this

@@ -10932,10 +10932,10 @@ package android.content {
     method @Nullable public abstract android.content.Intent registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter, @Nullable String, @Nullable android.os.Handler, int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY) public abstract void removeStickyBroadcast(@RequiresPermission android.content.Intent);
     method @Deprecated @RequiresPermission(allOf={"android.permission.INTERACT_ACROSS_USERS", android.Manifest.permission.BROADCAST_STICKY}) public abstract void removeStickyBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle);
+    method public void revokeOwnPermissionOnKill(@NonNull String);
+    method public void revokeOwnPermissionsOnKill(@NonNull java.util.Collection<java.lang.String>);
     method public abstract void revokeUriPermission(android.net.Uri, int);
     method public abstract void revokeUriPermission(String, android.net.Uri, int);
-    method public void selfRevokePermission(@NonNull String);
-    method public void selfRevokePermissions(@NonNull java.util.Collection<java.lang.String>);
     method public abstract void sendBroadcast(@RequiresPermission android.content.Intent);
     method public abstract void sendBroadcast(@RequiresPermission android.content.Intent, @Nullable String);
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle);
