@@ -368,7 +368,7 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Паказ апавяшчэнняў прыпынены ў рэжыме \"Не турбаваць\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Пачаць зараз"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Апавяшчэнняў няма"</string>
-    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Гэта прылада знаходзіцца пад кантролем вашых бацькоў"</string>
+    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Гэта прылада знаходзіцца пад кантролем бацькоў"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ваша арганізацыя валодае гэтай прыладай і можа кантраляваць сеткавы трафік"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> валодае гэтай прыладай і можа кантраляваць сеткавы трафік"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Гэта прылада належыць арганізацыі \"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>\""</string>
@@ -407,7 +407,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Ваш асабісты профіль падключаны да праграмы <xliff:g id="VPN_APP">%1$s</xliff:g>, якая можа сачыць за вашай сеткавай актыўнасцю, уключаючы электронную пошту, праграмы і вэб-сайты."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" ,"</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Адкрыйце налады VPN"</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Гэта прылада знаходзіцца пад кантролем вашых бацькоў. Бацькі могуць праглядаць і кантраляваць вашу інфармацыю, напрыклад пра праграмы, якія вы выкарыстоўваеце, даныя пра ваша месцазнаходжанне і час карыстання прыладай."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Гэта прылада знаходзіцца пад кантролем бацькоў. Бацькі могуць праглядаць і кантраляваць тваю інфармацыю, напрыклад пра праграмы, якія ты выкарыстоўваеш, даныя пра тваё месцазнаходжанне і час карыстання прыладай."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Разблакіравана з дапамогай TrustAgent"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
