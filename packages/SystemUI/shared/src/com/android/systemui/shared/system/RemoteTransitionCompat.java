@@ -25,6 +25,8 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionFilter.CONTAINER_ORDER_TOP;
 
+import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.ACTIVITY_TYPE_RECENTS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -145,6 +147,11 @@ public class RemoteTransitionCompat implements Parcelable {
                                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()) {
                             pipTask = taskInfo.token;
                         }
+                    } else if (change.getTaskInfo() != null
+                            && change.getTaskInfo().topActivityType == ACTIVITY_TYPE_RECENTS) {
+                        // This task is for recents, keep it on top.
+                        t.setLayer(leashMap.get(change.getLeash()),
+                                info.getChanges().size() * 3 - i);
                     }
                 }
                 // Also make all the wallpapers opaque since we want the visible from the start
