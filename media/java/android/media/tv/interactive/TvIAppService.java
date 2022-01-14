@@ -32,6 +32,7 @@ import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
+import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -174,8 +175,13 @@ public abstract class TvIAppService extends Service {
             }
 
             @Override
-            public void notifyAppLinkInfo(Bundle appLinkInfo) {
-                onAppLinkInfo(appLinkInfo);
+            public void registerAppLinkInfo(Bundle appLinkInfo) {
+                onRegisterAppLinkInfo(appLinkInfo);
+            }
+
+            @Override
+            public void unregisterAppLinkInfo(Bundle appLinkInfo) {
+                onUnregisterAppLinkInfo(appLinkInfo);
             }
 
             @Override
@@ -198,7 +204,15 @@ public abstract class TvIAppService extends Service {
      * Registers App link info.
      * @hide
      */
-    public void onAppLinkInfo(Bundle appLinkInfo) {
+    public void onRegisterAppLinkInfo(Bundle appLinkInfo) {
+        // TODO: make it abstract when unhide
+    }
+
+    /**
+     * Unregisters App link info.
+     * @hide
+     */
+    public void onUnregisterAppLinkInfo(Bundle appLinkInfo) {
         // TODO: make it abstract when unhide
     }
 
@@ -319,6 +333,13 @@ public abstract class TvIAppService extends Service {
         }
 
         /**
+         * Resets TvIAppService session.
+         * @hide
+         */
+        public void onResetInteractiveApp() {
+        }
+
+        /**
          * Creates broadcast-independent(BI) interactive application.
          *
          * @see #onDestroyBiInteractiveApp(String)
@@ -366,6 +387,13 @@ public abstract class TvIAppService extends Service {
          * @hide
          */
         public void onTrackInfoList(@NonNull List<TvTrackInfo> tracks) {
+        }
+
+        /**
+         * Receives current TV input ID.
+         * @hide
+         */
+        public void onCurrentTvInputId(@Nullable String inputId) {
         }
 
         /**
@@ -472,6 +500,13 @@ public abstract class TvIAppService extends Service {
          * @hide
          */
         public void onContentBlocked(TvContentRating rating) {
+        }
+
+        /**
+         * Called when signal strength is changed.
+         * @hide
+         */
+        public void onSignalStrength(@TvInputManager.SignalStrength int strength) {
         }
 
         /**
@@ -760,6 +795,31 @@ public abstract class TvIAppService extends Service {
         }
 
         /**
+         * Requests current TV input ID.
+         *
+         * @see android.media.tv.TvInputInfo
+         * @hide
+         */
+        public void requestCurrentTvInputId() {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestCurrentTvInputId");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onRequestCurrentTvInputId();
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestCurrentTvInputId", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * requests an advertisement request to be processed by the related TV input.
          * @param request advertisement request
          */
@@ -790,6 +850,10 @@ public abstract class TvIAppService extends Service {
             onStopInteractiveApp();
         }
 
+        void resetInteractiveApp() {
+            onResetInteractiveApp();
+        }
+
         void createBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
             onCreateBiInteractiveApp(biIAppUri, params);
         }
@@ -812,6 +876,10 @@ public abstract class TvIAppService extends Service {
 
         void sendTrackInfoList(@NonNull List<TvTrackInfo> tracks) {
             onTrackInfoList(tracks);
+        }
+
+        void sendCurrentTvInputId(@Nullable String inputId) {
+            onCurrentTvInputId(inputId);
         }
 
         void release() {
@@ -876,6 +944,13 @@ public abstract class TvIAppService extends Service {
                 Log.d(TAG, "notifyContentBlocked (rating=" + rating.flattenToString() + ")");
             }
             onContentBlocked(rating);
+        }
+
+        void notifySignalStrength(int strength) {
+            if (DEBUG) {
+                Log.d(TAG, "notifySignalStrength (strength=" + strength + ")");
+            }
+            onSignalStrength(strength);
         }
 
         /**
@@ -1194,6 +1269,11 @@ public abstract class TvIAppService extends Service {
         }
 
         @Override
+        public void resetInteractiveApp() {
+            mSessionImpl.resetInteractiveApp();
+        }
+
+        @Override
         public void createBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
             mSessionImpl.createBiInteractiveApp(biIAppUri, params);
         }
@@ -1221,6 +1301,11 @@ public abstract class TvIAppService extends Service {
         @Override
         public void sendTrackInfoList(@NonNull List<TvTrackInfo> tracks) {
             mSessionImpl.sendTrackInfoList(tracks);
+        }
+
+        @Override
+        public void sendCurrentTvInputId(@Nullable String inputId) {
+            mSessionImpl.sendCurrentTvInputId(inputId);
         }
 
         @Override
@@ -1262,6 +1347,11 @@ public abstract class TvIAppService extends Service {
         @Override
         public void notifyContentBlocked(String rating) {
             mSessionImpl.notifyContentBlocked(TvContentRating.unflattenFromString(rating));
+        }
+
+        @Override
+        public void notifySignalStrength(int strength) {
+            mSessionImpl.notifySignalStrength(strength);
         }
 
         @Override

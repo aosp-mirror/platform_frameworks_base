@@ -17,9 +17,9 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.net.Uri;
 
 /** @hide */
 public final class TableResponse extends BroadcastInfoResponse implements Parcelable {

@@ -32,6 +32,7 @@ oneway interface ITvInteractiveAppService {
     void createSession(in InputChannel channel, in ITvInteractiveAppSessionCallback callback,
             in String iAppServiceId, int type);
     void prepare(int type);
-    void notifyAppLinkInfo(in Bundle info);
+    void registerAppLinkInfo(in Bundle info);
+    void unregisterAppLinkInfo(in Bundle info);
     void sendAppLinkCommand(in Bundle command);
 }

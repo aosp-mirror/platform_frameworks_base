@@ -966,6 +966,27 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Notifies signal strength.
+         * @hide
+         */
+        public void notifySignalStrength(@TvInputManager.SignalStrength final int strength) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifySignalStrength");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onSignalStrength(strength);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifySignalStrength", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Assigns a size and position to the surface passed in {@link #onSetSurface}. The position
          * is relative to the overlay view that sits on top of this surface.
          *
