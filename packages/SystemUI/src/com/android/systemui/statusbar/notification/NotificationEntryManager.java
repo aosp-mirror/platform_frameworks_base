@@ -21,8 +21,10 @@ import static com.android.systemui.statusbar.notification.collection.NotifCollec
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -401,6 +403,15 @@ public class NotificationEntryManager implements
         @Override
         public void onNotificationsInitialized() {
         }
+
+        @Override
+        public void onNotificationChannelModified(
+                String pkgName,
+                UserHandle user,
+                NotificationChannel channel,
+                int modificationType) {
+            notifyChannelModified(pkgName, user, channel, modificationType);
+        }
     };
 
     /**
@@ -775,6 +786,19 @@ public class NotificationEntryManager implements
         }
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onRankingApplied();
+        }
+    }
+
+    void notifyChannelModified(
+            String pkgName,
+            UserHandle user,
+            NotificationChannel channel,
+            int modificationType) {
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onNotificationChannelModified(pkgName, user, channel, modificationType);
+        }
+        for (NotificationEntryListener listener : mNotificationEntryListeners) {
+            listener.onNotificationChannelModified(pkgName, user, channel, modificationType);
         }
     }
 
