@@ -21,7 +21,12 @@ import (
 
 	"android/soong/android"
 	"android/soong/genrule"
+	"android/soong/java"
 )
+
+const art = "art.module.public.api"
+const conscrypt = "conscrypt.module.public.api"
+const i18n = "i18n.module.public.api"
 
 // The intention behind this soong plugin is to generate a number of "merged"
 // API-related modules that would otherwise require a large amount of very
@@ -67,6 +72,13 @@ type genruleProps struct {
 	Srcs       []string
 	Tools      []string
 	Visibility []string
+}
+
+type libraryProps struct {
+	Name        *string
+	Sdk_version *string
+	Static_libs []string
+	Visibility  []string
 }
 
 // Struct to pass parameters for the various merged [current|removed].txt file modules we create.
@@ -130,6 +142,8 @@ func createMergedStubsSrcjar(ctx android.LoadHookContext, modules []string) {
 // This produces the same annotations.zip as framework-doc-stubs, but by using
 // outputs from individual modules instead of all the source code.
 func createMergedAnnotations(ctx android.LoadHookContext, modules []string) {
+	// Conscrypt and i18n currently do not enable annotations
+	modules = removeAll(modules, []string{conscrypt, i18n})
 	props := genruleProps{}
 	props.Name = proptools.StringPtr("sdk-annotations.zip")
 	props.Tools = []string{"merge_annotation_zips", "soong_zip"}
@@ -141,6 +155,15 @@ func createMergedAnnotations(ctx android.LoadHookContext, modules []string) {
 }
 
 func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
+	// For the filtered api versions, we prune all APIs except art module's APIs. because
+	// 1) ART apis are available by default to all modules, while other module-to-module deps are
+	//    explicit and probably receive more scrutiny anyway
+	// 2) The number of ART/libcore APIs is large, so not linting them would create a large gap
+	// 3) It's a compromise. Ideally we wouldn't be filtering out any module APIs, and have
+	//    per-module lint databases that excludes just that module's APIs. Alas, that's more
+	//    difficult to achieve.
+	modules = remove(modules, art)
+
 	props := genruleProps{}
 	props.Name = proptools.StringPtr("api-versions-xml-public-filtered")
 	props.Tools = []string{"api_versions_trimmer"}
@@ -154,6 +177,25 @@ func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
 
+func createMergedModuleLibStubs(ctx android.LoadHookContext, modules []string) {
+	// The user of this module compiles against the "core" SDK, so remove core libraries to avoid dupes.
+	modules = removeAll(modules, []string{art, conscrypt, i18n})
+	props := libraryProps{}
+	props.Name = proptools.StringPtr("framework-updatable-stubs-module_libs_api")
+	props.Static_libs = appendStr(modules, ".stubs.module_lib")
+	props.Sdk_version = proptools.StringPtr("module_current")
+	props.Visibility = []string{"//frameworks/base"}
+	ctx.CreateModule(java.LibraryFactory, &props)
+}
+
+func appendStr(modules []string, s string) []string {
+	a := make([]string, 0, len(modules))
+	for _, module := range modules {
+		a = append(a, module+s)
+	}
+	return a
+}
+
 func createSrcs(base string, modules []string, tag string) []string {
 	a := make([]string, 0, len(modules)+1)
 	a = append(a, base)
@@ -161,6 +203,13 @@ func createSrcs(base string, modules []string, tag string) []string {
 		a = append(a, ":"+module+tag)
 	}
 	return a
+}
+
+func removeAll(s []string, vs []string) []string {
+	for _, v := range vs {
+		s = remove(s, v)
+	}
+	return s
 }
 
 func remove(s []string, v string) []string {
@@ -176,9 +225,7 @@ func remove(s []string, v string) []string {
 func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string) {
 	var textFiles []MergedTxtDefinition
 	// Two module libraries currently do not support @SystemApi so only have the public scope.
-	bcpWithSystemApi := bootclasspath
-	bcpWithSystemApi = remove(bcpWithSystemApi, "conscrypt.module.public.api")
-	bcpWithSystemApi = remove(bcpWithSystemApi, "i18n.module.public.api")
+	bcpWithSystemApi := removeAll(bootclasspath, []string{conscrypt, i18n})
 
 	tagSuffix := []string{".api.txt}", ".removed-api.txt}"}
 	for i, f := range []string{"current.txt", "removed.txt"} {
@@ -226,22 +273,11 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 
 	createMergedStubsSrcjar(ctx, bootclasspath)
 
-	// Conscrypt and i18n currently do not enable annotations
-	annotationModules := bootclasspath
-	annotationModules = remove(annotationModules, "conscrypt.module.public.api")
-	annotationModules = remove(annotationModules, "i18n.module.public.api")
-	createMergedAnnotations(ctx, annotationModules)
+	createMergedModuleLibStubs(ctx, bootclasspath)
 
-	// For the filtered api versions, we prune all APIs except art module's APIs. because
-	// 1) ART apis are available by default to all modules, while other module-to-module deps are
-	//    explicit and probably receive more scrutiny anyway
-	// 2) The number of ART/libcore APIs is large, so not linting them would create a large gap
-	// 3) It's a compromise. Ideally we wouldn't be filtering out any module APIs, and have
-	//    per-module lint databases that excludes just that module's APIs. Alas, that's more
-	//    difficult to achieve.
-	filteredModules := bootclasspath
-	filteredModules = remove(filteredModules, "art.module.public.api")
-	createFilteredApiVersions(ctx, filteredModules)
+	createMergedAnnotations(ctx, bootclasspath)
+
+	createFilteredApiVersions(ctx, bootclasspath)
 }
 
 func combinedApisModuleFactory() android.Module {
