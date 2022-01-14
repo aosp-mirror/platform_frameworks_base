@@ -27290,6 +27290,8 @@ package android.net.vcn {
     ctor public VcnCellUnderlyingNetworkTemplate.Builder();
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate build();
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMetered(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMinDownstreamBandwidthKbps(int, int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMinUpstreamBandwidthKbps(int, int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setOperatorPlmnIds(@NonNull java.util.Set<java.lang.String>);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setOpportunistic(int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setRoaming(int);
@@ -27350,6 +27352,10 @@ package android.net.vcn {
 
   public abstract class VcnUnderlyingNetworkTemplate {
     method public int getMetered();
+    method public int getMinEntryDownstreamBandwidthKbps();
+    method public int getMinEntryUpstreamBandwidthKbps();
+    method public int getMinExitDownstreamBandwidthKbps();
+    method public int getMinExitUpstreamBandwidthKbps();
     field public static final int MATCH_ANY = 0; // 0x0
     field public static final int MATCH_FORBIDDEN = 2; // 0x2
     field public static final int MATCH_REQUIRED = 1; // 0x1
@@ -27363,6 +27369,8 @@ package android.net.vcn {
     ctor public VcnWifiUnderlyingNetworkTemplate.Builder();
     method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate build();
     method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setMetered(int);
+    method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setMinDownstreamBandwidthKbps(int, int);
+    method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setMinUpstreamBandwidthKbps(int, int);
     method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setSsids(@NonNull java.util.Set<java.lang.String>);
   }
 
