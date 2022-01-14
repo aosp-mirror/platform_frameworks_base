@@ -169,6 +169,20 @@ public class SparseDoubleArray implements Cloneable {
     }
 
     /**
+     * Removes the mapping at the given index.
+     */
+    public void removeAt(int index) {
+        mValues.removeAt(index);
+    }
+
+    /**
+     * Removes the mapping from the specified key, if there was any.
+     */
+    public void delete(int key) {
+        mValues.delete(key);
+    }
+
+    /**
      * Removes all key-value mappings from this SparseDoubleArray.
      */
     public void clear() {

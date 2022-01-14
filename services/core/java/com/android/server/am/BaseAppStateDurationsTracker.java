@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.os.SystemClock;
 import android.util.SparseArray;
@@ -27,9 +28,11 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.am.BaseAppStateEvents.MaxTrackingDurationConfig;
 import com.android.server.am.BaseAppStateEventsTracker.BaseAppStateEventsPolicy;
+import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -40,8 +43,19 @@ abstract class BaseAppStateDurationsTracker
         extends BaseAppStateEventsTracker<T, U> {
     static final boolean DEBUG_BASE_APP_STATE_DURATION_TRACKER = false;
 
+    static final int EVENT_TYPE_MEDIA_SESSION = 0;
+    static final int EVENT_TYPE_FGS_MEDIA_PLAYBACK = 1;
+    static final int EVENT_TYPE_FGS_LOCATION = 2;
+    static final int EVENT_NUM = 3;
+
+    final ArrayList<EventListener> mEventListeners = new ArrayList<>();
+
     @GuardedBy("mLock")
     final SparseArray<UidStateDurations> mUidStateDurations = new SparseArray<>();
+
+    interface EventListener {
+        void onNewEvent(int uid, String packageName, boolean start, long now, int eventType);
+    }
 
     BaseAppStateDurationsTracker(Context context, AppRestrictionController controller,
             Constructor<? extends Injector<T>> injector, Object outerContext) {
@@ -88,6 +102,21 @@ abstract class BaseAppStateDurationsTracker
     @GuardedBy("mLock")
     void onUntrackingUidLocked(int uid) {
         mUidStateDurations.remove(uid);
+    }
+
+    void registerEventListener(@NonNull EventListener listener) {
+        synchronized (mLock) {
+            mEventListeners.add(listener);
+        }
+    }
+
+    void notifyListenersOnEvent(int uid, String packageName,
+            boolean start, long now, int eventType) {
+        synchronized (mLock) {
+            for (int i = 0, size = mEventListeners.size(); i < size; i++) {
+                mEventListeners.get(i).onNewEvent(uid, packageName, start, now, eventType);
+            }
+        }
     }
 
     long getTotalDurations(String packageName, int uid, long now, int index, boolean bgOnly) {
@@ -222,13 +251,13 @@ abstract class BaseAppStateDurationsTracker
     /**
      * Simple duration table, with only one track of durations.
      */
-    static class SimplePackageDurations extends BaseAppStateDurations {
+    static class SimplePackageDurations extends BaseAppStateDurations<BaseTimeEvent> {
         static final int DEFAULT_INDEX = 0;
 
         SimplePackageDurations(int uid, String packageName,
                 MaxTrackingDurationConfig maxTrackingDurationConfig) {
             super(uid, packageName, 1, TAG, maxTrackingDurationConfig);
-            mEvents[DEFAULT_INDEX] = new LinkedList<Long>();
+            mEvents[DEFAULT_INDEX] = new LinkedList<BaseTimeEvent>();
         }
 
         SimplePackageDurations(SimplePackageDurations other) {
@@ -236,7 +265,7 @@ abstract class BaseAppStateDurationsTracker
         }
 
         void addEvent(boolean active, long now) {
-            addEvent(active, now, DEFAULT_INDEX);
+            addEvent(active, new BaseTimeEvent(now), DEFAULT_INDEX);
         }
 
         long getTotalDurations(long now) {

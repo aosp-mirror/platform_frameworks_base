@@ -929,6 +929,29 @@ public final class AppRestrictionController {
         return mInjector.getAppFGSTracker().hasForegroundServices(uid);
     }
 
+    /**
+     * @return The to-be-exempted battery usage of the given UID in the given duration; it could
+     *         be considered as "exempted" due to various use cases, i.e. media playback.
+     */
+    double getUidBatteryExemptedUsageSince(int uid, long since, long now) {
+        return mInjector.getAppBatteryExemptionTracker()
+                .getUidBatteryExemptedUsageSince(uid, since, now);
+    }
+
+    /**
+     * @return The total battery usage of the given UID since the system boots.
+     */
+    double getUidBatteryUsage(int uid) {
+        return mInjector.getUidBatteryUsageProvider().getUidBatteryUsage(uid);
+    }
+
+    interface UidBatteryUsageProvider {
+        /**
+         * @return The total battery usage of the given UID since the system boots.
+         */
+        double getUidBatteryUsage(int uid);
+    }
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix);
         pw.println("BACKGROUND RESTRICTION LEVEL SETTINGS");
@@ -1489,6 +1512,8 @@ public final class AppRestrictionController {
         private UserManagerInternal mUserManagerInternal;
         private PackageManagerInternal mPackageManagerInternal;
         private NotificationManager mNotificationManager;
+        private AppBatteryTracker mAppBatteryTracker;
+        private AppBatteryExemptionTracker mAppBatteryExemptionTracker;
         private AppFGSTracker mAppFGSTracker;
         private AppMediaSessionTracker mAppMediaSessionTracker;
 
@@ -1502,9 +1527,12 @@ public final class AppRestrictionController {
 
         void initAppStateTrackers(AppRestrictionController controller) {
             mAppRestrictionController = controller;
+            mAppBatteryTracker = new AppBatteryTracker(mContext, controller);
+            mAppBatteryExemptionTracker = new AppBatteryExemptionTracker(mContext, controller);
             mAppFGSTracker = new AppFGSTracker(mContext, controller);
             mAppMediaSessionTracker = new AppMediaSessionTracker(mContext, controller);
-            controller.mAppStateTrackers.add(new AppBatteryTracker(mContext, controller));
+            controller.mAppStateTrackers.add(mAppBatteryTracker);
+            controller.mAppStateTrackers.add(mAppBatteryExemptionTracker);
             controller.mAppStateTrackers.add(mAppFGSTracker);
             controller.mAppStateTrackers.add(mAppMediaSessionTracker);
             controller.mAppStateTrackers.add(new AppBroadcastEventsTracker(mContext, controller));
@@ -1583,6 +1611,14 @@ public final class AppRestrictionController {
 
         ActivityManagerService getActivityManagerService() {
             return mAppRestrictionController.mActivityManagerService;
+        }
+
+        UidBatteryUsageProvider getUidBatteryUsageProvider() {
+            return mAppBatteryTracker;
+        }
+
+        AppBatteryExemptionTracker getAppBatteryExemptionTracker() {
+            return mAppBatteryExemptionTracker;
         }
 
         String getPackageName(int pid) {
@@ -1669,6 +1705,12 @@ public final class AppRestrictionController {
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
         userFilter.addAction(Intent.ACTION_UID_REMOVED);
         mContext.registerReceiverForAllUsers(broadcastReceiver, userFilter, null, mBgHandler);
+    }
+
+    void forEachTracker(Consumer<BaseAppStateTracker> sink) {
+        for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
+            sink.accept(mAppStateTrackers.get(i));
+        }
     }
 
     private void onUserAdded(@UserIdInt int userId) {

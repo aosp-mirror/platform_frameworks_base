@@ -18,13 +18,15 @@ package com.android.server.am;
 
 import android.annotation.NonNull;
 
+import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
  * A helper class to track the timestamps of individual events.
  */
-class BaseAppStateTimeEvents extends BaseAppStateEvents<Long> {
+class BaseAppStateTimeEvents<T extends BaseTimeEvent> extends BaseAppStateEvents<T> {
 
     BaseAppStateTimeEvents(int uid, @NonNull String packageName, int numOfEventTypes,
             @NonNull String tag, @NonNull MaxTrackingDurationConfig maxTrackingDurationConfig) {
@@ -36,27 +38,29 @@ class BaseAppStateTimeEvents extends BaseAppStateEvents<Long> {
     }
 
     @Override
-    LinkedList<Long> add(LinkedList<Long> durations, LinkedList<Long> otherDurations) {
+    LinkedList<T> add(LinkedList<T> durations, LinkedList<T> otherDurations) {
         if (otherDurations == null || otherDurations.size() == 0) {
             return durations;
         }
         if (durations == null || durations.size() == 0) {
-            return (LinkedList<Long>) otherDurations.clone();
+            return (LinkedList<T>) otherDurations.clone();
         }
-        final Iterator<Long> itl = durations.iterator();
-        final Iterator<Long> itr = otherDurations.iterator();
-        LinkedList<Long> dest = new LinkedList<>();
-        for (long l = itl.next(), r = itr.next(); l != Long.MAX_VALUE || r != Long.MAX_VALUE;) {
-            if (l == r) {
-                dest.add(l);
-                l = itl.hasNext() ? itl.next() : Long.MAX_VALUE;
-                r = itr.hasNext() ? itr.next() : Long.MAX_VALUE;
-            } else if (l < r) {
-                dest.add(l);
-                l = itl.hasNext() ? itl.next() : Long.MAX_VALUE;
+        final Iterator<T> itl = durations.iterator();
+        final Iterator<T> itr = otherDurations.iterator();
+        T l = itl.next(), r = itr.next();
+        LinkedList<T> dest = new LinkedList<>();
+        for (long lts = l.getTimestamp(), rts = r.getTimestamp();
+                lts != Long.MAX_VALUE || rts != Long.MAX_VALUE;) {
+            if (lts == rts) {
+                dest.add((T) l.clone());
+                lts = itl.hasNext() ? (l = itl.next()).getTimestamp() : Long.MAX_VALUE;
+                rts = itr.hasNext() ? (r = itr.next()).getTimestamp() : Long.MAX_VALUE;
+            } else if (lts < rts) {
+                dest.add((T) l.clone());
+                lts = itl.hasNext() ? (l = itl.next()).getTimestamp() : Long.MAX_VALUE;
             } else {
-                dest.add(r);
-                r = itr.hasNext() ? itr.next() : Long.MAX_VALUE;
+                dest.add((T) r.clone());
+                rts = itr.hasNext() ? (r = itr.next()).getTimestamp() : Long.MAX_VALUE;
             }
         }
         return dest;
@@ -64,35 +68,78 @@ class BaseAppStateTimeEvents extends BaseAppStateEvents<Long> {
 
     @Override
     int getTotalEventsSince(long since, long now, int index) {
-        final LinkedList<Long> timestamps = mEvents[index];
-        if (timestamps == null || timestamps.size() == 0) {
+        final LinkedList<T> events = mEvents[index];
+        if (events == null || events.size() == 0) {
             return 0;
         }
         int count = 0;
-        for (long timestamp: timestamps) {
-            if (timestamp >= since) {
+        for (T event : events) {
+            if (event.getTimestamp() >= since) {
                 count++;
             }
         }
         return count;
     }
 
-    void addEvent(long now, int index) {
-        addEvent(now, now, index);
-    }
-
     @Override
     void trimEvents(long earliest, int index) {
-        final LinkedList<Long> events = mEvents[index];
+        final LinkedList<T> events = mEvents[index];
         if (events == null) {
             return;
         }
         while (events.size() > 0) {
-            final long current = events.peek();
-            if (current >= earliest) {
+            final T current = events.peek();
+            if (current.getTimestamp() >= earliest) {
                 return; // All we have are newer than the given timestamp.
             }
             events.pop();
+        }
+    }
+
+    /**
+     * A data class encapsulate the individual event data.
+     */
+    static class BaseTimeEvent implements Cloneable {
+        /**
+         * The timestamp this event occurred at.
+         */
+        long mTimestamp;
+
+        BaseTimeEvent(long timestamp) {
+            mTimestamp = timestamp;
+        }
+
+        BaseTimeEvent(BaseTimeEvent other) {
+            mTimestamp = other.mTimestamp;
+        }
+
+        void trimTo(long timestamp) {
+            mTimestamp = timestamp;
+        }
+
+        long getTimestamp() {
+            return mTimestamp;
+        }
+
+        @Override
+        public Object clone() {
+            return new BaseTimeEvent(this);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other == null) {
+                return false;
+            }
+            if (other.getClass() != BaseTimeEvent.class) {
+                return false;
+            }
+            return ((BaseTimeEvent) other).mTimestamp == mTimestamp;
+        }
+
+        @Override
+        public int hashCode() {
+            return Long.hashCode(mTimestamp);
         }
     }
 }

@@ -108,12 +108,17 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
+import com.android.server.am.AppBatteryExemptionTracker.AppBatteryExemptionPolicy;
+import com.android.server.am.AppBatteryExemptionTracker.UidBatteryStates;
+import com.android.server.am.AppBatteryExemptionTracker.UidStateEventWithBattery;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
 import com.android.server.am.AppBindServiceEventsTracker.AppBindServiceEventsPolicy;
 import com.android.server.am.AppBroadcastEventsTracker.AppBroadcastEventsPolicy;
 import com.android.server.am.AppFGSTracker.AppFGSPolicy;
 import com.android.server.am.AppMediaSessionTracker.AppMediaSessionPolicy;
 import com.android.server.am.AppRestrictionController.NotificationHelper;
+import com.android.server.am.AppRestrictionController.UidBatteryUsageProvider;
+import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -232,6 +237,7 @@ public final class BackgroundRestrictionTest {
     private AppRestrictionController mBgRestrictionController;
     private AppBatteryTracker mAppBatteryTracker;
     private AppBatteryPolicy mAppBatteryPolicy;
+    private AppBatteryExemptionTracker mAppBatteryExemptionTracker;
     private AppBroadcastEventsTracker mAppBroadcastEventsTracker;
     private AppBindServiceEventsTracker mAppBindServiceEventsTracker;
     private AppFGSTracker mAppFGSTracker;
@@ -1219,6 +1225,8 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Float> bgCurrentDrainBgRestrictedHighThreshold = null;
         DeviceConfigSession<Long> bgMediaPlaybackMinDurationThreshold = null;
         DeviceConfigSession<Long> bgLocationMinDurationThreshold = null;
+        DeviceConfigSession<Boolean> bgCurrentDrainEventDurationBasedThresholdEnabled = null;
+        DeviceConfigSession<Boolean> bgBatteryExemptionEnabled = null;
 
         mBgRestrictionController.addAppBackgroundRestrictionListener(listener);
 
@@ -1290,6 +1298,21 @@ public final class BackgroundRestrictionTest {
                     AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION);
             bgLocationMinDurationThreshold.set(bgLocationMinDuration);
 
+            bgCurrentDrainEventDurationBasedThresholdEnabled = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_EVENT_DURATION_BASED_THRESHOLD_ENABLED,
+                    DeviceConfig::getBoolean,
+                    AppBatteryPolicy
+                            .DEFAULT_BG_CURRENT_DRAIN_EVENT_DURATION_BASED_THRESHOLD_ENABLED);
+            bgCurrentDrainEventDurationBasedThresholdEnabled.set(true);
+
+            bgBatteryExemptionEnabled = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppBatteryExemptionPolicy.KEY_BG_BATTERY_EXEMPTION_ENABLED,
+                    DeviceConfig::getBoolean,
+                    AppBatteryExemptionPolicy.DEFAULT_BG_BATTERY_EXEMPTION_ENABLED);
+            bgBatteryExemptionEnabled.set(false);
+
             mCurrentTimeMillis = 10_000L;
             doReturn(mCurrentTimeMillis - windowMs).when(stats).getStatsStartTimestamp();
             doReturn(statsList).when(mBatteryStatsInternal).getBatteryUsageStats(anyObject());
@@ -1301,7 +1324,8 @@ public final class BackgroundRestrictionTest {
                     null, null, null, listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
-                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true, null, windowMs);
+                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, null, null, null);
 
             // Run with a media playback service with extended time. We should be back to normal.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
@@ -1325,7 +1349,7 @@ public final class BackgroundRestrictionTest {
                                 eq(REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE),
                                 eq(REASON_MAIN_USAGE),
                                 eq(REASON_SUB_USAGE_USER_INTERACTION));
-                    }, windowMs);
+                    }, windowMs, null, null, null);
 
             // Start over.
             resetBgRestrictionController();
@@ -1338,7 +1362,8 @@ public final class BackgroundRestrictionTest {
                     null, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah - 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
-                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true, null, windowMs);
+                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, null, null, null);
 
             // Run with a media playback service with extended time, with even higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
@@ -1346,7 +1371,8 @@ public final class BackgroundRestrictionTest {
                     null, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
-                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, false, null, windowMs);
+                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, false,
+                    null, windowMs, null, null, null);
 
             // Start over.
             resetBgRestrictionController();
@@ -1361,7 +1387,8 @@ public final class BackgroundRestrictionTest {
                     null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah - 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
-                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true, null, windowMs);
+                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, null, null, null);
 
             // Run with a media session with extended time, with even higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
@@ -1371,7 +1398,8 @@ public final class BackgroundRestrictionTest {
                     null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
-                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, false, null, windowMs);
+                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, false,
+                    null, windowMs, null, null, null);
 
             // Start over.
             resetBgRestrictionController();
@@ -1387,7 +1415,8 @@ public final class BackgroundRestrictionTest {
                     List.of(0L, timeout * 2), listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
-                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true, null, windowMs);
+                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, null, null, null);
 
             // Start over.
             resetBgRestrictionController();
@@ -1400,7 +1429,8 @@ public final class BackgroundRestrictionTest {
                     null, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah - 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
-                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true, null, windowMs);
+                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, null, null, null);
 
             // Run with a location service with extended time, with even higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
@@ -1408,7 +1438,8 @@ public final class BackgroundRestrictionTest {
                     null, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
-                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, false, null, windowMs);
+                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, false,
+                    null, windowMs, null, null, null);
 
             // Start over.
             resetBgRestrictionController();
@@ -1422,7 +1453,8 @@ public final class BackgroundRestrictionTest {
                     null, null, List.of(0L, timeout * 2), listener, stats, uids,
                     new double[]{restrictBucketThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
-                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true, null, windowMs);
+                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, null, null, null);
 
             // Start over.
             resetBgRestrictionController();
@@ -1435,7 +1467,8 @@ public final class BackgroundRestrictionTest {
                     ACCESS_BACKGROUND_LOCATION, null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah - 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
-                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true, null, windowMs);
+                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, null, null, null);
 
             // Run with bg location permission, with even higher current drain.
             runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
@@ -1443,8 +1476,134 @@ public final class BackgroundRestrictionTest {
                     ACCESS_BACKGROUND_LOCATION , null, null, listener, stats, uids,
                     new double[]{restrictBucketHighThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
-                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, false, null, windowMs);
+                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, false,
+                    null, windowMs, null,  null, null);
 
+            // Now turn off the event duration based feature flag.
+            bgCurrentDrainEventDurationBasedThresholdEnabled.set(false);
+            // Turn on the battery exemption feature flag.
+            bgBatteryExemptionEnabled.set(true);
+
+            // Start over.
+            resetBgRestrictionController();
+            setUidBatteryConsumptions(stats, uids, zeros, zeros, zeros);
+            mAppBatteryPolicy.reset();
+
+            waitForIdleHandler(mBgRestrictionController.getBackgroundHandler());
+
+            // Run with a media playback service which starts/stops immediately, we should
+            // goto the restricted bucket.
+            runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
+                    FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, 0, true,
+                    null, null, null, listener, stats, uids,
+                    new double[]{restrictBucketThresholdMah + 1, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    false, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, null, null, null);
+
+            // Run with a media playback service with extended time. We should be back to normal.
+            runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
+                    FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, bgMediaPlaybackMinDuration * 2, false,
+                    null, null, null, listener, stats, uids,
+                    new double[]{restrictBucketThresholdMah + 1, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    true, RESTRICTION_LEVEL_ADAPTIVE_BUCKET, timeout, false,
+                    () -> {
+                        // A user interaction will bring it back to normal.
+                        mIdleStateListener.onUserInteractionStarted(testPkgName1,
+                                UserHandle.getUserId(testUid1));
+                        waitForIdleHandler(mBgRestrictionController.getBackgroundHandler());
+                        // It should have been back to normal.
+                        listener.verify(timeout, testUid1, testPkgName1,
+                                RESTRICTION_LEVEL_ADAPTIVE_BUCKET);
+                        verify(mInjector.getAppStandbyInternal(), times(1)).maybeUnrestrictApp(
+                                eq(testPkgName1),
+                                eq(UserHandle.getUserId(testUid1)),
+                                eq(REASON_MAIN_FORCED_BY_SYSTEM),
+                                eq(REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE),
+                                eq(REASON_MAIN_USAGE),
+                                eq(REASON_SUB_USAGE_USER_INTERACTION));
+                    }, windowMs, null, null, null);
+
+            // Start over.
+            resetBgRestrictionController();
+            setUidBatteryConsumptions(stats, uids, zeros, zeros, zeros);
+            mAppBatteryPolicy.reset();
+
+            final double[] initialBg = {1, 1}, initialFgs = {1, 1}, initialFg = zeros;
+
+            // Run with a media playback service with extended time, with higher current drain.
+            runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
+                    FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, bgMediaPlaybackMinDuration * 2, false,
+                    null, null, null, listener, stats, uids,
+                    new double[]{restrictBucketHighThresholdMah - 1, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, initialBg, initialFgs, initialFg);
+
+            // Run with a media playback service with extended time, with even higher current drain,
+            // it still should stay in the current restriction level as we exempt the media
+            // playback.
+            runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
+                    FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, bgMediaPlaybackMinDuration * 2, false,
+                    null, null, null, listener, stats, uids,
+                    new double[]{restrictBucketHighThresholdMah + 100, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, false,
+                    null, windowMs, initialBg, initialFgs, initialFg);
+
+            // Start over.
+            resetBgRestrictionController();
+            setUidBatteryConsumptions(stats, uids, zeros, zeros, zeros);
+            mAppBatteryPolicy.reset();
+
+            // Run with a media session with extended time, with higher current drain.
+            runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
+                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false, null,
+                    List.of(Pair.create(createMediaControllers(new String[] {testPkgName1},
+                                new int[] {testUid1}), bgMediaPlaybackMinDuration * 2)),
+                    null, listener, stats, uids,
+                    new double[]{restrictBucketHighThresholdMah - 1, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, initialBg, initialFgs, initialFg);
+
+            // Run with a media session with extended time, with even higher current drain.
+            // it still should stay in the current restriction level as we exempt the media
+            // session.
+            runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
+                    FOREGROUND_SERVICE_TYPE_NONE, bgMediaPlaybackMinDuration * 2, false, null,
+                    List.of(Pair.create(createMediaControllers(new String[] {testPkgName1},
+                                new int[] {testUid1}), bgMediaPlaybackMinDuration * 2)),
+                    null, listener, stats, uids,
+                    new double[]{restrictBucketHighThresholdMah + 100, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, initialBg, initialFgs, initialFg);
+
+            // Start over.
+            resetBgRestrictionController();
+            setUidBatteryConsumptions(stats, uids, zeros, zeros, zeros);
+            mAppBatteryPolicy.reset();
+
+            // Run with a location service with extended time, with higher current drain.
+            runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
+                    FOREGROUND_SERVICE_TYPE_LOCATION, bgMediaPlaybackMinDuration * 2, false,
+                    null, null, null, listener, stats, uids,
+                    new double[]{restrictBucketHighThresholdMah - 1, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, true,
+                    null, windowMs, initialBg, initialFgs, initialFg);
+
+            // Run with a location service with extended time, with even higher current drain.
+            // it still should stay in the current restriction level as we exempt the location.
+            runTestBgCurrentDrainExemptionOnce(testPkgName1, testUid1, testPid1,
+                    FOREGROUND_SERVICE_TYPE_LOCATION, bgMediaPlaybackMinDuration * 2, false,
+                    null, null, null, listener, stats, uids,
+                    new double[]{restrictBucketHighThresholdMah + 100, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    true, RESTRICTION_LEVEL_RESTRICTED_BUCKET, timeout, false,
+                    null, windowMs, initialBg, initialFgs, initialFg);
         } finally {
             closeIfNotNull(bgCurrentDrainMonitor);
             closeIfNotNull(bgCurrentDrainWindow);
@@ -1454,6 +1613,8 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(bgCurrentDrainBgRestrictedHighThreshold);
             closeIfNotNull(bgMediaPlaybackMinDurationThreshold);
             closeIfNotNull(bgLocationMinDurationThreshold);
+            closeIfNotNull(bgCurrentDrainEventDurationBasedThresholdEnabled);
+            closeIfNotNull(bgBatteryExemptionEnabled);
         }
     }
 
@@ -1463,8 +1624,16 @@ public final class BackgroundRestrictionTest {
             List<Long> topStateChanges, TestAppRestrictionLevelListener listener,
             BatteryUsageStats stats, int[] uids, double[] bg, double[] fgs, double[] fg,
             boolean expectingTimeout, int expectingLevel, long timeout, boolean resetFGSTracker,
-            RunnableWithException extraVerifiers, long windowMs) throws Exception {
+            RunnableWithException extraVerifiers, long windowMs,
+            double[] initialBg, double[] initialFgs, double[] initialFg) throws Exception {
         listener.mLatchHolder[0] = new CountDownLatch(1);
+        if (initialBg != null) {
+            doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+            mCurrentTimeMillis += windowMs + 1;
+            setUidBatteryConsumptions(stats, uids, initialBg, initialFgs, initialFg);
+            mAppBatteryExemptionTracker.reset();
+            mAppBatteryPolicy.reset();
+        }
         runExemptionTestOnce(
                 packageName, uid, pid, serviceType, sleepMs, stopAfterSleep,
                 perm, mediaControllers, topStateChanges, resetFGSTracker, false,
@@ -1792,14 +1961,14 @@ public final class BackgroundRestrictionTest {
     public void testMergeAppStateDurations() throws Exception {
         final BaseAppStateDurations testObj = new BaseAppStateDurations(0, "", 1, "", null) {};
         assertAppStateDurations(null, testObj.add(null, null));
-        assertAppStateDurations(new LinkedList<Long>(), testObj.add(
-                null, new LinkedList<Long>()));
-        assertAppStateDurations(new LinkedList<Long>(), testObj.add(
-                new LinkedList<Long>(), null));
+        assertAppStateDurations(new LinkedList<BaseTimeEvent>(), testObj.add(
+                null, new LinkedList<BaseTimeEvent>()));
+        assertAppStateDurations(new LinkedList<BaseTimeEvent>(), testObj.add(
+                new LinkedList<BaseTimeEvent>(), null));
         assertAppStateDurations(createDurations(1), testObj.add(
-                createDurations(1), new LinkedList<Long>()));
+                createDurations(1), new LinkedList<BaseTimeEvent>()));
         assertAppStateDurations(createDurations(1), testObj.add(
-                new LinkedList<Long>(), createDurations(1)));
+                new LinkedList<BaseTimeEvent>(), createDurations(1)));
         assertAppStateDurations(createDurations(1, 4, 5, 8, 9), testObj.add(
                 createDurations(1, 3, 5, 7, 9), createDurations(2, 4, 6, 8, 10)));
         assertAppStateDurations(createDurations(1, 5), testObj.add(
@@ -1814,14 +1983,14 @@ public final class BackgroundRestrictionTest {
     public void testSubtractAppStateDurations() throws Exception {
         final BaseAppStateDurations testObj = new BaseAppStateDurations(0, "", 1, "", null) {};
         assertAppStateDurations(null, testObj.subtract(null, null));
-        assertAppStateDurations(null, testObj.subtract(null, new LinkedList<Long>()));
-        assertAppStateDurations(new LinkedList<Long>(), testObj.subtract(
-                new LinkedList<Long>(), null));
+        assertAppStateDurations(null, testObj.subtract(null, new LinkedList<BaseTimeEvent>()));
+        assertAppStateDurations(new LinkedList<BaseTimeEvent>(), testObj.subtract(
+                new LinkedList<BaseTimeEvent>(), null));
         assertAppStateDurations(createDurations(1), testObj.subtract(
-                createDurations(1), new LinkedList<Long>()));
-        assertAppStateDurations(new LinkedList<Long>(), testObj.subtract(
-                new LinkedList<Long>(), createDurations(1)));
-        assertAppStateDurations(new LinkedList<Long>(), testObj.subtract(
+                createDurations(1), new LinkedList<BaseTimeEvent>()));
+        assertAppStateDurations(new LinkedList<BaseTimeEvent>(), testObj.subtract(
+                new LinkedList<BaseTimeEvent>(), createDurations(1)));
+        assertAppStateDurations(new LinkedList<BaseTimeEvent>(), testObj.subtract(
                 createDurations(1), createDurations(1)));
         assertAppStateDurations(createDurations(1, 2, 5, 6, 9, 10), testObj.subtract(
                 createDurations(1, 3, 5, 7, 9), createDurations(2, 4, 6, 8, 10)));
@@ -1837,8 +2006,8 @@ public final class BackgroundRestrictionTest {
                 createDurations(1), createDurations(1, 2, 3, 4, 5, 6, 7, 8)));
     }
 
-    private void assertAppStateDurations(LinkedList<Long> expected, LinkedList<Long> actual)
-            throws Exception {
+    private void assertAppStateDurations(LinkedList<BaseTimeEvent> expected,
+            LinkedList<BaseTimeEvent> actual) throws Exception {
         assertListEquals(expected, actual);
     }
 
@@ -1849,13 +2018,14 @@ public final class BackgroundRestrictionTest {
                 assertEquals(expected.size(), actual.size());
             }
             while (expected.peek() != null) {
-                assertEquals(expected.poll(), actual.poll());
+                assertTrue(expected.poll().equals(actual.poll()));
             }
         }
     }
 
-    private LinkedList<Long> createDurations(long... timestamps) {
-        return Arrays.stream(timestamps).collect(LinkedList<Long>::new, LinkedList<Long>::add,
+    private LinkedList<BaseTimeEvent> createDurations(long... timestamps) {
+        return Arrays.stream(timestamps).mapToObj(BaseTimeEvent::new)
+                .collect(LinkedList<BaseTimeEvent>::new, LinkedList<BaseTimeEvent>::add,
                 (a, b) -> a.addAll(b));
     }
 
@@ -1921,6 +2091,117 @@ public final class BackgroundRestrictionTest {
         assertListEquals(createIntLinkedList(expectedEvents), testObj1.getRawEvents(0));
     }
 
+    @Test
+    public void testMergeUidBatteryUsage() throws Exception {
+        final UidBatteryStates testObj = new UidBatteryStates(0, "", null);
+        assertListEquals(null, testObj.add(null, null));
+        assertListEquals(new LinkedList<UidStateEventWithBattery>(), testObj.add(
+                null, new LinkedList<UidStateEventWithBattery>()));
+        assertListEquals(new LinkedList<UidStateEventWithBattery>(), testObj.add(
+                new LinkedList<UidStateEventWithBattery>(), null));
+        assertListEquals(createUidStateEventWithBatteryList(
+                new boolean[] {true}, new long[] {10L}, new double[] {10.0d}),
+                testObj.add(createUidStateEventWithBatteryList(
+                new boolean[] {true}, new long[] {10L}, new double[] {10.0d}),
+                new LinkedList<UidStateEventWithBattery>()));
+        assertListEquals(createUidStateEventWithBatteryList(
+                new boolean[] {true}, new long[] {10L}, new double[] {10.0d}),
+                testObj.add(new LinkedList<UidStateEventWithBattery>(),
+                createUidStateEventWithBatteryList(
+                new boolean[] {true}, new long[] {10L}, new double[] {10.0d})));
+        assertListEquals(createUidStateEventWithBatteryList(
+                new boolean[] {true}, new long[] {10L}, new double[] {10.0d}),
+                testObj.add(createUidStateEventWithBatteryList(
+                new boolean[] {true}, new long[] {11L}, new double[] {11.0d}),
+                createUidStateEventWithBatteryList(
+                new boolean[] {true}, new long[] {10L}, new double[] {10.0d})));
+        assertListEquals(createUidStateEventWithBatteryList(
+                new boolean[] {true}, new long[] {10L}, new double[] {10.0d}),
+                testObj.add(createUidStateEventWithBatteryList(
+                new boolean[] {true, false}, new long[] {11L, 12L}, new double[] {11.0d, 1.0d}),
+                createUidStateEventWithBatteryList(
+                new boolean[] {true}, new long[] {10L}, new double[] {10.0d})));
+        assertListEquals(createUidStateEventWithBatteryList(
+                new boolean[] {true}, new long[] {10L}, new double[] {10.0d}),
+                testObj.add(createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true}, new long[] {11L, 12L, 13L},
+                new double[] {11.0d, 1.0d, 13.0d}),
+                createUidStateEventWithBatteryList(
+                new boolean[] {true}, new long[] {10L}, new double[] {10.0d})));
+        assertListEquals(createUidStateEventWithBatteryList(
+                new boolean[] {true, false}, new long[] {10L, 13L}, new double[] {10.0d, 3.0d}),
+                testObj.add(createUidStateEventWithBatteryList(
+                new boolean[] {true, false}, new long[] {11L, 13L}, new double[] {11.0d, 2.0d}),
+                createUidStateEventWithBatteryList(
+                new boolean[] {true, false}, new long[] {10L, 12L}, new double[] {10.0d, 2.0d})));
+        assertListEquals(createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true}, new long[] {10L, 13L, 14L},
+                new double[] {10.0d, 3.0d, 14.0d}),
+                testObj.add(createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true}, new long[] {11L, 13L, 14L},
+                new double[] {11.0d, 2.0d, 14.0d}),
+                createUidStateEventWithBatteryList(
+                new boolean[] {true, false}, new long[] {10L, 12L}, new double[] {10.0d, 2.0d})));
+        assertListEquals(createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true, false, true, false},
+                new long[] {10L, 13L, 14L, 17L, 18L, 21L},
+                new double[] {10.0d, 3.0d, 14.0d, 3.0d, 18.0d, 3.0d}),
+                testObj.add(createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true, false, true, false},
+                new long[] {11L, 13L, 15L, 17L, 19L, 21L},
+                new double[] {11.0d, 2.0d, 15.0d, 2.0d, 19.0d, 2.0d}),
+                createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true, false, true, false},
+                new long[] {10L, 12L, 14L, 16L, 18L, 20L},
+                new double[] {10.0d, 2.0d, 14.0d, 2.0d, 18.0d, 2.0d})));
+        assertListEquals(createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true, false, true, false, true, false, true, false},
+                new long[] {10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L},
+                new double[] {10.0d, 1.0d, 12.0d, 1.0d, 14.0d, 1.0d, 16.0d, 1.0d, 18.0d, 1.0d}),
+                testObj.add(createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true, false},
+                new long[] {12L, 13L, 16L, 17L},
+                new double[] {12.0d, 1.0d, 16.0d, 1.0d}),
+                createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true, false, true, false},
+                new long[] {10L, 11L, 14L, 15L, 18L, 19L},
+                new double[] {10.0d, 1.0d, 14.0d, 1.0d, 18.0d, 1.0d})));
+        assertListEquals(createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true, false},
+                new long[] {10L, 14L, 18L, 19L},
+                new double[] {10.0d, 4.0d, 18.0d, 1.0d}),
+                testObj.add(createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true, false},
+                new long[] {11L, 12L, 13L, 14L},
+                new double[] {11.0d, 1.0d, 13.0d, 1.0d}),
+                createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true, false, true, false},
+                new long[] {10L, 11L, 12L, 13L, 18L, 19L},
+                new double[] {10.0d, 1.0d, 12.0d, 1.0d, 18.0d, 1.0d})));
+        assertListEquals(createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true, false},
+                new long[] {10L, 14L, 18L, 19L},
+                new double[] {10.0d, 4.0d, 18.0d, 1.0d}),
+                testObj.add(createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true, false},
+                new long[] {10L, 14L, 18L, 19L},
+                new double[] {10.0d, 4.0d, 18.0d, 1.0d}),
+                createUidStateEventWithBatteryList(
+                new boolean[] {true, false, true, false, true, false},
+                new long[] {10L, 11L, 12L, 13L, 18L, 19L},
+                new double[] {10.0d, 1.0d, 12.0d, 1.0d, 18.0d, 1.0d})));
+    }
+
+    private LinkedList<UidStateEventWithBattery> createUidStateEventWithBatteryList(
+            boolean[] isStart, long[] timestamps, double[] batteryUsage) {
+        final LinkedList<UidStateEventWithBattery> result = new LinkedList<>();
+        for (int i = 0; i < isStart.length; i++) {
+            result.add(new UidStateEventWithBattery(
+                    isStart[i], timestamps[i], batteryUsage[i], null));
+        }
+        return result;
+    }
+
     private class TestBgRestrictionInjector extends AppRestrictionController.Injector {
         private Context mContext;
 
@@ -1937,6 +2218,11 @@ public final class BackgroundRestrictionTest {
                                 BackgroundRestrictionTest.class),
                         BackgroundRestrictionTest.this);
                 controller.addAppStateTracker(mAppBatteryTracker);
+                mAppBatteryExemptionTracker = new AppBatteryExemptionTracker(mContext, controller,
+                        TestAppBatteryExemptionTrackerInjector.class.getDeclaredConstructor(
+                                BackgroundRestrictionTest.class),
+                        BackgroundRestrictionTest.this);
+                controller.addAppStateTracker(mAppBatteryExemptionTracker);
                 mAppFGSTracker = new AppFGSTracker(mContext, controller,
                         TestAppFGSTrackerInjector.class.getDeclaredConstructor(
                                 BackgroundRestrictionTest.class),
@@ -2026,6 +2312,16 @@ public final class BackgroundRestrictionTest {
         ActivityManagerService getActivityManagerService() {
             return mActivityManagerService;
         }
+
+        @Override
+        UidBatteryUsageProvider getUidBatteryUsageProvider() {
+            return mAppBatteryTracker;
+        }
+
+        @Override
+        AppBatteryExemptionTracker getAppBatteryExemptionTracker() {
+            return mAppBatteryExemptionTracker;
+        }
     }
 
     private class TestBaseTrackerInjector<T extends BaseAppStatePolicy>
@@ -2102,6 +2398,10 @@ public final class BackgroundRestrictionTest {
             super.setPolicy(policy);
             BackgroundRestrictionTest.this.mAppBatteryPolicy = policy;
         }
+    }
+
+    private class TestAppBatteryExemptionTrackerInjector
+            extends TestBaseTrackerInjector<AppBatteryExemptionPolicy> {
     }
 
     private class TestAppFGSTrackerInjector extends TestBaseTrackerInjector<AppFGSPolicy> {

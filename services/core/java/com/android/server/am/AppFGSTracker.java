@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.Manifest.permission.ACCESS_BACKGROUND_LOCATION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
 import static android.content.pm.ServiceInfo.NUM_OF_FOREGROUND_SERVICE_TYPES;
 import static android.content.pm.ServiceInfo.foregroundServiceTypeToLabel;
@@ -51,6 +52,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.am.AppFGSTracker.AppFGSPolicy;
 import com.android.server.am.AppFGSTracker.PackageDurations;
 import com.android.server.am.BaseAppStateEventsTracker.BaseAppStateEventsPolicy;
+import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
 import com.android.server.am.BaseAppStateTracker.Injector;
 
 import java.io.PrintWriter;
@@ -160,7 +162,7 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
 
     @Override
     public PackageDurations createAppStateEvents(int uid, String packageName) {
-        return new PackageDurations(uid, packageName, mInjector.getPolicy());
+        return new PackageDurations(uid, packageName, mInjector.getPolicy(), this);
     }
 
     @Override
@@ -306,7 +308,7 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
         synchronized (mLock) {
             PackageDurations pkg = mPkgEvents.get(uid, packageName);
             if (pkg == null) {
-                pkg = new PackageDurations(uid, packageName, mInjector.getPolicy());
+                pkg = new PackageDurations(uid, packageName, mInjector.getPolicy(), this);
                 mPkgEvents.put(uid, packageName, pkg);
             }
             pkg.setForegroundServiceType(serviceTypes, now);
@@ -383,7 +385,9 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
     /**
      * Tracks the durations with active FGS for a given package.
      */
-    static class PackageDurations extends BaseAppStateDurations {
+    static class PackageDurations extends BaseAppStateDurations<BaseTimeEvent> {
+        private final AppFGSTracker mTracker;
+
         /**
          * Whether or not this package is considered as having long-running FGS.
          */
@@ -402,23 +406,25 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
         static final int DEFAULT_INDEX = foregroundServiceTypeToIndex(FOREGROUND_SERVICE_TYPE_NONE);
 
         PackageDurations(int uid, String packageName,
-                MaxTrackingDurationConfig maxTrackingDurationConfig) {
+                MaxTrackingDurationConfig maxTrackingDurationConfig, AppFGSTracker tracker) {
             super(uid, packageName, NUM_OF_FOREGROUND_SERVICE_TYPES + 1, TAG,
                     maxTrackingDurationConfig);
-            mEvents[DEFAULT_INDEX] = new LinkedList<Long>();
+            mEvents[DEFAULT_INDEX] = new LinkedList<>();
+            mTracker = tracker;
         }
 
         PackageDurations(@NonNull PackageDurations other) {
             super(other);
             mIsLongRunning = other.mIsLongRunning;
             mForegroundServiceTypes = other.mForegroundServiceTypes;
+            mTracker = other.mTracker;
         }
 
         /**
          * Add a foreground service start/stop event.
          */
         void addEvent(boolean startFgs, long now) {
-            addEvent(startFgs, now, DEFAULT_INDEX);
+            addEvent(startFgs, new BaseTimeEvent(now), DEFAULT_INDEX);
             if (!startFgs && !hasForegroundServices()) {
                 mIsLongRunning = false;
             }
@@ -430,7 +436,9 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
                         continue;
                     }
                     if (isActive(i)) {
-                        mEvents[i].add(now);
+                        mEvents[i].add(new BaseTimeEvent(now));
+                        notifyListenersOnEventIfNecessary(false, now,
+                                indexToForegroundServiceType(i));
                     }
                 }
                 mForegroundServiceTypes = FOREGROUND_SERVICE_TYPE_NONE;
@@ -451,21 +459,39 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
                 if ((serviceTypes & serviceType) != 0) {
                     // Start this type.
                     if (mEvents[i] == null) {
-                        mEvents[i] = new LinkedList<Long>();
+                        mEvents[i] = new LinkedList<>();
                     }
                     if (!isActive(i)) {
-                        mEvents[i].add(now);
+                        mEvents[i].add(new BaseTimeEvent(now));
+                        notifyListenersOnEventIfNecessary(true, now, serviceType);
                     }
                 } else {
                     // Stop this type.
                     if (mEvents[i] != null && isActive(i)) {
-                        mEvents[i].add(now);
+                        mEvents[i].add(new BaseTimeEvent(now));
+                        notifyListenersOnEventIfNecessary(false, now, serviceType);
                     }
                 }
                 changes &= ~serviceType;
                 serviceType = Integer.highestOneBit(changes);
             }
             mForegroundServiceTypes = serviceTypes;
+        }
+
+        private void notifyListenersOnEventIfNecessary(boolean start, long now,
+                @ForegroundServiceType int serviceType) {
+            int eventType;
+            switch (serviceType) {
+                case FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK:
+                    eventType = BaseAppStateDurationsTracker.EVENT_TYPE_FGS_MEDIA_PLAYBACK;
+                    break;
+                case FOREGROUND_SERVICE_TYPE_LOCATION:
+                    eventType = BaseAppStateDurationsTracker.EVENT_TYPE_FGS_LOCATION;
+                    break;
+                default:
+                    return;
+            }
+            mTracker.notifyListenersOnEvent(mUid, mPackageName, start, now, eventType);
         }
 
         void setIsLongRunning(boolean isLongRunning) {

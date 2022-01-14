@@ -22,6 +22,8 @@ import android.os.UserHandle;
 import android.util.Slog;
 import android.util.TimeUtils;
 
+import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -29,7 +31,7 @@ import java.util.LinkedList;
  * A helper class to track the accumulated durations of certain events; supports tracking event
  * start/stop, trim.
  */
-abstract class BaseAppStateDurations extends BaseAppStateTimeEvents {
+abstract class BaseAppStateDurations<T extends BaseTimeEvent> extends BaseAppStateTimeEvents<T> {
     static final boolean DEBUG_BASE_APP_STATE_DURATIONS = false;
 
     BaseAppStateDurations(int uid, @NonNull String packageName, int numOfEventTypes,
@@ -44,12 +46,12 @@ abstract class BaseAppStateDurations extends BaseAppStateTimeEvents {
     /**
      * Add a start/stop event.
      */
-    void addEvent(boolean start, long now, int index) {
+    void addEvent(boolean start, @NonNull T event, int index) {
         if (mEvents[index] == null) {
-            mEvents[index] = new LinkedList<Long>();
+            mEvents[index] = new LinkedList<>();
         }
-        final LinkedList<Long> eventTimestamps = mEvents[index];
-        final int size = eventTimestamps.size();
+        final LinkedList<T> events = mEvents[index];
+        final int size = events.size();
         final boolean active = isActive(index);
 
         if (DEBUG_BASE_APP_STATE_DURATIONS && !start && !active) {
@@ -58,35 +60,38 @@ abstract class BaseAppStateDurations extends BaseAppStateTimeEvents {
         }
         if (start != active) {
             // Only record the event time if it's not the same state as now
-            eventTimestamps.add(now);
+            events.add(event);
         }
-        trimEvents(getEarliest(now), index);
+        trimEvents(getEarliest(event.getTimestamp()), index);
     }
 
     @Override
     void trimEvents(long earliest, int index) {
-        final LinkedList<Long> eventTimestamps = mEvents[index];
-        if (eventTimestamps == null) {
+        trimEvents(earliest, mEvents[index]);
+    }
+
+    void trimEvents(long earliest, LinkedList<T> events) {
+        if (events == null) {
             return;
         }
-        while (eventTimestamps.size() > 1) {
-            final long current = eventTimestamps.peek();
-            if (current >= earliest) {
+        while (events.size() > 1) {
+            final T current = events.peek();
+            if (current.getTimestamp() >= earliest) {
                 return; // All we have are newer than the given timestamp.
             }
             // Check the timestamp of stop event.
-            if (eventTimestamps.get(1) > earliest) {
+            if (events.get(1).getTimestamp() > earliest) {
                 // Trim the duration by moving the start time.
-                eventTimestamps.set(0, earliest);
+                events.get(0).trimTo(earliest);
                 return;
             }
             // Discard the 1st duration as it's older than the given timestamp.
-            eventTimestamps.pop();
-            eventTimestamps.pop();
+            events.pop();
+            events.pop();
         }
-        if (eventTimestamps.size() == 1) {
+        if (events.size() == 1) {
             // Trim the duration by moving the start time.
-            eventTimestamps.set(0, Math.max(earliest, eventTimestamps.peek()));
+            events.get(0).trimTo(Math.max(earliest, events.peek().getTimestamp()));
         }
     }
 
@@ -94,37 +99,39 @@ abstract class BaseAppStateDurations extends BaseAppStateTimeEvents {
      * Merge the two given duration table and return the result.
      */
     @Override
-    LinkedList<Long> add(LinkedList<Long> durations, LinkedList<Long> otherDurations) {
+    LinkedList<T> add(LinkedList<T> durations, LinkedList<T> otherDurations) {
         if (otherDurations == null || otherDurations.size() == 0) {
             return durations;
         }
         if (durations == null || durations.size() == 0) {
-            return (LinkedList<Long>) otherDurations.clone();
+            return (LinkedList<T>) otherDurations.clone();
         }
-        final Iterator<Long> itl = durations.iterator();
-        final Iterator<Long> itr = otherDurations.iterator();
-        LinkedList<Long> dest = new LinkedList<Long>();
+        final Iterator<T> itl = durations.iterator();
+        final Iterator<T> itr = otherDurations.iterator();
+        T l = itl.next(), r = itr.next();
+        LinkedList<T> dest = new LinkedList<>();
         boolean actl = false, actr = false;
-        for (long l = itl.next(), r = itr.next(); l != Long.MAX_VALUE || r != Long.MAX_VALUE;) {
+        for (long lts = l.getTimestamp(), rts = r.getTimestamp();
+                lts != Long.MAX_VALUE || rts != Long.MAX_VALUE;) {
             final boolean actCur = actl || actr;
-            final long earliest;
-            if (l == r) {
+            final T earliest;
+            if (lts == rts) {
                 earliest = l;
                 actl = !actl;
                 actr = !actr;
-                l = itl.hasNext() ? itl.next() : Long.MAX_VALUE;
-                r = itr.hasNext() ? itr.next() : Long.MAX_VALUE;
-            } else if (l < r) {
+                lts = itl.hasNext() ? (l = itl.next()).getTimestamp() : Long.MAX_VALUE;
+                rts = itr.hasNext() ? (r = itr.next()).getTimestamp() : Long.MAX_VALUE;
+            } else if (lts < rts) {
                 earliest = l;
                 actl = !actl;
-                l = itl.hasNext() ? itl.next() : Long.MAX_VALUE;
+                lts = itl.hasNext() ? (l = itl.next()).getTimestamp() : Long.MAX_VALUE;
             } else {
                 earliest = r;
                 actr = !actr;
-                r = itr.hasNext() ? itr.next() : Long.MAX_VALUE;
+                rts = itr.hasNext() ? (r = itr.next()).getTimestamp() : Long.MAX_VALUE;
             }
-            if (actCur != (actl || actr) && earliest != Long.MAX_VALUE) {
-                dest.add(earliest);
+            if (actCur != (actl || actr)) {
+                dest.add((T) earliest.clone());
             }
         }
         return dest;
@@ -168,35 +175,37 @@ abstract class BaseAppStateDurations extends BaseAppStateTimeEvents {
     /**
      * Subtract the other durations from the given duration table and return the new one.
      */
-    LinkedList<Long> subtract(LinkedList<Long> durations, LinkedList<Long> otherDurations) {
+    LinkedList<T> subtract(LinkedList<T> durations, LinkedList<T> otherDurations) {
         if (otherDurations == null || otherDurations.size() == 0
                 || durations == null || durations.size() == 0) {
             return durations;
         }
-        final Iterator<Long> itl = durations.iterator();
-        final Iterator<Long> itr = otherDurations.iterator();
-        LinkedList<Long> dest = new LinkedList<Long>();
+        final Iterator<T> itl = durations.iterator();
+        final Iterator<T> itr = otherDurations.iterator();
+        T l = itl.next(), r = itr.next();
+        LinkedList<T> dest = new LinkedList<>();
         boolean actl = false, actr = false;
-        for (long l = itl.next(), r = itr.next(); l != Long.MAX_VALUE || r != Long.MAX_VALUE;) {
+        for (long lts = l.getTimestamp(), rts = r.getTimestamp();
+                lts != Long.MAX_VALUE || rts != Long.MAX_VALUE;) {
             final boolean actCur = actl && !actr;
-            final long earliest;
-            if (l == r) {
+            final T earliest;
+            if (lts == rts) {
                 earliest = l;
                 actl = !actl;
                 actr = !actr;
-                l = itl.hasNext() ? itl.next() : Long.MAX_VALUE;
-                r = itr.hasNext() ? itr.next() : Long.MAX_VALUE;
-            } else if (l < r) {
+                lts = itl.hasNext() ? (l = itl.next()).getTimestamp() : Long.MAX_VALUE;
+                rts = itr.hasNext() ? (r = itr.next()).getTimestamp() : Long.MAX_VALUE;
+            } else if (lts < rts) {
                 earliest = l;
                 actl = !actl;
-                l = itl.hasNext() ? itl.next() : Long.MAX_VALUE;
+                lts = itl.hasNext() ? (l = itl.next()).getTimestamp() : Long.MAX_VALUE;
             } else {
                 earliest = r;
                 actr = !actr;
-                r = itr.hasNext() ? itr.next() : Long.MAX_VALUE;
+                rts = itr.hasNext() ? (r = itr.next()).getTimestamp() : Long.MAX_VALUE;
             }
-            if (actCur != (actl && !actr) && earliest != Long.MAX_VALUE) {
-                dest.add(earliest);
+            if (actCur != (actl && !actr)) {
+                dest.add((T) earliest.clone());
             }
         }
         return dest;
@@ -207,22 +216,22 @@ abstract class BaseAppStateDurations extends BaseAppStateTimeEvents {
     }
 
     long getTotalDurationsSince(long since, long now, int index) {
-        final LinkedList<Long> timestamps = mEvents[index];
-        if (timestamps == null || timestamps.size() == 0) {
+        final LinkedList<T> events = mEvents[index];
+        if (events == null || events.size() == 0) {
             return 0L;
         }
         boolean active = true;
         long last = 0;
         long duration = 0;
-        for (long timestamp: timestamps) {
-            if (timestamp < since || active) {
-                last = timestamp;
+        for (T event : events) {
+            if (event.getTimestamp() < since || active) {
+                last = event.getTimestamp();
             } else {
-                duration += Math.max(0, timestamp - Math.max(last, since));
+                duration += Math.max(0, event.getTimestamp() - Math.max(last, since));
             }
             active = !active;
         }
-        if ((timestamps.size() & 1) == 1) {
+        if ((events.size() & 1) == 1) {
             duration += Math.max(0, now - Math.max(last, since));
         }
         return duration;
