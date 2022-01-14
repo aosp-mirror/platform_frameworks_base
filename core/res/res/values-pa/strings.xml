@@ -666,11 +666,11 @@
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"ਚਿਹਰਾ ਪ੍ਰਤੀਕ"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹੋ"</string>
-    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ਐਪ ਨੂੰ ਕਿਸੇ ਖਾਤੇ ਲਈ ਸਮਕਾਲੀਕਰਨ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਹ ਪਤਾ ਕਰ ਸਕਦਾ ਹੈ ਕਿ People ਐਪ ਦਾ ਕਿਸੇ ਖਾਤੇ ਨਾਲ ਸਮਕਾਲੀਕਿਰਤ ਕੀਤਾ ਗਿਆ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
-    <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"ਸਮਕਾਲੀਕਰਨ ਚਾਲੂ ਅਤੇ ਬੰਦ ਨੂੰ ਟੌਗਲ ਕਰੋ"</string>
-    <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਲਈ ਸਮਕਾਲੀਕਰਨ ਸੈਟਿੰਗਾਂ ਸੋਧਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸਦੀ ਵਰਤੋਂ ਕਿਸੇ ਖਾਤੇ ਨਾਲ People ਐਪ ਦਾ ਸਮਕਾਲੀਕਰਨ ਚਾਲੂ ਕਰਨ ਲਈ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ਐਪ ਨੂੰ ਕਿਸੇ ਖਾਤੇ ਲਈ ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਹ ਪਤਾ ਕਰ ਸਕਦਾ ਹੈ ਕਿ People ਐਪ ਦਾ ਕਿਸੇ ਖਾਤੇ ਨਾਲ ਸਮਕਾਲੀਕਿਰਤ ਕੀਤਾ ਗਿਆ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
+    <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"ਸਿੰਕ ਚਾਲੂ ਅਤੇ ਬੰਦ ਨੂੰ ਟੌਗਲ ਕਰੋ"</string>
+    <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਲਈ ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਸੋਧਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸਦੀ ਵਰਤੋਂ ਕਿਸੇ ਖਾਤੇ ਨਾਲ People ਐਪ ਦਾ ਸਿੰਕ ਚਾਲੂ ਕਰਨ ਲਈ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"ਸਿੰਕ ਅੰਕੜੇ ਪੜ੍ਹੋ"</string>
-    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਲਈ ਸਮਕਾਲੀਕਰਨ ਸਥਿਤੀ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ, ਇਸ ਵਿੱਚ ਸਮਕਾਲੀਕਰਨ ਵਰਤਾਰਿਆਂ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਕਿੰਨੇ ਡਾਟਾ ਦਾ ਸਮਕਾਲੀਕਿਰਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਵੀ ਸ਼ਾਮਲ ਹੈ।"</string>
+    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਲਈ ਸਿੰਕ ਸਥਿਤੀ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ, ਇਸ ਵਿੱਚ ਸਿੰਕ ਵਰਤਾਰਿਆਂ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਕਿੰਨੇ ਡਾਟਾ ਦਾ ਸਮਕਾਲੀਕਿਰਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਵੀ ਸ਼ਾਮਲ ਹੈ।"</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"ਸਮੱਗਰੀਆਂ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"ਐਪ ਨੂੰ ਸਮੱਗਰੀਆਂ ਪੜ੍ਹਨ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ਸਮੱਗਰੀਆਂ ਦਾ ਸੰਸ਼ੋਧਨ ਕਰੋ ਜਾਂ ਮਿਟਾਓ"</string>
