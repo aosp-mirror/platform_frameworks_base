@@ -44,7 +44,7 @@ public class PipBoundsAlgorithm {
     private static final String TAG = PipBoundsAlgorithm.class.getSimpleName();
     private static final float INVALID_SNAP_FRACTION = -1f;
 
-    private final @NonNull PipBoundsState mPipBoundsState;
+    protected final @NonNull PipBoundsState mPipBoundsState;
     private final PipSnapAlgorithm mSnapAlgorithm;
 
     private float mDefaultSizePercent;

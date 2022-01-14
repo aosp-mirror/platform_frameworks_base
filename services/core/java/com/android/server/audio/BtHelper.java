@@ -102,8 +102,6 @@ public class BtHelper {
     /*package*/  static final int SCO_MODE_UNDEFINED = -1;
     // SCO audio mode is virtual voice call (BluetoothHeadset.startScoUsingVirtualVoiceCall())
     /*package*/  static final int SCO_MODE_VIRTUAL_CALL = 0;
-    // SCO audio mode is raw audio (BluetoothHeadset.connectAudio())
-    private  static final int SCO_MODE_RAW = 1;
     // SCO audio mode is Voice Recognition (BluetoothHeadset.startVoiceRecognition())
     private  static final int SCO_MODE_VR = 2;
     // max valid SCO audio mode values
@@ -122,8 +120,6 @@ public class BtHelper {
                 return "SCO_MODE_UNDEFINED";
             case SCO_MODE_VIRTUAL_CALL:
                 return "SCO_MODE_VIRTUAL_CALL";
-            case SCO_MODE_RAW:
-                return "SCO_MODE_RAW";
             case SCO_MODE_VR:
                 return "SCO_MODE_VR";
             default:
@@ -812,8 +808,6 @@ public class BtHelper {
     private static boolean disconnectBluetoothScoAudioHelper(BluetoothHeadset bluetoothHeadset,
             BluetoothDevice device, int scoAudioMode) {
         switch (scoAudioMode) {
-            case SCO_MODE_RAW:
-                return bluetoothHeadset.disconnectAudio();
             case SCO_MODE_VIRTUAL_CALL:
                 return bluetoothHeadset.stopScoUsingVirtualVoiceCall();
             case SCO_MODE_VR:
@@ -826,8 +820,6 @@ public class BtHelper {
     private static boolean connectBluetoothScoAudioHelper(BluetoothHeadset bluetoothHeadset,
             BluetoothDevice device, int scoAudioMode) {
         switch (scoAudioMode) {
-            case SCO_MODE_RAW:
-                return bluetoothHeadset.connectAudio();
             case SCO_MODE_VIRTUAL_CALL:
                 return bluetoothHeadset.startScoUsingVirtualVoiceCall();
             case SCO_MODE_VR:

@@ -488,6 +488,7 @@ public class TransitionTests extends WindowTestsBase {
         final TestTransitionPlayer player = registerTestTransitionPlayer();
 
         mDisplayContent.getDisplayRotation().setRotation(mDisplayContent.getRotation() + 1);
+        mDisplayContent.setLastHasContent();
         mDisplayContent.requestChangeTransitionIfNeeded(1 /* any changes */,
                 null /* displayChange */);
         final FadeRotationAnimationController fadeController =
@@ -536,6 +537,7 @@ public class TransitionTests extends WindowTestsBase {
                 null /* remoteTransition */, null /* displayChange */);
         mDisplayContent.getDisplayRotation().setRotation(mDisplayContent.getRotation() + 1);
         final int anyChanges = 1;
+        mDisplayContent.setLastHasContent();
         mDisplayContent.requestChangeTransitionIfNeeded(anyChanges, null /* displayChange */);
         transition.setKnownConfigChanges(mDisplayContent, anyChanges);
         final FadeRotationAnimationController fadeController =
@@ -550,9 +552,11 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(app.getTask().inTransition());
 
         final SurfaceControl.Transaction startTransaction = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl leash = statusBar.mToken.getAnimationLeash();
+        doReturn(true).when(leash).isValid();
         player.onTransactionReady(startTransaction);
         // The leash should be unrotated.
-        verify(startTransaction).setMatrix(eq(statusBar.mToken.getAnimationLeash()), any(), any());
+        verify(startTransaction).setMatrix(eq(leash), any(), any());
 
         // The redrawn window will be faded in when the transition finishes. And because this test
         // only use one non-activity window, the fade rotation controller should also be cleared.

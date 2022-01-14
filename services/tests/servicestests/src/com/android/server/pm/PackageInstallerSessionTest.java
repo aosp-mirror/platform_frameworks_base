@@ -187,7 +187,7 @@ public class PackageInstallerSessionTest {
                 /* isFailed */ false,
                 /* isApplied */false,
                 /* stagedSessionErrorCode */
-                PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                PackageInstaller.SessionInfo.SESSION_VERIFICATION_FAILED,
                 /* stagedSessionErrorMessage */ "some error");
     }
 

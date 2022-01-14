@@ -17,9 +17,7 @@
 package com.android.server.locales;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,11 +41,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
-import android.os.Environment;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.SimpleClock;
-import android.util.AtomicFile;
+import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
@@ -57,6 +54,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.XmlUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,10 +63,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -95,9 +90,8 @@ public class LocaleManagerBackupRestoreTest {
             LocaleList.forLanguageTags(DEFAULT_LOCALE_TAGS);
     private static final Map<String, String> DEFAULT_PACKAGE_LOCALES_MAP = Map.of(
             DEFAULT_PACKAGE_NAME, DEFAULT_LOCALE_TAGS);
-    private static final File STAGED_LOCALES_DIR = new File(
-            Environment.getExternalStorageDirectory(), "lmsUnitTests");
-
+    private static final SparseArray<LocaleManagerBackupHelper.StagedData> STAGE_DATA =
+            new SparseArray<>();
 
     private LocaleManagerBackupHelper mBackupHelper;
     private long mCurrentTimeMillis;
@@ -138,14 +132,17 @@ public class LocaleManagerBackupRestoreTest {
         doReturn(mMockPackageManager).when(mMockContext).getPackageManager();
 
         mBackupHelper = spy(new ShadowLocaleManagerBackupHelper(mMockContext,
-                mMockLocaleManagerService, mMockPackageManagerInternal,
-                new File(Environment.getExternalStorageDirectory(), "lmsUnitTests"), mClock));
+                mMockLocaleManagerService, mMockPackageManagerInternal, mClock, STAGE_DATA));
         doNothing().when(mBackupHelper).notifyBackupManager();
 
         mUserMonitor = mBackupHelper.getUserMonitor();
         mPackageMonitor = mBackupHelper.getPackageMonitor();
         setCurrentTimeMillis(DEFAULT_CREATION_TIME_MILLIS);
-        cleanStagedFiles();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        STAGE_DATA.clear();
     }
 
     @Test
@@ -203,25 +200,25 @@ public class LocaleManagerBackupRestoreTest {
     }
 
     @Test
-    public void testRestore_nullPayload_nothingRestoredAndNoStageFile() throws Exception {
+    public void testRestore_nullPayload_nothingRestoredAndNoStageData() throws Exception {
         mBackupHelper.stageAndApplyRestoredPayload(/* payload= */ null, DEFAULT_USER_ID);
 
         verifyNothingRestored();
-        checkStageFileDoesNotExist(DEFAULT_USER_ID);
+        checkStageDataDoesNotExist(DEFAULT_USER_ID);
     }
 
     @Test
-    public void testRestore_zeroLengthPayload_nothingRestoredAndNoStageFile() throws Exception {
+    public void testRestore_zeroLengthPayload_nothingRestoredAndNoStageData() throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         mBackupHelper.stageAndApplyRestoredPayload(/* payload= */ out.toByteArray(),
                 DEFAULT_USER_ID);
 
         verifyNothingRestored();
-        checkStageFileDoesNotExist(DEFAULT_USER_ID);
+        checkStageDataDoesNotExist(DEFAULT_USER_ID);
     }
 
     @Test
-    public void testRestore_allAppsInstalled_noStageFileCreated() throws Exception {
+    public void testRestore_allAppsInstalled_noStageDataCreated() throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_MAP);
 
@@ -234,8 +231,7 @@ public class LocaleManagerBackupRestoreTest {
         verify(mMockLocaleManagerService, times(1)).setApplicationLocales(DEFAULT_PACKAGE_NAME,
                 DEFAULT_USER_ID, DEFAULT_LOCALES);
 
-        // Stage file wasn't created.
-        checkStageFileDoesNotExist(DEFAULT_USER_ID);
+        checkStageDataDoesNotExist(DEFAULT_USER_ID);
     }
 
     @Test
@@ -248,8 +244,8 @@ public class LocaleManagerBackupRestoreTest {
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
         verifyNothingRestored();
-        verifyStageFileContent(DEFAULT_PACKAGE_LOCALES_MAP,
-                getStageFileIfExists(DEFAULT_USER_ID), DEFAULT_CREATION_TIME_MILLIS);
+        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_MAP,
+                DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
     }
 
     @Test
@@ -257,8 +253,10 @@ public class LocaleManagerBackupRestoreTest {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         HashMap<String, String> pkgLocalesMap = new HashMap<>();
 
-        String pkgNameA = "com.android.myAppA", pkgNameB = "com.android.myAppB";
-        String langTagsA = "ru", langTagsB = "hi,fr";
+        String pkgNameA = "com.android.myAppA";
+        String pkgNameB = "com.android.myAppB";
+        String langTagsA = "ru";
+        String langTagsB = "hi,fr";
         pkgLocalesMap.put(pkgNameA, langTagsA);
         pkgLocalesMap.put(pkgNameB, langTagsB);
         writeTestPayload(out, pkgLocalesMap);
@@ -273,12 +271,12 @@ public class LocaleManagerBackupRestoreTest {
                 LocaleList.forLanguageTags(langTagsA));
 
         pkgLocalesMap.remove(pkgNameA);
-        verifyStageFileContent(pkgLocalesMap, getStageFileIfExists(DEFAULT_USER_ID),
-                DEFAULT_CREATION_TIME_MILLIS);
+        verifyStageDataForUser(pkgLocalesMap,
+                DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
     }
 
     @Test
-    public void testRestore_appLocalesAlreadySet_nothingRestoredAndNoStageFile() throws Exception {
+    public void testRestore_appLocalesAlreadySet_nothingRestoredAndNoStageData() throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_MAP);
 
@@ -289,8 +287,7 @@ public class LocaleManagerBackupRestoreTest {
 
         // Since locales are already set, we should not restore anything for it.
         verifyNothingRestored();
-        // Stage file wasn't created
-        checkStageFileDoesNotExist(DEFAULT_USER_ID);
+        checkStageDataDoesNotExist(DEFAULT_USER_ID);
     }
 
     @Test
@@ -299,9 +296,12 @@ public class LocaleManagerBackupRestoreTest {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         HashMap<String, String> pkgLocalesMap = new HashMap<>();
 
-        String pkgNameA = "com.android.myAppA", pkgNameB = "com.android.myAppB", pkgNameC =
-                "com.android.myAppC";
-        String langTagsA = "ru", langTagsB = "hi,fr", langTagsC = "zh,es";
+        String pkgNameA = "com.android.myAppA";
+        String pkgNameB = "com.android.myAppB";
+        String pkgNameC = "com.android.myAppC";
+        String langTagsA = "ru";
+        String langTagsB = "hi,fr";
+        String langTagsC = "zh,es";
         pkgLocalesMap.put(pkgNameA, langTagsA);
         pkgLocalesMap.put(pkgNameB, langTagsB);
         pkgLocalesMap.put(pkgNameC, langTagsC);
@@ -328,8 +328,8 @@ public class LocaleManagerBackupRestoreTest {
         // App C is staged.
         pkgLocalesMap.remove(pkgNameA);
         pkgLocalesMap.remove(pkgNameB);
-        verifyStageFileContent(pkgLocalesMap, getStageFileIfExists(DEFAULT_USER_ID),
-                DEFAULT_CREATION_TIME_MILLIS);
+        verifyStageDataForUser(pkgLocalesMap,
+                DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
     }
 
     @Test
@@ -341,15 +341,15 @@ public class LocaleManagerBackupRestoreTest {
 
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
-        verifyStageFileContent(DEFAULT_PACKAGE_LOCALES_MAP, getStageFileIfExists(DEFAULT_USER_ID),
-                DEFAULT_CREATION_TIME_MILLIS);
+        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_MAP,
+                DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
 
         final long newCreationTime = DEFAULT_CREATION_TIME_MILLIS + 100;
         setCurrentTimeMillis(newCreationTime);
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
-        verifyStageFileContent(DEFAULT_PACKAGE_LOCALES_MAP, getStageFileIfExists(DEFAULT_USER_ID),
-                newCreationTime);
+        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_MAP,
+                newCreationTime, DEFAULT_USER_ID);
     }
 
     @Test
@@ -357,8 +357,10 @@ public class LocaleManagerBackupRestoreTest {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         HashMap<String, String> pkgLocalesMap = new HashMap<>();
 
-        String pkgNameA = "com.android.myAppA", pkgNameB = "com.android.myAppB";
-        String langTagsA = "ru", langTagsB = "hi,fr";
+        String pkgNameA = "com.android.myAppA";
+        String pkgNameB = "com.android.myAppB";
+        String langTagsA = "ru";
+        String langTagsB = "hi,fr";
         pkgLocalesMap.put(pkgNameA, langTagsA);
         pkgLocalesMap.put(pkgNameB, langTagsB);
         writeTestPayload(out, pkgLocalesMap);
@@ -380,8 +382,7 @@ public class LocaleManagerBackupRestoreTest {
                 LocaleList.forLanguageTags(langTagsA));
 
         pkgLocalesMap.remove(pkgNameA);
-        verifyStageFileContent(pkgLocalesMap, getStageFileIfExists(DEFAULT_USER_ID),
-                DEFAULT_CREATION_TIME_MILLIS);
+        verifyStageDataForUser(pkgLocalesMap, DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
 
         setUpPackageInstalled(pkgNameB);
 
@@ -389,7 +390,7 @@ public class LocaleManagerBackupRestoreTest {
 
         verify(mMockLocaleManagerService, times(1)).setApplicationLocales(pkgNameB, DEFAULT_USER_ID,
                 LocaleList.forLanguageTags(langTagsB));
-        checkStageFileDoesNotExist(DEFAULT_USER_ID);
+        checkStageDataDoesNotExist(DEFAULT_USER_ID);
     }
 
     @Test
@@ -404,8 +405,8 @@ public class LocaleManagerBackupRestoreTest {
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
         verifyNothingRestored();
-        verifyStageFileContent(DEFAULT_PACKAGE_LOCALES_MAP, getStageFileIfExists(DEFAULT_USER_ID),
-                DEFAULT_CREATION_TIME_MILLIS);
+        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_MAP,
+                DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
 
         // App is installed later (post SUW).
         setUpPackageInstalled(DEFAULT_PACKAGE_NAME);
@@ -415,11 +416,11 @@ public class LocaleManagerBackupRestoreTest {
 
         // Since locales are already set, we should not restore anything for it.
         verifyNothingRestored();
-        checkStageFileDoesNotExist(DEFAULT_USER_ID);
+        checkStageDataDoesNotExist(DEFAULT_USER_ID);
     }
 
     @Test
-    public void testStageFileDeletion_backupPassRunAfterRetentionPeriod_stageFileDeleted()
+    public void testStageDataDeletion_backupPassRunAfterRetentionPeriod_stageDataDeleted()
             throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_MAP);
@@ -429,8 +430,8 @@ public class LocaleManagerBackupRestoreTest {
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
         verifyNothingRestored();
-        verifyStageFileContent(DEFAULT_PACKAGE_LOCALES_MAP, getStageFileIfExists(DEFAULT_USER_ID),
-                DEFAULT_CREATION_TIME_MILLIS);
+        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_MAP,
+                DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
 
         // Retention period has not elapsed.
         setCurrentTimeMillis(
@@ -439,32 +440,78 @@ public class LocaleManagerBackupRestoreTest {
                 .getInstalledApplications(anyLong(), anyInt(), anyInt());
         assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
 
-        // Stage file should NOT be deleted.
-        checkStageFileExists(DEFAULT_USER_ID);
+        checkStageDataExists(DEFAULT_USER_ID);
 
-        // Exactly RETENTION_PERIOD amount of time has passed so stage file should still not be
+        // Exactly RETENTION_PERIOD amount of time has passed so stage data should still not be
         // removed.
         setCurrentTimeMillis(DEFAULT_CREATION_TIME_MILLIS + RETENTION_PERIOD.toMillis());
         doReturn(List.of()).when(mMockPackageManagerInternal)
                 .getInstalledApplications(anyLong(), anyInt(), anyInt());
         assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
 
-        // Stage file should NOT be deleted.
-        checkStageFileExists(DEFAULT_USER_ID);
+        checkStageDataExists(DEFAULT_USER_ID);
 
-        // Retention period has now expired, stage file should be deleted.
+        // Retention period has now expired, stage data should be deleted.
         setCurrentTimeMillis(
                 DEFAULT_CREATION_TIME_MILLIS + RETENTION_PERIOD.plusSeconds(1).toMillis());
         doReturn(List.of()).when(mMockPackageManagerInternal)
                 .getInstalledApplications(anyLong(), anyInt(), anyInt());
         assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
 
-        // Stage file should be deleted.
-        checkStageFileDoesNotExist(DEFAULT_USER_ID);
+        checkStageDataDoesNotExist(DEFAULT_USER_ID);
     }
 
     @Test
-    public void testUserRemoval_userRemoved_stageFileDeleted() throws Exception {
+    public void testStageDataDeletion_lazyRestoreAfterRetentionPeriod_stageDataDeleted()
+            throws Exception {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        HashMap<String, String> pkgLocalesMap = new HashMap<>();
+
+        String pkgNameA = "com.android.myAppA";
+        String pkgNameB = "com.android.myAppB";
+        String langTagsA = "ru";
+        String langTagsB = "hi,fr";
+        pkgLocalesMap.put(pkgNameA, langTagsA);
+        pkgLocalesMap.put(pkgNameB, langTagsB);
+        writeTestPayload(out, pkgLocalesMap);
+
+        setUpPackageNotInstalled(pkgNameA);
+        setUpPackageNotInstalled(pkgNameB);
+        setUpLocalesForPackage(pkgNameA, LocaleList.getEmptyLocaleList());
+        setUpLocalesForPackage(pkgNameB, LocaleList.getEmptyLocaleList());
+
+        mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
+
+        verifyNothingRestored();
+        verifyStageDataForUser(pkgLocalesMap, DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
+
+        // Retention period has not elapsed.
+        setCurrentTimeMillis(
+                DEFAULT_CREATION_TIME_MILLIS + RETENTION_PERIOD.minusHours(1).toMillis());
+
+        setUpPackageInstalled(pkgNameA);
+        mPackageMonitor.onPackageAdded(pkgNameA, DEFAULT_UID);
+
+        verify(mMockLocaleManagerService, times(1)).setApplicationLocales(pkgNameA, DEFAULT_USER_ID,
+                LocaleList.forLanguageTags(langTagsA));
+
+        pkgLocalesMap.remove(pkgNameA);
+        verifyStageDataForUser(pkgLocalesMap, DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
+
+        // Retention period has now expired, stage data should be deleted.
+        setCurrentTimeMillis(
+                DEFAULT_CREATION_TIME_MILLIS + RETENTION_PERIOD.plusSeconds(1).toMillis());
+        setUpPackageInstalled(pkgNameB);
+        mPackageMonitor.onPackageAdded(pkgNameB, DEFAULT_UID);
+
+        verify(mMockLocaleManagerService, times(0)).setApplicationLocales(eq(pkgNameB), anyInt(),
+                any());
+
+        checkStageDataDoesNotExist(DEFAULT_USER_ID);
+    }
+
+    @Test
+    public void testUserRemoval_userRemoved_stageDataDeleted() throws Exception {
         final ByteArrayOutputStream outDefault = new ByteArrayOutputStream();
         writeTestPayload(outDefault, DEFAULT_PACKAGE_LOCALES_MAP);
 
@@ -485,119 +532,20 @@ public class LocaleManagerBackupRestoreTest {
 
         verifyNothingRestored();
 
-        // Verify stage file contents.
-        AtomicFile stageFileDefaultUser = getStageFileIfExists(DEFAULT_USER_ID);
-        verifyStageFileContent(DEFAULT_PACKAGE_LOCALES_MAP, stageFileDefaultUser,
-                DEFAULT_CREATION_TIME_MILLIS);
-
-        AtomicFile stageFileWorkProfile = getStageFileIfExists(WORK_PROFILE_USER_ID);
-        verifyStageFileContent(pkgLocalesMapWorkProfile, stageFileWorkProfile,
-                DEFAULT_CREATION_TIME_MILLIS);
+        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_MAP,
+                DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
+        verifyStageDataForUser(pkgLocalesMapWorkProfile,
+                DEFAULT_CREATION_TIME_MILLIS, WORK_PROFILE_USER_ID);
 
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_USER_REMOVED);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, DEFAULT_USER_ID);
         mUserMonitor.onReceive(mMockContext, intent);
 
-        // Stage file should be removed only for DEFAULT_USER_ID.
-        checkStageFileDoesNotExist(DEFAULT_USER_ID);
-        verifyStageFileContent(pkgLocalesMapWorkProfile, stageFileWorkProfile,
-                DEFAULT_CREATION_TIME_MILLIS);
-    }
-
-    @Test
-    public void testLoadStageFiles_invalidNameFormat_stageFileDeleted() throws Exception {
-        // Stage file name should be : staged_locales_<user_id_int>.xml
-        File stageFile = new File(STAGED_LOCALES_DIR, "xyz.xml");
-        assertTrue(stageFile.createNewFile());
-        assertTrue(stageFile.isFile());
-
-        // Putting valid xml data in file.
-        FileOutputStream out = new FileOutputStream(stageFile);
-        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_MAP, /* forStage= */
-                true, /* creationTimeMillis= */ 0);
-        out.flush();
-        out.close();
-
-        verifyStageFileContent(DEFAULT_PACKAGE_LOCALES_MAP,
-                new AtomicFile(stageFile), /* creationTimeMillis= */ 0);
-
-        mBackupHelper = new LocaleManagerBackupHelper(mMockContext, mMockLocaleManagerService,
-                mMockPackageManagerInternal, STAGED_LOCALES_DIR, mClock);
-        assertFalse(stageFile.isFile());
-    }
-
-    @Test
-    public void testLoadStageFiles_userIdNotParseable_stageFileDeleted() throws Exception {
-        // Stage file name should be : staged_locales_<user_id_int>.xml
-        File stageFile = new File(STAGED_LOCALES_DIR, "staged_locales_abc.xml");
-        assertTrue(stageFile.createNewFile());
-        assertTrue(stageFile.isFile());
-
-        // Putting valid xml data in file.
-        FileOutputStream out = new FileOutputStream(stageFile);
-        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_MAP, /* forStage= */
-                true, /* creationTimeMillis= */ 0);
-        out.flush();
-        out.close();
-
-        verifyStageFileContent(DEFAULT_PACKAGE_LOCALES_MAP,
-                new AtomicFile(stageFile), /* creationTimeMillis= */ 0);
-
-        mBackupHelper = new LocaleManagerBackupHelper(mMockContext, mMockLocaleManagerService,
-                mMockPackageManagerInternal, STAGED_LOCALES_DIR, mClock);
-        assertFalse(stageFile.isFile());
-    }
-
-    @Test
-    public void testLoadStageFiles_invalidContent_stageFileDeleted() throws Exception {
-        File stageFile = new File(STAGED_LOCALES_DIR, "staged_locales_0.xml");
-        assertTrue(stageFile.createNewFile());
-        assertTrue(stageFile.isFile());
-
-        FileOutputStream out = new FileOutputStream(stageFile);
-        out.write("some_non_xml_string".getBytes());
-        out.close();
-
-        mBackupHelper = new LocaleManagerBackupHelper(mMockContext, mMockLocaleManagerService,
-                mMockPackageManagerInternal, STAGED_LOCALES_DIR, mClock);
-        assertFalse(stageFile.isFile());
-    }
-
-    @Test
-    public void testLoadStageFiles_validContent_doesLazyRestore() throws Exception {
-        File stageFile = new File(STAGED_LOCALES_DIR, "staged_locales_0.xml");
-        assertTrue(stageFile.createNewFile());
-        assertTrue(stageFile.isFile());
-
-        // Putting valid xml data in file.
-        FileOutputStream out = new FileOutputStream(stageFile);
-        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_MAP, /* forStage= */
-                true, DEFAULT_CREATION_TIME_MILLIS);
-        out.flush();
-        out.close();
-
-        verifyStageFileContent(DEFAULT_PACKAGE_LOCALES_MAP,
-                new AtomicFile(stageFile), DEFAULT_CREATION_TIME_MILLIS);
-
-        mBackupHelper = new LocaleManagerBackupHelper(mMockContext, mMockLocaleManagerService,
-                mMockPackageManagerInternal, STAGED_LOCALES_DIR, mClock);
-        mPackageMonitor = mBackupHelper.getPackageMonitor();
-
-        // Stage file still exists.
-        assertTrue(stageFile.isFile());
-
-        // App is installed later.
-        setUpPackageInstalled(DEFAULT_PACKAGE_NAME);
-        setUpLocalesForPackage(DEFAULT_PACKAGE_NAME, LocaleList.getEmptyLocaleList());
-
-        mPackageMonitor.onPackageAdded(DEFAULT_PACKAGE_NAME, DEFAULT_UID);
-
-        verify(mMockLocaleManagerService, times(1)).setApplicationLocales(DEFAULT_PACKAGE_NAME,
-                DEFAULT_USER_ID, DEFAULT_LOCALES);
-
-        // Stage file gets deleted here because all staged locales have been applied.
-        assertFalse(stageFile.isFile());
+        // Stage data should be removed only for DEFAULT_USER_ID.
+        checkStageDataDoesNotExist(DEFAULT_USER_ID);
+        verifyStageDataForUser(pkgLocalesMapWorkProfile,
+                DEFAULT_CREATION_TIME_MILLIS, WORK_PROFILE_USER_ID);
     }
 
     private void setUpPackageInstalled(String packageName) throws Exception {
@@ -633,15 +581,8 @@ public class LocaleManagerBackupRestoreTest {
                 any());
     }
 
-
     private static void verifyPayloadForAppLocales(Map<String, String> expectedPkgLocalesMap,
             byte[] payload)
-            throws IOException, XmlPullParserException {
-        verifyPayloadForAppLocales(expectedPkgLocalesMap, payload, /* forStage= */ false, -1);
-    }
-
-    private static void verifyPayloadForAppLocales(Map<String, String> expectedPkgLocalesMap,
-            byte[] payload, boolean forStage, long expectedCreationTime)
             throws IOException, XmlPullParserException {
         final ByteArrayInputStream stream = new ByteArrayInputStream(payload);
         final TypedXmlPullParser parser = Xml.newFastPullParser();
@@ -649,11 +590,6 @@ public class LocaleManagerBackupRestoreTest {
 
         Map<String, String> backupDataMap = new HashMap<>();
         XmlUtils.beginDocument(parser, TEST_LOCALES_XML_TAG);
-        if (forStage) {
-            long actualCreationTime = parser.getAttributeLong(/* namespace= */ null,
-                    "creationTimeMillis");
-            assertEquals(expectedCreationTime, actualCreationTime);
-        }
         int depth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, depth)) {
             if (parser.getName().equals("package")) {
@@ -668,13 +604,6 @@ public class LocaleManagerBackupRestoreTest {
 
     private static void writeTestPayload(OutputStream stream, Map<String, String> pkgLocalesMap)
             throws IOException {
-        writeTestPayload(stream, pkgLocalesMap, /* forStage= */ false, /* creationTimeMillis= */
-                -1);
-    }
-
-    private static void writeTestPayload(OutputStream stream, Map<String, String> pkgLocalesMap,
-            boolean forStage, long creationTimeMillis)
-            throws IOException {
         if (pkgLocalesMap.isEmpty()) {
             return;
         }
@@ -683,11 +612,6 @@ public class LocaleManagerBackupRestoreTest {
         out.setOutput(stream, StandardCharsets.UTF_8.name());
         out.startDocument(/* encoding= */ null, /* standalone= */ true);
         out.startTag(/* namespace= */ null, TEST_LOCALES_XML_TAG);
-
-        if (forStage) {
-            out.attribute(/* namespace= */ null, "creationTimeMillis",
-                    Long.toString(creationTimeMillis));
-        }
 
         for (String pkg : pkgLocalesMap.keySet()) {
             out.startTag(/* namespace= */ null, "package");
@@ -700,41 +624,19 @@ public class LocaleManagerBackupRestoreTest {
         out.endDocument();
     }
 
-    private static void verifyStageFileContent(Map<String, String> expectedPkgLocalesMap,
-            AtomicFile stageFile,
-            long creationTimeMillis)
-            throws Exception {
-        assertNotNull(stageFile);
-        try (InputStream stagedDataInputStream = stageFile.openRead()) {
-            verifyPayloadForAppLocales(expectedPkgLocalesMap, stagedDataInputStream.readAllBytes(),
-                    /* forStage= */ true, creationTimeMillis);
-        } catch (IOException | XmlPullParserException e) {
-            throw e;
-        }
+    private void verifyStageDataForUser(Map<String, String> expectedPkgLocalesMap,
+            long expectedCreationTimeMillis, int userId) {
+        LocaleManagerBackupHelper.StagedData stagedDataForUser = STAGE_DATA.get(userId);
+        assertNotNull(stagedDataForUser);
+        assertEquals(expectedCreationTimeMillis, stagedDataForUser.mCreationTimeMillis);
+        assertEquals(expectedPkgLocalesMap, stagedDataForUser.mPackageStates);
     }
 
-    private static void checkStageFileDoesNotExist(int userId) {
-        assertNull(getStageFileIfExists(userId));
+    private static void checkStageDataExists(int userId) {
+        assertNotNull(STAGE_DATA.get(userId));
     }
 
-    private static void checkStageFileExists(int userId) {
-        assertNotNull(getStageFileIfExists(userId));
-    }
-
-    private static AtomicFile getStageFileIfExists(int userId) {
-        File file = new File(STAGED_LOCALES_DIR, String.format("staged_locales_%d.xml", userId));
-        if (file.isFile()) {
-            return new AtomicFile(file);
-        }
-        return null;
-    }
-
-    private static void cleanStagedFiles() {
-        File[] files = STAGED_LOCALES_DIR.listFiles();
-        if (files != null) {
-            for (File f : files) {
-                f.delete();
-            }
-        }
+    private static void checkStageDataDoesNotExist(int userId) {
+        assertNull(STAGE_DATA.get(userId));
     }
 }

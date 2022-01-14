@@ -113,6 +113,7 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -2167,6 +2168,11 @@ class ContextImpl extends Context {
             return PERMISSION_DENIED;
         }
         return checkPermission(permission, pid, uid);
+    }
+
+    @Override
+    public void selfRevokePermissions(@NonNull Collection<String> permissions) {
+        getSystemService(PermissionManager.class).selfRevokePermissions(permissions);
     }
 
     @Override

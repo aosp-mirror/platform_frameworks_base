@@ -23,7 +23,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -209,8 +209,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         when(mMockProvisionController.isCurrentUserSetup()).thenReturn(true);
         doAnswer(invocation -> {
             mUserCallback = (DeviceProvisionedListener) invocation.getArguments()[0];
-            mUserCallback.onUserSetupChanged();
-            mUserCallback.onDeviceProvisionedChanged();
             TestableLooper.get(this).processAllMessages();
             return null;
         }).when(mMockProvisionController).addCallback(any());

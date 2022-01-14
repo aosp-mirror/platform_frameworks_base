@@ -3435,7 +3435,8 @@ public class StatsPullAtomService extends SystemService {
                     convertTimeZoneSuggestionToProtoBytes(
                             metricsState.getLatestTelephonySuggestion()),
                     convertTimeZoneSuggestionToProtoBytes(
-                            metricsState.getLatestGeolocationSuggestion())
+                            metricsState.getLatestGeolocationSuggestion()),
+                    metricsState.isTelephonyTimeZoneFallbackSupported()
             ));
         } catch (RuntimeException e) {
             Slog.e(TAG, "Getting time zone detection state failed: ", e);

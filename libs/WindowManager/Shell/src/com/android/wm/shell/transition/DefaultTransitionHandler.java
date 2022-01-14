@@ -282,7 +282,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final Runnable onAnimFinish = () -> {
             if (!animations.isEmpty()) return;
 
-            rotator.cleanUp();
             if (mRotationAnimation != null) {
                 mRotationAnimation.kill();
                 mRotationAnimation = null;
@@ -382,6 +381,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
 
         startTransaction.apply();
+        rotator.cleanUp(finishTransaction);
         TransitionMetrics.getInstance().reportAnimationStart(transition);
         // run finish now in-case there are no animations
         onAnimFinish.run();

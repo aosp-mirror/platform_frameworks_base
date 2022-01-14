@@ -70,19 +70,28 @@ public class ScreenshotActionChip extends FrameLayout {
         super.setPressed(mIsPending || pressed);
     }
 
-    void setIcon(Icon icon, boolean tint) {
+    /**
+     * Set chip icon and whether to tint with theme color
+     */
+    public void setIcon(Icon icon, boolean tint) {
         mIconView.setImageIcon(icon);
         if (!tint) {
             mIconView.setImageTintList(null);
         }
     }
 
-    void setText(CharSequence text) {
+    /**
+     * Set chip text
+     */
+    public void setText(CharSequence text) {
         mTextView.setText(text);
         updatePadding(text.length() > 0);
     }
 
-    void setPendingIntent(PendingIntent intent, Runnable finisher) {
+    /**
+     * Set PendingIntent to be sent and Runnable to be run, when chip is clicked
+     */
+    public void setPendingIntent(PendingIntent intent, Runnable finisher) {
         setOnClickListener(v -> {
             try {
                 intent.send();
@@ -93,7 +102,10 @@ public class ScreenshotActionChip extends FrameLayout {
         });
     }
 
-    void setIsPending(boolean isPending) {
+    /**
+     * Set pressed state of chip (to be used when chip is clicked before underlying intent is ready)
+     */
+    public void setIsPending(boolean isPending) {
         mIsPending = isPending;
         setPressed(mIsPending);
     }

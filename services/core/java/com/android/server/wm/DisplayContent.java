@@ -218,7 +218,6 @@ import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
-import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
@@ -1425,7 +1424,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mWaitingForConfig = true;
             if (mTransitionController.isShellTransitionsEnabled()) {
                 requestChangeTransitionIfNeeded(changes, null /* displayChange */);
-            } else {
+            } else if (mLastHasContent) {
                 mWmService.startFreezingDisplay(0 /* exitAnim */, 0 /* enterAnim */, this);
             }
             sendNewConfiguration();
@@ -1702,8 +1701,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             case SOFT_INPUT_STATE_HIDDEN:
                 return false;
         }
-        return r.mLastImeShown && mInputMethodWindow != null && mInputMethodWindow.mHasSurface
-                && mInputMethodWindow.mViewVisibility == View.VISIBLE;
+        return r.mLastImeShown;
     }
 
     /** Returns {@code true} if the top activity is transformed with the new rotation of display. */
@@ -3222,6 +3220,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     void requestChangeTransitionIfNeeded(@ActivityInfo.Config int changes,
             @Nullable TransitionRequestInfo.DisplayChange displayChange) {
+        if (!mLastHasContent) return;
         final TransitionController controller = mTransitionController;
         if (controller.isCollecting()) {
             if (displayChange != null) {
@@ -5090,6 +5089,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mLastHasContent;
     }
 
+    @VisibleForTesting
+    void setLastHasContent() {
+        mLastHasContent = true;
+    }
+
     void registerPointerEventListener(@NonNull PointerEventListener listener) {
         mPointerEventDispatcher.registerInputEventListener(listener);
     }
@@ -6460,9 +6464,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     DisplayArea findAreaForWindowType(int windowType, Bundle options,
             boolean ownerCanManageAppToken, boolean roundedCornerOverlay) {
-        // TODO(b/159767464): figure out how to find an appropriate TDA.
         if (windowType >= FIRST_APPLICATION_WINDOW && windowType <= LAST_APPLICATION_WINDOW) {
-            return getDefaultTaskDisplayArea();
+            return mDisplayAreaPolicy.getTaskDisplayArea(options);
         }
         // Return IME container here because it could be in one of sub RootDisplayAreas depending on
         // the focused edit text. Also, the RootDisplayArea choosing strategy is implemented by

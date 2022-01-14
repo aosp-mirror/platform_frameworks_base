@@ -24,8 +24,6 @@ import static android.view.SurfaceControl.JankData.JANK_SURFACEFLINGER_GPU_DEADL
 import static android.view.SurfaceControl.JankData.PREDICTION_ERROR;
 import static android.view.SurfaceControl.JankData.SURFACE_FLINGER_SCHEDULING;
 
-import static com.android.internal.jank.InteractionJankMonitor.ACTION_METRICS_LOGGED;
-import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_BEGIN;
 import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_CANCEL;
 import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_END;
 
@@ -241,7 +239,6 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             if (!mSurfaceOnly) {
                 mRendererWrapper.addObserver(mObserver);
             }
-            notifyCujEvent(ACTION_SESSION_BEGIN);
         }
     }
 
@@ -523,7 +520,6 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                     maxFrameTimeNanos, /* will be 0 if mSurfaceOnly == true */
                     missedSfFramesCount,
                     missedAppFramesCount);
-            notifyCujEvent(ACTION_METRICS_LOGGED);
         }
         if (DEBUG) {
             Log.i(TAG, "finish: CUJ=" + mSession.getName()

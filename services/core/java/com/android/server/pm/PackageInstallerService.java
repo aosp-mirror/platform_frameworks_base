@@ -331,7 +331,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 StagingManager.StagedSession stagedSession = session.mStagedSession;
                 if (!stagedSession.isInTerminalState() && stagedSession.hasParentSessionId()
                         && getSession(stagedSession.getParentSessionId()) == null) {
-                    stagedSession.setSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                    stagedSession.setSessionFailed(SessionInfo.SESSION_ACTIVATION_FAILED,
                             "An orphan staged session " + stagedSession.sessionId() + " is found, "
                                 + "parent " + stagedSession.getParentSessionId() + " is missing");
                     continue;
@@ -843,7 +843,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 mSilentUpdatePolicy, mInstallThread.getLooper(), mStagingManager, sessionId,
                 userId, callingUid, installSource, params, createdMillis, 0L, stageDir, stageCid,
                 null, null, false, false, false, false, null, SessionInfo.INVALID_ID,
-                false, false, false, SessionInfo.STAGED_SESSION_NO_ERROR, "");
+                false, false, false, SessionInfo.SESSION_NO_ERROR, "");
 
         synchronized (mSessions) {
             mSessions.put(sessionId, session);

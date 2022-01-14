@@ -1348,7 +1348,7 @@ public class BubbleController {
 
         mStackView.updateContentDescription();
 
-        mStackView.updateBubblesClickableStates();
+        mStackView.updateBubblesAcessibillityStates();
     }
 
     @VisibleForTesting

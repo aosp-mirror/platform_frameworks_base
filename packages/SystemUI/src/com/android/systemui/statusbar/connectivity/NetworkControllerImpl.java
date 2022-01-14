@@ -334,6 +334,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 setUserSetupComplete(deviceProvisionedController.isCurrentUserSetup());
             }
         });
+        // Get initial user setup state
+        setUserSetupComplete(deviceProvisionedController.isCurrentUserSetup());
 
         WifiManager.ScanResultsCallback scanResultsCallback =
                 new WifiManager.ScanResultsCallback() {
@@ -994,6 +996,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     @VisibleForTesting
+    boolean isUserSetup() {
+        return mUserSetup;
+    }
+
+    @VisibleForTesting
     boolean hasCorrectMobileControllers(List<SubscriptionInfo> allSubscriptions) {
         if (allSubscriptions.size() != mMobileSignalControllers.size()) {
             return false;
@@ -1137,6 +1144,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     /** */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NetworkController state:");
+        pw.println("  mUserSetup=" + mUserSetup);
 
         pw.println("  - telephony ------");
         pw.print("  hasVoiceCallingFeature()=");

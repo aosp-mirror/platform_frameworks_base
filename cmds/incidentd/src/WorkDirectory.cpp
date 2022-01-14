@@ -533,7 +533,7 @@ status_t ReportFile::load_envelope_impl(bool cleanup) {
 WorkDirectory::WorkDirectory()
         :mDirectory("/data/misc/incidents"),
          mMaxFileCount(100),
-         mMaxDiskUsageBytes(100 * 1024 * 1024) {  // Incident reports can take up to 100MB on disk.
+         mMaxDiskUsageBytes(400 * 1024 * 1024) {  // Incident reports can take up to 400MB on disk.
                                                  // TODO: Should be a flag.
     create_directory(mDirectory.c_str());
 }

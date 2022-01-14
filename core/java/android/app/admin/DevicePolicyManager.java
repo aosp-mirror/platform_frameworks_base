@@ -488,8 +488,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    // TODO(b/208628038): Uncomment when the permission is in place
-    //  @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_ROLE_HOLDER)
+    @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @SystemApi
     public static final String ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE =
@@ -535,8 +534,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    // TODO(b/208628038): Uncomment when the permission is in place
-    //  @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_ROLE_HOLDER)
+    @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @SystemApi
     public static final String ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE =
@@ -561,8 +559,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    // TODO(b/208628038): Uncomment when the permission is in place
-    //  @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_ROLE_HOLDER)
+    @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @SystemApi
     public static final String ACTION_ROLE_HOLDER_PROVISION_FINALIZATION =
@@ -2859,8 +2856,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    // TODO(b/208628038): Uncomment when the permission is in place
-    //  @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_ROLE_HOLDER)
+    @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @SystemApi
     public static final String ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER =

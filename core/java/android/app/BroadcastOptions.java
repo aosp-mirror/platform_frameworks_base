@@ -430,8 +430,8 @@ public class BroadcastOptions extends ComponentOptions {
      * permissions set by {@link #setRequireAllOfPermissions(String[])}, and none of the
      * permissions set by {@link #setRequireNoneOfPermissions(String[])} to get the broadcast.
      *
-     * @param requiredPermissions a list of Strings of permission the receiver must have, or null
-     *                            to clear any previously set value.
+     * @param requiredPermissions a list of Strings of permission the receiver must have. Set to
+     *                            null or an empty array to clear any previously set value.
      * @hide
      */
     @SystemApi
@@ -449,8 +449,8 @@ public class BroadcastOptions extends ComponentOptions {
      * permissions set by {@link #setRequireAllOfPermissions(String[])}, and none of the
      * permissions set by {@link #setRequireNoneOfPermissions(String[])} to get the broadcast.
      *
-     * @param excludedPermissions a list of Strings of permission the receiver must not have,
-     *                            or null to clear any previously set value.
+     * @param excludedPermissions a list of Strings of permission the receiver must not have. Set to
+     *                            null or an empty array to clear any previously set value.
      * @hide
      */
     @SystemApi

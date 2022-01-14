@@ -16,14 +16,20 @@
 
 package com.android.server.companion.virtual;
 
+import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_ENABLED;
+import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
+import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.annotation.NonNull;
+import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
 import android.graphics.Point;
+import android.hardware.display.DisplayManager;
 import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
@@ -32,6 +38,9 @@ import android.hardware.input.VirtualTouchEvent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.util.ArraySet;
 import android.util.SparseArray;
 import android.window.DisplayWindowPolicyController;
 
@@ -56,6 +65,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     final List<Integer> mVirtualDisplayIds = new ArrayList<>();
     private final OnDeviceCloseListener mListener;
     private final IBinder mAppToken;
+    private final VirtualDeviceParams mParams;
 
     /**
      * A mapping from the virtual display ID to its corresponding
@@ -65,17 +75,21 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             new SparseArray<>();
 
     VirtualDeviceImpl(Context context, AssociationInfo associationInfo,
-            IBinder token, int ownerUid, OnDeviceCloseListener listener) {
-        this(context, associationInfo, token, ownerUid, /* inputController= */ null, listener);
+            IBinder token, int ownerUid, OnDeviceCloseListener listener,
+            VirtualDeviceParams params) {
+        this(context, associationInfo, token, ownerUid, /* inputController= */ null, listener,
+                params);
     }
 
     @VisibleForTesting
     VirtualDeviceImpl(Context context, AssociationInfo associationInfo, IBinder token,
-            int ownerUid, InputController inputController, OnDeviceCloseListener listener) {
+            int ownerUid, InputController inputController, OnDeviceCloseListener listener,
+            VirtualDeviceParams params) {
         mContext = context;
         mAssociationInfo = associationInfo;
         mOwnerUid = ownerUid;
         mAppToken = token;
+        mParams = params;
         if (inputController == null) {
             mInputController = new InputController(mVirtualDeviceLock);
         } else {
@@ -89,7 +103,19 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
-    @Override
+    /**
+     * Returns the flags that should be added to any virtual displays created on this virtual
+     * device.
+     */
+    int getBaseVirtualDisplayFlags() {
+        int flags = 0;
+        if (mParams.getLockState() == VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED) {
+            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
+        }
+        return flags;
+    }
+
+    @Override // Binder call
     public int getAssociationId() {
         return mAssociationInfo.getId();
     }
@@ -267,9 +293,27 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mVirtualDisplayIds.add(displayId);
         final GenericWindowPolicyController dwpc =
                 new GenericWindowPolicyController(FLAG_SECURE,
-                        SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+                        SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, getAllowedUserHandles());
         mWindowPolicyControllers.put(displayId, dwpc);
         return dwpc;
+    }
+
+    private ArraySet<UserHandle> getAllowedUserHandles() {
+        ArraySet<UserHandle> result = new ArraySet<>();
+        DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        for (UserHandle profile : userManager.getAllProfiles()) {
+            int nearbyAppStreamingPolicy = dpm.getNearbyAppStreamingPolicy(profile.getIdentifier());
+            if (nearbyAppStreamingPolicy == NEARBY_STREAMING_ENABLED
+                    || nearbyAppStreamingPolicy == NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY) {
+                result.add(profile);
+            } else if (nearbyAppStreamingPolicy == NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY) {
+                if (mParams.getUsersWithMatchingAccounts().contains(profile)) {
+                    result.add(profile);
+                }
+            }
+        }
+        return result;
     }
 
     void onVirtualDisplayRemovedLocked(int displayId) {

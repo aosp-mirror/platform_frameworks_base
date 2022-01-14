@@ -53,6 +53,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -1012,6 +1013,11 @@ public class ContextWrapper extends Context {
         mBase.enforceUriPermission(
                 uri, readPermission, writePermission, pid, uid, modeFlags,
                 message);
+    }
+
+    @Override
+    public void selfRevokePermissions(@NonNull Collection<String> permissions) {
+        mBase.selfRevokePermissions(permissions);
     }
 
     @Override

@@ -264,6 +264,13 @@ final class InputMethodBindingController {
     }
 
     /**
+     * Returns {@code true} if current IME supports Stylus Handwriting.
+     */
+    boolean supportsStylusHandwriting() {
+        return mSupportsStylusHw;
+    }
+
+    /**
      * Used to bring IME service up to visible adjustment while it is being shown.
      */
     @GuardedBy("ImfLock.class")
@@ -302,15 +309,17 @@ final class InputMethodBindingController {
                         return;
                     }
                     if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
+                    final InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
+                    mSupportsStylusHw = info.supportsStylusHandwriting();
                     // Dispatch display id for InputMethodService to update context display.
                     mService.executeOrSendMessage(mCurMethod,
-                            mService.mCaller.obtainMessageIOO(MSG_INITIALIZE_IME,
-                                    mMethodMap.get(mSelectedMethodId).getConfigChanges(),
-                                    mCurMethod, mCurToken));
+                            mService.mCaller.obtainMessageIOOO(MSG_INITIALIZE_IME,
+                                    info.getConfigChanges(), mCurMethod, mCurToken,
+                                    mSupportsStylusHw));
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
                     mService.reRequestCurrentClientSessionLocked();
                 }
-                mSupportsStylusHw = mMethodMap.get(mSelectedMethodId).supportsStylusHandwriting();
+
                 if (mSupportsStylusHw) {
                     // TODO init Handwriting spy.
                 }

@@ -66,8 +66,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
-    fun moveCloserToTransfer_appIcon_chipTextContainsDeviceName_noLoadingIcon_noUndo() {
-        controllerSender.displayChip(moveCloserToTransfer())
+    fun moveCloserToStartCast_appIcon_chipTextContainsDeviceName_noLoadingIcon_noUndo() {
+        controllerSender.displayChip(moveCloserToStartCast())
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
@@ -192,8 +192,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
-    fun changeFromCloserToTransferToTransferInitiated_loadingIconAppears() {
-        controllerSender.displayChip(moveCloserToTransfer())
+    fun changeFromCloserToStartToTransferInitiated_loadingIconAppears() {
+        controllerSender.displayChip(moveCloserToStartCast())
         controllerSender.displayChip(transferInitiated())
 
         assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
@@ -216,9 +216,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
-    fun changeFromTransferSucceededToMoveCloser_undoButtonDisappears() {
+    fun changeFromTransferSucceededToMoveCloserToStart_undoButtonDisappears() {
         controllerSender.displayChip(transferSucceeded())
-        controllerSender.displayChip(moveCloserToTransfer())
+        controllerSender.displayChip(moveCloserToStartCast())
 
         assertThat(getChipView().getUndoButton().visibility).isEqualTo(View.GONE)
     }
@@ -240,8 +240,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     /** Helper method providing default parameters to not clutter up the tests. */
-    private fun moveCloserToTransfer() =
-        MoveCloserToTransfer(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
+    private fun moveCloserToStartCast() =
+        MoveCloserToStartCast(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferInitiated(
