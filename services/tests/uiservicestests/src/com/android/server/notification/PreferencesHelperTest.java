@@ -542,6 +542,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.setInvalidMessageSent(PKG_P, UID_P);
         mHelper.setValidMessageSent(PKG_P, UID_P);
         mHelper.setInvalidMsgAppDemoted(PKG_P, UID_P, true);
+        mHelper.setValidBubbleSent(PKG_P, UID_P);
 
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_NONE);
 
@@ -561,6 +562,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertFalse(mHelper.hasSentInvalidMsg(PKG_N_MR1, UID_N_MR1));
         assertTrue(mHelper.hasSentValidMsg(PKG_P, UID_P));
         assertTrue(mHelper.didUserEverDemoteInvalidMsgApp(PKG_P, UID_P));
+        assertTrue(mHelper.hasSentValidBubble(PKG_P, UID_P));
         assertEquals(channel1,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1.getId(), false));
         compareChannels(channel2,
@@ -4924,6 +4926,18 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // and is invalid once complete msgs are sent
         mHelper.setValidMessageSent(PKG_P, UID_P);
         assertFalse(mHelper.hasUserDemotedInvalidMsgApp(PKG_P, UID_P));
+    }
+
+    @Test
+    public void testValidBubbleSent() {
+        // create package preferences
+        mHelper.canShowBadge(PKG_P, UID_P);
+        // false by default
+        assertFalse(mHelper.hasSentValidBubble(PKG_P, UID_P));
+
+        // set something valid was sent
+        mHelper.setValidBubbleSent(PKG_P, UID_P);
+        assertTrue(mHelper.hasSentValidBubble(PKG_P, UID_P));
     }
 
     @Test

@@ -3094,6 +3094,13 @@ public class NotificationManagerService extends SystemService {
                 if (mPreferencesHelper.setValidMessageSent(
                         r.getSbn().getPackageName(), r.getUid())) {
                     handleSavePolicyFile();
+                } else if (r.getNotification().getBubbleMetadata() != null) {
+                    // If bubble metadata is present it is valid (if invalid it's removed
+                    // via BubbleExtractor).
+                    if (mPreferencesHelper.setValidBubbleSent(
+                            r.getSbn().getPackageName(), r.getUid())) {
+                        handleSavePolicyFile();
+                    }
                 }
             } else {
                 if (mPreferencesHelper.setInvalidMessageSent(
@@ -3594,6 +3601,12 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystem();
             mPreferencesHelper.setInvalidMsgAppDemoted(pkg, uid, isDemoted);
             handleSavePolicyFile();
+        }
+
+        @Override
+        public boolean hasSentValidBubble(String pkg, int uid) {
+            checkCallerIsSystem();
+            return mPreferencesHelper.hasSentValidBubble(pkg, uid);
         }
 
         @Override
