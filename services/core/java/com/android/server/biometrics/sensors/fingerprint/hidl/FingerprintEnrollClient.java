@@ -68,14 +68,15 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
 
         mEnrollReason = enrollReason;
         if (enrollReason == FingerprintManager.ENROLL_FIND_SENSOR) {
-            setShouldLog(false);
+            getLogger().disableMetrics();
         }
     }
 
     @NonNull
     @Override
     protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(createALSCallback(true /* startWithClient */), callback);
+        return new CompositeCallback(
+                getLogger().createALSCallback(true /* startWithClient */), callback);
     }
 
     @Override

@@ -23,7 +23,6 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.util.Slog;
 
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.BiometricsProto;
 
 import java.util.ArrayList;
@@ -116,10 +115,8 @@ public abstract class InternalEnumerateClient<T> extends HalClientMonitor<T>
                     + identifier.getBiometricId() + " " + identifier.getName());
             mUtils.removeBiometricForUser(getContext(),
                     getTargetUserId(), identifier.getBiometricId());
-            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
-                    mStatsModality,
-                    BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_FRAMEWORK,
-                    -1 /* sensorId */);
+
+            getLogger().logUnknownEnrollmentInFramework();
         }
         mEnrolledList.clear();
     }

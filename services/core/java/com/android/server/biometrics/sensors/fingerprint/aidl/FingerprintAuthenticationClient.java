@@ -33,6 +33,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.CallbackWithProbe;
+import com.android.server.biometrics.log.Probe;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -80,7 +82,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         mLockoutCache = lockoutCache;
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
         mSensorProps = sensorProps;
-        mALSProbeCallback = createALSCallback(false /* startWithClient */);
+        mALSProbeCallback = getLogger().createALSCallback(false /* startWithClient */);
     }
 
     @Override
@@ -233,7 +235,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_TIMED);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
-        logOnError(getContext(), error, 0 /* vendorCode */, getTargetUserId());
+        getLogger().logOnError(getContext(), error, 0 /* vendorCode */,
+                isCryptoOperation(), getTargetUserId());
 
         try {
             getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
@@ -251,7 +254,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_PERMANENT);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
-        logOnError(getContext(), error, 0 /* vendorCode */, getTargetUserId());
+        getLogger().logOnError(getContext(), error, 0 /* vendorCode */,
+                isCryptoOperation(), getTargetUserId());
 
         try {
             getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);

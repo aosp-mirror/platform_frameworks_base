@@ -26,7 +26,6 @@ import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.hardware.fingerprint.FingerprintStateListener;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Handler;
 import android.os.IBinder;
@@ -392,7 +391,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
             final ClientMonitorCallbackConverter listener = client.getListener();
             final String opPackageName = client.getOwnerString();
             final boolean restricted = authClient.isRestricted();
-            final int statsClient = client.getStatsClient();
+            final int statsClient = client.getLogger().getStatsClient();
             final boolean isKeyguard = authClient.isKeyguard();
 
             // Don't actually send cancel() to the HAL, since successful auth already finishes

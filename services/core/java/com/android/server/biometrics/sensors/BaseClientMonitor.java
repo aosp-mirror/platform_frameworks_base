@@ -25,18 +25,18 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.biometrics.log.BiometricLogger;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Abstract base class for keeping track and dispatching events from the biometric's HAL to the
+ * Abstract base class for keeping track and dispatching events from the biometric's HAL to
  * the current client.  Subclasses are responsible for coordinating the interaction with
  * the biometric's HAL for the specific action (e.g. authenticate, enroll, enumerate, etc.).
  */
-public abstract class BaseClientMonitor extends LoggableMonitor
-        implements IBinder.DeathRecipient {
+public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
 
     private static final String TAG = "Biometrics/ClientMonitor";
     protected static final boolean DEBUG = true;
@@ -107,6 +107,7 @@ public abstract class BaseClientMonitor extends LoggableMonitor
     private final int mTargetUserId;
     @NonNull private final String mOwner;
     private final int mSensorId; // sensorId as configured by the framework
+    @NonNull private final BiometricLogger mLogger;
 
     @Nullable private IBinder mToken;
     private long mRequestId;
@@ -159,7 +160,14 @@ public abstract class BaseClientMonitor extends LoggableMonitor
             @Nullable IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, int statsModality, int statsAction,
             int statsClient) {
-        super(context, statsModality, statsAction, statsClient);
+        this(context, token, listener, userId, owner, cookie, sensorId,
+                new BiometricLogger(context, statsModality, statsAction, statsClient));
+    }
+
+    @VisibleForTesting
+    BaseClientMonitor(@NonNull Context context,
+            @Nullable IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
+            @NonNull String owner, int cookie, int sensorId, @NonNull BiometricLogger logger) {
         mSequentialId = sCount++;
         mContext = context;
         mToken = token;
@@ -169,6 +177,7 @@ public abstract class BaseClientMonitor extends LoggableMonitor
         mOwner = owner;
         mCookie = cookie;
         mSensorId = sensorId;
+        mLogger = logger;
 
         try {
             if (token != null) {
@@ -177,10 +186,6 @@ public abstract class BaseClientMonitor extends LoggableMonitor
         } catch (RemoteException e) {
             Slog.w(TAG, "caught remote exception in linkToDeath: ", e);
         }
-    }
-
-    public int getCookie() {
-        return mCookie;
     }
 
     /**
@@ -255,6 +260,20 @@ public abstract class BaseClientMonitor extends LoggableMonitor
         }
     }
 
+    /**
+     * Only valid for AuthenticationClient.
+     * @return true if the client is authenticating for a crypto operation.
+     */
+    protected boolean isCryptoOperation() {
+        return false;
+    }
+
+    /** Logger for this client */
+    @NonNull
+    public BiometricLogger getLogger() {
+        return mLogger;
+    }
+
     public final Context getContext() {
         return mContext;
     }
@@ -277,6 +296,11 @@ public abstract class BaseClientMonitor extends LoggableMonitor
 
     public int getSensorId() {
         return mSensorId;
+    }
+
+    /** Cookie set when this monitor was created. */
+    public int getCookie() {
+        return mCookie;
     }
 
     /** Unique request id. */
