@@ -154,9 +154,9 @@
     <!-- Israel: 4 digits, known premium codes listed -->
     <shortcode country="il" pattern="\\d{4}" premium="4422|4545" />
 
-    <!-- Italy: 5 digits (premium=4xxxx), plus EU:
-         http://clients.txtnation.com/attachments/token/di5kfblvubttvlw/?name=Italy_CASP_EN.pdf -->
-    <shortcode country="it" pattern="\\d{5}" premium="4\\d{4}" free="116\\d{3}|4112503" standard="43\\d{3}" />
+    <!-- Italy: 5 digits (premium=41xxx,42xxx), plus EU:
+         https://www.itu.int/dms_pub/itu-t/oth/02/02/T020200006B0001PDFE.pdf -->
+    <shortcode country="it" pattern="\\d{5}" premium="4\\d{4}" free="116\\d{3}|4112503|40\\d{0,12}" standard="430\\d{2}|431\\d{2}|434\\d{4}|435\\d{4}|439\\d{7}" />
 
     <!-- Japan: 8083 used by SOFTBANK_DCB_2 -->
     <shortcode country="jp" pattern="\\d{1,5}" free="8083" />
