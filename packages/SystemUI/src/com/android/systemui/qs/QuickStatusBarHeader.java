@@ -241,10 +241,9 @@ public class QuickStatusBarHeader extends FrameLayout {
         boolean shouldUseSplitShade =
                 resources.getBoolean(R.bool.config_use_split_notification_shade);
 
-        mStatusIconsView.setVisibility(
-                shouldUseSplitShade || mUseCombinedQSHeader ? View.GONE : View.VISIBLE);
-        mDatePrivacyView.setVisibility(
-                shouldUseSplitShade || mUseCombinedQSHeader ? View.GONE : View.VISIBLE);
+        boolean gone = shouldUseSplitShade || mUseCombinedQSHeader || mQsDisabled;
+        mStatusIconsView.setVisibility(gone ? View.GONE : View.VISIBLE);
+        mDatePrivacyView.setVisibility(gone ? View.GONE : View.VISIBLE);
 
         mConfigShowBatteryEstimate = resources.getBoolean(R.bool.config_showBatteryEstimateQSBH);
 
