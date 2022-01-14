@@ -17,7 +17,6 @@ package android.net.vcn;
 
 import static android.net.ipsec.ike.IkeSessionParams.IKE_OPTION_MOBIKE;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_REQUIRED;
-import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_OK;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 
@@ -169,18 +168,15 @@ public final class VcnGatewayConnectionConfig {
     static {
         DEFAULT_UNDERLYING_NETWORK_TEMPLATES.add(
                 new VcnCellUnderlyingNetworkTemplate.Builder()
-                        .setNetworkQuality(NETWORK_QUALITY_OK)
                         .setOpportunistic(MATCH_REQUIRED)
                         .build());
 
         DEFAULT_UNDERLYING_NETWORK_TEMPLATES.add(
                 new VcnWifiUnderlyingNetworkTemplate.Builder()
-                        .setNetworkQuality(NETWORK_QUALITY_OK)
                         .build());
 
         DEFAULT_UNDERLYING_NETWORK_TEMPLATES.add(
                 new VcnCellUnderlyingNetworkTemplate.Builder()
-                        .setNetworkQuality(NETWORK_QUALITY_OK)
                         .build());
     }
 

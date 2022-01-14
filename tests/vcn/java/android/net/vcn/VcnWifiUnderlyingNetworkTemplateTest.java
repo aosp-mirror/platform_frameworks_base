@@ -17,8 +17,6 @@ package android.net.vcn;
 
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_ANY;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_FORBIDDEN;
-import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_ANY;
-import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_OK;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -28,15 +26,19 @@ import org.junit.Test;
 
 import java.util.Set;
 
-public class VcnWifiUnderlyingNetworkTemplateTest {
+public class VcnWifiUnderlyingNetworkTemplateTest extends VcnUnderlyingNetworkTemplateTestBase {
     private static final String SSID = "TestWifi";
-    private static final int INVALID_NETWORK_QUALITY = -1;
 
     // Package private for use in VcnGatewayConnectionConfigTest
     static VcnWifiUnderlyingNetworkTemplate getTestNetworkTemplate() {
         return new VcnWifiUnderlyingNetworkTemplate.Builder()
-                .setNetworkQuality(NETWORK_QUALITY_OK)
                 .setMetered(MATCH_FORBIDDEN)
+                .setMinUpstreamBandwidthKbps(
+                        TEST_MIN_ENTRY_UPSTREAM_BANDWIDTH_KBPS,
+                        TEST_MIN_EXIT_UPSTREAM_BANDWIDTH_KBPS)
+                .setMinDownstreamBandwidthKbps(
+                        TEST_MIN_ENTRY_DOWNSTREAM_BANDWIDTH_KBPS,
+                        TEST_MIN_EXIT_DOWNSTREAM_BANDWIDTH_KBPS)
                 .setSsids(Set.of(SSID))
                 .build();
     }
@@ -44,8 +46,19 @@ public class VcnWifiUnderlyingNetworkTemplateTest {
     @Test
     public void testBuilderAndGetters() {
         final VcnWifiUnderlyingNetworkTemplate networkPriority = getTestNetworkTemplate();
-        assertEquals(NETWORK_QUALITY_OK, networkPriority.getNetworkQuality());
         assertEquals(MATCH_FORBIDDEN, networkPriority.getMetered());
+        assertEquals(
+                TEST_MIN_ENTRY_UPSTREAM_BANDWIDTH_KBPS,
+                networkPriority.getMinEntryUpstreamBandwidthKbps());
+        assertEquals(
+                TEST_MIN_EXIT_UPSTREAM_BANDWIDTH_KBPS,
+                networkPriority.getMinExitUpstreamBandwidthKbps());
+        assertEquals(
+                TEST_MIN_ENTRY_DOWNSTREAM_BANDWIDTH_KBPS,
+                networkPriority.getMinEntryDownstreamBandwidthKbps());
+        assertEquals(
+                TEST_MIN_EXIT_DOWNSTREAM_BANDWIDTH_KBPS,
+                networkPriority.getMinExitDownstreamBandwidthKbps());
         assertEquals(Set.of(SSID), networkPriority.getSsids());
     }
 
@@ -53,18 +66,37 @@ public class VcnWifiUnderlyingNetworkTemplateTest {
     public void testBuilderAndGettersForDefaultValues() {
         final VcnWifiUnderlyingNetworkTemplate networkPriority =
                 new VcnWifiUnderlyingNetworkTemplate.Builder().build();
-        assertEquals(NETWORK_QUALITY_ANY, networkPriority.getNetworkQuality());
         assertEquals(MATCH_ANY, networkPriority.getMetered());
+
+        // Explicitly expect 0, as documented in Javadoc on setter methods..
+        assertEquals(0, networkPriority.getMinEntryUpstreamBandwidthKbps());
+        assertEquals(0, networkPriority.getMinExitUpstreamBandwidthKbps());
+        assertEquals(0, networkPriority.getMinEntryDownstreamBandwidthKbps());
+        assertEquals(0, networkPriority.getMinExitDownstreamBandwidthKbps());
+
         assertTrue(networkPriority.getSsids().isEmpty());
     }
 
     @Test
-    public void testBuildWithInvalidNetworkQuality() {
+    public void testBuilderRequiresStricterEntryCriteria() {
         try {
             new VcnWifiUnderlyingNetworkTemplate.Builder()
-                    .setNetworkQuality(INVALID_NETWORK_QUALITY);
-            fail("Expected to fail due to the invalid network quality");
-        } catch (Exception expected) {
+                    .setMinUpstreamBandwidthKbps(
+                            TEST_MIN_EXIT_UPSTREAM_BANDWIDTH_KBPS,
+                            TEST_MIN_ENTRY_UPSTREAM_BANDWIDTH_KBPS);
+
+            fail("Expected IAE for exit threshold > entry threshold");
+        } catch (IllegalArgumentException expected) {
+        }
+
+        try {
+            new VcnWifiUnderlyingNetworkTemplate.Builder()
+                    .setMinDownstreamBandwidthKbps(
+                            TEST_MIN_EXIT_DOWNSTREAM_BANDWIDTH_KBPS,
+                            TEST_MIN_ENTRY_DOWNSTREAM_BANDWIDTH_KBPS);
+
+            fail("Expected IAE for exit threshold > entry threshold");
+        } catch (IllegalArgumentException expected) {
         }
     }
 
