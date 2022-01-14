@@ -107,8 +107,6 @@ constructor(
     private var mDraggedFarEnough: Boolean = false
     private var mStartingChild: ExpandableView? = null
     private var mPulsing: Boolean = false
-    var isWakingToShadeLocked: Boolean = false
-        private set
 
     private var velocityTracker: VelocityTracker? = null
 
@@ -235,7 +233,6 @@ constructor(
             mStartingChild = null
         }
         if (statusBarStateController.isDozing) {
-            isWakingToShadeLocked = true
             wakeUpCoordinator.willWakeUp = true
             mPowerManager!!.wakeUp(SystemClock.uptimeMillis(), WAKE_REASON_GESTURE,
                     "com.android.systemui:PULSEDRAG")
@@ -333,10 +330,6 @@ constructor(
         mPulsing = pulsing
     }
 
-    fun onStartedWakingUp() {
-        isWakingToShadeLocked = false
-    }
-
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         IndentingPrintWriter(pw, "  ").let {
             it.println("PulseExpansionHandler:")
@@ -344,7 +337,6 @@ constructor(
             it.println("isExpanding: $isExpanding")
             it.println("leavingLockscreen: $leavingLockscreen")
             it.println("mPulsing: $mPulsing")
-            it.println("isWakingToShadeLocked: $isWakingToShadeLocked")
             it.println("qsExpanded: $qsExpanded")
             it.println("bouncerShowing: $bouncerShowing")
         }

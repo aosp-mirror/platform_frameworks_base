@@ -4,13 +4,12 @@ import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
-import android.util.DisplayMetrics
 import com.android.systemui.ExpandHelper
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.log.LogBuffer
+import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.MediaHierarchyManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
@@ -64,12 +63,11 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var lockScreenUserManager: NotificationLockscreenUserManager
     @Mock lateinit var falsingCollector: FalsingCollector
     @Mock lateinit var ambientState: AmbientState
-    @Mock lateinit var displayMetrics: DisplayMetrics
+    @Mock lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock lateinit var mediaHierarchyManager: MediaHierarchyManager
     @Mock lateinit var scrimController: ScrimController
     @Mock lateinit var configurationController: ConfigurationController
     @Mock lateinit var falsingManager: FalsingManager
-    @Mock lateinit var buffer: LogBuffer
     @Mock lateinit var notificationPanelController: NotificationPanelViewController
     @Mock lateinit var nsslController: NotificationStackScrollLayoutController
     @Mock lateinit var depthController: NotificationShadeDepthController
@@ -98,6 +96,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
             mediaHierarchyManager = mediaHierarchyManager,
             scrimController = scrimController,
             depthController = depthController,
+            wakefulnessLifecycle = wakefulnessLifecycle,
             context = context,
             configurationController = configurationController,
             falsingManager = falsingManager,
@@ -145,6 +144,23 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoingToLockedShade() {
         transitionController.goToLockedShade(null)
         verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
+    }
+
+    @Test
+    fun testWakingToShadeLockedWhenDozing() {
+        whenever(statusbarStateController.isDozing).thenReturn(true)
+        transitionController.goToLockedShade(null)
+        verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
+        assertTrue("Not waking to shade locked", transitionController.isWakingToShadeLocked)
+    }
+
+    @Test
+    fun testNotWakingToShadeLockedWhenNotDozing() {
+        whenever(statusbarStateController.isDozing).thenReturn(false)
+        transitionController.goToLockedShade(null)
+        verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
+        assertFalse("Waking to shade locked when not dozing",
+                transitionController.isWakingToShadeLocked)
     }
 
     @Test
