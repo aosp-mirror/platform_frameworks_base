@@ -17,14 +17,10 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
-import android.database.ContentObserver;
-import android.media.AudioAttributes;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.UserHandle;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.provider.Settings;
 
 import com.android.systemui.dagger.SysUISingleton;
 
@@ -37,19 +33,8 @@ public class VibratorHelper {
 
     private final Vibrator mVibrator;
     private final Context mContext;
-    private boolean mHapticFeedbackEnabled;
-    private static final AudioAttributes STATUS_BAR_VIBRATION_ATTRIBUTES =
-            new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                    .build();
-
-    final private ContentObserver mVibrationObserver = new ContentObserver(Handler.getMain()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            updateHapticFeedBackEnabled();
-        }
-    };
+    private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
 
     /**
      */
@@ -57,23 +42,11 @@ public class VibratorHelper {
     public VibratorHelper(Context context) {
         mContext = context;
         mVibrator = context.getSystemService(Vibrator.class);
-
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_ENABLED), true,
-                mVibrationObserver);
-        mVibrationObserver.onChange(false /* selfChange */);
     }
 
     public void vibrate(final int effectId) {
-        if (mHapticFeedbackEnabled) {
-            AsyncTask.execute(() ->
-                    mVibrator.vibrate(VibrationEffect.get(effectId, false /* fallback */),
-                            STATUS_BAR_VIBRATION_ATTRIBUTES));
-        }
-    }
-
-    private void updateHapticFeedBackEnabled() {
-        mHapticFeedbackEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) != 0;
+        AsyncTask.execute(() ->
+                mVibrator.vibrate(VibrationEffect.get(effectId, false /* fallback */),
+                        TOUCH_VIBRATION_ATTRIBUTES));
     }
 }
