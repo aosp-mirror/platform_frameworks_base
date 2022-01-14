@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.hardware.devicestate.DeviceStateManager;
 import android.util.Log;
 
+import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.wrapper.RotationPolicyWrapper;
