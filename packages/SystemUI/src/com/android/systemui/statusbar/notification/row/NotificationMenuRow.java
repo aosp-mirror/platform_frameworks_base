@@ -57,9 +57,6 @@ import java.util.Map;
 public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnClickListener,
         ExpandableNotificationRow.LayoutListener {
 
-    private static final boolean DEBUG = false;
-    private static final String TAG = "swipe";
-
     // Notification must be swiped at least this fraction of a single menu item to show menu
     private static final float SWIPED_FAR_ENOUGH_MENU_FRACTION = 0.25f;
     private static final float SWIPED_FAR_ENOUGH_MENU_UNCLEARABLE_FRACTION = 0.15f;

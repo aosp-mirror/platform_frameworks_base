@@ -48,11 +48,12 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.util.Compile;
 
 public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsContent {
 
     private static final String TAG = "FeedbackInfo";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
 
     private NotificationGuts mGutsContainer;
     private NotificationListenerService.Ranking mRanking;
