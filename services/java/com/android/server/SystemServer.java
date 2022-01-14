@@ -2677,7 +2677,7 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("MakePowerManagerServiceReady");
         try {
             // TODO: use boot phase
-            mPowerManagerService.systemReady(mActivityManagerService.getAppOpsService());
+            mPowerManagerService.systemReady();
         } catch (Throwable e) {
             reportWtf("making Power Manager Service ready", e);
         }
