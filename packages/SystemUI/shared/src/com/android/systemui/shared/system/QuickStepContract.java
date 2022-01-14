@@ -60,8 +60,6 @@ public class QuickStepContract {
     // See IRecentTasks.aidl
     public static final String KEY_EXTRA_RECENT_TASKS = "recent_tasks";
 
-    public static final String NAV_BAR_MODE_2BUTTON_OVERLAY =
-            WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
     public static final String NAV_BAR_MODE_3BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
     public static final String NAV_BAR_MODE_GESTURAL_OVERLAY =

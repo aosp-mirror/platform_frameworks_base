@@ -817,4 +817,40 @@ public final class PermissionControllerManager {
             }
         });
     }
+
+    /**
+     * Triggers the revocation of one or more permissions for a package, under the following
+     * conditions:
+     * <ul>
+     * <li>The package {@code packageName} must be under the same UID as the calling process
+     * (typically, the target package is the calling package).
+     * <li>Each permission in {@code permissions} must be granted to the package
+     * {@code packageName}.
+     * <li>Each permission in {@code permissions} must be a runtime permission.
+     * </ul>
+     * <p>
+     * For every permission in {@code permissions}, the entire permission group it belongs to will
+     * be revoked. This revocation happens asynchronously and kills all processes running in the
+     * same UID as {@code packageName}. It will be triggered once it is safe to do so.
+     *
+     * @param packageName The name of the package for which the permissions will be revoked.
+     * @param permissions List of permissions to be revoked.
+     *
+     * @see Context#selfRevokePermissions(Collection)
+     *
+     * @hide
+     */
+    public void selfRevokePermissions(@NonNull String packageName,
+            @NonNull List<String> permissions) {
+        mRemoteService.postAsync(service -> {
+            AndroidFuture<Void> future = new AndroidFuture<>();
+            service.selfRevokePermissions(packageName, permissions, future);
+            return future;
+        }).whenComplete((result, err) -> {
+            if (err != null) {
+                Log.e(TAG, "Failed to self revoke " + String.join(",", permissions)
+                        + " for package " + packageName, err);
+            }
+        });
+    }
 }

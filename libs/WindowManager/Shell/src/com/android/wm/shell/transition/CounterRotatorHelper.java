@@ -35,13 +35,11 @@ import java.util.List;
  */
 public class CounterRotatorHelper {
     private final ArrayMap<WindowContainerToken, CounterRotator> mRotatorMap = new ArrayMap<>();
-    private SurfaceControl mRootLeash;
 
     /** Puts the surface controls of closing changes to counter-rotated surfaces. */
     public void handleClosingChanges(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             int rotateDelta, int displayW, int displayH) {
-        mRootLeash = info.getRootLeash();
         final List<TransitionInfo.Change> changes = info.getChanges();
         final int numChanges = changes.size();
         for (int i = numChanges - 1; i >= 0; --i) {
@@ -71,10 +69,15 @@ public class CounterRotatorHelper {
         }
     }
 
-    /** Restores to the original state, i.e. reparent back to transition root. */
-    public void cleanUp() {
+    /**
+     * Removes the counter rotation surface in the finish transaction. No need to reparent the
+     * children as the finish transaction should have already taken care of that.
+     *
+     * This can only be called after startTransaction for {@link #handleClosingChanges} is applied.
+     */
+    public void cleanUp(@NonNull SurfaceControl.Transaction finishTransaction) {
         for (int i = mRotatorMap.size() - 1; i >= 0; --i) {
-            mRotatorMap.valueAt(i).cleanUp(mRootLeash);
+            mRotatorMap.valueAt(i).cleanUp(finishTransaction);
         }
         mRotatorMap.clear();
     }

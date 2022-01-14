@@ -299,6 +299,9 @@
 
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
 
+    <!-- For clipboard overlay -->
+    <uses-permission android:name="android.permission.READ_CLIPBOARD_IN_BACKGROUND" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
@@ -348,6 +351,7 @@
         <!-- started from PhoneWindowManager
              TODO: Should have an android:permission attribute -->
         <service android:name=".screenshot.TakeScreenshotService"
+            android:permission="com.android.systemui.permission.SELF"
             android:process=":screenshot"
             android:exported="false" />
 
@@ -760,6 +764,12 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".clipboardoverlay.EditTextActivity"
+                  android:theme="@style/EditTextActivity"
+                  android:exported="false"
+                  android:excludeFromRecents="true"
+                  />
+
         <activity android:name=".controls.management.ControlsProviderSelectorActivity"
                   android:label="@string/controls_providers_title"
                   android:theme="@style/Theme.ControlsManagement"
@@ -844,6 +854,12 @@
             android:exported="true"
             android:singleUser="true"
             android:permission="android.permission.BIND_DREAM_SERVICE" />
+
+        <!-- Service for external clients to do media transfer -->
+        <!-- TODO(b/203800643): Export and guard with a permission. -->
+        <service
+            android:name=".media.taptotransfer.sender.MediaTttSenderService"
+           />
 
         <receiver
             android:name=".tuner.TunerService$ClearReceiver"

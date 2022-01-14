@@ -2695,9 +2695,26 @@
     <!-- Configure mobile tcp buffer sizes in the form:
          rat-name:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
          If no value is found for the rat-name in use, the system default will be applied.
+
+         This is deprecated. Please use config_tcp_buffers.
     -->
     <string-array name="config_mobile_tcp_buffers">
     </string-array>
+
+    <!-- Configure tcp buffer sizes in the form:
+         rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
+         If this is configured as an empty string, the system default will be applied.
+
+         For now this config is used by mobile data only. In the future it should be
+         used by Wi-Fi as well.
+
+         Note that starting from Android 13, the TCP buffer size is fixed after boot up, and should
+         never be changed based on carriers or the network types. The value should be configured
+         appropriately based on the device's memory and performance. It is recommended to use lower
+         values if the device has low memory or doesn't support high-speed network such like LTE,
+         NR, or Wifi.
+    -->
+    <string name="config_tcp_buffers" translatable="false"></string>
 
     <!-- Configure ethernet tcp buffersizes in the form:
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max -->
@@ -2783,6 +2800,16 @@
         <item>350</item>
     </integer-array>
 
+    <!-- A vibration waveform for notifications that specify DEFAULT_VIBRATE.
+         This value is a float array with values grouped as
+         { targetAmplitude (within [0,1]), targetFrequency (in hertz), duration (in milliseconds) }
+         This is only applied on devices with vibration frequency control. If the device doesn't
+         support frequency control, then the vibration specified in
+         config_defaultNotificationVibePattern is used instead.
+     -->
+    <array name="config_defaultNotificationVibeWaveform">
+    </array>
+
     <!-- Vibrator pattern to be used as the default for notifications
          that do not specify vibration but vibrate anyway because the device
          is in vibrate mode.
@@ -2793,6 +2820,16 @@
         <item>150</item>
         <item>100</item>
     </integer-array>
+
+    <!-- A vibration waveform for notifications that do not specify vibration but vibrate anyway,
+         because the device is in vibrate mode. This value is a float array with values grouped as
+         { targetAmplitude (within [0,1]), targetFrequency (in hertz), duration (in milliseconds) }
+         This is only applied on devices with vibration frequency control. If the device doesn't
+         support frequency control, then the vibration specified in
+         config_notificationFallbackVibePattern is used instead.
+     -->
+    <array name="config_notificationFallbackVibeWaveform">
+    </array>
 
     <!-- Flag indicating if the speed up audio on mt call code should be executed -->
     <bool name="config_speed_up_audio_on_mt_calls">false</bool>
@@ -5567,4 +5604,7 @@
 
     <!-- Determines whether SafetyCenter feature is enabled. -->
     <bool name="config_enableSafetyCenter">true</bool>
+
+    <!-- Flag indicating if help links for Settings app should be enabled. -->
+    <bool name="config_settingsHelpLinksEnabled">false</bool>
 </resources>

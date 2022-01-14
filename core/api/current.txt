@@ -9743,13 +9743,14 @@ package android.bluetooth {
     field public static final int ERROR_BLUETOOTH_NOT_ALLOWED = 2; // 0x2
     field public static final int ERROR_BLUETOOTH_NOT_ENABLED = 1; // 0x1
     field public static final int ERROR_DEVICE_NOT_BONDED = 3; // 0x3
-    field public static final int ERROR_FEATURE_NOT_SUPPORTED = 10; // 0xa
-    field public static final int ERROR_GATT_WRITE_NOT_ALLOWED = 101; // 0x65
-    field public static final int ERROR_GATT_WRITE_REQUEST_BUSY = 102; // 0x66
+    field public static final int ERROR_GATT_WRITE_NOT_ALLOWED = 200; // 0xc8
+    field public static final int ERROR_GATT_WRITE_REQUEST_BUSY = 201; // 0xc9
     field public static final int ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION = 6; // 0x6
     field public static final int ERROR_MISSING_BLUETOOTH_PRIVILEGED_PERMISSION = 8; // 0x8
     field public static final int ERROR_PROFILE_SERVICE_NOT_BOUND = 9; // 0x9
     field public static final int ERROR_UNKNOWN = 2147483647; // 0x7fffffff
+    field public static final int FEATURE_NOT_SUPPORTED = 11; // 0xb
+    field public static final int FEATURE_SUPPORTED = 10; // 0xa
     field public static final int SUCCESS = 0; // 0x0
   }
 
@@ -10876,6 +10877,8 @@ package android.content {
     method @Deprecated @RequiresPermission(allOf={"android.permission.INTERACT_ACROSS_USERS", android.Manifest.permission.BROADCAST_STICKY}) public abstract void removeStickyBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle);
     method public abstract void revokeUriPermission(android.net.Uri, int);
     method public abstract void revokeUriPermission(String, android.net.Uri, int);
+    method public void selfRevokePermission(@NonNull String);
+    method public void selfRevokePermissions(@NonNull java.util.Collection<java.lang.String>);
     method public abstract void sendBroadcast(@RequiresPermission android.content.Intent);
     method public abstract void sendBroadcast(@RequiresPermission android.content.Intent, @Nullable String);
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle);
@@ -12762,11 +12765,16 @@ package android.content.pm {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.pm.PackageInstaller.SessionInfo> CREATOR;
     field public static final int INVALID_ID = -1; // 0xffffffff
-    field public static final int STAGED_SESSION_ACTIVATION_FAILED = 2; // 0x2
-    field public static final int STAGED_SESSION_CONFLICT = 4; // 0x4
-    field public static final int STAGED_SESSION_NO_ERROR = 0; // 0x0
-    field public static final int STAGED_SESSION_UNKNOWN = 3; // 0x3
-    field public static final int STAGED_SESSION_VERIFICATION_FAILED = 1; // 0x1
+    field public static final int SESSION_ACTIVATION_FAILED = 2; // 0x2
+    field public static final int SESSION_CONFLICT = 4; // 0x4
+    field public static final int SESSION_NO_ERROR = 0; // 0x0
+    field public static final int SESSION_UNKNOWN_ERROR = 3; // 0x3
+    field public static final int SESSION_VERIFICATION_FAILED = 1; // 0x1
+    field @Deprecated public static final int STAGED_SESSION_ACTIVATION_FAILED = 2; // 0x2
+    field @Deprecated public static final int STAGED_SESSION_CONFLICT = 4; // 0x4
+    field @Deprecated public static final int STAGED_SESSION_NO_ERROR = 0; // 0x0
+    field @Deprecated public static final int STAGED_SESSION_UNKNOWN = 3; // 0x3
+    field @Deprecated public static final int STAGED_SESSION_VERIFICATION_FAILED = 1; // 0x1
   }
 
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
@@ -15978,6 +15986,8 @@ package android.graphics {
     method public String getFontFeatureSettings();
     method public float getFontMetrics(android.graphics.Paint.FontMetrics);
     method public android.graphics.Paint.FontMetrics getFontMetrics();
+    method public void getFontMetricsInt(@NonNull CharSequence, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0) int, boolean, @NonNull android.graphics.Paint.FontMetricsInt);
+    method public void getFontMetricsInt(@NonNull char[], @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0) int, boolean, @NonNull android.graphics.Paint.FontMetricsInt);
     method public int getFontMetricsInt(android.graphics.Paint.FontMetricsInt);
     method public android.graphics.Paint.FontMetricsInt getFontMetricsInt();
     method public float getFontSpacing();
@@ -19741,6 +19751,7 @@ package android.inputmethodservice {
   @UiContext public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
     ctor public InputMethodService();
     method @Deprecated public boolean enableHardwareAcceleration();
+    method public final void finishStylusHandwriting();
     method public int getBackDisposition();
     method public int getCandidatesHiddenVisibility();
     method public android.view.inputmethod.InputBinding getCurrentInputBinding();
@@ -19750,6 +19761,7 @@ package android.inputmethodservice {
     method @Deprecated public int getInputMethodWindowRecommendedHeight();
     method public android.view.LayoutInflater getLayoutInflater();
     method public int getMaxWidth();
+    method @Nullable public final android.view.Window getStylusHandwritingWindow();
     method public CharSequence getTextForImeAction(int);
     method public android.app.Dialog getWindow();
     method public void hideStatusIcon();
@@ -19780,6 +19792,7 @@ package android.inputmethodservice {
     method public void onFinishCandidatesView(boolean);
     method public void onFinishInput();
     method public void onFinishInputView(boolean);
+    method public void onFinishStylusHandwriting();
     method public void onInitializeInterface();
     method public boolean onInlineSuggestionsResponse(@NonNull android.view.inputmethod.InlineSuggestionsResponse);
     method public boolean onKeyDown(int, android.view.KeyEvent);
@@ -19790,6 +19803,7 @@ package android.inputmethodservice {
     method public void onStartCandidatesView(android.view.inputmethod.EditorInfo, boolean);
     method public void onStartInput(android.view.inputmethod.EditorInfo, boolean);
     method public void onStartInputView(android.view.inputmethod.EditorInfo, boolean);
+    method public boolean onStartStylusHandwriting();
     method public void onUnbindInput();
     method @Deprecated public void onUpdateCursor(android.graphics.Rect);
     method public void onUpdateCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfo);
@@ -21892,14 +21906,27 @@ package android.media {
     method public android.media.Image acquireNextImage();
     method public void close();
     method public void discardFreeBuffers();
+    method public long getDataSpace();
+    method public int getHardwareBufferFormat();
     method public int getHeight();
     method public int getImageFormat();
     method public int getMaxImages();
     method public android.view.Surface getSurface();
+    method public long getUsage();
     method public int getWidth();
     method @NonNull public static android.media.ImageReader newInstance(@IntRange(from=1) int, @IntRange(from=1) int, int, @IntRange(from=1) int);
     method @NonNull public static android.media.ImageReader newInstance(@IntRange(from=1) int, @IntRange(from=1) int, int, @IntRange(from=1) int, long);
     method public void setOnImageAvailableListener(android.media.ImageReader.OnImageAvailableListener, android.os.Handler);
+  }
+
+  public static final class ImageReader.Builder {
+    ctor public ImageReader.Builder(@IntRange(from=1) int, @IntRange(from=1) int);
+    method @NonNull public android.media.ImageReader build();
+    method @NonNull public android.media.ImageReader.Builder setDefaultDataSpace(long);
+    method @NonNull public android.media.ImageReader.Builder setDefaultHardwareBufferFormat(int);
+    method @NonNull public android.media.ImageReader.Builder setImageFormat(int);
+    method @NonNull public android.media.ImageReader.Builder setMaxImages(int);
+    method @NonNull public android.media.ImageReader.Builder setUsage(long);
   }
 
   public static interface ImageReader.OnImageAvailableListener {
@@ -41976,6 +42003,7 @@ package android.telephony {
     field public static final int EPDG_ADDRESS_PCO = 2; // 0x2
     field public static final int EPDG_ADDRESS_PLMN = 1; // 0x1
     field public static final int EPDG_ADDRESS_STATIC = 0; // 0x0
+    field public static final int EPDG_ADDRESS_VISITED_COUNTRY = 4; // 0x4
     field public static final int ID_TYPE_FQDN = 2; // 0x2
     field public static final int ID_TYPE_KEY_ID = 11; // 0xb
     field public static final int ID_TYPE_RFC822_ADDR = 3; // 0x3
@@ -44938,6 +44966,7 @@ package android.text {
   public class BoringLayout extends android.text.Layout implements android.text.TextUtils.EllipsizeCallback {
     ctor public BoringLayout(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
     ctor public BoringLayout(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
+    ctor public BoringLayout(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, float, float, @NonNull android.text.BoringLayout.Metrics, boolean, @NonNull android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
     method public void ellipsized(int, int);
     method public int getBottomPadding();
     method public int getEllipsisCount(int);
@@ -44952,9 +44981,12 @@ package android.text {
     method public int getTopPadding();
     method public static android.text.BoringLayout.Metrics isBoring(CharSequence, android.text.TextPaint);
     method public static android.text.BoringLayout.Metrics isBoring(CharSequence, android.text.TextPaint, android.text.BoringLayout.Metrics);
+    method @Nullable public static android.text.BoringLayout.Metrics isBoring(@NonNull CharSequence, @NonNull android.text.TextPaint, @NonNull android.text.TextDirectionHeuristic, boolean, @Nullable android.text.BoringLayout.Metrics);
     method public static android.text.BoringLayout make(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
     method public static android.text.BoringLayout make(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
+    method @NonNull public static android.text.BoringLayout make(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, @NonNull android.text.BoringLayout.Metrics, boolean, @NonNull android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
     method public android.text.BoringLayout replaceOrMake(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
+    method @NonNull public android.text.BoringLayout replaceOrMake(@NonNull CharSequence, @NonNull android.text.TextPaint, @IntRange(from=0) int, @NonNull android.text.Layout.Alignment, @NonNull android.text.BoringLayout.Metrics, boolean, @NonNull android.text.TextUtils.TruncateAt, @IntRange(from=0) int, boolean);
     method public android.text.BoringLayout replaceOrMake(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
   }
 
@@ -45163,6 +45195,7 @@ package android.text {
     method public abstract int getTopPadding();
     method public final int getWidth();
     method public final void increaseWidthTo(int);
+    method public boolean isFallbackLineSpacingEnabled();
     method public boolean isRtlCharAt(int);
     method protected final boolean isSpanned();
     field public static final int BREAK_STRATEGY_BALANCED = 2; // 0x2
@@ -53170,6 +53203,7 @@ package android.view.inputmethod {
     method public boolean showSoftInput(android.view.View, int, android.os.ResultReceiver);
     method @Deprecated public void showSoftInputFromInputMethod(android.os.IBinder, int);
     method @Deprecated public void showStatusIcon(android.os.IBinder, String, @DrawableRes int);
+    method public void startStylusHandwriting(@NonNull android.view.View);
     method @Deprecated public boolean switchToLastInputMethod(android.os.IBinder);
     method @Deprecated public boolean switchToNextInputMethod(android.os.IBinder, boolean);
     method @Deprecated public void toggleSoftInput(int, int);

@@ -455,6 +455,10 @@ public class ActivityStartController {
             // Lock the loop to ensure the activities launched in a sequence.
             synchronized (mService.mGlobalLock) {
                 mService.deferWindowLayout();
+                // To avoid creating multiple starting window when creating starting multiples
+                // activities, we defer the creation of the starting window once all start request
+                // are processed
+                mService.mWindowManager.mStartingSurfaceController.beginDeferAddStartingWindow();
                 try {
                     for (int i = 0; i < starters.length; i++) {
                         final int startResult = starters[i].setResultTo(resultTo)
@@ -480,6 +484,7 @@ public class ActivityStartController {
                         }
                     }
                 } finally {
+                    mService.mWindowManager.mStartingSurfaceController.endDeferAddStartingWindow();
                     mService.continueWindowLayout();
                 }
             }

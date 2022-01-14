@@ -21,9 +21,12 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
+import android.annotation.SuppressLint;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.tv.TvInputService;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -415,6 +418,25 @@ public class TunerResourceManager {
     }
 
     /**
+     * Transfers the ownership of shared resource.
+     *
+     * <p><strong>Note:</strong> Only the existing frontend sharee can be the new owner.
+     *
+     * @param resourceType the type of the resource to transfer the ownership for.
+     * @param currentOwnerId the id of the current owner client.
+     * @param newOwnerId the id of the new owner client.
+     *
+     * @return true if successful and false otherwise.
+     */
+    public boolean transferOwner(int resourceType, int currentOwnerId, int newOwnerId) {
+        try {
+            return mService.transferOwner(resourceType, currentOwnerId, newOwnerId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Requests a Tuner Demux resource.
      *
      * <p>There are three possible scenarios:
@@ -696,6 +718,49 @@ public class TunerResourceManager {
             ResourceClientProfile holderProfile) {
         try {
             return mService.isHigherPriority(challengerProfile, holderProfile);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns a priority for the given use case type and the client's foreground or background
+     * status.
+     *
+     * @param useCase the use case type of the client. When the given use case type is invalid,
+     *        the default use case type will be used. {@see TvInputService#PriorityHintUseCaseType}.
+     * @param pid the pid of the client. When the pid is invalid, background status will be used as
+     *        a client's status. Otherwise, client's app corresponding to the given session id will
+     *        be used as a client. {@see TvInputService#onCreateSession(String, String)}.
+     *
+     * @return the client priority..
+     */
+    public int getClientPriority(@TvInputService.PriorityHintUseCaseType int useCase, int pid) {
+        try {
+            return mService.getClientPriority(useCase, pid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns a config priority for the given use case type and the foreground or background
+     * status.
+     *
+     * @param useCase the use case type of the client. When the given use case type is invalid,
+     *        the default use case type will be used. {@see TvInputService#PriorityHintUseCaseType}.
+     * @param isForeground {@code true} if foreground, {@code false} otherwise.
+     *
+     * @return the config priority.
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("ShowingMemberInHiddenClass")
+    public int getConfigPriority(@TvInputService.PriorityHintUseCaseType int useCase,
+            boolean isForeground) {
+        try {
+            return mService.getConfigPriority(useCase, isForeground);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -28,6 +28,9 @@ import android.media.tv.tuner.Tuner.Result;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -145,9 +148,9 @@ public class Lnb implements AutoCloseable {
 
     private static final String TAG = "Lnb";
 
-    LnbCallback mCallback;
-    Executor mExecutor;
-    Tuner mTuner;
+    Map<LnbCallback, Executor> mCallbackMap =
+            new HashMap<LnbCallback, Executor>();
+    Tuner mOwner;
     private final Object mCallbackLock = new Object();
 
 
@@ -164,38 +167,82 @@ public class Lnb implements AutoCloseable {
 
     private Lnb() {}
 
-    void setCallback(Executor executor, @Nullable LnbCallback callback, Tuner tuner) {
+    void setCallbackAndOwner(Executor executor, @Nullable LnbCallback callback, Tuner tuner) {
         synchronized (mCallbackLock) {
-            mCallback = callback;
-            mExecutor = executor;
-            mTuner = tuner;
+            if (callback != null && executor != null) {
+                addCallback(callback, executor);
+            }
+        }
+        setOwner(tuner);
+    }
+
+    /**
+     * Adds LnbCallback
+     *
+     * @param callback the callback to receive notifications from LNB.
+     * @param executor the executor on which callback will be invoked. Cannot be null.
+     */
+    public void addCallback(@NonNull  LnbCallback callback, @NonNull Executor executor) {
+        Objects.requireNonNull(callback, "callback must not be null");
+        Objects.requireNonNull(executor, "executor must not be null");
+        synchronized (mCallbackLock) {
+            mCallbackMap.put(callback, executor);
+        }
+    }
+
+    /**
+     * Removes LnbCallback
+     *
+     * @param callback the callback be removed for callback
+     *
+     * @return {@code true} when successful. {@code false} otherwise.
+     */
+    public boolean removeCallback(@NonNull LnbCallback callback) {
+        Objects.requireNonNull(callback, "callback must not be null");
+        synchronized (mCallbackLock) {
+            boolean result = (mCallbackMap.remove(callback) != null);
+            return result;
+        }
+    }
+
+    // allow owner transfer independent of whether callback is registered or not
+    /* package */ void setOwner(@NonNull Tuner newOwner) {
+        Objects.requireNonNull(newOwner, "newOwner must not be null");
+        synchronized (mLock) {
+            mOwner = newOwner;
         }
     }
 
     private void onEvent(int eventType) {
         synchronized (mCallbackLock) {
-            if (mExecutor != null && mCallback != null) {
-                mExecutor.execute(() -> {
-                    synchronized (mCallbackLock) {
-                        if (mCallback != null) {
-                            mCallback.onEvent(eventType);
+            for (LnbCallback callback : mCallbackMap.keySet()) {
+                Executor executor = mCallbackMap.get(callback);
+                if (callback != null && executor != null) {
+                    executor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (callback != null) {
+                                callback.onEvent(eventType);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         }
     }
 
     private void onDiseqcMessage(byte[] diseqcMessage) {
         synchronized (mCallbackLock) {
-            if (mExecutor != null && mCallback != null) {
-                mExecutor.execute(() -> {
-                    synchronized (mCallbackLock) {
-                        if (mCallback != null) {
-                            mCallback.onDiseqcMessage(diseqcMessage);
+            for (LnbCallback callback : mCallbackMap.keySet()) {
+                Executor executor = mCallbackMap.get(callback);
+                if (callback != null && executor != null) {
+                    executor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (callback != null) {
+                                callback.onDiseqcMessage(diseqcMessage);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         }
     }
@@ -279,7 +326,11 @@ public class Lnb implements AutoCloseable {
                 TunerUtils.throwExceptionForResult(res, "Failed to close LNB");
             } else {
                 mIsClosed = true;
-                mTuner.releaseLnb();
+                if (mOwner != null) {
+                    mOwner.releaseLnb();
+                    mOwner = null;
+                }
+                mCallbackMap.clear();
             }
         }
     }

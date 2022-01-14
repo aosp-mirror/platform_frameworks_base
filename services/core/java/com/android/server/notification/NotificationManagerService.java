@@ -6674,31 +6674,33 @@ public class NotificationManagerService extends SystemService {
         // package or a registered listener can enqueue.  Prevents DOS attacks and deals with leaks.
         if (!isSystemNotification && !isNotificationFromListener) {
             final int callingUid = Binder.getCallingUid();
-            if (mNotificationsByKey.get(r.getSbn().getKey()) == null
-                    && isCallerInstantApp(callingUid, userId)) {
-                // Ephemeral apps have some special constraints for notifications.
-                // They are not allowed to create new notifications however they are allowed to
-                // update notifications created by the system (e.g. a foreground service
-                // notification).
-                throw new SecurityException("Instant app " + pkg
-                        + " cannot create notifications");
-            }
+            synchronized (mNotificationLock) {
+                if (mNotificationsByKey.get(r.getSbn().getKey()) == null
+                        && isCallerInstantApp(callingUid, userId)) {
+                    // Ephemeral apps have some special constraints for notifications.
+                    // They are not allowed to create new notifications however they are allowed to
+                    // update notifications created by the system (e.g. a foreground service
+                    // notification).
+                    throw new SecurityException("Instant app " + pkg
+                            + " cannot create notifications");
+                }
 
-            // rate limit updates that aren't completed progress notifications
-            if (mNotificationsByKey.get(r.getSbn().getKey()) != null
-                    && !r.getNotification().hasCompletedProgress()
-                    && !isAutogroup) {
+                // rate limit updates that aren't completed progress notifications
+                if (mNotificationsByKey.get(r.getSbn().getKey()) != null
+                        && !r.getNotification().hasCompletedProgress()
+                        && !isAutogroup) {
 
-                final float appEnqueueRate = mUsageStats.getAppEnqueueRate(pkg);
-                if (appEnqueueRate > mMaxPackageEnqueueRate) {
-                    mUsageStats.registerOverRateQuota(pkg);
-                    final long now = SystemClock.elapsedRealtime();
-                    if ((now - mLastOverRateLogTime) > MIN_PACKAGE_OVERRATE_LOG_INTERVAL) {
-                        Slog.e(TAG, "Package enqueue rate is " + appEnqueueRate
-                                + ". Shedding " + r.getSbn().getKey() + ". package=" + pkg);
-                        mLastOverRateLogTime = now;
+                    final float appEnqueueRate = mUsageStats.getAppEnqueueRate(pkg);
+                    if (appEnqueueRate > mMaxPackageEnqueueRate) {
+                        mUsageStats.registerOverRateQuota(pkg);
+                        final long now = SystemClock.elapsedRealtime();
+                        if ((now - mLastOverRateLogTime) > MIN_PACKAGE_OVERRATE_LOG_INTERVAL) {
+                            Slog.e(TAG, "Package enqueue rate is " + appEnqueueRate
+                                    + ". Shedding " + r.getSbn().getKey() + ". package=" + pkg);
+                            mLastOverRateLogTime = now;
+                        }
+                        return false;
                     }
-                    return false;
                 }
             }
 

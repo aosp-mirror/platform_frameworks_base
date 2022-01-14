@@ -20,7 +20,7 @@ import android.annotation.SystemApi;
 
 /**
  * A class with constants representing possible return values for Bluetooth APIs. General return
- * values occupy the range 0 to 99. Profile-specific return values occupy the range 100-999.
+ * values occupy the range 0 to 199. Profile-specific return values occupy the range 200-999.
  * API-specific return values start at 1000. The exception to this is the "UNKNOWN" error code which
  * occupies the max integer value.
  */
@@ -29,28 +29,28 @@ public final class BluetoothStatusCodes {
     private BluetoothStatusCodes() {}
 
     /**
-     * Indicates that the API call was successful
+     * Indicates that the API call was successful.
      */
     public static final int SUCCESS = 0;
 
     /**
-     * Error code indicating that Bluetooth is not enabled
+     * Error code indicating that Bluetooth is not enabled.
      */
     public static final int ERROR_BLUETOOTH_NOT_ENABLED = 1;
 
     /**
      * Error code indicating that the API call was initiated by neither the system nor the active
-     * user
+     * user.
      */
     public static final int ERROR_BLUETOOTH_NOT_ALLOWED = 2;
 
     /**
-     * Error code indicating that the Bluetooth Device specified is not bonded
+     * Error code indicating that the Bluetooth Device specified is not bonded.
      */
     public static final int ERROR_DEVICE_NOT_BONDED = 3;
 
     /**
-     * Error code indicating that the Bluetooth Device specified is not connected, but is bonded
+     * Error code indicating that the Bluetooth Device specified is not connected, but is bonded.
      *
      * @hide
      */
@@ -58,7 +58,7 @@ public final class BluetoothStatusCodes {
 
     /**
      * Error code indicating that the caller does not have the
-     * {@link android.Manifest.permission#BLUETOOTH_ADVERTISE} permission
+     * {@link android.Manifest.permission#BLUETOOTH_ADVERTISE} permission.
      *
      * @hide
      */
@@ -66,13 +66,13 @@ public final class BluetoothStatusCodes {
 
     /**
      * Error code indicating that the caller does not have the
-     * {@link android.Manifest.permission#BLUETOOTH_CONNECT} permission
+     * {@link android.Manifest.permission#BLUETOOTH_CONNECT} permission.
      */
     public static final int ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION = 6;
 
     /**
      * Error code indicating that the caller does not have the
-     * {@link android.Manifest.permission#BLUETOOTH_SCAN} permission
+     * {@link android.Manifest.permission#BLUETOOTH_SCAN} permission.
      *
      * @hide
      */
@@ -80,30 +80,67 @@ public final class BluetoothStatusCodes {
 
     /**
      * Error code indicating that the caller does not have the
-     * {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED} permission
+     * {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED} permission.
      */
     public static final int ERROR_MISSING_BLUETOOTH_PRIVILEGED_PERMISSION = 8;
 
     /**
      * Error code indicating that the profile service is not bound. You can bind a profile service
-     * by calling {@link BluetoothAdapter#getProfileProxy}
+     * by calling {@link BluetoothAdapter#getProfileProxy}.
      */
     public static final int ERROR_PROFILE_SERVICE_NOT_BOUND = 9;
 
     /**
-     * Error code indicating that the feature is not supported.
+     * Indicates that the feature is supported.
      */
-    public static final int ERROR_FEATURE_NOT_SUPPORTED = 10;
+    public static final int FEATURE_SUPPORTED = 10;
+
+    /**
+     * Indicates that the feature is not supported.
+     */
+    public static final int FEATURE_NOT_SUPPORTED = 11;
+
+    /**
+     * Error code indicating that the device is not the active device for this profile.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_NOT_ACTIVE_DEVICE = 12;
+
+    /**
+     * Error code indicating that there are no active devices for the profile.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_NO_ACTIVE_DEVICES = 13;
+
+    /**
+     * Indicates that the Bluetooth profile is not connected to this device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_PROFILE_NOT_CONNECTED = 14;
+
+    /**
+     * Error code indicating that the requested operation timed out.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_TIMEOUT = 15;
 
     /**
      * A GATT writeCharacteristic request is not permitted on the remote device.
      */
-    public static final int ERROR_GATT_WRITE_NOT_ALLOWED = 101;
+    public static final int ERROR_GATT_WRITE_NOT_ALLOWED = 200;
 
     /**
      * A GATT writeCharacteristic request is issued to a busy remote device.
      */
-    public static final int ERROR_GATT_WRITE_REQUEST_BUSY = 102;
+    public static final int ERROR_GATT_WRITE_REQUEST_BUSY = 201;
 
     /**
      * If another application has already requested {@link OobData} then another fetch will be
@@ -284,6 +321,38 @@ public final class BluetoothStatusCodes {
      * @hide
      */
     public static final int ERROR_LE_AUDIO_BROADCAST_SOURCE_DISABLE_ENCRYPTION_FAILED = 1115;
+
+    /**
+     * Indicates that there is already one device for which SCO audio is connected or connecting.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_AUDIO_DEVICE_ALREADY_CONNECTED = 1116;
+
+    /**
+     * Indicates that SCO audio was already not connected for this device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_AUDIO_DEVICE_ALREADY_DISCONNECTED = 1117;
+
+    /**
+     * Indicates that there audio route is currently blocked by the system.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_AUDIO_ROUTE_BLOCKED = 1118;
+
+    /**
+     * Indicates that there is an active call preventing this operation from succeeding.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_CALL_ACTIVE = 1119;
 
     /**
      * Indicates that an unknown error has occurred has occurred.

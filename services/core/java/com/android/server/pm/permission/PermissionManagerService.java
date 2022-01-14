@@ -386,7 +386,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @Override
     public void startOneTimePermissionSession(String packageName, @UserIdInt int userId,
             long timeoutMillis, int importanceToResetTimer, int importanceToKeepSessionAlive) {
-        mContext.enforceCallingPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
                 "Must hold " + Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS
                         + " to register permissions as one time.");
         Objects.requireNonNull(packageName);
@@ -554,6 +555,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     public void revokePostNotificationPermissionWithoutKillForTest(String packageName, int userId) {
         mPermissionManagerServiceImpl.revokePostNotificationPermissionWithoutKillForTest(
                 packageName, userId);
+    }
+
+    @Override
+    public void selfRevokePermissions(@NonNull String packageName,
+            @NonNull List<String> permissions) {
+        mPermissionManagerServiceImpl.selfRevokePermissions(packageName, permissions);
     }
 
     @Override

@@ -523,6 +523,12 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String TASK_MANAGER_ENABLED = "task_manager_enabled";
 
+
+    /**
+     * (boolean) Whether the clipboard overlay is enabled.
+     */
+    public static final String CLIPBOARD_OVERLAY_ENABLED = "clipboard_overlay_enabled";
+
     private SystemUiDeviceConfigFlags() {
     }
 }

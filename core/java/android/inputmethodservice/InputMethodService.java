@@ -54,6 +54,7 @@ import static android.view.WindowInsets.Type.statusBars;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.annotation.AnyThread;
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
@@ -83,6 +84,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.provider.Settings;
 import android.text.InputType;
@@ -94,6 +96,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
 import android.view.Gravity;
+import android.view.InputChannel;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -119,6 +122,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodServiceTraceProto;
+import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.widget.FrameLayout;
@@ -142,6 +146,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -300,6 +305,44 @@ import java.util.Objects;
 public class InputMethodService extends AbstractInputMethodService {
     static final String TAG = "InputMethodService";
     static final boolean DEBUG = false;
+
+    /**
+     * Key for a boolean value that tells whether {@link InputMethodService} is responsible for
+     * rendering the back button and the IME switcher button or not when the gestural navigation is
+     * enabled.
+     *
+     * <p>This sysprop is just ignored when the gestural navigation mode is not enabled.</p>
+     *
+     * <p>
+     * To avoid complexity that is not necessary for production, you always need to reboot the
+     * device after modifying this flag as follows:
+     * <pre>
+     * $ adb root
+     * $ adb shell setprop persist.sys.ime.can_render_gestural_nav_buttons true
+     * $ adb reboot
+     * </pre>
+     * </p>
+     */
+    private static final String PROP_CAN_RENDER_GESTURAL_NAV_BUTTONS =
+            "persist.sys.ime.can_render_gestural_nav_buttons";
+
+    /**
+     * Returns whether {@link InputMethodService} is responsible for rendering the back button and
+     * the IME switcher button or not when the gestural navigation is enabled.
+     *
+     * <p>This method is supposed to be used with an assumption that the same value is returned in
+     * other processes. It is developers' responsibility for rebooting the device when the sysprop
+     * is modified.</p>
+     *
+     * @return {@code true} if {@link InputMethodService} is responsible for rendering the back
+     * button and the IME switcher button when the gestural navigation is enabled.
+     *
+     * @hide
+     */
+    @AnyThread
+    public static boolean canImeRenderGesturalNavButtons() {
+        return SystemProperties.getBoolean(PROP_CAN_RENDER_GESTURAL_NAV_BUTTONS, false);
+    }
 
     /**
      * Allows the system to optimize the back button affordance based on the presence of software
@@ -520,10 +563,14 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private boolean mAutomotiveHideNavBarForKeyboard;
     private boolean mIsAutomotive;
+    private boolean mHandwritingStarted;
     private Handler mHandler;
     private boolean mImeSurfaceScheduledForRemoval;
     private ImsConfigurationTracker mConfigTracker = new ImsConfigurationTracker();
     private boolean mDestroyed;
+
+    /** Stylus handwriting Ink window.  */
+    private InkWindow mInkWindow;
 
     /**
      * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#showSoftInput}
@@ -599,7 +646,8 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public final void initializeInternal(@NonNull IBinder token,
-                IInputMethodPrivilegedOperations privilegedOperations, int configChanges) {
+                IInputMethodPrivilegedOperations privilegedOperations, int configChanges,
+                boolean stylusHwSupported) {
             if (mDestroyed) {
                 Log.i(TAG, "The InputMethodService has already onDestroyed()."
                     + "Ignore the initialization.");
@@ -609,6 +657,9 @@ public class InputMethodService extends AbstractInputMethodService {
             mConfigTracker.onInitialize(configChanges);
             mPrivOps.set(privilegedOperations);
             InputMethodPrivilegedOperationsRegistry.put(token, mPrivOps);
+            if (stylusHwSupported) {
+                mInkWindow = new InkWindow(mWindow.getContext());
+            }
             attachToken(token);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -641,6 +692,9 @@ public class InputMethodService extends AbstractInputMethodService {
             attachToWindowToken(token);
             mToken = token;
             mWindow.setToken(token);
+            if (mInkWindow != null) {
+                mInkWindow.setToken(token);
+            }
         }
 
         /**
@@ -820,6 +874,49 @@ public class InputMethodService extends AbstractInputMethodService {
                                 : InputMethodManager.RESULT_UNCHANGED_HIDDEN), null);
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public void canStartStylusHandwriting(int requestId) {
+            if (DEBUG) Log.v(TAG, "canStartStylusHandwriting()");
+            if (mHandwritingStarted) {
+                Log.d(TAG, "There is an ongoing Handwriting session. ignoring.");
+                return;
+            }
+            if (!mInputStarted) {
+                Log.d(TAG, "Input should have started before starting Stylus handwriting.");
+                return;
+            }
+            if (onStartStylusHandwriting()) {
+                mPrivOps.onStylusHandwritingReady(requestId);
+            } else {
+                Log.i(TAG, "IME is not ready. Can't start Stylus Handwriting");
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @MainThread
+        @Override
+        public void startStylusHandwriting(
+                @NonNull InputChannel channel, @Nullable List<MotionEvent> stylusEvents) {
+            if (DEBUG) Log.v(TAG, "startStylusHandwriting()");
+            if (mHandwritingStarted) {
+                return;
+            }
+
+            mHandwritingStarted = true;
+            mShowInputRequested = false;
+
+            mInkWindow.show();
+            // TODO: deliver previous @param stylusEvents
+            // TODO: create spy receiver for @param channel
         }
 
         /**
@@ -2193,6 +2290,77 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     /**
+     * Called when an app requests stylus handwriting
+     * {@link InputMethodManager#startStylusHandwriting(View)}.
+     *
+     * This will always be preceded by {@link #onStartInput(EditorInfo, boolean)} for the
+     * {@link EditorInfo} and {@link InputConnection} for which stylus handwriting is being
+     * requested.
+     *
+     * If the IME supports handwriting for the current input, it should return {@code true},
+     * ensure its inking views are attached to the {@link #getStylusHandwritingWindow()}, and handle
+     * stylus input received on the ink window via {@link #getCurrentInputConnection()}.
+     * @return {@code true} if IME can honor the request, {@code false} if IME cannot at this time.
+     */
+    public boolean onStartStylusHandwriting() {
+        // Intentionally empty
+        return false;
+    }
+
+    /**
+     * Called when the current stylus handwriting session was finished (either by the system or
+     * via {@link #finishStylusHandwriting()}.
+     *
+     * When this is called, the ink window has been made invisible, and the IME no longer
+     * intercepts handwriting-related {@code MotionEvent}s.
+     */
+    public void onFinishStylusHandwriting() {
+        // Intentionally empty
+    }
+
+    /**
+     * Returns the stylus handwriting inking window.
+     * IMEs supporting stylus input are expected to attach their inking views to this
+     * window (e.g. with {@link Window#setContentView(View)} )). Handwriting-related
+     * {@link MotionEvent}s are dispatched to the attached view hierarchy.
+     *
+     * Note: This returns {@code null} if IME doesn't support stylus handwriting
+     *   i.e. if {@link InputMethodInfo#supportsStylusHandwriting()} is false.
+     *   This method should be called after {@link #onStartStylusHandwriting()}.
+     * @see #onStartStylusHandwriting()
+     */
+    @Nullable
+    public final Window getStylusHandwritingWindow() {
+        return mInkWindow;
+    }
+
+    /**
+     * Finish the current stylus handwriting session.
+     *
+     * This dismisses the {@link #getStylusHandwritingWindow ink window} and stops intercepting
+     * stylus {@code MotionEvent}s.
+     *
+     * Note for IME developers: Call this method at any time to finish current handwriting session.
+     * Generally, this should be invoked after a short timeout, giving the user enough time
+     * to start the next stylus stroke, if any.
+     *
+     * Handwriting session will be finished by framework on next {@link #onFinishInput()}.
+     */
+    public final void finishStylusHandwriting() {
+        if (DEBUG) Log.v(TAG, "finishStylusHandwriting()");
+        if (mInkWindow == null) {
+            return;
+        }
+        if (!mHandwritingStarted) {
+            return;
+        }
+
+        mHandwritingStarted = false;
+        mInkWindow.hide(false /* remove */);
+        onFinishStylusHandwriting();
+    }
+
+    /**
      * The system has decided that it may be time to show your input method.
      * This is called due to a corresponding call to your
      * {@link InputMethod#showSoftInput InputMethod.showSoftInput()}
@@ -2461,6 +2629,9 @@ public class InputMethodService extends AbstractInputMethodService {
         mInputStarted = false;
         mStartedInputConnection = null;
         mCurCompletions = null;
+        if (mInkWindow != null) {
+            finishStylusHandwriting();
+        }
     }
 
     void doStartInput(InputConnection ic, EditorInfo attribute, boolean restarting) {

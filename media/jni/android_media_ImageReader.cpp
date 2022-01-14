@@ -375,18 +375,13 @@ static void ImageReader_classInit(JNIEnv* env, jclass clazz)
 }
 
 static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint width, jint height,
-                             jint format, jint maxImages, jlong ndkUsage)
-{
+                             jint maxImages, jlong ndkUsage, jint nativeFormat, jlong dataSpace) {
     status_t res;
-    int nativeFormat;
-    android_dataspace nativeDataspace;
 
-    ALOGV("%s: width:%d, height: %d, format: 0x%x, maxImages:%d",
-          __FUNCTION__, width, height, format, maxImages);
+    ALOGV("%s: width:%d, height: %d, nativeFormat: %d, maxImages:%d",
+          __FUNCTION__, width, height, nativeFormat, maxImages);
 
-    PublicFormat publicFormat = static_cast<PublicFormat>(format);
-    nativeFormat = mapPublicFormatToHalFormat(publicFormat);
-    nativeDataspace = mapPublicFormatToHalDataspace(publicFormat);
+    android_dataspace nativeDataspace = static_cast<android_dataspace>(dataSpace);
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
@@ -400,7 +395,7 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint w
     BufferQueue::createBufferQueue(&gbProducer, &gbConsumer);
     sp<BufferItemConsumer> bufferConsumer;
     String8 consumerName = String8::format("ImageReader-%dx%df%xm%d-%d-%d",
-            width, height, format, maxImages, getpid(),
+            width, height, nativeFormat, maxImages, getpid(),
             createProcessUniqueId());
     uint64_t consumerUsage =
             android_hardware_HardwareBuffer_convertToGrallocUsageBits(ndkUsage);
@@ -527,7 +522,8 @@ static void ImageReader_imageRelease(JNIEnv* env, jobject thiz, jobject image)
     ALOGV("%s: Image (format: 0x%x) has been released", __FUNCTION__, ctx->getBufferFormat());
 }
 
-static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image) {
+static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image,
+                                   jboolean legacyValidateImageFormat) {
     ALOGV("%s:", __FUNCTION__);
     JNIImageReaderContext* ctx = ImageReader_getContext(env, thiz);
     if (ctx == NULL) {
@@ -590,7 +586,7 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image) {
             ALOGV("%s: Producer buffer size: %dx%d, doesn't match ImageReader configured size: %dx%d",
                     __FUNCTION__, outputWidth, outputHeight, imageReaderWidth, imageReaderHeight);
         }
-        if (imgReaderFmt != bufferFormat) {
+        if (legacyValidateImageFormat && imgReaderFmt != bufferFormat) {
             if (imgReaderFmt == HAL_PIXEL_FORMAT_YCbCr_420_888 &&
                     isPossiblyYUV(bufferFormat)) {
                 // Treat formats that are compatible with flexible YUV
@@ -958,10 +954,10 @@ static jobject Image_getHardwareBuffer(JNIEnv* env, jobject thiz) {
 
 static const JNINativeMethod gImageReaderMethods[] = {
     {"nativeClassInit",        "()V",                        (void*)ImageReader_classInit },
-    {"nativeInit",             "(Ljava/lang/Object;IIIIJ)V",  (void*)ImageReader_init },
+    {"nativeInit",             "(Ljava/lang/Object;IIIJIJ)V",   (void*)ImageReader_init },
     {"nativeClose",            "()V",                        (void*)ImageReader_close },
     {"nativeReleaseImage",     "(Landroid/media/Image;)V",   (void*)ImageReader_imageRelease },
-    {"nativeImageSetup",       "(Landroid/media/Image;)I",   (void*)ImageReader_imageSetup },
+    {"nativeImageSetup",       "(Landroid/media/Image;Z)I",   (void*)ImageReader_imageSetup },
     {"nativeGetSurface",       "()Landroid/view/Surface;",   (void*)ImageReader_getSurface },
     {"nativeDetachImage",      "(Landroid/media/Image;)I",   (void*)ImageReader_detachImage },
     {"nativeCreateImagePlanes",

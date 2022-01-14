@@ -16,23 +16,28 @@
 
 package com.android.systemui.media.taptotransfer
 
+import android.content.ComponentName
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
-import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender
-import com.android.systemui.media.taptotransfer.sender.MoveCloserToTransfer
-import com.android.systemui.media.taptotransfer.sender.TransferInitiated
-import com.android.systemui.media.taptotransfer.sender.TransferSucceeded
+import com.android.systemui.media.taptotransfer.sender.*
+import com.android.systemui.shared.mediattt.DeviceInfo
+import com.android.systemui.shared.mediattt.IDeviceSenderCallback
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.time.FakeSystemClock
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import org.mockito.Mockito.anyString
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -51,10 +56,19 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     private lateinit var mediaTttChipControllerSender: MediaTttChipControllerSender
     @Mock
     private lateinit var mediaTttChipControllerReceiver: MediaTttChipControllerReceiver
+    @Mock
+    private lateinit var mediaSenderService: IDeviceSenderCallback.Stub
+    private lateinit var mediaSenderServiceComponentName: ComponentName
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        mediaSenderServiceComponentName = ComponentName(context, MediaTttSenderService::class.java)
+        context.addMockService(mediaSenderServiceComponentName, mediaSenderService)
+        whenever(mediaSenderService.queryLocalInterface(anyString())).thenReturn(mediaSenderService)
+        whenever(mediaSenderService.asBinder()).thenReturn(mediaSenderService)
+
         mediaTttCommandLineHelper =
             MediaTttCommandLineHelper(
                 commandRegistry,
@@ -102,10 +116,14 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     }
 
     @Test
-    fun sender_moveCloserToTransfer_chipDisplayWithCorrectState() {
-        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
+    fun sender_moveCloserToStartCast_serviceCallbackCalled() {
+        commandRegistry.onShellCommand(pw, getMoveCloserToStartCastCommand())
 
-        verify(mediaTttChipControllerSender).displayChip(any(MoveCloserToTransfer::class.java))
+        assertThat(context.isBound(mediaSenderServiceComponentName)).isTrue()
+
+        val deviceInfoCaptor = argumentCaptor<DeviceInfo>()
+        verify(mediaSenderService).closeToReceiverToStartCast(any(), capture(deviceInfoCaptor))
+        assertThat(deviceInfoCaptor.value!!.name).isEqualTo(DEVICE_NAME)
     }
 
     @Test
@@ -143,11 +161,11 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
         verify(mediaTttChipControllerReceiver).removeChip()
     }
 
-    private fun getMoveCloserToTransferCommand(): Array<String> =
+    private fun getMoveCloserToStartCastCommand(): Array<String> =
         arrayOf(
             ADD_CHIP_COMMAND_SENDER_TAG,
             DEVICE_NAME,
-            MOVE_CLOSER_TO_TRANSFER_COMMAND_NAME
+            MOVE_CLOSER_TO_START_CAST_COMMAND_NAME
         )
 
     private fun getTransferInitiatedCommand(): Array<String> =

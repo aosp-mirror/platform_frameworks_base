@@ -18,10 +18,13 @@ package android.media;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.graphics.GraphicBuffer;
 import android.graphics.ImageFormat;
 import android.graphics.ImageFormat.Format;
 import android.graphics.Rect;
+import android.hardware.DataSpace;
+import android.hardware.DataSpace.NamedDataSpace;
 import android.hardware.HardwareBuffer;
 import android.hardware.HardwareBuffer.Usage;
 import android.hardware.camera2.MultiResolutionImageReader;
@@ -136,8 +139,7 @@ public class ImageReader implements AutoCloseable {
         // If the format is private don't default to USAGE_CPU_READ_OFTEN since it may not
         // work, and is inscrutable anyway
         return new ImageReader(width, height, format, maxImages,
-                format == ImageFormat.PRIVATE ? 0 : HardwareBuffer.USAGE_CPU_READ_OFTEN,
-                /*parent*/ null);
+                format == ImageFormat.PRIVATE ? 0 : HardwareBuffer.USAGE_CPU_READ_OFTEN, null);
     }
 
     /**
@@ -268,44 +270,32 @@ public class ImageReader implements AutoCloseable {
         // If the format is private don't default to USAGE_CPU_READ_OFTEN since it may not
         // work, and is inscrutable anyway
         return new ImageReader(width, height, format, maxImages,
-                format == ImageFormat.PRIVATE ? 0 : HardwareBuffer.USAGE_CPU_READ_OFTEN,
-                parent);
+                format == ImageFormat.PRIVATE ? 0 : HardwareBuffer.USAGE_CPU_READ_OFTEN, parent);
     }
 
-
-    /**
-     * @hide
-     */
-    protected ImageReader(int width, int height, int format, int maxImages, long usage,
-            MultiResolutionImageReader parent) {
-        mWidth = width;
-        mHeight = height;
-        mFormat = format;
-        mUsage = usage;
-        mMaxImages = maxImages;
-        mParent = parent;
-
+    private void initializeImageReader(int width, int height, int imageFormat, int maxImages,
+            long usage, int hardwareBufferFormat, long dataSpace, boolean useLegacyImageFormat) {
         if (width < 1 || height < 1) {
             throw new IllegalArgumentException(
                 "The image dimensions must be positive");
         }
-        if (mMaxImages < 1) {
+
+        if (maxImages < 1) {
             throw new IllegalArgumentException(
                 "Maximum outstanding image count must be at least 1");
         }
 
-        if (format == ImageFormat.NV21) {
+        if (imageFormat == ImageFormat.NV21) {
             throw new IllegalArgumentException(
-                    "NV21 format is not supported");
+                "NV21 format is not supported");
         }
 
-        mNumPlanes = ImageUtils.getNumPlanesForFormat(mFormat);
-
-        nativeInit(new WeakReference<>(this), width, height, format, maxImages, usage);
-
-        mSurface = nativeGetSurface();
+        nativeInit(new WeakReference<>(this), width, height, maxImages, usage,
+                hardwareBufferFormat, dataSpace);
 
         mIsReaderValid = true;
+
+        mSurface = nativeGetSurface();
         // Estimate the native buffer allocation size and register it so it gets accounted for
         // during GC. Note that this doesn't include the buffers required by the buffer queue
         // itself and the buffers requested by the producer.
@@ -313,8 +303,44 @@ public class ImageReader implements AutoCloseable {
         // complex, and 1 buffer is enough for the VM to treat the ImageReader as being of some
         // size.
         mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(
-                width, height, format, /*buffer count*/ 1);
+            width, height, useLegacyImageFormat ? imageFormat : hardwareBufferFormat,
+            /*buffer count*/ 1);
         VMRuntime.getRuntime().registerNativeAllocation(mEstimatedNativeAllocBytes);
+    }
+
+    private ImageReader(int width, int height, int imageFormat, int maxImages, long usage,
+            MultiResolutionImageReader parent) {
+        mWidth = width;
+        mHeight = height;
+        mFormat = imageFormat;
+        mUsage = usage;
+        mMaxImages = maxImages;
+        mParent = parent;
+        // retrieve hal Format and hal dataspace from imageFormat
+        mHardwareBufferFormat = PublicFormatUtils.getHalFormat(mFormat);
+        mDataSpace = PublicFormatUtils.getHalDataspace(mFormat);
+        mUseLegacyImageFormat = true;
+        mNumPlanes = ImageUtils.getNumPlanesForFormat(mFormat);
+
+        initializeImageReader(width, height, imageFormat, maxImages, usage, mHardwareBufferFormat,
+                mDataSpace, mUseLegacyImageFormat);
+    }
+
+    private ImageReader(int width, int height, int maxImages, long usage,
+            MultiResolutionImageReader parent, int hardwareBufferFormat, long dataSpace) {
+        mWidth = width;
+        mHeight = height;
+        mFormat = ImageFormat.UNKNOWN; // set default image format value as UNKNOWN
+        mUsage = usage;
+        mMaxImages = maxImages;
+        mParent = parent;
+        mHardwareBufferFormat = hardwareBufferFormat;
+        mDataSpace = dataSpace;
+        mUseLegacyImageFormat = false;
+        mNumPlanes = ImageUtils.getNumPlanesForHardwareBufferFormat(mHardwareBufferFormat);
+
+        initializeImageReader(width, height, mFormat, maxImages, usage, hardwareBufferFormat,
+                dataSpace, mUseLegacyImageFormat);
     }
 
     /**
@@ -354,12 +380,42 @@ public class ImageReader implements AutoCloseable {
      * As of now, each format is only compatible to itself.
      * The actual format of the images can be found using {@link Image#getFormat}.</p>
      *
+     * <p>Use this function if the ImageReader instance is created by factory method
+     * {@code newInstance} function or by builder pattern {@code ImageReader.Builder} and using
+     * {@link Builder#setImageFormat}.</p>
+     *
      * @return the expected format of an Image
      *
      * @see ImageFormat
      */
     public int getImageFormat() {
         return mFormat;
+    }
+
+    /**
+     * The default {@link HardwareBuffer} format of {@link Image Images}.
+     *
+     * <p>Use this function if the ImageReader instance is created by builder pattern
+     * {@code ImageReader.Builder} and using {@link Builder#setDefaultHardwareBufferFormat} and
+     * {@link Builder#setDefaultDataSpace}.</p>
+     *
+     * @return the expected {@link HardwareBuffer} format of an Image.
+     */
+    public @HardwareBuffer.Format int getHardwareBufferFormat() {
+        return mHardwareBufferFormat;
+    }
+
+    /**
+     * The default dataspace of {@link Image Images}.
+     *
+     * <p>Use this function if the ImageReader instance is created by builder pattern
+     * {@code ImageReader.Builder} and {@link Builder#setDefaultDataSpace}.</p>
+     *
+     * @return the expected dataspace of an Image.
+     */
+    @SuppressLint("MethodNameUnits")
+    public @NamedDataSpace long getDataSpace() {
+        return mDataSpace;
     }
 
     /**
@@ -381,6 +437,15 @@ public class ImageReader implements AutoCloseable {
      */
     public int getMaxImages() {
         return mMaxImages;
+    }
+
+    /**
+     * The usage flag of images that can be produced by the ImageReader.
+     *
+     * @return The usage flag of the images for this ImageReader.
+     */
+    public @Usage long getUsage() {
+        return mUsage;
     }
 
     /**
@@ -469,7 +534,12 @@ public class ImageReader implements AutoCloseable {
      * @hide
      */
     public Image acquireNextImageNoThrowISE() {
-        SurfaceImage si = new SurfaceImage(mFormat);
+        SurfaceImage si;
+        if (mUseLegacyImageFormat) {
+            si = new SurfaceImage(mFormat);
+        } else {
+            si = new SurfaceImage(mHardwareBufferFormat, mDataSpace);
+        }
         return acquireNextSurfaceImage(si) == ACQUIRE_SUCCESS ? si : null;
     }
 
@@ -492,7 +562,7 @@ public class ImageReader implements AutoCloseable {
             // A null image will eventually be returned if ImageReader is already closed.
             int status = ACQUIRE_NO_BUFS;
             if (mIsReaderValid) {
-                status = nativeImageSetup(si);
+                status = nativeImageSetup(si, mUseLegacyImageFormat);
             }
 
             switch (status) {
@@ -545,7 +615,12 @@ public class ImageReader implements AutoCloseable {
     public Image acquireNextImage() {
         // Initialize with reader format, but can be overwritten by native if the image
         // format is different from the reader format.
-        SurfaceImage si = new SurfaceImage(mFormat);
+        SurfaceImage si;
+        if (mUseLegacyImageFormat) {
+            si = new SurfaceImage(mFormat);
+        } else {
+            si = new SurfaceImage(mHardwareBufferFormat, mDataSpace);
+        }
         int status = acquireNextSurfaceImage(si);
 
         switch (status) {
@@ -838,13 +913,161 @@ public class ImageReader implements AutoCloseable {
         }
     }
 
+    /**
+     * Builder class for {@link ImageReader} objects.
+     */
+    public static final class Builder {
+        private int mWidth;
+        private int mHeight;
+        private int mMaxImages = 1;
+        private int mImageFormat = ImageFormat.UNKNOWN;
+        private int mHardwareBufferFormat = HardwareBuffer.RGBA_8888;
+        private long mDataSpace = DataSpace.DATASPACE_UNKNOWN;
+        private long mUsage = HardwareBuffer.USAGE_CPU_READ_OFTEN;
+        private boolean mUseLegacyImageFormat = false;
+
+        /**
+         * Constructs a new builder for {@link ImageReader}.
+         *
+         * @param width The default width in pixels that will be passed to the producer.
+         *              May be overridden by the producer.
+         * @param height The default height in pixels that will be passed to the producer.
+         *              May be overridden by the producer.
+         * @see Image
+         */
+        public Builder(@IntRange(from = 1) int width, @IntRange(from = 1) int height) {
+            mWidth = width;
+            mHeight = height;
+        }
+
+        /**
+         * Set the maximal number of images.
+         *
+         * @param maxImages The maximum number of images the user will want to
+         *            access simultaneously. This should be as small as possible to
+         *            limit memory use. Default value is 1.
+         * @return the Builder instance with customized usage value.
+         */
+        public @NonNull Builder setMaxImages(int maxImages) {
+            mMaxImages = maxImages;
+            return this;
+        }
+
+        /**
+         * Set the consumer usage flag.
+         *
+         * @param usage The intended usage of the images consumed by this ImageReader.
+         *              See the usages on {@link HardwareBuffer} for a list of valid usage bits.
+         *              Default value is {@link HardwareBuffer#USAGE_CPU_READ_OFTEN}.
+         * @return the Builder instance with customized usage value.
+         *
+         * @see HardwareBuffer
+         */
+        public @NonNull Builder setUsage(long usage) {
+            mUsage = usage;
+            return this;
+        }
+
+        /**
+         * Set the default image format passed by the producer. May be overridden by the producer.
+         *
+         * <p>{@link #setImageFormat} function replaces the combination of
+         * {@link #setDefaultHardwareBufferFormat} and {@link #setDefaultDataSpace} functions.
+         * Either this or these two functions must be called to initialize an {@code ImageReader}
+         * instance.</p>
+         *
+         * @param imageFormat The format of the image that this reader will produce. This
+         *                    must be one of the {@link android.graphics.ImageFormat} or
+         *                   {@link android.graphics.PixelFormat} constants. Note that not
+         *                   all formats are supported, like ImageFormat.NV21. The default value is
+         *                   {@link ImageFormat#UNKNOWN}.
+         * @return the builder instance with customized image format value.
+         *
+         * @see #setDefaultHardwareBufferFormat
+         * @see #setDefaultDataSpace
+         */
+        public @NonNull Builder setImageFormat(@Format int imageFormat) {
+            mImageFormat = imageFormat;
+            mUseLegacyImageFormat = true;
+            mHardwareBufferFormat = HardwareBuffer.RGBA_8888;
+            mDataSpace = DataSpace.DATASPACE_UNKNOWN;
+            return this;
+        }
+
+        /**
+         * Set the default hardwareBuffer format passed by the producer.
+         * May be overridden by the producer.
+         *
+         * <p>This function works together with {@link #setDefaultDataSpace} for an
+         * {@link ImageReader} instance. Setting at least one of these two replaces
+         * {@link #setImageFormat} function.</p>
+         *
+         * <p>The format of the Image can be overridden after {@link #setImageFormat} by calling
+         * this function and then {@link #setDefaultDataSpace} functions.
+         * <i>Warning:</i> Missing one of callings for initializing or overriding the format may
+         * involve undefined behaviors.</p>
+         *
+         * @param hardwareBufferFormat The HardwareBuffer format of the image that this reader
+         *                             will produce. The default value is
+         *                             {@link HardwareBuffer#RGBA_8888 HardwareBuffer.RGBA_8888}.
+         * @return the builder instance with customized hardwareBuffer value.
+         *
+         * @see #setDefaultDataSpace
+         * @see #setImageFormat
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder setDefaultHardwareBufferFormat(
+                @HardwareBuffer.Format int hardwareBufferFormat) {
+            mHardwareBufferFormat = hardwareBufferFormat;
+            mUseLegacyImageFormat = false;
+            mImageFormat = ImageFormat.UNKNOWN;
+            return this;
+        }
+
+        /**
+         * Set the default dataspace passed by the producer.
+         * May be overridden by the producer.
+         *
+         * <p>This function works together with {@link #setDefaultHardwareBufferFormat} for an
+         * {@link ImageReader} instance. Setting at least one of these two replaces
+         * {@link #setImageFormat} function.</p>
+         *
+         * @param dataSpace The dataspace of the image that this reader will produce.
+         *                  The default value is {@link DataSpace#DATASPACE_UNKNOWN}.
+         * @return the builder instance with customized dataspace value.
+         *
+         * @see #setDefaultHardwareBufferFormat
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder setDefaultDataSpace(@NamedDataSpace long dataSpace) {
+            mDataSpace = dataSpace;
+            mUseLegacyImageFormat = false;
+            mImageFormat = ImageFormat.UNKNOWN;
+            return this;
+        }
+
+        /**
+         * Builds a new ImageReader object.
+         *
+         * @return The new ImageReader object.
+         */
+        public @NonNull ImageReader build() {
+            if (mUseLegacyImageFormat) {
+                return new ImageReader(mWidth, mHeight, mImageFormat, mMaxImages, mUsage, null);
+            } else {
+                return new ImageReader(mWidth, mHeight, mMaxImages, mUsage, null,
+                    mHardwareBufferFormat, mDataSpace);
+            }
+        }
+    }
+
     private final int mWidth;
     private final int mHeight;
     private final int mFormat;
     private final long mUsage;
     private final int mMaxImages;
     private final int mNumPlanes;
-    private final Surface mSurface;
+    private Surface mSurface;
     private int mEstimatedNativeAllocBytes;
 
     private final Object mListenerLock = new Object();
@@ -860,6 +1083,12 @@ public class ImageReader implements AutoCloseable {
     // Applicable if this isn't a standalone ImageReader, but belongs to a
     // MultiResolutionImageReader.
     private final MultiResolutionImageReader mParent;
+
+    private final int mHardwareBufferFormat;
+
+    private final long mDataSpace;
+
+    private final boolean mUseLegacyImageFormat;
 
     /**
      * This field is used by native code, do not access or modify.
@@ -897,6 +1126,12 @@ public class ImageReader implements AutoCloseable {
             mFormat = format;
         }
 
+        SurfaceImage(int hardwareBufferFormat, long dataSpace) {
+            mHardwareBufferFormat = hardwareBufferFormat;
+            mDataSpace = dataSpace;
+            mFormat = PublicFormatUtils.getPublicFormat(mHardwareBufferFormat, mDataSpace);
+        }
+
         @Override
         public void close() {
             ImageReader.this.releaseImage(this);
@@ -909,10 +1144,15 @@ public class ImageReader implements AutoCloseable {
         @Override
         public int getFormat() {
             throwISEIfImageIsInvalid();
-            int readerFormat = ImageReader.this.getImageFormat();
-            // Assume opaque reader always produce opaque images.
-            mFormat = (readerFormat == ImageFormat.PRIVATE) ? readerFormat :
-                nativeGetFormat(readerFormat);
+            // update mFormat only if ImageReader is initialized by factory pattern.
+            // if using builder pattern, mFormat has been updated upon initialization.
+            // no need update here.
+            if (ImageReader.this.mUseLegacyImageFormat) {
+                int readerFormat = ImageReader.this.getImageFormat();
+                // Assume opaque reader always produce opaque images.
+                mFormat = (readerFormat == ImageFormat.PRIVATE) ? readerFormat :
+                    nativeGetFormat(readerFormat);
+            }
             return mFormat;
         }
 
@@ -1125,6 +1365,8 @@ public class ImageReader implements AutoCloseable {
 
         private SurfacePlane[] mPlanes;
         private int mFormat = ImageFormat.UNKNOWN;
+        private int mHardwareBufferFormat = HardwareBuffer.RGBA_8888;
+        private long mDataSpace = DataSpace.DATASPACE_UNKNOWN;
         // If this image is detached from the ImageReader.
         private AtomicBoolean mIsDetached = new AtomicBoolean(false);
 
@@ -1137,8 +1379,8 @@ public class ImageReader implements AutoCloseable {
         private synchronized native HardwareBuffer nativeGetHardwareBuffer();
     }
 
-    private synchronized native void nativeInit(Object weakSelf, int w, int h,
-                                                    int fmt, int maxImgs, long consumerUsage);
+    private synchronized native void nativeInit(Object weakSelf, int w, int h, int maxImgs,
+            long consumerUsage, int hardwareBufferFormat, long dataSpace);
     private synchronized native void nativeClose();
     private synchronized native void nativeReleaseImage(Image i);
     private synchronized native Surface nativeGetSurface();
@@ -1152,7 +1394,7 @@ public class ImageReader implements AutoCloseable {
      * @see #ACQUIRE_NO_BUFS
      * @see #ACQUIRE_MAX_IMAGES
      */
-    private synchronized native int nativeImageSetup(Image i);
+    private synchronized native int nativeImageSetup(Image i, boolean legacyValidateImageFormat);
 
     /**
      * @hide

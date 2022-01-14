@@ -292,7 +292,6 @@ public class RecentTasksController implements TaskStackListenerCallback,
          * Invalidates this instance, preventing future calls from updating the controller.
          */
         void invalidate() {
-            Slog.d("b/206648922", "invalidating controller: " + mController);
             mController = null;
         }
 
@@ -313,13 +312,16 @@ public class RecentTasksController implements TaskStackListenerCallback,
         @Override
         public GroupedRecentTaskInfo[] getRecentTasks(int maxNum, int flags, int userId)
                 throws RemoteException {
+            if (mController == null) {
+                // The controller is already invalidated -- just return an empty task list for now
+                return new GroupedRecentTaskInfo[0];
+            }
+
             final GroupedRecentTaskInfo[][] out = new GroupedRecentTaskInfo[][]{null};
             executeRemoteCallWithTaskPermission(mController, "getRecentTasks",
                     (controller) -> out[0] = controller.getRecentTasks(maxNum, flags, userId)
                             .toArray(new GroupedRecentTaskInfo[0]),
                     true /* blocking */);
-            Slog.d("b/206648922", "getRecentTasks(" + maxNum + "): " + out[0]
-                    + " mController=" + mController);
             return out[0];
         }
     }

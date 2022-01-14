@@ -99,6 +99,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
             override fun onAnimationEnd(animation: Animator?) {
                 lightRevealAnimationPlaying = false
+                interactionJankMonitor.end(CUJ_SCREEN_OFF)
             }
 
             override fun onAnimationStart(animation: Animator?) {

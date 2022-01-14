@@ -233,6 +233,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_REMOVE_IME_SURFACE = 1060;
     static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
     static final int MSG_UPDATE_IME_WINDOW_STATUS = 1070;
+    static final int MSG_START_HANDWRITING = 1100;
 
     static final int MSG_START_INPUT = 2000;
 
@@ -313,6 +314,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @GuardedBy("ImfLock.class")
     private int mMethodMapUpdateCount = 0;
+
+    /**
+     * Tracks requestIds for Stylus handwriting mode.
+     */
+    @GuardedBy("ImfLock.class")
+    private int mHwRequestId = 0;
 
     /**
      * The display id for which the latest startInput was called.
@@ -3019,24 +3026,45 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                if (mCurClient == null || client == null
-                        || mCurClient.client.asBinder() != client.asBinder()) {
-                    // We need to check if this is the current client with
-                    // focus in the window manager, to allow this call to
-                    // be made before input is started in it.
-                    final ClientState cs = mClients.get(client.asBinder());
-                    if (cs == null) {
-                        throw new IllegalArgumentException(
-                                "unknown client " + client.asBinder());
-                    }
-                    if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                            cs.selfReportedDisplayId)) {
-                        Slog.w(TAG, "Ignoring showSoftInput of uid " + uid + ": " + client);
-                        return false;
-                    }
+                if (!canInteractWithImeLocked(uid, client, "showSoftInput")) {
+                    return false;
                 }
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
                 return showCurrentInputLocked(windowToken, flags, resultReceiver, reason);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            }
+        }
+    }
+
+    @Override
+    public void startStylusHandwriting(IInputMethodClient client) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.startStylusHandwriting");
+        ImeTracing.getInstance().triggerManagerServiceDump(
+                "InputMethodManagerService#startStylusHandwriting");
+        int uid = Binder.getCallingUid();
+        synchronized (ImfLock.class) {
+            if (!calledFromValidUserLocked()) {
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                return;
+            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                if (!canInteractWithImeLocked(uid, client, "startStylusHandwriting")) {
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                    return;
+                }
+                if (!mBindingController.supportsStylusHandwriting()) {
+                    Slog.w(TAG, "Stylus HW unsupported by IME. Ignoring startStylusHandwriting()");
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                    return;
+                }
+                if (DEBUG) Slog.v(TAG, "Client requesting Stylus Handwriting to be started");
+                if (getCurMethodLocked() != null) {
+                    executeOrSendMessage(getCurMethodLocked(), mCaller.obtainMessageIO(
+                            MSG_START_HANDWRITING, ++mHwRequestId, getCurMethodLocked()));
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -3521,6 +3549,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         return res;
+    }
+
+    @GuardedBy("ImfLock.class")
+    private boolean canInteractWithImeLocked(
+            int uid, IInputMethodClient client, String methodName) {
+        if (mCurClient == null || client == null
+                || mCurClient.client.asBinder() != client.asBinder()) {
+            // We need to check if this is the current client with
+            // focus in the window manager, to allow this call to
+            // be made before input is started in it.
+            final ClientState cs = mClients.get(client.asBinder());
+            if (cs == null) {
+                throw new IllegalArgumentException("unknown client " + client.asBinder());
+            }
+            if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
+                    cs.selfReportedDisplayId)) {
+                Slog.w(TAG, String.format("Ignoring %s of uid %d : %s", methodName, uid, client));
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean shouldRestoreImeVisibility(IBinder windowToken,
@@ -4237,7 +4286,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                     final IBinder token = (IBinder) args.arg2;
                     ((IInputMethod) args.arg1).initializeInternal(token,
-                            new InputMethodPrivilegedOperationsImpl(this, token), msg.arg1);
+                            new InputMethodPrivilegedOperationsImpl(this, token),
+                            msg.arg1, (boolean) args.arg3);
                 } catch (RemoteException e) {
                 }
                 args.recycle();
@@ -4410,8 +4460,32 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 return true;
             }
+            case MSG_START_HANDWRITING:
+                try {
+                    (((IInputMethod) msg.obj)).canStartStylusHandwriting(msg.arg1);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "RemoteException calling canStartStylusHandwriting(): ", e);
+                }
+                return true;
         }
         return false;
+    }
+
+    @BinderThread
+    private void onStylusHandwritingReady(int requestId) {
+        synchronized (ImfLock.class) {
+            if (mHwRequestId != requestId) {
+                // obsolete request
+                return;
+            }
+
+            try {
+                // TODO: replace null  with actual Channel, MotionEvents
+                getCurMethodLocked().startStylusHandwriting(null, null);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "RemoteException calling startStylusHandwriting(): ", e);
+            }
+        }
     }
 
     private void handleSetInteractive(final boolean interactive) {
@@ -5957,6 +6031,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void applyImeVisibilityAsync(IBinder windowToken, boolean setVisible) {
             mImms.applyImeVisibility(mToken, windowToken, setVisible);
+        }
+
+        @BinderThread
+        @Override
+        public void onStylusHandwritingReady(int requestId) {
+            mImms.onStylusHandwritingReady(requestId);
         }
     }
 }

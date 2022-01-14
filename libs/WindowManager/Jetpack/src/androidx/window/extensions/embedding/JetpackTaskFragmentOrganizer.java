@@ -79,22 +79,23 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     }
 
     @Override
-    public void registerOrganizer() {
-        if (mAnimationController != null) {
-            throw new IllegalStateException("Must unregister the organizer before re-register.");
+    public void unregisterOrganizer() {
+        stopOverrideSplitAnimation();
+        mAnimationController = null;
+        super.unregisterOrganizer();
+    }
+
+    void startOverrideSplitAnimation() {
+        if (mAnimationController == null) {
+            mAnimationController = new TaskFragmentAnimationController(this);
         }
-        super.registerOrganizer();
-        mAnimationController = new TaskFragmentAnimationController(this);
         mAnimationController.registerRemoteAnimations();
     }
 
-    @Override
-    public void unregisterOrganizer() {
+    void stopOverrideSplitAnimation() {
         if (mAnimationController != null) {
             mAnimationController.unregisterRemoteAnimations();
-            mAnimationController = null;
         }
-        super.unregisterOrganizer();
     }
 
     /**

@@ -17,6 +17,7 @@
 package android.app;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,8 +41,10 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.persistentdata.IPersistentDataBlockService;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.IOnKeyguardExitResult;
 import android.view.IWindowManager;
@@ -49,6 +52,9 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.util.Preconditions;
+import com.android.internal.widget.IWeakEscrowTokenActivatedListener;
+import com.android.internal.widget.IWeakEscrowTokenRemovedListener;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
 import com.android.internal.widget.LockscreenCredential;
@@ -57,6 +63,8 @@ import com.android.internal.widget.VerifyCredentialResponse;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Class that can be used to lock and unlock the keyguard. The
@@ -69,10 +77,13 @@ public class KeyguardManager {
     private static final String TAG = "KeyguardManager";
 
     private final Context mContext;
+    private final LockPatternUtils mLockPatternUtils;
     private final IWindowManager mWM;
     private final IActivityManager mAm;
     private final ITrustManager mTrustManager;
     private final INotificationManager mNotificationManager;
+    private final ArrayMap<WeakEscrowTokenRemovedListener, IWeakEscrowTokenRemovedListener>
+            mListeners = new ArrayMap<>();
 
     /**
      * Intent used to prompt user for device credentials.
@@ -455,8 +466,42 @@ public class KeyguardManager {
         public void onDismissCancelled() { }
     }
 
+    /**
+     * Callback passed to
+     * {@link KeyguardManager#addWeakEscrowToken}
+     * to notify caller of state change.
+     * @hide
+     */
+    @SystemApi
+    public interface WeakEscrowTokenActivatedListener {
+        /**
+         * The method to be called when the token is activated.
+         * @param handle 64 bit handle corresponding to the escrow token
+         * @param user user for whom the weak escrow token has been added
+         */
+        void onWeakEscrowTokenActivated(long handle, @NonNull UserHandle user);
+    }
+
+    /**
+     * Listener passed to
+     * {@link KeyguardManager#registerWeakEscrowTokenRemovedListener} and
+     * {@link KeyguardManager#unregisterWeakEscrowTokenRemovedListener}
+     * to notify caller of an weak escrow token has been removed.
+     * @hide
+     */
+    @SystemApi
+    public interface WeakEscrowTokenRemovedListener {
+        /**
+         * The method to be called when the token is removed.
+         * @param handle 64 bit handle corresponding to the escrow token
+         * @param user user for whom the escrow token has been added
+         */
+        void onWeakEscrowTokenRemoved(long handle, @NonNull UserHandle user);
+    }
+
     KeyguardManager(Context context) throws ServiceNotFoundException {
         mContext = context;
+        mLockPatternUtils = new LockPatternUtils(context);
         mWM = WindowManagerGlobal.getWindowManagerService();
         mAm = ActivityManager.getService();
         mTrustManager = ITrustManager.Stub.asInterface(
@@ -785,7 +830,6 @@ public class KeyguardManager {
             return false;
         }
 
-        LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
         int userId = mContext.getUserId();
         if (isDeviceSecure(userId)) {
             Log.e(TAG, "Password already set, rejecting call to setLock");
@@ -799,7 +843,7 @@ public class KeyguardManager {
         try {
             LockscreenCredential credential = createLockscreenCredential(
                     lockType, password);
-            success = lockPatternUtils.setLockCredential(
+            success = mLockPatternUtils.setLockCredential(
                     credential,
                     /* savedPassword= */ LockscreenCredential.createNone(),
                     userId);
@@ -810,6 +854,150 @@ public class KeyguardManager {
             Arrays.fill(password, (byte) 0);
         }
         return success;
+    }
+
+    /**
+     * Create a weak escrow token for the current user, which can later be used to unlock FBE
+     * or change user password.
+     *
+     * After adding, if the user currently  has a secure lockscreen, they will need to perform a
+     * confirm credential operation in order to activate the token for future use. If the user
+     * has no secure lockscreen, then the token is activated immediately.
+     *
+     * If the user changes or removes the lockscreen password, any activated weak escrow token will
+     * be removed.
+     *
+     * @return a unique 64-bit token handle which is needed to refer to this token later.
+     * @hide
+     */
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
+    @RequiresPermission(Manifest.permission.MANAGE_WEAK_ESCROW_TOKEN)
+    @SystemApi
+    public long addWeakEscrowToken(@NonNull byte[] token, @NonNull UserHandle user,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull WeakEscrowTokenActivatedListener listener) {
+        Objects.requireNonNull(token, "Token cannot be null.");
+        Objects.requireNonNull(user, "User cannot be null.");
+        Objects.requireNonNull(executor, "Executor cannot be null.");
+        Objects.requireNonNull(listener, "Listener cannot be null.");
+        int userId = user.getIdentifier();
+        IWeakEscrowTokenActivatedListener internalListener =
+                new IWeakEscrowTokenActivatedListener.Stub() {
+            @Override
+            public void onWeakEscrowTokenActivated(long handle, int userId) {
+                UserHandle user = UserHandle.of(userId);
+                final long restoreToken = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onWeakEscrowTokenActivated(handle, user));
+                } finally {
+                    Binder.restoreCallingIdentity(restoreToken);
+                }
+                Log.i(TAG, "Weak escrow token activated.");
+            }
+        };
+        return mLockPatternUtils.addWeakEscrowToken(token, userId, internalListener);
+    }
+
+    /**
+     * Remove a weak escrow token.
+     *
+     * @return true if the given handle refers to a valid weak token previously returned from
+     * {@link #addWeakEscrowToken}, whether it's active or not. return false otherwise.
+     * @hide
+     */
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
+    @RequiresPermission(Manifest.permission.MANAGE_WEAK_ESCROW_TOKEN)
+    @SystemApi
+    public boolean removeWeakEscrowToken(long handle, @NonNull UserHandle user) {
+        Objects.requireNonNull(user, "User cannot be null.");
+        return mLockPatternUtils.removeWeakEscrowToken(handle, user.getIdentifier());
+    }
+
+    /**
+     * Check if the given weak escrow token is active or not.
+     * @hide
+     */
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
+    @RequiresPermission(Manifest.permission.MANAGE_WEAK_ESCROW_TOKEN)
+    @SystemApi
+    public boolean isWeakEscrowTokenActive(long handle, @NonNull UserHandle user) {
+        Objects.requireNonNull(user, "User cannot be null.");
+        return mLockPatternUtils.isWeakEscrowTokenActive(handle, user.getIdentifier());
+    }
+
+    /**
+     * Check if the given weak escrow token is validate.
+     * @hide
+     */
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
+    @RequiresPermission(Manifest.permission.MANAGE_WEAK_ESCROW_TOKEN)
+    @SystemApi
+    public boolean isWeakEscrowTokenValid(long handle, @NonNull byte[] token,
+            @NonNull UserHandle user) {
+        Objects.requireNonNull(token, "Token cannot be null.");
+        Objects.requireNonNull(user, "User cannot be null.");
+        return mLockPatternUtils.isWeakEscrowTokenValid(handle, token, user.getIdentifier());
+    }
+
+    /**
+     * Register the given WeakEscrowTokenRemovedListener.
+     *
+     * @return true if the listener is registered successfully, return false otherwise.
+     * @hide
+     */
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
+    @RequiresPermission(Manifest.permission.MANAGE_WEAK_ESCROW_TOKEN)
+    @SystemApi
+    public boolean registerWeakEscrowTokenRemovedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull WeakEscrowTokenRemovedListener listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null.");
+        Objects.requireNonNull(executor, "Executor cannot be null.");
+        Preconditions.checkArgument(!mListeners.containsKey(listener),
+                "Listener already registered: %s", listener);
+        IWeakEscrowTokenRemovedListener internalListener =
+                new IWeakEscrowTokenRemovedListener.Stub() {
+            @Override
+            public void onWeakEscrowTokenRemoved(long handle, int userId) {
+                UserHandle user = UserHandle.of(userId);
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onWeakEscrowTokenRemoved(handle, user));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        };
+        if (mLockPatternUtils.registerWeakEscrowTokenRemovedListener(internalListener)) {
+            mListeners.put(listener, internalListener);
+            return true;
+        } else {
+            Log.e(TAG, "Listener failed to register");
+            return false;
+        }
+    }
+
+    /**
+     * Unregister the given WeakEscrowTokenRemovedListener.
+     *
+     * @return true if the listener is unregistered successfully, return false otherwise.
+     * @hide
+     */
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
+    @RequiresPermission(Manifest.permission.MANAGE_WEAK_ESCROW_TOKEN)
+    @SystemApi
+    public boolean unregisterWeakEscrowTokenRemovedListener(
+            @NonNull WeakEscrowTokenRemovedListener listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null.");
+        IWeakEscrowTokenRemovedListener internalListener = mListeners.get(listener);
+        Preconditions.checkArgument(internalListener != null, "Listener was not registered");
+        if (mLockPatternUtils.unregisterWeakEscrowTokenRemovedListener(internalListener)) {
+            mListeners.remove(listener);
+            return true;
+        } else {
+            Log.e(TAG, "Listener failed to unregister.");
+            return false;
+        }
     }
 
     /**
@@ -832,13 +1020,12 @@ public class KeyguardManager {
     })
     public boolean setLock(@LockTypes int newLockType, @Nullable byte[] newPassword,
             @LockTypes int currentLockType, @Nullable byte[] currentPassword) {
-        final LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
         final int userId = mContext.getUserId();
         LockscreenCredential currentCredential = createLockscreenCredential(
                 currentLockType, currentPassword);
         LockscreenCredential newCredential = createLockscreenCredential(
                 newLockType, newPassword);
-        return lockPatternUtils.setLockCredential(newCredential, currentCredential, userId);
+        return mLockPatternUtils.setLockCredential(newCredential, currentCredential, userId);
     }
 
     /**
@@ -857,10 +1044,9 @@ public class KeyguardManager {
             Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE
     })
     public boolean checkLock(@LockTypes int lockType, @Nullable byte[] password) {
-        final LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
         final LockscreenCredential credential = createLockscreenCredential(
                 lockType, password);
-        final VerifyCredentialResponse response = lockPatternUtils.verifyCredential(
+        final VerifyCredentialResponse response = mLockPatternUtils.verifyCredential(
                 credential, mContext.getUserId(), /* flags= */ 0);
         if (response == null) {
             return false;

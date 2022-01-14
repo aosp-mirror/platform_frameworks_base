@@ -16,10 +16,7 @@
 
 package com.android.internal.jank;
 
-import static android.content.Intent.FLAG_RECEIVER_REGISTERED_ONLY;
-
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NORMAL;
-import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NOT_BEGUN;
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_TIMEOUT;
 import static com.android.internal.jank.FrameTracker.REASON_END_NORMAL;
 import static com.android.internal.jank.FrameTracker.REASON_END_UNKNOWN;
@@ -71,11 +68,9 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
-import android.os.SystemProperties;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.Log;
@@ -131,14 +126,8 @@ public class InteractionJankMonitor {
     private static final int DEFAULT_TRACE_THRESHOLD_MISSED_FRAMES = 3;
     private static final int DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS = 64;
 
-    public static final String ACTION_SESSION_BEGIN = ACTION_PREFIX + ".ACTION_SESSION_BEGIN";
     public static final String ACTION_SESSION_END = ACTION_PREFIX + ".ACTION_SESSION_END";
     public static final String ACTION_SESSION_CANCEL = ACTION_PREFIX + ".ACTION_SESSION_CANCEL";
-    public static final String ACTION_METRICS_LOGGED = ACTION_PREFIX + ".ACTION_METRICS_LOGGED";
-    public static final String BUNDLE_KEY_CUJ_NAME = ACTION_PREFIX + ".CUJ_NAME";
-    public static final String BUNDLE_KEY_TIMESTAMP = ACTION_PREFIX + ".TIMESTAMP";
-    @VisibleForTesting
-    public static final String PROP_NOTIFY_CUJ_EVENT = "debug.jank.notify_cuj_events";
 
     // Every value must have a corresponding entry in CUJ_STATSD_INTERACTION_TYPE.
     public static final int CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE = 0;
@@ -374,8 +363,7 @@ public class InteractionJankMonitor {
                 new ChoreographerWrapper(Choreographer.getInstance());
 
         synchronized (mLock) {
-            FrameTrackerListener eventsListener =
-                    (s, act) -> handleCujEvents(config.getContext(), act, s);
+            FrameTrackerListener eventsListener = (s, act) -> handleCujEvents(act, s);
             return new FrameTracker(session, mWorker.getThreadHandler(),
                     threadedRenderer, viewRoot, surfaceControl, choreographer, mMetrics,
                     mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis,
@@ -383,23 +371,12 @@ public class InteractionJankMonitor {
         }
     }
 
-    private void handleCujEvents(Context context, String action, Session session) {
+    private void handleCujEvents(String action, Session session) {
         // Clear the running and timeout tasks if the end / cancel was fired within the tracker.
         // Or we might have memory leaks.
         if (needRemoveTasks(action, session)) {
             removeTimeout(session.getCuj());
             removeTracker(session.getCuj());
-        }
-
-        // Notify the receivers if necessary.
-        if (session.shouldNotify()) {
-            if (context != null) {
-                notifyEvents(context, action, session);
-            } else {
-                throw new IllegalArgumentException(
-                        "Can't notify cuj events due to lack of context: cuj="
-                        + session.getName() + ", action=" + action);
-            }
         }
     }
 
@@ -410,22 +387,6 @@ public class InteractionJankMonitor {
                 && !(session.getReason() == REASON_CANCEL_NORMAL
                 || session.getReason() == REASON_CANCEL_TIMEOUT);
         return badEnd || badCancel;
-    }
-
-    /**
-     * Notifies who may interest in some CUJ events.
-     */
-    @VisibleForTesting
-    public void notifyEvents(Context context, String action, Session session) {
-        if (action.equals(ACTION_SESSION_CANCEL)
-                && session.getReason() == REASON_CANCEL_NOT_BEGUN) {
-            return;
-        }
-        Intent intent = new Intent(action);
-        intent.putExtra(BUNDLE_KEY_CUJ_NAME, getNameOfCuj(session.getCuj()));
-        intent.putExtra(BUNDLE_KEY_TIMESTAMP, session.getTimeStamp());
-        intent.addFlags(FLAG_RECEIVER_REGISTERED_ONLY);
-        context.sendBroadcast(intent);
     }
 
     private void removeTimeout(@CujType int cujType) {
@@ -625,7 +586,17 @@ public class InteractionJankMonitor {
      */
     public static String getNameOfInteraction(int interactionType) {
         // There is an offset amount of 1 between cujType and interactionType.
-        return getNameOfCuj(interactionType - 1);
+        return getNameOfCuj(getCujTypeFromInteraction(interactionType));
+    }
+
+    /**
+     * A helper method to translate interaction type to CUJ type.
+     *
+     * @param interactionType the interaction type defined in AtomsProto.java
+     * @return the integer in {@link CujType}
+     */
+    private static int getCujTypeFromInteraction(int interactionType) {
+        return interactionType - 1;
     }
 
     /**
@@ -935,13 +906,11 @@ public class InteractionJankMonitor {
         private final long mTimeStamp;
         @Reasons
         private int mReason = REASON_END_UNKNOWN;
-        private final boolean mShouldNotify;
         private final String mName;
 
         public Session(@CujType int cujType, @NonNull String postfix) {
             mCujType = cujType;
             mTimeStamp = System.nanoTime();
-            mShouldNotify = SystemProperties.getBoolean(PROP_NOTIFY_CUJ_EVENT, false);
             mName = TextUtils.isEmpty(postfix)
                     ? String.format("J<%s>", getNameOfCuj(mCujType))
                     : String.format("J<%s::%s>", getNameOfCuj(mCujType), postfix);
@@ -980,11 +949,6 @@ public class InteractionJankMonitor {
 
         public @Reasons int getReason() {
             return mReason;
-        }
-
-        /** Determines if should notify the receivers of cuj events */
-        public boolean shouldNotify() {
-            return mShouldNotify;
         }
     }
 }

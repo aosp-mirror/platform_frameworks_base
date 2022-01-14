@@ -175,7 +175,7 @@ final class LetterboxConfiguration {
      * Overrides corners raidus for activities presented in the letterbox mode. If given value < 0,
      * both it and a value of {@link
      * com.android.internal.R.integer.config_letterboxActivityCornersRadius} will be ignored and
-     * and corners of the activity won't be rounded.
+     * corners of the activity won't be rounded.
      */
     void setLetterboxActivityCornersRadius(int cornersRadius) {
         mLetterboxActivityCornersRadius = cornersRadius;

@@ -94,8 +94,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Interface to global information about an application environment.  This is
@@ -6406,6 +6409,43 @@ public abstract class Context {
             @Nullable Uri uri, @Nullable String readPermission,
             @Nullable String writePermission, int pid, int uid, @Intent.AccessUriMode int modeFlags,
             @Nullable String message);
+
+
+    /**
+     * Triggers the asynchronous revocation of a permission.
+     *
+     * @param permName The name of the permission to be revoked.
+     * @see #selfRevokePermissions(Collection)
+     */
+    public void selfRevokePermission(@NonNull String permName) {
+        selfRevokePermissions(Collections.singletonList(permName));
+    }
+
+    /**
+     * Triggers the revocation of one or more permissions for the calling package. A package is only
+     * able to revoke a permission under the following conditions:
+     * <ul>
+     * <li>Each permission in {@code permissions} must be granted to the calling package.
+     * <li>Each permission in {@code permissions} must be a runtime permission.
+     * </ul>
+     * <p>
+     * For every permission in {@code permissions}, the entire permission group it belongs to will
+     * be revoked. The revocation happens asynchronously and kills all processes running in the
+     * calling UID. It will be triggered once it is safe to do so. In particular, it will not be
+     * triggered as long as the package remains in the foreground, or has any active manifest
+     * components (e.g. when another app is accessing a content provider in the package).
+     * <p>
+     * If you want to revoke the permissions right away, you could call {@code System.exit()}, but
+     * this could affect other apps that are accessing your app at the moment. For example, apps
+     * accessing a content provider in your app will all crash.
+     *
+     * @param permissions Collection of permissions to be revoked.
+     * @see PackageManager#getGroupOfPlatformPermission(String, Executor, Consumer)
+     * @see PackageManager#getPlatformPermissionsForGroup(String, Executor, Consumer)
+     */
+    public void selfRevokePermissions(@NonNull Collection<String> permissions) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
 
     /** @hide */
     @IntDef(flag = true, prefix = { "CONTEXT_" }, value = {
