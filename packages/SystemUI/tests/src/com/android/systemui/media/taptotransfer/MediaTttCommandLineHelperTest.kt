@@ -21,9 +21,10 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
-import com.android.systemui.media.taptotransfer.sender.*
+import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender
+import com.android.systemui.media.taptotransfer.sender.MediaTttSenderService
 import com.android.systemui.shared.mediattt.DeviceInfo
-import com.android.systemui.shared.mediattt.IDeviceSenderCallback
+import com.android.systemui.shared.mediattt.IDeviceSenderService
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.mockito.any
@@ -55,7 +56,7 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     @Mock
     private lateinit var mediaTttChipControllerReceiver: MediaTttChipControllerReceiver
     @Mock
-    private lateinit var mediaSenderService: IDeviceSenderCallback.Stub
+    private lateinit var mediaSenderService: IDeviceSenderService.Stub
     private lateinit var mediaSenderServiceComponentName: ComponentName
 
     @Before
@@ -160,7 +161,8 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
         assertThat(context.isBound(mediaSenderServiceComponentName)).isTrue()
 
         val deviceInfoCaptor = argumentCaptor<DeviceInfo>()
-        verify(mediaSenderService).transferToReceiverSucceeded(any(), capture(deviceInfoCaptor))
+        verify(mediaSenderService)
+            .transferToReceiverSucceeded(any(), capture(deviceInfoCaptor), any())
         assertThat(deviceInfoCaptor.value!!.name).isEqualTo(DEVICE_NAME)
     }
 

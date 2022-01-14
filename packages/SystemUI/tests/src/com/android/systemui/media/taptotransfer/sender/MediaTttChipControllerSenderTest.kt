@@ -26,6 +26,7 @@ import android.widget.TextView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.shared.mediattt.IUndoTransferCallback
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -122,7 +123,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_nullUndoRunnable_noUndo() {
-        controllerSender.displayChip(transferToReceiverSucceeded(undoRunnable = null))
+        controllerSender.displayChip(transferToReceiverSucceeded(undoCallback = null))
 
         val chipView = getChipView()
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
@@ -130,7 +131,10 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_withUndoRunnable_undoWithClick() {
-        controllerSender.displayChip(transferToReceiverSucceeded { })
+        val undoCallback = object : IUndoTransferCallback.Stub() {
+            override fun onUndoTriggered() {}
+        }
+        controllerSender.displayChip(transferToReceiverSucceeded(undoCallback))
 
         val chipView = getChipView()
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.VISIBLE)
@@ -139,13 +143,30 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_withUndoRunnable_undoButtonClickRunsRunnable() {
-        var runnableRun = false
-        val runnable = Runnable { runnableRun = true }
+        var undoCallbackCalled = false
+        val undoCallback = object : IUndoTransferCallback.Stub() {
+            override fun onUndoTriggered() {
+                undoCallbackCalled = true
+            }
+        }
 
-        controllerSender.displayChip(transferToReceiverSucceeded(undoRunnable = runnable))
+        controllerSender.displayChip(transferToReceiverSucceeded(undoCallback))
         getChipView().getUndoButton().performClick()
 
-        assertThat(runnableRun).isTrue()
+        assertThat(undoCallbackCalled).isTrue()
+    }
+
+    @Test
+    fun transferToReceiverSucceeded_undoButtonClick_switchesToTransferToThisDeviceTriggered() {
+        val undoCallback = object : IUndoTransferCallback.Stub() {
+            override fun onUndoTriggered() {}
+        }
+        controllerSender.displayChip(transferToReceiverSucceeded(undoCallback))
+
+        getChipView().getUndoButton().performClick()
+
+        assertThat(getChipView().getChipText())
+            .isEqualTo(transferToThisDeviceTriggered().getChipTextString(context))
     }
 
     @Test
@@ -181,7 +202,13 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Test
     fun changeFromTransferTriggeredToTransferSucceeded_undoButtonAppears() {
         controllerSender.displayChip(transferToReceiverTriggered())
-        controllerSender.displayChip(transferToReceiverSucceeded { })
+        controllerSender.displayChip(
+            transferToReceiverSucceeded(
+                object : IUndoTransferCallback.Stub() {
+                    override fun onUndoTriggered() {}
+                }
+            )
+        )
 
         assertThat(getChipView().getUndoButton().visibility).isEqualTo(View.VISIBLE)
     }
@@ -237,9 +264,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         TransferToThisDeviceTriggered(appIconDrawable, APP_ICON_CONTENT_DESC)
 
     /** Helper method providing default parameters to not clutter up the tests. */
-    private fun transferToReceiverSucceeded(undoRunnable: Runnable? = null) =
+    private fun transferToReceiverSucceeded(undoCallback: IUndoTransferCallback? = null) =
         TransferToReceiverSucceeded(
-            appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoRunnable
+            appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoCallback
         )
 
     /** Helper method providing default parameters to not clutter up the tests. */

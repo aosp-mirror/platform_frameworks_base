@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import com.android.systemui.R
 import com.android.systemui.media.taptotransfer.common.MediaTttChipState
+import com.android.systemui.shared.mediattt.IUndoTransferCallback
 
 /**
  * A class that stores all the information necessary to display the media tap-to-transfer chip on
@@ -114,14 +115,14 @@ class TransferToThisDeviceTriggered(
  * A state representing that a transfer to the receiver device has been successfully completed.
  *
  * @property otherDeviceName the name of the other device involved in the transfer.
- * @property undoRunnable if present, the runnable that should be run to undo the transfer. We will
- *   show an Undo button on the chip if this runnable is present.
+ * @property undoCallback if present, the callback that should be called when the user clicks the
+ *   undo button. The undo button will only be shown if this is non-null.
  */
 class TransferToReceiverSucceeded(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
     private val otherDeviceName: String,
-    val undoRunnable: Runnable? = null
+    val undoCallback: IUndoTransferCallback? = null
 ) : ChipStateSender(appIconDrawable, appIconContentDescription) {
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_transfer_playing_different_device, otherDeviceName)

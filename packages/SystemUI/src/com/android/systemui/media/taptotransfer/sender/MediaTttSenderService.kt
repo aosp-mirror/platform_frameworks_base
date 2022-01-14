@@ -25,7 +25,8 @@ import android.media.MediaRoute2Info
 import android.os.IBinder
 import com.android.systemui.R
 import com.android.systemui.shared.mediattt.DeviceInfo
-import com.android.systemui.shared.mediattt.IDeviceSenderCallback
+import com.android.systemui.shared.mediattt.IUndoTransferCallback
+import com.android.systemui.shared.mediattt.IDeviceSenderService
 import javax.inject.Inject
 
 /**
@@ -37,7 +38,7 @@ class MediaTttSenderService @Inject constructor(
 ) : Service() {
 
     // TODO(b/203800643): Add logging when callbacks trigger.
-    private val binder: IBinder = object : IDeviceSenderCallback.Stub() {
+    private val binder: IBinder = object : IDeviceSenderService.Stub() {
         override fun closeToReceiverToStartCast(
             mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
         ) {
@@ -69,9 +70,13 @@ class MediaTttSenderService @Inject constructor(
         }
 
         override fun transferToReceiverSucceeded(
-            mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
+            mediaInfo: MediaRoute2Info,
+            otherDeviceInfo: DeviceInfo,
+            undoCallback: IUndoTransferCallback
         ) {
-            this@MediaTttSenderService.transferToReceiverSucceeded(mediaInfo, otherDeviceInfo)
+            this@MediaTttSenderService.transferToReceiverSucceeded(
+                mediaInfo, otherDeviceInfo, undoCallback
+            )
         }
     }
 
@@ -131,14 +136,13 @@ class MediaTttSenderService @Inject constructor(
     }
 
     private fun transferToReceiverSucceeded(
-        mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
+        mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo, undoCallback: IUndoTransferCallback
     ) {
         val chipState = TransferToReceiverSucceeded(
             appIconDrawable = fakeAppIconDrawable,
             appIconContentDescription = mediaInfo.name.toString(),
-            otherDeviceName = otherDeviceInfo.name
-            // TODO(b/203800643): Implement the undo API correctly so we can provide an undo
-            //   callback here.
+            otherDeviceName = otherDeviceInfo.name,
+            undoCallback = undoCallback
         )
         controller.displayChip(chipState)
     }

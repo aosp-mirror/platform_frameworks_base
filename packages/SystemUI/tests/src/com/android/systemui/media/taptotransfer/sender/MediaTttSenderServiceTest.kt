@@ -4,7 +4,8 @@ import android.media.MediaRoute2Info
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.mediattt.DeviceInfo
-import com.android.systemui.shared.mediattt.IDeviceSenderCallback
+import com.android.systemui.shared.mediattt.IDeviceSenderService
+import com.android.systemui.shared.mediattt.IUndoTransferCallback
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -18,8 +19,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class MediaTttSenderServiceTest : SysuiTestCase() {
 
-    private lateinit var service: MediaTttSenderService
-    private lateinit var callback: IDeviceSenderCallback
+    private lateinit var service: IDeviceSenderService
 
     @Mock
     private lateinit var controller: MediaTttChipControllerSender
@@ -31,14 +31,14 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        service = MediaTttSenderService(context, controller)
-        callback = IDeviceSenderCallback.Stub.asInterface(service.onBind(null))
+        val mediaTttSenderService = MediaTttSenderService(context, controller)
+        service = IDeviceSenderService.Stub.asInterface(mediaTttSenderService.onBind(null))
     }
 
     @Test
     fun closeToReceiverToStartCast_controllerTriggeredWithCorrectState() {
         val name = "Fake name"
-        callback.closeToReceiverToStartCast(mediaInfo, DeviceInfo(name))
+        service.closeToReceiverToStartCast(mediaInfo, DeviceInfo(name))
 
         val chipStateCaptor = argumentCaptor<MoveCloserToStartCast>()
         verify(controller).displayChip(capture(chipStateCaptor))
@@ -50,7 +50,7 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
     @Test
     fun closeToReceiverToEndCast_controllerTriggeredWithCorrectState() {
         val name = "Fake name"
-        callback.closeToReceiverToEndCast(mediaInfo, DeviceInfo(name))
+        service.closeToReceiverToEndCast(mediaInfo, DeviceInfo(name))
 
         val chipStateCaptor = argumentCaptor<MoveCloserToEndCast>()
         verify(controller).displayChip(capture(chipStateCaptor))
@@ -61,7 +61,7 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
 
     @Test
     fun transferToThisDeviceTriggered_controllerTriggeredWithCorrectState() {
-        callback.transferToThisDeviceTriggered(mediaInfo, DeviceInfo("Fake name"))
+        service.transferToThisDeviceTriggered(mediaInfo, DeviceInfo("Fake name"))
 
         verify(controller).displayChip(any<TransferToThisDeviceTriggered>())
     }
@@ -69,7 +69,7 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
     @Test
     fun transferToReceiverTriggered_controllerTriggeredWithCorrectState() {
         val name = "Fake name"
-        callback.transferToReceiverTriggered(mediaInfo, DeviceInfo(name))
+        service.transferToReceiverTriggered(mediaInfo, DeviceInfo(name))
 
         val chipStateCaptor = argumentCaptor<TransferToReceiverTriggered>()
         verify(controller).displayChip(capture(chipStateCaptor))
@@ -81,18 +81,22 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
     @Test
     fun transferToReceiverSucceeded_controllerTriggeredWithCorrectState() {
         val name = "Fake name"
-        callback.transferToReceiverSucceeded(mediaInfo, DeviceInfo(name))
+        val undoCallback = object : IUndoTransferCallback.Stub() {
+            override fun onUndoTriggered() {}
+        }
+        service.transferToReceiverSucceeded(mediaInfo, DeviceInfo(name), undoCallback)
 
         val chipStateCaptor = argumentCaptor<TransferToReceiverSucceeded>()
         verify(controller).displayChip(capture(chipStateCaptor))
 
         val chipState = chipStateCaptor.value!!
         assertThat(chipState.getChipTextString(context)).contains(name)
+        assertThat(chipState.undoCallback).isEqualTo(undoCallback)
     }
 
     @Test
     fun transferFailed_controllerTriggeredWithTransferFailedState() {
-        callback.transferFailed(mediaInfo, DeviceInfo("Fake name"))
+        service.transferFailed(mediaInfo, DeviceInfo("Fake name"))
 
         verify(controller).displayChip(any<TransferFailed>())
     }

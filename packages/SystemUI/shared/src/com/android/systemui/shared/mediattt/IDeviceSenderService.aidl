@@ -18,16 +18,17 @@ package com.android.systemui.shared.mediattt;
 
 import android.media.MediaRoute2Info;
 import com.android.systemui.shared.mediattt.DeviceInfo;
+import com.android.systemui.shared.mediattt.IUndoTransferCallback;
 
 /**
- * A callback interface that can be invoked to trigger media transfer events on System UI.
+ * An interface that can be invoked to trigger media transfer events on System UI.
  *
  * This interface is for the *sender* device, which is the device currently playing media. This
  * sender device can transfer the media to a different device, called the receiver.
  *
  * System UI will implement this interface and other services will invoke it.
  */
-interface IDeviceSenderCallback {
+interface IDeviceSenderService {
     /**
      * Invoke to notify System UI that this device (the sender) is close to a receiver device, so
      * the user can potentially *start* a cast to the receiver device if the user moves their device
@@ -92,9 +93,13 @@ interface IDeviceSenderCallback {
      *   - This callback is for *starting* a cast. It should be used when this device had previously
      *     been playing media locally and the media has successfully been transferred to the
      *     receiver device instead.
+     *
+     * @param undoCallback will be invoked if the user chooses to undo this transfer.
      */
     oneway void transferToReceiverSucceeded(
-        in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
+        in MediaRoute2Info mediaInfo,
+        in DeviceInfo otherDeviceInfo,
+        in IUndoTransferCallback undoCallback);
 
     /**
      * Invoke to notify System UI that the attempted transfer has failed.

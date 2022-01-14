@@ -39,7 +39,8 @@ import com.android.systemui.media.taptotransfer.sender.TransferToReceiverTrigger
 import com.android.systemui.media.taptotransfer.sender.TransferToThisDeviceTriggered
 import com.android.systemui.media.taptotransfer.sender.TransferToReceiverSucceeded
 import com.android.systemui.shared.mediattt.DeviceInfo
-import com.android.systemui.shared.mediattt.IDeviceSenderCallback
+import com.android.systemui.shared.mediattt.IDeviceSenderService
+import com.android.systemui.shared.mediattt.IUndoTransferCallback
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import java.io.PrintWriter
@@ -56,7 +57,7 @@ class MediaTttCommandLineHelper @Inject constructor(
     private val mediaTttChipControllerSender: MediaTttChipControllerSender,
     private val mediaTttChipControllerReceiver: MediaTttChipControllerReceiver,
 ) {
-    private var senderCallback: IDeviceSenderCallback? = null
+    private var senderService: IDeviceSenderService? = null
     private val senderServiceConnection = SenderServiceConnection()
 
     private val appIconDrawable =
@@ -85,33 +86,45 @@ class MediaTttCommandLineHelper @Inject constructor(
 
             when (args[1]) {
                 MOVE_CLOSER_TO_START_CAST_COMMAND_NAME -> {
-                    runOnService { senderCallback ->
-                        senderCallback.closeToReceiverToStartCast(mediaInfo, otherDeviceInfo)
+                    runOnService { senderService ->
+                        senderService.closeToReceiverToStartCast(mediaInfo, otherDeviceInfo)
                     }
                 }
                 MOVE_CLOSER_TO_END_CAST_COMMAND_NAME -> {
-                    runOnService { senderCallback ->
-                        senderCallback.closeToReceiverToEndCast(mediaInfo, otherDeviceInfo)
+                    runOnService { senderService ->
+                        senderService.closeToReceiverToEndCast(mediaInfo, otherDeviceInfo)
                     }
                 }
                 TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME -> {
-                    runOnService { senderCallback ->
-                        senderCallback.transferToReceiverTriggered(mediaInfo, otherDeviceInfo)
+                    runOnService { senderService ->
+                        senderService.transferToReceiverTriggered(mediaInfo, otherDeviceInfo)
                     }
                 }
                 TRANSFER_TO_THIS_DEVICE_TRIGGERED_COMMAND_NAME -> {
-                    runOnService { senderCallback ->
-                        senderCallback.transferToThisDeviceTriggered(mediaInfo, otherDeviceInfo)
+                    runOnService { senderService ->
+                        senderService.transferToThisDeviceTriggered(mediaInfo, otherDeviceInfo)
                     }
                 }
                 TRANSFER_TO_RECEIVER_SUCCEEDED_COMMAND_NAME -> {
-                    runOnService { senderCallback ->
-                        senderCallback.transferToReceiverSucceeded(mediaInfo, otherDeviceInfo)
+                    val undoCallback = object : IUndoTransferCallback.Stub() {
+                        override fun onUndoTriggered() {
+                            Log.i(TAG, "Undo callback triggered")
+                            // The external services that implement this callback would kick off a
+                            // transfer back to this device, so mimic that here.
+                            runOnService { senderService ->
+                                senderService
+                                    .transferToThisDeviceTriggered(mediaInfo, otherDeviceInfo)
+                            }
+                        }
+                    }
+                    runOnService { senderService ->
+                        senderService
+                            .transferToReceiverSucceeded(mediaInfo, otherDeviceInfo, undoCallback)
                     }
                 }
                 TRANSFER_FAILED_COMMAND_NAME -> {
-                    runOnService { senderCallback ->
-                        senderCallback.transferFailed(mediaInfo, otherDeviceInfo)
+                    runOnService { senderService ->
+                        senderService.transferFailed(mediaInfo, otherDeviceInfo)
                     }
                 }
                 else -> {
@@ -133,16 +146,16 @@ class MediaTttCommandLineHelper @Inject constructor(
             )
         }
 
-        private fun runOnService(command: SenderCallbackCommand) {
-            val currentServiceCallback = senderCallback
-            if (currentServiceCallback != null) {
-                command.run(currentServiceCallback)
+        private fun runOnService(command: SenderServiceCommand) {
+            val currentService = senderService
+            if (currentService != null) {
+                command.run(currentService)
             } else {
                 bindService(command)
             }
         }
 
-        private fun bindService(command: SenderCallbackCommand) {
+        private fun bindService(command: SenderServiceCommand) {
             senderServiceConnection.pendingCommand = command
             val binding = context.bindService(
                 Intent(context, MediaTttSenderService::class.java),
@@ -157,7 +170,7 @@ class MediaTttCommandLineHelper @Inject constructor(
     inner class RemoveChipCommandSender : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
             mediaTttChipControllerSender.removeChip()
-            if (senderCallback != null) {
+            if (senderService != null) {
                 context.unbindService(senderServiceConnection)
             }
         }
@@ -188,27 +201,27 @@ class MediaTttCommandLineHelper @Inject constructor(
         }
     }
 
-    /** A service connection for [IDeviceSenderCallback]. */
+    /** A service connection for [IDeviceSenderService]. */
     private inner class SenderServiceConnection : ServiceConnection {
         // A command that should be run when the service gets connected.
-        var pendingCommand: SenderCallbackCommand? = null
+        var pendingCommand: SenderServiceCommand? = null
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val newCallback = IDeviceSenderCallback.Stub.asInterface(service)
-            senderCallback = newCallback
+            val newCallback = IDeviceSenderService.Stub.asInterface(service)
+            senderService = newCallback
             pendingCommand?.run(newCallback)
             pendingCommand = null
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
-            senderCallback = null
+            senderService = null
         }
     }
 
-    /** An interface defining a command that should be run on the sender callback. */
-    private fun interface SenderCallbackCommand {
-        /** Runs the command on the provided [senderCallback]. */
-        fun run(senderCallback: IDeviceSenderCallback)
+    /** An interface defining a command that should be run on the sender service. */
+    private fun interface SenderServiceCommand {
+        /** Runs the command on the provided [senderService]. */
+        fun run(senderService: IDeviceSenderService)
     }
 }
 
