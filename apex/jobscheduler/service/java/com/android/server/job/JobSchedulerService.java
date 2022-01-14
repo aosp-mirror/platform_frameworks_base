@@ -1556,7 +1556,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "UID " + uid + " bias changed from " + prevBias + " to " + newBias);
                 }
                 for (int c = 0; c < mControllers.size(); ++c) {
-                    mControllers.get(c).onUidBiasChangedLocked(uid, newBias);
+                    mControllers.get(c).onUidBiasChangedLocked(uid, prevBias, newBias);
                 }
             }
         }
