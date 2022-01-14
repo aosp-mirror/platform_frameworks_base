@@ -34,7 +34,7 @@ public final class BtProfileConnectionInfo implements Parcelable {
     /** @hide */
     @IntDef({
             BluetoothProfile.A2DP,
-            BluetoothProfile.A2DP_SINK, // Can only be set by BtHelper
+            BluetoothProfile.A2DP_SINK,
             BluetoothProfile.HEADSET, // Can only be set by BtHelper
             BluetoothProfile.HEARING_AID,
             BluetoothProfile.LE_AUDIO,
@@ -102,6 +102,16 @@ public final class BtProfileConnectionInfo implements Parcelable {
             int volume) {
         return new BtProfileConnectionInfo(BluetoothProfile.A2DP, suppressNoisyIntent, volume,
             false);
+    }
+
+    /**
+     * Constructor for A2dp sink info
+     * The {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent will not be sent.
+     *
+     * @param volume of device -1 to ignore value
+     */
+    public static @NonNull BtProfileConnectionInfo a2dpSinkInfo(int volume) {
+        return new BtProfileConnectionInfo(BluetoothProfile.A2DP_SINK, true, volume, false);
     }
 
     /**
