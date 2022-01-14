@@ -91,7 +91,6 @@ import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
@@ -195,38 +194,32 @@ final class InstallPackageHelper {
     private final AppDataHelper mAppDataHelper;
     private final BroadcastHelper mBroadcastHelper;
     private final RemovePackageHelper mRemovePackageHelper;
-    private final StorageManager mStorageManager;
-    private final RollbackManagerInternal mRollbackManager;
     private final IncrementalManager mIncrementalManager;
     private final ApexManager mApexManager;
     private final DexManager mDexManager;
     private final ArtManagerService mArtManagerService;
-    private final AppOpsManager mAppOpsManager;
     private final Context mContext;
     private final PackageDexOptimizer mPackageDexOptimizer;
     private final PackageAbiHelper mPackageAbiHelper;
     private final ViewCompiler mViewCompiler;
-    private final IBackupManager mIBackupManager;
     private final SharedLibrariesImpl mSharedLibraries;
+    private final PackageManagerServiceInjector mInjector;
 
     // TODO(b/198166813): remove PMS dependency
     InstallPackageHelper(PackageManagerService pm, AppDataHelper appDataHelper) {
         mPm = pm;
+        mInjector = pm.mInjector;
         mAppDataHelper = appDataHelper;
         mBroadcastHelper = new BroadcastHelper(pm.mInjector);
         mRemovePackageHelper = new RemovePackageHelper(pm);
-        mStorageManager = pm.mInjector.getSystemService(StorageManager.class);
-        mRollbackManager = pm.mInjector.getLocalService(RollbackManagerInternal.class);
         mIncrementalManager = pm.mInjector.getIncrementalManager();
         mApexManager = pm.mInjector.getApexManager();
         mDexManager = pm.mInjector.getDexManager();
         mArtManagerService = pm.mInjector.getArtManagerService();
-        mAppOpsManager = pm.mInjector.getSystemService(AppOpsManager.class);
         mContext = pm.mInjector.getContext();
         mPackageDexOptimizer = pm.mInjector.getPackageDexOptimizer();
         mPackageAbiHelper = pm.mInjector.getAbiHelper();
         mViewCompiler = pm.mInjector.getViewCompiler();
-        mIBackupManager = pm.mInjector.getIBackupManager();
         mSharedLibraries = pm.mInjector.getSharedLibrariesImpl();
     }
 
@@ -693,7 +686,8 @@ final class InstallPackageHelper {
      * Returns whether the restore successfully completed.
      */
     private boolean performBackupManagerRestore(int userId, int token, PackageInstalledInfo res) {
-        if (mIBackupManager != null) {
+        IBackupManager iBackupManager = mInjector.getIBackupManager();
+        if (iBackupManager != null) {
             // For backwards compatibility as USER_ALL previously routed directly to USER_SYSTEM
             // in the BackupManager. USER_ALL is used in compatibility tests.
             if (userId == UserHandle.USER_ALL) {
@@ -704,8 +698,8 @@ final class InstallPackageHelper {
             }
             Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
             try {
-                if (mIBackupManager.isUserReadyForBackup(userId)) {
-                    mIBackupManager.restoreAtInstallForUser(
+                if (iBackupManager.isUserReadyForBackup(userId)) {
+                    iBackupManager.restoreAtInstallForUser(
                             userId, res.mPkg.getPackageName(), token);
                 } else {
                     Slog.w(TAG, "User " + userId + " is not ready. Restore at install "
@@ -756,7 +750,9 @@ final class InstallPackageHelper {
 
         if (ps != null && doSnapshotOrRestore) {
             final String seInfo = AndroidPackageUtils.getSeInfo(res.mPkg, ps);
-            mRollbackManager.snapshotAndRestoreUserData(packageName,
+            final RollbackManagerInternal rollbackManager =
+                    mInjector.getLocalService(RollbackManagerInternal.class);
+            rollbackManager.snapshotAndRestoreUserData(packageName,
                     UserHandle.toUserHandles(installedUsers), appId, ceDataInode, seInfo, token);
             return true;
         }
@@ -2787,8 +2783,10 @@ final class InstallPackageHelper {
                 // Send broadcast package appeared if external for all users
                 if (res.mPkg.isExternalStorage()) {
                     if (!update) {
+                        final StorageManager storageManager =
+                                mInjector.getSystemService(StorageManager.class);
                         VolumeInfo volume =
-                                mStorageManager.findVolumeByUuid(
+                                storageManager.findVolumeByUuid(
                                         StorageManager.convert(
                                                 res.mPkg.getVolumeUuid()).toString());
                         int packageExternalStorageType =
