@@ -74,11 +74,6 @@ stubs_defaults {
     srcs: [
         ":android-non-updatable-stub-sources",
 
-        // Module sources
-        ":art.module.public.api{.public.stubs.source}",
-        ":conscrypt.module.public.api{.public.stubs.source}",
-        ":i18n.module.public.api{.public.stubs.source}",
-
         // No longer part of the stubs, but are included in the docs.
         ":android-test-base-sources",
         ":android-test-mock-sources",
@@ -116,6 +111,10 @@ stubs_defaults {
     name: "framework-doc-stubs-sources-default",
     defaults: ["framework-doc-stubs-default"],
     srcs: [
+        ":art.module.public.api{.public.stubs.source}",
+        ":conscrypt.module.public.api{.public.stubs.source}",
+        ":i18n.module.public.api{.public.stubs.source}",
+
         ":framework-appsearch-sources",
         ":framework-connectivity-sources",
         ":framework-graphics-srcs",
@@ -156,22 +155,8 @@ droidstubs {
 droidstubs {
     name: "framework-doc-stubs",
     defaults: ["framework-doc-stubs-default"],
+    srcs: [":all-modules-public-stubs-source"],
     args: metalava_framework_docs_args,
-    srcs: [
-        ":android.net.ipsec.ike{.public.stubs.source}",
-        ":framework-appsearch{.public.stubs.source}",
-        ":framework-connectivity{.public.stubs.source}",
-        ":framework-graphics{.public.stubs.source}",
-        ":framework-media{.public.stubs.source}",
-        ":framework-mediaprovider{.public.stubs.source}",
-        ":framework-permission{.public.stubs.source}",
-        ":framework-permission-s{.public.stubs.source}",
-        ":framework-scheduling{.public.stubs.source}",
-        ":framework-sdkextensions{.public.stubs.source}",
-        ":framework-statsd{.public.stubs.source}",
-        ":framework-tethering{.public.stubs.source}",
-        ":framework-wifi{.public.stubs.source}",
-    ],
     aidl: {
         local_include_dirs: [
             "apex/media/aidl/stable",
