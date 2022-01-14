@@ -15407,6 +15407,7 @@ package android.webkit {
     method @Deprecated public abstract void setUseWebViewBackgroundForOverscrollBackground(boolean);
     method @Deprecated public abstract void setUserAgent(int);
     method public abstract void setVideoOverlayForEmbeddedEncryptedVideoEnabled(boolean);
+    field public static final long ENABLE_SIMPLIFIED_DARK_MODE = 214741472L; // 0xcccb1e0L
   }
 
   public class WebStorage {
