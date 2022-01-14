@@ -27,6 +27,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
+import static android.content.pm.PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
@@ -2097,10 +2098,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         } else {
             // Session is sealed and committed but could not be verified, we need to destroy it.
             destroy();
-            // Dispatch message to remove session from PackageInstallerService.
-            dispatchSessionFinished(error, msg, null);
-            maybeFinishChildSessions(error, msg);
         }
+        // Dispatch message to remove session from PackageInstallerService.
+        dispatchSessionFinished(error, msg, null);
+        maybeFinishChildSessions(error, msg);
     }
 
     private void onSessionInstallationFailure(int error, String detailedMessage) {
@@ -2301,7 +2302,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (params.isStaged) {
             // TODO(b/136257624): CTS test fails if we don't send session finished broadcast, even
             //  though ideally, we just need to send session committed broadcast.
-            dispatchSessionFinished(INSTALL_SUCCEEDED, "Session staged", null);
+            sendUpdateToRemoteStatusReceiver(INSTALL_SUCCEEDED, "Session staged", null);
 
             mStagedSession.verifySession();
         } else {
@@ -2549,6 +2550,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mStagedSession.notifyEndPreRebootVerification();
                 if (error == SessionInfo.SESSION_NO_ERROR) {
                     mStagingManager.commitSession(mStagedSession);
+                } else {
+                    dispatchSessionFinished(INSTALL_FAILED_VERIFICATION_FAILURE, msg, null);
+                    maybeFinishChildSessions(INSTALL_FAILED_VERIFICATION_FAILURE, msg);
                 }
             });
             return;
@@ -2578,7 +2582,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Do not try to install staged apex session. Parent session will have at least one apk
         // session.
         if (!isMultiPackage() && isApexSession() && params.isStaged) {
-            sendUpdateToRemoteStatusReceiver(INSTALL_SUCCEEDED,
+            dispatchSessionFinished(INSTALL_SUCCEEDED,
                     "Apex package should have been installed by apexd", null);
             return null;
         }
@@ -2592,14 +2596,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @Override
             public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                     Bundle extras) {
-                if (isStaged()) {
-                    sendUpdateToRemoteStatusReceiver(returnCode, msg, extras);
-                } else {
+                if (!isStaged()) {
                     // We've reached point of no return; call into PMS to install the stage.
                     // Regardless of success or failure we always destroy session.
                     destroyInternal();
-                    dispatchSessionFinished(returnCode, msg, extras);
                 }
+                dispatchSessionFinished(returnCode, msg, extras);
             }
         };
 
