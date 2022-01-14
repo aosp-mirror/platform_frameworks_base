@@ -48,7 +48,7 @@ extern jmethodID method_reportMeasurementData;
 void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz);
 
 void setMeasurementData(JNIEnv* env, jobject& callbacksObj, jobject clock,
-                        jobjectArray measurementArray);
+                        jobjectArray measurementArray, jobjectArray gnssAgcArray);
 
 class GnssMeasurementCallbackAidl : public hardware::gnss::BnGnssMeasurementCallback {
 public:
@@ -62,6 +62,8 @@ private:
 
     jobjectArray translateAllGnssMeasurements(
             JNIEnv* env, const std::vector<hardware::gnss::GnssMeasurement>& measurements);
+    jobjectArray translateAllGnssAgcs(
+            JNIEnv* env, const std::vector<std::optional<hardware::gnss::GnssData::GnssAgc>>& agcs);
 
     void translateAndSetGnssData(const hardware::gnss::GnssData& data);
 
@@ -139,7 +141,7 @@ void GnssMeasurementCallbackHidl::translateAndSetGnssData(const T& data) {
     size_t count = getMeasurementCount(data);
     jobjectArray measurementArray =
             translateAllGnssMeasurements(env, data.measurements.data(), count);
-    setMeasurementData(env, mCallbacksObj, clock, measurementArray);
+    setMeasurementData(env, mCallbacksObj, clock, measurementArray, nullptr);
 
     env->DeleteLocalRef(clock);
     env->DeleteLocalRef(measurementArray);

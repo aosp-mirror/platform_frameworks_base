@@ -20150,6 +20150,24 @@ package android.location {
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssAntennaInfo.SphericalCorrections> CREATOR;
   }
 
+  public final class GnssAutomaticGainControl implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0) public long getCarrierFrequencyHz();
+    method public int getConstellationType();
+    method @FloatRange(from=0xffffd8f0, to=10000) public double getLevelDb();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssAutomaticGainControl> CREATOR;
+  }
+
+  public static final class GnssAutomaticGainControl.Builder {
+    ctor public GnssAutomaticGainControl.Builder();
+    ctor public GnssAutomaticGainControl.Builder(@NonNull android.location.GnssAutomaticGainControl);
+    method @NonNull public android.location.GnssAutomaticGainControl build();
+    method @NonNull public android.location.GnssAutomaticGainControl.Builder setCarrierFrequencyHz(@IntRange(from=0) long);
+    method @NonNull public android.location.GnssAutomaticGainControl.Builder setConstellationType(int);
+    method @NonNull public android.location.GnssAutomaticGainControl.Builder setLevelDb(@FloatRange(from=0xffffd8f0, to=10000) double);
+  }
+
   public final class GnssCapabilities implements android.os.Parcelable {
     method public int describeContents();
     method public boolean hasAntennaInfo();
@@ -20206,7 +20224,7 @@ package android.location {
     method public double getAccumulatedDeltaRangeMeters();
     method public int getAccumulatedDeltaRangeState();
     method public double getAccumulatedDeltaRangeUncertaintyMeters();
-    method public double getAutomaticGainControlLevelDb();
+    method @Deprecated public double getAutomaticGainControlLevelDb();
     method @FloatRange(from=0, to=63) public double getBasebandCn0DbHz();
     method @Deprecated public long getCarrierCycles();
     method public float getCarrierFrequencyHz();
@@ -20228,7 +20246,7 @@ package android.location {
     method public int getState();
     method public int getSvid();
     method public double getTimeOffsetNanos();
-    method public boolean hasAutomaticGainControlLevelDb();
+    method @Deprecated public boolean hasAutomaticGainControlLevelDb();
     method public boolean hasBasebandCn0DbHz();
     method @Deprecated public boolean hasCarrierCycles();
     method public boolean hasCarrierFrequencyHz();
@@ -20290,9 +20308,19 @@ package android.location {
   public final class GnssMeasurementsEvent implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.location.GnssClock getClock();
+    method @NonNull public java.util.Collection<android.location.GnssAutomaticGainControl> getGnssAutomaticGainControls();
     method @NonNull public java.util.Collection<android.location.GnssMeasurement> getMeasurements();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurementsEvent> CREATOR;
+  }
+
+  public static final class GnssMeasurementsEvent.Builder {
+    ctor public GnssMeasurementsEvent.Builder();
+    ctor public GnssMeasurementsEvent.Builder(@NonNull android.location.GnssMeasurementsEvent);
+    method @NonNull public android.location.GnssMeasurementsEvent build();
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setClock(@NonNull android.location.GnssClock);
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setGnssAutomaticGainControls(@NonNull java.util.Collection<android.location.GnssAutomaticGainControl>);
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setMeasurements(@NonNull java.util.Collection<android.location.GnssMeasurement>);
   }
 
   public abstract static class GnssMeasurementsEvent.Callback {
