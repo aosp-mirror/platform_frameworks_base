@@ -30,6 +30,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.mockito.ArgumentMatchers.any;
 
+import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -37,6 +38,8 @@ import android.hardware.display.DisplayManagerGlobal;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+
+import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
 
 class TestDisplayContent extends DisplayContent {
 
@@ -81,6 +84,7 @@ class TestDisplayContent extends DisplayContent {
         protected final ActivityTaskManagerService mService;
         private boolean mSystemDecorations = false;
         private int mStatusBarHeight = 0;
+        private SettingsEntry mOverrideSettings;
 
         Builder(ActivityTaskManagerService service, int width, int height) {
             mService = service;
@@ -103,6 +107,10 @@ class TestDisplayContent extends DisplayContent {
         }
         private String generateUniqueId() {
             return "TEST_DISPLAY_CONTENT_" + System.currentTimeMillis();
+        }
+        Builder setOverrideSettings(@Nullable SettingsEntry overrideSettings) {
+            mOverrideSettings = overrideSettings;
+            return this;
         }
         Builder setSystemDecorations(boolean yes) {
             mSystemDecorations = yes;
@@ -150,6 +158,11 @@ class TestDisplayContent extends DisplayContent {
         }
         TestDisplayContent build() {
             SystemServicesTestRule.checkHoldsLock(mService.mGlobalLock);
+
+            if (mOverrideSettings != null) {
+                mService.mWindowManager.mDisplayWindowSettingsProvider
+                        .updateOverrideSettings(mInfo, mOverrideSettings);
+            }
 
             final int displayId = SystemServicesTestRule.sNextDisplayId++;
             final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
