@@ -529,8 +529,10 @@ public class NotificationGroupManagerLegacy implements
             mIsolatedEntries.put(entry.getKey(), entry.getSbn());
             if (groupKeysChanged) {
                 updateSuppression(mGroupMap.get(oldGroupKey));
-                updateSuppression(mGroupMap.get(newGroupKey));
             }
+            // Always update the suppression of the group from which you're isolated, in case
+            // this entry was or now is the alertOverride for that group.
+            updateSuppression(mGroupMap.get(newGroupKey));
         } else if (!wasGroupChild && isGroupChild) {
             onEntryBecomingChild(entry);
         }
