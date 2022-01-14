@@ -39,7 +39,8 @@ public class MediaContainerView extends ExpandableView {
     }
 
     @Override
-    public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
+    public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear,
+            Runnable onEnd) {
         // No animation, it doesn't need it, this would be local
     }
 }

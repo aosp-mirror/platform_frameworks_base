@@ -358,7 +358,12 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
             Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener);
 
-    public abstract void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear);
+    public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
+        performAddAnimation(delay, duration, isHeadsUpAppear, null);
+    }
+
+    public abstract void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear,
+            Runnable onEndRunnable);
 
     /**
      * Set the notification appearance to be below the speed bump.

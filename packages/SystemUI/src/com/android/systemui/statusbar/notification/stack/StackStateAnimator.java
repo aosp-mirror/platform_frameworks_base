@@ -86,6 +86,7 @@ public class StackStateAnimator {
     private NotificationShelf mShelf;
     private float mStatusBarIconLocation;
     private int[] mTmpLocation = new int[2];
+    private StackStateLogger mLogger;
 
     public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
         mHostLayout = hostLayout;
@@ -111,6 +112,10 @@ public class StackStateAnimator {
                 return mNewAddChildren.contains(view);
             }
         };
+    }
+
+    protected void setLogger(StackStateLogger logger) {
+        mLogger = logger;
     }
 
     public boolean isRunning() {
@@ -337,6 +342,12 @@ public class StackStateAnimator {
             ArrayList<NotificationStackScrollLayout.AnimationEvent> animationEvents) {
         for (NotificationStackScrollLayout.AnimationEvent event : animationEvents) {
             final ExpandableView changingView = (ExpandableView) event.mChangingView;
+            boolean loggable = false;
+            String key = null;
+            if (changingView instanceof ExpandableNotificationRow && mLogger != null) {
+                loggable = true;
+                key = ((ExpandableNotificationRow) changingView).getEntry().getKey();
+            }
             if (event.animationType ==
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_ADD) {
 
@@ -407,10 +418,22 @@ public class StackStateAnimator {
                 if (event.headsUpFromBottom) {
                     mTmpState.yTranslation = mHeadsUpAppearHeightBottom;
                 } else {
+                    Runnable onAnimationEnd = null;
+                    if (loggable) {
+                        String finalKey = key;
+                        onAnimationEnd = () -> mLogger.appearAnimationEnded(finalKey);
+                    }
                     changingView.performAddAnimation(0, ANIMATION_DURATION_HEADS_UP_APPEAR,
-                            true /* isHeadsUpAppear */);
+                            true /* isHeadsUpAppear */, onAnimationEnd);
                 }
                 mHeadsUpAppearChildren.add(changingView);
+                // this only captures HEADS_UP_APPEAR animations, but HUNs can appear with normal
+                // ADD animations, which would not be logged here.
+                if (loggable) {
+                    mLogger.logHUNViewAppearing(
+                            ((ExpandableNotificationRow) changingView).getEntry().getKey());
+                }
+
                 mTmpState.applyToView(changingView);
             } else if (event.animationType == NotificationStackScrollLayout
                             .AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR ||
@@ -453,10 +476,21 @@ public class StackStateAnimator {
                     // We need to add the global animation listener, since once no animations are
                     // running anymore, the panel will instantly hide itself. We need to wait until
                     // the animation is fully finished for this though.
+                    Runnable postAnimation = endRunnable;
+                    if (loggable) {
+                        mLogger.logHUNViewDisappearing(key);
+
+                        Runnable finalEndRunnable = endRunnable;
+                        String finalKey1 = key;
+                        postAnimation = () -> {
+                            mLogger.disappearAnimationEnded(finalKey1);
+                            if (finalEndRunnable != null) finalEndRunnable.run();
+                        };
+                    }
                     long removeAnimationDelay = changingView.performRemoveAnimation(
                             ANIMATION_DURATION_HEADS_UP_DISAPPEAR,
                             0, 0.0f, true /* isHeadsUpAppear */, targetLocation,
-                            endRunnable, getGlobalAnimationFinishedListener());
+                            postAnimation, getGlobalAnimationFinishedListener());
                     mAnimationProperties.delay += removeAnimationDelay;
                 } else if (endRunnable != null) {
                     endRunnable.run();
