@@ -183,7 +183,8 @@ public class AppCompatOverridesServiceTest {
                 mOverridesToRemoveByPackageConfigCaptor.getValue().packageNameToOverridesToRemove;
         Map<Long, PackageOverride> addedOverrides;
         assertThat(packageNameToAddedOverrides.keySet()).containsExactly(PACKAGE_1, PACKAGE_3);
-        assertThat(packageNameToRemovedOverrides.keySet()).containsExactly(PACKAGE_3, PACKAGE_4);
+        assertThat(packageNameToRemovedOverrides.keySet()).containsExactly(PACKAGE_2, PACKAGE_3,
+                PACKAGE_4);
         // Package 1
         addedOverrides = packageNameToAddedOverrides.get(PACKAGE_1).overrides;
         assertThat(addedOverrides).hasSize(3);
@@ -193,6 +194,9 @@ public class AppCompatOverridesServiceTest {
                 new PackageOverride.Builder().setMinVersionCode(2).setEnabled(true).build());
         assertThat(addedOverrides.get(789L)).isEqualTo(
                 new PackageOverride.Builder().setEnabled(false).build());
+        // Package 2
+        assertThat(packageNameToRemovedOverrides.get(PACKAGE_2).changeIds).containsExactly(123L,
+                456L, 789L);
         // Package 3
         addedOverrides = packageNameToAddedOverrides.get(PACKAGE_3).overrides;
         assertThat(addedOverrides).hasSize(1);
