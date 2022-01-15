@@ -486,7 +486,6 @@ class Task extends TaskFragment {
     // root task moves and we in fact do so when moving from full screen to pinned.
     private boolean mPreserveNonFloatingState = false;
 
-    private Dimmer mDimmer = new Dimmer(this);
     private final Rect mTmpDimBoundsRect = new Rect();
 
     /** @see #setCanAffectSystemUiFlags */
@@ -3460,18 +3459,11 @@ class Task extends TaskFragment {
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
-
-        boolean isTopActivityResumed = mReuseActivitiesReport.top != null
-                 && mReuseActivitiesReport.top.getOrganizedTask() == this
-                 && mReuseActivitiesReport.top.isState(RESUMED);
         // Whether the direct top activity is in size compat mode on foreground.
-        info.topActivityInSizeCompat = isTopActivityResumed
-                && mReuseActivitiesReport.top.inSizeCompatMode();
-        // Whether the direct top activity requested showing camera compat control.
-        info.cameraCompatControlState = isTopActivityResumed
-                ? mReuseActivitiesReport.top.getCameraCompatControlState()
-                : TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-
+        info.topActivityInSizeCompat = mReuseActivitiesReport.top != null
+                && mReuseActivitiesReport.top.getOrganizedTask() == this
+                && mReuseActivitiesReport.top.inSizeCompatMode()
+                && mReuseActivitiesReport.top.isState(RESUMED);
         info.launchCookies.clear();
         info.addLaunchCookie(mLaunchCookie);
         forAllActivities(r -> {
