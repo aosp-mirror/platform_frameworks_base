@@ -174,7 +174,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         }
 
         verify(mCallback, times(AUTOGROUP_AT_COUNT + 1))
-            .updateAutogroupSummary(anyString(), eq(true));
+            .updateAutogroupSummary(anyInt(), anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(
@@ -203,7 +203,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         mGroupHelper.onNotificationUpdated(notifications.get(0), true);
 
         verify(mCallback, times(AUTOGROUP_AT_COUNT + 2))
-                .updateAutogroupSummary(anyString(), eq(true));
+                .updateAutogroupSummary(anyInt(), anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(
@@ -236,7 +236,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         mGroupHelper.onNotificationUpdated(notifications.get(0), true);
 
         verify(mCallback, times(AUTOGROUP_AT_COUNT + 3))
-                .updateAutogroupSummary(anyString(), eq(true));
+                .updateAutogroupSummary(anyInt(), anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(
@@ -263,7 +263,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         mGroupHelper.onNotificationRemoved(notifications.get(0));
 
         verify(mCallback, times(AUTOGROUP_AT_COUNT + 2))
-                .updateAutogroupSummary(anyString(), eq(true));
+                .updateAutogroupSummary(anyInt(), anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(
@@ -291,7 +291,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         mGroupHelper.onNotificationUpdated(notifications.get(0), true);
 
         verify(mCallback, times(1))
-                .updateAutogroupSummary(anyString(), eq(true));
+                .updateAutogroupSummary(anyInt(), anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(
@@ -315,7 +315,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         }
 
         verify(mCallback, times(1))
-                .updateAutogroupSummary(anyString(), eq(true));
+                .updateAutogroupSummary(anyInt(), anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(
@@ -339,7 +339,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         }
 
         verify(mCallback, times(0))
-                .updateAutogroupSummary(anyString(), eq(true));
+                .updateAutogroupSummary(anyInt(), anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(userId, pkg, AUTOGROUP_KEY), 0);
