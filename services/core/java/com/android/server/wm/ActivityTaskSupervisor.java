@@ -364,6 +364,17 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     /** Check if placing task or activity on specified display is allowed. */
     boolean canPlaceEntityOnDisplay(int displayId, int callingPid, int callingUid,
             ActivityInfo activityInfo) {
+        return canPlaceEntityOnDisplay(displayId, callingPid, callingUid, null /* task */,
+                activityInfo);
+    }
+
+    boolean canPlaceEntityOnDisplay(int displayId, int callingPid, int callingUid, Task task) {
+        return canPlaceEntityOnDisplay(displayId, callingPid, callingUid, task,
+                null /* activityInfo */);
+    }
+
+    private boolean canPlaceEntityOnDisplay(int displayId, int callingPid, int callingUid,
+            Task task, ActivityInfo activityInfo) {
         if (displayId == DEFAULT_DISPLAY) {
             // No restrictions for the default display.
             return true;
@@ -372,12 +383,31 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Can't launch on secondary displays if feature is not supported.
             return false;
         }
+
         if (!isCallerAllowedToLaunchOnDisplay(callingPid, callingUid, displayId, activityInfo)) {
             // Can't place activities to a display that has restricted launch rules.
             // In this case the request should be made by explicitly adding target display id and
             // by caller with corresponding permissions. See #isCallerAllowedToLaunchOnDisplay().
             return false;
         }
+
+        final DisplayContent displayContent =
+                mRootWindowContainer.getDisplayContentOrCreate(displayId);
+        if (displayContent != null && displayContent.mDwpcHelper.hasController()) {
+            final ArrayList<ActivityInfo> activities = new ArrayList<>();
+            if (activityInfo != null) {
+                activities.add(activityInfo);
+            }
+            if (task != null) {
+                task.forAllActivities((r) -> {
+                    activities.add(r.info);
+                });
+            }
+            if (!displayContent.mDwpcHelper.canContainActivities(activities)) {
+                return false;
+            }
+        }
+
         return true;
     }
 
