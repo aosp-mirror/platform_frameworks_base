@@ -22,6 +22,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANI
 import static com.android.server.wm.WindowOrganizerController.configurationsAreEqualForOrganizer;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -497,6 +498,23 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         return null;
     }
 
+    private boolean shouldSendEventWhenTaskInvisible(@NonNull Task task,
+            @NonNull PendingTaskFragmentEvent event) {
+        final TaskFragmentOrganizerState state =
+                mTaskFragmentOrganizerState.get(event.mTaskFragmentOrg.asBinder());
+        final TaskFragmentInfo lastInfo = state.mLastSentTaskFragmentInfos.get(event.mTaskFragment);
+        final TaskFragmentInfo info = event.mTaskFragment.getTaskFragmentInfo();
+        // Send an info changed callback if this event is for the last activities to finish in a
+        // Task so that the {@link TaskFragmentOrganizer} can delete this TaskFragment. Otherwise,
+        // the Task may be removed before it becomes visible again to send this event because it no
+        // longer has activities. As a result, the organizer will never get this info changed event
+        // and will not delete the TaskFragment because the organizer thinks the TaskFragment still
+        // has running activities.
+        return event.mEventType == PendingTaskFragmentEvent.EVENT_INFO_CHANGED
+                && task.topRunningActivity() == null && lastInfo != null
+                && lastInfo.getRunningActivityCount() > 0 && info.getRunningActivityCount() == 0;
+    }
+
     void dispatchPendingEvents() {
         if (mAtmService.mWindowManager.mWindowPlacerLocked.isLayoutDeferred()
                 || mPendingTaskFragmentEvents.isEmpty()) {
@@ -510,7 +528,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             final PendingTaskFragmentEvent event = mPendingTaskFragmentEvents.get(i);
             final Task task = event.mTaskFragment != null ? event.mTaskFragment.getTask() : null;
             if (task != null && (task.lastActiveTime <= event.mDeferTime
-                    || !isTaskVisible(task, visibleTasks, invisibleTasks))) {
+                    || !(isTaskVisible(task, visibleTasks, invisibleTasks)
+                    || shouldSendEventWhenTaskInvisible(task, event)))) {
                 // Defer sending events to the TaskFragment until the host task is active again.
                 event.mDeferTime = task.lastActiveTime;
                 continue;
