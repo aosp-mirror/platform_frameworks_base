@@ -16,12 +16,14 @@
 
 package android.companion.virtual;
 
+import android.app.PendingIntent;
 import android.graphics.Point;
 import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualTouchEvent;
+import android.os.ResultReceiver;
 
 /**
  * Interface for a virtual device.
@@ -41,6 +43,7 @@ interface IVirtualDevice {
      * Closes the virtual device and frees all associated resources.
      */
     void close();
+
     void createVirtualKeyboard(
             int displayId,
             String inputDeviceName,
@@ -66,4 +69,10 @@ interface IVirtualDevice {
     boolean sendRelativeEvent(IBinder token, in VirtualMouseRelativeEvent event);
     boolean sendScrollEvent(IBinder token, in VirtualMouseScrollEvent event);
     boolean sendTouchEvent(IBinder token, in VirtualTouchEvent event);
+
+    /**
+     * Launches a pending intent on the given display that is owned by this virtual device.
+     */
+    void launchPendingIntent(
+            int displayId, in PendingIntent pendingIntent, in ResultReceiver resultReceiver);
 }
