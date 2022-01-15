@@ -24,6 +24,8 @@ import android.util.IndentingPrintWriter;
  *
  * <p>See {@link SystemServer.SystemServerDumper} for usage example.
  */
+// TODO(b/149254050): replace / merge with package android.util.Dumpable (it would require
+// exporting IndentingPrintWriter as @SystemApi) and/or changing the method to use a prefix
 public interface Dumpable {
 
     /**

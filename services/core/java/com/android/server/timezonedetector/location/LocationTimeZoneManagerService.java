@@ -281,15 +281,7 @@ public class LocationTimeZoneManagerService extends Binder {
                 LocationTimeZoneProvider primary = mPrimaryProviderConfig.createProvider();
                 LocationTimeZoneProvider secondary = mSecondaryProviderConfig.createProvider();
                 LocationTimeZoneProviderController.MetricsLogger metricsLogger =
-                        new LocationTimeZoneProviderController.MetricsLogger() {
-                            @Override
-                            public void onStateChange(
-                                    @LocationTimeZoneProviderController.State String state) {
-                                // TODO b/200279201 - wire this up to metrics code
-                                // No-op.
-                            }
-                        };
-
+                        new RealControllerMetricsLogger();
                 boolean recordStateChanges = mServiceConfigAccessor.getRecordStateChangesForTests();
                 LocationTimeZoneProviderController controller =
                         new LocationTimeZoneProviderController(mThreadingDomain, metricsLogger,

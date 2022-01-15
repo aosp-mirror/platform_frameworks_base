@@ -90,6 +90,7 @@ import android.transition.Scene;
 import android.transition.TransitionManager;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
+import android.util.Dumpable;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
@@ -145,6 +146,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
 import com.android.internal.policy.PhoneWindow;
+import com.android.internal.util.dump.DumpableContainerImpl;
 
 import dalvik.system.VMRuntime;
 
@@ -953,6 +955,9 @@ public class Activity extends ContextThemeWrapper
     private UiTranslationController mUiTranslationController;
 
     private SplashScreen mSplashScreen;
+
+    @Nullable
+    private DumpableContainerImpl mDumpableContainer;
 
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
@@ -7081,8 +7086,23 @@ public class Activity extends ContextThemeWrapper
         dumpInner(prefix, fd, writer, args);
     }
 
+    /**
+     * See {@link android.util.DumpableContainer#addDumpable(Dumpable)}.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public final boolean addDumpable(@NonNull Dumpable dumpable) {
+        if (mDumpableContainer == null) {
+            mDumpableContainer = new DumpableContainerImpl();
+        }
+        return mDumpableContainer.addDumpable(dumpable);
+    }
+
     void dumpInner(@NonNull String prefix, @Nullable FileDescriptor fd,
             @NonNull PrintWriter writer, @Nullable String[] args) {
+        String innerPrefix = prefix + "  ";
+
         if (args != null && args.length > 0) {
             // Handle special cases
             switch (args[0]) {
@@ -7095,12 +7115,33 @@ public class Activity extends ContextThemeWrapper
                 case "--translation":
                     dumpUiTranslation(prefix, writer);
                     return;
+                case "--list-dumpables":
+                    if (mDumpableContainer == null) {
+                        writer.print(prefix); writer.println("No dumpables");
+                        return;
+                    }
+                    mDumpableContainer.listDumpables(prefix, writer);
+                    return;
+                case "--dump-dumpable":
+                    if (args.length == 1) {
+                        writer.println("--dump-dumpable requires the dumpable name");
+                        return;
+                    }
+                    if (mDumpableContainer == null) {
+                        writer.println("no dumpables");
+                        return;
+                    }
+                    // Strips --dump-dumpable NAME
+                    String[] prunedArgs = new String[args.length - 2];
+                    System.arraycopy(args, 2, prunedArgs, 0, prunedArgs.length);
+                    mDumpableContainer.dumpOneDumpable(prefix, writer, args[1], prunedArgs);
+                    return;
             }
         }
+
         writer.print(prefix); writer.print("Local Activity ");
                 writer.print(Integer.toHexString(System.identityHashCode(this)));
                 writer.println(" State:");
-        String innerPrefix = prefix + "  ";
         writer.print(innerPrefix); writer.print("mResumed=");
                 writer.print(mResumed); writer.print(" mStopped=");
                 writer.print(mStopped); writer.print(" mFinished=");
@@ -7138,6 +7179,10 @@ public class Activity extends ContextThemeWrapper
         dumpUiTranslation(prefix, writer);
 
         ResourcesManager.getInstance().dump(prefix, writer);
+
+        if (mDumpableContainer != null) {
+            mDumpableContainer.dumpAllDumpables(prefix, writer, args);
+        }
     }
 
     void dumpContentCaptureManager(String prefix, PrintWriter writer) {

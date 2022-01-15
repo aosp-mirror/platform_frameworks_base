@@ -41,10 +41,10 @@ public final class DeviceStateTest {
     @Test
     public void testConstruct() {
         final DeviceState state = new DeviceState(MINIMUM_DEVICE_STATE /* identifier */,
-                "CLOSED" /* name */, DeviceState.FLAG_CANCEL_STICKY_REQUESTS /* flags */);
+                "TEST_CLOSED" /* name */, DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS /* flags */);
         assertEquals(state.getIdentifier(), MINIMUM_DEVICE_STATE);
-        assertEquals(state.getName(), "CLOSED");
-        assertEquals(state.getFlags(), DeviceState.FLAG_CANCEL_STICKY_REQUESTS);
+        assertEquals(state.getName(), "TEST_CLOSED");
+        assertEquals(state.getFlags(), DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS);
     }
 
     @Test

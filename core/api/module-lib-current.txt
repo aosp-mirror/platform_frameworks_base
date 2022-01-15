@@ -9,6 +9,10 @@ package android {
 
 package android.app {
 
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+    method public final boolean addDumpable(@NonNull android.util.Dumpable);
+  }
+
   public class ActivityManager {
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
@@ -160,6 +164,7 @@ package android.media {
 
   public final class BtProfileConnectionInfo implements android.os.Parcelable {
     method @NonNull public static android.media.BtProfileConnectionInfo a2dpInfo(boolean, int);
+    method @NonNull public static android.media.BtProfileConnectionInfo a2dpSinkInfo(int);
     method public int describeContents();
     method public boolean getIsLeOutput();
     method public int getProfile();

@@ -32,6 +32,7 @@ bootstrap_go_package {
         "soong",
         "soong-android",
         "soong-genrule",
+        "soong-java",
     ],
     srcs: ["api.go"],
     pluginFor: ["soong_build"],

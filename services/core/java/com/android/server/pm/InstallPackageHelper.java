@@ -91,7 +91,6 @@ import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
@@ -195,38 +194,32 @@ final class InstallPackageHelper {
     private final AppDataHelper mAppDataHelper;
     private final BroadcastHelper mBroadcastHelper;
     private final RemovePackageHelper mRemovePackageHelper;
-    private final StorageManager mStorageManager;
-    private final RollbackManagerInternal mRollbackManager;
     private final IncrementalManager mIncrementalManager;
     private final ApexManager mApexManager;
     private final DexManager mDexManager;
     private final ArtManagerService mArtManagerService;
-    private final AppOpsManager mAppOpsManager;
     private final Context mContext;
     private final PackageDexOptimizer mPackageDexOptimizer;
     private final PackageAbiHelper mPackageAbiHelper;
     private final ViewCompiler mViewCompiler;
-    private final IBackupManager mIBackupManager;
     private final SharedLibrariesImpl mSharedLibraries;
+    private final PackageManagerServiceInjector mInjector;
 
     // TODO(b/198166813): remove PMS dependency
     InstallPackageHelper(PackageManagerService pm, AppDataHelper appDataHelper) {
         mPm = pm;
+        mInjector = pm.mInjector;
         mAppDataHelper = appDataHelper;
         mBroadcastHelper = new BroadcastHelper(pm.mInjector);
         mRemovePackageHelper = new RemovePackageHelper(pm);
-        mStorageManager = pm.mInjector.getSystemService(StorageManager.class);
-        mRollbackManager = pm.mInjector.getLocalService(RollbackManagerInternal.class);
         mIncrementalManager = pm.mInjector.getIncrementalManager();
         mApexManager = pm.mInjector.getApexManager();
         mDexManager = pm.mInjector.getDexManager();
         mArtManagerService = pm.mInjector.getArtManagerService();
-        mAppOpsManager = pm.mInjector.getSystemService(AppOpsManager.class);
         mContext = pm.mInjector.getContext();
         mPackageDexOptimizer = pm.mInjector.getPackageDexOptimizer();
         mPackageAbiHelper = pm.mInjector.getAbiHelper();
         mViewCompiler = pm.mInjector.getViewCompiler();
-        mIBackupManager = pm.mInjector.getIBackupManager();
         mSharedLibraries = pm.mInjector.getSharedLibrariesImpl();
     }
 
@@ -693,7 +686,8 @@ final class InstallPackageHelper {
      * Returns whether the restore successfully completed.
      */
     private boolean performBackupManagerRestore(int userId, int token, PackageInstalledInfo res) {
-        if (mIBackupManager != null) {
+        IBackupManager iBackupManager = mInjector.getIBackupManager();
+        if (iBackupManager != null) {
             // For backwards compatibility as USER_ALL previously routed directly to USER_SYSTEM
             // in the BackupManager. USER_ALL is used in compatibility tests.
             if (userId == UserHandle.USER_ALL) {
@@ -704,8 +698,8 @@ final class InstallPackageHelper {
             }
             Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
             try {
-                if (mIBackupManager.isUserReadyForBackup(userId)) {
-                    mIBackupManager.restoreAtInstallForUser(
+                if (iBackupManager.isUserReadyForBackup(userId)) {
+                    iBackupManager.restoreAtInstallForUser(
                             userId, res.mPkg.getPackageName(), token);
                 } else {
                     Slog.w(TAG, "User " + userId + " is not ready. Restore at install "
@@ -756,7 +750,9 @@ final class InstallPackageHelper {
 
         if (ps != null && doSnapshotOrRestore) {
             final String seInfo = AndroidPackageUtils.getSeInfo(res.mPkg, ps);
-            mRollbackManager.snapshotAndRestoreUserData(packageName,
+            final RollbackManagerInternal rollbackManager =
+                    mInjector.getLocalService(RollbackManagerInternal.class);
+            rollbackManager.snapshotAndRestoreUserData(packageName,
                     UserHandle.toUserHandles(installedUsers), appId, ceDataInode, seInfo, token);
             return true;
         }
@@ -1969,14 +1965,15 @@ final class InstallPackageHelper {
                             reconciledPkg.mPrepareResult.mExistingPackage.getPackageName());
                     if ((reconciledPkg.mInstallArgs.mInstallFlags & PackageManager.DONT_KILL_APP)
                             == 0) {
-                        if (ps1.getOldCodePaths() == null) {
-                            ps1.setOldCodePaths(new ArraySet<>());
+                        Set<String> oldCodePaths = ps1.getOldCodePaths();
+                        if (oldCodePaths == null) {
+                            oldCodePaths = new ArraySet<>();
                         }
-                        Collections.addAll(ps1.getOldCodePaths(), oldPackage.getBaseApkPath());
+                        Collections.addAll(oldCodePaths, oldPackage.getBaseApkPath());
                         if (oldPackage.getSplitCodePaths() != null) {
-                            Collections.addAll(ps1.getOldCodePaths(),
-                                    oldPackage.getSplitCodePaths());
+                            Collections.addAll(oldCodePaths, oldPackage.getSplitCodePaths());
                         }
+                        ps1.setOldCodePaths(oldCodePaths);
                     } else {
                         ps1.setOldCodePaths(null);
                     }
@@ -2787,8 +2784,10 @@ final class InstallPackageHelper {
                 // Send broadcast package appeared if external for all users
                 if (res.mPkg.isExternalStorage()) {
                     if (!update) {
+                        final StorageManager storageManager =
+                                mInjector.getSystemService(StorageManager.class);
                         VolumeInfo volume =
-                                mStorageManager.findVolumeByUuid(
+                                storageManager.findVolumeByUuid(
                                         StorageManager.convert(
                                                 res.mPkg.getVolumeUuid()).toString());
                         int packageExternalStorageType =
@@ -3055,7 +3054,7 @@ final class InstallPackageHelper {
         final RemovePackageHelper removePackageHelper = new RemovePackageHelper(mPm);
         removePackageHelper.removePackageLI(stubPkg, true /*chatty*/);
         try {
-            return scanSystemPackageTracedLI(scanFile, parseFlags, scanFlags, 0, null);
+            return scanSystemPackageTracedLI(scanFile, parseFlags, scanFlags, null);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to install compressed system package:" + stubPkg.getPackageName(),
                     e);
@@ -3188,7 +3187,7 @@ final class InstallPackageHelper {
                         | ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
         @PackageManagerService.ScanFlags int scanFlags = mPm.getSystemPackageScanFlags(codePath);
         final AndroidPackage pkg = scanSystemPackageTracedLI(
-                        codePath, parseFlags, scanFlags, 0 /*currentTime*/, null);
+                codePath, parseFlags, scanFlags, null);
 
         PackageSetting pkgSetting = mPm.mSettings.getPackageLPr(pkg.getPackageName());
 
@@ -3363,7 +3362,7 @@ final class InstallPackageHelper {
                 mRemovePackageHelper.removePackageLI(pkg, true);
                 try {
                     final File codePath = new File(pkg.getPath());
-                    scanSystemPackageTracedLI(codePath, 0, scanFlags, 0, null);
+                    scanSystemPackageTracedLI(codePath, 0, scanFlags, null);
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "Failed to parse updated, ex-system package: "
                             + e.getMessage());
@@ -3384,7 +3383,7 @@ final class InstallPackageHelper {
 
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     public void installPackagesFromDir(File scanDir, int parseFlags, int scanFlags,
-            long currentTime, PackageParser2 packageParser, ExecutorService executorService) {
+            PackageParser2 packageParser, ExecutorService executorService) {
         final File[] files = scanDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             Log.d(TAG, "No files in app dir " + scanDir);
@@ -3426,7 +3425,7 @@ final class InstallPackageHelper {
                             parseResult.parsedPackage);
                 }
                 try {
-                    addForInitLI(parseResult.parsedPackage, parseFlags, scanFlags, currentTime,
+                    addForInitLI(parseResult.parsedPackage, parseFlags, scanFlags,
                             null);
                 } catch (PackageManagerException e) {
                     errorCode = e.error;
@@ -3489,7 +3488,7 @@ final class InstallPackageHelper {
 
             try {
                 final AndroidPackage newPkg = scanSystemPackageTracedLI(
-                        scanFile, reparseFlags, rescanFlags, 0, null);
+                        scanFile, reparseFlags, rescanFlags, null);
                 // We rescanned a stub, add it to the list of stubbed system packages
                 if (newPkg.isStub()) {
                     stubSystemApps.add(packageName);
@@ -3503,14 +3502,14 @@ final class InstallPackageHelper {
 
     /**
      *  Traces a package scan.
-     *  @see #scanSystemPackageLI(File, int, int, long, UserHandle)
+     *  @see #scanSystemPackageLI(File, int, int, UserHandle)
      */
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     public AndroidPackage scanSystemPackageTracedLI(File scanFile, final int parseFlags,
-            int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
+            int scanFlags, UserHandle user) throws PackageManagerException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage [" + scanFile.toString() + "]");
         try {
-            return scanSystemPackageLI(scanFile, parseFlags, scanFlags, currentTime, user);
+            return scanSystemPackageLI(scanFile, parseFlags, scanFlags, user);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -3522,7 +3521,7 @@ final class InstallPackageHelper {
      */
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     private AndroidPackage scanSystemPackageLI(File scanFile, int parseFlags, int scanFlags,
-            long currentTime, UserHandle user) throws PackageManagerException {
+            UserHandle user) throws PackageManagerException {
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
@@ -3538,7 +3537,7 @@ final class InstallPackageHelper {
             PackageManagerService.renameStaticSharedLibraryPackage(parsedPackage);
         }
 
-        return addForInitLI(parsedPackage, parseFlags, scanFlags, currentTime, user);
+        return addForInitLI(parsedPackage, parseFlags, scanFlags, user);
     }
 
     /**
@@ -3557,11 +3556,11 @@ final class InstallPackageHelper {
     @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
     private AndroidPackage addForInitLI(ParsedPackage parsedPackage,
             @ParsingPackageUtils.ParseFlags int parseFlags,
-            @PackageManagerService.ScanFlags int scanFlags, long currentTime,
+            @PackageManagerService.ScanFlags int scanFlags,
             @Nullable UserHandle user) throws PackageManagerException {
 
         final Pair<ScanResult, Boolean> scanResultPair = scanSystemPackageLI(
-                parsedPackage, parseFlags, scanFlags, currentTime, user);
+                parsedPackage, parseFlags, scanFlags, user);
         final ScanResult scanResult = scanResultPair.first;
         boolean shouldHideSystemApp = scanResultPair.second;
         if (scanResult.mSuccess) {
@@ -3739,7 +3738,7 @@ final class InstallPackageHelper {
 
     private Pair<ScanResult, Boolean> scanSystemPackageLI(ParsedPackage parsedPackage,
             @ParsingPackageUtils.ParseFlags int parseFlags,
-            @PackageManagerService.ScanFlags int scanFlags, long currentTime,
+            @PackageManagerService.ScanFlags int scanFlags,
             @Nullable UserHandle user) throws PackageManagerException {
         final boolean scanSystemPartition =
                 (parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0;
@@ -3926,7 +3925,7 @@ final class InstallPackageHelper {
         }
 
         final ScanResult scanResult = scanPackageNewLI(parsedPackage, parseFlags,
-                scanFlags | SCAN_UPDATE_SIGNATURE, currentTime, user, null);
+                scanFlags | SCAN_UPDATE_SIGNATURE, 0 /* currentTime */, user, null);
         return new Pair<>(scanResult, shouldHideSystemApp);
     }
 

@@ -106,6 +106,7 @@ import android.window.TransitionRequestInfo;
 
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
 
 import org.junit.After;
 import org.junit.Before;
@@ -720,18 +721,21 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Creates a {@link DisplayContent} and adds it to the system. */
     private DisplayContent createNewDisplayWithImeSupport(@DisplayImePolicy int imePolicy) {
-        return createNewDisplay(mDisplayInfo, imePolicy);
+        return createNewDisplay(mDisplayInfo, imePolicy, /* overrideSettings */ null);
     }
 
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
     DisplayContent createNewDisplay(DisplayInfo info) {
-        return createNewDisplay(info, DISPLAY_IME_POLICY_LOCAL);
+        return createNewDisplay(info, DISPLAY_IME_POLICY_LOCAL, /* overrideSettings */ null);
     }
 
     /** Creates a {@link DisplayContent} and adds it to the system. */
-    private DisplayContent createNewDisplay(DisplayInfo info, @DisplayImePolicy int imePolicy) {
+    private DisplayContent createNewDisplay(DisplayInfo info, @DisplayImePolicy int imePolicy,
+            @Nullable SettingsEntry overrideSettings) {
         final DisplayContent display =
-                new TestDisplayContent.Builder(mAtm, info).build();
+                new TestDisplayContent.Builder(mAtm, info)
+                        .setOverrideSettings(overrideSettings)
+                        .build();
         final DisplayContent dc = display.mDisplayContent;
         // this display can show IME.
         dc.mWmService.mDisplayWindowSettings.setDisplayImePolicy(dc, imePolicy);
@@ -749,7 +753,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.state = displayState;
-        return createNewDisplay(displayInfo, DISPLAY_IME_POLICY_LOCAL);
+        return createNewDisplay(displayInfo, DISPLAY_IME_POLICY_LOCAL, /* overrideSettings */ null);
     }
 
     /** Creates a {@link TestWindowState} */
@@ -761,11 +765,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Creates a {@link DisplayContent} as parts of simulate display info for test. */
     DisplayContent createMockSimulatedDisplay() {
+        return createMockSimulatedDisplay(/* overrideSettings */ null);
+    }
+
+    DisplayContent createMockSimulatedDisplay(@Nullable SettingsEntry overrideSettings) {
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.type = Display.TYPE_VIRTUAL;
         displayInfo.ownerUid = SYSTEM_UID;
-        return createNewDisplay(displayInfo, DISPLAY_IME_POLICY_FALLBACK_DISPLAY);
+        return createNewDisplay(displayInfo, DISPLAY_IME_POLICY_FALLBACK_DISPLAY, overrideSettings);
     }
 
     IDisplayWindowInsetsController createDisplayWindowInsetsController() {

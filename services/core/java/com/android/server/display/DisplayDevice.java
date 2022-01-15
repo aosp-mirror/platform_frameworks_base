@@ -37,6 +37,8 @@ import java.io.PrintWriter;
  * </p>
  */
 abstract class DisplayDevice {
+    private static final Display.Mode EMPTY_DISPLAY_MODE = new Display.Mode.Builder().build();
+
     private final DisplayAdapter mDisplayAdapter;
     private final IBinder mDisplayToken;
     private final String mUniqueId;
@@ -211,6 +213,13 @@ abstract class DisplayDevice {
      * Returns true if the mode set by user is supported by the display.
      */
     public void setUserPreferredDisplayModeLocked(Display.Mode mode) { }
+
+    /**
+     * Returns the user preferred display mode.
+     */
+    public Display.Mode getUserPreferredDisplayModeLocked() {
+        return EMPTY_DISPLAY_MODE;
+    }
 
     /**
      * Sets the requested color mode.

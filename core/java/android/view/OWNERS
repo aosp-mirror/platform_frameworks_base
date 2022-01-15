@@ -80,6 +80,7 @@ per-file Inset*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IPinnedStackListener.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IRecents*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IRemote*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ISurfaceControlViewHost*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IWindow*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file RemoteAnimation*.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file RemoteAnimation*.aidl = file:/services/core/java/com/android/server/wm/OWNERS

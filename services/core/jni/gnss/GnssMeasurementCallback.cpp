@@ -27,12 +27,16 @@ using hardware::gnss::GnssClock;
 using hardware::gnss::GnssData;
 using hardware::gnss::GnssMeasurement;
 using hardware::gnss::SatellitePvt;
+using GnssAgc = hardware::gnss::GnssData::GnssAgc;
 
 namespace {
 jclass class_arrayList;
 jclass class_clockInfo;
 jclass class_correlationVectorBuilder;
+jclass class_gnssAgc;
+jclass class_gnssAgcBuilder;
 jclass class_gnssMeasurementsEvent;
+jclass class_gnssMeasurementsEventBuilder;
 jclass class_gnssMeasurement;
 jclass class_gnssClock;
 jclass class_positionEcef;
@@ -47,7 +51,16 @@ jmethodID method_correlationVectorBuilderSetFrequencyOffsetMetersPerSecond;
 jmethodID method_correlationVectorBuilderSetMagnitude;
 jmethodID method_correlationVectorBuilderSetSamplingStartMeters;
 jmethodID method_correlationVectorBuilderSetSamplingWidthMeters;
-jmethodID method_gnssMeasurementsEventCtor;
+jmethodID method_gnssAgcBuilderCtor;
+jmethodID method_gnssAgcBuilderSetLevelDb;
+jmethodID method_gnssAgcBuilderSetConstellationType;
+jmethodID method_gnssAgcBuilderSetCarrierFrequencyHz;
+jmethodID method_gnssAgcBuilderBuild;
+jmethodID method_gnssMeasurementsEventBuilderCtor;
+jmethodID method_gnssMeasurementsEventBuilderSetClock;
+jmethodID method_gnssMeasurementsEventBuilderSetMeasurements;
+jmethodID method_gnssMeasurementsEventBuilderSetGnssAutomaticGainControls;
+jmethodID method_gnssMeasurementsEventBuilderBuild;
 jmethodID method_gnssMeasurementsSetCorrelationVectors;
 jmethodID method_gnssMeasurementsSetSatellitePvt;
 jmethodID method_gnssClockCtor;
@@ -69,12 +82,55 @@ jmethodID method_clockInfo;
 void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz) {
     method_reportMeasurementData = env->GetMethodID(clazz, "reportMeasurementData",
                                                     "(Landroid/location/GnssMeasurementsEvent;)V");
+
+    // Initialize GnssMeasurement related classes and methods
     jclass gnssMeasurementsEventClass = env->FindClass("android/location/GnssMeasurementsEvent");
     class_gnssMeasurementsEvent = (jclass)env->NewGlobalRef(gnssMeasurementsEventClass);
-    method_gnssMeasurementsEventCtor =
-            env->GetMethodID(class_gnssMeasurementsEvent, "<init>",
-                             "(Landroid/location/GnssClock;[Landroid/location/GnssMeasurement;)V");
+    jclass gnssMeasurementsEventBuilderClass =
+            env->FindClass("android/location/GnssMeasurementsEvent$Builder");
+    class_gnssMeasurementsEventBuilder =
+            (jclass)env->NewGlobalRef(gnssMeasurementsEventBuilderClass);
+    method_gnssMeasurementsEventBuilderCtor =
+            env->GetMethodID(class_gnssMeasurementsEventBuilder, "<init>", "()V");
+    method_gnssMeasurementsEventBuilderSetClock =
+            env->GetMethodID(class_gnssMeasurementsEventBuilder, "setClock",
+                             "(Landroid/location/GnssClock;)"
+                             "Landroid/location/GnssMeasurementsEvent$Builder;");
+    method_gnssMeasurementsEventBuilderSetMeasurements =
+            env->GetMethodID(class_gnssMeasurementsEventBuilder, "setMeasurements",
+                             "([Landroid/location/GnssMeasurement;)"
+                             "Landroid/location/GnssMeasurementsEvent$Builder;");
+    method_gnssMeasurementsEventBuilderSetGnssAutomaticGainControls =
+            env->GetMethodID(class_gnssMeasurementsEventBuilder, "setGnssAutomaticGainControls",
+                             "([Landroid/location/GnssAutomaticGainControl;)"
+                             "Landroid/location/GnssMeasurementsEvent$Builder;");
+    method_gnssMeasurementsEventBuilderBuild =
+            env->GetMethodID(class_gnssMeasurementsEventBuilder, "build",
+                             "()Landroid/location/GnssMeasurementsEvent;");
 
+    // Initialize GnssAgc related classes and methods
+    jclass gnssAgcClass = env->FindClass("android/location/GnssAutomaticGainControl");
+    class_gnssAgc = (jclass)env->NewGlobalRef(gnssAgcClass);
+    jclass gnssAgcBuilderClass =
+            env->FindClass("android/location/GnssAutomaticGainControl$Builder");
+    class_gnssAgcBuilder = (jclass)env->NewGlobalRef(gnssAgcBuilderClass);
+    method_gnssAgcBuilderCtor = env->GetMethodID(class_gnssAgcBuilder, "<init>", "()V");
+    method_gnssAgcBuilderSetLevelDb =
+            env->GetMethodID(class_gnssAgcBuilder, "setLevelDb",
+                             "(D)"
+                             "Landroid/location/GnssAutomaticGainControl$Builder;");
+    method_gnssAgcBuilderSetConstellationType =
+            env->GetMethodID(class_gnssAgcBuilder, "setConstellationType",
+                             "(I)"
+                             "Landroid/location/GnssAutomaticGainControl$Builder;");
+    method_gnssAgcBuilderSetCarrierFrequencyHz =
+            env->GetMethodID(class_gnssAgcBuilder, "setCarrierFrequencyHz",
+                             "(J)"
+                             "Landroid/location/GnssAutomaticGainControl$Builder;");
+    method_gnssAgcBuilderBuild = env->GetMethodID(class_gnssAgcBuilder, "build",
+                                                  "()Landroid/location/GnssAutomaticGainControl;");
+
+    // Initialize GnssMeasurement related classes and methods
     jclass gnssMeasurementClass = env->FindClass("android/location/GnssMeasurement");
     class_gnssMeasurement = (jclass)env->NewGlobalRef(gnssMeasurementClass);
     method_gnssMeasurementCtor = env->GetMethodID(class_gnssMeasurement, "<init>", "()V");
@@ -152,14 +208,25 @@ void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz) {
 }
 
 void setMeasurementData(JNIEnv* env, jobject& callbacksObj, jobject clock,
-                        jobjectArray measurementArray) {
-    jobject gnssMeasurementsEvent =
-            env->NewObject(class_gnssMeasurementsEvent, method_gnssMeasurementsEventCtor, clock,
-                           measurementArray);
+                        jobjectArray measurementArray, jobjectArray gnssAgcArray) {
+    jobject gnssMeasurementsEventBuilderObject =
+            env->NewObject(class_gnssMeasurementsEventBuilder,
+                           method_gnssMeasurementsEventBuilderCtor);
+    env->CallObjectMethod(gnssMeasurementsEventBuilderObject,
+                          method_gnssMeasurementsEventBuilderSetClock, clock);
+    env->CallObjectMethod(gnssMeasurementsEventBuilderObject,
+                          method_gnssMeasurementsEventBuilderSetMeasurements, measurementArray);
+    env->CallObjectMethod(gnssMeasurementsEventBuilderObject,
+                          method_gnssMeasurementsEventBuilderSetGnssAutomaticGainControls,
+                          gnssAgcArray);
+    jobject gnssMeasurementsEventObject =
+            env->CallObjectMethod(gnssMeasurementsEventBuilderObject,
+                                  method_gnssMeasurementsEventBuilderBuild);
 
-    env->CallVoidMethod(callbacksObj, method_reportMeasurementData, gnssMeasurementsEvent);
+    env->CallVoidMethod(callbacksObj, method_reportMeasurementData, gnssMeasurementsEventObject);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    env->DeleteLocalRef(gnssMeasurementsEvent);
+    env->DeleteLocalRef(gnssMeasurementsEventBuilderObject);
+    env->DeleteLocalRef(gnssMeasurementsEventObject);
 }
 
 template <class T_Measurement, class T_Flags>
@@ -289,9 +356,13 @@ void GnssMeasurementCallbackAidl::translateAndSetGnssData(const GnssData& data) 
     JavaObject gnssClockJavaObject(env, class_gnssClock, method_gnssClockCtor);
     translateGnssClock(env, data, gnssClockJavaObject);
     jobject clock = gnssClockJavaObject.get();
-
     jobjectArray measurementArray = translateAllGnssMeasurements(env, data.measurements);
-    setMeasurementData(env, mCallbacksObj, clock, measurementArray);
+
+    jobjectArray gnssAgcArray = nullptr;
+    if (data.gnssAgcs.has_value()) {
+        gnssAgcArray = translateAllGnssAgcs(env, data.gnssAgcs.value());
+    }
+    setMeasurementData(env, mCallbacksObj, clock, measurementArray, gnssAgcArray);
 
     env->DeleteLocalRef(clock);
     env->DeleteLocalRef(measurementArray);
@@ -434,6 +505,38 @@ jobjectArray GnssMeasurementCallbackAidl::translateAllGnssMeasurements(
     }
 
     return gnssMeasurementArray;
+}
+
+jobjectArray GnssMeasurementCallbackAidl::translateAllGnssAgcs(
+        JNIEnv* env, const std::vector<std::optional<GnssAgc>>& agcs) {
+    if (agcs.size() == 0) {
+        return nullptr;
+    }
+
+    jobjectArray gnssAgcArray =
+            env->NewObjectArray(agcs.size(), class_gnssAgc, nullptr /* initialElement */);
+
+    for (uint16_t i = 0; i < agcs.size(); ++i) {
+        if (!agcs[i].has_value()) {
+            continue;
+        }
+        const GnssAgc& gnssAgc = agcs[i].value();
+
+        jobject agcBuilderObject = env->NewObject(class_gnssAgcBuilder, method_gnssAgcBuilderCtor);
+        env->CallObjectMethod(agcBuilderObject, method_gnssAgcBuilderSetLevelDb,
+                              gnssAgc.agcLevelDb);
+        env->CallObjectMethod(agcBuilderObject, method_gnssAgcBuilderSetConstellationType,
+                              (int)gnssAgc.constellation);
+        env->CallObjectMethod(agcBuilderObject, method_gnssAgcBuilderSetCarrierFrequencyHz,
+                              gnssAgc.carrierFrequencyHz);
+        jobject agcObject = env->CallObjectMethod(agcBuilderObject, method_gnssAgcBuilderBuild);
+
+        env->SetObjectArrayElement(gnssAgcArray, i, agcObject);
+        env->DeleteLocalRef(agcBuilderObject);
+        env->DeleteLocalRef(agcObject);
+    }
+
+    return gnssAgcArray;
 }
 
 void GnssMeasurementCallbackAidl::translateGnssClock(JNIEnv* env, const GnssData& data,

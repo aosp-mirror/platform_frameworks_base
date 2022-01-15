@@ -48,23 +48,6 @@ public abstract class VcnUnderlyingNetworkTemplate {
     /** @hide */
     static final int NETWORK_PRIORITY_TYPE_CELL = 2;
 
-    /** Denotes that any network quality is acceptable. @hide */
-    public static final int NETWORK_QUALITY_ANY = 0;
-    /** Denotes that network quality needs to be OK. @hide */
-    public static final int NETWORK_QUALITY_OK = 100000;
-
-    private static final SparseArray<String> NETWORK_QUALITY_TO_STRING_MAP = new SparseArray<>();
-
-    static {
-        NETWORK_QUALITY_TO_STRING_MAP.put(NETWORK_QUALITY_ANY, "NETWORK_QUALITY_ANY");
-        NETWORK_QUALITY_TO_STRING_MAP.put(NETWORK_QUALITY_OK, "NETWORK_QUALITY_OK");
-    }
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({NETWORK_QUALITY_OK, NETWORK_QUALITY_ANY})
-    public @interface NetworkQuality {}
-
     /**
      * Used to configure the matching criteria of a network characteristic. This may include network
      * capabilities, or cellular subscription information. Denotes that networks with or without the
@@ -103,44 +86,73 @@ public abstract class VcnUnderlyingNetworkTemplate {
     private final int mNetworkPriorityType;
 
     /** @hide */
-    static final String NETWORK_QUALITY_KEY = "mNetworkQuality";
-
-    private final int mNetworkQuality;
-
-    /** @hide */
     static final String METERED_MATCH_KEY = "mMeteredMatchCriteria";
 
     private final int mMeteredMatchCriteria;
 
     /** @hide */
+    public static final int DEFAULT_MIN_BANDWIDTH_KBPS = 0;
+
+    /** @hide */
+    static final String MIN_ENTRY_UPSTREAM_BANDWIDTH_KBPS_KEY = "mMinEntryUpstreamBandwidthKbps";
+
+    private final int mMinEntryUpstreamBandwidthKbps;
+
+    /** @hide */
+    static final String MIN_EXIT_UPSTREAM_BANDWIDTH_KBPS_KEY = "mMinExitUpstreamBandwidthKbps";
+
+    private final int mMinExitUpstreamBandwidthKbps;
+
+    /** @hide */
+    static final String MIN_ENTRY_DOWNSTREAM_BANDWIDTH_KBPS_KEY =
+            "mMinEntryDownstreamBandwidthKbps";
+
+    private final int mMinEntryDownstreamBandwidthKbps;
+
+    /** @hide */
+    static final String MIN_EXIT_DOWNSTREAM_BANDWIDTH_KBPS_KEY = "mMinExitDownstreamBandwidthKbps";
+
+    private final int mMinExitDownstreamBandwidthKbps;
+
+    /** @hide */
     VcnUnderlyingNetworkTemplate(
-            int networkPriorityType, int networkQuality, int meteredMatchCriteria) {
+            int networkPriorityType,
+            int meteredMatchCriteria,
+            int minEntryUpstreamBandwidthKbps,
+            int minExitUpstreamBandwidthKbps,
+            int minEntryDownstreamBandwidthKbps,
+            int minExitDownstreamBandwidthKbps) {
         mNetworkPriorityType = networkPriorityType;
-        mNetworkQuality = networkQuality;
         mMeteredMatchCriteria = meteredMatchCriteria;
+        mMinEntryUpstreamBandwidthKbps = minEntryUpstreamBandwidthKbps;
+        mMinExitUpstreamBandwidthKbps = minExitUpstreamBandwidthKbps;
+        mMinEntryDownstreamBandwidthKbps = minEntryDownstreamBandwidthKbps;
+        mMinExitDownstreamBandwidthKbps = minExitDownstreamBandwidthKbps;
     }
 
     /** @hide */
-    static void validateNetworkQuality(int networkQuality) {
+    static void validateMatchCriteria(int matchCriteria, String matchingCapability) {
         Preconditions.checkArgument(
-                networkQuality == NETWORK_QUALITY_ANY || networkQuality == NETWORK_QUALITY_OK,
-                "Invalid networkQuality:" + networkQuality);
+                MATCH_CRITERIA_TO_STRING_MAP.contains(matchCriteria),
+                "Invalid matching criteria: " + matchCriteria + " for " + matchingCapability);
     }
 
     /** @hide */
-    static void validateMatchCriteria(int meteredMatchCriteria, String matchingCapability) {
+    static void validateMinBandwidthKbps(int minEntryBandwidth, int minExitBandwidth) {
         Preconditions.checkArgument(
-                MATCH_CRITERIA_TO_STRING_MAP.contains(meteredMatchCriteria),
-                "Invalid matching criteria: "
-                        + meteredMatchCriteria
-                        + " for "
-                        + matchingCapability);
+                minEntryBandwidth >= 0, "Invalid minEntryBandwidth, must be >= 0");
+        Preconditions.checkArgument(
+                minExitBandwidth >= 0, "Invalid minExitBandwidth, must be >= 0");
+        Preconditions.checkArgument(
+                minEntryBandwidth >= minExitBandwidth,
+                "Minimum entry bandwidth must be >= exit bandwidth");
     }
 
     /** @hide */
     protected void validate() {
-        validateNetworkQuality(mNetworkQuality);
         validateMatchCriteria(mMeteredMatchCriteria, "mMeteredMatchCriteria");
+        validateMinBandwidthKbps(mMinEntryUpstreamBandwidthKbps, mMinExitUpstreamBandwidthKbps);
+        validateMinBandwidthKbps(mMinEntryDownstreamBandwidthKbps, mMinExitDownstreamBandwidthKbps);
     }
 
     /** @hide */
@@ -168,15 +180,24 @@ public abstract class VcnUnderlyingNetworkTemplate {
         final PersistableBundle result = new PersistableBundle();
 
         result.putInt(NETWORK_PRIORITY_TYPE_KEY, mNetworkPriorityType);
-        result.putInt(NETWORK_QUALITY_KEY, mNetworkQuality);
         result.putInt(METERED_MATCH_KEY, mMeteredMatchCriteria);
+        result.putInt(MIN_ENTRY_UPSTREAM_BANDWIDTH_KBPS_KEY, mMinEntryUpstreamBandwidthKbps);
+        result.putInt(MIN_EXIT_UPSTREAM_BANDWIDTH_KBPS_KEY, mMinExitUpstreamBandwidthKbps);
+        result.putInt(MIN_ENTRY_DOWNSTREAM_BANDWIDTH_KBPS_KEY, mMinEntryDownstreamBandwidthKbps);
+        result.putInt(MIN_EXIT_DOWNSTREAM_BANDWIDTH_KBPS_KEY, mMinExitDownstreamBandwidthKbps);
 
         return result;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mNetworkPriorityType, mNetworkQuality, mMeteredMatchCriteria);
+        return Objects.hash(
+                mNetworkPriorityType,
+                mMeteredMatchCriteria,
+                mMinEntryUpstreamBandwidthKbps,
+                mMinExitUpstreamBandwidthKbps,
+                mMinEntryDownstreamBandwidthKbps,
+                mMinExitDownstreamBandwidthKbps);
     }
 
     @Override
@@ -187,8 +208,11 @@ public abstract class VcnUnderlyingNetworkTemplate {
 
         final VcnUnderlyingNetworkTemplate rhs = (VcnUnderlyingNetworkTemplate) other;
         return mNetworkPriorityType == rhs.mNetworkPriorityType
-                && mNetworkQuality == rhs.mNetworkQuality
-                && mMeteredMatchCriteria == rhs.mMeteredMatchCriteria;
+                && mMeteredMatchCriteria == rhs.mMeteredMatchCriteria
+                && mMinEntryUpstreamBandwidthKbps == rhs.mMinEntryUpstreamBandwidthKbps
+                && mMinExitUpstreamBandwidthKbps == rhs.mMinExitUpstreamBandwidthKbps
+                && mMinEntryDownstreamBandwidthKbps == rhs.mMinEntryDownstreamBandwidthKbps
+                && mMinExitDownstreamBandwidthKbps == rhs.mMinExitDownstreamBandwidthKbps;
     }
 
     /** @hide */
@@ -197,8 +221,8 @@ public abstract class VcnUnderlyingNetworkTemplate {
     }
 
     /** @hide */
-    static String getMatchCriteriaString(int meteredMatchCriteria) {
-        return getNameString(MATCH_CRITERIA_TO_STRING_MAP, meteredMatchCriteria);
+    static String getMatchCriteriaString(int matchCriteria) {
+        return getNameString(MATCH_CRITERIA_TO_STRING_MAP, matchCriteria);
     }
 
     /** @hide */
@@ -213,24 +237,14 @@ public abstract class VcnUnderlyingNetworkTemplate {
         pw.println(this.getClass().getSimpleName() + ":");
         pw.increaseIndent();
 
-        pw.println(
-                "mNetworkQuality: "
-                        + getNameString(NETWORK_QUALITY_TO_STRING_MAP, mNetworkQuality));
         pw.println("mMeteredMatchCriteria: " + getMatchCriteriaString(mMeteredMatchCriteria));
+        pw.println("mMinEntryUpstreamBandwidthKbps: " + mMinEntryUpstreamBandwidthKbps);
+        pw.println("mMinExitUpstreamBandwidthKbps: " + mMinExitUpstreamBandwidthKbps);
+        pw.println("mMinEntryDownstreamBandwidthKbps: " + mMinEntryDownstreamBandwidthKbps);
+        pw.println("mMinExitDownstreamBandwidthKbps: " + mMinExitDownstreamBandwidthKbps);
         dumpTransportSpecificFields(pw);
 
         pw.decreaseIndent();
-    }
-
-    /**
-     * Retrieve the required network quality to match this template.
-     *
-     * @see Builder#setNetworkQuality(int)
-     * @hide
-     */
-    @NetworkQuality
-    public int getNetworkQuality() {
-        return mNetworkQuality;
     }
 
     /**
@@ -239,8 +253,47 @@ public abstract class VcnUnderlyingNetworkTemplate {
      * @see VcnWifiUnderlyingNetworkTemplate.Builder#setMetered(int)
      * @see VcnCellUnderlyingNetworkTemplate.Builder#setMetered(int)
      */
-    @MatchCriteria
     public int getMetered() {
         return mMeteredMatchCriteria;
+    }
+
+    /**
+     * Returns the minimum entry upstream bandwidth allowed by this template.
+     *
+     * @see VcnWifiUnderlyingNetworkTemplate.Builder#setMinUpstreamBandwidthKbps(int, int)
+     * @see VcnCellUnderlyingNetworkTemplate.Builder#setMinUpstreamBandwidthKbps(int, int)
+     */
+    public int getMinEntryUpstreamBandwidthKbps() {
+        return mMinEntryUpstreamBandwidthKbps;
+    }
+
+    /**
+     * Returns the minimum exit upstream bandwidth allowed by this template.
+     *
+     * @see VcnWifiUnderlyingNetworkTemplate.Builder#setMinUpstreamBandwidthKbps(int, int)
+     * @see VcnCellUnderlyingNetworkTemplate.Builder#setMinUpstreamBandwidthKbps(int, int)
+     */
+    public int getMinExitUpstreamBandwidthKbps() {
+        return mMinExitUpstreamBandwidthKbps;
+    }
+
+    /**
+     * Returns the minimum entry downstream bandwidth allowed by this template.
+     *
+     * @see VcnWifiUnderlyingNetworkTemplate.Builder#setMinDownstreamBandwidthKbps(int, int)
+     * @see VcnCellUnderlyingNetworkTemplate.Builder#setMinDownstreamBandwidthKbps(int, int)
+     */
+    public int getMinEntryDownstreamBandwidthKbps() {
+        return mMinEntryDownstreamBandwidthKbps;
+    }
+
+    /**
+     * Returns the minimum exit downstream bandwidth allowed by this template.
+     *
+     * @see VcnWifiUnderlyingNetworkTemplate.Builder#setMinDownstreamBandwidthKbps(int, int)
+     * @see VcnCellUnderlyingNetworkTemplate.Builder#setMinDownstreamBandwidthKbps(int, int)
+     */
+    public int getMinExitDownstreamBandwidthKbps() {
+        return mMinExitDownstreamBandwidthKbps;
     }
 }

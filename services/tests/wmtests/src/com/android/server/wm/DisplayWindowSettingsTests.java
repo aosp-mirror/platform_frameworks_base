@@ -51,6 +51,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -445,6 +446,21 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         assertEquals(123, config.densityDpi);
         dc.computeScreenConfiguration(config);
         assertEquals(456, config.densityDpi);
+    }
+
+    @Test
+    public void testDisplayRotationSettingsAppliedOnCreation() {
+        // Create new displays with different rotation settings
+        final SettingsEntry settingsEntry1 = new SettingsEntry();
+        settingsEntry1.mIgnoreOrientationRequest = false;
+        final DisplayContent dcDontIgnoreOrientation = createMockSimulatedDisplay(settingsEntry1);
+        final SettingsEntry settingsEntry2 = new SettingsEntry();
+        settingsEntry2.mIgnoreOrientationRequest = true;
+        final DisplayContent dcIgnoreOrientation = createMockSimulatedDisplay(settingsEntry2);
+
+        // Verify that newly created displays are created with correct rotation settings
+        assertFalse(dcDontIgnoreOrientation.getIgnoreOrientationRequest());
+        assertTrue(dcIgnoreOrientation.getIgnoreOrientationRequest());
     }
 
     public final class TestSettingsProvider implements DisplayWindowSettings.SettingsProvider {

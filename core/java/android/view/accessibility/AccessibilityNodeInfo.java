@@ -4321,15 +4321,13 @@ public class AccessibilityNodeInfo implements Parcelable {
                 return "ACTION_PRESS_AND_HOLD";
             case R.id.accessibilityActionImeEnter:
                 return "ACTION_IME_ENTER";
+            case R.id.accessibilityActionDragStart:
+                return "ACTION_DRAG";
+            case R.id.accessibilityActionDragCancel:
+                return "ACTION_CANCEL_DRAG";
+            case R.id.accessibilityActionDragDrop:
+                return "ACTION_DROP";
             default:
-                // TODO(197520937): Use finalized constants in switch
-                if (action == R.id.accessibilityActionDragStart) {
-                    return "ACTION_DRAG";
-                } else if (action == R.id.accessibilityActionDragCancel) {
-                    return "ACTION_CANCEL_DRAG";
-                } else if (action == R.id.accessibilityActionDragDrop) {
-                    return "ACTION_DROP";
-                }
                 return "ACTION_UNKNOWN";
         }
     }

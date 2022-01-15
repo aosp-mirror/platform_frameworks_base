@@ -4750,7 +4750,7 @@ public class UserManager {
     public int removeUserWhenPossible(@NonNull UserHandle user,
             boolean overrideDevicePolicy) {
         try {
-            return mService.removeUserOrSetEphemeral(user.getIdentifier(), overrideDevicePolicy);
+            return mService.removeUserWhenPossible(user.getIdentifier(), overrideDevicePolicy);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -4777,7 +4777,7 @@ public class UserManager {
     public @RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId,
             boolean evenWhenDisallowed) {
         try {
-            return mService.removeUserOrSetEphemeral(userId, evenWhenDisallowed);
+            return mService.removeUserWhenPossible(userId, evenWhenDisallowed);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

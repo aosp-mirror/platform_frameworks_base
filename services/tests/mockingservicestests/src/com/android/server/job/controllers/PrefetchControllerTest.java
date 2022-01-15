@@ -200,8 +200,10 @@ public class PrefetchControllerTest {
     }
 
     private void setUidBias(int uid, int bias) {
+        int prevBias = mJobSchedulerService.getUidBias(uid);
+        doReturn(bias).when(mJobSchedulerService).getUidBias(uid);
         synchronized (mPrefetchController.mLock) {
-            mPrefetchController.onUidBiasChangedLocked(uid, bias);
+            mPrefetchController.onUidBiasChangedLocked(uid, prevBias, bias);
         }
     }
 

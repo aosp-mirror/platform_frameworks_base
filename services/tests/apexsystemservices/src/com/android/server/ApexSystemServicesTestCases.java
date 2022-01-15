@@ -37,6 +37,10 @@ import org.junit.rules.RuleChain;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
+import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class ApexSystemServicesTestCases extends BaseHostJUnit4Test {
 
@@ -67,7 +71,7 @@ public class ApexSystemServicesTestCases extends BaseHostJUnit4Test {
     }
 
     @Test
-    public void noApexSystemServerStartsWithoutApex() throws Exception {
+    public void testNoApexSystemServiceStartsWithoutApex() throws Exception {
         mPreparer.reboot();
 
         assertThat(getFakeApexSystemServiceLogcat())
@@ -75,7 +79,7 @@ public class ApexSystemServicesTestCases extends BaseHostJUnit4Test {
     }
 
     @Test
-    public void apexSystemServerStarts() throws Exception {
+    public void testApexSystemServiceStarts() throws Exception {
         // Pre-install the apex
         String apex = "test_com.android.server.apex";
         mPreparer.pushResourceFile(apex, "/system/apex/" + apex);
@@ -86,9 +90,40 @@ public class ApexSystemServicesTestCases extends BaseHostJUnit4Test {
                 .contains("FakeApexSystemService onStart");
     }
 
+    @Test
+    public void testInitOrder() throws Exception {
+        // Pre-install the apex
+        String apex = "test_com.android.server.apex";
+        mPreparer.pushResourceFile(apex, "/system/apex/" + apex);
+        // Reboot activates the apex
+        mPreparer.reboot();
+
+        assertThat(getFakeApexSystemServiceLogcat().lines()
+                .map(ApexSystemServicesTestCases::getDebugMessage)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()))
+                .containsExactly(
+                        // Second service has a higher initOrder and must be started first
+                        "FakeApexSystemService2 onStart",
+                        "FakeApexSystemService onStart"
+                )
+                .inOrder();
+    }
+
     private String getFakeApexSystemServiceLogcat() throws DeviceNotAvailableException {
         return mDevice.executeAdbCommand("logcat", "-v", "brief", "-d", "FakeApexSystemService:D",
                 "*:S");
+    }
+
+    private static final Pattern DEBUG_MESSAGE =
+            Pattern.compile("(FakeApexSystemService[0-9]* onStart)");
+
+    private static String getDebugMessage(String logcatLine) {
+        return DEBUG_MESSAGE.matcher(logcatLine)
+                .results()
+                .map(m -> m.group(1))
+                .findFirst()
+                .orElse(null);
     }
 
 }

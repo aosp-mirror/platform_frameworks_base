@@ -298,6 +298,7 @@ public final class Geocoder {
      * @param lowerLeftLongitude  the longitude of the lower left corner of the bounding box
      * @param upperRightLatitude  the latitude of the upper right corner of the bounding box
      * @param upperRightLongitude the longitude of the upper right corner of the bounding box
+     * @param listener            a listener for receiving results
      *
      * @throws IllegalArgumentException if locationName is null
      * @throws IllegalArgumentException if any latitude or longitude is invalid

@@ -40,6 +40,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.RankingBuilder;
+import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.SectionClassifier;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
@@ -92,6 +93,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private NotifSection mNotifSection;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private IStatusBarService mService;
+    @Mock private ConversationNotificationManager mConvoManager;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
     private final SectionClassifier mSectionClassifier = new SectionClassifier();
     private final NotifUiAdjustmentProvider mAdjustmentProvider =
@@ -119,6 +121,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 mock(NotifViewBarn.class),
                 mAdjustmentProvider,
                 mService,
+                mConvoManager,
                 TEST_CHILD_BIND_CUTOFF,
                 TEST_MAX_GROUP_DELAY);
 
@@ -402,6 +405,13 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         assertFalse(mUninflatedFilter.shouldFilterOut(summary, 401));
         assertFalse(mUninflatedFilter.shouldFilterOut(child0, 401));
         assertFalse(mUninflatedFilter.shouldFilterOut(child1, 401));
+    }
+
+    @Test
+    public void testCallConversationManagerBindWhenInflated() {
+        mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
+        mNotifInflater.getInflateCallback(mEntry).onInflationFinished(mEntry, null);
+        verify(mConvoManager, times(1)).onEntryViewBound(eq(mEntry));
     }
 
     @Test

@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.Compile;
 import com.android.systemui.util.leak.LeakDetector;
 
 import java.io.FileDescriptor;
@@ -1011,7 +1012,7 @@ public class NotificationEntryManager implements
     }
 
     private static final String TAG = "NotificationEntryMgr";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
 
     /**
      * Used when a notification is removed and it doesn't have a reason that maps to one of the

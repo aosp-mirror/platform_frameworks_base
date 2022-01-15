@@ -517,7 +517,7 @@ public final class ConnectivityController extends RestrictingController implemen
 
     @GuardedBy("mLock")
     @Override
-    public void onUidBiasChangedLocked(int uid, int newBias) {
+    public void onUidBiasChangedLocked(int uid, int prevBias, int newBias) {
         UidStats uidStats = mUidStats.get(uid);
         if (uidStats != null && uidStats.baseBias != newBias) {
             uidStats.baseBias = newBias;

@@ -2995,19 +2995,17 @@ public class AudioManager {
         void onModeChanged(@AudioMode int mode);
     }
 
-    private final Object mModeListenerLock = new Object();
     /**
-     * List of listeners for audio mode and their associated Executor.
-     * List is lazy-initialized on first registration
+     * manages the OnModeChangedListener listeners and the ModeDispatcherStub
      */
-    @GuardedBy("mModeListenerLock")
-    private @Nullable ArrayList<ListenerInfo<OnModeChangedListener>> mModeListeners;
+    private final CallbackUtil.LazyListenerManager<OnModeChangedListener> mModeChangedListenerMgr =
+            new CallbackUtil.LazyListenerManager();
 
-    @GuardedBy("mModeListenerLock")
-    private ModeDispatcherStub mModeDispatcherStub;
 
-    private final class ModeDispatcherStub extends IAudioModeDispatcher.Stub {
+    final class ModeDispatcherStub extends IAudioModeDispatcher.Stub
+            implements CallbackUtil.DispatcherStub {
 
+        @Override
         public void register(boolean register) {
             try {
                 if (register) {
@@ -3021,10 +3019,8 @@ public class AudioManager {
         }
 
         @Override
-        @SuppressLint("GuardedBy") // lock applied inside callListeners method
         public void dispatchAudioModeChanged(int mode) {
-            CallbackUtil.callListeners(mModeListeners, mModeListenerLock,
-                    (listener) -> listener.onModeChanged(mode));
+            mModeChangedListenerMgr.callListeners((listener) -> listener.onModeChanged(mode));
         }
     }
 
@@ -3037,15 +3033,8 @@ public class AudioManager {
     public void addOnModeChangedListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnModeChangedListener listener) {
-        synchronized (mModeListenerLock) {
-            final Pair<ArrayList<ListenerInfo<OnModeChangedListener>>, ModeDispatcherStub> res =
-                    CallbackUtil.addListener("addOnModeChangedListener",
-                            executor, listener, mModeListeners, mModeDispatcherStub,
-                            () -> new ModeDispatcherStub(),
-                            stub -> stub.register(true));
-            mModeListeners = res.first;
-            mModeDispatcherStub = res.second;
-        }
+        mModeChangedListenerMgr.addListener(executor, listener, "addOnModeChangedListener",
+                () -> new ModeDispatcherStub());
     }
 
     /**
@@ -3054,14 +3043,7 @@ public class AudioManager {
      * @param listener
      */
     public void removeOnModeChangedListener(@NonNull OnModeChangedListener listener) {
-        synchronized (mModeListenerLock) {
-            final Pair<ArrayList<ListenerInfo<OnModeChangedListener>>, ModeDispatcherStub> res =
-                    CallbackUtil.removeListener("removeOnModeChangedListener",
-                            listener, mModeListeners, mModeDispatcherStub,
-                            stub -> stub.register(false));
-            mModeListeners = res.first;
-            mModeDispatcherStub = res.second;
-        }
+        mModeChangedListenerMgr.removeListener(listener, "removeOnModeChangedListener");
     }
 
     /**
@@ -7718,6 +7700,12 @@ public class AudioManager {
     }
 
     /**
+     * manages the OnCommunicationDeviceChangedListener listeners and the
+     * CommunicationDeviceDispatcherStub
+     */
+    private final CallbackUtil.LazyListenerManager<OnCommunicationDeviceChangedListener>
+            mCommDeviceChangedListenerMgr = new CallbackUtil.LazyListenerManager();
+    /**
      * Adds a listener for being notified of changes to the communication audio device.
      * See {@link #setCommunicationDevice(AudioDeviceInfo)}.
      * @param executor
@@ -7726,16 +7714,9 @@ public class AudioManager {
     public void addOnCommunicationDeviceChangedListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnCommunicationDeviceChangedListener listener) {
-        synchronized (mCommDevListenerLock) {
-            final Pair<ArrayList<ListenerInfo<OnCommunicationDeviceChangedListener>>,
-                    CommunicationDeviceDispatcherStub> res =
-                    CallbackUtil.addListener("addOnCommunicationDeviceChangedListener",
-                            executor, listener, mCommDevListeners, mCommDevDispatcherStub,
-                            () -> new CommunicationDeviceDispatcherStub(),
-                            stub -> stub.register(true));
-            mCommDevListeners = res.first;
-            mCommDevDispatcherStub = res.second;
-        }
+        mCommDeviceChangedListenerMgr.addListener(
+                            executor, listener, "addOnCommunicationDeviceChangedListener",
+                            () -> new CommunicationDeviceDispatcherStub());
     }
 
     /**
@@ -7745,32 +7726,14 @@ public class AudioManager {
      */
     public void removeOnCommunicationDeviceChangedListener(
             @NonNull OnCommunicationDeviceChangedListener listener) {
-        synchronized (mCommDevListenerLock) {
-            final Pair<ArrayList<ListenerInfo<OnCommunicationDeviceChangedListener>>,
-                    CommunicationDeviceDispatcherStub> res =
-                    CallbackUtil.removeListener("removeOnCommunicationDeviceChangedListener",
-                            listener, mCommDevListeners, mCommDevDispatcherStub,
-                            stub -> stub.register(false));
-            mCommDevListeners = res.first;
-            mCommDevDispatcherStub = res.second;
-        }
+        mCommDeviceChangedListenerMgr.removeListener(listener,
+                "removeOnCommunicationDeviceChangedListener");
     }
 
-    private final Object mCommDevListenerLock = new Object();
-    /**
-     * List of listeners for preferred device for strategy and their associated Executor.
-     * List is lazy-initialized on first registration
-     */
-    @GuardedBy("mCommDevListenerLock")
-    private @Nullable
-            ArrayList<ListenerInfo<OnCommunicationDeviceChangedListener>> mCommDevListeners;
-
-    @GuardedBy("mCommDevListenerLock")
-    private CommunicationDeviceDispatcherStub mCommDevDispatcherStub;
-
     private final class CommunicationDeviceDispatcherStub
-            extends ICommunicationDeviceDispatcher.Stub {
+            extends ICommunicationDeviceDispatcher.Stub implements CallbackUtil.DispatcherStub {
 
+        @Override
         public void register(boolean register) {
             try {
                 if (register) {
@@ -7784,10 +7747,9 @@ public class AudioManager {
         }
 
         @Override
-        @SuppressLint("GuardedBy") // lock applied inside callListeners method
         public void dispatchCommunicationDeviceChanged(int portId) {
             AudioDeviceInfo device = getDeviceForPortId(portId, GET_DEVICES_OUTPUTS);
-            CallbackUtil.callListeners(mCommDevListeners, mCommDevListenerLock,
+            mCommDeviceChangedListenerMgr.callListeners(
                     (listener) -> listener.onCommunicationDeviceChanged(device));
         }
     }

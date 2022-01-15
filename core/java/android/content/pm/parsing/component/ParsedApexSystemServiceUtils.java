@@ -53,10 +53,13 @@ public class ParsedApexSystemServiceUtils {
                     R.styleable.AndroidManifestApexSystemService_minSdkVersion);
             String maxSdkVersion = sa.getString(
                     R.styleable.AndroidManifestApexSystemService_maxSdkVersion);
+            int initOrder = sa.getInt(R.styleable.AndroidManifestApexSystemService_initOrder, 0);
 
             systemService.setName(className)
                     .setMinSdkVersion(minSdkVersion)
-                    .setMaxSdkVersion(maxSdkVersion);
+                    .setMaxSdkVersion(maxSdkVersion)
+                    .setInitOrder(initOrder);
+
             if (!TextUtils.isEmpty(jarPath)) {
                 systemService.setJarPath(jarPath);
             }

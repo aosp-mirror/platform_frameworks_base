@@ -149,7 +149,7 @@ public class RemoteTransitionCompat implements Parcelable {
                 }
                 // Also make all the wallpapers opaque since we want the visible from the start
                 for (int i = wallpapers.length - 1; i >= 0; --i) {
-                    t.setAlpha(wallpapers[i].leash.mSurfaceControl, 1);
+                    t.setAlpha(wallpapers[i].leash, 1);
                 }
                 t.apply();
                 mRecentsSession.setup(controller, info, finishedCallback, pausingTasks, pipTask,
@@ -267,10 +267,10 @@ public class RemoteTransitionCompat implements Parcelable {
                 // We are receiving new opening tasks, so convert to onTasksAppeared.
                 final RemoteAnimationTargetCompat target = new RemoteAnimationTargetCompat(
                         openingTasks.get(i), layer, info, t);
-                mLeashMap.put(mOpeningLeashes.get(i), target.leash.mSurfaceControl);
-                t.reparent(target.leash.mSurfaceControl, mInfo.getRootLeash());
-                t.setLayer(target.leash.mSurfaceControl, layer);
-                t.hide(target.leash.mSurfaceControl);
+                mLeashMap.put(mOpeningLeashes.get(i), target.leash);
+                t.reparent(target.leash, mInfo.getRootLeash());
+                t.setLayer(target.leash, layer);
+                t.hide(target.leash);
                 targets[i] = target;
             }
             t.apply();
