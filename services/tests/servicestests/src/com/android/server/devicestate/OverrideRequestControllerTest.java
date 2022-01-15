@@ -213,6 +213,25 @@ public final class OverrideRequestControllerTest {
         assertEquals(mStatusListener.getLastStatus(firstRequest).intValue(), STATUS_CANCELED);
     }
 
+    @Test
+    public void cancelOverrideRequestsTest() {
+        OverrideRequest firstRequest = new OverrideRequest(new Binder(), 0 /* pid */,
+                1 /* requestedState */, 0 /* flags */);
+        OverrideRequest secondRequest = new OverrideRequest(new Binder(), 0 /* pid */,
+                2 /* requestedState */, 0 /* flags */);
+
+        mController.addRequest(firstRequest);
+        mController.addRequest(secondRequest);
+
+        assertEquals(mStatusListener.getLastStatus(secondRequest).intValue(), STATUS_ACTIVE);
+        assertEquals(mStatusListener.getLastStatus(firstRequest).intValue(), STATUS_SUSPENDED);
+
+        mController.cancelOverrideRequests();
+
+        assertEquals(mStatusListener.getLastStatus(secondRequest).intValue(), STATUS_CANCELED);
+        assertEquals(mStatusListener.getLastStatus(firstRequest).intValue(), STATUS_CANCELED);
+    }
+
     private static final class TestStatusChangeListener implements
             OverrideRequestController.StatusChangeListener {
         private Map<OverrideRequest, Integer> mLastStatusMap = new HashMap<>();

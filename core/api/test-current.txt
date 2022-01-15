@@ -1147,15 +1147,15 @@ package android.hardware.display {
 
   public final class DisplayManager {
     method public boolean areUserDisabledHdrTypesAllowed();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearUserPreferredDisplayMode();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearGlobalUserPreferredDisplayMode();
+    method @Nullable public android.view.Display.Mode getGlobalUserPreferredDisplayMode();
     method @NonNull public int[] getUserDisabledHdrTypes();
-    method @Nullable public android.view.Display.Mode getUserPreferredDisplayMode();
     method public boolean isMinimalPostProcessingRequested(int);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setAreUserDisabledHdrTypesAllowed(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void setGlobalUserPreferredDisplayMode(@NonNull android.view.Display.Mode);
     method @RequiresPermission(android.Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE) public void setRefreshRateSwitchingType(int);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public void setShouldAlwaysRespectAppRequestedMode(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserDisabledHdrTypes(@NonNull int[]);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void setUserPreferredDisplayMode(@NonNull android.view.Display.Mode);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public boolean shouldAlwaysRespectAppRequestedMode();
     field public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2; // 0x2
     field public static final int SWITCHING_TYPE_NONE = 0; // 0x0
@@ -1319,7 +1319,7 @@ package android.location {
     method public void setAccumulatedDeltaRangeMeters(double);
     method public void setAccumulatedDeltaRangeState(int);
     method public void setAccumulatedDeltaRangeUncertaintyMeters(double);
-    method public void setAutomaticGainControlLevelInDb(double);
+    method @Deprecated public void setAutomaticGainControlLevelInDb(double);
     method public void setBasebandCn0DbHz(double);
     method @Deprecated public void setCarrierCycles(long);
     method public void setCarrierFrequencyHz(float);
@@ -1344,10 +1344,6 @@ package android.location {
     method public void setSvid(int);
     method public void setTimeOffsetNanos(double);
     field public static final int ADR_STATE_ALL = 31; // 0x1f
-  }
-
-  public final class GnssMeasurementsEvent implements android.os.Parcelable {
-    ctor public GnssMeasurementsEvent(android.location.GnssClock, android.location.GnssMeasurement[]);
   }
 
   public final class GnssNavigationMessage implements android.os.Parcelable {
@@ -2714,11 +2710,14 @@ package android.view {
   }
 
   public final class Display {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearUserPreferredDisplayMode();
     method @NonNull public android.view.Display.Mode getDefaultMode();
     method @NonNull public int[] getReportedHdrTypes();
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
     method public int getType();
+    method @Nullable public android.view.Display.Mode getUserPreferredDisplayMode();
     method public boolean hasAccess(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void setUserPreferredDisplayMode(@NonNull android.view.Display.Mode);
     field public static final int FLAG_TRUSTED = 128; // 0x80
     field public static final int TYPE_EXTERNAL = 2; // 0x2
     field public static final int TYPE_INTERNAL = 1; // 0x1
@@ -2731,6 +2730,13 @@ package android.view {
   public static final class Display.Mode implements android.os.Parcelable {
     ctor public Display.Mode(int, int, float);
     method public boolean matches(int, int, float);
+  }
+
+  public static final class Display.Mode.Builder {
+    ctor public Display.Mode.Builder();
+    method @NonNull public android.view.Display.Mode build();
+    method @NonNull public android.view.Display.Mode.Builder setRefreshRate(float);
+    method @NonNull public android.view.Display.Mode.Builder setResolution(int, int);
   }
 
   public class FocusFinder {

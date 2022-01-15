@@ -29,7 +29,6 @@ import android.media.permission.ClearCallingIdentityContext;
 import android.media.permission.SafeCloseable;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -376,16 +375,8 @@ public class Spatializer {
     public void addOnSpatializerStateChangedListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnSpatializerStateChangedListener listener) {
-        synchronized (mStateListenerLock) {
-            final Pair<ArrayList<ListenerInfo<OnSpatializerStateChangedListener>>,
-                    SpatializerInfoDispatcherStub> res =
-                    CallbackUtil.addListener("addOnSpatializerStateChangedListener",
-                            executor, listener, mStateListeners, mInfoDispatcherStub,
-                            () -> new SpatializerInfoDispatcherStub(),
-                            stub -> stub.register(true));
-            mStateListeners = res.first;
-            mInfoDispatcherStub = res.second;
-        }
+        mStateListenerMgr.addListener(executor, listener, "addOnSpatializerStateChangedListener",
+                () -> new SpatializerInfoDispatcherStub());
     }
 
     /**
@@ -396,15 +387,7 @@ public class Spatializer {
      */
     public void removeOnSpatializerStateChangedListener(
             @NonNull OnSpatializerStateChangedListener listener) {
-        synchronized (mStateListenerLock) {
-            final Pair<ArrayList<ListenerInfo<OnSpatializerStateChangedListener>>,
-                    SpatializerInfoDispatcherStub> res =
-                    CallbackUtil.removeListener("removeOnSpatializerStateChangedListener",
-                            listener, mStateListeners, mInfoDispatcherStub,
-                            stub -> stub.register(false));
-            mStateListeners = res.first;
-            mInfoDispatcherStub = res.second;
-        }
+        mStateListenerMgr.removeListener(listener, "removeOnSpatializerStateChangedListener");
     }
 
     /**
@@ -459,18 +442,16 @@ public class Spatializer {
         }
     }
 
-    private final Object mStateListenerLock = new Object();
     /**
-     * List of listeners for state listener and their associated Executor.
-     * List is lazy-initialized on first registration
+     * manages the OnSpatializerStateChangedListener listeners and the
+     * SpatializerInfoDispatcherStub
      */
-    @GuardedBy("mStateListenerLock")
-    private @Nullable ArrayList<ListenerInfo<OnSpatializerStateChangedListener>> mStateListeners;
+    private final CallbackUtil.LazyListenerManager<OnSpatializerStateChangedListener>
+            mStateListenerMgr = new CallbackUtil.LazyListenerManager();
 
-    @GuardedBy("mStateListenerLock")
-    private @Nullable SpatializerInfoDispatcherStub mInfoDispatcherStub;
-
-    private final class SpatializerInfoDispatcherStub extends ISpatializerCallback.Stub {
+    private final class SpatializerInfoDispatcherStub extends ISpatializerCallback.Stub
+            implements CallbackUtil.DispatcherStub {
+        @Override
         public void register(boolean register) {
             try {
                 if (register) {
@@ -486,7 +467,7 @@ public class Spatializer {
         @Override
         @SuppressLint("GuardedBy") // lock applied inside callListeners method
         public void dispatchSpatializerEnabledChanged(boolean enabled) {
-            CallbackUtil.callListeners(mStateListeners, mStateListenerLock,
+            mStateListenerMgr.callListeners(
                     (listener) -> listener.onSpatializerEnabledChanged(
                             Spatializer.this, enabled));
         }
@@ -494,7 +475,7 @@ public class Spatializer {
         @Override
         @SuppressLint("GuardedBy") // lock applied inside callListeners method
         public void dispatchSpatializerAvailableChanged(boolean available) {
-            CallbackUtil.callListeners(mStateListeners, mStateListenerLock,
+            mStateListenerMgr.callListeners(
                     (listener) -> listener.onSpatializerAvailableChanged(
                             Spatializer.this, available));
         }
@@ -612,16 +593,9 @@ public class Spatializer {
     public void addOnHeadTrackingModeChangedListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnHeadTrackingModeChangedListener listener) {
-        synchronized (mHeadTrackingListenerLock) {
-            final Pair<ArrayList<ListenerInfo<OnHeadTrackingModeChangedListener>>,
-                    SpatializerHeadTrackingDispatcherStub> res = CallbackUtil.addListener(
-                        "addOnHeadTrackingModeChangedListener", executor, listener,
-                        mHeadTrackingListeners, mHeadTrackingDispatcherStub,
-                        () -> new SpatializerHeadTrackingDispatcherStub(),
-                        stub -> stub.register(true));
-            mHeadTrackingListeners = res.first;
-            mHeadTrackingDispatcherStub = res.second;
-        }
+        mHeadTrackingListenerMgr.addListener(executor, listener,
+                "addOnHeadTrackingModeChangedListener",
+                 () -> new SpatializerHeadTrackingDispatcherStub());
     }
 
     /**
@@ -634,15 +608,8 @@ public class Spatializer {
     @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
     public void removeOnHeadTrackingModeChangedListener(
             @NonNull OnHeadTrackingModeChangedListener listener) {
-        synchronized (mHeadTrackingListenerLock) {
-            final Pair<ArrayList<ListenerInfo<OnHeadTrackingModeChangedListener>>,
-                    SpatializerHeadTrackingDispatcherStub> res = CallbackUtil.removeListener(
-                        "removeOnHeadTrackingModeChangedListener", listener,
-                        mHeadTrackingListeners, mHeadTrackingDispatcherStub,
-                        stub -> stub.register(false));
-            mHeadTrackingListeners = res.first;
-            mHeadTrackingDispatcherStub = res.second;
-        }
+        mHeadTrackingListenerMgr.removeListener(listener,
+                "removeOnHeadTrackingModeChangedListener");
     }
 
     /**
@@ -828,20 +795,17 @@ public class Spatializer {
     //-----------------------------------------------------------------------------
     // head tracking callback management and stub
 
-    private final Object mHeadTrackingListenerLock = new Object();
     /**
-     * List of listeners for head tracking mode listener and their associated Executor.
-     * List is lazy-initialized on first registration
+     * manages the OnHeadTrackingModeChangedListener listeners and the
+     * SpatializerHeadTrackingDispatcherStub
      */
-    @GuardedBy("mHeadTrackingListenerLock")
-    private @Nullable ArrayList<ListenerInfo<OnHeadTrackingModeChangedListener>>
-            mHeadTrackingListeners;
-
-    @GuardedBy("mHeadTrackingListenerLock")
-    private @Nullable SpatializerHeadTrackingDispatcherStub mHeadTrackingDispatcherStub;
+    private final CallbackUtil.LazyListenerManager<OnHeadTrackingModeChangedListener>
+            mHeadTrackingListenerMgr = new CallbackUtil.LazyListenerManager();
 
     private final class SpatializerHeadTrackingDispatcherStub
-            extends ISpatializerHeadTrackingModeCallback.Stub {
+            extends ISpatializerHeadTrackingModeCallback.Stub
+            implements CallbackUtil.DispatcherStub {
+        @Override
         public void register(boolean register) {
             try {
                 if (register) {
@@ -857,14 +821,14 @@ public class Spatializer {
         @Override
         @SuppressLint("GuardedBy") // lock applied inside callListeners method
         public void dispatchSpatializerActualHeadTrackingModeChanged(int mode) {
-            CallbackUtil.callListeners(mHeadTrackingListeners, mHeadTrackingListenerLock,
+            mHeadTrackingListenerMgr.callListeners(
                     (listener) -> listener.onHeadTrackingModeChanged(Spatializer.this, mode));
         }
 
         @Override
         @SuppressLint("GuardedBy") // lock applied inside callListeners method
         public void dispatchSpatializerDesiredHeadTrackingModeChanged(int mode) {
-            CallbackUtil.callListeners(mHeadTrackingListeners, mHeadTrackingListenerLock,
+            mHeadTrackingListenerMgr.callListeners(
                     (listener) -> listener.onDesiredHeadTrackingModeChanged(
                             Spatializer.this, mode));
         }

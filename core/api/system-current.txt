@@ -6384,6 +6384,7 @@ package android.media.tv {
 
   public static final class TvInputManager.Hardware {
     method public void overrideAudioSink(int, String, int, int, int);
+    method public void overrideAudioSink(@NonNull android.media.AudioDeviceInfo, @IntRange(from=0) int, int, int);
     method public void setStreamVolume(float);
     method public boolean setSurface(android.view.Surface, android.media.tv.TvStreamConfig);
   }
@@ -9154,6 +9155,7 @@ package android.os {
     field public static final int EVENT_UNSPECIFIED = 0; // 0x0
     field public static final int REASON_ACCOUNT_TRANSFER = 104; // 0x68
     field public static final int REASON_ACTIVITY_RECOGNITION = 103; // 0x67
+    field public static final int REASON_BLUETOOTH_BROADCAST = 203; // 0xcb
     field public static final int REASON_GEOFENCING = 100; // 0x64
     field public static final int REASON_LOCATION_PROVIDER = 312; // 0x138
     field public static final int REASON_OTHER = 1; // 0x1

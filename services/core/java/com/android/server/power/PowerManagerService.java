@@ -102,7 +102,6 @@ import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
@@ -290,7 +289,6 @@ public final class PowerManagerService extends SystemService
     private BatteryManagerInternal mBatteryManagerInternal;
     private DisplayManagerInternal mDisplayManagerInternal;
     private IBatteryStats mBatteryStats;
-    private IAppOpsService mAppOps;
     private WindowManagerPolicy mPolicy;
     private Notifier mNotifier;
     private WirelessChargerDetector mWirelessChargerDetector;
@@ -298,7 +296,7 @@ public final class PowerManagerService extends SystemService
     private DreamManagerInternal mDreamManager;
     private LogicalLight mAttentionLight;
 
-    private InattentiveSleepWarningController mInattentiveSleepWarningOverlayController;
+    private final InattentiveSleepWarningController mInattentiveSleepWarningOverlayController;
     private final AmbientDisplaySuppressionController mAmbientDisplaySuppressionController;
 
     private final Object mLock = LockGuard.installNewLock(LockGuard.INDEX_POWER);
@@ -318,10 +316,10 @@ public final class PowerManagerService extends SystemService
 
     // Table of all suspend blockers.
     // There should only be a few of these.
-    private final ArrayList<SuspendBlocker> mSuspendBlockers = new ArrayList<SuspendBlocker>();
+    private final ArrayList<SuspendBlocker> mSuspendBlockers = new ArrayList<>();
 
     // Table of all wake locks acquired by applications.
-    private final ArrayList<WakeLock> mWakeLocks = new ArrayList<WakeLock>();
+    private final ArrayList<WakeLock> mWakeLocks = new ArrayList<>();
 
     // A bitfield that summarizes the state of all active wakelocks.
     private int mWakeLockSummary;
@@ -353,8 +351,6 @@ public final class PowerManagerService extends SystemService
     // Timestamp of the last screen brightness boost.
     private long mLastScreenBrightnessBoostTime;
     private boolean mScreenBrightnessBoostInProgress;
-
-    private DisplayGroupPowerChangeListener mDisplayGroupPowerChangeListener;
 
     // The suspend blocker used to keep the CPU alive while the device is booting.
     private final SuspendBlocker mBootingSuspendBlocker;
@@ -938,7 +934,7 @@ public final class PowerManagerService extends SystemService
          * Handler for asynchronous operations performed by the power manager.
          */
         Handler createHandler(Looper looper, Handler.Callback callback) {
-            return new Handler(looper, callback, true /*async*/);
+            return new Handler(looper, callback, /* async= */ true);
         }
 
         void invalidateIsInteractiveCaches() {
@@ -973,7 +969,7 @@ public final class PowerManagerService extends SystemService
         mInjector = injector;
 
         mHandlerThread = new ServiceThread(TAG,
-                Process.THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
+                Process.THREAD_PRIORITY_DISPLAY, /* allowIo= */ false);
         mHandlerThread.start();
         mHandler = injector.createHandler(mHandlerThread.getLooper(),
                 new PowerManagerHandlerCallback());
@@ -1160,18 +1156,18 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    public void systemReady(IAppOpsService appOps) {
+    public void systemReady() {
         synchronized (mLock) {
             mSystemReady = true;
-            mAppOps = appOps;
             mDreamManager = getLocalService(DreamManagerInternal.class);
             mDisplayManagerInternal = getLocalService(DisplayManagerInternal.class);
             mPolicy = getLocalService(WindowManagerPolicy.class);
             mBatteryManagerInternal = getLocalService(BatteryManagerInternal.class);
             mAttentionDetector.systemReady(mContext);
             mPowerGroups.append(Display.DEFAULT_DISPLAY_GROUP, new PowerGroup());
-            mDisplayGroupPowerChangeListener = new DisplayGroupPowerChangeListener();
-            mDisplayManagerInternal.registerDisplayGroupListener(mDisplayGroupPowerChangeListener);
+            DisplayGroupPowerChangeListener displayGroupPowerChangeListener =
+                    new DisplayGroupPowerChangeListener();
+            mDisplayManagerInternal.registerDisplayGroupListener(displayGroupPowerChangeListener);
 
             SensorManager sensorManager = new SystemSensorManager(mContext, mHandler.getLooper());
 
@@ -1723,6 +1719,7 @@ public final class PowerManagerService extends SystemService
     }
 
     // Called from native code.
+    @SuppressWarnings("unused")
     private void userActivityFromNative(long eventTime, int event, int displayId, int flags) {
         userActivityInternal(displayId, eventTime, event, flags, Process.SYSTEM_UID);
     }
@@ -1757,7 +1754,7 @@ public final class PowerManagerService extends SystemService
             if (userActivityNoUpdateLocked(mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP),
                     mClock.uptimeMillis(),
                     PowerManager.USER_ACTIVITY_EVENT_ATTENTION,
-                    0 /* flags */,
+                    /* flags= */ 0,
                     Process.SYSTEM_UID)) {
                 updatePowerStateLocked();
             }
@@ -2046,6 +2043,7 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    @SuppressWarnings("deprecation")
     @GuardedBy("mLock")
     private void setGlobalWakefulnessLocked(int wakefulness, long eventTime, int reason, int uid,
             int opUid, String opPackageName, String details) {
@@ -2491,9 +2489,8 @@ public final class PowerManagerService extends SystemService
      * Updates the value of mWakeLockSummary to summarize the state of all active wake locks.
      * Note that most wake-locks are ignored when the system is asleep.
      *
-     * This function must have no other side-effects.
+     * This function must have no other side effects.
      */
-    @SuppressWarnings("deprecation")
     @GuardedBy("mLock")
     private void updateWakeLockSummaryLocked(int dirty) {
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_WAKEFULNESS | DIRTY_DISPLAY_GROUP_WAKEFULNESS))
@@ -2596,6 +2593,7 @@ public final class PowerManagerService extends SystemService
     }
 
     /** Get wake lock summary flags that correspond to the given wake lock. */
+    @SuppressWarnings("deprecation")
     private int getWakeLockSummaryFlags(WakeLock wakeLock) {
         switch (wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
             case PowerManager.PARTIAL_WAKE_LOCK:
@@ -3170,7 +3168,7 @@ public final class PowerManagerService extends SystemService
         if (mDreamManager != null) {
             // Restart the dream whenever the sandman is summoned.
             if (startDreaming) {
-                mDreamManager.stopDream(false /*immediate*/);
+                mDreamManager.stopDream(/* immediate= */ false);
                 mDreamManager.startDream(wakefulness == WAKEFULNESS_DOZING);
             }
             isDreaming = mDreamManager.isDreaming();
@@ -3254,7 +3252,7 @@ public final class PowerManagerService extends SystemService
 
         // Stop dream.
         if (isDreaming) {
-            mDreamManager.stopDream(false /*immediate*/);
+            mDreamManager.stopDream(/* immediate= */ false);
         }
     }
 
@@ -3518,7 +3516,7 @@ public final class PowerManagerService extends SystemService
                 mDirty |= DIRTY_PROXIMITY_POSITIVE;
                 userActivityNoUpdateLocked(mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP),
                         mClock.uptimeMillis(), PowerManager.USER_ACTIVITY_EVENT_OTHER,
-                        0 /* flags */, Process.SYSTEM_UID);
+                        /* flags= */ 0, Process.SYSTEM_UID);
                 updatePowerStateLocked();
             }
         }
@@ -4302,7 +4300,7 @@ public final class PowerManagerService extends SystemService
         if (sQuiescent) {
             // Pass the optional "quiescent" argument to the bootloader to let it know
             // that it should not turn the screen/lights on.
-            if (reason != ""){
+            if (!"".equals(reason)) {
                 reason += ",";
             }
             reason = reason + "quiescent";
@@ -5412,8 +5410,8 @@ public final class PowerManagerService extends SystemService
                 ws = new WorkSource();
                 // XXX should WorkSource have a way to set uids as an int[] instead of adding them
                 // one at a time?
-                for (int i = 0; i < uids.length; i++) {
-                    ws.add(uids[i]);
+                for (int uid : uids) {
+                    ws.add(uid);
                 }
             }
             updateWakeLockWorkSource(lock, ws, null);
@@ -5954,7 +5952,8 @@ public final class PowerManagerService extends SystemService
             // if uid is of root's, we permit this operation straight away
             if (uid != Process.ROOT_UID) {
                 if (!Settings.checkAndNoteWriteSettingsOperation(mContext, uid,
-                        Settings.getPackageNameForUid(mContext, uid), true)) {
+                        Settings.getPackageNameForUid(mContext, uid), /* attributionTag= */ null,
+                        /* throwException= */ true)) {
                     return;
                 }
             }
@@ -6118,6 +6117,7 @@ public final class PowerManagerService extends SystemService
             for (String arg : args) {
                 if (arg.equals("--proto")) {
                     isDumpProto = true;
+                    break;
                 }
             }
             try {

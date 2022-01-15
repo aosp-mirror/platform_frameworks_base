@@ -2745,7 +2745,7 @@ class PackageManagerShellCommand extends ShellCommand {
         IUserManager um = IUserManager.Stub.asInterface(
                 ServiceManager.getService(Context.USER_SERVICE));
         if (setEphemeralIfInUse) {
-            return removeUserOrSetEphemeral(um, userId);
+            return removeUserWhenPossible(um, userId);
         } else {
             final boolean success = wait ? removeUserAndWait(um, userId) : removeUser(um, userId);
             if (success) {
@@ -2808,10 +2808,10 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int removeUserOrSetEphemeral(IUserManager um, @UserIdInt int userId)
+    private int removeUserWhenPossible(IUserManager um, @UserIdInt int userId)
             throws RemoteException {
         Slog.i(TAG, "Removing " + userId + " or set as ephemeral if in use.");
-        int result = um.removeUserOrSetEphemeral(userId, /* evenWhenDisallowed= */ false);
+        int result = um.removeUserWhenPossible(userId, /* overrideDevicePolicy= */ false);
         switch (result) {
             case UserManager.REMOVE_RESULT_REMOVED:
                 getOutPrintWriter().printf("Success: user %d removed\n", userId);

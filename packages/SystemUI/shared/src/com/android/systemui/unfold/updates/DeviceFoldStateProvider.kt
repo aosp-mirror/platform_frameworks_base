@@ -22,6 +22,7 @@ import android.os.Handler
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.core.util.Consumer
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 import com.android.systemui.unfold.updates.hinge.FULLY_CLOSED_DEGREES
@@ -29,14 +30,17 @@ import com.android.systemui.unfold.updates.hinge.FULLY_OPEN_DEGREES
 import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import java.util.concurrent.Executor
+import javax.inject.Inject
 
-class DeviceFoldStateProvider(
+class DeviceFoldStateProvider
+@Inject
+constructor(
     context: Context,
     private val hingeAngleProvider: HingeAngleProvider,
     private val screenStatusProvider: ScreenStatusProvider,
     private val deviceStateManager: DeviceStateManager,
-    private val mainExecutor: Executor,
-    private val handler: Handler
+    @Main private val mainExecutor: Executor,
+    @Main private val handler: Handler
 ) : FoldStateProvider {
 
     private val outputListeners: MutableList<FoldUpdatesListener> = mutableListOf()

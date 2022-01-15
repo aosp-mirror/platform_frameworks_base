@@ -513,16 +513,22 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             if (!valid) {
                 Slog.w(TAG, "Remove old session: " + session.sessionId);
                 // Remove expired sessions as well as child sessions if any
-                mSessions.remove(session.sessionId);
-                // Since this is early during boot we don't send
-                // any observer events about the session, but we
-                // keep details around for dumpsys.
-                addHistoricalSessionLocked(session);
-                for (PackageInstallerSession child : session.getChildSessions()) {
-                    mSessions.remove(child.sessionId);
-                    addHistoricalSessionLocked(child);
-                }
+                removeActiveSession(session);
             }
+        }
+    }
+
+    /**
+     * Moves a session (including the child sessions) from mSessions to mHistoricalSessions.
+     * This should only be called on a root session.
+     */
+    @GuardedBy("mSessions")
+    private void removeActiveSession(PackageInstallerSession session) {
+        mSessions.remove(session.sessionId);
+        addHistoricalSessionLocked(session);
+        for (PackageInstallerSession child : session.getChildSessions()) {
+            mSessions.remove(child.sessionId);
+            addHistoricalSessionLocked(child);
         }
     }
 
@@ -1654,10 +1660,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         mStagingManager.abortSession(session.mStagedSession);
                     }
                     synchronized (mSessions) {
-                        if (!session.isStaged() || !success) {
-                            mSessions.remove(session.sessionId);
+                        // Child sessions will be removed along with its parent as a whole
+                        if (!session.hasParentSessionId()
+                                && (!session.isStaged() || session.isDestroyed())) {
+                            removeActiveSession(session);
                         }
-                        addHistoricalSessionLocked(session);
 
                         final File appIconFile = buildAppIconFile(session.sessionId);
                         if (appIconFile.exists()) {

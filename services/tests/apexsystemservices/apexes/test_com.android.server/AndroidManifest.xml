@@ -21,21 +21,29 @@
     <application android:hasCode="false" android:testOnly="true">
         <apex-system-service
             android:name="com.android.server.testing.FakeApexSystemService"
-            android:path="/apex/test_com.android.server/javalib/FakeApexSystemService.jar"
-            android:minSdkVersion="30"/>
+            android:path="/apex/test_com.android.server/javalib/FakeApexSystemServices.jar"
+            android:minSdkVersion="30"
+        />
+
+        <apex-system-service
+            android:name="com.android.server.testing.FakeApexSystemService2"
+            android:path="/apex/test_com.android.server/javalib/FakeApexSystemServices.jar"
+            android:minSdkVersion="30"
+            android:initOrder="1"
+        />
 
         <!-- Always inactive system service, since maxSdkVersion is low -->
         <apex-system-service
-            android:name="com.android.apex.test.OldApexSystemService"
-            android:path="/apex/com.android.apex.test/javalib/fake.jar"
+            android:name="com.android.server.testing.OldApexSystemService"
+            android:path="/apex/test_com.android.server/javalib/fake.jar"
             android:minSdkVersion="1"
             android:maxSdkVersion="1"
         />
 
         <!-- Always inactive system service, since minSdkVersion is high -->
         <apex-system-service
-            android:name="com.android.apex.test.NewApexSystemService"
-            android:path="/apex/com.android.apex.test/javalib/fake.jar"
+            android:name="com.android.server.testing.NewApexSystemService"
+            android:path="/apex/test_com.android.server/javalib/fake.jar"
             android:minSdkVersion="999999"
         />
     </application>

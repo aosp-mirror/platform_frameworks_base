@@ -3581,7 +3581,8 @@ public interface WindowManager extends ViewManager {
 
         /**
          * If specified, the insets provided by this window will be our window frame minus the
-         * insets specified by providedInternalInsets.
+         * insets specified by providedInternalInsets. This should not be used together with
+         * {@link WindowState#mGivenContentInsets}. If both of them are set, both will be applied.
          *
          * @hide
          */

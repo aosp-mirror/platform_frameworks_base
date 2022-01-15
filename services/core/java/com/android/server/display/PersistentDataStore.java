@@ -291,6 +291,54 @@ final class PersistentDataStore {
         return false;
     }
 
+    public boolean setUserPreferredRefreshRate(DisplayDevice displayDevice, float refreshRate) {
+        final String displayDeviceUniqueId = displayDevice.getUniqueId();
+        if (!displayDevice.hasStableUniqueId() || displayDeviceUniqueId == null) {
+            return false;
+        }
+        DisplayState state = getDisplayState(displayDevice.getUniqueId(), true);
+        if (state.setRefreshRate(refreshRate)) {
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+
+    public float getUserPreferredRefreshRate(DisplayDevice device) {
+        if (device == null || !device.hasStableUniqueId()) {
+            return Float.NaN;
+        }
+        final DisplayState state = getDisplayState(device.getUniqueId(), false);
+        if (state == null) {
+            return Float.NaN;
+        }
+        return state.getRefreshRate();
+    }
+
+    public boolean setUserPreferredResolution(DisplayDevice displayDevice, int width, int height) {
+        final String displayDeviceUniqueId = displayDevice.getUniqueId();
+        if (!displayDevice.hasStableUniqueId() || displayDeviceUniqueId == null) {
+            return false;
+        }
+        DisplayState state = getDisplayState(displayDevice.getUniqueId(), true);
+        if (state.setResolution(width, height)) {
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+
+    public Point getUserPreferredResolution(DisplayDevice displayDevice) {
+        if (displayDevice == null || !displayDevice.hasStableUniqueId()) {
+            return null;
+        }
+        final DisplayState state = getDisplayState(displayDevice.getUniqueId(), false);
+        if (state == null) {
+            return null;
+        }
+        return state.getResolution();
+    }
+
     public Point getStableDisplaySize() {
         loadIfNeeded();
         return mStableDeviceValues.getDisplaySize();
@@ -536,6 +584,9 @@ final class PersistentDataStore {
     private static final class DisplayState {
         private int mColorMode;
         private float mBrightness;
+        private int mWidth;
+        private int mHeight;
+        private float mRefreshRate;
 
         // Brightness configuration by user
         private BrightnessConfigurations mDisplayBrightnessConfigurations =
@@ -574,6 +625,31 @@ final class PersistentDataStore {
 
         public BrightnessConfiguration getBrightnessConfiguration(int userSerial) {
             return mDisplayBrightnessConfigurations.mConfigurations.get(userSerial);
+        }
+
+        public boolean setResolution(int width, int height) {
+            if (width == mWidth && height == mHeight) {
+                return false;
+            }
+            mWidth = width;
+            mHeight = height;
+            return true;
+        }
+
+        public Point getResolution() {
+            return new Point(mWidth, mHeight);
+        }
+
+        public boolean setRefreshRate(float refreshRate) {
+            if (refreshRate == mRefreshRate) {
+                return false;
+            }
+            mRefreshRate = refreshRate;
+            return true;
+        }
+
+        public float getRefreshRate() {
+            return mRefreshRate;
         }
 
         public void loadFromXml(TypedXmlPullParser parser)

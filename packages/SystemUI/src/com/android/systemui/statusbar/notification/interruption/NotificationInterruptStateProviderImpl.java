@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.util.Compile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,8 +53,8 @@ import javax.inject.Inject;
 @SysUISingleton
 public class NotificationInterruptStateProviderImpl implements NotificationInterruptStateProvider {
     private static final String TAG = "InterruptionStateProvider";
-    private static final boolean DEBUG = true; //false;
-    private static final boolean DEBUG_HEADS_UP = true;
+    private static final boolean DEBUG = Compile.IS_DEBUG;
+    private static final boolean DEBUG_HEADS_UP = Compile.IS_DEBUG;
     private static final boolean ENABLE_HEADS_UP = true;
     private static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 

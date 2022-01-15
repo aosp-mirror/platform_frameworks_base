@@ -1122,6 +1122,7 @@ public class DisplayPolicy {
                             if (!mNavButtonForcedVisible) {
                                 inOutFrame.inset(windowState.getLayoutingAttrs(
                                         displayFrames.mRotation).providedInternalInsets);
+                                inOutFrame.inset(win.mGivenContentInsets);
                             }
                         },
 
@@ -1190,9 +1191,12 @@ public class DisplayPolicy {
                                 break;
                         }
                         mDisplayContent.setInsetProvider(insetsType, win, (displayFrames,
-                                windowState, inOutFrame) -> inOutFrame.inset(
-                                windowState.getLayoutingAttrs(displayFrames.mRotation)
-                                        .providedInternalInsets), imeFrameProvider);
+                                windowState, inOutFrame) -> {
+                            inOutFrame.inset(
+                                    windowState.getLayoutingAttrs(displayFrames.mRotation)
+                                            .providedInternalInsets);
+                            inOutFrame.inset(win.mGivenContentInsets);
+                        }, imeFrameProvider);
                         mInsetsSourceWindowsExceptIme.add(win);
                     }
                 }

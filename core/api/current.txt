@@ -17,6 +17,7 @@ package android {
     field public static final String ACCESS_MEDIA_LOCATION = "android.permission.ACCESS_MEDIA_LOCATION";
     field public static final String ACCESS_NETWORK_STATE = "android.permission.ACCESS_NETWORK_STATE";
     field public static final String ACCESS_NOTIFICATION_POLICY = "android.permission.ACCESS_NOTIFICATION_POLICY";
+    field public static final String ACCESS_SUPPLEMENTAL_APIS = "android.permission.ACCESS_SUPPLEMENTAL_APIS";
     field public static final String ACCESS_WIFI_STATE = "android.permission.ACCESS_WIFI_STATE";
     field public static final String ACCOUNT_MANAGER = "android.permission.ACCOUNT_MANAGER";
     field public static final String ACTIVITY_RECOGNITION = "android.permission.ACTIVITY_RECOGNITION";
@@ -18330,10 +18331,12 @@ package android.hardware.biometrics {
     ctor public BiometricPrompt.CryptoObject(@NonNull java.security.Signature);
     ctor public BiometricPrompt.CryptoObject(@NonNull javax.crypto.Cipher);
     ctor public BiometricPrompt.CryptoObject(@NonNull javax.crypto.Mac);
-    ctor public BiometricPrompt.CryptoObject(@NonNull android.security.identity.IdentityCredential);
+    ctor @Deprecated public BiometricPrompt.CryptoObject(@NonNull android.security.identity.IdentityCredential);
+    ctor public BiometricPrompt.CryptoObject(@NonNull android.security.identity.PresentationSession);
     method public javax.crypto.Cipher getCipher();
-    method @Nullable public android.security.identity.IdentityCredential getIdentityCredential();
+    method @Deprecated @Nullable public android.security.identity.IdentityCredential getIdentityCredential();
     method public javax.crypto.Mac getMac();
+    method @Nullable public android.security.identity.PresentationSession getPresentationSession();
     method public java.security.Signature getSignature();
   }
 
@@ -20149,6 +20152,24 @@ package android.location {
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssAntennaInfo.SphericalCorrections> CREATOR;
   }
 
+  public final class GnssAutomaticGainControl implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0) public long getCarrierFrequencyHz();
+    method public int getConstellationType();
+    method @FloatRange(from=0xffffd8f0, to=10000) public double getLevelDb();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssAutomaticGainControl> CREATOR;
+  }
+
+  public static final class GnssAutomaticGainControl.Builder {
+    ctor public GnssAutomaticGainControl.Builder();
+    ctor public GnssAutomaticGainControl.Builder(@NonNull android.location.GnssAutomaticGainControl);
+    method @NonNull public android.location.GnssAutomaticGainControl build();
+    method @NonNull public android.location.GnssAutomaticGainControl.Builder setCarrierFrequencyHz(@IntRange(from=0) long);
+    method @NonNull public android.location.GnssAutomaticGainControl.Builder setConstellationType(int);
+    method @NonNull public android.location.GnssAutomaticGainControl.Builder setLevelDb(@FloatRange(from=0xffffd8f0, to=10000) double);
+  }
+
   public final class GnssCapabilities implements android.os.Parcelable {
     method public int describeContents();
     method public boolean hasAntennaInfo();
@@ -20205,7 +20226,7 @@ package android.location {
     method public double getAccumulatedDeltaRangeMeters();
     method public int getAccumulatedDeltaRangeState();
     method public double getAccumulatedDeltaRangeUncertaintyMeters();
-    method public double getAutomaticGainControlLevelDb();
+    method @Deprecated public double getAutomaticGainControlLevelDb();
     method @FloatRange(from=0, to=63) public double getBasebandCn0DbHz();
     method @Deprecated public long getCarrierCycles();
     method public float getCarrierFrequencyHz();
@@ -20227,7 +20248,7 @@ package android.location {
     method public int getState();
     method public int getSvid();
     method public double getTimeOffsetNanos();
-    method public boolean hasAutomaticGainControlLevelDb();
+    method @Deprecated public boolean hasAutomaticGainControlLevelDb();
     method public boolean hasBasebandCn0DbHz();
     method @Deprecated public boolean hasCarrierCycles();
     method public boolean hasCarrierFrequencyHz();
@@ -20289,9 +20310,19 @@ package android.location {
   public final class GnssMeasurementsEvent implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.location.GnssClock getClock();
+    method @NonNull public java.util.Collection<android.location.GnssAutomaticGainControl> getGnssAutomaticGainControls();
     method @NonNull public java.util.Collection<android.location.GnssMeasurement> getMeasurements();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurementsEvent> CREATOR;
+  }
+
+  public static final class GnssMeasurementsEvent.Builder {
+    ctor public GnssMeasurementsEvent.Builder();
+    ctor public GnssMeasurementsEvent.Builder(@NonNull android.location.GnssMeasurementsEvent);
+    method @NonNull public android.location.GnssMeasurementsEvent build();
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setClock(@NonNull android.location.GnssClock);
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setGnssAutomaticGainControls(@NonNull java.util.Collection<android.location.GnssAutomaticGainControl>);
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setMeasurements(@NonNull java.util.Collection<android.location.GnssMeasurement>);
   }
 
   public abstract static class GnssMeasurementsEvent.Callback {
@@ -27724,6 +27755,8 @@ package android.net.vcn {
     ctor public VcnCellUnderlyingNetworkTemplate.Builder();
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate build();
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMetered(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMinDownstreamBandwidthKbps(int, int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMinUpstreamBandwidthKbps(int, int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setOperatorPlmnIds(@NonNull java.util.Set<java.lang.String>);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setOpportunistic(int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setRoaming(int);
@@ -27784,6 +27817,10 @@ package android.net.vcn {
 
   public abstract class VcnUnderlyingNetworkTemplate {
     method public int getMetered();
+    method public int getMinEntryDownstreamBandwidthKbps();
+    method public int getMinEntryUpstreamBandwidthKbps();
+    method public int getMinExitDownstreamBandwidthKbps();
+    method public int getMinExitUpstreamBandwidthKbps();
     field public static final int MATCH_ANY = 0; // 0x0
     field public static final int MATCH_FORBIDDEN = 2; // 0x2
     field public static final int MATCH_REQUIRED = 1; // 0x1
@@ -27797,6 +27834,8 @@ package android.net.vcn {
     ctor public VcnWifiUnderlyingNetworkTemplate.Builder();
     method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate build();
     method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setMetered(int);
+    method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setMinDownstreamBandwidthKbps(int, int);
+    method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setMinUpstreamBandwidthKbps(int, int);
     method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setSsids(@NonNull java.util.Set<java.lang.String>);
   }
 
@@ -38029,6 +38068,51 @@ package android.security.identity {
     ctor public CipherSuiteNotSupportedException(@NonNull String, @NonNull Throwable);
   }
 
+  public class CredentialDataRequest {
+    method @NonNull public java.util.Map<java.lang.String,java.util.Collection<java.lang.String>> getDeviceSignedEntriesToRequest();
+    method @NonNull public java.util.Map<java.lang.String,java.util.Collection<java.lang.String>> getIssuerSignedEntriesToRequest();
+    method @Nullable public byte[] getReaderSignature();
+    method @Nullable public byte[] getRequestMessage();
+    method public boolean isAllowUsingExhaustedKeys();
+    method public boolean isAllowUsingExpiredKeys();
+    method public boolean isIncrementUseCount();
+  }
+
+  public static final class CredentialDataRequest.Builder {
+    ctor public CredentialDataRequest.Builder();
+    method @NonNull public android.security.identity.CredentialDataRequest build();
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setAllowUsingExhaustedKeys(boolean);
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setAllowUsingExpiredKeys(boolean);
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setDeviceSignedEntriesToRequest(@NonNull java.util.Map<java.lang.String,java.util.Collection<java.lang.String>>);
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setIncrementUseCount(boolean);
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setIssuerSignedEntriesToRequest(@NonNull java.util.Map<java.lang.String,java.util.Collection<java.lang.String>>);
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setReaderSignature(@NonNull byte[]);
+    method @NonNull public android.security.identity.CredentialDataRequest.Builder setRequestMessage(@NonNull byte[]);
+  }
+
+  public abstract class CredentialDataResult {
+    method @Nullable public abstract byte[] getDeviceMac();
+    method @NonNull public abstract byte[] getDeviceNameSpaces();
+    method @NonNull public abstract android.security.identity.CredentialDataResult.Entries getDeviceSignedEntries();
+    method @NonNull public abstract android.security.identity.CredentialDataResult.Entries getIssuerSignedEntries();
+    method @NonNull public abstract byte[] getStaticAuthenticationData();
+  }
+
+  public static interface CredentialDataResult.Entries {
+    method @Nullable public byte[] getEntry(@NonNull String, @NonNull String);
+    method @NonNull public java.util.Collection<java.lang.String> getEntryNames(@NonNull String);
+    method @NonNull public java.util.Collection<java.lang.String> getNamespaces();
+    method @NonNull public java.util.Collection<java.lang.String> getRetrievedEntryNames(@NonNull String);
+    method public int getStatus(@NonNull String, @NonNull String);
+    field public static final int STATUS_NOT_IN_REQUEST_MESSAGE = 3; // 0x3
+    field public static final int STATUS_NOT_REQUESTED = 2; // 0x2
+    field public static final int STATUS_NO_ACCESS_CONTROL_PROFILES = 6; // 0x6
+    field public static final int STATUS_NO_SUCH_ENTRY = 1; // 0x1
+    field public static final int STATUS_OK = 0; // 0x0
+    field public static final int STATUS_READER_AUTHENTICATION_FAILED = 5; // 0x5
+    field public static final int STATUS_USER_AUTHENTICATION_FAILED = 4; // 0x4
+  }
+
   public class DocTypeNotSupportedException extends android.security.identity.IdentityCredentialException {
     ctor public DocTypeNotSupportedException(@NonNull String);
     ctor public DocTypeNotSupportedException(@NonNull String, @NonNull Throwable);
@@ -38040,19 +38124,19 @@ package android.security.identity {
   }
 
   public abstract class IdentityCredential {
-    method @NonNull public abstract java.security.KeyPair createEphemeralKeyPair();
-    method @NonNull public abstract byte[] decryptMessageFromReader(@NonNull byte[]) throws android.security.identity.MessageDecryptionException;
+    method @Deprecated @NonNull public abstract java.security.KeyPair createEphemeralKeyPair();
+    method @Deprecated @NonNull public abstract byte[] decryptMessageFromReader(@NonNull byte[]) throws android.security.identity.MessageDecryptionException;
     method @NonNull public byte[] delete(@NonNull byte[]);
-    method @NonNull public abstract byte[] encryptMessageToReader(@NonNull byte[]);
+    method @Deprecated @NonNull public abstract byte[] encryptMessageToReader(@NonNull byte[]);
     method @NonNull public abstract java.util.Collection<java.security.cert.X509Certificate> getAuthKeysNeedingCertification();
     method @NonNull public abstract int[] getAuthenticationDataUsageCount();
     method @NonNull public abstract java.util.Collection<java.security.cert.X509Certificate> getCredentialKeyCertificateChain();
-    method @NonNull public abstract android.security.identity.ResultData getEntries(@Nullable byte[], @NonNull java.util.Map<java.lang.String,java.util.Collection<java.lang.String>>, @Nullable byte[], @Nullable byte[]) throws android.security.identity.EphemeralPublicKeyNotFoundException, android.security.identity.InvalidReaderSignatureException, android.security.identity.InvalidRequestMessageException, android.security.identity.NoAuthenticationKeyAvailableException, android.security.identity.SessionTranscriptMismatchException;
+    method @Deprecated @NonNull public abstract android.security.identity.ResultData getEntries(@Nullable byte[], @NonNull java.util.Map<java.lang.String,java.util.Collection<java.lang.String>>, @Nullable byte[], @Nullable byte[]) throws android.security.identity.EphemeralPublicKeyNotFoundException, android.security.identity.InvalidReaderSignatureException, android.security.identity.InvalidRequestMessageException, android.security.identity.NoAuthenticationKeyAvailableException, android.security.identity.SessionTranscriptMismatchException;
     method @NonNull public byte[] proveOwnership(@NonNull byte[]);
-    method public abstract void setAllowUsingExhaustedKeys(boolean);
-    method public void setAllowUsingExpiredKeys(boolean);
+    method @Deprecated public abstract void setAllowUsingExhaustedKeys(boolean);
+    method @Deprecated public void setAllowUsingExpiredKeys(boolean);
     method public abstract void setAvailableAuthenticationKeys(int, int);
-    method public abstract void setReaderEphemeralPublicKey(@NonNull java.security.PublicKey) throws java.security.InvalidKeyException;
+    method @Deprecated public abstract void setReaderEphemeralPublicKey(@NonNull java.security.PublicKey) throws java.security.InvalidKeyException;
     method @Deprecated public abstract void storeStaticAuthenticationData(@NonNull java.security.cert.X509Certificate, @NonNull byte[]) throws android.security.identity.UnknownAuthenticationKeyException;
     method public void storeStaticAuthenticationData(@NonNull java.security.cert.X509Certificate, @NonNull java.time.Instant, @NonNull byte[]) throws android.security.identity.UnknownAuthenticationKeyException;
     method @NonNull public byte[] update(@NonNull android.security.identity.PersonalizationData);
@@ -38065,6 +38149,7 @@ package android.security.identity {
 
   public abstract class IdentityCredentialStore {
     method @NonNull public abstract android.security.identity.WritableIdentityCredential createCredential(@NonNull String, @NonNull String) throws android.security.identity.AlreadyPersonalizedException, android.security.identity.DocTypeNotSupportedException;
+    method @NonNull public android.security.identity.PresentationSession createPresentationSession(int) throws android.security.identity.CipherSuiteNotSupportedException;
     method @Deprecated @Nullable public abstract byte[] deleteCredentialByName(@NonNull String);
     method @Nullable public abstract android.security.identity.IdentityCredential getCredentialByName(@NonNull String, int) throws android.security.identity.CipherSuiteNotSupportedException;
     method @Nullable public static android.security.identity.IdentityCredentialStore getDirectAccessInstance(@NonNull android.content.Context);
@@ -38103,22 +38188,29 @@ package android.security.identity {
     method @NonNull public android.security.identity.PersonalizationData.Builder putEntry(@NonNull String, @NonNull String, @NonNull java.util.Collection<android.security.identity.AccessControlProfileId>, @NonNull byte[]);
   }
 
-  public abstract class ResultData {
-    method @NonNull public abstract byte[] getAuthenticatedData();
-    method @Nullable public abstract byte[] getEntry(@NonNull String, @NonNull String);
-    method @Nullable public abstract java.util.Collection<java.lang.String> getEntryNames(@NonNull String);
-    method @Nullable public abstract byte[] getMessageAuthenticationCode();
-    method @NonNull public abstract java.util.Collection<java.lang.String> getNamespaces();
-    method @Nullable public abstract java.util.Collection<java.lang.String> getRetrievedEntryNames(@NonNull String);
-    method @NonNull public abstract byte[] getStaticAuthenticationData();
-    method public abstract int getStatus(@NonNull String, @NonNull String);
-    field public static final int STATUS_NOT_IN_REQUEST_MESSAGE = 3; // 0x3
-    field public static final int STATUS_NOT_REQUESTED = 2; // 0x2
-    field public static final int STATUS_NO_ACCESS_CONTROL_PROFILES = 6; // 0x6
-    field public static final int STATUS_NO_SUCH_ENTRY = 1; // 0x1
-    field public static final int STATUS_OK = 0; // 0x0
-    field public static final int STATUS_READER_AUTHENTICATION_FAILED = 5; // 0x5
-    field public static final int STATUS_USER_AUTHENTICATION_FAILED = 4; // 0x4
+  public abstract class PresentationSession {
+    method @Nullable public abstract android.security.identity.CredentialDataResult getCredentialData(@NonNull String, @NonNull android.security.identity.CredentialDataRequest) throws android.security.identity.EphemeralPublicKeyNotFoundException, android.security.identity.InvalidReaderSignatureException, android.security.identity.InvalidRequestMessageException, android.security.identity.NoAuthenticationKeyAvailableException;
+    method @NonNull public abstract java.security.KeyPair getEphemeralKeyPair();
+    method public abstract void setReaderEphemeralPublicKey(@NonNull java.security.PublicKey) throws java.security.InvalidKeyException;
+    method public abstract void setSessionTranscript(@NonNull byte[]);
+  }
+
+  @Deprecated public abstract class ResultData {
+    method @Deprecated @NonNull public abstract byte[] getAuthenticatedData();
+    method @Deprecated @Nullable public abstract byte[] getEntry(@NonNull String, @NonNull String);
+    method @Deprecated @Nullable public abstract java.util.Collection<java.lang.String> getEntryNames(@NonNull String);
+    method @Deprecated @Nullable public abstract byte[] getMessageAuthenticationCode();
+    method @Deprecated @NonNull public abstract java.util.Collection<java.lang.String> getNamespaces();
+    method @Deprecated @Nullable public abstract java.util.Collection<java.lang.String> getRetrievedEntryNames(@NonNull String);
+    method @Deprecated @NonNull public abstract byte[] getStaticAuthenticationData();
+    method @Deprecated public abstract int getStatus(@NonNull String, @NonNull String);
+    field @Deprecated public static final int STATUS_NOT_IN_REQUEST_MESSAGE = 3; // 0x3
+    field @Deprecated public static final int STATUS_NOT_REQUESTED = 2; // 0x2
+    field @Deprecated public static final int STATUS_NO_ACCESS_CONTROL_PROFILES = 6; // 0x6
+    field @Deprecated public static final int STATUS_NO_SUCH_ENTRY = 1; // 0x1
+    field @Deprecated public static final int STATUS_OK = 0; // 0x0
+    field @Deprecated public static final int STATUS_READER_AUTHENTICATION_FAILED = 5; // 0x5
+    field @Deprecated public static final int STATUS_USER_AUTHENTICATION_FAILED = 4; // 0x4
   }
 
   public class SessionTranscriptMismatchException extends android.security.identity.IdentityCredentialException {
@@ -47164,6 +47256,15 @@ package android.util {
     field public int widthPixels;
     field public float xdpi;
     field public float ydpi;
+  }
+
+  public interface Dumpable {
+    method public void dump(@NonNull java.io.PrintWriter, @Nullable String[]);
+    method @NonNull public default String getDumpableName();
+  }
+
+  public interface DumpableContainer {
+    method public boolean addDumpable(@NonNull android.util.Dumpable);
   }
 
   public class EventLog {

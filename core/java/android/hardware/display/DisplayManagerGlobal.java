@@ -896,9 +896,9 @@ public final class DisplayManagerGlobal {
      * Sets the default display mode, according to the refresh rate and the resolution chosen by the
      * user.
      */
-    public void setUserPreferredDisplayMode(Display.Mode mode) {
+    public void setUserPreferredDisplayMode(int displayId, Display.Mode mode) {
         try {
-            mDm.setUserPreferredDisplayMode(mode);
+            mDm.setUserPreferredDisplayMode(displayId, mode);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -907,9 +907,9 @@ public final class DisplayManagerGlobal {
     /**
      * Returns the user preferred display mode.
      */
-    public Display.Mode getUserPreferredDisplayMode() {
+    public Display.Mode getUserPreferredDisplayMode(int displayId) {
         try {
-            return mDm.getUserPreferredDisplayMode();
+            return mDm.getUserPreferredDisplayMode(displayId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

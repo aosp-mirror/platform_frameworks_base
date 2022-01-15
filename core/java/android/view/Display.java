@@ -19,6 +19,7 @@ package android.view;
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -136,6 +137,24 @@ public final class Display {
      * Invalid display id.
      */
     public static final int INVALID_DISPLAY = -1;
+
+    /**
+     * Invalid resolution width.
+     * @hide
+     */
+    public static final int INVALID_DISPLAY_WIDTH = -1;
+
+    /**
+     * Invalid resolution height.
+     * @hide
+     */
+    public static final int INVALID_DISPLAY_HEIGHT = -1;
+
+    /**
+     * Invalid refresh rate.
+     * @hide
+     */
+    public static final float INVALID_DISPLAY_REFRESH_RATE = 0.0f;
 
     /**
      * The default display group id, which is the display group id of the primary display assuming
@@ -1170,6 +1189,49 @@ public final class Display {
     }
 
     /**
+     * Sets the default {@link Display.Mode} to use for the display.  The display mode includes
+     * preference for resolution and refresh rate.
+     * If the mode specified is not supported by the display, then no mode change occurs.
+     *
+     * @param mode The {@link Display.Mode} to set, which can include resolution and/or
+     * refresh-rate. It is created using {@link Display.Mode.Builder}.
+     *`
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE)
+    public void setUserPreferredDisplayMode(@NonNull Display.Mode mode) {
+        // Create a new object containing default values for the unused fields like mode ID and
+        // alternative refresh rates.
+        Display.Mode preferredMode = new Display.Mode(mode.getPhysicalWidth(),
+                mode.getPhysicalHeight(), mode.getRefreshRate());
+        mGlobal.setUserPreferredDisplayMode(mDisplayId, preferredMode);
+    }
+
+    /**
+     * Removes the display's user preferred display mode.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE)
+    public void clearUserPreferredDisplayMode() {
+        mGlobal.setUserPreferredDisplayMode(mDisplayId, null);
+    }
+
+    /**
+     * Returns the display's user preferred display mode.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public Display.Mode getUserPreferredDisplayMode() {
+        return mGlobal.getUserPreferredDisplayMode(mDisplayId);
+    }
+
+
+    /**
      * Returns whether this display can be used to display wide color gamut content.
      * This does not necessarily mean the device itself can render wide color gamut
      * content. To ensure wide color gamut content can be produced, refer to
@@ -1710,6 +1772,30 @@ public final class Display {
     }
 
     /**
+     * Returns true if the specified width is valid.
+     * @hide
+     */
+    public static boolean isWidthValid(int width) {
+        return width > 0;
+    }
+
+    /**
+     * Returns true if the specified height is valid.
+     * @hide
+     */
+    public static boolean isHeightValid(int height) {
+        return height > 0;
+    }
+
+    /**
+     * Returns true if the specified refresh-rate is valid.
+     * @hide
+     */
+    public static boolean isRefreshRateValid(float refreshRate) {
+        return refreshRate > 0.0f;
+    }
+
+    /**
      * A mode supported by a given display.
      *
      * @see Display#getSupportedModes()
@@ -1846,6 +1932,30 @@ public final class Display {
         }
 
         /**
+         * Returns {@code true} if this mode matches the given parameters, if those parameters are
+         * valid.<p>
+         * If resolution (width and height) is valid and refresh-rate is not, the method matches
+         * only resolution.
+         * If refresh-rate is valid and resolution (width and height) is not, the method matches
+         * only refresh-rate.</p>
+         *
+         * @hide
+         */
+        public boolean matchesIfValid(int width, int height, float refreshRate) {
+            if (!isWidthValid(width) && !isHeightValid(height)
+                    && !isRefreshRateValid(refreshRate)) {
+                return false;
+            }
+            if (isWidthValid(width) != isHeightValid(height)) {
+                return false;
+            }
+            return (!isWidthValid(width) || mWidth == width)
+                    && (!isHeightValid(height) || mHeight == height)
+                    && (!isRefreshRateValid(refreshRate)
+                    || Float.floatToIntBits(mRefreshRate) == Float.floatToIntBits(refreshRate));
+        }
+
+        /**
          * Returns {@code true} if this mode equals to the other mode in all parameters except
          * the refresh rate.
          *
@@ -1853,6 +1963,24 @@ public final class Display {
          */
         public boolean equalsExceptRefreshRate(@Nullable Display.Mode other) {
             return mWidth == other.mWidth && mHeight == other.mHeight;
+        }
+
+        /**
+         * Returns {@code true} if refresh-rate is set for a display mode
+         *
+         * @hide
+         */
+        public boolean isRefreshRateSet() {
+            return mRefreshRate != INVALID_DISPLAY_REFRESH_RATE;
+        }
+
+        /**
+         * Returns {@code true} if refresh-rate is set for a display mode
+         *
+         * @hide
+         */
+        public boolean isResolutionSet() {
+            return mWidth != INVALID_DISPLAY_WIDTH && mHeight != INVALID_DISPLAY_HEIGHT;
         }
 
         @Override
@@ -1923,6 +2051,80 @@ public final class Display {
                 return new Mode[size];
             }
         };
+
+        /**
+         * Builder is used to create {@link Display.Mode} objects
+         *
+         * @hide
+         */
+        @TestApi
+        public static final class Builder {
+            private int mWidth;
+            private int mHeight;
+            private float mRefreshRate;
+
+            public Builder() {
+                mWidth = Display.INVALID_DISPLAY_WIDTH;
+                mHeight = Display.INVALID_DISPLAY_HEIGHT;
+                mRefreshRate = Display.INVALID_DISPLAY_REFRESH_RATE;
+            }
+
+            /**
+             * Sets the resolution (width and height) of a {@link Display.Mode}
+             *
+             * @return Instance of {@link Builder}
+             */
+            @NonNull
+            public Builder setResolution(int width, int height) {
+                if (width > 0 && height > 0) {
+                    mWidth = width;
+                    mHeight = height;
+                }
+                return this;
+            }
+
+            /**
+             * Sets the refresh rate of a {@link Display.Mode}
+             *
+             * @return Instance of {@link Builder}
+             */
+            @NonNull
+            public Builder setRefreshRate(float refreshRate) {
+                if (refreshRate > 0.0f) {
+                    mRefreshRate = refreshRate;
+                }
+                return this;
+            }
+
+            /**
+             * Creates the {@link Display.Mode} object.
+             *
+             * <p>
+             * If resolution needs to be set, but refresh-rate doesn't matter, create a mode with
+             * Builder and call setResolution.
+             * {@code
+             * Display.Mode mode =
+             *      new Display.Mode.Builder()
+             *      .setResolution(width, height)
+             *      .build();
+             * }
+             * </p><p>
+             * If refresh-rate needs to be set, but resolution doesn't matter, create a mode with
+             * Builder and call setRefreshRate.
+             * {@code
+             * Display.Mode mode =
+             *      new Display.Mode.Builder()
+             *      .setRefreshRate(refreshRate)
+             *      .build();
+             * }
+             * </p>
+             */
+            @NonNull
+            public Mode build() {
+                Display.Mode mode = new Mode(mWidth, mHeight, mRefreshRate);
+                return mode;
+            }
+        }
     }
 
     /**

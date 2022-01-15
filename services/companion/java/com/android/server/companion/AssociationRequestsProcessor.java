@@ -23,7 +23,7 @@ import static android.companion.CompanionDeviceManager.COMPANION_DEVICE_DISCOVER
 import static android.content.ComponentName.createRelative;
 
 import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
-import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
+import static com.android.server.companion.PackageUtils.enforceUsesCompanionDeviceFeature;
 import static com.android.server.companion.PermissionsUtils.enforcePermissionsForAssociation;
 import static com.android.server.companion.RolesUtils.isRoleHolder;
 
@@ -31,6 +31,7 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
@@ -102,8 +103,9 @@ import java.util.Set;
  * @see #processAssociationRequestApproval(AssociationRequest, IAssociationRequestCallback,
  * ResultReceiver, MacAddress)
  */
+@SuppressLint("LongLogTag")
 class AssociationRequestsProcessor {
-    private static final String TAG = LOG_TAG + ".AssociationRequestsProcessor";
+    private static final String TAG = "CompanionDevice_AssociationRequestsProcessor";
 
     private static final ComponentName ASSOCIATION_REQUEST_APPROVAL_ACTIVITY =
             createRelative(COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME, ".CompanionDeviceActivity");
@@ -161,7 +163,7 @@ class AssociationRequestsProcessor {
 
         // 1. Enforce permissions and other requirements.
         enforcePermissionsForAssociation(mContext, request, packageUid);
-        mService.checkUsesFeature(packageName, userId);
+        enforceUsesCompanionDeviceFeature(mContext, userId, packageName);
 
         // 2. Check if association can be created without launching UI (i.e. CDM needs NEITHER
         // to perform discovery NOR to collect user consent).

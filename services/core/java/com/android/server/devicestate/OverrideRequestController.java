@@ -153,6 +153,16 @@ final class OverrideRequestController {
     }
 
     /**
+     * Cancels all override requests, this could be due to the device being put
+     * into a hardware state that declares the flag "FLAG_CANCEL_OVERRIDE_REQUESTS"
+     */
+    void cancelOverrideRequests() {
+        mTmpRequestsToCancel.clear();
+        mTmpRequestsToCancel.addAll(mRequests);
+        cancelRequestsLocked(mTmpRequestsToCancel);
+    }
+
+    /**
      * Returns {@code true} if this controller is current managing a request with the specified
      * {@code token}, {@code false} otherwise.
      */

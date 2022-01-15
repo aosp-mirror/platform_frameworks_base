@@ -136,6 +136,8 @@ class AssociationStoreImpl implements AssociationStore {
 
             // Update the ID-to-Association map.
             mIdMap.put(id, updated);
+            // Invalidate the corresponding user cache entry.
+            invalidateCacheForUserLocked(current.getUserId());
 
             // Update the MacAddress-to-List<Association> map if needed.
             final MacAddress updatedAddress = updated.getDeviceMacAddress();

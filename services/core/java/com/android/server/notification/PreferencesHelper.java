@@ -808,6 +808,23 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
+    /** Sets whether this package has sent a notification with valid bubble metadata. */
+    public boolean setValidBubbleSent(String packageName, int uid) {
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
+            boolean valueChanged = !r.hasSentValidBubble;
+            r.hasSentValidBubble = true;
+            return valueChanged;
+        }
+    }
+
+    boolean hasSentValidBubble(String packageName, int uid) {
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
+            return r.hasSentValidBubble;
+        }
+    }
+
     @Override
     public boolean isGroupBlocked(String packageName, int uid, String groupId) {
         if (groupId == null) {
@@ -847,6 +864,9 @@ public class PreferencesHelper implements RankingConfig {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 throw new IllegalArgumentException("Invalid package");
+            }
+            if (fromTargetApp) {
+                group.setBlocked(false);
             }
             final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
             if (oldGroup != null) {
@@ -2813,8 +2833,9 @@ public class PreferencesHelper implements RankingConfig {
 
         boolean hasSentInvalidMessage = false;
         boolean hasSentValidMessage = false;
-        // notE: only valid while hasSentMessage is false and hasSentInvalidMessage is true
+        // note: only valid while hasSentMessage is false and hasSentInvalidMessage is true
         boolean userDemotedMsgApp = false;
+        boolean hasSentValidBubble = false;
 
         Delegate delegate = null;
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();
