@@ -44,6 +44,7 @@ oneway interface ITvInputSessionCallback {
     void onTimeShiftStartPositionChanged(long timeMs);
     void onTimeShiftCurrentPositionChanged(long timeMs);
     void onAitInfoUpdated(in AitInfo aitInfo);
+    void onSignalStrength(int strength);
 
     // For the recording session
     void onTuned(in Uri channelUri);

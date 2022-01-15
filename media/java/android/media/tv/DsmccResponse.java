@@ -21,6 +21,9 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** @hide */
 public final class DsmccResponse extends BroadcastInfoResponse implements Parcelable {
     public static final @TvInputManager.BroadcastInfoType int responseType =
@@ -41,20 +44,27 @@ public final class DsmccResponse extends BroadcastInfoResponse implements Parcel
             };
 
     private final ParcelFileDescriptor mFileDescriptor;
+    private final boolean mIsDirectory;
+    private final List<String> mChildren;
 
     public static DsmccResponse createFromParcelBody(Parcel in) {
         return new DsmccResponse(in);
     }
 
     public DsmccResponse(int requestId, int sequence, @ResponseResult int responseResult,
-            ParcelFileDescriptor file) {
+            ParcelFileDescriptor file, boolean isDirectory, List<String> children) {
         super(responseType, requestId, sequence, responseResult);
         mFileDescriptor = file;
+        mIsDirectory = isDirectory;
+        mChildren = children;
     }
 
     protected DsmccResponse(Parcel source) {
         super(responseType, source);
         mFileDescriptor = source.readFileDescriptor();
+        mIsDirectory = (source.readInt() == 1);
+        mChildren = new ArrayList<>();
+        source.readStringList(mChildren);
     }
 
     public ParcelFileDescriptor getFile() {
@@ -65,5 +75,7 @@ public final class DsmccResponse extends BroadcastInfoResponse implements Parcel
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         mFileDescriptor.writeToParcel(dest, flags);
+        dest.writeInt(mIsDirectory ? 1 : 0);
+        dest.writeStringList(mChildren);
     }
 }

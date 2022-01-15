@@ -3539,6 +3539,23 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void onSignalStrength(int strength) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onSignalStrength(" + strength + ")");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onSignalStrength(strength, mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onSignalStrength", e);
+                }
+            }
+        }
+
+        @Override
         public void onTuned(Uri channelUri) {
             synchronized (mLock) {
                 if (DEBUG) {

@@ -23,7 +23,7 @@ import android.os.Parcelable;
 /** @hide */
 public final class CommandRequest extends BroadcastInfoRequest implements Parcelable {
     public static final @TvInputManager.BroadcastInfoType int requestType =
-            TvInputManager.BROADCAST_INFO_TYPE_TV_PROPRIETARY_FUNCTION;
+            TvInputManager.BROADCAST_INFO_TYPE_COMMAND;
 
     public static final @NonNull Parcelable.Creator<CommandRequest> CREATOR =
             new Parcelable.Creator<CommandRequest>() {

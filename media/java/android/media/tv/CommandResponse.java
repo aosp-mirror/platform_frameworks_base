@@ -23,7 +23,7 @@ import android.os.Parcelable;
 /** @hide */
 public final class CommandResponse extends BroadcastInfoResponse implements Parcelable {
     public static final @TvInputManager.BroadcastInfoType int responseType =
-            TvInputManager.BROADCAST_INFO_TYPE_TV_PROPRIETARY_FUNCTION;
+            TvInputManager.BROADCAST_INFO_TYPE_COMMAND;
 
     public static final @NonNull Parcelable.Creator<CommandResponse> CREATOR =
             new Parcelable.Creator<CommandResponse>() {
