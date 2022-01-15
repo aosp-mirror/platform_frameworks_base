@@ -16,20 +16,20 @@
 
 package android.media.tv.interactive;
 
-import android.media.tv.interactive.ITvIAppServiceCallback;
-import android.media.tv.interactive.ITvIAppSessionCallback;
+import android.media.tv.interactive.ITvInteractiveAppServiceCallback;
+import android.media.tv.interactive.ITvInteractiveAppSessionCallback;
 import android.os.Bundle;
 import android.view.InputChannel;
 
 /**
- * Top-level interface to a TV IApp component (implemented in a Service). It's used for
+ * Top-level interface to a TV Interactive App component (implemented in a Service). It's used for
  * TvIAppManagerService to communicate with TvIAppService.
  * @hide
  */
-oneway interface ITvIAppService {
-    void registerCallback(in ITvIAppServiceCallback callback);
-    void unregisterCallback(in ITvIAppServiceCallback callback);
-    void createSession(in InputChannel channel, in ITvIAppSessionCallback callback,
+oneway interface ITvInteractiveAppService {
+    void registerCallback(in ITvInteractiveAppServiceCallback callback);
+    void unregisterCallback(in ITvInteractiveAppServiceCallback callback);
+    void createSession(in InputChannel channel, in ITvInteractiveAppSessionCallback callback,
             in String iAppServiceId, int type);
     void prepare(int type);
     void notifyAppLinkInfo(in Bundle info);

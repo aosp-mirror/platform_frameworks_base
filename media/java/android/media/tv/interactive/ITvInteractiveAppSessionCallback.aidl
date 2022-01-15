@@ -19,17 +19,17 @@ package android.media.tv.interactive;
 import android.graphics.Rect;
 import android.media.tv.AdRequest;
 import android.media.tv.BroadcastInfoRequest;
-import android.media.tv.interactive.ITvIAppSession;
+import android.media.tv.interactive.ITvInteractiveAppSession;
 import android.net.Uri;
 import android.os.Bundle;
 
 /**
- * Helper interface for ITvIAppSession to allow TvIAppService to notify the system service when
- * there is a related event.
+ * Helper interface for ITvInteractiveAppSession to allow TvIAppService to notify the
+ * system service when there is a related event.
  * @hide
  */
-oneway interface ITvIAppSessionCallback {
-    void onSessionCreated(in ITvIAppSession session);
+oneway interface ITvInteractiveAppSessionCallback {
+    void onSessionCreated(in ITvInteractiveAppSession session);
     void onLayoutSurface(int left, int top, int right, int bottom);
     void onBroadcastInfoRequest(in BroadcastInfoRequest request);
     void onRemoveBroadcastInfo(int id);

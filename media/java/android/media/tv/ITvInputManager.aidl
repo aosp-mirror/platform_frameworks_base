@@ -77,7 +77,7 @@ interface ITvInputManager {
     void setCaptionEnabled(in IBinder sessionToken, boolean enabled, int userId);
     void selectTrack(in IBinder sessionToken, int type, in String trackId, int userId);
 
-    void setIAppNotificationEnabled(in IBinder sessionToken, boolean enabled, int userId);
+    void setInteractiveAppNotificationEnabled(in IBinder sessionToken, boolean enabled, int userId);
 
     void sendAppPrivateCommand(in IBinder sessionToken, in String action, in Bundle data,
             int userId);
