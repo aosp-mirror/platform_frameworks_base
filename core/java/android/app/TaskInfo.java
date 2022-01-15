@@ -19,7 +19,6 @@ package android.app;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -40,8 +39,6 @@ import android.view.DisplayCutout;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -259,51 +256,6 @@ public class TaskInfo {
      */
     public boolean isSleeping;
 
-    /**
-     * Camera compat control isn't shown because it's not requested by heuristics.
-     * @hide
-     */
-    public static final int CAMERA_COMPAT_CONTROL_HIDDEN = 0;
-
-    /**
-     * Camera compat control is shown with the treatment suggested.
-     * @hide
-     */
-    public static final int CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED = 1;
-
-    /**
-     * Camera compat control is shown to allow reverting the applied treatment.
-     * @hide
-     */
-    public static final int CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED = 2;
-
-    /**
-     * Camera compat control is dismissed by user.
-     * @hide
-     */
-    public static final int CAMERA_COMPAT_CONTROL_DISMISSED = 3;
-
-    /**
-     * Enum for the Camera app compat control states.
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "CAMERA_COMPAT_CONTROL_" }, value = {
-            CAMERA_COMPAT_CONTROL_HIDDEN,
-            CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED,
-            CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED,
-            CAMERA_COMPAT_CONTROL_DISMISSED,
-    })
-    public @interface CameraCompatControlState {};
-
-    /**
-     * State of the Camera app compat control which is used to correct stretched viewfinder
-     * in apps that don't handle all possible configurations and changes between them correctly.
-     * @hide
-     */
-    @CameraCompatControlState
-    public int cameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
-
     TaskInfo() {
         // Do nothing
     }
@@ -372,17 +324,6 @@ public class TaskInfo {
         launchCookies.add(cookie);
     }
 
-    /** @hide */
-    public boolean hasCameraCompatControl() {
-        return cameraCompatControlState != CAMERA_COMPAT_CONTROL_HIDDEN
-                && cameraCompatControlState != CAMERA_COMPAT_CONTROL_DISMISSED;
-    }
-
-    /** @hide */
-    public boolean hasCompatUI() {
-        return hasCameraCompatControl() || topActivityInSizeCompat;
-    }
-
     /**
      * @return {@code true} if this task contains the launch cookie.
      * @hide
@@ -435,20 +376,19 @@ public class TaskInfo {
      * @return {@code true} if parameters that are important for size compat have changed.
      * @hide
      */
-    public boolean equalsForCompatUi(@Nullable TaskInfo that) {
+    public boolean equalsForSizeCompat(@Nullable TaskInfo that) {
         if (that == null) {
             return false;
         }
         return displayId == that.displayId
                 && taskId == that.taskId
                 && topActivityInSizeCompat == that.topActivityInSizeCompat
-                && cameraCompatControlState == that.cameraCompatControlState
-                // Bounds are important if top activity has compat controls.
-                && (!hasCompatUI() || configuration.windowConfiguration.getBounds()
+                // Bounds are important if top activity is in size compat
+                && (!topActivityInSizeCompat || configuration.windowConfiguration.getBounds()
                     .equals(that.configuration.windowConfiguration.getBounds()))
-                && (!hasCompatUI() || configuration.getLayoutDirection()
+                && (!topActivityInSizeCompat || configuration.getLayoutDirection()
                     == that.configuration.getLayoutDirection())
-                && (!hasCompatUI() || isVisible == that.isVisible);
+                && (!topActivityInSizeCompat || isVisible == that.isVisible);
     }
 
     /**
@@ -488,7 +428,6 @@ public class TaskInfo {
         topActivityInSizeCompat = source.readBoolean();
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
         displayAreaFeatureId = source.readInt();
-        cameraCompatControlState = source.readInt();
     }
 
     /**
@@ -529,7 +468,6 @@ public class TaskInfo {
         dest.writeBoolean(topActivityInSizeCompat);
         dest.writeTypedObject(mTopActivityLocusId, flags);
         dest.writeInt(displayAreaFeatureId);
-        dest.writeInt(cameraCompatControlState);
     }
 
     @Override
@@ -560,22 +498,6 @@ public class TaskInfo {
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
-                + " cameraCompatControlState="
-                        + cameraCompatControlStateToString(cameraCompatControlState)
                 + "}";
-    }
-
-    /** @hide */
-    public static String cameraCompatControlStateToString(
-            @CameraCompatControlState int cameraCompatControlState) {
-        switch (cameraCompatControlState) {
-            case CAMERA_COMPAT_CONTROL_HIDDEN: return "hidden";
-            case CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED: return "treatment-suggested";
-            case CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED: return "treatment-applied";
-            case CAMERA_COMPAT_CONTROL_DISMISSED: return "dismissed";
-            default:
-                throw new AssertionError(
-                    "Unexpected camera compat control state: " + cameraCompatControlState);
-        }
     }
 }
