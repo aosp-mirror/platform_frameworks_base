@@ -422,7 +422,6 @@ filegroup {
     name: "framework-ike-shared-srcs",
     visibility: ["//packages/modules/IPsec"],
     srcs: [
-        "core/java/android/net/annotations/PolicyDirection.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
         "services/core/java/com/android/server/vcn/util/PersistableBundleUtils.java",
