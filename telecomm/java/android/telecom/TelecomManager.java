@@ -1294,14 +1294,24 @@ public class TelecomManager {
      * {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.
      * <p>
      * Requires permission {@link android.Manifest.permission#READ_PHONE_STATE}, or that the caller
-     * is the default dialer app.
+     * is the default dialer app to get all phone account handles.
+     * <P>
+     * If the caller doesn't meet any of the above requirements and has {@link
+     * android.Manifest.permission#MANAGE_OWN_CALLS}, the caller can get only the phone account
+     * handles they have registered.
      * <p>
-     * A {@link SecurityException} will be thrown if a called is not the default dialer, or lacks
-     * the {@link android.Manifest.permission#READ_PHONE_STATE} permission.
+     * A {@link SecurityException} will be thrown if the caller is not the default dialer
+     * or the caller does not have at least one of the following permissions:
+     * {@link android.Manifest.permission#READ_PHONE_STATE} permission,
+     * {@link android.Manifest.permission#MANAGE_OWN_CALLS} permission
      *
      * @return A list of {@code PhoneAccountHandle} objects.
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.MANAGE_OWN_CALLS
+    })
     public List<PhoneAccountHandle> getSelfManagedPhoneAccounts() {
         ITelecomService service = getTelecomService();
         if (service != null) {
