@@ -54,6 +54,10 @@ class AutomaticBrightnessController {
 
     private static final boolean DEBUG_PRETEND_LIGHT_SENSOR_ABSENT = false;
 
+    public static final int AUTO_BRIGHTNESS_ENABLED = 1;
+    public static final int AUTO_BRIGHTNESS_DISABLED = 2;
+    public static final int AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE = 3;
+
     // How long the current sensor reading is assumed to be valid beyond the current time.
     // This provides a bit of prediction, as well as ensures that the weight for the last sample is
     // non-zero, which in turn ensures that the total weight is non-zero.
@@ -214,6 +218,7 @@ class AutomaticBrightnessController {
     private IActivityTaskManager mActivityTaskManager;
     private PackageManager mPackageManager;
     private Context mContext;
+    private int mState = AUTO_BRIGHTNESS_DISABLED;
 
     private final Injector mInjector;
 
@@ -331,10 +336,11 @@ class AutomaticBrightnessController {
         return mCurrentBrightnessMapper.getAutoBrightnessAdjustment();
     }
 
-    public void configure(boolean enable, @Nullable BrightnessConfiguration configuration,
+    public void configure(int state, @Nullable BrightnessConfiguration configuration,
             float brightness, boolean userChangedBrightness, float adjustment,
             boolean userChangedAutoBrightnessAdjustment, int displayPolicy) {
-        mHbmController.setAutoBrightnessEnabled(enable);
+        mState = state;
+        mHbmController.setAutoBrightnessEnabled(mState);
         // While dozing, the application processor may be suspended which will prevent us from
         // receiving new information from the light sensor. On some devices, we may be able to
         // switch to a wake-up light sensor instead but for now we will simply disable the sensor
@@ -346,6 +352,7 @@ class AutomaticBrightnessController {
         if (userChangedAutoBrightnessAdjustment) {
             changed |= setAutoBrightnessAdjustment(adjustment);
         }
+        final boolean enable = mState == AUTO_BRIGHTNESS_ENABLED;
         if (userChangedBrightness && enable) {
             // Update the brightness curve with the new user control point. It's critical this
             // happens after we update the autobrightness adjustment since it may reset it.
@@ -459,6 +466,7 @@ class AutomaticBrightnessController {
     public void dump(PrintWriter pw) {
         pw.println();
         pw.println("Automatic Brightness Controller Configuration:");
+        pw.println("  mState=" + configStateToString(mState));
         pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
         pw.println("  mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
         pw.println("  mDozeScaleFactor=" + mDozeScaleFactor);
@@ -518,6 +526,19 @@ class AutomaticBrightnessController {
         pw.println();
         mAmbientBrightnessThresholds.dump(pw);
         mScreenBrightnessThresholds.dump(pw);
+    }
+
+    private String configStateToString(int state) {
+        switch (state) {
+        case AUTO_BRIGHTNESS_ENABLED:
+            return "AUTO_BRIGHTNESS_ENABLED";
+        case AUTO_BRIGHTNESS_DISABLED:
+            return "AUTO_BRIGHTNESS_DISABLED";
+        case AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE:
+            return "AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE";
+        default:
+            return String.valueOf(state);
+        }
     }
 
     private boolean setLightSensorEnabled(boolean enable) {
