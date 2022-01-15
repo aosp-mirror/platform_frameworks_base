@@ -2701,6 +2701,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // should trigger a broadcast
         mBinderService.setNotificationsEnabledForPackage(PKG, 0, true);
+        Thread.sleep(500);
+        waitForIdle();
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
         verify(mContext, times(1)).sendBroadcastAsUser(captor.capture(), any(), eq(null));
 
@@ -2728,6 +2730,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // should trigger a broadcast
         mBinderService.setNotificationsEnabledForPackage(PKG, 0, true);
+        Thread.sleep(500);
+        waitForIdle();
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
         verify(mContext, times(1)).sendBroadcastAsUser(captor.capture(), any(), eq(null));
 
