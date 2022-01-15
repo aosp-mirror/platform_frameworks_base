@@ -19,9 +19,10 @@ import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
 
+import android.annotation.BinderThread;
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityThread;
 import android.app.IWindowToken;
 import android.app.ResourcesManager;
 import android.content.Context;
@@ -30,7 +31,9 @@ import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IWindowManager;
@@ -70,6 +73,8 @@ public class WindowTokenClient extends IWindowToken.Stub {
     private boolean mShouldDumpConfigForIme;
 
     private boolean mAttachToWindowContainer;
+
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     /**
      * Attaches {@code context} to this {@link WindowTokenClient}. Each {@link WindowTokenClient}
@@ -132,7 +137,8 @@ public class WindowTokenClient extends IWindowToken.Stub {
             if (configuration == null) {
                 return false;
             }
-            onConfigurationChanged(configuration, displayId, false /* shouldReportConfigChange */);
+            mHandler.post(() -> onConfigurationChanged(configuration, displayId,
+                    false /* shouldReportConfigChange */));
             mAttachToWindowContainer = true;
             return true;
         } catch (RemoteException e) {
@@ -179,9 +185,11 @@ public class WindowTokenClient extends IWindowToken.Stub {
      * @param newConfig the updated {@link Configuration}
      * @param newDisplayId the updated {@link android.view.Display} ID
      */
+    @BinderThread
     @Override
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId) {
-        onConfigurationChanged(newConfig, newDisplayId, true /* shouldReportConfigChange */);
+        mHandler.post(() -> onConfigurationChanged(newConfig, newDisplayId,
+                true /* shouldReportConfigChange */));
     }
 
     // TODO(b/192048581): rewrite this method based on WindowContext and WindowProviderService
@@ -192,6 +200,7 @@ public class WindowTokenClient extends IWindowToken.Stub {
      * Similar to {@link #onConfigurationChanged(Configuration, int)}, but adds a flag to control
      * whether to dispatch configuration update or not.
      */
+    @MainThread
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId,
             boolean shouldReportConfigChange) {
@@ -217,16 +226,14 @@ public class WindowTokenClient extends IWindowToken.Stub {
 
             if (shouldReportConfigChange && context instanceof WindowContext) {
                 final WindowContext windowContext = (WindowContext) context;
-                ActivityThread.currentActivityThread().getHandler().post(
-                        () -> windowContext.dispatchConfigurationChanged(newConfig));
+                windowContext.dispatchConfigurationChanged(newConfig);
             }
 
             final int diff = mConfiguration.diffPublicOnly(newConfig);
             if (shouldReportConfigChange && diff != 0
                     && context instanceof WindowProviderService) {
                 final WindowProviderService windowProviderService = (WindowProviderService) context;
-                ActivityThread.currentActivityThread().getHandler().post(
-                        () -> windowProviderService.onConfigurationChanged(newConfig));
+                windowProviderService.onConfigurationChanged(newConfig);
             }
             freeTextLayoutCachesIfNeeded(diff);
             if (mShouldDumpConfigForIme) {
@@ -248,12 +255,15 @@ public class WindowTokenClient extends IWindowToken.Stub {
         }
     }
 
+    @BinderThread
     @Override
     public void onWindowTokenRemoved() {
-        final Context context = mContextRef.get();
-        if (context != null) {
-            context.destroy();
-            mContextRef.clear();
-        }
+        mHandler.post(() -> {
+            final Context context = mContextRef.get();
+            if (context != null) {
+                context.destroy();
+                mContextRef.clear();
+            }
+        });
     }
 }
