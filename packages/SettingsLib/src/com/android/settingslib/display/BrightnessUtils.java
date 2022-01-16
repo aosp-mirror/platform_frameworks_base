@@ -18,10 +18,12 @@ package com.android.settingslib.display;
 
 import android.util.MathUtils;
 
+import com.android.internal.display.BrightnessSynchronizer;
+
 public class BrightnessUtils {
 
     public static final int GAMMA_SPACE_MIN = 0;
-    public static final int GAMMA_SPACE_MAX = 65535;
+    public static final int GAMMA_SPACE_MAX = 255;
 
     // Hybrid Log Gamma constant values
     private static final float R = 0.5f;
@@ -75,21 +77,8 @@ public class BrightnessUtils {
      * @return The corresponding setting value.
      */
     public static final float convertGammaToLinearFloat(int val, float min, float max) {
-        final float normalizedVal = MathUtils.norm(GAMMA_SPACE_MIN, GAMMA_SPACE_MAX, val);
-        final float ret;
-        if (normalizedVal <= R) {
-            ret = MathUtils.sq(normalizedVal / R);
-        } else {
-            ret = MathUtils.exp((normalizedVal - C) / A) + B;
-        }
-
-        // HLG is normalized to the range [0, 12], ensure that value is within that range,
-        // it shouldn't be out of bounds.
-        final float normalizedRet = MathUtils.constrain(ret, 0, 12);
-
-        // Re-normalize to the range [0, 1]
-        // in order to derive the correct setting value.
-        return MathUtils.lerp(min, max, normalizedRet / 12);
+        return MathUtils.constrain(BrightnessSynchronizer.brightnessIntToFloat(val),
+                         min, max);
     }
 
     /**
@@ -127,15 +116,7 @@ public class BrightnessUtils {
      * @return The corresponding slider value
      */
     public static final int convertLinearToGammaFloat(float val, float min, float max) {
-        // For some reason, HLG normalizes to the range [0, 12] rather than [0, 1]
-        final float normalizedVal = MathUtils.norm(min, max, val) * 12;
-        final float ret;
-        if (normalizedVal <= 1f) {
-            ret = MathUtils.sqrt(normalizedVal) * R;
-        } else {
-            ret = A * MathUtils.log(normalizedVal - B) + C;
-        }
-
-        return Math.round(MathUtils.lerp(GAMMA_SPACE_MIN, GAMMA_SPACE_MAX, ret));
+        return BrightnessSynchronizer.brightnessFloatToInt(
+                       MathUtils.constrain(val, min, max));
     }
 }
