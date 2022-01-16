@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -27,6 +28,8 @@ import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.media.AudioDeviceInfo;
+import android.media.AudioFormat.Encoding;
 import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Binder;
@@ -59,6 +62,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -2998,11 +3002,43 @@ public final class TvInputManager {
             return false;
         }
 
+        /**
+         * Override default audio sink from audio policy.
+         *
+         * @param audioType device type of the audio sink to override with.
+         * @param audioAddress device address of the audio sink to override with.
+         * @param samplingRate desired sampling rate. Use default when it's 0.
+         * @param channelMask desired channel mask. Use default when it's
+         *        AudioFormat.CHANNEL_OUT_DEFAULT.
+         * @param format desired format. Use default when it's AudioFormat.ENCODING_DEFAULT.
+         */
         public void overrideAudioSink(int audioType, String audioAddress, int samplingRate,
                 int channelMask, int format) {
             try {
                 mInterface.overrideAudioSink(audioType, audioAddress, samplingRate, channelMask,
                         format);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Override default audio sink from audio policy.
+         *
+         * @param device {@link android.media.AudioDeviceInfo} to use.
+         * @param samplingRate desired sampling rate. Use default when it's 0.
+         * @param channelMask desired channel mask. Use default when it's
+         *        AudioFormat.CHANNEL_OUT_DEFAULT.
+         * @param format desired format. Use default when it's AudioFormat.ENCODING_DEFAULT.
+         */
+        public void overrideAudioSink(@NonNull AudioDeviceInfo device,
+                @IntRange(from = 0) int samplingRate,
+                int channelMask, @Encoding int format) {
+            Objects.requireNonNull(device);
+            try {
+                mInterface.overrideAudioSink(
+                        AudioDeviceInfo.convertDeviceTypeToInternalDevice(device.getType()),
+                        device.getAddress(), samplingRate, channelMask, format);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }

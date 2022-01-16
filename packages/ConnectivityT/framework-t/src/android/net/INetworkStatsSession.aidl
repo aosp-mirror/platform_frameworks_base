@@ -46,6 +46,10 @@ interface INetworkStatsSession {
      */
     @UnsupportedAppUsage
     NetworkStats getSummaryForAllUid(in NetworkTemplate template, long start, long end, boolean includeTags);
+
+    /** Return network layer usage summary per UID for tagged traffic that matches template. */
+    NetworkStats getTaggedSummaryForAllUid(in NetworkTemplate template, long start, long end);
+
     /** Return historical network layer stats for specific UID traffic that matches template. */
     @UnsupportedAppUsage
     NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid, int set, int tag, int fields);

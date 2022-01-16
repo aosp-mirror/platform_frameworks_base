@@ -138,6 +138,7 @@ package android {
     field public static final String MANAGE_APP_PREDICTIONS = "android.permission.MANAGE_APP_PREDICTIONS";
     field public static final String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";
     field public static final String MANAGE_AUTO_FILL = "android.permission.MANAGE_AUTO_FILL";
+    field public static final String MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED = "android.permission.MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED";
     field public static final String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
     field public static final String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
     field public static final String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
@@ -2263,6 +2264,25 @@ package android.bluetooth {
 }
 
 package android.bluetooth.le {
+
+  public final class AdvertiseSettings implements android.os.Parcelable {
+    method public int getOwnAddressType();
+  }
+
+  public static final class AdvertiseSettings.Builder {
+    method @NonNull public android.bluetooth.le.AdvertiseSettings.Builder setOwnAddressType(int);
+  }
+
+  public final class AdvertisingSetParameters implements android.os.Parcelable {
+    method public int getOwnAddressType();
+    field public static final int ADDRESS_TYPE_DEFAULT = -1; // 0xffffffff
+    field public static final int ADDRESS_TYPE_PUBLIC = 0; // 0x0
+    field public static final int ADDRESS_TYPE_RANDOM = 1; // 0x1
+  }
+
+  public static final class AdvertisingSetParameters.Builder {
+    method @NonNull public android.bluetooth.le.AdvertisingSetParameters.Builder setOwnAddressType(int);
+  }
 
   public final class BluetoothLeScanner {
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.UPDATE_DEVICE_STATS}) public void startScanFromSource(android.os.WorkSource, android.bluetooth.le.ScanCallback);
@@ -5861,6 +5881,7 @@ package android.media.tv {
 
   public static final class TvInputManager.Hardware {
     method public void overrideAudioSink(int, String, int, int, int);
+    method public void overrideAudioSink(@NonNull android.media.AudioDeviceInfo, @IntRange(from=0) int, int, int);
     method public void setStreamVolume(float);
     method public boolean setSurface(android.view.Surface, android.media.tv.TvStreamConfig);
   }
@@ -8487,6 +8508,7 @@ package android.os {
     field public static final int EVENT_UNSPECIFIED = 0; // 0x0
     field public static final int REASON_ACCOUNT_TRANSFER = 104; // 0x68
     field public static final int REASON_ACTIVITY_RECOGNITION = 103; // 0x67
+    field public static final int REASON_BLUETOOTH_BROADCAST = 203; // 0xcb
     field public static final int REASON_GEOFENCING = 100; // 0x64
     field public static final int REASON_LOCATION_PROVIDER = 312; // 0x138
     field public static final int REASON_OTHER = 1; // 0x1

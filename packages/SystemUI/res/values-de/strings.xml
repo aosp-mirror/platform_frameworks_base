@@ -265,7 +265,7 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Der Flugmodus ist aktiviert."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"lautlos"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"nur Weckrufe"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Nicht stören."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Bitte nicht stören."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"„Bitte nicht stören“ deaktiviert."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"„Bitte nicht stören“ aktiviert"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>

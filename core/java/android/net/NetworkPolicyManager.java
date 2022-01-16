@@ -535,6 +535,46 @@ public class NetworkPolicyManager {
     }
 
     /**
+     * Get subscription plan for the given networkTemplate.
+     *
+     * @param template the networkTemplate to get the subscription plan for.
+     * @return the active {@link SubscriptionPlan} for the given template, or
+     *         {@code null} if not found.
+     * @hide
+     */
+    @Nullable
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    // @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public SubscriptionPlan getSubscriptionPlan(@NonNull NetworkTemplate template) {
+        try {
+            return mService.getSubscriptionPlan(template);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies that the specified {@link NetworkStatsProvider} has reached its quota
+     * which was set through {@link NetworkStatsProvider#onSetLimit(String, long)} or
+     * {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    // @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void onStatsProviderWarningOrLimitReached() {
+        try {
+            mService.onStatsProviderWarningOrLimitReached();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Resets network policy settings back to factory defaults.
      *
      * @hide

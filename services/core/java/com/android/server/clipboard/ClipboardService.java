@@ -535,9 +535,6 @@ public class ClipboardService extends SystemService {
         mEmulatorClipboardMonitor.accept(clip);
 
         final int userId = UserHandle.getUserId(uid);
-        if (clip != null) {
-            startClassificationLocked(clip, userId);
-        }
 
         // Update this user
         setPrimaryClipInternalLocked(getClipboardLocked(userId), clip, uid, sourcePackage);
@@ -593,6 +590,17 @@ public class ClipboardService extends SystemService {
     @GuardedBy("mLock")
     private void setPrimaryClipInternalLocked(PerUserClipboard clipboard, @Nullable ClipData clip,
             int uid, @Nullable String sourcePackage) {
+        final int userId = UserHandle.getUserId(uid);
+        if (clip != null) {
+            startClassificationLocked(clip, userId);
+        }
+
+        setPrimaryClipInternalNoClassifyLocked(clipboard, clip, uid, sourcePackage);
+    }
+
+    @GuardedBy("mLock")
+    private void setPrimaryClipInternalNoClassifyLocked(PerUserClipboard clipboard,
+            @Nullable ClipData clip, int uid, @Nullable String sourcePackage) {
         revokeUris(clipboard);
         clipboard.activePermissionOwners.clear();
         if (clip == null && clipboard.primaryClip == null) {

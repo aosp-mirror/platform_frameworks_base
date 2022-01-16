@@ -1796,9 +1796,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private void triggerOnStatsProviderWarningOrLimitReached() throws InterruptedException {
-        final NetworkPolicyManagerInternal npmi = LocalServices
-                .getService(NetworkPolicyManagerInternal.class);
-        npmi.onStatsProviderWarningOrLimitReached("TEST");
+        mService.onStatsProviderWarningOrLimitReached();
         // Wait for processing of MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED.
         postMsgAndWaitForCompletion();
         verify(mStatsService).forceUpdate();
