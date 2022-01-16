@@ -54,6 +54,7 @@ import com.android.net.module.util.NetworkIdentityUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Provides access to network usage history and statistics. Usage data is collected in
@@ -368,7 +369,7 @@ public class NetworkStatsManager {
      * @return Statistics which is described above.
      * @hide
      */
-    @Nullable
+    @NonNull
     // @SystemApi(client = MODULE_LIBRARIES)
     @WorkerThread
     public NetworkStats querySummary(@NonNull NetworkTemplate template, long startTime,
@@ -377,6 +378,39 @@ public class NetworkStatsManager {
             NetworkStats result =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
             result.startSummaryEnumeration();
+            return result;
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return null; // To make the compiler happy.
+    }
+
+    /**
+     * Query tagged network usage statistics summaries.
+     *
+     * The results will only include tagged traffic made by UIDs belonging to the calling user
+     * profile. The results are aggregated over time, so that all buckets will have the same
+     * start and end timestamps as the passed arguments. Not aggregated over state, uid,
+     * default network, metered, or roaming.
+     * This may take a long time, and apps should avoid calling this on their main thread.
+     *
+     * @param template Template used to match networks. See {@link NetworkTemplate}.
+     * @param startTime Start of period, in milliseconds since the Unix epoch, see
+     *            {@link System#currentTimeMillis}.
+     * @param endTime End of period, in milliseconds since the Unix epoch, see
+     *            {@link System#currentTimeMillis}.
+     * @return Statistics which is described above.
+     * @hide
+     */
+    @NonNull
+    // @SystemApi(client = MODULE_LIBRARIES)
+    @WorkerThread
+    public NetworkStats queryTaggedSummary(@NonNull NetworkTemplate template, long startTime,
+            long endTime) throws SecurityException {
+        try {
+            NetworkStats result =
+                    new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
+            result.startTaggedSummaryEnumeration();
             return result;
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -533,6 +567,31 @@ public class NetworkStatsManager {
         result = new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
         result.startUserUidEnumeration();
         return result;
+    }
+
+    /**
+     * Query realtime network usage statistics details with interfaces constrains.
+     * Return snapshot of current UID statistics, including any {@link TrafficStats#UID_TETHERING},
+     * video calling data usage and count of network operations that set by
+     * {@link TrafficStats#incrementOperationCount}. The returned data doesn't include any
+     * statistics that is reported by {@link NetworkStatsProvider}.
+     *
+     * @param requiredIfaces A list of interfaces the stats should be restricted to, or
+     *               {@link NetworkStats#INTERFACES_ALL}.
+     *
+     * @hide
+     */
+    //@SystemApi
+    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    @NonNull public android.net.NetworkStats getDetailedUidStats(
+                @NonNull Set<String> requiredIfaces) {
+        Objects.requireNonNull(requiredIfaces, "requiredIfaces cannot be null");
+        try {
+            return mService.getDetailedUidStats(requiredIfaces.toArray(new String[0]));
+        } catch (RemoteException e) {
+            if (DBG) Log.d(TAG, "Remote exception when get detailed uid stats");
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** @hide */

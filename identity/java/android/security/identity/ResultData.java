@@ -28,7 +28,10 @@ import java.util.Collection;
 /**
  * An object that contains the result of retrieving data from a credential. This is used to return
  * data requested from a {@link IdentityCredential}.
+ *
+ * @deprecated Use {@link PresentationSession} instead.
  */
+@Deprecated
 public abstract class ResultData {
 
     /** Value was successfully retrieved. */

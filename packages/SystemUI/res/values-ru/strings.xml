@@ -158,7 +158,7 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Подтверждено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Нажмите \"Подтвердить\""</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Аутентификация выполнена"</string>
-    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Использовать PIN-код"</string>
+    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN-код"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Использовать графический ключ"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Использовать пароль"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Неверный PIN-код."</string>
@@ -1167,7 +1167,7 @@
     <string name="person_available" msgid="2318599327472755472">"Онлайн"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Не удалось узнать уровень заряда батареи"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Нажмите, чтобы узнать больше."</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Будильников нет"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Нет будильников"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Сканер отпечатков пальцев"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Сканер отпечатков пальцев отключен"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"выполнить аутентификацию"</string>

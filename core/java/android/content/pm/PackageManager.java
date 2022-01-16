@@ -2485,6 +2485,8 @@ public abstract class PackageManager {
      * API shipped in Android 11.
      * <li><code>202101</code>: corresponds to the features included in the Identity Credential
      * API shipped in Android 12.
+     * <li><code>202201</code>: corresponds to the features included in the Identity Credential
+     * API shipped in Android 13.
      * </ul>
      */
     @SdkConstant(SdkConstantType.FEATURE)

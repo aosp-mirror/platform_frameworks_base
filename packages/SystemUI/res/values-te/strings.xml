@@ -599,9 +599,9 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ధ్వని సెట్టింగ్‌లు"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"విస్తరింపజేయండి"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"కుదించండి"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"మీడియాకు ఆటోమేటిక్ శీర్షికలు"</string>
-    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"ఉపశీర్షికల చిట్కాను మూసివేయండి"</string>
-    <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"శీర్షికలు అతివ్యాప్తి"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"మీడియాకు ఆటోమేటిక్ క్యాప్షన్‌లు"</string>
+    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"క్యాప్షన్‌ల చిట్కాను మూసివేయండి"</string>
+    <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"క్యాప్షన్‌లు ఓవర్‌లే"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ప్రారంభించు"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"నిలిపివేయండి"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"పరికరం అవుట్‌పుట్‌ని మార్చండి"</string>
@@ -658,9 +658,9 @@
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"బ్లూటూత్ మరియు Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"సిస్టమ్ UI ట్యూనర్"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"పొందుపరిచిన బ్యాటరీ శాతం చూపు"</string>
-    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"ఛార్జింగ్‌లో లేనప్పుడు స్థితి పట్టీ చిహ్నం లోపల బ్యాటరీ స్థాయి శాతం చూపుతుంది"</string>
+    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"ఛార్జింగ్‌లో లేనప్పుడు స్టేటస్‌ పట్టీ చిహ్నం లోపల బ్యాటరీ స్థాయి శాతం చూపుతుంది"</string>
     <string name="quick_settings" msgid="6211774484997470203">"క్విక్ సెట్టింగ్‌లు"</string>
-    <string name="status_bar" msgid="4357390266055077437">"స్థితి పట్టీ"</string>
+    <string name="status_bar" msgid="4357390266055077437">"స్టేటస్‌ పట్టీ"</string>
     <string name="overview" msgid="3522318590458536816">"ఓవర్‌వ్యూ"</string>
     <string name="demo_mode" msgid="263484519766901593">"సిస్టమ్ UI డెమో మోడ్"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"డెమో మోడ్ ప్రారంభించండి"</string>
@@ -696,7 +696,7 @@
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"సిస్టమ్ UI ట్యూనర్‌ను సెట్టింగ్‌ల నుండి తీసివేసి, దాని అన్ని లక్షణాలను ఉపయోగించడం ఆపివేయాలా?"</string>
     <string name="activity_not_found" msgid="8711661533828200293">"యాప్ మీ డివైజ్‌లో ఇన్‌స్టాల్ చేయలేదు"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"గడియారం సెకన్లు చూపు"</string>
-    <string name="clock_seconds_desc" msgid="2415312788902144817">"స్థితి పట్టీలో గడియారం సెకన్లు చూపుతుంది. బ్యాటరీ శక్తి ప్రభావితం చేయవచ్చు."</string>
+    <string name="clock_seconds_desc" msgid="2415312788902144817">"స్టేటస్‌ పట్టీలో గడియారం సెకన్లు చూపుతుంది. బ్యాటరీ శక్తి ప్రభావితం చేయవచ్చు."</string>
     <string name="qs_rearrange" msgid="484816665478662911">"శీఘ్ర సెట్టింగ్‌ల ఏర్పాటు క్రమం మార్చు"</string>
     <string name="show_brightness" msgid="6700267491672470007">"శీఘ్ర సెట్టింగ్‌ల్లో ప్రకాశం చూపు"</string>
     <string name="experimental" msgid="3549865454812314826">"ప్రయోగాత్మకం"</string>
@@ -711,7 +711,7 @@
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ఆన్‌లో ఉన్నాయి"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ఆఫ్‌లో ఉన్నాయి"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"\'ముఖం ఆధారం\'ను - ఆన్ చేయండి"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"పవర్ నోటిఫికేషన్ నియంత్రణలతో, మీరు యాప్ నోటిఫికేషన్‌ల కోసం ప్రాముఖ్యత స్థాయిని 0 నుండి 5 వరకు సెట్ చేయవచ్చు. \n\n"<b>"స్థాయి 5"</b>" \n- నోటిఫికేషన్ లిస్ట్‌ పైభాగంలో చూపబడతాయి \n- పూర్తి స్క్రీన్ అంతరాయం అనుమతించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 4"</b>\n"- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 3"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n\n"<b>"స్థాయి 2"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం మరియు వైబ్రేషన్ చేయవు \n\n"<b>"స్థాయి 1"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం లేదా వైబ్రేట్ చేయవు \n- లాక్ స్క్రీన్ మరియు స్థితి పట్టీ నుండి దాచబడతాయి \n- నోటిఫికేషన్ లిస్ట్‌ దిగువ భాగంలో చూపబడతాయి \n\n"<b>"స్థాయి 0"</b>" \n- యాప్ నుండి అన్ని నోటిఫికేషన్‌లు బ్లాక్ చేయబడతాయి"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"పవర్ నోటిఫికేషన్ కంట్రోల్స్ సాయంతో, మీరు యాప్ నోటిఫికేషన్‌లకు ప్రాముఖ్యతా స్థాయిని 0 నుండి 5 వరకు సెట్ చేయవచ్చు. \n\n"<b>"స్థాయి 5"</b>" \n- నోటిఫికేషన్ లిస్ట్‌ పైభాగంలో చూపబడతాయి \n- ఫుల్-స్క్రీన్ అంతరాయం అనుమతించబడుతుంది \n- ఎల్లప్పుడూ క్విక్ వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 4"</b>\n"- ఫుల్-స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎల్లప్పుడూ క్విక్ వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 3"</b>" \n- ఫుల్-స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ క్విక్ వీక్షణ అందించబడదు \n\n"<b>"స్థాయి 2"</b>" \n- ఫుల్-స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ క్విక్ వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం మరియు వైబ్రేషన్ చేయవు \n\n"<b>"స్థాయి 1"</b>" \n- ఫుల్-స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ క్విక్ వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం లేదా వైబ్రేట్ చేయవు \n- లాక్ స్క్రీన్, స్టేటస్ బార్‌ల నుండి దాచబడతాయి \n- నోటిఫికేషన్ లిస్ట్‌ దిగువ భాగంలో చూపబడతాయి \n\n"<b>"స్థాయి 0"</b>" \n- యాప్ నుండి అన్ని నోటిఫికేషన్‌లు బ్లాక్ చేయబడతాయి"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"నోటిఫికేషన్‌లు"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"ఇకపై మీకు ఈ నోటిఫికేషన్‌లు కనిపించవు"</string>
     <string name="notification_channel_minimized" msgid="6892672757877552959">"ఈ నోటిఫికేషన్‌లు కుదించబడ్డాయి"</string>
@@ -927,7 +927,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"శీఘ్ర సెట్టింగ్‌లను తెరవండి."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"శీఘ్ర సెట్టింగ్‌లను మూసివేయండి."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"అలారం సెట్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> వలె సైన్ ఇన్ చేశారు"</string>
+    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> లాగా సైన్ ఇన్ చేశారు"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"యూజర్‌ను ఎంపిక చేయండి"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ఇంటర్నెట్ లేదు"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"వివరాలను తెరవండి."</string>
@@ -1101,7 +1101,7 @@
     <string name="controls_error_removed_title" msgid="1207794911208047818">"కంట్రోల్ అందుబాటులో లేదు"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>ను యాక్సెస్ చేయడం సాధ్యపడలేదు. <xliff:g id="APPLICATION">%2$s</xliff:g> యాప్‌ను తనిఖీ చేసి, కంట్రోల్ ఇప్పటికీ అందుబాటులో ఉందని, యాప్ సెట్టింగ్‌లు మారలేదని నిర్ధారించుకోండి."</string>
     <string name="controls_open_app" msgid="483650971094300141">"యాప్‌ను తెరువు"</string>
-    <string name="controls_error_generic" msgid="352500456918362905">"స్థితిని లోడ్ చేయడం సాధ్యపడదు"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"స్టేటస్ లోడ్ చేయడం సాధ్యపడలేదు"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ఎర్రర్, మళ్లీ ప్రయత్నించండి"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"పురోగతిలో ఉంది"</string>
     <string name="controls_added_tooltip" msgid="5866098408470111984">"కొత్త కంట్రోల్స్‌ను చూడటానికి త్వరిత సెట్టింగ్‌లను తెరవండి"</string>

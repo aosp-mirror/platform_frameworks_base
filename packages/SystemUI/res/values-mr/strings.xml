@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"सिस्टम UI"</string>
+    <string name="app_label" msgid="4811759950673118541">"सिस्टीम UI"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"साफ करा"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"सूचना नाहीत"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"सुरू असलेले"</string>
@@ -638,7 +638,7 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"म्यूट करा"</string>
     <string name="qs_status_phone_vibrate" msgid="7055409506885541979">"फोन व्हायब्रेटवर आहे"</string>
     <string name="qs_status_phone_muted" msgid="3763664791309544103">"फोन म्यूट केला"</string>
-    <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. सशब्द करण्यासाठी टॅप करा."</string>
+    <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. अनम्यूट करण्यासाठी टॅप करा."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. व्हायब्रेट सेट करण्यासाठी टॅप करा. प्रवेशयोग्यता सेवा म्यूट केल्या जाऊ शकतात."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. म्यूट करण्यासाठी टॅप करा. प्रवेशक्षमता सेवा म्यूट केल्या जाऊ शकतात."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. व्हायब्रेट सेट करण्यासाठी टॅप करा."</string>

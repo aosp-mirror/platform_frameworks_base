@@ -512,7 +512,7 @@
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ရိုက်ကူးဖမ်းယူခြင်း (သို့) ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> နှင့် ဖမ်းယူခြင်း သို့မဟုတ် ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"နောက်ထပ် မပြပါနှင့်"</string>
-    <string name="clear_all_notifications_text" msgid="348312370303046130">"အားလုံးထုတ်ပစ်ရန်"</string>
+    <string name="clear_all_notifications_text" msgid="348312370303046130">"အားလုံးရှင်းရန်"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"စီမံရန်"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"မှတ်တမ်း"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"အသစ်"</string>
@@ -642,9 +642,9 @@
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s။ တုန်ခါမှုကို သတ်မှတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s။ တုန်ခါခြင်းသို့ သတ်မှတ်ရန်တို့ပါ။"</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s။ အသံတိတ်ရန် တို့ပါ။"</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s။ အသံပိတ်ရန် တို့ပါ။"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ဖုန်းခေါ်သံမုဒ်သို့ ပြောင်းရန် တို့ပါ"</string>
-    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"အသံတိတ်ရန်"</string>
+    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"အသံပိတ်ရန်"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"အသံဖွင့်ရန်"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"တုန်ခါမှု"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s အသံအတိုးအလျှော့ ခလုတ်များ"</string>
@@ -726,13 +726,13 @@
     <string name="inline_block_button" msgid="479892866568378793">"ပိတ်ထားရန်"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"ဆက်ပြရန်"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"ချုံ့ရန်"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"အသံတိတ်ရန်"</string>
-    <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"ဆက်လက် အသံတိတ်ရန်"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"အသံပိတ်ရန်"</string>
+    <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"ဆက်လက် အသံပိတ်ရန်"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"သတိပေးခြင်း"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"ဆက်လက် သတိပေးရန်"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"အကြောင်းကြားချက်များ ပိတ်ရန်"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"ဤအက်ပ်ထံမှ အကြောင်းကြားချက်များကို ဆက်ပြလိုပါသလား။"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"အသံတိတ်ရန်"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"အသံပိတ်ရန်"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"မူလ"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"အလိုအလျောက်"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"အသံ သို့မဟုတ် တုန်ခါမှုမရှိပါ"</string>
@@ -779,7 +779,7 @@
     <string name="notification_more_settings" msgid="4936228656989201793">"နောက်ထပ် ဆက်တင်များ"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"စိတ်ကြိုက်ပြုလုပ်ရန်"</string>
     <string name="notification_done" msgid="6215117625922713976">"ပြီးပါပြီ"</string>
-    <string name="inline_undo" msgid="9026953267645116526">"တစ်ဆင့်နောက်ပြန်ရန်"</string>
+    <string name="inline_undo" msgid="9026953267645116526">"နောက်ပြန်ရန်"</string>
     <string name="demote" msgid="6225813324237153980">"ဤအကြောင်းကြားချက်ကို စကားဝိုင်းမဟုတ်ဟု မှတ်ထားရန်"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"အရေးကြီး စကားဝိုင်းများ"</string>
     <string name="notification_conversation_unfavorite" msgid="181383708304763807">"အရေးကြီးစကားဝိုင်း မဟုတ်ပါ"</string>
@@ -793,7 +793,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"အကြောင်းကြားချက်များကို ဆိုင်းငံ့ရန် ရွေးချယ်စရာများ"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"ကျွန်ုပ်ကို သတိပေးပါ"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"ဆက်တင်များ"</string>
-    <string name="snooze_undo" msgid="2738844148845992103">"တစ်ဆင့်နောက်ပြန်ရန်"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"နောက်ပြန်ရန်"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ဆိုင်းငံ့ရန်"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d နာရီ</item>

@@ -93,10 +93,10 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Snimite još"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Odbacite snimak ekrana"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pregled snimka ekrana"</string>
-    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Gornja ivica <xliff:g id="PERCENT">%1$d</xliff:g> odsto"</string>
-    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Donja ivica <xliff:g id="PERCENT">%1$d</xliff:g> odsto"</string>
-    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Leva ivica <xliff:g id="PERCENT">%1$d</xliff:g> odsto"</string>
-    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Desna ivica <xliff:g id="PERCENT">%1$d</xliff:g> odsto"</string>
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Gornja ivica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Donja ivica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Leva ivica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Desna ivica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Snimač ekrana"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obrađujemo video snimka ekrana"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obaveštenje o sesiji snimanja ekrana je aktivno"</string>
@@ -950,7 +950,7 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Neke funkcije su ograničene dok se telefon ne ohladi.\nDodirnite za više informacija"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon će automatski pokušati da se ohladi. I dalje ćete moći da koristite telefon, ali će sporije reagovati.\n\nKada se telefon ohladi, normalno će raditi."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Pogledajte upozorenja"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"Isključite punjač iz napajanja"</string>
+    <string name="high_temp_alarm_title" msgid="2359958549570161495">"Isključite punjač iz struje"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Došlo je do problema sa punjenjem ovog uređaja. Isključite adapter iz napajanja i budite pažljivi jer kabl može da bude topao."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Pogledajte upozorenja"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Leva prečica"</string>
@@ -1161,7 +1161,7 @@
     <string name="person_available" msgid="2318599327472755472">"Dostupno"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problem sa očitavanjem merača baterije"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dodirnite za više informacija"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Alarm nije podešen"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nije podešen"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Senzor za otisak prsta"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Senzor za otisak prsta je onemogućen"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"potvrdite identitet"</string>

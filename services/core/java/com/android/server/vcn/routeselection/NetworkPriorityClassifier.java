@@ -20,8 +20,8 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
-import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_ANY;
-import static android.net.vcn.VcnUnderlyingNetworkTemplate.NETWORK_QUALITY_OK;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_FORBIDDEN;
+import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_REQUIRED;
 
 import static com.android.server.VcnManagementService.LOCAL_LOG;
 
@@ -44,7 +44,8 @@ import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.VcnContext;
 
-import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /** @hide */
@@ -76,7 +77,7 @@ class NetworkPriorityClassifier {
     public static int calculatePriorityClass(
             VcnContext vcnContext,
             UnderlyingNetworkRecord networkRecord,
-            LinkedHashSet<VcnUnderlyingNetworkTemplate> underlyingNetworkPriorities,
+            List<VcnUnderlyingNetworkTemplate> underlyingNetworkTemplates,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
@@ -94,7 +95,7 @@ class NetworkPriorityClassifier {
         }
 
         int priorityIndex = 0;
-        for (VcnUnderlyingNetworkTemplate nwPriority : underlyingNetworkPriorities) {
+        for (VcnUnderlyingNetworkTemplate nwPriority : underlyingNetworkTemplates) {
             if (checkMatchesPriorityRule(
                     vcnContext,
                     nwPriority,
@@ -119,10 +120,32 @@ class NetworkPriorityClassifier {
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
             PersistableBundle carrierConfig) {
-        // TODO: Check Network Quality reported by metric monitors/probers.
-
         final NetworkCapabilities caps = networkRecord.networkCapabilities;
-        if (!networkPriority.allowMetered() && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)) {
+        final boolean isSelectedUnderlyingNetwork =
+                currentlySelected != null
+                        && Objects.equals(currentlySelected.network, networkRecord.network);
+
+        final int meteredMatch = networkPriority.getMetered();
+        final boolean isMetered = !caps.hasCapability(NET_CAPABILITY_NOT_METERED);
+        if (meteredMatch == MATCH_REQUIRED && !isMetered
+                || meteredMatch == MATCH_FORBIDDEN && isMetered) {
+            return false;
+        }
+
+        // Fails bandwidth requirements if either (a) less than exit threshold, or (b), not
+        // selected, but less than entry threshold
+        if (caps.getLinkUpstreamBandwidthKbps() < networkPriority.getMinExitUpstreamBandwidthKbps()
+                || (caps.getLinkUpstreamBandwidthKbps()
+                                < networkPriority.getMinEntryUpstreamBandwidthKbps()
+                        && !isSelectedUnderlyingNetwork)) {
+            return false;
+        }
+
+        if (caps.getLinkDownstreamBandwidthKbps()
+                        < networkPriority.getMinExitDownstreamBandwidthKbps()
+                || (caps.getLinkDownstreamBandwidthKbps()
+                                < networkPriority.getMinEntryDownstreamBandwidthKbps()
+                        && !isSelectedUnderlyingNetwork)) {
             return false;
         }
 
@@ -166,19 +189,19 @@ class NetworkPriorityClassifier {
         }
 
         // TODO: Move the Network Quality check to the network metric monitor framework.
-        if (networkPriority.getNetworkQuality()
-                > getWifiQuality(networkRecord, currentlySelected, carrierConfig)) {
+        if (!isWifiRssiAcceptable(networkRecord, currentlySelected, carrierConfig)) {
             return false;
         }
 
-        if (networkPriority.getSsid() != null && networkPriority.getSsid() != caps.getSsid()) {
+        if (!networkPriority.getSsids().isEmpty()
+                && !networkPriority.getSsids().contains(caps.getSsid())) {
             return false;
         }
 
         return true;
     }
 
-    private static int getWifiQuality(
+    private static boolean isWifiRssiAcceptable(
             UnderlyingNetworkRecord networkRecord,
             UnderlyingNetworkRecord currentlySelected,
             PersistableBundle carrierConfig) {
@@ -189,14 +212,14 @@ class NetworkPriorityClassifier {
 
         if (isSelectedNetwork
                 && caps.getSignalStrength() >= getWifiExitRssiThreshold(carrierConfig)) {
-            return NETWORK_QUALITY_OK;
+            return true;
         }
 
         if (caps.getSignalStrength() >= getWifiEntryRssiThreshold(carrierConfig)) {
-            return NETWORK_QUALITY_OK;
+            return true;
         }
 
-        return NETWORK_QUALITY_ANY;
+        return false;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -226,26 +249,31 @@ class NetworkPriorityClassifier {
                         .getSystemService(TelephonyManager.class)
                         .createForSubscriptionId(subId);
 
-        if (!networkPriority.getAllowedOperatorPlmnIds().isEmpty()) {
+        if (!networkPriority.getOperatorPlmnIds().isEmpty()) {
             final String plmnId = subIdSpecificTelephonyMgr.getNetworkOperator();
-            if (!networkPriority.getAllowedOperatorPlmnIds().contains(plmnId)) {
+            if (!networkPriority.getOperatorPlmnIds().contains(plmnId)) {
                 return false;
             }
         }
 
-        if (!networkPriority.getAllowedSpecificCarrierIds().isEmpty()) {
+        if (!networkPriority.getSimSpecificCarrierIds().isEmpty()) {
             final int carrierId = subIdSpecificTelephonyMgr.getSimSpecificCarrierId();
-            if (!networkPriority.getAllowedSpecificCarrierIds().contains(carrierId)) {
+            if (!networkPriority.getSimSpecificCarrierIds().contains(carrierId)) {
                 return false;
             }
         }
 
-        if (!networkPriority.allowRoaming() && !caps.hasCapability(NET_CAPABILITY_NOT_ROAMING)) {
+        final int roamingMatch = networkPriority.getRoaming();
+        final boolean isRoaming = !caps.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+        if (roamingMatch == MATCH_REQUIRED && !isRoaming
+                || roamingMatch == MATCH_FORBIDDEN && isRoaming) {
             return false;
         }
 
-        if (networkPriority.requireOpportunistic()) {
-            if (!isOpportunistic(snapshot, caps.getSubscriptionIds())) {
+        final int opportunisticMatch = networkPriority.getOpportunistic();
+        final boolean isOpportunistic = isOpportunistic(snapshot, caps.getSubscriptionIds());
+        if (opportunisticMatch == MATCH_REQUIRED) {
+            if (!isOpportunistic) {
                 return false;
             }
 
@@ -265,6 +293,8 @@ class NetworkPriorityClassifier {
                             .contains(SubscriptionManager.getActiveDataSubscriptionId())) {
                 return false;
             }
+        } else if (opportunisticMatch == MATCH_FORBIDDEN && !isOpportunistic) {
+            return false;
         }
 
         return true;
