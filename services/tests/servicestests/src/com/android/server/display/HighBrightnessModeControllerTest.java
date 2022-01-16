@@ -28,7 +28,9 @@ import static com.android.server.display.AutomaticBrightnessController
 import static com.android.server.display.HighBrightnessModeController.HBM_TRANSITION_POINT_INVALID;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -501,6 +503,24 @@ public class HighBrightnessModeControllerTest {
         verify(mInjectorMock).reportHbmStateChange(eq(displayStatsId),
             eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_OFF),
             eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_LUX_DROP));
+    }
+
+    @Test
+    public void tetHbmStats_NbmHdrNoReport() {
+        final HighBrightnessModeController hbmc = createDefaultHbm(new OffsettableClock());
+        final int displayStatsId = mDisplayUniqueId.hashCode();
+
+        hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
+        hbmc.onBrightnessChanged(DEFAULT_MIN);
+        hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/);
+        advanceTime(0);
+        assertEquals(HIGH_BRIGHTNESS_MODE_HDR, hbmc.getHighBrightnessMode());
+
+        // Verify Stats HBM_ON_HDR not report
+        verify(mInjectorMock, never()).reportHbmStateChange(eq(displayStatsId),
+            eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_HDR),
+            anyInt());
     }
 
     @Test
