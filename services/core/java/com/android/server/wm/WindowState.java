@@ -5985,4 +5985,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean isTrustedOverlay() {
         return mInputWindowHandle.isTrustedOverlay();
     }
+
+    public boolean receiveFocusFromTapOutside() {
+        return canReceiveKeys(true);
+    }
+
+    @Override
+    public void handleTapOutsideFocusOutsideSelf() {
+        // Nothing to do here since raising the other window will naturally take care of
+        // us loosing focus
+    }
+
+    @Override
+    public void handleTapOutsideFocusInsideSelf() {
+        final DisplayContent displayContent = getDisplayContent();
+        if (!displayContent.isOnTop()) {
+            displayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP, displayContent,
+                    true /* includingParents */);
+        }
+        mWmService.handleTaskFocusChange(getTask(), mActivityRecord);
+    }
 }
