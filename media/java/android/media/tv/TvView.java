@@ -486,9 +486,9 @@ public class TvView extends ViewGroup {
      *                {@code false} otherwise.
      * @hide
      */
-    public void setIAppNotificationEnabled(boolean enabled) {
+    public void setInteractiveAppNotificationEnabled(boolean enabled) {
         if (mSession != null) {
-            mSession.setIAppNotificationEnabled(enabled);
+            mSession.setInteractiveAppNotificationEnabled(enabled);
         }
     }
 

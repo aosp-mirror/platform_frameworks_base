@@ -398,8 +398,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             Slog.d(TAG, "setResumedActivity taskFrag:" + this + " + from: "
                     + mResumedActivity + " to:" + r + " reason:" + reason);
         }
+        final ActivityRecord prevR = mResumedActivity;
         mResumedActivity = r;
         mTaskSupervisor.updateTopResumedActivityIfNeeded();
+        if (r == null && prevR.mDisplayContent != null
+                && prevR.mDisplayContent.getFocusedRootTask() == null) {
+            // Only need to notify DWPC when no activity will resume.
+            prevR.mDisplayContent.onRunningActivityChanged();
+        } else if (r != null) {
+            r.mDisplayContent.onRunningActivityChanged();
+        }
     }
 
     @VisibleForTesting

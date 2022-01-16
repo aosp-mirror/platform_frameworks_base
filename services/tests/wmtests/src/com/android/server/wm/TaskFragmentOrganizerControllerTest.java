@@ -21,14 +21,17 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.testing.Assert.assertThrows;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.content.Intent;
@@ -471,6 +474,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
                 .setOrganizer(mOrganizer)
+                .setFragmentToken(mFragmentToken)
                 .build();
 
         // Mock the task to invisible
@@ -484,5 +488,39 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Verifies that event was not sent
         verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
+    }
+
+    /**
+     * Tests that a task fragment info changed event is still sent if the task is invisible only
+     * when the info changed event is because of the last activity in a task finishing.
+     */
+    @Test
+    public void testLastPendingTaskFragmentInfoChangedEventOfInvisibleTaskSent() {
+        // Create a TaskFragment with an activity, all within a parent task
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(mFragmentToken)
+                .setCreateParentTask()
+                .createActivityCount(1)
+                .build();
+        final Task parentTask = taskFragment.getTask();
+        final ActivityRecord activity = taskFragment.getTopNonFinishingActivity();
+        assertTrue(parentTask.shouldBeVisible(null));
+
+        // Dispatch pending info changed event from creating the activity
+        mController.registerOrganizer(mIOrganizer);
+        taskFragment.mTaskFragmentAppearedSent = true;
+        mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
+        mController.dispatchPendingEvents();
+
+        // Finish the activity and verify that the task is invisible
+        activity.finishing = true;
+        assertFalse(parentTask.shouldBeVisible(null));
+
+        // Verify the info changed callback still occurred despite the task being invisible
+        reset(mOrganizer);
+        mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
+        mController.dispatchPendingEvents();
+        verify(mOrganizer).onTaskFragmentInfoChanged(any());
     }
 }

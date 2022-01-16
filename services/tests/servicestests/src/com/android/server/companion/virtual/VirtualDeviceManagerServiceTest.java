@@ -71,6 +71,8 @@ public class VirtualDeviceManagerServiceTest {
     private InputController.NativeWrapper mNativeWrapperMock;
     @Mock
     private DisplayManagerInternal mDisplayManagerInternalMock;
+    @Mock
+    private VirtualDeviceImpl.PendingTrampolineCallback mPendingTrampolineCallback;
 
     @Before
     public void setUp() {
@@ -85,7 +87,8 @@ public class VirtualDeviceManagerServiceTest {
         mInputController = new InputController(new Object(), mNativeWrapperMock);
         mDeviceImpl = new VirtualDeviceImpl(mContext,
                 /* association info */ null, new Binder(), /* uid */ 0, mInputController,
-                (int associationId) -> {}, new VirtualDeviceParams.Builder().build());
+                (int associationId) -> {}, mPendingTrampolineCallback,
+                new VirtualDeviceParams.Builder().build());
     }
 
     @Test

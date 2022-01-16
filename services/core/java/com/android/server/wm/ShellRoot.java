@@ -25,14 +25,15 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMAT
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.IWindow;
 import android.view.SurfaceControl;
+import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 
@@ -135,12 +136,47 @@ public class ShellRoot {
                 ANIMATION_TYPE_WINDOW_ANIMATION);
     }
 
-    @Nullable
-    IBinder getAccessibilityWindowToken() {
-        if (mAccessibilityWindow != null) {
-            return mAccessibilityWindow.asBinder();
+    WindowInfo getWindowInfo() {
+        if (mShellRootLayer != SHELL_ROOT_LAYER_DIVIDER
+                && mShellRootLayer != SHELL_ROOT_LAYER_PIP) {
+            return null;
         }
-        return null;
+        if (mShellRootLayer == SHELL_ROOT_LAYER_DIVIDER
+                && !mDisplayContent.getDefaultTaskDisplayArea().isSplitScreenModeActivated()) {
+            return null;
+        }
+        if (mShellRootLayer == SHELL_ROOT_LAYER_PIP
+                && mDisplayContent.getDefaultTaskDisplayArea().getRootPinnedTask() == null) {
+            return null;
+        }
+        if (mAccessibilityWindow == null) {
+            return null;
+        }
+        WindowInfo windowInfo = WindowInfo.obtain();
+        windowInfo.displayId = mToken.getDisplayArea().getDisplayContent().mDisplayId;
+        windowInfo.type = mToken.windowType;
+        windowInfo.layer = mToken.getWindowLayerFromType();
+        windowInfo.token = mAccessibilityWindow.asBinder();
+        windowInfo.focused = false;
+        windowInfo.hasFlagWatchOutsideTouch = false;
+        final Rect regionRect = new Rect();
+
+
+        // DividerView
+        if (mShellRootLayer == SHELL_ROOT_LAYER_DIVIDER) {
+            windowInfo.inPictureInPicture = false;
+            mDisplayContent.getDockedDividerController().getTouchRegion(regionRect);
+            windowInfo.regionInScreen.set(regionRect);
+            windowInfo.title = "Splitscreen Divider";
+        }
+        // PipMenuView
+        if (mShellRootLayer == SHELL_ROOT_LAYER_PIP) {
+            windowInfo.inPictureInPicture = true;
+            mDisplayContent.getDefaultTaskDisplayArea().getRootPinnedTask().getBounds(regionRect);
+            windowInfo.regionInScreen.set(regionRect);
+            windowInfo.title = "Picture-in-Picture menu";
+        }
+        return windowInfo;
     }
 
     void setAccessibilityWindow(IWindow window) {
@@ -160,6 +196,10 @@ public class ShellRoot {
             } catch (RemoteException e) {
                 mAccessibilityWindow = null;
             }
+        }
+        if (mDisplayContent.mWmService.mAccessibilityController.hasCallbacks()) {
+            mDisplayContent.mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(
+                    mDisplayContent.getDisplayId());
         }
     }
 }

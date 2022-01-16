@@ -2657,16 +2657,20 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void sendAppBlockStateChangedBroadcast(String pkg, int uid, boolean blocked) {
-        try {
-            getContext().sendBroadcastAsUser(
-                    new Intent(ACTION_APP_BLOCK_STATE_CHANGED)
-                            .putExtra(NotificationManager.EXTRA_BLOCKED_STATE, blocked)
-                            .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-                            .setPackage(pkg),
-                    UserHandle.of(UserHandle.getUserId(uid)), null);
-        } catch (SecurityException e) {
-            Slog.w(TAG, "Can't notify app about app block change", e);
-        }
+        // From Android T, revoking the notification permission will cause the app to be killed.
+        // delay this broadcast so it doesn't race with that process death
+        mHandler.postDelayed(() -> {
+            try {
+                getContext().sendBroadcastAsUser(
+                        new Intent(ACTION_APP_BLOCK_STATE_CHANGED)
+                                .putExtra(NotificationManager.EXTRA_BLOCKED_STATE, blocked)
+                                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                                .setPackage(pkg),
+                        UserHandle.of(UserHandle.getUserId(uid)), null);
+            } catch (SecurityException e) {
+                Slog.w(TAG, "Can't notify app about app block change", e);
+            }
+        }, 500);
     }
 
     @Override
