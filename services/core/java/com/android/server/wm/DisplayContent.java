@@ -222,7 +222,6 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
-import android.window.DisplayWindowPolicyController;
 import android.window.IDisplayAreaOrganizer;
 import android.window.TransitionRequestInfo;
 
@@ -698,12 +697,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     boolean mDontMoveToTop;
 
     /**
-     * The policy controller of the windows that can be displayed on the virtual display.
+     * The helper of policy controller.
      *
-     * @see DisplayWindowPolicyController
+     * @see DisplayWindowPolicyControllerHelper
      */
-    @Nullable
-    DisplayWindowPolicyController mDisplayWindowPolicyController;
+    DisplayWindowPolicyControllerHelper mDwpcHelper;
 
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
@@ -2739,8 +2737,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mDisplayInfo.copyFrom(newDisplayInfo);
             }
 
-            mDisplayWindowPolicyController =
-                    displayManagerInternal.getDisplayWindowPolicyController(mDisplayId);
+            mDwpcHelper = new DisplayWindowPolicyControllerHelper(this);
         }
 
         updateBaseDisplayMetrics(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight,
@@ -3453,10 +3450,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInputMonitor.dump(pw, "  ");
         pw.println();
         mInsetsStateController.dump(prefix, pw);
-        if (mDisplayWindowPolicyController != null) {
-            pw.println();
-            mDisplayWindowPolicyController.dump(prefix, pw);
-        }
+        mDwpcHelper.dump(prefix, pw);
     }
 
     @Override
@@ -3682,6 +3676,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         getInputMonitor().setFocusedAppLw(newFocus);
         updateTouchExcludeRegion();
         return true;
+    }
+
+    /** Update the top activity and the uids of non-finishing activity */
+    void onRunningActivityChanged() {
+        mDwpcHelper.onRunningActivityChanged();
     }
 
     /** Called when the focused {@link TaskDisplayArea} on this display may have changed. */

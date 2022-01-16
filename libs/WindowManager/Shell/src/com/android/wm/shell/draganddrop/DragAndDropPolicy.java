@@ -62,6 +62,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.InstanceId;
+import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -132,6 +133,8 @@ public class DragAndDropPolicy {
         final Rect fullscreenHitRegion = new Rect(displayRegion);
         final boolean inLandscape = mSession.displayLayout.isLandscape();
         final boolean inSplitScreen = mSplitScreen != null && mSplitScreen.isSplitScreenVisible();
+        final float dividerWidth = mContext.getResources().getDimensionPixelSize(
+                R.dimen.split_divider_bar_width);
         // We allow splitting if we are already in split-screen or the running task is a standard
         // task in fullscreen mode.
         final boolean allowSplit = inSplitScreen
@@ -153,8 +156,11 @@ public class DragAndDropPolicy {
 
                 // If we have existing split regions use those bounds, otherwise split it 50/50
                 if (inSplitScreen) {
+                    // Add the divider bounds to each side since that counts for the hit region.
                     leftHitRegion.set(topOrLeftBounds);
+                    leftHitRegion.right += dividerWidth / 2;
                     rightHitRegion.set(bottomOrRightBounds);
+                    rightHitRegion.left -= dividerWidth / 2;
                 } else {
                     displayRegion.splitVertically(leftHitRegion, rightHitRegion);
                 }
@@ -170,8 +176,11 @@ public class DragAndDropPolicy {
 
                 // If we have existing split regions use those bounds, otherwise split it 50/50
                 if (inSplitScreen) {
+                    // Add the divider bounds to each side since that counts for the hit region.
                     topHitRegion.set(topOrLeftBounds);
+                    topHitRegion.bottom += dividerWidth / 2;
                     bottomHitRegion.set(bottomOrRightBounds);
+                    bottomHitRegion.top -= dividerWidth / 2;
                 } else {
                     displayRegion.splitHorizontally(topHitRegion, bottomHitRegion);
                 }

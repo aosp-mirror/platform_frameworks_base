@@ -267,6 +267,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.ScrollCaptureResponse;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
 import android.view.TaskTransitionSpec;
 import android.view.View;
@@ -2244,6 +2245,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 if ((attrChanges & (WindowManager.LayoutParams.PRIVATE_FLAGS_CHANGED)) != 0) {
                     winAnimator.setColorSpaceAgnosticLocked((win.mAttrs.privateFlags
                             & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
+                }
+                if (win.mActivityRecord != null
+                        && !displayContent.mDwpcHelper.keepActivityOnWindowFlagsChanged(
+                                win.mActivityRecord.info, flagChanges, privateFlagChanges)) {
+                    mH.sendMessage(mH.obtainMessage(H.REPARENT_TASK_TO_DEFAULT_DISPLAY,
+                            win.mActivityRecord.getTask()));
+                    Slog.w(TAG_WM, "Activity " + win.mActivityRecord + " window flag changed,"
+                            + " can't remain on display " + displayContent.getDisplayId());
+                    return 0;
                 }
             }
 
@@ -5064,6 +5074,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int ON_POINTER_DOWN_OUTSIDE_FOCUS = 62;
         public static final int LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED = 63;
         public static final int WINDOW_STATE_BLAST_SYNC_TIMEOUT = 64;
+        public static final int REPARENT_TASK_TO_DEFAULT_DISPLAY = 65;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -5378,6 +5389,15 @@ public class WindowManagerService extends IWindowManager.Stub
                         final WindowState ws = (WindowState) msg.obj;
                         Slog.i(TAG, "Blast sync timeout: " + ws);
                         ws.immediatelyNotifyBlastSync();
+                    }
+                    break;
+                }
+                case REPARENT_TASK_TO_DEFAULT_DISPLAY: {
+                    synchronized (mGlobalLock) {
+                        Task task = (Task) msg.obj;
+                        task.reparent(mRoot.getDefaultTaskDisplayArea(), true /* onTop */);
+                        // Resume focusable root task after reparenting to another display area.
+                        task.resumeNextFocusAfterReparent();
                     }
                     break;
                 }
@@ -7890,6 +7910,28 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken) {
             return WindowManagerService.this.shouldRestoreImeVisibility(imeTargetWindowToken);
+        }
+
+        @Override
+        public void addTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay) {
+            synchronized (mGlobalLock) {
+                final Task task = mRoot.getRootTask(taskId);
+                if (task == null) {
+                    throw new IllegalArgumentException("no task with taskId" + taskId);
+                }
+                task.addOverlay(overlay);
+            }
+        }
+
+        @Override
+        public void removeTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay) {
+            synchronized (mGlobalLock) {
+                final Task task = mRoot.getRootTask(taskId);
+                if (task == null) {
+                    throw new IllegalArgumentException("no task with taskId" + taskId);
+                }
+                task.removeOverlay(overlay);
+            }
         }
     }
 

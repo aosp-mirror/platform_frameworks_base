@@ -84,11 +84,9 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
     }
 
     @Override
-    public void onRunningAppsChanged(int[] runningUids) {
+    public void onRunningAppsChanged(ArraySet<Integer> runningUids) {
         mRunningUids.clear();
-        for (int i = 0; i < runningUids.length; i++) {
-            mRunningUids.add(runningUids[i]);
-        }
+        mRunningUids.addAll(runningUids);
     }
 
     /**

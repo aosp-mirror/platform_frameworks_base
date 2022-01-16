@@ -19,6 +19,7 @@ package android.window;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
+import android.util.ArraySet;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -81,8 +82,10 @@ public abstract class DisplayWindowPolicyController {
 
     /**
      * This is called when the apps that contains running activities on the display has changed.
+     * The running activities refer to the non-finishing activities regardless of they are running
+     * in a process.
      */
-    public void onRunningAppsChanged(int[] runningUids) {}
+    public void onRunningAppsChanged(ArraySet<Integer> runningUids) {}
 
     /** Dump debug data */
     public void dump(String prefix, final PrintWriter pw) {

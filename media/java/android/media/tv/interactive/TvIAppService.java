@@ -75,45 +75,48 @@ public abstract class TvIAppService extends Service {
     // TODO: cleanup and unhide APIs.
 
     /**
-     * This is the interface name that a service implementing a TV IApp service should say that it
-     * supports -- that is, this is the action it uses for its intent filter. To be supported, the
-     * service must also require the android.Manifest.permission#BIND_TV_IAPP permission so
-     * that other applications cannot abuse it.
+     * This is the interface name that a service implementing a TV Interactive App service should
+     * say that it supports -- that is, this is the action it uses for its intent filter. To be
+     * supported, the service must also require the
+     * android.Manifest.permission#BIND_TV_INTERACTIVE_APP permission so that other applications
+     * cannot abuse it.
      */
-    public static final String SERVICE_INTERFACE = "android.media.tv.interactive.TvIAppService";
+    public static final String SERVICE_INTERFACE =
+            "android.media.tv.interactive.TvIAppService";
 
     /**
-     * Name under which a TvIAppService component publishes information about itself. This meta-data
-     * must reference an XML resource containing an
-     * <code>&lt;{@link android.R.styleable#TvIAppService tv-iapp}&gt;</code>
+     * Name under which a TvIAppService component publishes information about itself. This
+     * meta-data must reference an XML resource containing an
+     * <code>&lt;{@link android.R.styleable#TvIAppService tv-interactive-app}&gt;</code>
      * tag.
      */
     public static final String SERVICE_META_DATA = "android.media.tv.interactive.app";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef(prefix = "IAPP_SERVICE_COMMAND_TYPE_", value = {
-            IAPP_SERVICE_COMMAND_TYPE_TUNE,
-            IAPP_SERVICE_COMMAND_TYPE_TUNE_NEXT,
-            IAPP_SERVICE_COMMAND_TYPE_TUNE_PREV,
-            IAPP_SERVICE_COMMAND_TYPE_STOP,
-            IAPP_SERVICE_COMMAND_TYPE_SET_STREAM_VOLUME,
-            IAPP_SERVICE_COMMAND_TYPE_SELECT_TRACK
+    @StringDef(prefix = "INTERACTIVE_APP_SERVICE_COMMAND_TYPE_", value = {
+            INTERACTIVE_APP_SERVICE_COMMAND_TYPE_TUNE,
+            INTERACTIVE_APP_SERVICE_COMMAND_TYPE_TUNE_NEXT,
+            INTERACTIVE_APP_SERVICE_COMMAND_TYPE_TUNE_PREV,
+            INTERACTIVE_APP_SERVICE_COMMAND_TYPE_STOP,
+            INTERACTIVE_APP_SERVICE_COMMAND_TYPE_SET_STREAM_VOLUME,
+            INTERACTIVE_APP_SERVICE_COMMAND_TYPE_SELECT_TRACK
     })
-    public @interface IAppServiceCommandType {}
+    public @interface InteractiveAppServiceCommandType {}
 
     /** @hide */
-    public static final String IAPP_SERVICE_COMMAND_TYPE_TUNE = "tune";
+    public static final String INTERACTIVE_APP_SERVICE_COMMAND_TYPE_TUNE = "tune";
     /** @hide */
-    public static final String IAPP_SERVICE_COMMAND_TYPE_TUNE_NEXT = "tune_next";
+    public static final String INTERACTIVE_APP_SERVICE_COMMAND_TYPE_TUNE_NEXT = "tune_next";
     /** @hide */
-    public static final String IAPP_SERVICE_COMMAND_TYPE_TUNE_PREV = "tune_previous";
+    public static final String INTERACTIVE_APP_SERVICE_COMMAND_TYPE_TUNE_PREV = "tune_previous";
     /** @hide */
-    public static final String IAPP_SERVICE_COMMAND_TYPE_STOP = "stop";
+    public static final String INTERACTIVE_APP_SERVICE_COMMAND_TYPE_STOP = "stop";
     /** @hide */
-    public static final String IAPP_SERVICE_COMMAND_TYPE_SET_STREAM_VOLUME = "set_stream_volume";
+    public static final String INTERACTIVE_APP_SERVICE_COMMAND_TYPE_SET_STREAM_VOLUME =
+            "set_stream_volume";
     /** @hide */
-    public static final String IAPP_SERVICE_COMMAND_TYPE_SELECT_TRACK = "select_track";
+    public static final String INTERACTIVE_APP_SERVICE_COMMAND_TYPE_SELECT_TRACK = "select_track";
     /** @hide */
     public static final String COMMAND_PARAMETER_KEY_CHANNEL_URI = "command_channel_uri";
     /** @hide */
@@ -129,29 +132,29 @@ public abstract class TvIAppService extends Service {
             "command_track_select_mode";
 
     private final Handler mServiceHandler = new ServiceHandler();
-    private final RemoteCallbackList<ITvIAppServiceCallback> mCallbacks =
+    private final RemoteCallbackList<ITvInteractiveAppServiceCallback> mCallbacks =
             new RemoteCallbackList<>();
 
     /** @hide */
     @Override
     public final IBinder onBind(Intent intent) {
-        ITvIAppService.Stub tvIAppServiceBinder = new ITvIAppService.Stub() {
+        ITvInteractiveAppService.Stub tvIAppServiceBinder = new ITvInteractiveAppService.Stub() {
             @Override
-            public void registerCallback(ITvIAppServiceCallback cb) {
+            public void registerCallback(ITvInteractiveAppServiceCallback cb) {
                 if (cb != null) {
                     mCallbacks.register(cb);
                 }
             }
 
             @Override
-            public void unregisterCallback(ITvIAppServiceCallback cb) {
+            public void unregisterCallback(ITvInteractiveAppServiceCallback cb) {
                 if (cb != null) {
                     mCallbacks.unregister(cb);
                 }
             }
 
             @Override
-            public void createSession(InputChannel channel, ITvIAppSessionCallback cb,
+            public void createSession(InputChannel channel, ITvInteractiveAppSessionCallback cb,
                     String iAppServiceId, int type) {
                 if (cb == null) {
                     return;
@@ -184,7 +187,7 @@ public abstract class TvIAppService extends Service {
     }
 
     /**
-     * Prepares TV IApp service for the given type.
+     * Prepares TV Interactive App service for the given type.
      * @hide
      */
     public void onPrepare(int type) {
@@ -211,11 +214,11 @@ public abstract class TvIAppService extends Service {
     /**
      * Returns a concrete implementation of {@link Session}.
      *
-     * <p>May return {@code null} if this TV IApp service fails to create a session for some
-     * reason.
+     * <p>May return {@code null} if this TV Interactive App service fails to create a session for
+     * some reason.
      *
-     * @param iAppServiceId The ID of the TV IApp associated with the session.
-     * @param type The type of the TV IApp associated with the session.
+     * @param iAppServiceId The ID of the TV Interactive App associated with the session.
+     * @param type The type of the TV Interactive App associated with the session.
      * @hide
      */
     @Nullable
@@ -229,7 +232,8 @@ public abstract class TvIAppService extends Service {
      * @param state the current state
      * @hide
      */
-    public final void notifyStateChanged(int type, @TvIAppManager.TvIAppRteState int state) {
+    public final void notifyStateChanged(
+            int type, @TvIAppManager.TvInteractiveAppRteState int state) {
         mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_RTE_STATE_CHANGED,
                 type, state).sendToTarget();
     }
@@ -243,7 +247,7 @@ public abstract class TvIAppService extends Service {
 
         private final Object mLock = new Object();
         // @GuardedBy("mLock")
-        private ITvIAppSessionCallback mSessionCallback;
+        private ITvInteractiveAppSessionCallback mSessionCallback;
         // @GuardedBy("mLock")
         private final List<Runnable> mPendingActions = new ArrayList<>();
 
@@ -276,7 +280,7 @@ public abstract class TvIAppService extends Service {
          * <p>By default, the media view is disabled. Must be called explicitly after the
          * session is created to enable the media view.
          *
-         * <p>The TV IApp service can disable its media view when needed.
+         * <p>The TV Interactive App service can disable its media view when needed.
          *
          * @param enable {@code true} if you want to enable the media view. {@code false}
          *            otherwise.
@@ -304,14 +308,14 @@ public abstract class TvIAppService extends Service {
          * Starts TvIAppService session.
          * @hide
          */
-        public void onStartIApp() {
+        public void onStartInteractiveApp() {
         }
 
         /**
          * Stops TvIAppService session.
          * @hide
          */
-        public void onStopIApp() {
+        public void onStopInteractiveApp() {
         }
 
         /**
@@ -367,9 +371,9 @@ public abstract class TvIAppService extends Service {
         /**
          * Called when the application sets the surface.
          *
-         * <p>The TV IApp service should render interactive app UI onto the given surface. When
-         * called with {@code null}, the IApp service should immediately free any references to the
-         * currently set surface and stop using it.
+         * <p>The TV Interactive App service should render interactive app UI onto the given
+         * surface. When called with {@code null}, the Interactive App service should immediately
+         * free any references to the currently set surface and stop using it.
          *
          * @param surface The surface to be used for interactive app UI rendering. Can be
          *                {@code null}.
@@ -394,8 +398,8 @@ public abstract class TvIAppService extends Service {
          *
          * <p>This is always called at least once when the session is created regardless of whether
          * the media view is enabled or not. The media view container size is the same as the
-         * containing {@link TvIAppView}. Note that the size of the underlying surface can be
-         * different if the surface was changed by calling {@link #layoutSurface}.
+         * containing {@link TvInteractiveAppView}. Note that the size of the underlying surface can
+         * be different if the surface was changed by calling {@link #layoutSurface}.
          *
          * @param width The width of the media view.
          * @param height The height of the media view.
@@ -624,7 +628,8 @@ public abstract class TvIAppService extends Service {
          * @param cmdType type of the specific command
          * @param parameters parameters of the specific command
          */
-        public void requestCommand(@IAppServiceCommandType String cmdType, Bundle parameters) {
+        public void requestCommand(
+                @InteractiveAppServiceCommandType String cmdType, Bundle parameters) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -777,12 +782,12 @@ public abstract class TvIAppService extends Service {
             });
         }
 
-        void startIApp() {
-            onStartIApp();
+        void startInteractiveApp() {
+            onStartInteractiveApp();
         }
 
-        void stopIApp() {
-            onStopIApp();
+        void stopInteractiveApp() {
+            onStopInteractiveApp();
         }
 
         void createBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
@@ -898,7 +903,8 @@ public abstract class TvIAppService extends Service {
          * Notifies when the session state is changed.
          * @param state the current state.
          */
-        public void notifySessionStateChanged(@TvIAppManager.TvIAppRteState int state) {
+        public void notifySessionStateChanged(
+                @TvIAppManager.TvInteractiveAppRteState int state) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -977,7 +983,7 @@ public abstract class TvIAppService extends Service {
             return TvIAppManager.Session.DISPATCH_NOT_HANDLED;
         }
 
-        private void initialize(ITvIAppSessionCallback callback) {
+        private void initialize(ITvInteractiveAppSessionCallback callback) {
             synchronized (mLock) {
                 mSessionCallback = callback;
                 for (Runnable runnable : mPendingActions) {
@@ -1087,8 +1093,8 @@ public abstract class TvIAppService extends Service {
             if (DEBUG) Log.d(TAG, "relayoutMediaView(" + frame + ")");
             if (mMediaFrame == null || mMediaFrame.width() != frame.width()
                     || mMediaFrame.height() != frame.height()) {
-                // Note: relayoutMediaView is called whenever TvIAppView's layout is changed
-                // regardless of setMediaViewEnabled.
+                // Note: relayoutMediaView is called whenever TvInteractiveAppView's layout is
+                // changed regardless of setMediaViewEnabled.
                 onMediaViewSizeChanged(frame.right - frame.left, frame.bottom - frame.top);
             }
             mMediaFrame = frame;
@@ -1159,31 +1165,32 @@ public abstract class TvIAppService extends Service {
     }
 
     /**
-     * Implements the internal ITvIAppSession interface.
+     * Implements the internal ITvInteractiveAppSession interface.
      * @hide
      */
-    public static class ITvIAppSessionWrapper extends ITvIAppSession.Stub {
-        // TODO: put ITvIAppSessionWrapper in a separate Java file
+    public static class ITvInteractiveAppSessionWrapper extends ITvInteractiveAppSession.Stub {
+        // TODO: put ITvInteractiveAppSessionWrapper in a separate Java file
         private final Session mSessionImpl;
         private InputChannel mChannel;
-        private TvIAppEventReceiver mReceiver;
+        private TvInteractiveAppEventReceiver mReceiver;
 
-        public ITvIAppSessionWrapper(Context context, Session mSessionImpl, InputChannel channel) {
+        public ITvInteractiveAppSessionWrapper(
+                Context context, Session mSessionImpl, InputChannel channel) {
             this.mSessionImpl = mSessionImpl;
             mChannel = channel;
             if (channel != null) {
-                mReceiver = new TvIAppEventReceiver(channel, context.getMainLooper());
+                mReceiver = new TvInteractiveAppEventReceiver(channel, context.getMainLooper());
             }
         }
 
         @Override
-        public void startIApp() {
-            mSessionImpl.startIApp();
+        public void startInteractiveApp() {
+            mSessionImpl.startInteractiveApp();
         }
 
         @Override
-        public void stopIApp() {
-            mSessionImpl.stopIApp();
+        public void stopInteractiveApp() {
+            mSessionImpl.stopInteractiveApp();
         }
 
         @Override
@@ -1292,8 +1299,8 @@ public abstract class TvIAppService extends Service {
             mSessionImpl.removeMediaView(true);
         }
 
-        private final class TvIAppEventReceiver extends InputEventReceiver {
-            TvIAppEventReceiver(InputChannel inputChannel, Looper looper) {
+        private final class TvInteractiveAppEventReceiver extends InputEventReceiver {
+            TvInteractiveAppEventReceiver(InputChannel inputChannel, Looper looper) {
                 super(inputChannel, looper);
             }
 
@@ -1307,7 +1314,8 @@ public abstract class TvIAppService extends Service {
 
                 int handled = mSessionImpl.dispatchInputEvent(event, this);
                 if (handled != TvIAppManager.Session.DISPATCH_IN_PROGRESS) {
-                    finishInputEvent(event, handled == TvIAppManager.Session.DISPATCH_HANDLED);
+                    finishInputEvent(
+                            event, handled == TvIAppManager.Session.DISPATCH_HANDLED);
                 }
             }
         }
@@ -1337,7 +1345,8 @@ public abstract class TvIAppService extends Service {
                 case DO_CREATE_SESSION: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     InputChannel channel = (InputChannel) args.arg1;
-                    ITvIAppSessionCallback cb = (ITvIAppSessionCallback) args.arg2;
+                    ITvInteractiveAppSessionCallback cb =
+                            (ITvInteractiveAppSessionCallback) args.arg2;
                     String iAppServiceId = (String) args.arg3;
                     int type = (int) args.arg4;
                     args.recycle();
@@ -1351,8 +1360,8 @@ public abstract class TvIAppService extends Service {
                         }
                         return;
                     }
-                    ITvIAppSession stub = new ITvIAppSessionWrapper(
-                            TvIAppService.this, sessionImpl, channel);
+                    ITvInteractiveAppSession stub = new ITvInteractiveAppSessionWrapper(
+                            android.media.tv.interactive.TvIAppService.this, sessionImpl, channel);
 
                     SomeArgs someArgs = SomeArgs.obtain();
                     someArgs.arg1 = sessionImpl;
@@ -1365,8 +1374,9 @@ public abstract class TvIAppService extends Service {
                 case DO_NOTIFY_SESSION_CREATED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     Session sessionImpl = (Session) args.arg1;
-                    ITvIAppSession stub = (ITvIAppSession) args.arg2;
-                    ITvIAppSessionCallback cb = (ITvIAppSessionCallback) args.arg3;
+                    ITvInteractiveAppSession stub = (ITvInteractiveAppSession) args.arg2;
+                    ITvInteractiveAppSessionCallback cb =
+                            (ITvInteractiveAppSessionCallback) args.arg3;
                     try {
                         cb.onSessionCreated(stub);
                     } catch (RemoteException e) {

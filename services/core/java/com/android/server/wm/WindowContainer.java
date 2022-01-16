@@ -85,6 +85,7 @@ import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceSession;
 import android.view.TaskTransitionSpec;
@@ -312,6 +313,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     private final List<WindowContainerListener> mListeners = new ArrayList<>();
 
+    private OverlayHost mOverlayHost;
+
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
         mTransitionController = mWmService.mAtmService.getTransitionController();
@@ -341,6 +344,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         super.onConfigurationChanged(newParentConfig);
         updateSurfacePositionNonOrganized();
         scheduleAnimation();
+        if (mOverlayHost != null) {
+            mOverlayHost.dispatchConfigurationChanged(getConfiguration());
+        }
     }
 
     void reparent(WindowContainer newParent, int position) {
@@ -487,6 +493,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 t.reparent(sc, mSurfaceControl);
             }
         }
+
+        if (mOverlayHost != null) {
+            mOverlayHost.setParent(t, mSurfaceControl);
+        }
+
         scheduleAnimation();
     }
 
@@ -631,6 +642,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             setSurfaceControl(null);
             mLastSurfacePosition.set(0, 0);
             scheduleAnimation();
+        }
+        if (mOverlayHost != null) {
+            mOverlayHost.release();
+            mOverlayHost = null;
         }
 
         // This must happen after updating the surface so that sync transactions can be handled
@@ -2308,6 +2323,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 wc.assignLayer(t, layer++);
             }
         }
+        if (mOverlayHost != null) {
+            mOverlayHost.setLayer(t, layer++);
+        }
     }
 
     void assignChildLayers() {
@@ -3569,5 +3587,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     private interface IAnimationStarter {
         void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
                 @AnimationType int type, @Nullable AnimationAdapter snapshotAnim);
+    }
+
+    void addOverlay(SurfaceControlViewHost.SurfacePackage overlay) {
+        if (mOverlayHost == null) {
+            mOverlayHost = new OverlayHost(mWmService);
+        }
+        mOverlayHost.addOverlay(overlay, mSurfaceControl);
+    }
+
+    void removeOverlay(SurfaceControlViewHost.SurfacePackage overlay) {
+        if (mOverlayHost != null && !mOverlayHost.removeOverlay(overlay)) {
+            mOverlayHost.release();
+            mOverlayHost = null;
+        }
     }
 }

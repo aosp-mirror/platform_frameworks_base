@@ -66,6 +66,7 @@ struct SensorOffsets
     jfieldID    flags;
     //methods
     jmethodID   setType;
+    jmethodID   setId;
     jmethodID   setUuid;
     jmethodID   init;
 } gSensorOffsets;
@@ -112,6 +113,7 @@ nativeClassInit (JNIEnv *_env, jclass _this)
     sensorOffsets.flags = GetFieldIDOrDie(_env,sensorClass, "mFlags", "I");
 
     sensorOffsets.setType = GetMethodIDOrDie(_env,sensorClass, "setType", "(I)Z");
+    sensorOffsets.setId = GetMethodIDOrDie(_env,sensorClass, "setId", "(I)V");
     sensorOffsets.setUuid = GetMethodIDOrDie(_env,sensorClass, "setUuid", "(JJ)V");
     sensorOffsets.init = GetMethodIDOrDie(_env,sensorClass, "<init>", "()V");
 
@@ -188,9 +190,10 @@ translateNativeSensorToJavaSensor(JNIEnv *env, jobject sensor, const Sensor& nat
             env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
         }
 
-        // TODO(b/29547335): Rename "setUuid" method to "setId".
-        int64_t id = nativeSensor.getId();
-        env->CallVoidMethod(sensor, sensorOffsets.setUuid, id, 0);
+        int32_t id = nativeSensor.getId();
+        env->CallVoidMethod(sensor, sensorOffsets.setId, id);
+        Sensor::uuid_t uuid = nativeSensor.getUuid();
+        env->CallVoidMethod(sensor, sensorOffsets.setUuid, id, uuid.i64[0], uuid.i64[1]);
     }
     return sensor;
 }

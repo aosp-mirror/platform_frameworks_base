@@ -735,8 +735,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onTracksChanged(mSession, tracks);
-                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
-                        mSession.getIAppSession().notifyTracksChanged(tracks);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyTracksChanged(tracks);
                     }
                 }
             });
@@ -747,8 +748,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onTrackSelected(mSession, type, trackId);
-                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
-                        mSession.getIAppSession().notifyTrackSelected(type, trackId);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyTrackSelected(type, trackId);
                     }
                 }
             });
@@ -768,8 +770,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onVideoAvailable(mSession);
-                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
-                        mSession.getIAppSession().notifyVideoAvailable();
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyVideoAvailable();
                     }
                 }
             });
@@ -780,8 +783,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onVideoUnavailable(mSession, reason);
-                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
-                        mSession.getIAppSession().notifyVideoUnavailable(reason);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyVideoUnavailable(reason);
                     }
                 }
             });
@@ -792,8 +796,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onContentAllowed(mSession);
-                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
-                        mSession.getIAppSession().notifyContentAllowed();
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyContentAllowed();
                     }
                 }
             });
@@ -804,8 +809,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onContentBlocked(mSession, rating);
-                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
-                        mSession.getIAppSession().notifyContentBlocked(rating);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyContentBlocked(rating);
                     }
                 }
             });
@@ -871,8 +877,9 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onTuned(mSession, channelUri);
-                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
-                        mSession.getIAppSession().notifyTuned(channelUri);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyTuned(channelUri);
                     }
                 }
             });
@@ -903,8 +910,9 @@ public final class TvInputManager {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        if (mSession.getIAppSession() != null) {
-                            mSession.getIAppSession().notifyBroadcastInfoResponse(response);
+                        if (mSession.getInteractiveAppSession() != null) {
+                            mSession.getInteractiveAppSession()
+                                    .notifyBroadcastInfoResponse(response);
                         }
                     }
                 });
@@ -916,8 +924,8 @@ public final class TvInputManager {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        if (mSession.getIAppSession() != null) {
-                            mSession.getIAppSession().notifyAdResponse(response);
+                        if (mSession.getInteractiveAppSession() != null) {
+                            mSession.getInteractiveAppSession().notifyAdResponse(response);
                         }
                     }
                 });
@@ -2265,12 +2273,12 @@ public final class TvInputManager {
             mSessionCallbackRecordMap = sessionCallbackRecordMap;
         }
 
-        public TvIAppManager.Session getIAppSession() {
+        public TvIAppManager.Session getInteractiveAppSession() {
             return mIAppSession;
         }
 
-        public void setIAppSession(TvIAppManager.Session IAppSession) {
-            this.mIAppSession = IAppSession;
+        public void setInteractiveAppSession(TvIAppManager.Session iAppSession) {
+            this.mIAppSession = iAppSession;
         }
 
         /**
@@ -2531,13 +2539,13 @@ public final class TvInputManager {
          *                {@code false} otherwise.
          * @hide
          */
-        public void setIAppNotificationEnabled(boolean enabled) {
+        public void setInteractiveAppNotificationEnabled(boolean enabled) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
             try {
-                mService.setIAppNotificationEnabled(mToken, enabled, mUserId);
+                mService.setInteractiveAppNotificationEnabled(mToken, enabled, mUserId);
                 mIAppNotificationEnabled = enabled;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();

@@ -1180,7 +1180,7 @@ public abstract class TvInputService extends Service {
          * @param enabled {@code true} to enable, {@code false} to disable.
          * @hide
          */
-        public void onSetIAppNotificationEnabled(boolean enabled) {
+        public void onSetInteractiveAppNotificationEnabled(boolean enabled) {
         }
 
         /**
@@ -1532,10 +1532,10 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link #onSetIAppNotificationEnabled}.
+         * Calls {@link #onSetInteractiveAppNotificationEnabled}.
          */
-        void setIAppNotificationEnabled(boolean enabled) {
-            onSetIAppNotificationEnabled(enabled);
+        void setInteractiveAppNotificationEnabled(boolean enabled) {
+            onSetInteractiveAppNotificationEnabled(enabled);
         }
 
         /**

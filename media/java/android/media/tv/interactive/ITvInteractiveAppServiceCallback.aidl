@@ -17,10 +17,10 @@
 package android.media.tv.interactive;
 
 /**
- * Helper interface for ITvIAppService to allow the TvIAppService to notify the
+ * Helper interface for ITvInteractiveAppService to allow the TvIAppService to notify the
  * TvIAppManagerService.
  * @hide
  */
-oneway interface ITvIAppServiceCallback {
+oneway interface ITvInteractiveAppServiceCallback {
     void onStateChanged(int type, int state);
 }

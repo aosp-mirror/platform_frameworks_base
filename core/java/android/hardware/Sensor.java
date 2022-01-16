@@ -22,6 +22,8 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.input.InputSensorInfo;
 import android.os.Build;
 
+import java.util.UUID;
+
 /**
  * Class representing a sensor. Use {@link SensorManager#getSensorList} to get
  * the list of available sensors. For more information about Android sensors,
@@ -925,6 +927,7 @@ public final class Sensor {
     @UnsupportedAppUsage
     private int     mFlags;
     private int     mId;
+    private UUID    mUuid;
 
     Sensor() {
     }
@@ -951,6 +954,8 @@ public final class Sensor {
         this.mMaxDelay = sensorInfo.getMaxDelay();
         this.mFlags = sensorInfo.getFlags();
         this.mId = sensorInfo.getId();
+        // The UUID is never specified when creating a sensor from Input manager
+        this.mUuid = new UUID((long) this.mId, 0);
     }
 
     /**
@@ -1040,11 +1045,9 @@ public final class Sensor {
     }
 
     /**
-     * Do not use.
-     *
-     * This method throws an UnsupportedOperationException.
-     *
-     * Use getId() if you want a unique ID.
+     * Reserved for system and audio servers.
+     * When called from an unauthorized context, the UUID will contain the
+     * sensor ID in the MSB and 0 in the LSB.
      *
      * @see getId
      *
@@ -1052,7 +1055,7 @@ public final class Sensor {
      */
     @SystemApi
     public java.util.UUID getUuid() {
-        throw new UnsupportedOperationException();
+        return mUuid;
     }
 
     /**
@@ -1286,17 +1289,24 @@ public final class Sensor {
     }
 
     /**
-     * Sets the ID associated with the sensor.
+     * Sets the UUID associated with the sensor.
      *
-     * The method name is misleading; while this ID is based on the UUID,
-     * we do not pass in the actual UUID.
+     * NOTE: to be used only by native bindings in SensorManager.
+     *
+     * @see #getUuid
+     */
+    private void setUuid(long msb, long lsb) {
+        mUuid = new UUID(msb, lsb);
+    }
+
+    /**
+     * Sets the ID associated with the sensor.
      *
      * NOTE: to be used only by native bindings in SensorManager.
      *
      * @see #getId
      */
-    private void setUuid(long msb, long lsb) {
-        // TODO(b/29547335): Rename this method to setId.
-        mId = (int) msb;
+    private void setId(int id) {
+        mId = id;
     }
 }

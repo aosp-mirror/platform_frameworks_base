@@ -1124,6 +1124,8 @@ public class ImageReader implements AutoCloseable {
     private class SurfaceImage extends android.media.Image {
         public SurfaceImage(int format) {
             mFormat = format;
+            mHardwareBufferFormat = ImageReader.this.mHardwareBufferFormat;
+            mDataSpace = ImageReader.this.mDataSpace;
         }
 
         SurfaceImage(int hardwareBufferFormat, long dataSpace) {
@@ -1226,6 +1228,12 @@ public class ImageReader implements AutoCloseable {
         public HardwareBuffer getHardwareBuffer() {
             throwISEIfImageIsInvalid();
             return nativeGetHardwareBuffer();
+        }
+
+        @Override
+        public long getDataSpace() {
+            throwISEIfImageIsInvalid();
+            return mDataSpace;
         }
 
         @Override

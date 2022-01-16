@@ -155,7 +155,6 @@ import com.android.net.module.util.BinderUtils;
 import com.android.net.module.util.CollectionUtils;
 import com.android.net.module.util.NetworkStatsUtils;
 import com.android.net.module.util.PermissionUtils;
-import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 
 import java.io.File;
@@ -208,6 +207,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final int DEFAULT_PERFORM_POLL_DELAY_MS = 1000;
 
     private static final String TAG_NETSTATS_ERROR = "netstats_error";
+
+    /**
+     * EventLog tags used when logging into the event log. Note the values must be sync with
+     * frameworks/base/services/core/java/com/android/server/EventLogTags.logtags to get correct
+     * name translation.
+      */
+    private static final int LOG_TAG_NETSTATS_MOBILE_SAMPLE = 51100;
+    private static final int LOG_TAG_NETSTATS_WIFI_SAMPLE = 51101;
 
     private final Context mContext;
     private final NetworkStatsFactory mStatsFactory;
@@ -1624,7 +1631,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         xtTotal = mXtRecorder.getTotalSinceBootLocked(template);
         uidTotal = mUidRecorder.getTotalSinceBootLocked(template);
 
-        EventLogTags.writeNetstatsMobileSample(
+        EventLog.writeEvent(LOG_TAG_NETSTATS_MOBILE_SAMPLE,
                 devTotal.rxBytes, devTotal.rxPackets, devTotal.txBytes, devTotal.txPackets,
                 xtTotal.rxBytes, xtTotal.rxPackets, xtTotal.txBytes, xtTotal.txPackets,
                 uidTotal.rxBytes, uidTotal.rxPackets, uidTotal.txBytes, uidTotal.txPackets,
@@ -1636,7 +1643,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         xtTotal = mXtRecorder.getTotalSinceBootLocked(template);
         uidTotal = mUidRecorder.getTotalSinceBootLocked(template);
 
-        EventLogTags.writeNetstatsWifiSample(
+        EventLog.writeEvent(LOG_TAG_NETSTATS_WIFI_SAMPLE,
                 devTotal.rxBytes, devTotal.rxPackets, devTotal.txBytes, devTotal.txPackets,
                 xtTotal.rxBytes, xtTotal.rxPackets, xtTotal.txBytes, xtTotal.txPackets,
                 uidTotal.rxBytes, uidTotal.rxPackets, uidTotal.txBytes, uidTotal.txPackets,

@@ -23,6 +23,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.Activity;
+import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.content.Context;
 import android.graphics.Point;
@@ -33,15 +35,19 @@ import android.hardware.input.VirtualKeyboard;
 import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualTouchscreen;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.view.Surface;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.Executor;
 
 /**
  * System level service for managing virtual devices.
@@ -126,6 +132,49 @@ public final class VirtualDeviceManager {
         private VirtualDevice(Context context, IVirtualDevice virtualDevice) {
             mContext = context.getApplicationContext();
             mVirtualDevice = virtualDevice;
+        }
+
+        /**
+         * Launches a given pending intent on the give display ID.
+         *
+         * @param displayId The display to launch the pending intent on. This display must be
+         *   created from this virtual device.
+         * @param pendingIntent The pending intent to be launched. If the intent is an activity
+         *   intent, the activity will be started on the virtual display using
+         *   {@link android.app.ActivityOptions#setLaunchDisplayId}. If the intent is a service or
+         *   broadcast intent, an attempt will be made to catch activities started as a result of
+         *   sending the pending intent and move them to the given display.
+         * @param executor The executor to run {@code launchCallback} on.
+         * @param launchCallback Callback that is called when the pending intent launching is
+         *   complete.
+         *
+         * @hide
+         */
+        public void launchPendingIntent(
+                int displayId,
+                @NonNull PendingIntent pendingIntent,
+                @NonNull Executor executor,
+                @NonNull LaunchCallback launchCallback) {
+            try {
+                mVirtualDevice.launchPendingIntent(
+                        displayId,
+                        pendingIntent,
+                        new ResultReceiver(new Handler(Looper.myLooper())) {
+                            @Override
+                            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                                super.onReceiveResult(resultCode, resultData);
+                                executor.execute(() -> {
+                                    if (resultCode == Activity.RESULT_OK) {
+                                        launchCallback.onLaunchSuccess();
+                                    } else {
+                                        launchCallback.onLaunchFailed();
+                                    }
+                                });
+                            }
+                        });
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
         }
 
         /**
@@ -298,5 +347,23 @@ public final class VirtualDeviceManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Callback for launching pending intents on the virtual device.
+     *
+     * @hide
+     */
+    // TODO(b/194949534): Unhide this API
+    public interface LaunchCallback {
+        /**
+         * Called when the pending intent launched successfully.
+         */
+        void onLaunchSuccess();
+
+        /**
+         * Called when the pending intent failed to launch.
+         */
+        void onLaunchFailed();
     }
 }
