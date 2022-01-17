@@ -31,6 +31,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_B
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IMMERSIVE_MODE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
@@ -304,6 +305,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                         allowSystemGestureIgnoringBarVisibility())
                 .setFlag(SYSUI_STATE_SCREEN_PINNING,
                         ActivityManagerWrapper.getInstance().isScreenPinningActive())
+                .setFlag(SYSUI_STATE_IMMERSIVE_MODE, isImmersiveMode())
                 .commitUpdate(mDisplayId);
     }
 
@@ -443,6 +445,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     private boolean allowSystemGestureIgnoringBarVisibility() {
         return mBehavior != BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+    }
+
+    private boolean isImmersiveMode() {
+        return mBehavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
     }
 
     @Override
