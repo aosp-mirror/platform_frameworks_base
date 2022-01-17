@@ -1464,29 +1464,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private static final class MethodCallback extends IInputSessionCallback.Stub {
-        private final InputMethodManagerService mParentIMMS;
-        private final IInputMethod mMethod;
-        private final InputChannel mChannel;
-
-        MethodCallback(InputMethodManagerService imms, IInputMethod method,
-                InputChannel channel) {
-            mParentIMMS = imms;
-            mMethod = method;
-            mChannel = channel;
-        }
-
-        @Override
-        public void sessionCreated(IInputMethodSession session) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                mParentIMMS.onSessionCreated(mMethod, session, mChannel);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
     private static final class UserSwitchHandlerTask implements Runnable {
         final InputMethodManagerService mService;
 
@@ -2607,7 +2584,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             IInputMethod curMethod = getCurMethodLocked();
             executeOrSendMessage(curMethod, mCaller.obtainMessageOOO(
                     MSG_CREATE_SESSION, curMethod, channels[1],
-                    new MethodCallback(this, curMethod, channels[0])));
+                    new IInputSessionCallback.Stub() {
+                        @Override
+                        public void sessionCreated(IInputMethodSession session) {
+                            final long ident = Binder.clearCallingIdentity();
+                            try {
+                                onSessionCreated(curMethod, session, channels[0]);
+                            } finally {
+                                Binder.restoreCallingIdentity(ident);
+                            }
+                        }
+                    }));
         }
     }
 
