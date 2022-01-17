@@ -478,10 +478,15 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int FLAG_IS_GENERATED_GESTURE = 0x8;
 
     /**
-     * This flag associated with {@link #ACTION_POINTER_UP}, this indicates that the pointer
-     * has been canceled. Typically this is used for palm event when the user has accidental
-     * touches.
-     * @hide
+     * This flag is only set for events with {@link #ACTION_POINTER_UP} and {@link #ACTION_CANCEL}.
+     * It indicates that the pointer going up was an unintentional user touch. When FLAG_CANCELED
+     * is set, the typical actions that occur in response for a pointer going up (such as click
+     * handlers, end of drawing) should be aborted. This flag is typically set when the user was
+     * accidentally touching the screen, such as by gripping the device, or placing the palm on the
+     * screen.
+     *
+     * @see #ACTION_POINTER_UP
+     * @see #ACTION_CANCEL
      */
     public static final int FLAG_CANCELED = 0x20;
 
