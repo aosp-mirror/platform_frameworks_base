@@ -30,8 +30,6 @@ import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
@@ -1926,27 +1924,6 @@ class ActivityStarter {
 
     private void computeLaunchParams(ActivityRecord r, ActivityRecord sourceRecord,
             Task targetTask) {
-        final Task sourceRootTask = mSourceRootTask != null ? mSourceRootTask
-                : mRootWindowContainer.getTopDisplayFocusedRootTask();
-        if (sourceRootTask != null && sourceRootTask.inSplitScreenWindowingMode()
-                && (mOptions == null
-                        || mOptions.getLaunchWindowingMode() == WINDOWING_MODE_UNDEFINED)) {
-            int windowingMode =
-                    targetTask != null ? targetTask.getWindowingMode() : WINDOWING_MODE_UNDEFINED;
-            if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
-                if (sourceRootTask.inSplitScreenPrimaryWindowingMode()) {
-                    windowingMode = WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-                } else if (sourceRootTask.inSplitScreenSecondaryWindowingMode()) {
-                    windowingMode = WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-                }
-            }
-
-            if (mOptions == null) {
-                mOptions = ActivityOptions.makeBasic();
-            }
-            mOptions.setLaunchWindowingMode(windowingMode);
-        }
-
         mSupervisor.getLaunchParamsController().calculate(targetTask, r.info.windowLayout, r,
                 sourceRecord, mOptions, mRequest, PHASE_BOUNDS, mLaunchParams);
         mPreferredTaskDisplayArea = mLaunchParams.hasPreferredTaskDisplayArea()
