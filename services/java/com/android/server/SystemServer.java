@@ -409,8 +409,6 @@ public final class SystemServer implements Dumpable {
     private static final String SAFETY_CENTER_SERVICE_CLASS =
             "com.android.safetycenter.SafetyCenterService";
 
-    private static final String SUPPLEMENTALPROCESS_APEX_PATH =
-            "/apex/com.android.supplementalprocess/javalib/service-supplementalprocess.jar";
     private static final String SUPPLEMENTALPROCESS_SERVICE_CLASS =
             "com.android.server.supplementalprocess.SupplementalProcessManagerService$Lifecycle";
 
@@ -2570,8 +2568,7 @@ public final class SystemServer implements Dumpable {
 
         // Supplemental Process
         t.traceBegin("StartSupplementalProcessManagerService");
-        mSystemServiceManager.startServiceFromJar(SUPPLEMENTALPROCESS_SERVICE_CLASS,
-                SUPPLEMENTALPROCESS_APEX_PATH);
+        mSystemServiceManager.startService(SUPPLEMENTALPROCESS_SERVICE_CLASS);
         t.traceEnd();
 
         if (safeMode) {
