@@ -81,7 +81,7 @@ filegroup {
         ":framework-mca-effect-sources",
         ":framework-mca-filterfw-sources",
         ":framework-mca-filterpacks-sources",
-        ":framework-media-sources",
+        ":framework-media-non-updatable-sources",
         ":framework-mms-sources",
         ":framework-omapi-sources",
         ":framework-opengl-sources",
