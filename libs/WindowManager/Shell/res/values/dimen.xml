@@ -222,6 +222,37 @@
     <!-- The width of the camera compat hint. -->
     <dimen name="camera_compat_hint_width">143dp</dimen>
 
+    <!-- The corner radius of the letterbox education toast. -->
+    <dimen name="letterbox_education_toast_corner_radius">100dp</dimen>
+
+    <!-- The corner radius of the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_corner_radius">28dp</dimen>
+
+    <!-- The margin between the letterbox education toast/dialog and the bottom of the task. -->
+    <dimen name="letterbox_education_margin_bottom">16dp</dimen>
+
+    <!-- The size of the icon in the letterbox education toast. -->
+    <dimen name="letterbox_education_toast_icon_size">24dp</dimen>
+
+    <!-- The size of an icon in the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_icon_size">48dp</dimen>
+
+    <!-- The width of each action container in the letterbox education dialog -->
+    <dimen name="letterbox_education_dialog_action_width">136dp</dimen>
+
+    <!-- The space between two actions in the letterbox education dialog -->
+    <dimen name="letterbox_education_dialog_space_between_actions">18dp</dimen>
+
+    <!-- The maximum width of the title and subtitle in the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_title_max_width">444dp</dimen>
+
+    <!-- The maximum width of the text in the letterbox education toast. -->
+    <dimen name="letterbox_education_toast_text_max_width">398dp</dimen>
+
+    <!-- The distance that the letterbox education dialog will move up during appear/dismiss
+         animation.  -->
+    <dimen name="letterbox_education_dialog_animation_elevation">20dp</dimen>
+
     <!-- The width of the brand image on staring surface. -->
     <dimen name="starting_surface_brand_image_width">200dp</dimen>
 
