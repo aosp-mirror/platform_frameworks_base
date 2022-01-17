@@ -142,7 +142,15 @@ public class NetworkStatsManager {
         setAugmentWithSubscriptionPlan(true);
     }
 
-    /** @hide */
+    /**
+     * Set poll on open flag to indicate the poll is needed before service gets statistics
+     * result. This is default enabled. However, for any non-privileged caller, the poll might
+     * be omitted in case of rate limiting.
+     *
+     * @param pollOnOpen true if poll is needed.
+     * @hide
+     */
+    // @SystemApi(client = MODULE_LIBRARIES)
     public void setPollOnOpen(boolean pollOnOpen) {
         if (pollOnOpen) {
             mFlags |= FLAG_POLL_ON_OPEN;
@@ -861,6 +869,76 @@ public class NetworkStatsManager {
 
         private static Object getObject(Message msg, String key) {
             return msg.getData().getParcelable(key);
+        }
+    }
+
+    /**
+     * Mark given UID as being in foreground for stats purposes.
+     *
+     * @hide
+     */
+    // @SystemApi
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public void setUidForeground(int uid, boolean uidForeground) {
+        try {
+            mService.setUidForeground(uid, uidForeground);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Advise persistence threshold; may be overridden internally.
+     *
+     * @hide
+     */
+    // @SystemApi
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public void advisePersistThreshold(long thresholdBytes) {
+        try {
+            mService.advisePersistThreshold(thresholdBytes);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Force update of statistics.
+     *
+     * @hide
+     */
+    // @SystemApi
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public void forceUpdate() {
+        try {
+            mService.forceUpdate();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the warning and limit to all registered custom network stats providers.
+     * Note that invocation of any interface will be sent to all providers.
+     *
+     * @hide
+     */
+    // @SystemApi
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public void setStatsProviderWarningAndLimitAsync(@NonNull String iface, long warning,
+            long limit) {
+        try {
+            mService.setStatsProviderWarningAndLimitAsync(iface, warning, limit);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }
