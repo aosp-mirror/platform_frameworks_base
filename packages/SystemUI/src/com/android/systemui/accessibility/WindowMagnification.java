@@ -23,7 +23,6 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_M
 import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
@@ -65,7 +64,6 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     private final OverviewProxyService mOverviewProxyService;
 
     private WindowMagnificationConnectionImpl mWindowMagnificationConnectionImpl;
-    private Configuration mLastConfiguration;
     private SysUiState mSysUiState;
 
     private static class ControllerSupplier extends
@@ -107,7 +105,6 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
             SysUiState sysUiState, OverviewProxyService overviewProxyService) {
         super(context);
         mHandler = mainHandler;
-        mLastConfiguration = new Configuration(context.getResources().getConfiguration());
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mCommandQueue = commandQueue;
         mModeSwitchesController = modeSwitchesController;
@@ -115,18 +112,6 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
         mOverviewProxyService = overviewProxyService;
         mMagnificationControllerSupplier = new ControllerSupplier(context,
                 mHandler, this, context.getSystemService(DisplayManager.class), sysUiState);
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        final int configDiff = newConfig.diff(mLastConfiguration);
-        mLastConfiguration.setTo(newConfig);
-        mMagnificationControllerSupplier.forEach(
-                magnificationController -> magnificationController.onConfigurationChanged(
-                        configDiff));
-        if (mModeSwitchesController != null) {
-            mModeSwitchesController.onConfigurationChanged(configDiff);
-        }
     }
 
     @Override
