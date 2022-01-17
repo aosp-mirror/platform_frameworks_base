@@ -228,10 +228,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_SHOW_SOFT_INPUT = 1020;
     private static final int MSG_HIDE_SOFT_INPUT = 1030;
     private static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
-    /**
-     * package-private because this is also used by {@link InputMethodBindingController}.
-     */
-    static final int MSG_INITIALIZE_IME = 1040;
+    private static final int MSG_INITIALIZE_IME = 1040;
     private static final int MSG_CREATE_SESSION = 1050;
     private static final int MSG_REMOVE_IME_SURFACE = 1060;
     private static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
@@ -288,7 +285,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final WindowManagerInternal mWindowManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
     final InputManagerInternal mInputManagerInternal;
-    final HandlerCaller mCaller;
+    private final HandlerCaller mCaller;
     final boolean mHasFeature;
     private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
             new ArrayMap<>();
@@ -2244,7 +2241,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    void executeOrSendMessage(IInterface target, Message msg) {
+    private void executeOrSendMessage(IInterface target, Message msg) {
          if (target.asBinder() instanceof Binder) {
              mCaller.sendMessage(msg);
          } else {
@@ -2527,6 +2524,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } else {
             return FALLBACK_DISPLAY_ID;
         }
+    }
+
+    @AnyThread
+    void executeOrSendInitializeIme(@NonNull IInputMethod inputMethod, @NonNull IBinder token,
+            @android.content.pm.ActivityInfo.Config int configChanges, boolean supportStylusHw) {
+        executeOrSendMessage(inputMethod, mCaller.obtainMessageIOOO(MSG_INITIALIZE_IME,
+                configChanges, inputMethod, token, supportStylusHw));
     }
 
     @AnyThread
