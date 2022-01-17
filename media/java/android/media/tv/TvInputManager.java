@@ -363,9 +363,10 @@ public final class TvInputManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({BROADCAST_INFO_TYPE_TS, BROADCAST_INFO_TYPE_TABLE, BROADCAST_INFO_TYPE_SECTION,
+    @IntDef(prefix = "BROADCAST_INFO_TYPE_", value =
+            {BROADCAST_INFO_TYPE_TS, BROADCAST_INFO_TYPE_TABLE, BROADCAST_INFO_TYPE_SECTION,
             BROADCAST_INFO_TYPE_PES, BROADCAST_INFO_STREAM_EVENT, BROADCAST_INFO_TYPE_DSMCC,
-            BROADCAST_INFO_TYPE_TV_PROPRIETARY_FUNCTION})
+            BROADCAST_INFO_TYPE_COMMAND, BROADCAST_INFO_TYPE_TIMELINE})
     public @interface BroadcastInfoType {}
 
     /** @hide */
@@ -381,7 +382,31 @@ public final class TvInputManager {
     /** @hide */
     public static final int BROADCAST_INFO_TYPE_DSMCC = 6;
     /** @hide */
-    public static final int BROADCAST_INFO_TYPE_TV_PROPRIETARY_FUNCTION = 7;
+    public static final int BROADCAST_INFO_TYPE_COMMAND = 7;
+    /** @hide */
+    public static final int BROADCAST_INFO_TYPE_TIMELINE = 8;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "SIGNAL_STRENGTH_",
+            value = {SIGNAL_STRENGTH_LOST, SIGNAL_STRENGTH_WEAK, SIGNAL_STRENGTH_STRONG})
+    public @interface SignalStrength {}
+
+    /**
+     * Signal lost.
+     * @hide
+     */
+    public static final int SIGNAL_STRENGTH_LOST = 1;
+    /**
+     * Weak signal.
+     * @hide
+     */
+    public static final int SIGNAL_STRENGTH_WEAK = 2;
+    /**
+     * Strong signal.
+     * @hide
+     */
+    public static final int SIGNAL_STRENGTH_STRONG = 3;
 
     /**
      * An unknown state of the client pid gets from the TvInputManager. Client gets this value when
@@ -662,6 +687,14 @@ public final class TvInputManager {
         }
 
         /**
+         * This is called when signal strength is updated.
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param strength The current signal strength.
+         */
+        public void onSignalStrength(Session session, @SignalStrength int strength) {
+        }
+
+        /**
          * This is called when the session has been tuned to the given channel.
          *
          * @param channelUri The URI of a channel.
@@ -868,6 +901,19 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onAitInfoUpdated(mSession, aitInfo);
+                }
+            });
+        }
+
+        void postSignalStrength(final int strength) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onSignalStrength(mSession, strength);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifySignalStrength(strength);
+                    }
                 }
             });
         }
@@ -1303,6 +1349,18 @@ public final class TvInputManager {
                         return;
                     }
                     record.postAitInfoUpdated(aitInfo);
+                }
+            }
+
+            @Override
+            public void onSignalStrength(int strength, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postSignalStrength(strength);
                 }
             }
 

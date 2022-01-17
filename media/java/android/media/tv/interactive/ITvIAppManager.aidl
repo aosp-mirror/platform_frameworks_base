@@ -34,10 +34,12 @@ import android.view.Surface;
 interface ITvIAppManager {
     List<TvInteractiveAppInfo> getTvInteractiveAppServiceList(int userId);
     void prepare(String tiasId, int type, int userId);
-    void notifyAppLinkInfo(String tiasId, in Bundle info, int userId);
+    void registerAppLinkInfo(String tiasId, in Bundle info, int userId);
+    void unregisterAppLinkInfo(String tiasId, in Bundle info, int userId);
     void sendAppLinkCommand(String tiasId, in Bundle command, int userId);
     void startInteractiveApp(in IBinder sessionToken, int userId);
     void stopInteractiveApp(in IBinder sessionToken, int userId);
+    void resetInteractiveApp(in IBinder sessionToken, int userId);
     void createBiInteractiveApp(
             in IBinder sessionToken, in Uri biIAppUri, in Bundle params, int userId);
     void destroyBiInteractiveApp(in IBinder sessionToken, in String biIAppId, int userId);
@@ -45,6 +47,7 @@ interface ITvIAppManager {
     void sendCurrentChannelLcn(in IBinder sessionToken, int lcn, int userId);
     void sendStreamVolume(in IBinder sessionToken, float volume, int userId);
     void sendTrackInfoList(in IBinder sessionToken, in List<TvTrackInfo> tracks, int userId);
+    void sendCurrentTvInputId(in IBinder sessionToken, in String inputId, int userId);
     void createSession(in ITvInteractiveAppClient client, in String iAppServiceId, int type,
             int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
@@ -55,6 +58,7 @@ interface ITvIAppManager {
     void notifyVideoUnavailable(in IBinder sessionToken, int reason, int userId);
     void notifyContentAllowed(in IBinder sessionToken, int userId);
     void notifyContentBlocked(in IBinder sessionToken, in String rating, int userId);
+    void notifySignalStrength(in IBinder sessionToken, int stength, int userId);
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
     void dispatchSurfaceChanged(in IBinder sessionToken, int format, int width, int height,
             int userId);

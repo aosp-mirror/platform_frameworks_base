@@ -96,7 +96,7 @@ public final class TvIAppManager {
      * Key for package name in app link.
      * <p>Type: String
      *
-     * @see #notifyAppLinkInfo(String, Bundle)
+     * @see #registerAppLinkInfo(String, Bundle)
      * @see #sendAppLinkCommand(String, Bundle)
      * @hide
      */
@@ -106,7 +106,7 @@ public final class TvIAppManager {
      * Key for class name in app link.
      * <p>Type: String
      *
-     * @see #notifyAppLinkInfo(String, Bundle)
+     * @see #registerAppLinkInfo(String, Bundle)
      * @see #sendAppLinkCommand(String, Bundle)
      * @hide
      */
@@ -116,7 +116,7 @@ public final class TvIAppManager {
      * Key for URI scheme in app link.
      * <p>Type: String
      *
-     * @see #notifyAppLinkInfo(String, Bundle)
+     * @see #registerAppLinkInfo(String, Bundle)
      * @hide
      */
     public static final String KEY_URI_SCHEME = "uri_scheme";
@@ -125,7 +125,7 @@ public final class TvIAppManager {
      * Key for URI host in app link.
      * <p>Type: String
      *
-     * @see #notifyAppLinkInfo(String, Bundle)
+     * @see #registerAppLinkInfo(String, Bundle)
      * @hide
      */
     public static final String KEY_URI_HOST = "uri_host";
@@ -134,7 +134,7 @@ public final class TvIAppManager {
      * Key for URI prefix in app link.
      * <p>Type: String
      *
-     * @see #notifyAppLinkInfo(String, Bundle)
+     * @see #registerAppLinkInfo(String, Bundle)
      * @hide
      */
     public static final String KEY_URI_PREFIX = "uri_prefix";
@@ -343,6 +343,18 @@ public final class TvIAppManager {
                         return;
                     }
                     record.postRequestTrackInfoList();
+                }
+            }
+
+            @Override
+            public void onRequestCurrentTvInputId(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestCurrentTvInputId();
                 }
             }
 
@@ -611,12 +623,25 @@ public final class TvIAppManager {
     }
 
     /**
-     * Notifies app link info.
+     * Registers app link info.
      * @hide
      */
-    public void notifyAppLinkInfo(@NonNull String tvIAppServiceId, @NonNull Bundle appLinkInfo) {
+    public void registerAppLinkInfo(@NonNull String tvIAppServiceId, @NonNull Bundle appLinkInfo) {
         try {
-            mService.notifyAppLinkInfo(tvIAppServiceId, appLinkInfo, mUserId);
+            mService.registerAppLinkInfo(tvIAppServiceId, appLinkInfo, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters app link info.
+     * @hide
+     */
+    public void unregisterAppLinkInfo(
+            @NonNull String tvIAppServiceId, @NonNull Bundle appLinkInfo) {
+        try {
+            mService.unregisterAppLinkInfo(tvIAppServiceId, appLinkInfo, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -740,6 +765,18 @@ public final class TvIAppManager {
             }
         }
 
+        void resetInteractiveApp() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.resetInteractiveApp(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         void createBiInteractiveApp(Uri biIAppUri, Bundle params) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
@@ -807,6 +844,18 @@ public final class TvIAppManager {
             }
             try {
                 mService.sendTrackInfoList(mToken, tracks, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendCurrentTvInputId(@Nullable String inputId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendCurrentTvInputId(mToken, inputId, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1099,6 +1148,21 @@ public final class TvIAppManager {
             }
             try {
                 mService.notifyContentBlocked(mToken, rating.flattenToString(), mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Notifies Interactive APP session when signal strength is changed.
+         */
+        public void notifySignalStrength(int strength) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifySignalStrength(mToken, strength, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1421,6 +1485,15 @@ public final class TvIAppManager {
             });
         }
 
+        void postRequestCurrentTvInputId() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestCurrentTvInputId(mSession);
+                }
+            });
+        }
+
         void postAdRequest(final AdRequest request) {
             mHandler.post(new Runnable() {
                 @Override
@@ -1545,8 +1618,16 @@ public final class TvIAppManager {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#notifySessionStateChanged} is
-         * called.
+         * This is called when {@link TvIAppService.Session#RequestCurrentTvInputId} is called.
+         *
+         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @hide
+         */
+        public void onRequestCurrentTvInputId(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#notifySessionStateChanged} is called.
          *
          * @param session A {@link TvIAppManager.Session} associated with this callback.
          * @param state the current state.
