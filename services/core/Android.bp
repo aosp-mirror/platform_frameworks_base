@@ -103,6 +103,7 @@ java_library_static {
         ":android.hardware.biometrics.face-V2-java-source",
         ":statslog-art-java-gen",
         ":statslog-contexthub-java-gen",
+        ":services.bluetooth-sources", // TODO(b/214988855) : Remove once apex is ready
         ":services.core-sources",
         ":services.core.protologsrc",
         ":dumpstate_aidl",
