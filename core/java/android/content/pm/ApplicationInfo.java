@@ -1543,6 +1543,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     @Nullable
     private ArrayMap<String, String> mAppClassNamesByProcess;
 
+    /**
+     * Resource file providing the application's locales configuration.
+     */
+    private int localeConfigRes;
+
     public void dump(Printer pw, String prefix) {
         dump(pw, prefix, DUMP_FLAG_ALL);
     }
@@ -1659,6 +1664,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             if (requestRawExternalStorageAccess != null) {
                 pw.println(prefix + "requestRawExternalStorageAccess="
                         + requestRawExternalStorageAccess);
+            }
+            if (localeConfigRes != 0) {
+                pw.println(prefix + "localeConfigRes=0x"
+                        + Integer.toHexString(localeConfigRes));
             }
         }
         pw.println(prefix + "createTimestamp=" + createTimestamp);
@@ -1891,6 +1900,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         memtagMode = orig.memtagMode;
         nativeHeapZeroInitialized = orig.nativeHeapZeroInitialized;
         requestRawExternalStorageAccess = orig.requestRawExternalStorageAccess;
+        localeConfigRes = orig.localeConfigRes;
         createTimestamp = System.currentTimeMillis();
     }
 
@@ -1993,6 +2003,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 dest.writeString(mAppClassNamesByProcess.valueAt(i));
             }
         }
+        dest.writeInt(localeConfigRes);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ApplicationInfo> CREATOR
@@ -2088,6 +2099,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 mAppClassNamesByProcess.put(source.readString(), source.readString());
             }
         }
+        localeConfigRes = source.readInt();
     }
 
     /**
@@ -2630,5 +2642,17 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
         }
         return className;
+    }
+
+    /** @hide */ public void setLocaleConfigRes(int value) { localeConfigRes = value; }
+
+    /**
+     * Return the resource id pointing to the resource file that provides the application's locales
+     * configuration.
+     *
+     * @hide
+     */
+    public int getLocaleConfigRes() {
+        return localeConfigRes;
     }
 }

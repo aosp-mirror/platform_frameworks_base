@@ -343,4 +343,11 @@ public interface ParsingPackageRead extends PkgWithoutStateAppInfo, PkgWithoutSt
      * @see R.styleable#AndroidManifestApplication_resetEnabledSettingsOnAppDataCleared
      */
     boolean isResetEnabledSettingsOnAppDataCleared();
+
+    /**
+     * The resource ID used to provide the application's locales configuration.
+     *
+     * @see R.styleable#AndroidManifestApplication_localeConfig
+     */
+    int getLocaleConfigRes();
 }

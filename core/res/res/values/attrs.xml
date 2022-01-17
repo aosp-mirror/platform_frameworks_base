@@ -9665,4 +9665,11 @@
     <attr name="iconfactoryBadgeSize" format="dimension"/>
     <!-- Perceptual luminance of a color, in accessibility friendly color space. From 0 to 100. -->
     <attr name="lStar" format="float"/>
-</resources>
+
+    <!-- The attributes of the {@code <locale>} tag within {@code <locale-config>}. -->
+    <declare-styleable name="LocaleConfig_Locale">
+        <!-- The <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">IETF BCP47 language tag</a>
+        of the supported locale. {@link android.app.LocaleConfig} -->
+        <attr name="name" />
+    </declare-styleable>
+    </resources>
