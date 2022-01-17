@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -27,8 +28,8 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 
 import com.android.server.NetworkManagementSocketTagger;
 
@@ -36,6 +37,8 @@ import dalvik.system.SocketTagger;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -53,6 +56,7 @@ import java.net.SocketException;
  * use {@link NetworkStatsManager} instead.
  */
 public class TrafficStats {
+    private static final String TAG = TrafficStats.class.getSimpleName();
     /**
      * The return value to indicate that the device does not support the statistic.
      */
@@ -173,10 +177,23 @@ public class TrafficStats {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
     private synchronized static INetworkStatsService getStatsService() {
         if (sStatsService == null) {
-            sStatsService = INetworkStatsService.Stub.asInterface(
-                    ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+            sStatsService = getStatsBinder();
         }
         return sStatsService;
+    }
+
+    @Nullable
+    private static INetworkStatsService getStatsBinder() {
+        try {
+            final Method getServiceMethod = Class.forName("android.os.ServiceManager")
+                    .getDeclaredMethod("getService", new Class[]{String.class});
+            final IBinder binder = (IBinder) getServiceMethod.invoke(
+                    null, Context.NETWORK_STATS_SERVICE);
+            return INetworkStatsService.Stub.asInterface(binder);
+        } catch (NoSuchMethodException | ClassNotFoundException | IllegalAccessException
+                | InvocationTargetException e) {
+            throw new NullPointerException("Cannot get INetworkStatsService: " + e);
+        }
     }
 
     /**
