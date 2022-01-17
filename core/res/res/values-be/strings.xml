@@ -402,7 +402,7 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Дазваляе прыкладанню захоўваць некаторыя пастаянныя часткi ў памяцi. Гэта можа абмежаваць аб\'ём памяці, даступнай для іншых прыкладанняў, i запаволiць працу планшэта."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Дазваляе праграме пастаянна захоўваць некаторыя свае часткі ў памяці прылады. Гэта можа абмежаваць аб\'ём памяці, даступнай для іншых праграм, і запаволіць працу прылады Android TV."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Дазваляе прыкладанню захоўваць некаторыя пастаянныя часткi ў памяцi. Гэта можа абмежаваць аб\'ём памяці, даступнай для іншых прыкладанняў, i запаволiць працу тэлефона."</string>
-    <string name="permlab_foregroundService" msgid="1768855976818467491">"запусціць асноўныя сэрвісы"</string>
+    <string name="permlab_foregroundService" msgid="1768855976818467491">"запусціць актыўныя сэрвісы"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Дазваляе праграме выкарыстоўваць асноўныя сэрвісы."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"вымерыць прастору для захоўвання прыкладання"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Дазваляе прыкладанням атрымліваць яго код, дадзеныя і аб\'ём кэш-памяці"</string>
@@ -718,8 +718,8 @@
     <string name="permdesc_handoverStatus" msgid="3842269451732571070">"Дазваляе праграме атрымліваць інфармацыю аб бягучых перадачах Android Beam"</string>
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"выдаленне сертыфікатаў DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"Дазваляе праграме выдаляць сертыфікаты DRM. Ніколі не павінна патрабавацца для звычайных праграм."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"прывязка да службы паведамленняў аператара"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Дазваляе ўладальніку выконваць прывязку да інтэрфейсу верхняга ўзроўню службы паведамленняў аператара. Ніколі не павінна патрабавацца для звычайных праграм."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"падключэнне да сэрвісу абмену паведамленнямі аператара"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Дазваляе ўладальніку выконваць падключэнне да базавага інтэрфейсу сэрвісу абмену паведамленнямі аператара. Звычайныя праграмы ніколі не выкарыстоўваюць гэты дазвол."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"прывязвацца з сэрвісаў аператара"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Дазваляе ўладальніку ажыццяўляць прывязку да сэрвісаў аператара. Ніколі не павінна патрабавацца для звычайных праграм."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"атрымліваць доступ да рэжыму «Не турбаваць»"</string>
