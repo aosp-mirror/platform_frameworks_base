@@ -69,6 +69,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserManager;
 import android.os.VibrationEffect;
 import android.provider.Settings;
@@ -4590,11 +4591,13 @@ public class NotificationPanelViewController extends PanelViewController {
 
         @Override
         public void onSmallestScreenWidthChanged() {
+            Trace.beginSection("onSmallestScreenWidthChanged");
             if (DEBUG) Log.d(TAG, "onSmallestScreenWidthChanged");
 
             // Can affect multi-user switcher visibility as it depends on screen size by default:
             // it is enabled only for devices with large screens (see config_keyguardUserSwitcher)
             reInflateViews();
+            Trace.endSection();
         }
 
         @Override

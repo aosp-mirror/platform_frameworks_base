@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -224,10 +225,12 @@ public class FragmentHostManager {
     }
 
     public void reloadFragments() {
+        Trace.beginSection("FrargmentHostManager#reloadFragments");
         // Save the old state.
         Parcelable p = destroyFragmentHost();
         // Generate a new fragment host and restore its state.
         createFragmentHost(p);
+        Trace.endSection();
     }
 
     class HostCallbacks extends FragmentHostCallback<FragmentHostManager> {
