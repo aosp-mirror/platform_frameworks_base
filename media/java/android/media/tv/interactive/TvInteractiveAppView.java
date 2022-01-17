@@ -581,6 +581,19 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
+     * To toggle Digital Teletext Application if there is one in AIT app list.
+     * @param enable
+     */
+    public void setTeletextAppEnabled(boolean enable) {
+        if (DEBUG) {
+            Log.d(TAG, "setTeletextAppEnabled enable=" + enable);
+        }
+        if (mSession != null) {
+            mSession.setTeletextAppEnabled(enable);
+        }
+    }
+
+    /**
      * Callback used to receive various status updates on the {@link TvInteractiveAppView}.
      */
     public abstract static class TvInteractiveAppCallback {
@@ -622,6 +635,16 @@ public class TvInteractiveAppView extends ViewGroup {
          */
         public void onBiInteractiveAppCreated(@NonNull String iAppServiceId, @NonNull Uri biIAppUri,
                 @Nullable String biIAppId) {
+        }
+
+        /**
+         * This is called when the digital teletext app state is changed.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param state digital teletext app current state.
+         */
+        public void onTeletextAppStateChanged(
+                @NonNull String iAppServiceId, @TvIAppManager.TeletextAppState int state) {
         }
 
         /**
@@ -844,6 +867,20 @@ public class TvInteractiveAppView extends ViewGroup {
                         }
                     });
                 }
+            }
+        }
+
+        @Override
+        public void onTeletextAppStateChanged(Session session, int state) {
+            if (DEBUG) {
+                Log.d(TAG, "onTeletextAppStateChanged (state=" + state +  ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onTeletextAppStateChanged - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onTeletextAppStateChanged(mIAppServiceId, state);
             }
         }
 

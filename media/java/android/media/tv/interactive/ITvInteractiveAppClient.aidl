@@ -36,6 +36,7 @@ oneway interface ITvInteractiveAppClient {
     void onRemoveBroadcastInfo(int id, int seq);
     void onSessionStateChanged(int state, int seq);
     void onBiInteractiveAppCreated(in Uri biIAppUri, in String biIAppId, int seq);
+    void onTeletextAppStateChanged(int state, int seq);
     void onCommandRequest(in String cmdType, in Bundle parameters, int seq);
     void onSetVideoBounds(in Rect rect, int seq);
     void onRequestCurrentChannelUri(int seq);
