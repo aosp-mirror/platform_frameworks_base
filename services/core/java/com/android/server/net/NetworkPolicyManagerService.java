@@ -151,6 +151,8 @@ import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.usage.NetworkStats;
+import android.app.usage.NetworkStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -181,7 +183,6 @@ import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStateSnapshot;
-import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.TrafficStats;
@@ -443,7 +444,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
-    private NetworkStatsManagerInternal mNetworkStats;
+    private NetworkStatsManager mNetworkStats;
     private final INetworkManagementService mNetworkManager;
     private UsageStatsManagerInternal mUsageStats;
     private AppStandbyInternal mAppStandby;
@@ -455,6 +456,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private ConnectivityManager mConnManager;
     private PowerManagerInternal mPowerManagerInternal;
     private PowerWhitelistManager mPowerWhitelistManager;
+    @NonNull
+    private final Dependencies mDeps;
 
     /** Current cached value of the current Battery Saver mode's setting for restrict background. */
     @GuardedBy("mUidRulesFirstLock")
@@ -706,7 +709,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             INetworkManagementService networkManagement) {
         this(context, activityManager, networkManagement, AppGlobals.getPackageManager(),
-                getDefaultClock(), getDefaultSystemDir(), false);
+                getDefaultClock(), getDefaultSystemDir(), false, new Dependencies(context));
     }
 
     private static @NonNull File getDefaultSystemDir() {
@@ -718,9 +721,59 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 Clock.systemUTC());
     }
 
+    static class Dependencies {
+        final Context mContext;
+        final NetworkStatsManager mNetworkStatsManager;
+        Dependencies(Context context) {
+            mContext = context;
+            mNetworkStatsManager = mContext.getSystemService(NetworkStatsManager.class);
+            // Query stats from NetworkStatsService will trigger a poll by default.
+            // But since NPMS listens stats updated event, and will query stats
+            // after the event. A polling -> updated -> query -> polling loop will be introduced
+            // if polls on open. Hence, while NPMS manages it's poll requests explicitly, set
+            // flag to false to prevent a polling loop.
+            mNetworkStatsManager.setPollOnOpen(false);
+        }
+
+        long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
+            Trace.traceBegin(TRACE_TAG_NETWORK, "getNetworkTotalBytes");
+            try {
+                final NetworkStats.Bucket ret = mNetworkStatsManager
+                        .querySummaryForDevice(template, start, end);
+                return ret.getRxBytes() + ret.getTxBytes();
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Failed to read network stats: " + e);
+                return 0;
+            } finally {
+                Trace.traceEnd(TRACE_TAG_NETWORK);
+            }
+        }
+
+        @NonNull
+        List<NetworkStats.Bucket> getNetworkUidBytes(
+                @NonNull NetworkTemplate template, long start, long end) {
+            Trace.traceBegin(TRACE_TAG_NETWORK, "getNetworkUidBytes");
+            final List<NetworkStats.Bucket> buckets = new ArrayList<>();
+            try {
+                final NetworkStats stats = mNetworkStatsManager.querySummary(template, start, end);
+                while (stats.hasNextBucket()) {
+                    final NetworkStats.Bucket bucket = new NetworkStats.Bucket();
+                    stats.getNextBucket(bucket);
+                    buckets.add(bucket);
+                }
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Failed to read network stats: " + e);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_NETWORK);
+            }
+            return buckets;
+        }
+    }
+
+    @VisibleForTesting
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             INetworkManagementService networkManagement, IPackageManager pm, Clock clock,
-            File systemDir, boolean suppressDefaultPolicy) {
+            File systemDir, boolean suppressDefaultPolicy, Dependencies deps) {
         mContext = Objects.requireNonNull(context, "missing context");
         mActivityManager = Objects.requireNonNull(activityManager, "missing activityManager");
         mNetworkManager = Objects.requireNonNull(networkManagement, "missing networkManagement");
@@ -741,10 +794,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mUidEventHandler = new Handler(mUidEventThread.getLooper(), mUidEventHandlerCallback);
 
         mSuppressDefaultPolicy = suppressDefaultPolicy;
+        mDeps = Objects.requireNonNull(deps, "missing Dependencies");
 
         mPolicyFile = new AtomicFile(new File(systemDir, "netpolicy.xml"), "net-policy");
 
         mAppOps = context.getSystemService(AppOpsManager.class);
+        mNetworkStats = context.getSystemService(NetworkStatsManager.class);
         mMultipathPolicyTracker = new MultipathPolicyTracker(mContext, mHandler);
         // Expose private service for system components to use.
         LocalServices.addService(NetworkPolicyManagerInternal.class,
@@ -844,7 +899,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
             mAppStandby = LocalServices.getService(AppStandbyInternal.class);
-            mNetworkStats = LocalServices.getService(NetworkStatsManagerInternal.class);
 
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
@@ -1167,20 +1221,33 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     };
 
     /**
-     * Receiver that watches for {@link INetworkStatsService} updates, which we
+     * Receiver that watches for {@link NetworkStatsManager} updates, which we
      * use to check against {@link NetworkPolicy#warningBytes}.
      */
-    final private BroadcastReceiver mStatsReceiver = new BroadcastReceiver() {
+    private final NetworkStatsBroadcastReceiver mStatsReceiver =
+            new NetworkStatsBroadcastReceiver();
+    private class NetworkStatsBroadcastReceiver extends BroadcastReceiver {
+        private boolean mIsAnyIntentReceived = false;
         @Override
         public void onReceive(Context context, Intent intent) {
             // on background handler thread, and verified
             // READ_NETWORK_USAGE_HISTORY permission above.
+
+            mIsAnyIntentReceived = true;
 
             synchronized (mNetworkPoliciesSecondLock) {
                 updateNetworkRulesNL();
                 updateNetworkEnabledNL();
                 updateNotificationsNL();
             }
+        }
+
+        /**
+         * Return whether any {@code ACTION_NETWORK_STATS_UPDATED} intent is received.
+         * Used to determine if NetworkStatsService is ready.
+         */
+        public boolean isAnyIntentReceived() {
+            return mIsAnyIntentReceived;
         }
     };
 
@@ -1405,15 +1472,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         long maxBytes = 0;
         int maxUid = 0;
 
-        final NetworkStats stats = getNetworkUidBytes(template, start, end);
-        NetworkStats.Entry entry = null;
-        for (int i = 0; i < stats.size(); i++) {
-            entry = stats.getValues(i, entry);
-            final long bytes = entry.rxBytes + entry.txBytes;
+        // Skip if not ready. NetworkStatsService will block public API calls until it is
+        // ready. To prevent NPMS be blocked on that, skip and fail fast instead.
+        if (!mStatsReceiver.isAnyIntentReceived()) return null;
+
+        final List<NetworkStats.Bucket> stats = mDeps.getNetworkUidBytes(template, start, end);
+        for (final NetworkStats.Bucket entry : stats) {
+            final long bytes = entry.getRxBytes() + entry.getTxBytes();
             totalBytes += bytes;
             if (bytes > maxBytes) {
                 maxBytes = bytes;
-                maxUid = entry.uid;
+                maxUid = entry.getUid();
             }
         }
 
@@ -5398,25 +5467,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Deprecated
     private long getTotalBytes(NetworkTemplate template, long start, long end) {
-        return getNetworkTotalBytes(template, start, end);
-    }
-
-    private long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
-        try {
-            return mNetworkStats.getNetworkTotalBytes(template, start, end);
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Failed to read network stats: " + e);
-            return 0;
-        }
-    }
-
-    private NetworkStats getNetworkUidBytes(NetworkTemplate template, long start, long end) {
-        try {
-            return mNetworkStats.getNetworkUidBytes(template, start, end);
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Failed to read network stats: " + e);
-            return new NetworkStats(SystemClock.elapsedRealtime(), 0);
-        }
+        // Skip if not ready. NetworkStatsService will block public API calls until it is
+        // ready. To prevent NPMS be blocked on that, skip and fail fast instead.
+        if (!mStatsReceiver.isAnyIntentReceived()) return 0;
+        return mDeps.getNetworkTotalBytes(template, start, end);
     }
 
     private boolean isBandwidthControlEnabled() {
