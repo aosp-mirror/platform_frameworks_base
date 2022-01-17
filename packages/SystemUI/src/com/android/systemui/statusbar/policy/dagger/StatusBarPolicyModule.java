@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy.dagger;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.UserManager;
 
@@ -35,6 +36,7 @@ import com.android.systemui.statusbar.policy.DeviceControlsController;
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.DevicePostureControllerImpl;
+import com.android.systemui.statusbar.policy.DeviceStateRotationLockSettingsManager;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionControllerImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
@@ -161,6 +163,14 @@ public interface StatusBarPolicyModule {
         );
         controller.init();
         return controller;
+    }
+
+    /** Returns a singleton instance of DeviceStateRotationLockSettingsManager */
+    @SysUISingleton
+    @Provides
+    static DeviceStateRotationLockSettingsManager provideAutoRotateSettingsManager(
+            Context context) {
+        return DeviceStateRotationLockSettingsManager.getInstance(context);
     }
 
     /**

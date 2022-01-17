@@ -64,7 +64,6 @@ public final class RotationLockControllerImpl implements RotationLockController 
         mDeviceStateRotationLockSettingController = deviceStateRotationLockSettingController;
         mIsPerDeviceStateRotationLockEnabled = deviceStateRotationLockDefaults.length > 0;
         if (mIsPerDeviceStateRotationLockEnabled) {
-            deviceStateRotationLockSettingController.initialize();
             mCallbacks.add(mDeviceStateRotationLockSettingController);
         }
 

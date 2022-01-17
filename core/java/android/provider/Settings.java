@@ -10525,7 +10525,7 @@ public final class Settings {
                 DEVICE_STATE_ROTATION_LOCK_UNLOCKED,
         })
         @Retention(RetentionPolicy.SOURCE)
-        @interface DeviceStateRotationLockSetting {
+        public @interface DeviceStateRotationLockSetting {
         }
 
         /**
