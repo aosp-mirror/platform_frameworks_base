@@ -3834,7 +3834,7 @@ package android.hardware.hdmi {
   }
 
   public class HdmiDeviceInfo implements android.os.Parcelable {
-    ctor public HdmiDeviceInfo();
+    ctor @Deprecated public HdmiDeviceInfo();
     method public int describeContents();
     method public int getAdopterId();
     method public int getDeviceId();
@@ -3855,6 +3855,7 @@ package android.hardware.hdmi {
     method public boolean isSourceType();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ADDR_INTERNAL = 0; // 0x0
+    field public static final int ADDR_INVALID = -1; // 0xffffffff
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.hdmi.HdmiDeviceInfo> CREATOR;
     field public static final int DEVICE_AUDIO_SYSTEM = 5; // 0x5
     field public static final int DEVICE_INACTIVE = -1; // 0xffffffff
@@ -3868,6 +3869,7 @@ package android.hardware.hdmi {
     field public static final int PATH_INTERNAL = 0; // 0x0
     field public static final int PATH_INVALID = 65535; // 0xffff
     field public static final int PORT_INVALID = -1; // 0xffffffff
+    field public static final int VENDOR_ID_UNKNOWN = 16777215; // 0xffffff
   }
 
   public final class HdmiHotplugEvent implements android.os.Parcelable {

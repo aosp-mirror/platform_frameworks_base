@@ -64,22 +64,34 @@ public class DeviceSelectActionFromTvTest {
     private static final byte[] POWER_ON = new byte[] { POWER_STATUS_ON };
     private static final byte[] POWER_STANDBY = new byte[] { POWER_STATUS_STANDBY };
     private static final byte[] POWER_TRANSIENT_TO_ON = new byte[] { POWER_STATUS_TRANSIENT_TO_ON };
-    private static final HdmiCecMessage REPORT_POWER_STATUS_ON = new HdmiCecMessage(
+    private static final HdmiCecMessage REPORT_POWER_STATUS_ON = HdmiCecMessage.build(
             ADDR_PLAYBACK_1, ADDR_TV, Constants.MESSAGE_REPORT_POWER_STATUS, POWER_ON);
-    private static final HdmiCecMessage REPORT_POWER_STATUS_STANDBY = new HdmiCecMessage(
+    private static final HdmiCecMessage REPORT_POWER_STATUS_STANDBY = HdmiCecMessage.build(
             ADDR_PLAYBACK_1, ADDR_TV, Constants.MESSAGE_REPORT_POWER_STATUS, POWER_STANDBY);
-    private static final HdmiCecMessage REPORT_POWER_STATUS_TRANSIENT_TO_ON = new HdmiCecMessage(
+    private static final HdmiCecMessage REPORT_POWER_STATUS_TRANSIENT_TO_ON = HdmiCecMessage.build(
             ADDR_PLAYBACK_1, ADDR_TV, Constants.MESSAGE_REPORT_POWER_STATUS, POWER_TRANSIENT_TO_ON);
     private static final HdmiCecMessage SET_STREAM_PATH = HdmiCecMessageBuilder.buildSetStreamPath(
                         ADDR_TV, PHYSICAL_ADDRESS_PLAYBACK_1);
-    private static final HdmiDeviceInfo INFO_PLAYBACK_1 = new HdmiDeviceInfo(
-            ADDR_PLAYBACK_1, PHYSICAL_ADDRESS_PLAYBACK_1, PORT_1, HdmiDeviceInfo.DEVICE_PLAYBACK,
-            0x1234, "Playback 1",
-            HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-    private static final HdmiDeviceInfo INFO_PLAYBACK_2 = new HdmiDeviceInfo(
-            ADDR_PLAYBACK_2, PHYSICAL_ADDRESS_PLAYBACK_2, PORT_2, HdmiDeviceInfo.DEVICE_PLAYBACK,
-            0x1234, "Playback 2",
-            HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+    private static final HdmiDeviceInfo INFO_PLAYBACK_1 = HdmiDeviceInfo.cecDeviceBuilder()
+            .setLogicalAddress(ADDR_PLAYBACK_1)
+            .setPhysicalAddress(PHYSICAL_ADDRESS_PLAYBACK_1)
+            .setPortId(PORT_1)
+            .setDeviceType(HdmiDeviceInfo.DEVICE_PLAYBACK)
+            .setVendorId(0x1234)
+            .setDisplayName("Plyback 1")
+            .setDevicePowerStatus(HdmiControlManager.POWER_STATUS_ON)
+            .setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_1_4_B)
+            .build();
+    private static final HdmiDeviceInfo INFO_PLAYBACK_2 = HdmiDeviceInfo.cecDeviceBuilder()
+            .setLogicalAddress(ADDR_PLAYBACK_2)
+            .setPhysicalAddress(PHYSICAL_ADDRESS_PLAYBACK_2)
+            .setPortId(PORT_2)
+            .setDeviceType(HdmiDeviceInfo.DEVICE_PLAYBACK)
+            .setVendorId(0x1234)
+            .setDisplayName("Playback 2")
+            .setDevicePowerStatus(HdmiControlManager.POWER_STATUS_ON)
+            .setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_1_4_B)
+            .build();
 
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
@@ -123,7 +135,6 @@ public class DeviceSelectActionFromTvTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDeviceTv);
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[2];
         hdmiPortInfos[0] =

@@ -109,7 +109,6 @@ public class ArcInitiationActionFromAvrTest {
                 hdmiControlService, mNativeWrapper, hdmiControlService.getAtomWriter());
         hdmiControlService.setCecController(hdmiCecController);
         hdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(hdmiControlService));
-        hdmiControlService.setMessageValidator(new HdmiCecMessageValidator(hdmiControlService));
         hdmiControlService.initService();
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         hdmiControlService.setPowerManager(mPowerManager);
