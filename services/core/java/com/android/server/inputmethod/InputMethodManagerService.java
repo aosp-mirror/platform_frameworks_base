@@ -219,38 +219,44 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         int FAILURE = -1;
     }
 
-    static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
-    static final int MSG_SHOW_IM_SUBTYPE_ENABLER = 2;
-    static final int MSG_SHOW_IM_CONFIG = 3;
+    private static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
+    private static final int MSG_SHOW_IM_SUBTYPE_ENABLER = 2;
+    private static final int MSG_SHOW_IM_CONFIG = 3;
 
-    static final int MSG_UNBIND_INPUT = 1000;
-    static final int MSG_BIND_INPUT = 1010;
-    static final int MSG_SHOW_SOFT_INPUT = 1020;
-    static final int MSG_HIDE_SOFT_INPUT = 1030;
-    static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
+    private static final int MSG_UNBIND_INPUT = 1000;
+    private static final int MSG_BIND_INPUT = 1010;
+    private static final int MSG_SHOW_SOFT_INPUT = 1020;
+    private static final int MSG_HIDE_SOFT_INPUT = 1030;
+    private static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
+    /**
+     * package-private because this is also used by {@link InputMethodBindingController}.
+     */
     static final int MSG_INITIALIZE_IME = 1040;
-    static final int MSG_CREATE_SESSION = 1050;
-    static final int MSG_REMOVE_IME_SURFACE = 1060;
-    static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
-    static final int MSG_UPDATE_IME_WINDOW_STATUS = 1070;
-    static final int MSG_START_HANDWRITING = 1100;
+    private static final int MSG_CREATE_SESSION = 1050;
+    private static final int MSG_REMOVE_IME_SURFACE = 1060;
+    private static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
+    private static final int MSG_UPDATE_IME_WINDOW_STATUS = 1070;
+    private static final int MSG_START_HANDWRITING = 1100;
 
-    static final int MSG_START_INPUT = 2000;
+    private static final int MSG_START_INPUT = 2000;
 
-    static final int MSG_UNBIND_CLIENT = 3000;
-    static final int MSG_BIND_CLIENT = 3010;
-    static final int MSG_SET_ACTIVE = 3020;
-    static final int MSG_SET_INTERACTIVE = 3030;
-    static final int MSG_REPORT_FULLSCREEN_MODE = 3045;
+    private static final int MSG_UNBIND_CLIENT = 3000;
+    private static final int MSG_BIND_CLIENT = 3010;
+    private static final int MSG_SET_ACTIVE = 3020;
+    private static final int MSG_SET_INTERACTIVE = 3030;
+    private static final int MSG_REPORT_FULLSCREEN_MODE = 3045;
 
+    /**
+     * package-private because this is also used by {@link InputMethodMenuController}.
+     */
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
-    static final int MSG_SYSTEM_UNLOCK_USER = 5000;
-    static final int MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED = 5010;
+    private static final int MSG_SYSTEM_UNLOCK_USER = 5000;
+    private static final int MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED = 5010;
 
-    static final int MSG_INLINE_SUGGESTIONS_REQUEST = 6000;
+    private static final int MSG_INLINE_SUGGESTIONS_REQUEST = 6000;
 
-    static final int MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE = 7000;
+    private static final int MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE = 7000;
 
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
