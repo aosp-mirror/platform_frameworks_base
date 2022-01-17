@@ -2580,9 +2580,9 @@ public class StatusBar extends CoreStartable implements
             return controllerFromStatusBar.get();
         }
 
-        if (dismissShade && rootView == mNotificationShadeWindowView) {
-            // We are animating a view in the shade. We have to make sure that we collapse it when
-            // the animation ends or is cancelled.
+        if (dismissShade) {
+            // If the view is not in the status bar, then we are animating a view in the shade.
+            // We have to make sure that we collapse it when the animation ends or is cancelled.
             return new StatusBarLaunchAnimatorController(animationController, this,
                     true /* isLaunchForActivity */);
         }

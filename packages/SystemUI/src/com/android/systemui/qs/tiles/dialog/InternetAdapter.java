@@ -164,7 +164,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
             if (connectedState != WifiEntry.CONNECTED_STATE_DISCONNECTED) {
                 mWifiListLayout.setOnClickListener(
                         v -> mInternetDialogController.launchWifiNetworkDetailsSetting(
-                                wifiEntry.getKey()));
+                                wifiEntry.getKey(), v));
                 return;
             }
             mWifiListLayout.setOnClickListener(v -> {

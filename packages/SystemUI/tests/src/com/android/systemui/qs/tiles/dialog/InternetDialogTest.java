@@ -458,7 +458,8 @@ public class InternetDialogTest extends SysuiTestCase {
     public void onClickSeeMoreButton_clickSeeAll_verifyLaunchNetworkSetting() {
         mSeeAll.performClick();
 
-        verify(mInternetDialogController).launchNetworkSetting();
+        verify(mInternetDialogController).launchNetworkSetting(
+                mDialogView.requireViewById(R.id.see_all_layout));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.android.systemui.statusbar.phone
 
+import android.view.View
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.LaunchAnimator
 
@@ -12,6 +13,11 @@ class StatusBarLaunchAnimatorController(
     private val statusBar: StatusBar,
     private val isLaunchForActivity: Boolean = true
 ) : ActivityLaunchAnimator.Controller by delegate {
+    // Always sync the opening window with the shade, given that we draw a hole punch in the shade
+    // of the same size and position as the opening app to make it visible.
+    override val openingWindowSyncView: View?
+        get() = statusBar.notificationShadeWindowView
+
     override fun onIntentStarted(willAnimate: Boolean) {
         delegate.onIntentStarted(willAnimate)
         if (!willAnimate) {

@@ -355,8 +355,8 @@ public class InternetDialog extends SystemUIDialog implements
                                 isChecked, false);
                     }
                 });
-        mConnectedWifListLayout.setOnClickListener(v -> onClickConnectedWifi());
-        mSeeAllLayout.setOnClickListener(v -> onClickSeeMoreButton());
+        mConnectedWifListLayout.setOnClickListener(this::onClickConnectedWifi);
+        mSeeAllLayout.setOnClickListener(this::onClickSeeMoreButton);
         mWiFiToggle.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {
                     if (mWifiManager == null) return;
@@ -519,7 +519,7 @@ public class InternetDialog extends SystemUIDialog implements
         if (TextUtils.isEmpty(mWifiScanNotifyText.getText())) {
             final AnnotationLinkSpan.LinkInfo linkInfo = new AnnotationLinkSpan.LinkInfo(
                     AnnotationLinkSpan.LinkInfo.DEFAULT_ANNOTATION,
-                    v -> mInternetDialogController.launchWifiScanningSetting());
+                    mInternetDialogController::launchWifiScanningSetting);
             mWifiScanNotifyText.setText(AnnotationLinkSpan.linkify(
                     getContext().getText(R.string.wifi_scan_notify_message), linkInfo));
             mWifiScanNotifyText.setMovementMethod(LinkMovementMethod.getInstance());
@@ -527,15 +527,16 @@ public class InternetDialog extends SystemUIDialog implements
         mWifiScanNotifyLayout.setVisibility(View.VISIBLE);
     }
 
-    void onClickConnectedWifi() {
+    void onClickConnectedWifi(View view) {
         if (mConnectedWifiEntry == null) {
             return;
         }
-        mInternetDialogController.launchWifiNetworkDetailsSetting(mConnectedWifiEntry.getKey());
+        mInternetDialogController.launchWifiNetworkDetailsSetting(mConnectedWifiEntry.getKey(),
+                view);
     }
 
-    void onClickSeeMoreButton() {
-        mInternetDialogController.launchNetworkSetting();
+    void onClickSeeMoreButton(View view) {
+        mInternetDialogController.launchNetworkSetting(view);
     }
 
     CharSequence getDialogTitleText() {

@@ -20,6 +20,7 @@ import com.android.systemui.SysuiTestCase
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertNotNull
+import junit.framework.Assert.assertNull
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
@@ -43,7 +44,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         dialogLaunchAnimator = DialogLaunchAnimator(
-            dreamManager, launchAnimator, forceDisableSynchronization = true)
+            dreamManager, launchAnimator, isForTesting = true)
     }
 
     @After
@@ -92,11 +93,6 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
 
         // Clicking the transparent background should dismiss the dialog.
         runOnMainThreadAndWaitForIdleSync {
-            // TODO(b/204561691): Remove this call to disableAllCurrentDialogsExitAnimations() and
-            // make sure that the test still pass on git_master/cf_x86_64_phone-userdebug in
-            // Forrest.
-            dialogLaunchAnimator.disableAllCurrentDialogsExitAnimations()
-
             transparentBackground.performClick()
         }
         assertFalse(dialog.isShowing)
@@ -110,12 +106,43 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         assertTrue(firstDialog.isShowing)
         assertTrue(secondDialog.isShowing)
         runOnMainThreadAndWaitForIdleSync {
-            dialogLaunchAnimator.disableAllCurrentDialogsExitAnimations()
             dialogLaunchAnimator.dismissStack(secondDialog)
         }
 
         assertFalse(firstDialog.isShowing)
         assertFalse(secondDialog.isShowing)
+    }
+
+    @Test
+    fun testActivityLaunchControllerFromDialog() {
+        val firstDialog = createAndShowDialog()
+        val secondDialog = createDialogAndShowFromDialog(firstDialog)
+
+        val controller =
+            dialogLaunchAnimator.createActivityLaunchController(secondDialog.contentView)!!
+
+        // The dialog shouldn't be dismissable during the animation.
+        runOnMainThreadAndWaitForIdleSync {
+            controller.onLaunchAnimationStart(isExpandingFullyAbove = true)
+            secondDialog.dismiss()
+        }
+        assertTrue(secondDialog.isShowing)
+
+        // Both dialogs should be dismissed at the end of the animation.
+        runOnMainThreadAndWaitForIdleSync {
+            controller.onLaunchAnimationEnd(isExpandingFullyAbove = true)
+        }
+        assertFalse(firstDialog.isShowing)
+        assertFalse(secondDialog.isShowing)
+    }
+
+    @Test
+    fun testActivityLaunchFromHiddenDialog() {
+        val dialog = createAndShowDialog()
+        runOnMainThreadAndWaitForIdleSync {
+            dialog.hide()
+        }
+        assertNull(dialogLaunchAnimator.createActivityLaunchController(dialog.contentView))
     }
 
     private fun createAndShowDialog(): TestDialog {

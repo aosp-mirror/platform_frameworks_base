@@ -44,6 +44,9 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Base class for dialogs that should appear over panels and keyguard.
  *
@@ -67,6 +70,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     private int mLastHeight = Integer.MIN_VALUE;
     private int mLastConfigurationWidthDp = -1;
     private int mLastConfigurationHeightDp = -1;
+
+    private List<Runnable> mOnCreateRunnables = new ArrayList<>();
 
     public SystemUIDialog(Context context) {
         this(context, R.style.Theme_SystemUI_Dialog);
@@ -110,6 +115,10 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         mLastConfigurationWidthDp = config.screenWidthDp;
         mLastConfigurationHeightDp = config.screenHeightDp;
         updateWindowSize();
+
+        for (int i = 0; i < mOnCreateRunnables.size(); i++) {
+            mOnCreateRunnables.get(i).run();
+        }
     }
 
     private void updateWindowSize() {
@@ -197,16 +206,67 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         setMessage(mContext.getString(resId));
     }
 
+    /**
+     * Set a listener to be invoked when the positive button of the dialog is pressed. The dialog
+     * will automatically be dismissed when the button is clicked.
+     */
     public void setPositiveButton(int resId, OnClickListener onClick) {
-        setButton(BUTTON_POSITIVE, mContext.getString(resId), onClick);
+        setPositiveButton(resId, onClick, true /* dismissOnClick */);
     }
 
+    /**
+     * Set a listener to be invoked when the positive button of the dialog is pressed. The dialog
+     * will be dismissed when the button is clicked iff {@code dismissOnClick} is true.
+     */
+    public void setPositiveButton(int resId, OnClickListener onClick, boolean dismissOnClick) {
+        setButton(BUTTON_POSITIVE, resId, onClick, dismissOnClick);
+    }
+
+    /**
+     * Set a listener to be invoked when the negative button of the dialog is pressed. The dialog
+     * will automatically be dismissed when the button is clicked.
+     */
     public void setNegativeButton(int resId, OnClickListener onClick) {
-        setButton(BUTTON_NEGATIVE, mContext.getString(resId), onClick);
+        setNegativeButton(resId, onClick, true /* dismissOnClick */);
     }
 
+    /**
+     * Set a listener to be invoked when the negative button of the dialog is pressed. The dialog
+     * will be dismissed when the button is clicked iff {@code dismissOnClick} is true.
+     */
+    public void setNegativeButton(int resId, OnClickListener onClick, boolean dismissOnClick) {
+        setButton(BUTTON_NEGATIVE, resId, onClick, dismissOnClick);
+    }
+
+    /**
+     * Set a listener to be invoked when the neutral button of the dialog is pressed. The dialog
+     * will automatically be dismissed when the button is clicked.
+     */
     public void setNeutralButton(int resId, OnClickListener onClick) {
-        setButton(BUTTON_NEUTRAL, mContext.getString(resId), onClick);
+        setNeutralButton(resId, onClick, true /* dismissOnClick */);
+    }
+
+    /**
+     * Set a listener to be invoked when the neutral button of the dialog is pressed. The dialog
+     * will be dismissed when the button is clicked iff {@code dismissOnClick} is true.
+     */
+    public void setNeutralButton(int resId, OnClickListener onClick, boolean dismissOnClick) {
+        setButton(BUTTON_NEUTRAL, resId, onClick, dismissOnClick);
+    }
+
+    private void setButton(int whichButton, int resId, OnClickListener onClick,
+            boolean dismissOnClick) {
+        if (dismissOnClick) {
+            setButton(whichButton, mContext.getString(resId), onClick);
+        } else {
+            // Set a null OnClickListener to make sure the button is still created and shown.
+            setButton(whichButton, mContext.getString(resId), (OnClickListener) null);
+
+            // When the dialog is created, set the click listener but don't dismiss the dialog when
+            // it is clicked.
+            mOnCreateRunnables.add(() -> getButton(whichButton).setOnClickListener(
+                    view -> onClick.onClick(this, whichButton)));
+        }
     }
 
     public static void setShowForAllUsers(Dialog dialog, boolean show) {
