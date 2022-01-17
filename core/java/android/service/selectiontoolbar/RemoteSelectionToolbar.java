@@ -158,6 +158,8 @@ final class RemoteSelectionToolbar {
     private final Rect mPreviousContentRect = new Rect();
 
     private final Rect mTempContentRect = new Rect();
+    private final Rect mTempContentRectForRoot = new Rect();
+    private final int[] mTempCoords = new int[2];
 
     RemoteSelectionToolbar(Context context, long selectionToolbarToken, IBinder hostInputToken,
             SelectionToolbarRenderService.RemoteCallbackWrapper callbackWrapper,
@@ -214,7 +216,13 @@ final class RemoteSelectionToolbar {
         mOpenOverflowAnimation.setAnimationListener(mOverflowAnimationListener);
         mCloseOverflowAnimation = new AnimationSet(true);
         mCloseOverflowAnimation.setAnimationListener(mOverflowAnimationListener);
-        mShowAnimation = createEnterAnimation(mContentContainer);
+        mShowAnimation = createEnterAnimation(mContentContainer,
+                new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        updateFloatingToolbarRootContentRect();
+                    }
+                });
         mDismissAnimation = createExitAnimation(
                 mContentContainer,
                 150,  // startDelay
@@ -239,6 +247,20 @@ final class RemoteSelectionToolbar {
             }
             mCallbackWrapper.onMenuItemClicked((ToolbarMenuItem) tag);
         };
+    }
+
+    private void updateFloatingToolbarRootContentRect() {
+        if (mSurfaceControlViewHost == null) {
+            return;
+        }
+        final FloatingToolbarRoot root = (FloatingToolbarRoot) mSurfaceControlViewHost.getView();
+        mContentContainer.getLocationOnScreen(mTempCoords);
+        int contentLeft = mTempCoords[0];
+        int contentTop = mTempCoords[1];
+        mTempContentRectForRoot.set(contentLeft, contentTop,
+                contentLeft + mContentContainer.getWidth(),
+                contentTop + mContentContainer.getHeight());
+        root.setContentRect(mTempContentRectForRoot);
     }
 
     private WidgetInfo createWidgetInfo() {
@@ -514,6 +536,7 @@ final class RemoteSelectionToolbar {
                         isInRTLMode() ? 0 : mContentContainer.getWidth() - startWidth;
                 float actualOverflowButtonX = overflowButtonX + deltaContainerWidth;
                 mOverflowButton.setX(actualOverflowButtonX);
+                updateFloatingToolbarRootContentRect();
             }
         };
         widthAnimation.setInterpolator(mLogAccelerateInterpolator);
@@ -589,6 +612,7 @@ final class RemoteSelectionToolbar {
                         isInRTLMode() ? 0 : mContentContainer.getWidth() - startWidth;
                 float actualOverflowButtonX = overflowButtonX + deltaContainerWidth;
                 mOverflowButton.setX(actualOverflowButtonX);
+                updateFloatingToolbarRootContentRect();
             }
         };
         widthAnimation.setInterpolator(mFastOutSlowInInterpolator);
@@ -1303,10 +1327,11 @@ final class RemoteSelectionToolbar {
      *
      * @param view  The view to animate
      */
-    private static AnimatorSet createEnterAnimation(View view) {
+    private static AnimatorSet createEnterAnimation(View view, Animator.AnimatorListener listener) {
         AnimatorSet animation = new AnimatorSet();
         animation.playTogether(
                 ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1).setDuration(150));
+        animation.addListener(listener);
         return animation;
     }
 

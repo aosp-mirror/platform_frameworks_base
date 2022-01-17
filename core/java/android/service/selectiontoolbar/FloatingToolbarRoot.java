@@ -18,7 +18,9 @@ package android.service.selectiontoolbar;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.LinearLayout;
 
@@ -31,10 +33,12 @@ import android.widget.LinearLayout;
 @SuppressLint("ViewConstructor")
 public class FloatingToolbarRoot extends LinearLayout {
 
+    private static final boolean DEBUG = false;
+    private static final String TAG = "FloatingToolbarRoot";
+
     private final IBinder mTargetInputToken;
     private final SelectionToolbarRenderService.TransferTouchListener mTransferTouchListener;
-    private float mDownX;
-    private float mDownY;
+    private Rect mContentRect;
 
     public FloatingToolbarRoot(Context context, IBinder targetInputToken,
             SelectionToolbarRenderService.TransferTouchListener transferTouchListener) {
@@ -44,16 +48,29 @@ public class FloatingToolbarRoot extends LinearLayout {
         setFocusable(false);
     }
 
+    /**
+     * Sets the Rect that shows the selection toolbar content.
+     */
+    public void setContentRect(Rect contentRect) {
+        mContentRect = contentRect;
+    }
+
     @Override
     @SuppressLint("ClickableViewAccessibility")
     public boolean dispatchTouchEvent(MotionEvent event) {
-        switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN: {
-                mDownX = event.getX();
-                mDownY = event.getY();
-                // TODO: Check x, y if we need to transfer touch focus to application
-                //mTransferTouchListener.onTransferTouch(getViewRootImpl().getInputToken(),
-                //        mTargetInputToken);
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            int downX = (int) event.getX();
+            int downY = (int) event.getY();
+            if (DEBUG) {
+                Log.d(TAG, "downX=" + downX + " downY=" + downY);
+            }
+            // TODO(b/215497659): Check FLAG_WINDOW_IS_PARTIALLY_OBSCURED
+            if (!mContentRect.contains(downX, downY)) {
+                if (DEBUG) {
+                    Log.d(TAG, "Transfer touch focus to application.");
+                }
+                mTransferTouchListener.onTransferTouch(getViewRootImpl().getInputToken(),
+                        mTargetInputToken);
             }
         }
         return super.dispatchTouchEvent(event);
