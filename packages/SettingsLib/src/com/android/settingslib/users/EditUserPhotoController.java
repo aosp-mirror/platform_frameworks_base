@@ -21,6 +21,8 @@ import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -29,6 +31,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -78,6 +81,7 @@ public class EditUserPhotoController {
     private static final int REQUEST_CODE_CHOOSE_PHOTO = 1001;
     private static final int REQUEST_CODE_TAKE_PHOTO = 1002;
     private static final int REQUEST_CODE_CROP_PHOTO = 1003;
+    private static final int REQUEST_CODE_PICK_AVATAR = 1004;
     // in rare cases we get a null Cursor when querying for DisplayPhoto.CONTENT_MAX_DIMENSIONS_URI
     // so we need a default photo size
     private static final int DEFAULT_PHOTO_SIZE = 500;
@@ -113,7 +117,7 @@ public class EditUserPhotoController {
         mCropPictureUri = createTempImageUri(activity, CROP_PICTURE_FILE_NAME, !waiting);
         mTakePictureUri = createTempImageUri(activity, TAKE_PICTURE_FILE_NAME, !waiting);
         mPhotoSize = getPhotoSize(activity);
-        mImageView.setOnClickListener(v -> showUpdatePhotoPopup());
+        mImageView.setOnClickListener(v -> showAvatarPicker());
         mNewUserPhotoBitmap = bitmap;
     }
 
@@ -151,12 +155,29 @@ public class EditUserPhotoController {
                     copyAndCropPhoto(pictureUri);
                 }
                 return true;
+            case REQUEST_CODE_PICK_AVATAR:
+                int index = data.getIntExtra(AvatarPickerActivity.EXTRA_AVATAR_INDEX, -1);
+                Resources res = mImageView.getContext().getResources();
+                try (TypedArray avatarImages = res.obtainTypedArray(R.array.avatar_images)) {
+                    if (index >= 0 && index < avatarImages.length()) {
+                        Drawable drawable = avatarImages.getDrawable(index);
+                        if (!(drawable instanceof BitmapDrawable)) {
+                            return false;
+                        }
+                        onPhotoProcessed(((BitmapDrawable) drawable).getBitmap());
+                    }
+                }
         }
         return false;
     }
 
     public Drawable getNewUserPhotoDrawable() {
         return mNewUserPhotoDrawable;
+    }
+
+    private void showAvatarPicker() {
+        Intent intent = new Intent(mImageView.getContext(), AvatarPickerActivity.class);
+        mActivityStarter.startActivityForResult(intent, REQUEST_CODE_PICK_AVATAR);
     }
 
     private void showUpdatePhotoPopup() {

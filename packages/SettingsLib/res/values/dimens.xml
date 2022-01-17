@@ -102,4 +102,9 @@
     <dimen name="user_photo_size_in_profile_info_dialog">112dp</dimen>
     <dimen name="add_a_photo_icon_size_in_profile_info_dialog">32dp</dimen>
 
+    <integer name="avatar_picker_columns">3</integer>
+    <dimen name="avatar_size_in_picker">96dp</dimen>
+    <dimen name="avatar_picker_padding">6dp</dimen>
+    <dimen name="avatar_picker_margin">2dp</dimen>
+
 </resources>
