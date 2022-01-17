@@ -3506,7 +3506,7 @@
   <java-symbol type="id" name="autofill_save_yes" />
   <java-symbol type="string" name="autofill_error_cannot_autofill" />
   <java-symbol type="string" name="autofill_picker_no_suggestions" />
-  <java-symbol type="plurals" name="autofill_picker_some_suggestions" />
+  <java-symbol type="string" name="autofill_picker_some_suggestions" />
   <java-symbol type="string" name="autofill" />
   <java-symbol type="string" name="autofill_picker_accessibility_title " />
   <java-symbol type="string" name="autofill_update_title" />

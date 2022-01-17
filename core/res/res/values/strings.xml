@@ -5530,10 +5530,11 @@
     <string name="autofill_picker_no_suggestions">No autofill suggestions</string>
 
     <!-- Accessibility string to announce there are some autofill suggestions in the autofill picker. [CHAR LIMIT=NONE] -->
-    <plurals name="autofill_picker_some_suggestions">
-        <item quantity="one">One autofill suggestion</item>
-        <item quantity="other"><xliff:g id="count" example="Two">%1$s</xliff:g> autofill suggestions</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions">{count, plural,
+        =1    {One autofill suggestion}
+        other {# autofill suggestions}
+    }
+    </string>
 
     <!-- Title for the autofill save dialog shown when the the contents of the activity can be saved
          by an autofill service, but the service does not know what the activity represents [CHAR LIMIT=NONE] -->
