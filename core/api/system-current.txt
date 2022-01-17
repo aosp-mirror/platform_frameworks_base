@@ -8168,6 +8168,17 @@ package android.net {
 
   public static class NetworkStats.Entry {
     ctor public NetworkStats.Entry(@Nullable String, int, int, int, int, int, int, long, long, long, long, long);
+    method public int getDefaultNetwork();
+    method public int getMetered();
+    method public long getOperations();
+    method public int getRoaming();
+    method public long getRxBytes();
+    method public long getRxPackets();
+    method public int getSet();
+    method public int getTag();
+    method public long getTxBytes();
+    method public long getTxPackets();
+    method public int getUid();
   }
 
   @Deprecated public class RssiCurve implements android.os.Parcelable {
