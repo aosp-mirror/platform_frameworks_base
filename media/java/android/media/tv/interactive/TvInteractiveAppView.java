@@ -420,6 +420,19 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
+     * Resets the interactive application.
+     * @hide
+     */
+    public void resetInteractiveApp() {
+        if (DEBUG) {
+            Log.d(TAG, "resetInteractiveApp");
+        }
+        if (mSession != null) {
+            mSession.resetInteractiveApp();
+        }
+    }
+
+    /**
      * Sends current channel URI to related TV interactive app.
      * @hide
      */
@@ -468,6 +481,23 @@ public class TvInteractiveAppView extends ViewGroup {
         }
         if (mSession != null) {
             mSession.sendTrackInfoList(tracks);
+        }
+    }
+
+    /**
+     * Sends current TV input ID to related TV interactive app.
+     *
+     * @param inputId The current TV input ID whose channel is tuned. {@code null} if no channel is
+     *                tuned.
+     * @see android.media.tv.TvInputInfo
+     * @hide
+     */
+    public void sendCurrentTvInputId(@Nullable String inputId) {
+        if (DEBUG) {
+            Log.d(TAG, "sendCurrentTvInputId");
+        }
+        if (mSession != null) {
+            mSession.sendCurrentTvInputId(inputId);
         }
     }
 
@@ -641,6 +671,14 @@ public class TvInteractiveAppView extends ViewGroup {
          * @hide
          */
         public void onRequestTrackInfoList(@NonNull String iAppServiceId) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#RequestCurrentTvInputId} is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         */
+        public void onRequestCurrentTvInputId(@NonNull String iAppServiceId) {
         }
 
     }
@@ -916,6 +954,20 @@ public class TvInteractiveAppView extends ViewGroup {
                         }
                     });
                 }
+            }
+        }
+
+        @Override
+        public void onRequestCurrentTvInputId(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestCurrentTvInputId");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestCurrentTvInputId - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onRequestCurrentTvInputId(mIAppServiceId);
             }
         }
     }

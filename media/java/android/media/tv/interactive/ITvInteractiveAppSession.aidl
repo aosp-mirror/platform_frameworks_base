@@ -33,12 +33,14 @@ import android.view.Surface;
 oneway interface ITvInteractiveAppSession {
     void startInteractiveApp();
     void stopInteractiveApp();
+    void resetInteractiveApp();
     void createBiInteractiveApp(in Uri biIAppUri, in Bundle params);
     void destroyBiInteractiveApp(in String biIAppId);
     void sendCurrentChannelUri(in Uri channelUri);
     void sendCurrentChannelLcn(int lcn);
     void sendStreamVolume(float volume);
     void sendTrackInfoList(in List<TvTrackInfo> tracks);
+    void sendCurrentTvInputId(in String inputId);
     void release();
     void notifyTuned(in Uri channelUri);
     void notifyTrackSelected(int type, in String trackId);
@@ -47,6 +49,7 @@ oneway interface ITvInteractiveAppSession {
     void notifyVideoUnavailable(int reason);
     void notifyContentAllowed();
     void notifyContentBlocked(in String rating);
+    void notifySignalStrength(int strength);
     void setSurface(in Surface surface);
     void dispatchSurfaceChanged(int format, int width, int height);
     void notifyBroadcastInfoResponse(in BroadcastInfoResponse response);

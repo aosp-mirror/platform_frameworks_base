@@ -41,5 +41,6 @@ oneway interface ITvInteractiveAppSessionCallback {
     void onRequestCurrentChannelLcn();
     void onRequestStreamVolume();
     void onRequestTrackInfoList();
+    void onRequestCurrentTvInputId();
     void onAdRequest(in AdRequest request);
 }

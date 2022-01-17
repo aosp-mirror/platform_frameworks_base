@@ -42,5 +42,6 @@ oneway interface ITvInteractiveAppClient {
     void onRequestCurrentChannelLcn(int seq);
     void onRequestStreamVolume(int seq);
     void onRequestTrackInfoList(int seq);
+    void onRequestCurrentTvInputId(int seq);
     void onAdRequest(in AdRequest request, int Seq);
 }

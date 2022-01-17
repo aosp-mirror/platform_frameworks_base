@@ -22,6 +22,7 @@ import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -29,6 +30,8 @@ import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
+
+import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -51,6 +54,7 @@ public class CaptioningManager {
     private final ArrayList<CaptioningChangeListener> mListeners = new ArrayList<>();
     private final ContentResolver mContentResolver;
     private final ContentObserver mContentObserver;
+    private final Resources mResources;
 
     /**
      * Creates a new captioning manager for the specified context.
@@ -62,6 +66,7 @@ public class CaptioningManager {
 
         final Handler handler = new Handler(context.getMainLooper());
         mContentObserver = new MyContentObserver(handler);
+        mResources = context.getResources();
     }
 
     /**
@@ -179,6 +184,13 @@ public class CaptioningManager {
                 mContentResolver.unregisterContentObserver(mContentObserver);
             }
         }
+    }
+
+    /**
+     * Returns true if system wide call captioning is enabled for this device.
+     */
+    public boolean isCallCaptioningEnabled() {
+        return mResources.getBoolean(R.bool.config_systemCaptionsServiceCallsEnabled);
     }
 
     private void notifyEnabledChanged() {

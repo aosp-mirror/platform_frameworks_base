@@ -50,8 +50,10 @@ public abstract class BroadcastInfoResponse implements Parcelable {
                             return StreamEventResponse.createFromParcelBody(source);
                         case TvInputManager.BROADCAST_INFO_TYPE_DSMCC:
                             return DsmccResponse.createFromParcelBody(source);
-                        case TvInputManager.BROADCAST_INFO_TYPE_TV_PROPRIETARY_FUNCTION:
+                        case TvInputManager.BROADCAST_INFO_TYPE_COMMAND:
                             return CommandResponse.createFromParcelBody(source);
+                        case TvInputManager.BROADCAST_INFO_TYPE_TIMELINE:
+                            return TimelineResponse.createFromParcelBody(source);
                         default:
                             throw new IllegalStateException(
                                     "Unexpected broadcast info response type (value "

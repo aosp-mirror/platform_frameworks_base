@@ -1071,6 +1071,16 @@ public class TvView extends ViewGroup {
         }
 
         /**
+         * This is called when signal strength is updated.
+         * @param inputId The ID of the TV input bound to this view.
+         * @param strength The current signal strength.
+         *
+         * @hide
+         */
+        public void onSignalStrength(String inputId, @TvInputManager.SignalStrength int strength) {
+        }
+
+        /**
          * This is called when the session has been tuned to the given channel.
          *
          * @param channelUri The URI of a channel.
@@ -1386,6 +1396,20 @@ public class TvView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onAitInfoUpdated(mInputId, aitInfo);
+            }
+        }
+
+        @Override
+        public void onSignalStrength(Session session, int strength) {
+            if (DEBUG) {
+                Log.d(TAG, "onSignalStrength(strength=" + strength + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onSignalStrength - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onSignalStrength(mInputId, strength);
             }
         }
 
