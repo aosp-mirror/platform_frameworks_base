@@ -26,10 +26,8 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SeamlessRotationAppHelper
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.FlickerComponentName
-import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -102,8 +100,6 @@ class SeamlessAppRotationTest(
     @Presubmit
     @Test
     fun appWindowFullScreen() {
-        // This test doesn't work in shell transitions because of b/206101151
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertWm {
             this.invoke("isFullScreen") {
                 val appWindow = it.windowState(testApp.`package`)
@@ -139,8 +135,6 @@ class SeamlessAppRotationTest(
     @Presubmit
     @Test
     fun appLayerAlwaysVisible() {
-        // This test doesn't work in shell transitions because of b/206101151
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayers {
             isVisible(testApp.component)
         }
@@ -152,8 +146,6 @@ class SeamlessAppRotationTest(
     @Presubmit
     @Test
     fun appLayerRotates() {
-        // This test doesn't work in shell transitions because of b/206101151
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayers {
             this.invoke("entireScreenCovered") { entry ->
                 entry.entry.displays.map { display ->
@@ -193,8 +185,6 @@ class SeamlessAppRotationTest(
     @Presubmit
     @Test
     fun focusDoesNotChange() {
-        // This test doesn't work in shell transitions because of b/206101151
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertEventLog {
             this.focusDoesNotChange()
         }
