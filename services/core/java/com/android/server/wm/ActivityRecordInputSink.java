@@ -26,6 +26,7 @@ import android.compat.annotation.Disabled;
 import android.os.IBinder;
 import android.os.InputConstants;
 import android.os.Looper;
+import android.os.Process;
 import android.util.Slog;
 import android.view.InputChannel;
 import android.view.InputEvent;
@@ -113,14 +114,13 @@ class ActivityRecordInputSink {
     }
 
     private InputWindowHandle createInputWindowHandle() {
-        InputWindowHandle inputWindowHandle = new InputWindowHandle(
-                mActivityRecord.getInputApplicationHandle(false),
+        InputWindowHandle inputWindowHandle = new InputWindowHandle(null,
                 mActivityRecord.getDisplayId());
         inputWindowHandle.replaceTouchableRegionWithCrop(
                 mActivityRecord.getParentSurfaceControl());
         inputWindowHandle.name = mName;
-        inputWindowHandle.ownerUid = mActivityRecord.getUid();
-        inputWindowHandle.ownerPid = mActivityRecord.getPid();
+        inputWindowHandle.ownerUid = Process.myUid();
+        inputWindowHandle.ownerPid = Process.myPid();
         inputWindowHandle.layoutParamsFlags =
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
