@@ -246,10 +246,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_SET_INTERACTIVE = 3030;
     private static final int MSG_REPORT_FULLSCREEN_MODE = 3045;
 
-    /**
-     * package-private because this is also used by {@link InputMethodMenuController}.
-     */
-    static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
+    private static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
     private static final int MSG_SYSTEM_UNLOCK_USER = 5000;
     private static final int MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED = 5010;
@@ -284,7 +281,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     final Context mContext;
     final Resources mRes;
-    final Handler mHandler;
+    private final Handler mHandler;
     final InputMethodSettings mSettings;
     final SettingsObserver mSettingsObserver;
     final IWindowManager mIWindowManager;
@@ -1812,10 +1809,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
                         com.android.internal.R.bool.show_ongoing_ime_switcher);
                 if (mShowOngoingImeSwitcherForPhones) {
-                    final InputMethodMenuController.HardKeyboardListener hardKeyboardListener =
-                            mMenuController.getHardKeyboardListener();
-                    mWindowManagerInternal.setOnHardKeyboardStatusChangeListener(
-                            hardKeyboardListener);
+                    mWindowManagerInternal.setOnHardKeyboardStatusChangeListener(available -> {
+                        mHandler.obtainMessage(MSG_HARD_KEYBOARD_SWITCH_CHANGED, available ? 1 : 0)
+                                .sendToTarget();
+                    });
                 }
 
                 mMyPackageMonitor.register(mContext, null, UserHandle.ALL, true);
@@ -4422,9 +4419,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // --------------------------------------------------------------
             case MSG_HARD_KEYBOARD_SWITCH_CHANGED:
-                final InputMethodMenuController.HardKeyboardListener hardKeyboardListener =
-                        mMenuController.getHardKeyboardListener();
-                hardKeyboardListener.handleHardKeyboardStatusChange(msg.arg1 == 1);
+                mMenuController.handleHardKeyboardStatusChange(msg.arg1 == 1);
                 return true;
             case MSG_SYSTEM_UNLOCK_USER: {
                 final int userId = msg.arg1;
