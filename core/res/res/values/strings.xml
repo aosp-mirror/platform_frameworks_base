@@ -463,10 +463,11 @@
     <!-- SSL CA cert notification --> <skip />
     <!-- Shows up when there is a user SSL CA Cert installed on the
          device.  Indicates to the user that SSL traffic can be intercepted.  [CHAR LIMIT=NONE] -->
-    <plurals name="ssl_ca_cert_warning">
-        <item quantity="one">Certificate authority installed</item>
-        <item quantity="other">Certificate authorities installed</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning">{count, plural,
+        =1    {Certificate authority installed}
+        other {Certificate authorities installed}
+    }
+    </string>
     <!-- Content text for a notification. The Title of the notification is "ssl_ca_cert_warning".
          This says that an unknown party is doing the monitoring. [CHAR LIMIT=100]-->
     <string name="ssl_ca_cert_noti_by_unknown">By an unknown third party</string>
