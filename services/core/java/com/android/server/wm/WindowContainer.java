@@ -393,6 +393,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         if (mParent != null) {
             mParent.onChildAdded(this);
+        } else if (mSurfaceAnimator.hasLeash()) {
+            mSurfaceAnimator.cancelAnimation();
         }
         if (!mReparenting) {
             onSyncReparent(oldParent, mParent);
