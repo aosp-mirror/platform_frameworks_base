@@ -1260,10 +1260,9 @@
   <java-symbol type="string" name="conference_call" />
   <java-symbol type="string" name="tooltip_popup_title" />
 
-  <java-symbol type="plurals" name="last_num_days" />
-  <java-symbol type="plurals" name="restr_pin_countdown" />
   <java-symbol type="string" name="bugreport_countdown" />
   <java-symbol type="string" name="file_count" />
+  <java-symbol type="string" name="last_num_days" />
   <java-symbol type="string" name="matches_found" />
   <java-symbol type="plurals" name="pinpuk_attempts" />
   <java-symbol type="string" name="ssl_ca_cert_warning" />
@@ -3098,23 +3097,23 @@
 
   <java-symbol type="id" name="aerr_wait" />
 
-  <java-symbol type="plurals" name="duration_minutes_shortest" />
-  <java-symbol type="plurals" name="duration_hours_shortest" />
-  <java-symbol type="plurals" name="duration_days_shortest" />
-  <java-symbol type="plurals" name="duration_years_shortest" />
-  <java-symbol type="plurals" name="duration_minutes_shortest_future" />
-  <java-symbol type="plurals" name="duration_hours_shortest_future" />
-  <java-symbol type="plurals" name="duration_days_shortest_future" />
-  <java-symbol type="plurals" name="duration_years_shortest_future" />
+  <java-symbol type="string" name="duration_minutes_shortest" />
+  <java-symbol type="string" name="duration_hours_shortest" />
+  <java-symbol type="string" name="duration_days_shortest" />
+  <java-symbol type="string" name="duration_years_shortest" />
+  <java-symbol type="string" name="duration_minutes_shortest_future" />
+  <java-symbol type="string" name="duration_hours_shortest_future" />
+  <java-symbol type="string" name="duration_days_shortest_future" />
+  <java-symbol type="string" name="duration_years_shortest_future" />
 
-  <java-symbol type="plurals" name="duration_minutes_relative" />
-  <java-symbol type="plurals" name="duration_hours_relative" />
-  <java-symbol type="plurals" name="duration_days_relative" />
-  <java-symbol type="plurals" name="duration_years_relative" />
-  <java-symbol type="plurals" name="duration_minutes_relative_future" />
-  <java-symbol type="plurals" name="duration_hours_relative_future" />
-  <java-symbol type="plurals" name="duration_days_relative_future" />
-  <java-symbol type="plurals" name="duration_years_relative_future" />
+  <java-symbol type="string" name="duration_minutes_relative" />
+  <java-symbol type="string" name="duration_hours_relative" />
+  <java-symbol type="string" name="duration_days_relative" />
+  <java-symbol type="string" name="duration_years_relative" />
+  <java-symbol type="string" name="duration_minutes_relative_future" />
+  <java-symbol type="string" name="duration_hours_relative_future" />
+  <java-symbol type="string" name="duration_days_relative_future" />
+  <java-symbol type="string" name="duration_years_relative_future" />
 
   <java-symbol type="string" name="now_string_shortest" />
 
