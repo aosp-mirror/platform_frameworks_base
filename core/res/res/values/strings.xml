@@ -5372,12 +5372,6 @@
     <!-- Default notification text to be displayed in screening call notifications [CHAR LIMIT=40] -->
     <string name="call_notification_screening_text">Screening an incoming call</string>
 
-    <!-- Label describing the number of selected items [CHAR LIMIT=48] -->
-    <plurals name="selected_count">
-        <item quantity="one"><xliff:g id="count" example="1">%1$d</xliff:g> selected</item>
-        <item quantity="other"><xliff:g id="count" example="3">%1$d</xliff:g> selected</item>
-    </plurals>
-
     <string name="default_notification_channel_label">Uncategorized</string>
 
     <string name="importance_from_user">You set the importance of these notifications.</string>
