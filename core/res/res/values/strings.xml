@@ -4191,12 +4191,11 @@
 
     <!-- Displayed on the Find dialog to display the index of the highlighted
          match and total number of matches found in the current page. [CHAR LIMIT=NONE] -->
-    <plurals name="matches_found">
-        <!-- Case of one match -->
-        <item quantity="one">1 match</item>
-        <!-- Case of multiple total matches -->
-        <item quantity="other"><xliff:g id="index" example="2">%d</xliff:g> of <xliff:g id="total" example="137">%d</xliff:g></item>
-    </plurals>
+    <string name="matches_found">{ count, plural,
+        =1 {# match}
+        other {# of {total}}}
+    }
+    </string>
 
     <!-- Label for the "Done" button on the far left of action mode toolbars. -->
     <string name="action_mode_done">Done</string>
