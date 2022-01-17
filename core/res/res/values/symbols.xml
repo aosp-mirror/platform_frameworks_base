@@ -1261,9 +1261,9 @@
   <java-symbol type="string" name="tooltip_popup_title" />
 
   <java-symbol type="plurals" name="bugreport_countdown" />
-  <java-symbol type="plurals" name="file_count" />
   <java-symbol type="plurals" name="last_num_days" />
   <java-symbol type="plurals" name="restr_pin_countdown" />
+  <java-symbol type="string" name="file_count" />
   <java-symbol type="string" name="matches_found" />
   <java-symbol type="plurals" name="pinpuk_attempts" />
   <java-symbol type="plurals" name="ssl_ca_cert_warning" />
