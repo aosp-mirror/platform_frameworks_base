@@ -20,22 +20,34 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /** @hide */
 public final class InternalNetworkManagementException
         extends RuntimeException implements Parcelable {
 
     /* @hide */
-    public InternalNetworkManagementException(@NonNull final Throwable t) {
-        super(t);
+    public InternalNetworkManagementException(@NonNull final String errorMessage) {
+        super(errorMessage);
     }
 
-    private InternalNetworkManagementException(@NonNull final Parcel source) {
-        super(source.readString());
+    @Override
+    public int hashCode() {
+        return Objects.hash(getMessage());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        final InternalNetworkManagementException that = (InternalNetworkManagementException) obj;
+
+        return Objects.equals(getMessage(), that.getMessage());
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString(getCause().getMessage());
+        dest.writeString(getMessage());
     }
 
     @Override
@@ -53,7 +65,7 @@ public final class InternalNetworkManagementException
 
                 @Override
                 public InternalNetworkManagementException createFromParcel(@NonNull Parcel source) {
-                    return new InternalNetworkManagementException(source);
+                    return new InternalNetworkManagementException(source.readString());
                 }
             };
 }
