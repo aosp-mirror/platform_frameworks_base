@@ -167,9 +167,11 @@ public class StorageNotification extends CoreStartable {
         mStorageManager.registerListener(mListener);
 
         mContext.registerReceiver(mSnoozeReceiver, new IntentFilter(ACTION_SNOOZE_VOLUME),
-                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
         mContext.registerReceiver(mFinishReceiver, new IntentFilter(ACTION_FINISH_WIZARD),
-                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
 
         // Kick current state into place
         final List<DiskInfo> disks = mStorageManager.getDisks();

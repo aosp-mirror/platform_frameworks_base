@@ -88,7 +88,8 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         filter.addAction(ACTION_GET_FLAGS);
         flagManager.setRestartAction(this::restartSystemUI);
         flagManager.setClearCacheAction(this::removeFromCache);
-        context.registerReceiver(mReceiver, filter, null, null);
+        context.registerReceiver(mReceiver, filter, null, null,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
         dumpManager.registerDumpable(TAG, this);
     }
 
