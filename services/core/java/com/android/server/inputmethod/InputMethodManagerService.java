@@ -1478,14 +1478,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void sessionCreated(IInputMethodSession session) {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.sessionCreated");
             final long ident = Binder.clearCallingIdentity();
             try {
                 mParentIMMS.onSessionCreated(mMethod, session, mChannel);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
@@ -2539,34 +2537,40 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCaller.obtainMessageI(MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE, uid).sendToTarget();
     }
 
-    void onSessionCreated(IInputMethod method, IInputMethodSession session,
-            InputChannel channel) {
-        synchronized (ImfLock.class) {
-            if (mUserSwitchHandlerTask != null) {
-                // We have a pending user-switching task so it's better to just ignore this session.
-                channel.dispose();
-                return;
-            }
-            IInputMethod curMethod = getCurMethodLocked();
-            if (curMethod != null && method != null
-                    && curMethod.asBinder() == method.asBinder()) {
-                if (mCurClient != null) {
-                    clearClientSessionLocked(mCurClient);
-                    mCurClient.curSession = new SessionState(mCurClient,
-                            method, session, channel);
-                    InputBindResult res = attachNewInputLocked(
-                            StartInputReason.SESSION_CREATED_BY_IME, true);
-                    if (res.method != null) {
-                        executeOrSendMessage(mCurClient.client, mCaller.obtainMessageOO(
-                                MSG_BIND_CLIENT, mCurClient.client, res));
-                    }
+    @BinderThread
+    void onSessionCreated(IInputMethod method, IInputMethodSession session, InputChannel channel) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.onSessionCreated");
+        try {
+            synchronized (ImfLock.class) {
+                if (mUserSwitchHandlerTask != null) {
+                    // We have a pending user-switching task so it's better to just ignore this
+                    // session.
+                    channel.dispose();
                     return;
                 }
+                IInputMethod curMethod = getCurMethodLocked();
+                if (curMethod != null && method != null
+                        && curMethod.asBinder() == method.asBinder()) {
+                    if (mCurClient != null) {
+                        clearClientSessionLocked(mCurClient);
+                        mCurClient.curSession = new SessionState(mCurClient,
+                                method, session, channel);
+                        InputBindResult res = attachNewInputLocked(
+                                StartInputReason.SESSION_CREATED_BY_IME, true);
+                        if (res.method != null) {
+                            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageOO(
+                                    MSG_BIND_CLIENT, mCurClient.client, res));
+                        }
+                        return;
+                    }
+                }
             }
-        }
 
-        // Session abandoned.  Close its associated input channel.
-        channel.dispose();
+            // Session abandoned.  Close its associated input channel.
+            channel.dispose();
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
     }
 
     @GuardedBy("ImfLock.class")
