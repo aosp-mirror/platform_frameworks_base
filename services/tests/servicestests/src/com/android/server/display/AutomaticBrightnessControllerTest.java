@@ -19,6 +19,7 @@ package com.android.server.display;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyFloat;
@@ -34,11 +35,14 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
+import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.testutils.OffsettableClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,6 +50,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
@@ -61,7 +66,11 @@ public class AutomaticBrightnessControllerTest {
     private static final float DOZE_SCALE_FACTOR = 0.0f;
     private static final boolean RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG = false;
     private static final int LIGHT_SENSOR_WARMUP_TIME = 0;
-
+    private static final int AMBIENT_LIGHT_HORIZON_SHORT = 1000;
+    private static final int AMBIENT_LIGHT_HORIZON_LONG = 2000;
+    private static final float EPSILON = 0.001f;
+    private OffsettableClock mClock = new OffsettableClock();
+    private TestLooper mTestLooper;
     private Context mContext;
     private AutomaticBrightnessController mController;
 
@@ -91,21 +100,36 @@ public class AutomaticBrightnessControllerTest {
         }
     }
 
+    private void advanceTime(long timeMs) {
+        mClock.fastForward(timeMs);
+        mTestLooper.dispatchAll();
+    }
+
     private AutomaticBrightnessController setupController(Sensor lightSensor) {
+        mClock = new OffsettableClock.Stopped();
+        mTestLooper = new TestLooper(mClock::now);
+
         AutomaticBrightnessController controller = new AutomaticBrightnessController(
                 new AutomaticBrightnessController.Injector() {
                     @Override
                     public Handler getBackgroundThreadHandler() {
                         return mNoOpHandler;
                     }
-                },
-                () -> { }, mContext.getMainLooper(), mSensorManager, lightSensor,
+
+                    @Override
+                    AutomaticBrightnessController.Clock createClock() {
+                        return mClock::now;
+                    }
+
+                }, // pass in test looper instead, pass in offsetable clock
+                () -> { }, mTestLooper.getLooper(), mSensorManager, lightSensor,
                 mBrightnessMappingStrategy, LIGHT_SENSOR_WARMUP_TIME, BRIGHTNESS_MIN_FLOAT,
                 BRIGHTNESS_MAX_FLOAT, DOZE_SCALE_FACTOR, LIGHT_SENSOR_RATE,
                 INITIAL_LIGHT_SENSOR_RATE, BRIGHTENING_LIGHT_DEBOUNCE_CONFIG,
                 DARKENING_LIGHT_DEBOUNCE_CONFIG, RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG,
                 mAmbientBrightnessThresholds, mScreenBrightnessThresholds,
-                mContext, mHbmController, mIdleBrightnessMappingStrategy
+                mContext, mHbmController, mIdleBrightnessMappingStrategy,
+                AMBIENT_LIGHT_HORIZON_SHORT, AMBIENT_LIGHT_HORIZON_LONG
         );
 
         when(mHbmController.getCurrentBrightnessMax()).thenReturn(BRIGHTNESS_MAX_FLOAT);
@@ -275,5 +299,96 @@ public class AutomaticBrightnessControllerTest {
 
         // Ensure we use the correct mapping strategy
         verify(mIdleBrightnessMappingStrategy, times(1)).addUserDataPoint(1000f, 0.5f);
+    }
+
+    @Test
+    public void testAmbientLightHorizon() throws Exception {
+        // create abc
+        Sensor lightSensor = TestUtils.createSensor(Sensor.TYPE_LIGHT, "Light Sensor");
+        mController = setupController(lightSensor);
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(lightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        long increment = 500;
+        // set autobrightness to low
+        // t = 0
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 0));
+
+        // t = 500
+        mClock.fastForward(increment);
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 0));
+
+        // t = 1000
+        mClock.fastForward(increment);
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 0));
+        assertEquals(0.0f, mController.getAmbientLux(), EPSILON);
+
+        // t = 1500
+        mClock.fastForward(increment);
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 0));
+        assertEquals(0.0f, mController.getAmbientLux(), EPSILON);
+
+        // t = 2000
+        // ensure that our reading is at 0.
+        mClock.fastForward(increment);
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 0));
+        assertEquals(0.0f, mController.getAmbientLux(), EPSILON);
+
+        // t = 2500
+        // first 10000 lux sensor event reading
+        mClock.fastForward(increment);
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 10000));
+        assertTrue(mController.getAmbientLux() > 0.0f);
+        assertTrue(mController.getAmbientLux() < 10000.0f);
+
+        // t = 3000
+        // lux reading should still not yet be 10000.
+        mClock.fastForward(increment);
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 10000));
+        assertTrue(mController.getAmbientLux() > 0.0f);
+        assertTrue(mController.getAmbientLux() < 10000.0f);
+
+        // t = 3500
+        mClock.fastForward(increment);
+        // lux has been high (10000) for 1000ms.
+        // lux reading should be 10000
+        // short horizon (ambient lux) is high, long horizon is still not high
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 10000));
+        assertEquals(10000.0f, mController.getAmbientLux(), EPSILON);
+
+        // t = 4000
+        // stay high
+        mClock.fastForward(increment);
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 10000));
+        assertEquals(10000.0f, mController.getAmbientLux(), EPSILON);
+
+        // t = 4500
+        Mockito.clearInvocations(mBrightnessMappingStrategy);
+        mClock.fastForward(increment);
+        // short horizon is high, long horizon is high too
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 10000));
+        verify(mBrightnessMappingStrategy, times(1)).getBrightness(10000, null, -1);
+        assertEquals(10000.0f, mController.getAmbientLux(), EPSILON);
+
+        // t = 5000
+        mClock.fastForward(increment);
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 0));
+        assertTrue(mController.getAmbientLux() > 0.0f);
+        assertTrue(mController.getAmbientLux() < 10000.0f);
+
+        // t = 5500
+        mClock.fastForward(increment);
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 0));
+        assertTrue(mController.getAmbientLux() > 0.0f);
+        assertTrue(mController.getAmbientLux() < 10000.0f);
+
+        // t = 6000
+        mClock.fastForward(increment);
+        // ambient lux goes to 0
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 0));
+        assertEquals(0.0f, mController.getAmbientLux(), EPSILON);
     }
 }
