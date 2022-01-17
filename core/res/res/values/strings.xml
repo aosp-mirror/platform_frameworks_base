@@ -5197,52 +5197,60 @@
     <string name="data_saver_enable_button">Turn on</string>
 
     <!-- Zen mode condition - summary: time duration in minutes. [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_minutes_summary">
-        <item quantity="one">For one minute (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-        <item quantity="other">For %1$d minutes (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary">{count, plural,
+        =1    {For one minute (until {formattedTime})}
+        other {For # minutes (until {formattedTime})}
+    }
+    </string>
 
     <!-- Zen mode condition - summary: time duration in minutes (short version). [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_minutes_summary_short">
-        <item quantity="one">For 1 min (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-        <item quantity="other">For %1$d min (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary_short">{count, plural,
+        =1    {For 1 min (until {formattedTime})}
+        other {For # min (until {formattedTime})}
+    }
+    </string>
 
     <!-- Zen mode condition - summary: time duration in hours. [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_hours_summary">
-        <item quantity="one">For 1 hour (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-        <item quantity="other">For %1$d hours (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-    </plurals>
+    <string name="zen_mode_duration_hours_summary">{count, plural,
+        =1    {For 1 hour (until {formattedTime})}
+        other {For # hours (until {formattedTime})}
+    }
+    </string>
 
     <!-- Zen mode condition - summary: time duration in hours (short version). [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_hours_summary_short">
-        <item quantity="one">For 1 hr (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-        <item quantity="other">For %1$d hr (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-    </plurals>
+    <string name="zen_mode_duration_hours_summary_short">{count, plural,
+        =1    {For 1 hr (until {formattedTime})}
+        other {For # hr (until {formattedTime})}
+    }
+    </string>
 
     <!-- Zen mode condition - line one: time duration in minutes. [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_minutes">
-        <item quantity="one">For one minute</item>
-        <item quantity="other">For %d minutes</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes">{count, plural,
+        =1    {For one minute}
+        other {For # minutes}
+    }
+    </string>
 
     <!-- Zen mode condition - line one: time duration in minutes (short version). [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_minutes_short">
-        <item quantity="one">For 1 min</item>
-        <item quantity="other">For %d min</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_short">{count, plural,
+        =1    {For 1 min}
+        other {For # min}
+    }
+    </string>
 
     <!-- Zen mode condition - line one: time duration in hours. [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_hours">
-        <item quantity="one">For 1 hour</item>
-        <item quantity="other">For %d hours</item>
-    </plurals>
+    <string name="zen_mode_duration_hours">{count, plural,
+        =1    {For 1 hour}
+        other {For # hours}
+    }
+    </string>
 
     <!-- Zen mode condition - line one: time duration in hours (short version). [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_hours_short">
-        <item quantity="one">For 1 hr</item>
-        <item quantity="other">For %d hr</item>
-    </plurals>
+    <string name="zen_mode_duration_hours_short">{count, plural,
+        =1    {For 1 hr}
+        other {For # hr}
+    }
+    </string>
 
     <!-- Zen mode condition - line two: ending time indicating the next day. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_until_next_day">Until <xliff:g id="formattedTime" example="Tue, 10 PM">%1$s</xliff:g></string>

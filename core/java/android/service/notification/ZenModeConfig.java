@@ -46,6 +46,7 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.PluralsMessageFormatter;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -63,8 +64,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -1333,25 +1336,30 @@ public class ZenModeConfig implements Parcelable {
         final CharSequence formattedTime =
                 getFormattedTime(context, time, isToday(time), userHandle);
         final Resources res = context.getResources();
+        final Map<String, Object> arguments = new HashMap<>();
         if (minutes < 60) {
             // display as minutes
             num = minutes;
-            int summaryResId = shortVersion ? R.plurals.zen_mode_duration_minutes_summary_short
-                    : R.plurals.zen_mode_duration_minutes_summary;
-            summary = res.getQuantityString(summaryResId, num, num, formattedTime);
-            int line1ResId = shortVersion ? R.plurals.zen_mode_duration_minutes_short
-                    : R.plurals.zen_mode_duration_minutes;
-            line1 = res.getQuantityString(line1ResId, num, num, formattedTime);
+            int summaryResId = shortVersion ? R.string.zen_mode_duration_minutes_summary_short
+                    : R.string.zen_mode_duration_minutes_summary;
+            arguments.put("count", num);
+            arguments.put("formattedTime", formattedTime);
+            summary = PluralsMessageFormatter.format(res, arguments, summaryResId);
+            int line1ResId = shortVersion ? R.string.zen_mode_duration_minutes_short
+                    : R.string.zen_mode_duration_minutes;
+            line1 = PluralsMessageFormatter.format(res, arguments, line1ResId);
             line2 = res.getString(R.string.zen_mode_until, formattedTime);
         } else if (minutes < DAY_MINUTES) {
             // display as hours
             num =  Math.round(minutes / 60f);
-            int summaryResId = shortVersion ? R.plurals.zen_mode_duration_hours_summary_short
-                    : R.plurals.zen_mode_duration_hours_summary;
-            summary = res.getQuantityString(summaryResId, num, num, formattedTime);
-            int line1ResId = shortVersion ? R.plurals.zen_mode_duration_hours_short
-                    : R.plurals.zen_mode_duration_hours;
-            line1 = res.getQuantityString(line1ResId, num, num, formattedTime);
+            int summaryResId = shortVersion ? R.string.zen_mode_duration_hours_summary_short
+                    : R.string.zen_mode_duration_hours_summary;
+            arguments.put("count", num);
+            arguments.put("formattedTime", formattedTime);
+            summary = PluralsMessageFormatter.format(res, arguments, summaryResId);
+            int line1ResId = shortVersion ? R.string.zen_mode_duration_hours_short
+                    : R.string.zen_mode_duration_hours;
+            line1 = PluralsMessageFormatter.format(res, arguments, line1ResId);
             line2 = res.getString(R.string.zen_mode_until, formattedTime);
         } else {
             // display as day/time
