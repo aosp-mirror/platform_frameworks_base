@@ -1260,9 +1260,9 @@
   <java-symbol type="string" name="conference_call" />
   <java-symbol type="string" name="tooltip_popup_title" />
 
-  <java-symbol type="plurals" name="bugreport_countdown" />
   <java-symbol type="plurals" name="last_num_days" />
   <java-symbol type="plurals" name="restr_pin_countdown" />
+  <java-symbol type="string" name="bugreport_countdown" />
   <java-symbol type="string" name="file_count" />
   <java-symbol type="string" name="matches_found" />
   <java-symbol type="plurals" name="pinpuk_attempts" />

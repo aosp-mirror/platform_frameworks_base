@@ -689,10 +689,11 @@
         your device is unresponsive or too slow, or when you need all report sections.
         Does not allow you to enter more details or take additional screenshots.</string>
     <!--  Toast message informing user in how many seconds a bugreport screenshot will be taken -->
-    <plurals name="bugreport_countdown">
-        <item quantity="one">Taking screenshot for bug report in <xliff:g id="number">%d</xliff:g> second.</item>
-        <item quantity="other">Taking screenshot for bug report in <xliff:g id="number">%d</xliff:g> seconds.</item>
-    </plurals>
+    <string name="bugreport_countdown">{count, plural,
+        =1 {Taking screenshot for bug report in # second.}
+        other {Taking screenshot for bug report in # seconds.}
+    }
+    </string>
 
     <!-- Format for build summary info [CHAR LIMIT=NONE] -->
     <string name="bugreport_status" translatable="false">%s (%s)</string>
