@@ -49,12 +49,8 @@ import static android.net.NetworkPolicyManager.blockedReasonsToString;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
 import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
-import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.METERED_YES;
-import static android.net.NetworkStats.SET_ALL;
-import static android.net.NetworkStats.TAG_ALL;
-import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkTemplate.buildTemplateCarrierMetered;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.MB_IN_BYTES;
@@ -75,6 +71,7 @@ import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOO
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_RAPID;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
 import static com.android.server.net.NetworkPolicyManagerService.UidBlockedState.getEffectiveBlockedReasons;
+import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -108,6 +105,8 @@ import android.app.IActivityManager;
 import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.usage.NetworkStats;
+import android.app.usage.NetworkStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.Intent;
@@ -125,8 +124,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicy;
 import android.net.NetworkStateSnapshot;
-import android.net.NetworkStats;
-import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.wifi.WifiInfo;
@@ -138,7 +135,6 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.RemoteException;
 import android.os.SimpleClock;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
@@ -263,12 +259,13 @@ public class NetworkPolicyManagerServiceTest {
     private @Mock CarrierConfigManager mCarrierConfigManager;
     private @Mock TelephonyManager mTelephonyManager;
     private @Mock UserManager mUserManager;
+    private @Mock NetworkStatsManager mStatsManager;
+    private TestDependencies mDeps;
 
     private ArgumentCaptor<ConnectivityManager.NetworkCallback> mNetworkCallbackCaptor =
             ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
 
     private ActivityManagerInternal mActivityManagerInternal;
-    private NetworkStatsManagerInternal mStatsService;
 
     private IUidObserver mUidObserver;
     private INetworkManagementEventObserver mNetworkObserver;
@@ -335,8 +332,47 @@ public class NetworkPolicyManagerServiceTest {
                 .setBatterySaverEnabled(false).build();
         final PowerManagerInternal pmInternal = addLocalServiceMock(PowerManagerInternal.class);
         when(pmInternal.getLowPowerState(anyInt())).thenReturn(state);
+    }
 
-        mStatsService = addLocalServiceMock(NetworkStatsManagerInternal.class);
+    private class TestDependencies extends NetworkPolicyManagerService.Dependencies {
+        private final SparseArray<NetworkStats.Bucket> mMockedStats = new SparseArray<>();
+
+        TestDependencies(Context context) {
+            super(context);
+        }
+
+        @Override
+        long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
+            int total = 0;
+            for (int i = 0; i < mMockedStats.size(); i++) {
+                NetworkStats.Bucket bucket = mMockedStats.valueAt(i);
+                total += bucket.getRxBytes() + bucket.getTxBytes();
+            }
+            return total;
+        }
+
+        @Override
+        List<NetworkStats.Bucket> getNetworkUidBytes(NetworkTemplate template, long start,
+                long end) {
+            final List<NetworkStats.Bucket> ret = new ArrayList<>();
+            for (int i = 0; i < mMockedStats.size(); i++) {
+                ret.add(mMockedStats.valueAt(i));
+            }
+            return ret;
+        }
+
+        private void setMockedTotalBytes(int uid, long rxBytes, long txBytes) {
+            final NetworkStats.Bucket bucket = mock(NetworkStats.Bucket.class);
+            when(bucket.getUid()).thenReturn(uid);
+            when(bucket.getRxBytes()).thenReturn(rxBytes);
+            when(bucket.getTxBytes()).thenReturn(txBytes);
+            mMockedStats.set(uid, bucket);
+        }
+
+        private void increaseMockedTotalBytes(int uid, long rxBytes, long txBytes) {
+            final NetworkStats.Bucket bucket = mMockedStats.get(uid);
+            setMockedTotalBytes(uid, bucket.getRxBytes() + rxBytes, bucket.getTxBytes() + txBytes);
+        }
     }
 
     @Before
@@ -376,6 +412,8 @@ public class NetworkPolicyManagerServiceTest {
                         return mConnManager;
                     case Context.USER_SERVICE:
                         return mUserManager;
+                    case Context.NETWORK_STATS_SERVICE:
+                        return mStatsManager;
                     default:
                         return super.getSystemService(name);
                 }
@@ -400,8 +438,9 @@ public class NetworkPolicyManagerServiceTest {
         }).when(mActivityManager).registerUidObserver(any(), anyInt(), anyInt(), any(String.class));
 
         mFutureIntent = newRestrictBackgroundChangedFuture();
+        mDeps = new TestDependencies(mServiceContext);
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager,
-                mNetworkManager, mIpm, mClock, mPolicyDir, true);
+                mNetworkManager, mIpm, mClock, mPolicyDir, true, mDeps);
         mService.bindConnectivityManager();
         mPolicyListener = new NetworkPolicyListenerAnswer(mService);
 
@@ -456,6 +495,9 @@ public class NetworkPolicyManagerServiceTest {
         verify(mNetworkManager).registerObserver(networkObserver.capture());
         mNetworkObserver = networkObserver.getValue();
 
+        // Simulate NetworkStatsService broadcast stats updated to signal its readiness.
+        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_UPDATED));
+
         NetworkPolicy defaultPolicy = mService.buildDefaultCarrierPolicy(0, "");
         mDefaultWarningBytes = defaultPolicy.warningBytes;
         mDefaultLimitBytes = defaultPolicy.limitBytes;
@@ -479,7 +521,6 @@ public class NetworkPolicyManagerServiceTest {
         LocalServices.removeServiceForTest(DeviceIdleInternal.class);
         LocalServices.removeServiceForTest(AppStandbyInternal.class);
         LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
-        LocalServices.removeServiceForTest(NetworkStatsManagerInternal.class);
     }
 
     @After
@@ -1108,10 +1149,7 @@ public class NetworkPolicyManagerServiceTest {
         when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);
 
         // pretend that 512 bytes total have happened
-        stats = new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, 256L, 2L, 256L, 2L);
-        when(mStatsService.getNetworkTotalBytes(sTemplateWifi, CYCLE_START, CYCLE_END))
-                .thenReturn(stats.getTotalBytes());
+        mDeps.setMockedTotalBytes(UID_A, 256L, 256L);
 
         mPolicyListener.expect().onMeteredIfacesChanged(any());
         setNetworkPolicies(new NetworkPolicy(
@@ -1124,26 +1162,6 @@ public class NetworkPolicyManagerServiceTest {
 
     @Test
     public void testNotificationWarningLimitSnooze() throws Exception {
-        // Create a place to store fake usage
-        final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
-        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
-        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
-                .thenAnswer(new Answer<Long>() {
-                    @Override
-                    public Long answer(InvocationOnMock invocation) throws Throwable {
-                        final NetworkStatsHistory.Entry entry = history.getValues(
-                                invocation.getArgument(1), invocation.getArgument(2), null);
-                        return entry.rxBytes + entry.txBytes;
-                    }
-                });
-        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
-                .thenAnswer(new Answer<NetworkStats>() {
-                    @Override
-                    public NetworkStats answer(InvocationOnMock invocation) throws Throwable {
-                        return stats;
-                    }
-                });
-
         // Get active mobile network in place
         expectMobileDefaults();
         mService.updateNetworks();
@@ -1161,9 +1179,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Normal usage means no notification
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(360), 0);
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
@@ -1178,9 +1194,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Push over warning
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1799), 0L, 0L, 0L, 0));
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(1799), 0);
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
@@ -1196,9 +1210,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Push over warning, but with a config that isn't from an identified carrier
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1799), 0L, 0L, 0L, 0));
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(1799), 0);
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
@@ -1215,9 +1227,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Push over limit
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1810), 0L, 0L, 0L, 0));
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(1810), 0);
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
@@ -1248,26 +1258,6 @@ public class NetworkPolicyManagerServiceTest {
 
     @Test
     public void testNotificationRapid() throws Exception {
-        // Create a place to store fake usage
-        final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
-        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
-        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
-                .thenAnswer(new Answer<Long>() {
-                    @Override
-                    public Long answer(InvocationOnMock invocation) throws Throwable {
-                        final NetworkStatsHistory.Entry entry = history.getValues(
-                                invocation.getArgument(1), invocation.getArgument(2), null);
-                        return entry.rxBytes + entry.txBytes;
-                    }
-                });
-        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
-                .thenAnswer(new Answer<NetworkStats>() {
-                    @Override
-                    public NetworkStats answer(InvocationOnMock invocation) throws Throwable {
-                        return stats;
-                    }
-                });
-
         // Get active mobile network in place
         expectMobileDefaults();
         mService.updateNetworks();
@@ -1285,9 +1275,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Using 20% data in 20% time is normal
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(360), 0);
 
             reset(mNotifManager);
             mService.updateNetworks();
@@ -1297,16 +1285,9 @@ public class NetworkPolicyManagerServiceTest {
         // Using 80% data in 20% time is alarming; but spread equally among
         // three UIDs means we get generic alert
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
-            stats.clear();
-            stats.insertEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
-                    DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
-            stats.insertEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
-                    DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
-            stats.insertEntry(IFACE_ALL, UID_C, SET_ALL, TAG_ALL,
-                    DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(480), 0);
+            mDeps.setMockedTotalBytes(UID_B, DataUnit.MEGABYTES.toBytes(480), 0);
+            mDeps.setMockedTotalBytes(UID_C, DataUnit.MEGABYTES.toBytes(480), 0);
 
             reset(mNotifManager);
             mService.updateNetworks();
@@ -1325,14 +1306,9 @@ public class NetworkPolicyManagerServiceTest {
         // Using 80% data in 20% time is alarming; but mostly done by one UID
         // means we get specific alert
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
-            stats.clear();
-            stats.insertEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
-                    DataUnit.MEGABYTES.toBytes(960), 0, 0, 0, 0);
-            stats.insertEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
-                    DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(960), 0);
+            mDeps.setMockedTotalBytes(UID_B, DataUnit.MEGABYTES.toBytes(480), 0);
+            mDeps.setMockedTotalBytes(UID_C, 0, 0);
 
             reset(mNotifManager);
             mService.updateNetworks();
@@ -1362,13 +1338,10 @@ public class NetworkPolicyManagerServiceTest {
 
         // bring up wifi network with metered policy
         snapshots = List.of(buildWifi());
-        stats = new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, 0L, 0L, 0L, 0L);
+        mDeps.setMockedTotalBytes(UID_A, 0L, 0L);
 
         {
             when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);
-            when(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15,
-                    currentTimeMillis())).thenReturn(stats.getTotalBytes());
 
             mPolicyListener.expect().onMeteredIfacesChanged(any());
             setNetworkPolicies(new NetworkPolicy(
@@ -1647,18 +1620,6 @@ public class NetworkPolicyManagerServiceTest {
         final NetworkPolicyManagerInternal internal = LocalServices
                 .getService(NetworkPolicyManagerInternal.class);
 
-        // Create a place to store fake usage
-        final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
-        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
-        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
-                .thenAnswer(invocation -> {
-                    final NetworkStatsHistory.Entry entry = history.getValues(
-                            invocation.getArgument(1), invocation.getArgument(2), null);
-                    return entry.rxBytes + entry.txBytes;
-                });
-        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
-                .thenReturn(stats);
-
         // Get active mobile network in place
         expectMobileDefaults();
         mService.updateNetworks();
@@ -1669,9 +1630,7 @@ public class NetworkPolicyManagerServiceTest {
         setCurrentTimeMillis(end);
 
         // Get some data usage in place
-        history.clear();
-        history.recordData(start, end,
-                new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
+        mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(360), 0);
 
         // No data plan
         {
@@ -1786,20 +1745,11 @@ public class NetworkPolicyManagerServiceTest {
                 true);
     }
 
-    private void increaseMockedTotalBytes(NetworkStats stats, long rxBytes, long txBytes) {
-        stats.insertEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
-                rxBytes, 1, txBytes, 1, 0);
-        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
-                .thenReturn(stats.getTotalBytes());
-        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
-                .thenReturn(stats);
-    }
-
     private void triggerOnStatsProviderWarningOrLimitReached() throws InterruptedException {
         mService.onStatsProviderWarningOrLimitReached();
         // Wait for processing of MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED.
         postMsgAndWaitForCompletion();
-        verify(mStatsService).forceUpdate();
+        verify(mStatsManager).forceUpdate();
         // Wait for processing of MSG_*_INTERFACE_QUOTAS.
         postMsgAndWaitForCompletion();
     }
@@ -1812,13 +1762,12 @@ public class NetworkPolicyManagerServiceTest {
     public void testStatsProviderWarningAndLimitReached() throws Exception {
         final int CYCLE_DAY = 15;
 
-        final NetworkStats stats = new NetworkStats(0L, 1);
-        increaseMockedTotalBytes(stats, 2999, 2000);
+        mDeps.setMockedTotalBytes(UID_A, 2999, 2000);
 
         // Get active mobile network in place
         expectMobileDefaults();
         mService.updateNetworks();
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE,
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE,
                 Long.MAX_VALUE);
 
         // Set warning to 7KB and limit to 10KB.
@@ -1828,32 +1777,32 @@ public class NetworkPolicyManagerServiceTest {
         postMsgAndWaitForCompletion();
 
         // Verifies that remaining quotas are set to providers.
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2001L, 5001L);
-        reset(mStatsService);
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2001L, 5001L);
+        reset(mStatsManager);
 
         // Increase the usage and simulates that limit reached fires earlier by provider,
         // but actually the quota is not yet reached. Verifies that the limit reached leads to
         // a force update and new quotas should be set.
-        increaseMockedTotalBytes(stats, 1000, 999);
+        mDeps.increaseMockedTotalBytes(UID_A, 1000, 999);
         triggerOnStatsProviderWarningOrLimitReached();
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2L, 3002L);
-        reset(mStatsService);
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2L, 3002L);
+        reset(mStatsManager);
 
         // Increase the usage and simulate warning reached, the new warning should be unlimited
         // since service will disable warning quota to stop lower layer from keep triggering
         // warning reached event.
-        increaseMockedTotalBytes(stats, 1000L, 1000);
+        mDeps.increaseMockedTotalBytes(UID_A, 1000L, 1000);
         triggerOnStatsProviderWarningOrLimitReached();
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(
                 TEST_IFACE, Long.MAX_VALUE, 1002L);
-        reset(mStatsService);
+        reset(mStatsManager);
 
         // Increase the usage that over the warning and limit, the new limit should set to 1 to
         // block the network traffic.
-        increaseMockedTotalBytes(stats, 1000L, 1000);
+        mDeps.increaseMockedTotalBytes(UID_A, 1000L, 1000);
         triggerOnStatsProviderWarningOrLimitReached();
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE, 1L);
-        reset(mStatsService);
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE, 1L);
+        reset(mStatsManager);
     }
 
     private void enableRestrictedMode(boolean enable) throws Exception {
@@ -2143,7 +2092,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private void verifyAdvisePersistThreshold() throws Exception {
-        verify(mStatsService).advisePersistThreshold(anyLong());
+        verify(mStatsManager).advisePersistThreshold(anyLong());
     }
 
     private static class TestAbstractFuture<T> extends AbstractFuture<T> {
