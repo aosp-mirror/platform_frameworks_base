@@ -1556,6 +1556,17 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public boolean isCredentialSharedWithParent(@UserIdInt int userId) {
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
+                "isCredentialSharedWithParent");
+        synchronized (mUsersLock) {
+            UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
+            return userTypeDetails != null && userTypeDetails.isProfile()
+                    && userTypeDetails.isCredentialSharedWithParent();
+        }
+    }
+
+    @Override
     public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
                 "isUserUnlockingOrUnlocked");

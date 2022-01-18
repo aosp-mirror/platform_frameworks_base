@@ -4763,6 +4763,28 @@ public class UserManager {
     }
 
     /**
+     * Returns {@code true} if the user shares lock settings credential with its parent user
+     *
+     * This API only works for {@link UserManager#isProfile() profiles}
+     * and will always return false for any other user type.
+     *
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.INTERACT_ACROSS_USERS})
+    @SuppressAutoDoc
+    public boolean isCredentialSharedWithParent() {
+        try {
+            return mService.isCredentialSharedWithParent(mUserId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Removes a user and all associated data.
      * @param userId the integer handle of the user.
      * @hide
