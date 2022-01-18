@@ -29,6 +29,7 @@ import android.util.Xml;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.SharedUserApi;
 
 import libcore.io.IoUtils;
 
@@ -346,7 +347,7 @@ public final class SELinuxMMAC {
     }
 
     private static int getTargetSdkVersionForSeInfo(AndroidPackage pkg,
-            SharedUserSetting sharedUserSetting, PlatformCompat compatibility) {
+            SharedUserApi sharedUser, PlatformCompat compatibility) {
         // Apps which share a sharedUserId must be placed in the same selinux domain. If this
         // package is the first app installed as this shared user, set seInfoTargetSdkVersion to its
         // targetSdkVersion. These are later adjusted in PackageManagerService's constructor to be
@@ -355,8 +356,8 @@ public final class SELinuxMMAC {
         // NOTE: As new packages are installed / updated, the shared user's seinfoTargetSdkVersion
         // will NOT be modified until next boot, even if a lower targetSdkVersion is used. This
         // ensures that all packages continue to run in the same selinux domain.
-        if ((sharedUserSetting != null) && (sharedUserSetting.packages.size() != 0)) {
-            return sharedUserSetting.seInfoTargetSdkVersion;
+        if ((sharedUser != null) && (sharedUser.getPackages().size() != 0)) {
+            return sharedUser.getSeInfoTargetSdkVersion();
         }
         final ApplicationInfo appInfo = AndroidPackageUtils.generateAppInfoWithoutState(pkg);
         if (compatibility.isChangeEnabledInternal(SELINUX_LATEST_CHANGES, appInfo)) {
@@ -376,18 +377,18 @@ public final class SELinuxMMAC {
      * the ApplicationInfo instance of the package.
      *
      * @param pkg               object representing the package to be labeled.
-     * @param sharedUserSetting if the app shares a sharedUserId, then this has the shared setting.
+     * @param sharedUser if the app shares a sharedUserId, then this has the shared setting.
      * @param compatibility     the PlatformCompat service to ask about state of compat changes.
      * @return String representing the resulting seinfo.
      */
-    public static String getSeInfo(AndroidPackage pkg, SharedUserSetting sharedUserSetting,
+    public static String getSeInfo(AndroidPackage pkg, SharedUserApi sharedUser,
             PlatformCompat compatibility) {
-        final int targetSdkVersion = getTargetSdkVersionForSeInfo(pkg, sharedUserSetting,
+        final int targetSdkVersion = getTargetSdkVersionForSeInfo(pkg, sharedUser,
                 compatibility);
         // TODO(b/71593002): isPrivileged for sharedUser and appInfo should never be out of sync.
         // They currently can be if the sharedUser apps are signed with the platform key.
-        final boolean isPrivileged = (sharedUserSetting != null)
-                ? sharedUserSetting.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
+        final boolean isPrivileged = (sharedUser != null)
+                ? sharedUser.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
         return getSeInfo(pkg, isPrivileged, targetSdkVersion);
     }
 

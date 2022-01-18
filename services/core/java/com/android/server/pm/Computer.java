@@ -43,12 +43,14 @@ import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
 
@@ -633,4 +635,9 @@ public interface Computer {
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries();
+
+
+    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
+    @Nullable
+    Pair<PackageStateInternal, SharedUserApi> getPackageOrSharedUser(int appId);
 }

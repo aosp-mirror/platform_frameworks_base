@@ -1120,16 +1120,6 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     /**
-     * @param userId    the specified user to modify the theme for
-     * @param themeName the theme name to persist
-     * @see android.window.SplashScreen#setSplashScreenTheme(int)
-     */
-    public void setSplashScreenTheme(@UserIdInt int userId, @Nullable String themeName) {
-        modifyUserState(userId).setSplashScreenTheme(themeName);
-        onChanged();
-    }
-
-    /**
      * @param userId the specified user to get the theme setting from
      * @return the theme name previously persisted for the user or null if no splashscreen theme is
      * persisted.

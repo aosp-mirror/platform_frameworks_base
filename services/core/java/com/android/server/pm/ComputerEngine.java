@@ -133,9 +133,9 @@ import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateImpl;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
-import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.PackageUserStateUtils;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedInstrumentation;
 import com.android.server.pm.pkg.component.ParsedIntentInfo;
@@ -1570,7 +1570,7 @@ public class ComputerEngine implements Computer {
             PackageInfo pi = new PackageInfo();
             pi.packageName = ps.getPackageName();
             pi.setLongVersionCode(ps.getVersionCode());
-            pi.sharedUserId = (ps.getSharedUser() != null) ? ps.getSharedUser().name : null;
+            pi.sharedUserId = (ps.getSharedUser() != null) ? ps.getSharedUser().getName() : null;
             pi.firstInstallTime = state.getFirstInstallTime();
             pi.lastUpdateTime = ps.getLastUpdateTime();
 
@@ -5421,13 +5421,14 @@ public class ComputerEngine implements Computer {
             return EmptyArray.STRING;
         }
 
-        ArraySet<PackageSetting> packages = packageSetting.getSharedUser().packages;
+        ArraySet<? extends PackageStateInternal> packages =
+                packageSetting.getSharedUser().getPackageStates();
         final int numPackages = packages.size();
         String[] res = new String[numPackages];
         int i = 0;
         for (int index = 0; index < numPackages; index++) {
-            final PackageSetting ps = packages.valueAt(index);
-            if (ps.getInstalled(userId)) {
+            final PackageStateInternal ps = packages.valueAt(index);
+            if (ps.getUserStateOrDefault(userId).isInstalled()) {
                 res[i++] = ps.getPackageName();
             }
         }
@@ -5579,5 +5580,18 @@ public class ComputerEngine implements Computer {
     @Override
     public boolean getBlockUninstall(@UserIdInt int userId, @NonNull String packageName) {
         return mSettings.getBlockUninstall(userId, packageName);
+    }
+
+    @Nullable
+    @Override
+    public Pair<PackageStateInternal, SharedUserApi> getPackageOrSharedUser(int appId) {
+        final SettingBase settingBase = mSettings.getSettingBase(appId);
+        if (settingBase instanceof SharedUserSetting) {
+            return Pair.create(null, (SharedUserApi) settingBase);
+        } else if (settingBase instanceof PackageSetting) {
+            return Pair.create((PackageStateInternal) settingBase, null);
+        } else {
+            return null;
+        }
     }
 }

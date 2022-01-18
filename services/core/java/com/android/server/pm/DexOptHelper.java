@@ -71,10 +71,15 @@ final class DexOptHelper {
     private final PackageManagerService mPm;
 
     public boolean isDexOptDialogShown() {
-        return mDexOptDialogShown;
+        synchronized (mLock) {
+            return mDexOptDialogShown;
+        }
     }
 
-    @GuardedBy("mPm.mLock")
+    // TODO: Is this lock really necessary?
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
     private boolean mDexOptDialogShown;
 
     DexOptHelper(PackageManagerService pm) {
@@ -191,7 +196,7 @@ final class DexOptHelper {
                                     numberOfPackagesVisited, numberOfPackagesToDexopt), true);
                 } catch (RemoteException e) {
                 }
-                synchronized (mPm.mLock) {
+                synchronized (mLock) {
                     mDexOptDialogShown = true;
                 }
             }

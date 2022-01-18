@@ -42,11 +42,13 @@ import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
 
@@ -1286,6 +1288,14 @@ public final class ComputerTracker implements Computer {
     public WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries() {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getSharedLibraries();
+        }
+    }
+
+    @Nullable
+    @Override
+    public Pair<PackageStateInternal, SharedUserApi> getPackageOrSharedUser(int appId) {
+        try (ThreadComputer current = snapshot()) {
+            return current.mComputer.getPackageOrSharedUser(appId);
         }
     }
 }

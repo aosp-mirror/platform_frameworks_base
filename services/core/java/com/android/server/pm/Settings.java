@@ -1438,19 +1438,19 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    boolean isPermissionUpgradeNeededLPr(int userId) {
+    boolean isPermissionUpgradeNeeded(int userId) {
         return mRuntimePermissionsPersistence.isPermissionUpgradeNeeded(userId);
     }
 
-    void updateRuntimePermissionsFingerprintLPr(@UserIdInt int userId) {
+    void updateRuntimePermissionsFingerprint(@UserIdInt int userId) {
         mRuntimePermissionsPersistence.updateRuntimePermissionsFingerprint(userId);
     }
 
-    int getDefaultRuntimePermissionsVersionLPr(int userId) {
+    int getDefaultRuntimePermissionsVersion(int userId) {
         return mRuntimePermissionsPersistence.getVersion(userId);
     }
 
-    void setDefaultRuntimePermissionsVersionLPr(int version, int userId) {
+    void setDefaultRuntimePermissionsVersion(int version, int userId) {
         mRuntimePermissionsPersistence.setVersion(version, userId);
     }
 
@@ -5107,7 +5107,7 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    void dumpReadMessagesLPr(PrintWriter pw, DumpState dumpState) {
+    void dumpReadMessages(PrintWriter pw, DumpState dumpState) {
         pw.println("Settings parse messages:");
         pw.print(mReadMessages.toString());
     }

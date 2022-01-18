@@ -49,6 +49,7 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.SELinuxUtil;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import dalvik.system.VMRuntime;
 
@@ -277,8 +278,8 @@ final class AppDataHelper {
         });
     }
 
-    public void prepareAppDataContentsLIF(AndroidPackage pkg, @Nullable PackageSetting pkgSetting,
-            int userId, int flags) {
+    public void prepareAppDataContentsLIF(AndroidPackage pkg,
+            @Nullable PackageStateInternal pkgSetting, int userId, int flags) {
         if (pkg == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
@@ -287,7 +288,7 @@ final class AppDataHelper {
     }
 
     private void prepareAppDataContentsLeafLIF(AndroidPackage pkg,
-            @Nullable PackageSetting pkgSetting, int userId, int flags) {
+            @Nullable PackageStateInternal pkgSetting, int userId, int flags) {
         final String volumeUuid = pkg.getVolumeUuid();
         final String packageName = pkg.getPackageName();
 

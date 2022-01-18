@@ -40,12 +40,14 @@ import android.content.pm.SigningDetails;
 import android.content.pm.VersionedPackage;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
 
@@ -840,6 +842,14 @@ public final class ComputerLocked extends ComputerEngine {
     public WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries() {
         synchronized (mLock) {
             return super.getSharedLibraries();
+        }
+    }
+
+    @Nullable
+    @Override
+    public Pair<PackageStateInternal, SharedUserApi> getPackageOrSharedUser(int appId) {
+        synchronized (mLock) {
+            return super.getPackageOrSharedUser(appId);
         }
     }
 }

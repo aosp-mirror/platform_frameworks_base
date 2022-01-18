@@ -256,6 +256,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
 
     /**
      * Given the library name, returns a list of shared libraries on all versions.
+     * TODO: Remove, this is used for live mutation outside of the defined commit path
      */
     @GuardedBy("mPm.mLock")
     @Override

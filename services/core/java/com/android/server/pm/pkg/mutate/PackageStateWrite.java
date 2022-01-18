@@ -17,7 +17,9 @@
 package com.android.server.pm.pkg.mutate;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.util.ArraySet;
 
@@ -38,4 +40,19 @@ public interface PackageStateWrite {
 
     @NonNull
     PackageStateWrite setMimeGroup(@NonNull String mimeGroup, @NonNull ArraySet<String> mimeTypes);
+
+    @NonNull
+    PackageStateWrite setCategoryOverride(@ApplicationInfo.Category int category);
+
+    @NonNull
+    PackageStateWrite setUpdateAvailable(boolean updateAvailable);
+
+    @NonNull
+    PackageStateWrite setLoadingProgress(float progress);
+
+    @NonNull
+    PackageStateWrite setOverrideSeInfo(@Nullable String newSeInfo);
+
+    @NonNull
+    PackageStateWrite setInstaller(@NonNull String installerPackageName);
 }
