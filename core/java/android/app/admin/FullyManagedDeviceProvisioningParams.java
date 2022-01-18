@@ -25,6 +25,7 @@ import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.stats.devicepolicy.DevicePolicyEnums;
 
 import java.util.Locale;
@@ -52,6 +53,7 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
     @SuppressLint("UseIcu")
     @Nullable private final Locale mLocale;
     private final boolean mDeviceOwnerCanGrantSensorsPermissions;
+    @NonNull private final PersistableBundle mAdminExtras;
 
     private FullyManagedDeviceProvisioningParams(
             @NonNull ComponentName deviceAdminComponentName,
@@ -60,7 +62,8 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
             @Nullable String timeZone,
             long localTime,
             @Nullable @SuppressLint("UseIcu") Locale locale,
-            boolean deviceOwnerCanGrantSensorsPermissions) {
+            boolean deviceOwnerCanGrantSensorsPermissions,
+            @NonNull PersistableBundle adminExtras) {
         this.mDeviceAdminComponentName = requireNonNull(deviceAdminComponentName);
         this.mOwnerName = requireNonNull(ownerName);
         this.mLeaveAllSystemAppsEnabled = leaveAllSystemAppsEnabled;
@@ -69,6 +72,7 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
         this.mLocale = locale;
         this.mDeviceOwnerCanGrantSensorsPermissions =
                 deviceOwnerCanGrantSensorsPermissions;
+        this.mAdminExtras = adminExtras;
     }
 
     private FullyManagedDeviceProvisioningParams(
@@ -78,14 +82,16 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
             @Nullable String timeZone,
             long localTime,
             @Nullable String localeStr,
-            boolean deviceOwnerCanGrantSensorsPermissions) {
+            boolean deviceOwnerCanGrantSensorsPermissions,
+            @Nullable PersistableBundle adminExtras) {
         this(deviceAdminComponentName,
                 ownerName,
                 leaveAllSystemAppsEnabled,
                 timeZone,
                 localTime,
                 getLocale(localeStr),
-                deviceOwnerCanGrantSensorsPermissions);
+                deviceOwnerCanGrantSensorsPermissions,
+                adminExtras);
     }
 
     @Nullable
@@ -151,6 +157,15 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
     }
 
     /**
+     * Returns a copy of the admin extras bundle.
+     *
+     * @see DevicePolicyManager#EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE
+     */
+    public @NonNull PersistableBundle getAdminExtras() {
+        return new PersistableBundle(mAdminExtras);
+    }
+
+    /**
      * Logs the provisioning params using {@link DevicePolicyEventLogger}.
      *
      * @hide
@@ -188,6 +203,7 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
         @Nullable private Locale mLocale;
         // Default to allowing control over sensor permission grants.
         boolean mDeviceOwnerCanGrantSensorsPermissions = true;
+        @NonNull private PersistableBundle mAdminExtras;
 
         /**
          * Initialize a new {@link Builder} to construct a
@@ -262,6 +278,17 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
         }
 
         /**
+         * Sets a {@link PersistableBundle} that contains admin-specific extras.
+         */
+        @NonNull
+        public Builder setAdminExtras(@NonNull PersistableBundle adminExtras) {
+            mAdminExtras = adminExtras != null
+                    ? new PersistableBundle(adminExtras)
+                    : new PersistableBundle();
+            return this;
+        }
+
+        /**
          * Combines all of the attributes that have been set on this {@code Builder}
          *
          * @return a new {@link FullyManagedDeviceProvisioningParams} object.
@@ -275,7 +302,8 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
                     mTimeZone,
                     mLocalTime,
                     mLocale,
-                    mDeviceOwnerCanGrantSensorsPermissions);
+                    mDeviceOwnerCanGrantSensorsPermissions,
+                    mAdminExtras);
         }
     }
 
@@ -298,6 +326,7 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
                 + ", mLocale=" + (mLocale == null ? "null" : mLocale)
                 + ", mDeviceOwnerCanGrantSensorsPermissions="
                 + mDeviceOwnerCanGrantSensorsPermissions
+                + ", mAdminExtras=" + mAdminExtras
                 + '}';
     }
 
@@ -310,6 +339,7 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
         dest.writeLong(mLocalTime);
         dest.writeString(mLocale == null ? null : mLocale.toLanguageTag());
         dest.writeBoolean(mDeviceOwnerCanGrantSensorsPermissions);
+        dest.writePersistableBundle(mAdminExtras);
     }
 
     @NonNull
@@ -324,6 +354,7 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
                     long localtime = in.readLong();
                     String locale = in.readString();
                     boolean deviceOwnerCanGrantSensorsPermissions = in.readBoolean();
+                    PersistableBundle adminExtras = in.readPersistableBundle();
 
                     return new FullyManagedDeviceProvisioningParams(
                             componentName,
@@ -332,7 +363,8 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
                             timeZone,
                             localtime,
                             locale,
-                            deviceOwnerCanGrantSensorsPermissions);
+                            deviceOwnerCanGrantSensorsPermissions,
+                            adminExtras);
                 }
 
                 @Override

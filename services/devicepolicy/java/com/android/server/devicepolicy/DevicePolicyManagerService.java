@@ -17577,6 +17577,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     startTime,
                     callerPackage);
 
+            onCreateAndProvisionManagedProfileStarted(provisioningParams);
+
             installExistingAdminPackage(userInfo.id, admin.getPackageName());
             if (!enableAdminAndSetProfileOwner(
                     userInfo.id, caller.getUserId(), admin, provisioningParams.getOwnerName())) {
@@ -17596,6 +17598,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(admin, userInfo.id);
                 }
             }
+
+            onCreateAndProvisionManagedProfileCompleted(provisioningParams);
 
             sendProvisioningCompletedBroadcast(
                     userInfo.id,
@@ -17617,6 +17621,29 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Binder.restoreCallingIdentity(identity);
         }
     }
+
+    /**
+     * Callback called at the beginning of {@link #createAndProvisionManagedProfile(
+     * ManagedProfileProvisioningParams, String)} after the relevant prechecks have passed.
+     *
+     * <p>The logic in this method blocks provisioning.
+     *
+     * <p>This method is meant to be overridden by OEMs.
+     */
+    private void onCreateAndProvisionManagedProfileStarted(
+            ManagedProfileProvisioningParams provisioningParams) {}
+
+    /**
+     * Callback called at the end of {@link #createAndProvisionManagedProfile(
+     * ManagedProfileProvisioningParams, String)} after all the other provisioning tasks
+     * have completed successfully.
+     *
+     * <p>The logic in this method blocks provisioning.
+     *
+     * <p>This method is meant to be overridden by OEMs.
+     */
+    private void onCreateAndProvisionManagedProfileCompleted(
+            ManagedProfileProvisioningParams provisioningParams) {}
 
     private void resetInteractAcrossProfilesAppOps() {
         mInjector.getCrossProfileApps().clearInteractAcrossProfilesAppOps();
@@ -17857,6 +17884,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         ERROR_PRE_CONDITION_FAILED,
                         "Provisioning preconditions failed with result: " + result);
             }
+            onProvisionFullyManagedDeviceStarted(provisioningParams);
             setTimeAndTimezone(provisioningParams.getTimeZone(), provisioningParams.getLocalTime());
             setLocale(provisioningParams.getLocale());
 
@@ -17882,6 +17910,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             disallowAddUser();
             setAdminCanGrantSensorsPermissionForUserUnchecked(deviceOwnerUserId,
                     provisioningParams.canDeviceOwnerGrantSensorsPermissions());
+            onProvisionFullyManagedDeviceCompleted(provisioningParams);
             sendProvisioningCompletedBroadcast(
                     deviceOwnerUserId,
                     ACTION_PROVISION_MANAGED_DEVICE,
@@ -17896,6 +17925,29 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Binder.restoreCallingIdentity(identity);
         }
     }
+
+    /**
+     * Callback called at the beginning of {@link #provisionFullyManagedDevice(
+     * FullyManagedDeviceProvisioningParams, String)} after the relevant prechecks have passed.
+     *
+     * <p>The logic in this method blocks provisioning.
+     *
+     * <p>This method is meant to be overridden by OEMs.
+     */
+    private void onProvisionFullyManagedDeviceStarted(
+            FullyManagedDeviceProvisioningParams provisioningParams) {}
+
+    /**
+     * Callback called at the end of {@link #provisionFullyManagedDevice(
+     * FullyManagedDeviceProvisioningParams, String)} after all the other provisioning tasks
+     * have completed successfully.
+     *
+     * <p>The logic in this method blocks provisioning.
+     *
+     * <p>This method is meant to be overridden by OEMs.
+     */
+    private void onProvisionFullyManagedDeviceCompleted(
+            FullyManagedDeviceProvisioningParams provisioningParams) {}
 
     private void setTimeAndTimezone(String timeZone, long localTime) {
         try {
