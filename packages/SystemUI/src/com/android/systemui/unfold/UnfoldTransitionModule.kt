@@ -90,7 +90,7 @@ class UnfoldTransitionModule {
         config: UnfoldTransitionConfig,
         provider: Optional<UnfoldTransitionProgressProvider>
     ): ShellUnfoldProgressProvider =
-        if (config.isEnabled && provider.isPresent()) {
+        if (config.isEnabled && provider.isPresent) {
             UnfoldProgressProvider(provider.get())
         } else {
             ShellUnfoldProgressProvider.NO_PROVIDER

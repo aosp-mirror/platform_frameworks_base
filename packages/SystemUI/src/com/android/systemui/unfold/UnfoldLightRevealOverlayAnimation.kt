@@ -20,8 +20,8 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.hardware.devicestate.DeviceStateManager
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener
-import android.hardware.input.InputManager
 import android.hardware.display.DisplayManager
+import android.hardware.input.InputManager
 import android.os.Handler
 import android.os.Trace
 import android.view.Choreographer
@@ -46,7 +46,9 @@ import java.util.function.Consumer
 import javax.inject.Inject
 
 @SysUIUnfoldScope
-class UnfoldLightRevealOverlayAnimation @Inject constructor(
+class UnfoldLightRevealOverlayAnimation
+@Inject
+constructor(
     private val context: Context,
     private val deviceStateManager: DeviceStateManager,
     private val displayManager: DisplayManager,
@@ -75,12 +77,13 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
         deviceStateManager.registerCallback(executor, FoldListener())
         unfoldTransitionProgressProvider.addCallback(transitionListener)
 
-        val containerBuilder = SurfaceControl.Builder(SurfaceSession())
-            .setContainerLayer()
-            .setName("unfold-overlay-container")
+        val containerBuilder =
+            SurfaceControl.Builder(SurfaceSession())
+                .setContainerLayer()
+                .setName("unfold-overlay-container")
 
-        displayAreaHelper.get().attachToRootDisplayArea(Display.DEFAULT_DISPLAY,
-            containerBuilder) { builder ->
+        displayAreaHelper.get().attachToRootDisplayArea(
+                Display.DEFAULT_DISPLAY, containerBuilder) { builder ->
             executor.execute {
                 overlayContainer = builder.build()
 
@@ -89,13 +92,13 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
                     .show(overlayContainer)
                     .apply()
 
-                wwm = WindowlessWindowManager(context.resources.configuration,
-                    overlayContainer, null)
+                wwm =
+                    WindowlessWindowManager(context.resources.configuration, overlayContainer, null)
             }
         }
 
-        displayManager.registerDisplayListener(displayListener, handler,
-            DisplayManager.EVENT_FLAG_DISPLAY_CHANGED)
+        displayManager.registerDisplayListener(
+            displayListener, handler, DisplayManager.EVENT_FLAG_DISPLAY_CHANGED)
 
         // Get unfolded display size immediately as 'current display info' might be
         // not up-to-date during unfolding
@@ -136,8 +139,8 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
         ensureOverlayRemoved()
 
         val newRoot = SurfaceControlViewHost(context, context.display!!, wwm, false)
-        val newView = LightRevealScrim(context, null)
-            .apply {
+        val newView =
+            LightRevealScrim(context, null).apply {
                 revealEffect = createLightRevealEffect()
                 isScrimOpaqueChangedListener = Consumer {}
                 revealAmount = 0f
@@ -147,8 +150,7 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
         newRoot.setView(newView, params)
 
         onOverlayReady?.let { callback ->
-            Trace.beginAsyncSection(
-                "UnfoldLightRevealOverlayAnimation#relayout", 0)
+            Trace.beginAsyncSection("UnfoldLightRevealOverlayAnimation#relayout", 0)
 
             newRoot.relayout(params) { transaction ->
                 val vsyncId = Choreographer.getSfInstance().vsyncId
@@ -161,15 +163,11 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
                     // (turn on the brightness) only when the content is actually visible as it
                     // might be presented only in the next frame.
                     // See b/197538198
-                    transaction.setFrameTimelineVsync(vsyncId)
-                        .apply(/* sync */true)
+                    transaction.setFrameTimelineVsync(vsyncId).apply(/* sync */ true)
 
-                    transaction
-                        .setFrameTimelineVsync(vsyncId + 1)
-                        .apply(/* sync */ true)
+                    transaction.setFrameTimelineVsync(vsyncId + 1).apply(/* sync */ true)
 
-                    Trace.endAsyncSection(
-                        "UnfoldLightRevealOverlayAnimation#relayout", 0)
+                    Trace.endAsyncSection("UnfoldLightRevealOverlayAnimation#relayout", 0)
                     callback.run()
                 }
             }
@@ -185,10 +183,10 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
         val rotation = context.display!!.rotation
         val isNatural = rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
 
-        params.height = if (isNatural)
-            unfoldedDisplayInfo.naturalHeight else unfoldedDisplayInfo.naturalWidth
-        params.width = if (isNatural)
-            unfoldedDisplayInfo.naturalWidth else unfoldedDisplayInfo.naturalHeight
+        params.height =
+            if (isNatural) unfoldedDisplayInfo.naturalHeight else unfoldedDisplayInfo.naturalWidth
+        params.width =
+            if (isNatural) unfoldedDisplayInfo.naturalWidth else unfoldedDisplayInfo.naturalHeight
 
         params.format = PixelFormat.TRANSLUCENT
         params.type = WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY
@@ -206,8 +204,8 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
     }
 
     private fun createLightRevealEffect(): LightRevealEffect {
-        val isVerticalFold = currentRotation == Surface.ROTATION_0 ||
-            currentRotation == Surface.ROTATION_180
+        val isVerticalFold =
+            currentRotation == Surface.ROTATION_0 || currentRotation == Surface.ROTATION_180
         return LinearLightRevealEffect(isVertical = isVerticalFold)
     }
 
@@ -218,7 +216,8 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
     }
 
     private fun getUnfoldedDisplayInfo(): DisplayInfo =
-        displayManager.displays
+        displayManager
+            .displays
             .asSequence()
             .map { DisplayInfo().apply { it.getDisplayInfo(this) } }
             .filter { it.type == Display.TYPE_INTERNAL }
@@ -255,18 +254,19 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
             }
         }
 
-        override fun onDisplayAdded(displayId: Int) {
-        }
+        override fun onDisplayAdded(displayId: Int) {}
 
-        override fun onDisplayRemoved(displayId: Int) {
-        }
+        override fun onDisplayRemoved(displayId: Int) {}
     }
 
-    private inner class FoldListener : FoldStateListener(context, Consumer { isFolded ->
-        if (isFolded) {
-            ensureOverlayRemoved()
-            isUnfoldHandled = false
-        }
-        this.isFolded = isFolded
-    })
+    private inner class FoldListener :
+        FoldStateListener(
+            context,
+            Consumer { isFolded ->
+                if (isFolded) {
+                    ensureOverlayRemoved()
+                    isUnfoldHandled = false
+                }
+                this.isFolded = isFolded
+            })
 }
