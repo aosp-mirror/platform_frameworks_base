@@ -10356,9 +10356,9 @@ package android.service.autofill {
   }
 
   public static final class Dataset.Builder {
-    ctor public Dataset.Builder(@NonNull android.service.autofill.InlinePresentation);
+    ctor @Deprecated public Dataset.Builder(@NonNull android.service.autofill.InlinePresentation);
     method @NonNull public android.service.autofill.Dataset.Builder setContent(@NonNull android.view.autofill.AutofillId, @Nullable android.content.ClipData);
-    method @NonNull public android.service.autofill.Dataset.Builder setFieldInlinePresentation(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setFieldInlinePresentation(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.service.autofill.InlinePresentation);
   }
 
   public abstract class InlineSuggestionRenderService extends android.app.Service {

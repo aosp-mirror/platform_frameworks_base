@@ -37727,21 +37727,23 @@ package android.service.autofill {
   }
 
   public static final class Dataset.Builder {
-    ctor public Dataset.Builder(@NonNull android.widget.RemoteViews);
+    ctor @Deprecated public Dataset.Builder(@NonNull android.widget.RemoteViews);
+    ctor public Dataset.Builder(@NonNull android.service.autofill.Presentations);
     ctor public Dataset.Builder();
     method @NonNull public android.service.autofill.Dataset build();
     method @NonNull public android.service.autofill.Dataset.Builder setAuthentication(@Nullable android.content.IntentSender);
+    method @NonNull public android.service.autofill.Dataset.Builder setField(@NonNull android.view.autofill.AutofillId, @Nullable android.service.autofill.Field);
     method @NonNull public android.service.autofill.Dataset.Builder setId(@Nullable String);
-    method @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
   }
 
   public final class DateTransformation implements android.os.Parcelable android.service.autofill.Transformation {
@@ -37756,6 +37758,19 @@ package android.service.autofill {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.autofill.DateValueSanitizer> CREATOR;
+  }
+
+  public final class Field {
+    method @Nullable public android.service.autofill.Presentations getPresentations();
+    method @Nullable public android.view.autofill.AutofillValue getValue();
+  }
+
+  public static final class Field.Builder {
+    ctor public Field.Builder();
+    method @NonNull public android.service.autofill.Field build();
+    method @NonNull public android.service.autofill.Field.Builder setFilter(@Nullable java.util.regex.Pattern);
+    method @NonNull public android.service.autofill.Field.Builder setPresentations(@NonNull android.service.autofill.Presentations);
+    method @NonNull public android.service.autofill.Field.Builder setValue(@NonNull android.view.autofill.AutofillValue);
   }
 
   public final class FieldClassification {
@@ -37840,11 +37855,14 @@ package android.service.autofill {
     method @NonNull public android.service.autofill.FillResponse.Builder addDataset(@Nullable android.service.autofill.Dataset);
     method @NonNull public android.service.autofill.FillResponse build();
     method @NonNull public android.service.autofill.FillResponse.Builder disableAutofill(long);
-    method @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews);
-    method @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews, @Nullable android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews, @Nullable android.service.autofill.InlinePresentation, @Nullable android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews);
+    method @Deprecated @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews, @Nullable android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews, @Nullable android.service.autofill.InlinePresentation, @Nullable android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.service.autofill.Presentations);
     method @NonNull public android.service.autofill.FillResponse.Builder setClientState(@Nullable android.os.Bundle);
+    method @NonNull public android.service.autofill.FillResponse.Builder setDialogHeader(@NonNull android.widget.RemoteViews);
     method @NonNull public android.service.autofill.FillResponse.Builder setFieldClassificationIds(@NonNull android.view.autofill.AutofillId...);
+    method @NonNull public android.service.autofill.FillResponse.Builder setFillDialogTriggerIds(@NonNull android.view.autofill.AutofillId...);
     method @NonNull public android.service.autofill.FillResponse.Builder setFlags(int);
     method @NonNull public android.service.autofill.FillResponse.Builder setFooter(@NonNull android.widget.RemoteViews);
     method @NonNull public android.service.autofill.FillResponse.Builder setHeader(@NonNull android.widget.RemoteViews);
@@ -37887,6 +37905,22 @@ package android.service.autofill {
   }
 
   public interface OnClickAction {
+  }
+
+  public final class Presentations {
+    method @Nullable public android.widget.RemoteViews getDialogPresentation();
+    method @Nullable public android.service.autofill.InlinePresentation getInlinePresentation();
+    method @Nullable public android.service.autofill.InlinePresentation getInlineTooltipPresentation();
+    method @Nullable public android.widget.RemoteViews getMenuPresentation();
+  }
+
+  public static final class Presentations.Builder {
+    ctor public Presentations.Builder();
+    method @NonNull public android.service.autofill.Presentations build();
+    method @NonNull public android.service.autofill.Presentations.Builder setDialogPresentation(@NonNull android.widget.RemoteViews);
+    method @NonNull public android.service.autofill.Presentations.Builder setInlinePresentation(@NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Presentations.Builder setInlineTooltipPresentation(@NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Presentations.Builder setMenuPresentation(@NonNull android.widget.RemoteViews);
   }
 
   public final class RegexValidator implements android.os.Parcelable android.service.autofill.Validator {
