@@ -54,6 +54,7 @@ import com.android.net.module.util.NetworkIdentityUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Provides access to network usage history and statistics. Usage data is collected in
@@ -141,7 +142,15 @@ public class NetworkStatsManager {
         setAugmentWithSubscriptionPlan(true);
     }
 
-    /** @hide */
+    /**
+     * Set poll on open flag to indicate the poll is needed before service gets statistics
+     * result. This is default enabled. However, for any non-privileged caller, the poll might
+     * be omitted in case of rate limiting.
+     *
+     * @param pollOnOpen true if poll is needed.
+     * @hide
+     */
+    // @SystemApi(client = MODULE_LIBRARIES)
     public void setPollOnOpen(boolean pollOnOpen) {
         if (pollOnOpen) {
             mFlags |= FLAG_POLL_ON_OPEN;
@@ -368,7 +377,7 @@ public class NetworkStatsManager {
      * @return Statistics which is described above.
      * @hide
      */
-    @Nullable
+    @NonNull
     // @SystemApi(client = MODULE_LIBRARIES)
     @WorkerThread
     public NetworkStats querySummary(@NonNull NetworkTemplate template, long startTime,
@@ -377,6 +386,39 @@ public class NetworkStatsManager {
             NetworkStats result =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
             result.startSummaryEnumeration();
+            return result;
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return null; // To make the compiler happy.
+    }
+
+    /**
+     * Query tagged network usage statistics summaries.
+     *
+     * The results will only include tagged traffic made by UIDs belonging to the calling user
+     * profile. The results are aggregated over time, so that all buckets will have the same
+     * start and end timestamps as the passed arguments. Not aggregated over state, uid,
+     * default network, metered, or roaming.
+     * This may take a long time, and apps should avoid calling this on their main thread.
+     *
+     * @param template Template used to match networks. See {@link NetworkTemplate}.
+     * @param startTime Start of period, in milliseconds since the Unix epoch, see
+     *            {@link System#currentTimeMillis}.
+     * @param endTime End of period, in milliseconds since the Unix epoch, see
+     *            {@link System#currentTimeMillis}.
+     * @return Statistics which is described above.
+     * @hide
+     */
+    @NonNull
+    // @SystemApi(client = MODULE_LIBRARIES)
+    @WorkerThread
+    public NetworkStats queryTaggedSummary(@NonNull NetworkTemplate template, long startTime,
+            long endTime) throws SecurityException {
+        try {
+            NetworkStats result =
+                    new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
+            result.startTaggedSummaryEnumeration();
             return result;
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -533,6 +575,31 @@ public class NetworkStatsManager {
         result = new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
         result.startUserUidEnumeration();
         return result;
+    }
+
+    /**
+     * Query realtime network usage statistics details with interfaces constrains.
+     * Return snapshot of current UID statistics, including any {@link TrafficStats#UID_TETHERING},
+     * video calling data usage and count of network operations that set by
+     * {@link TrafficStats#incrementOperationCount}. The returned data doesn't include any
+     * statistics that is reported by {@link NetworkStatsProvider}.
+     *
+     * @param requiredIfaces A list of interfaces the stats should be restricted to, or
+     *               {@link NetworkStats#INTERFACES_ALL}.
+     *
+     * @hide
+     */
+    //@SystemApi
+    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    @NonNull public android.net.NetworkStats getDetailedUidStats(
+                @NonNull Set<String> requiredIfaces) {
+        Objects.requireNonNull(requiredIfaces, "requiredIfaces cannot be null");
+        try {
+            return mService.getDetailedUidStats(requiredIfaces.toArray(new String[0]));
+        } catch (RemoteException e) {
+            if (DBG) Log.d(TAG, "Remote exception when get detailed uid stats");
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** @hide */
@@ -802,6 +869,76 @@ public class NetworkStatsManager {
 
         private static Object getObject(Message msg, String key) {
             return msg.getData().getParcelable(key);
+        }
+    }
+
+    /**
+     * Mark given UID as being in foreground for stats purposes.
+     *
+     * @hide
+     */
+    // @SystemApi
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public void setUidForeground(int uid, boolean uidForeground) {
+        try {
+            mService.setUidForeground(uid, uidForeground);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Advise persistence threshold; may be overridden internally.
+     *
+     * @hide
+     */
+    // @SystemApi
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public void advisePersistThreshold(long thresholdBytes) {
+        try {
+            mService.advisePersistThreshold(thresholdBytes);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Force update of statistics.
+     *
+     * @hide
+     */
+    // @SystemApi
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public void forceUpdate() {
+        try {
+            mService.forceUpdate();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the warning and limit to all registered custom network stats providers.
+     * Note that invocation of any interface will be sent to all providers.
+     *
+     * @hide
+     */
+    // @SystemApi
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public void setStatsProviderWarningAndLimitAsync(@NonNull String iface, long warning,
+            long limit) {
+        try {
+            mService.setStatsProviderWarningAndLimitAsync(iface, warning, limit);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

@@ -23,8 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
-import android.annotation.SystemApi;
-import android.app.PropertyInvalidatedCache;
+import android.annotation.SystemApi; //import android.app.PropertyInvalidatedCache;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresBluetoothLocationPermission;
 import android.bluetooth.annotations.RequiresBluetoothScanPermission;
@@ -1597,6 +1596,7 @@ public final class BluetoothDevice implements Parcelable, Attributable {
         return false;
     }
 
+    /*
     private static final String BLUETOOTH_BONDING_CACHE_PROPERTY =
             "cache_key.bluetooth.get_bond_state";
     private final PropertyInvalidatedCache<BluetoothDevice, Integer> mBluetoothBondCache =
@@ -1612,16 +1612,19 @@ public final class BluetoothDevice implements Parcelable, Attributable {
                     }
                 }
             };
+     */
 
     /** @hide */
-    public void disableBluetoothGetBondStateCache() {
+    /* public void disableBluetoothGetBondStateCache() {
         mBluetoothBondCache.disableLocal();
-    }
+    } */
 
     /** @hide */
+    /*
     public static void invalidateBluetoothGetBondStateCache() {
         PropertyInvalidatedCache.invalidateCache(BLUETOOTH_BONDING_CACHE_PROPERTY);
     }
+     */
 
     /**
      * Get the bond state of the remote device.
@@ -1643,13 +1646,11 @@ public final class BluetoothDevice implements Parcelable, Attributable {
             return BOND_NONE;
         }
         try {
-            return mBluetoothBondCache.query(this);
-        } catch (RuntimeException e) {
-            if (e.getCause() instanceof RemoteException) {
-                Log.e(TAG, "", e);
-            } else {
-                throw e;
-            }
+            //return mBluetoothBondCache.query(this);
+            return sService.getBondState(this, mAttributionSource);
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to ", e);
+            e.rethrowFromSystemServer();
         }
         return BOND_NONE;
     }

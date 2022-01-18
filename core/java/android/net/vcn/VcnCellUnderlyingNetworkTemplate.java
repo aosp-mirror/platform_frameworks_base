@@ -63,13 +63,22 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
     private final int mOpportunisticMatchCriteria;
 
     private VcnCellUnderlyingNetworkTemplate(
-            int networkQuality,
             int meteredMatchCriteria,
+            int minEntryUpstreamBandwidthKbps,
+            int minExitUpstreamBandwidthKbps,
+            int minEntryDownstreamBandwidthKbps,
+            int minExitDownstreamBandwidthKbps,
             Set<String> allowedNetworkPlmnIds,
             Set<Integer> allowedSpecificCarrierIds,
             int roamingMatchCriteria,
             int opportunisticMatchCriteria) {
-        super(NETWORK_PRIORITY_TYPE_CELL, networkQuality, meteredMatchCriteria);
+        super(
+                NETWORK_PRIORITY_TYPE_CELL,
+                meteredMatchCriteria,
+                minEntryUpstreamBandwidthKbps,
+                minExitUpstreamBandwidthKbps,
+                minEntryDownstreamBandwidthKbps,
+                minExitDownstreamBandwidthKbps);
         mAllowedNetworkPlmnIds = new ArraySet<>(allowedNetworkPlmnIds);
         mAllowedSpecificCarrierIds = new ArraySet<>(allowedSpecificCarrierIds);
         mRoamingMatchCriteria = roamingMatchCriteria;
@@ -109,8 +118,16 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
             @NonNull PersistableBundle in) {
         Objects.requireNonNull(in, "PersistableBundle is null");
 
-        final int networkQuality = in.getInt(NETWORK_QUALITY_KEY);
         final int meteredMatchCriteria = in.getInt(METERED_MATCH_KEY);
+
+        final int minEntryUpstreamBandwidthKbps =
+                in.getInt(MIN_ENTRY_UPSTREAM_BANDWIDTH_KBPS_KEY, DEFAULT_MIN_BANDWIDTH_KBPS);
+        final int minExitUpstreamBandwidthKbps =
+                in.getInt(MIN_EXIT_UPSTREAM_BANDWIDTH_KBPS_KEY, DEFAULT_MIN_BANDWIDTH_KBPS);
+        final int minEntryDownstreamBandwidthKbps =
+                in.getInt(MIN_ENTRY_DOWNSTREAM_BANDWIDTH_KBPS_KEY, DEFAULT_MIN_BANDWIDTH_KBPS);
+        final int minExitDownstreamBandwidthKbps =
+                in.getInt(MIN_EXIT_DOWNSTREAM_BANDWIDTH_KBPS_KEY, DEFAULT_MIN_BANDWIDTH_KBPS);
 
         final PersistableBundle plmnIdsBundle =
                 in.getPersistableBundle(ALLOWED_NETWORK_PLMN_IDS_KEY);
@@ -131,8 +148,11 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
         final int opportunisticMatchCriteria = in.getInt(OPPORTUNISTIC_MATCH_KEY);
 
         return new VcnCellUnderlyingNetworkTemplate(
-                networkQuality,
                 meteredMatchCriteria,
+                minEntryUpstreamBandwidthKbps,
+                minExitUpstreamBandwidthKbps,
+                minEntryDownstreamBandwidthKbps,
+                minExitDownstreamBandwidthKbps,
                 allowedNetworkPlmnIds,
                 allowedSpecificCarrierIds,
                 roamingMatchCriteria,
@@ -243,7 +263,6 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
 
     /** This class is used to incrementally build VcnCellUnderlyingNetworkTemplate objects. */
     public static final class Builder {
-        private int mNetworkQuality = NETWORK_QUALITY_ANY;
         private int mMeteredMatchCriteria = MATCH_ANY;
 
         @NonNull private final Set<String> mAllowedNetworkPlmnIds = new ArraySet<>();
@@ -252,27 +271,13 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
         private int mRoamingMatchCriteria = MATCH_ANY;
         private int mOpportunisticMatchCriteria = MATCH_ANY;
 
+        private int mMinEntryUpstreamBandwidthKbps = DEFAULT_MIN_BANDWIDTH_KBPS;
+        private int mMinExitUpstreamBandwidthKbps = DEFAULT_MIN_BANDWIDTH_KBPS;
+        private int mMinEntryDownstreamBandwidthKbps = DEFAULT_MIN_BANDWIDTH_KBPS;
+        private int mMinExitDownstreamBandwidthKbps = DEFAULT_MIN_BANDWIDTH_KBPS;
+
         /** Construct a Builder object. */
         public Builder() {}
-
-        /**
-         * Set the required network quality to match this template.
-         *
-         * <p>Network quality is a aggregation of multiple signals that reflect the network link
-         * metrics. For example, the network validation bit (see {@link
-         * NetworkCapabilities#NET_CAPABILITY_VALIDATED}), estimated first hop transport bandwidth
-         * and signal strength.
-         *
-         * @param networkQuality the required network quality. Defaults to NETWORK_QUALITY_ANY
-         * @hide
-         */
-        @NonNull
-        public Builder setNetworkQuality(@NetworkQuality int networkQuality) {
-            validateNetworkQuality(networkQuality);
-
-            mNetworkQuality = networkQuality;
-            return this;
-        }
 
         /**
          * Set the matching criteria for metered networks.
@@ -369,12 +374,92 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
             return this;
         }
 
+        /**
+         * Set the minimum upstream bandwidths that this template will match.
+         *
+         * <p>This template will not match a network that does not provide at least the bandwidth
+         * passed as the entry bandwidth, except in the case that the network is selected as the VCN
+         * Gateway Connection's underlying network, where it will continue to match until the
+         * bandwidth drops under the exit bandwidth.
+         *
+         * <p>The entry criteria MUST be greater than, or equal to the exit criteria to avoid the
+         * invalid case where a network fulfills the entry criteria, but at the same time fails the
+         * exit criteria.
+         *
+         * <p>Estimated bandwidth of a network is provided by the transport layer, and reported in
+         * {@link NetworkCapabilities}. The provided estimates will be used without modification.
+         *
+         * @param minEntryUpstreamBandwidthKbps the minimum accepted upstream bandwidth for networks
+         *     that ARE NOT the already-selected underlying network, or {@code 0} to disable this
+         *     requirement. Disabled by default.
+         * @param minExitUpstreamBandwidthKbps the minimum accepted upstream bandwidth for a network
+         *     that IS the already-selected underlying network, or {@code 0} to disable this
+         *     requirement. Disabled by default.
+         * @return this {@link Builder} instance, for chaining
+         */
+        @NonNull
+        // The getter for the two integers are separated, and in the superclass. Please see {@link
+        // VcnUnderlyingNetworkTemplate#getMinEntryUpstreamBandwidthKbps()} and {@link
+        // VcnUnderlyingNetworkTemplate#getMinExitUpstreamBandwidthKbps()}
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public Builder setMinUpstreamBandwidthKbps(
+                int minEntryUpstreamBandwidthKbps, int minExitUpstreamBandwidthKbps) {
+            validateMinBandwidthKbps(minEntryUpstreamBandwidthKbps, minExitUpstreamBandwidthKbps);
+
+            mMinEntryUpstreamBandwidthKbps = minEntryUpstreamBandwidthKbps;
+            mMinExitUpstreamBandwidthKbps = minExitUpstreamBandwidthKbps;
+
+            return this;
+        }
+
+        /**
+         * Set the minimum upstream bandwidths that this template will match.
+         *
+         * <p>This template will not match a network that does not provide at least the bandwidth
+         * passed as the entry bandwidth, except in the case that the network is selected as the VCN
+         * Gateway Connection's underlying network, where it will continue to match until the
+         * bandwidth drops under the exit bandwidth.
+         *
+         * <p>The entry criteria MUST be greater than, or equal to the exit criteria to avoid the
+         * invalid case where a network fulfills the entry criteria, but at the same time fails the
+         * exit criteria.
+         *
+         * <p>Estimated bandwidth of a network is provided by the transport layer, and reported in
+         * {@link NetworkCapabilities}. The provided estimates will be used without modification.
+         *
+         * @param minEntryDownstreamBandwidthKbps the minimum accepted downstream bandwidth for
+         *     networks that ARE NOT the already-selected underlying network, or {@code 0} to
+         *     disable this requirement. Disabled by default.
+         * @param minExitDownstreamBandwidthKbps the minimum accepted downstream bandwidth for a
+         *     network that IS the already-selected underlying network, or {@code 0} to disable this
+         *     requirement. Disabled by default.
+         * @return this {@link Builder} instance, for chaining
+         */
+        @NonNull
+        // The getter for the two integers are separated, and in the superclass. Please see {@link
+        // VcnUnderlyingNetworkTemplate#getMinEntryDownstreamBandwidthKbps()} and {@link
+        // VcnUnderlyingNetworkTemplate#getMinExitDownstreamBandwidthKbps()}
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public Builder setMinDownstreamBandwidthKbps(
+                int minEntryDownstreamBandwidthKbps, int minExitDownstreamBandwidthKbps) {
+            validateMinBandwidthKbps(
+                    minEntryDownstreamBandwidthKbps, minExitDownstreamBandwidthKbps);
+
+            mMinEntryDownstreamBandwidthKbps = minEntryDownstreamBandwidthKbps;
+            mMinExitDownstreamBandwidthKbps = minExitDownstreamBandwidthKbps;
+
+            return this;
+        }
+
         /** Build the VcnCellUnderlyingNetworkTemplate. */
         @NonNull
         public VcnCellUnderlyingNetworkTemplate build() {
             return new VcnCellUnderlyingNetworkTemplate(
-                    mNetworkQuality,
                     mMeteredMatchCriteria,
+                    mMinEntryUpstreamBandwidthKbps,
+                    mMinExitUpstreamBandwidthKbps,
+                    mMinEntryDownstreamBandwidthKbps,
+                    mMinExitDownstreamBandwidthKbps,
                     mAllowedNetworkPlmnIds,
                     mAllowedSpecificCarrierIds,
                     mRoamingMatchCriteria,
