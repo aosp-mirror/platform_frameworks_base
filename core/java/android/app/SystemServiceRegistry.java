@@ -128,6 +128,7 @@ import android.media.tv.interactive.ITvIAppManager;
 import android.media.tv.interactive.TvIAppManager;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
+import android.nearby.NearbyFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializerTiramisu;
 import android.net.EthernetManager;
@@ -1537,6 +1538,7 @@ public final class SystemServiceRegistry {
             UwbFrameworkInitializer.registerServiceWrappers();
             SafetyCenterFrameworkInitializer.registerServiceWrappers();
             ConnectivityFrameworkInitializerTiramisu.registerServiceWrappers();
+            NearbyFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...
