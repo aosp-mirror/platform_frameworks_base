@@ -16,9 +16,9 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.dsl.FlickerBuilder
@@ -96,14 +96,13 @@ abstract class ExitPipTransition(testSpec: FlickerTestParameter) : PipTransition
     }
 
     /**
-     * Checks that the focus changes between the [pipApp] window and the launcher when
-     * closing the pip window
+     * Checks that the focus doesn't change between windows during the transition
      */
-    @FlakyTest(bugId = 151179149)
+    @Postsubmit
     @Test
-    open fun focusChanges() {
+    open fun focusDoesNotChange() {
         testSpec.assertEventLog {
-            this.focusChanges(pipApp.launcherName, "NexusLauncherActivity")
+            this.focusDoesNotChange()
         }
     }
 }
