@@ -686,16 +686,14 @@ static binder_status_t readBlob(AParcel* parcel, T inPlaceCallback, U ashmemCall
                                           }
                                           return data->ptr != nullptr;
                                       }));
-        inPlaceCallback(std::move(data.ptr), data.size);
-        return STATUS_OK;
+        return inPlaceCallback(std::move(data.ptr), data.size);
     } else if (type == BlobType::ASHMEM) {
         int rawFd = -1;
         int32_t size = 0;
         ON_ERROR_RETURN(AParcel_readInt32(parcel, &size));
         ON_ERROR_RETURN(AParcel_readParcelFileDescriptor(parcel, &rawFd));
         android::base::unique_fd fd(rawFd);
-        ashmemCallback(std::move(fd), size);
-        return STATUS_OK;
+        return ashmemCallback(std::move(fd), size);
     } else {
         // Although the above if/else was "exhaustive" guard against unknown types
         return STATUS_UNKNOWN_ERROR;
@@ -768,7 +766,7 @@ static binder_status_t writeBlob(AParcel* parcel, const int32_t size, const void
 // framework, we may need to update this maximum size.
 static constexpr size_t kMaxColorSpaceSerializedBytes = 80;
 
-static constexpr auto RuntimeException = "java/lang/RuntimeException";
+static constexpr auto BadParcelableException = "android/os/BadParcelableException";
 
 static bool validateImageInfo(const SkImageInfo& info, int32_t rowBytes) {
     // TODO: Can we avoid making a SkBitmap for this?
@@ -809,7 +807,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
             kRGB_565_SkColorType != colorType &&
             kARGB_4444_SkColorType != colorType &&
             kAlpha_8_SkColorType != colorType) {
-        jniThrowExceptionFmt(env, RuntimeException,
+        jniThrowExceptionFmt(env, BadParcelableException,
                              "Bitmap_createFromParcel unknown colortype: %d\n", colorType);
         return NULL;
     }
@@ -821,7 +819,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         return NULL;
     }
     if (!Bitmap::computeAllocationSize(rowBytes, height, &allocationSize)) {
-        jniThrowExceptionFmt(env, RuntimeException,
+        jniThrowExceptionFmt(env, BadParcelableException,
                              "Received bad bitmap size: width=%d, height=%d, rowBytes=%d", width,
                              height, rowBytes);
         return NULL;
@@ -831,13 +829,23 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
             p.get(),
             // In place callback
             [&](std::unique_ptr<int8_t[]> buffer, int32_t size) {
+                if (allocationSize > size) {
+                    android_errorWriteLog(0x534e4554, "213169612");
+                    return STATUS_BAD_VALUE;
+                }
                 nativeBitmap = Bitmap::allocateHeapBitmap(allocationSize, imageInfo, rowBytes);
                 if (nativeBitmap) {
-                    memcpy(nativeBitmap->pixels(), buffer.get(), size);
+                    memcpy(nativeBitmap->pixels(), buffer.get(), allocationSize);
+                    return STATUS_OK;
                 }
+                return STATUS_NO_MEMORY;
             },
             // Ashmem callback
             [&](android::base::unique_fd fd, int32_t size) {
+                if (allocationSize > size) {
+                    android_errorWriteLog(0x534e4554, "213169612");
+                    return STATUS_BAD_VALUE;
+                }
                 int flags = PROT_READ;
                 if (isMutable) {
                     flags |= PROT_WRITE;
@@ -846,18 +854,21 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
                 if (addr == MAP_FAILED) {
                     const int err = errno;
                     ALOGW("mmap failed, error %d (%s)", err, strerror(err));
-                    return;
+                    return STATUS_NO_MEMORY;
                 }
                 nativeBitmap =
                         Bitmap::createFrom(imageInfo, rowBytes, fd.release(), addr, size, !isMutable);
+                return STATUS_OK;
             });
-    if (error != STATUS_OK) {
+
+    if (error != STATUS_OK && error != STATUS_NO_MEMORY) {
         // TODO: Stringify the error, see signalExceptionForError in android_util_Binder.cpp
-        jniThrowExceptionFmt(env, RuntimeException, "Failed to read from Parcel, error=%d", error);
+        jniThrowExceptionFmt(env, BadParcelableException, "Failed to read from Parcel, error=%d",
+                             error);
         return nullptr;
     }
-    if (!nativeBitmap) {
-        jniThrowRuntimeException(env, "Could not allocate java pixel ref.");
+    if (error == STATUS_NO_MEMORY || !nativeBitmap) {
+        jniThrowRuntimeException(env, "Could not allocate bitmap data.");
         return nullptr;
     }
 
