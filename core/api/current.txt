@@ -53044,6 +53044,7 @@ package android.view.inputmethod {
     method public int getCharacterBoundsFlags(int);
     method public CharSequence getComposingText();
     method public int getComposingTextStart();
+    method @Nullable public android.view.inputmethod.EditorBoundsInfo getEditorBoundsInfo();
     method public float getInsertionMarkerBaseline();
     method public float getInsertionMarkerBottom();
     method public int getInsertionMarkerFlags();
@@ -53065,9 +53066,25 @@ package android.view.inputmethod {
     method public android.view.inputmethod.CursorAnchorInfo build();
     method public void reset();
     method public android.view.inputmethod.CursorAnchorInfo.Builder setComposingText(int, CharSequence);
+    method @NonNull public android.view.inputmethod.CursorAnchorInfo.Builder setEditorBoundsInfo(@Nullable android.view.inputmethod.EditorBoundsInfo);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setInsertionMarkerLocation(float, float, float, float, int);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setMatrix(android.graphics.Matrix);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setSelectionRange(int, int);
+  }
+
+  public final class EditorBoundsInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.graphics.RectF getEditorBounds();
+    method @Nullable public android.graphics.RectF getHandwritingBounds();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.EditorBoundsInfo> CREATOR;
+  }
+
+  public static final class EditorBoundsInfo.Builder {
+    ctor public EditorBoundsInfo.Builder();
+    method @NonNull public android.view.inputmethod.EditorBoundsInfo build();
+    method @NonNull public android.view.inputmethod.EditorBoundsInfo.Builder setEditorBounds(@Nullable android.graphics.RectF);
+    method @NonNull public android.view.inputmethod.EditorBoundsInfo.Builder setHandwritingBounds(@Nullable android.graphics.RectF);
   }
 
   public class EditorInfo implements android.text.InputType android.os.Parcelable {
