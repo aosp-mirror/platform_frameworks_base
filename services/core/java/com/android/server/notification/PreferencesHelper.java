@@ -98,6 +98,8 @@ public class PreferencesHelper implements RankingConfig {
 
     @VisibleForTesting
     static final int NOTIFICATION_CHANNEL_COUNT_LIMIT = 5000;
+    @VisibleForTesting
+    static final int NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT = 6000;
 
     private static final int NOTIFICATION_PREFERENCES_PULL_LIMIT = 1000;
     private static final int NOTIFICATION_CHANNEL_PULL_LIMIT = 2000;
@@ -239,6 +241,7 @@ public class PreferencesHelper implements RankingConfig {
                                 }
                             }
                             boolean skipWarningLogged = false;
+                            boolean skipGroupWarningLogged = false;
                             boolean hasSAWPermission = false;
                             if (upgradeForBubbles && uid != UNKNOWN_UID) {
                                 hasSAWPermission = mAppOps.noteOpNoThrow(
@@ -289,6 +292,14 @@ public class PreferencesHelper implements RankingConfig {
                                 String tagName = parser.getName();
                                 // Channel groups
                                 if (TAG_GROUP.equals(tagName)) {
+                                    if (r.groups.size() >= NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT) {
+                                        if (!skipGroupWarningLogged) {
+                                            Slog.w(TAG, "Skipping further groups for " + r.pkg
+                                                    + "; app has too many");
+                                            skipGroupWarningLogged = true;
+                                        }
+                                        continue;
+                                    }
                                     String id = parser.getAttributeValue(null, ATT_ID);
                                     CharSequence groupName = parser.getAttributeValue(null,
                                             ATT_NAME);
@@ -799,6 +810,9 @@ public class PreferencesHelper implements RankingConfig {
             }
             if (fromTargetApp) {
                 group.setBlocked(false);
+                if (r.groups.size() >= NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT) {
+                    throw new IllegalStateException("Limit exceed; cannot create more groups");
+                }
             }
             final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
             if (oldGroup != null) {
