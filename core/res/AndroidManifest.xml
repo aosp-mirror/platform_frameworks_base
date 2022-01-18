@@ -2724,6 +2724,10 @@
     <permission android:name="android.permission.INTERACT_ACROSS_PROFILES"
         android:protectionLevel="signature|appop" />
 
+    <!-- @SystemApi @hide Allows starting activities across profiles in the same profile group. -->
+    <permission android:name="android.permission.START_CROSS_PROFILE_ACTIVITIES"
+                android:protectionLevel="signature|role" />
+
     <!-- Allows configuring apps to have the INTERACT_ACROSS_PROFILES permission so that they can
          interact across profiles in the same profile group.
          @hide -->
