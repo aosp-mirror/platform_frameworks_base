@@ -4103,7 +4103,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 "IME-snapshot-surface");
         t.setBuffer(imeSurface, buffer);
         t.setColorSpace(mSurfaceControl, ColorSpace.get(ColorSpace.Named.SRGB));
-        t.setRelativeLayer(imeSurface, activity.getSurfaceControl(), 1);
+        t.setLayer(imeSurface, 1);
         t.setPosition(imeSurface, mInputMethodWindow.getDisplayFrame().left,
                 mInputMethodWindow.getDisplayFrame().top);
         return imeSurface;
