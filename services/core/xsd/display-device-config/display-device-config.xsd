@@ -58,6 +58,15 @@
                 <xs:element type="sensorDetails" name="proxSensor">
                     <xs:annotation name="final"/>
                 </xs:element>
+
+                <!-- Length of the ambient light horizon used to calculate the long & short term
+                estimates of ambient light in milliseconds.-->
+                <xs:element type="xs:nonNegativeInteger" name="ambientLightHorizonLong">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <xs:element type="xs:nonNegativeInteger" name="ambientLightHorizonShort">
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>

@@ -188,7 +188,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDeviceAudioSystem);
         mLocalDevices.add(mHdmiCecLocalDevicePlayback);
         mHdmiCecLocalDeviceAudioSystem.setRoutingControlFeatureEnabled(true);

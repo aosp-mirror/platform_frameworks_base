@@ -1058,6 +1058,7 @@ package android.app.admin {
     field public static final int CODE_USER_HAS_PROFILE_OWNER = 2; // 0x2
     field public static final int CODE_USER_NOT_RUNNING = 3; // 0x3
     field public static final int CODE_USER_SETUP_COMPLETED = 4; // 0x4
+    field public static final String EXTRA_FORCE_UPDATE_ROLE_HOLDER = "android.app.extra.FORCE_UPDATE_ROLE_HOLDER";
     field public static final String EXTRA_PROFILE_OWNER_NAME = "android.app.extra.PROFILE_OWNER_NAME";
     field @Deprecated public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_ICON_URI = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_ICON_URI";
     field @Deprecated public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL";
@@ -1069,6 +1070,7 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_SUPPORT_URL = "android.app.extra.PROVISIONING_SUPPORT_URL";
     field public static final String EXTRA_PROVISIONING_TRIGGER = "android.app.extra.PROVISIONING_TRIGGER";
     field public static final String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
+    field public static final String EXTRA_ROLE_HOLDER_STATE = "android.app.extra.ROLE_HOLDER_STATE";
     field public static final int FLAG_SUPPORTED_MODES_DEVICE_OWNER = 4; // 0x4
     field public static final int FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED = 1; // 0x1
     field public static final int FLAG_SUPPORTED_MODES_PERSONALLY_OWNED = 2; // 0x2
@@ -1084,6 +1086,7 @@ package android.app.admin {
     field public static final int RESULT_DEVICE_OWNER_SET = 123; // 0x7b
     field public static final int RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR = 1; // 0x1
     field public static final int RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR = 2; // 0x2
+    field public static final int RESULT_UPDATE_ROLE_HOLDER = 2; // 0x2
     field public static final int RESULT_WORK_PROFILE_CREATED = 122; // 0x7a
     field public static final int STATE_USER_PROFILE_COMPLETE = 4; // 0x4
     field public static final int STATE_USER_PROFILE_FINALIZED = 5; // 0x5
@@ -3834,7 +3837,7 @@ package android.hardware.hdmi {
   }
 
   public class HdmiDeviceInfo implements android.os.Parcelable {
-    ctor public HdmiDeviceInfo();
+    ctor @Deprecated public HdmiDeviceInfo();
     method public int describeContents();
     method public int getAdopterId();
     method public int getDeviceId();
@@ -3855,6 +3858,7 @@ package android.hardware.hdmi {
     method public boolean isSourceType();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ADDR_INTERNAL = 0; // 0x0
+    field public static final int ADDR_INVALID = -1; // 0xffffffff
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.hdmi.HdmiDeviceInfo> CREATOR;
     field public static final int DEVICE_AUDIO_SYSTEM = 5; // 0x5
     field public static final int DEVICE_INACTIVE = -1; // 0xffffffff
@@ -3868,6 +3872,7 @@ package android.hardware.hdmi {
     field public static final int PATH_INTERNAL = 0; // 0x0
     field public static final int PATH_INVALID = 65535; // 0xffff
     field public static final int PORT_INVALID = -1; // 0xffffffff
+    field public static final int VENDOR_ID_UNKNOWN = 16777215; // 0xffffff
   }
 
   public final class HdmiHotplugEvent implements android.os.Parcelable {
@@ -8166,6 +8171,17 @@ package android.net {
 
   public static class NetworkStats.Entry {
     ctor public NetworkStats.Entry(@Nullable String, int, int, int, int, int, int, long, long, long, long, long);
+    method public int getDefaultNetwork();
+    method public int getMetered();
+    method public long getOperations();
+    method public int getRoaming();
+    method public long getRxBytes();
+    method public long getRxPackets();
+    method public int getSet();
+    method public int getTag();
+    method public long getTxBytes();
+    method public long getTxPackets();
+    method public int getUid();
   }
 
   @Deprecated public class RssiCurve implements android.os.Parcelable {

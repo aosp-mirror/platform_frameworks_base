@@ -18,6 +18,8 @@ package com.android.server.display.config {
 
   public class DisplayConfiguration {
     ctor public DisplayConfiguration();
+    method public final java.math.BigInteger getAmbientLightHorizonLong();
+    method public final java.math.BigInteger getAmbientLightHorizonShort();
     method @Nullable public final com.android.server.display.config.DensityMap getDensityMap();
     method public com.android.server.display.config.HighBrightnessMode getHighBrightnessMode();
     method public final com.android.server.display.config.SensorDetails getLightSensor();
@@ -29,6 +31,8 @@ package com.android.server.display.config {
     method public final java.math.BigDecimal getScreenBrightnessRampFastIncrease();
     method public final java.math.BigDecimal getScreenBrightnessRampSlowDecrease();
     method public final java.math.BigDecimal getScreenBrightnessRampSlowIncrease();
+    method public final void setAmbientLightHorizonLong(java.math.BigInteger);
+    method public final void setAmbientLightHorizonShort(java.math.BigInteger);
     method public final void setDensityMap(@Nullable com.android.server.display.config.DensityMap);
     method public void setHighBrightnessMode(com.android.server.display.config.HighBrightnessMode);
     method public final void setLightSensor(com.android.server.display.config.SensorDetails);

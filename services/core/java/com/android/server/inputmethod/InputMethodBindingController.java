@@ -18,8 +18,6 @@ package com.android.server.inputmethod;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
-import static com.android.server.inputmethod.InputMethodManagerService.MSG_INITIALIZE_IME;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -311,11 +309,8 @@ final class InputMethodBindingController {
                     if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
                     final InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
                     mSupportsStylusHw = info.supportsStylusHandwriting();
-                    // Dispatch display id for InputMethodService to update context display.
-                    mService.executeOrSendMessage(mCurMethod,
-                            mService.mCaller.obtainMessageIOOO(MSG_INITIALIZE_IME,
-                                    info.getConfigChanges(), mCurMethod, mCurToken,
-                                    mSupportsStylusHw));
+                    mService.executeOrSendInitializeIme(mCurMethod, mCurToken,
+                            info.getConfigChanges(), mSupportsStylusHw);
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
                     mService.reRequestCurrentClientSessionLocked();
                 }

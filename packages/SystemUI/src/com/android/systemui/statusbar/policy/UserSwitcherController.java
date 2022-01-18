@@ -229,7 +229,8 @@ public class UserSwitcherController implements Dumpable {
 
         filter = new IntentFilter();
         mContext.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM, filter,
-                PERMISSION_SELF, null /* scheduler */);
+                PERMISSION_SELF, null /* scheduler */,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
 
         mSettingsObserver = new ContentObserver(mHandler) {
             @Override

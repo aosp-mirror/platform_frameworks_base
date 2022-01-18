@@ -99,7 +99,6 @@ public class PowerStatusMonitorActionTest {
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(hdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mTvDevice = new HdmiCecLocalDeviceTv(mHdmiControlService);
         mTvDevice.init();
         mLocalDevices.add(mTvDevice);

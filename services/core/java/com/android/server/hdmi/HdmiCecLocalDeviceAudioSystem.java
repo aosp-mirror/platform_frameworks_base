@@ -15,6 +15,9 @@
  */
 package com.android.server.hdmi;
 
+import static android.hardware.hdmi.DeviceFeatures.FEATURE_NOT_SUPPORTED;
+import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
+
 import static com.android.server.hdmi.Constants.ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
 import static com.android.server.hdmi.Constants.PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
 import static com.android.server.hdmi.Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
@@ -22,6 +25,7 @@ import static com.android.server.hdmi.Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONT
 import android.annotation.Nullable;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -177,14 +181,12 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     @Override
-    protected List<Integer> getDeviceFeatures() {
-        List<Integer> deviceFeatures = new ArrayList<>();
+    protected DeviceFeatures computeDeviceFeatures() {
+        boolean arcSupport = SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true);
 
-        if (SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)) {
-            deviceFeatures.add(Constants.DEVICE_FEATURE_SOURCE_SUPPORTS_ARC_RX);
-        }
-
-        return deviceFeatures;
+        return DeviceFeatures.NO_FEATURES_SUPPORTED.toBuilder()
+                .setArcRxSupport(arcSupport ? FEATURE_SUPPORTED : FEATURE_NOT_SUPPORTED)
+                .build();
     }
 
     @Override

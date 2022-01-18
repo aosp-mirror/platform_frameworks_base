@@ -18,7 +18,6 @@ package com.android.server.inputmethod;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.server.inputmethod.InputMethodManagerService.DEBUG;
-import static com.android.server.inputmethod.InputMethodManagerService.MSG_HARD_KEYBOARD_SWITCH_CHANGED;
 import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
 
 import android.app.ActivityThread;
@@ -28,7 +27,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -62,10 +60,8 @@ public class InputMethodMenuController {
     private final InputMethodManagerService mService;
     private final InputMethodUtils.InputMethodSettings mSettings;
     private final InputMethodSubtypeSwitchingController mSwitchingController;
-    private final Handler mHandler;
     private final ArrayMap<String, InputMethodInfo> mMethodMap;
     private final KeyguardManager mKeyguardManager;
-    private final HardKeyboardListener mHardKeyboardListener;
     private final WindowManagerInternal mWindowManagerInternal;
 
     private Context mSettingsContext;
@@ -83,10 +79,8 @@ public class InputMethodMenuController {
         mService = service;
         mSettings = mService.mSettings;
         mSwitchingController = mService.mSwitchingController;
-        mHandler = mService.mHandler;
         mMethodMap = mService.mMethodMap;
         mKeyguardManager = mService.mKeyguardManager;
-        mHardKeyboardListener = new HardKeyboardListener();
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
     }
 
@@ -271,10 +265,6 @@ public class InputMethodMenuController {
         }
     }
 
-    HardKeyboardListener getHardKeyboardListener() {
-        return mHardKeyboardListener;
-    }
-
     AlertDialog getSwitchingDialogLocked() {
         return mSwitchingDialog;
     }
@@ -290,24 +280,16 @@ public class InputMethodMenuController {
         return mSwitchingDialog.isShowing();
     }
 
-    class HardKeyboardListener implements WindowManagerInternal.OnHardKeyboardStatusChangeListener {
-        @Override
-        public void onHardKeyboardStatusChange(boolean available) {
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_HARD_KEYBOARD_SWITCH_CHANGED,
-                    available ? 1 : 0));
+    void handleHardKeyboardStatusChange(boolean available) {
+        if (DEBUG) {
+            Slog.w(TAG, "HardKeyboardStatusChanged: available=" + available);
         }
-
-        public void handleHardKeyboardStatusChange(boolean available) {
-            if (DEBUG) {
-                Slog.w(TAG, "HardKeyboardStatusChanged: available=" + available);
-            }
-            synchronized (ImfLock.class) {
-                if (mSwitchingDialog != null && mSwitchingDialogTitleView != null
-                        && mSwitchingDialog.isShowing()) {
-                    mSwitchingDialogTitleView.findViewById(
-                            com.android.internal.R.id.hard_keyboard_section).setVisibility(
-                            available ? View.VISIBLE : View.GONE);
-                }
+        synchronized (ImfLock.class) {
+            if (mSwitchingDialog != null && mSwitchingDialogTitleView != null
+                    && mSwitchingDialog.isShowing()) {
+                mSwitchingDialogTitleView.findViewById(
+                        com.android.internal.R.id.hard_keyboard_section).setVisibility(
+                        available ? View.VISIBLE : View.GONE);
             }
         }
     }

@@ -972,6 +972,7 @@ package android {
     field public static final int listSeparatorTextViewStyle = 16843272; // 0x1010208
     field public static final int listViewStyle = 16842868; // 0x1010074
     field public static final int listViewWhiteStyle = 16842869; // 0x1010075
+    field public static final int localeConfig;
     field public static final int lockTaskMode = 16844013; // 0x10104ed
     field public static final int logo = 16843454; // 0x10102be
     field public static final int logoDescription = 16844009; // 0x10104e9
@@ -5695,6 +5696,17 @@ package android.app {
     method @Deprecated public void removeAllActivities();
     method @Deprecated public android.os.Bundle saveInstanceState();
     method @Deprecated public android.view.Window startActivity(String, android.content.Intent);
+  }
+
+  public class LocaleConfig {
+    ctor public LocaleConfig(@NonNull android.content.Context);
+    method public int getStatus();
+    method @Nullable public android.os.LocaleList getSupportedLocales();
+    field public static final int STATUS_NOT_SPECIFIED = 1; // 0x1
+    field public static final int STATUS_PARSING_FAILED = 2; // 0x2
+    field public static final int STATUS_SUCCESS = 0; // 0x0
+    field public static final String TAG_LOCALE = "locale";
+    field public static final String TAG_LOCALE_CONFIG = "locale-config";
   }
 
   public class LocaleManager {
@@ -20996,6 +21008,7 @@ package android.media {
     method @NonNull public java.util.List<android.media.AudioPlaybackConfiguration> getActivePlaybackConfigurations();
     method @NonNull public java.util.List<android.media.AudioRecordingConfiguration> getActiveRecordingConfigurations();
     method public int getAllowedCapturePolicy();
+    method @NonNull public java.util.List<android.media.AudioDeviceInfo> getAudioDevicesForAttributes(@NonNull android.media.AudioAttributes);
     method public int getAudioHwSyncForSession(int);
     method @NonNull public java.util.List<android.media.AudioDeviceInfo> getAvailableCommunicationDevices();
     method @Nullable public android.media.AudioDeviceInfo getCommunicationDevice();
@@ -49266,6 +49279,7 @@ package android.view {
     field public static final int EDGE_LEFT = 4; // 0x4
     field public static final int EDGE_RIGHT = 8; // 0x8
     field public static final int EDGE_TOP = 1; // 0x1
+    field public static final int FLAG_CANCELED = 32; // 0x20
     field public static final int FLAG_WINDOW_IS_OBSCURED = 1; // 0x1
     field public static final int FLAG_WINDOW_IS_PARTIALLY_OBSCURED = 2; // 0x2
     field public static final int INVALID_POINTER_ID = -1; // 0xffffffff

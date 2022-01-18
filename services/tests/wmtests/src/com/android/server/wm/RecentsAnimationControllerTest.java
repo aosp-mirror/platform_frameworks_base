@@ -117,8 +117,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_RECENTS,
                 mFinishedCallback);
 
-        // Remove the app window so that the animation target can not be created
-        activity.removeImmediately();
+        // The activity doesn't contain window so the animation target cannot be created.
         mController.startAnimation();
 
         // Verify that the finish callback to reparent the leash is called

@@ -399,10 +399,11 @@ final class InputMonitor {
         if (recentsAnimationInputConsumer != null && focus != null) {
             final RecentsAnimationController recentsAnimationController =
                     mService.getRecentsAnimationController();
+            // Apply recents input consumer when the focusing window is in recents animation.
             final boolean shouldApplyRecentsInputConsumer = (recentsAnimationController != null
                     && recentsAnimationController.shouldApplyInputConsumer(focus.mActivityRecord))
                     // Shell transitions doesn't use RecentsAnimationController
-                    || getWeak(mActiveRecentsActivity) != null;
+                    || getWeak(mActiveRecentsActivity) != null && focus.inTransition();
             if (shouldApplyRecentsInputConsumer) {
                 requestFocus(recentsAnimationInputConsumer.mWindowHandle.token,
                         recentsAnimationInputConsumer.mName);

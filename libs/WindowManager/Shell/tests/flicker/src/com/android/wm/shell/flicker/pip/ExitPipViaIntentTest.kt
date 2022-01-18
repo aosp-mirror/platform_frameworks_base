@@ -24,9 +24,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.rules.WMFlickerServiceRuleForTestSpec
-import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
 import org.junit.Rule
 import org.junit.Test
@@ -101,11 +99,7 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
     /** {@inheritDoc}  */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        super.statusBarLayerRotatesScales()
-    }
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     companion object {
         /**

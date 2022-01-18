@@ -101,8 +101,6 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        // This test doesn't work in shell transitions because of b/204570898
-        assumeFalse(isShellTransitionsEnabled)
         val component = FlickerComponentName("", "RecentTaskScreenshotSurface")
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry(
@@ -116,8 +114,6 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun launcherWindowBecomesInvisible() {
-        // This test doesn't work in shell transitions because of b/204574221
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertWm {
             this.isAppWindowVisible(LAUNCHER_COMPONENT)
                     .then()
@@ -127,11 +123,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun imeWindowIsAlwaysVisible() {
-        // This test doesn't work in shell transitions because of b/204570898
-        assumeFalse(isShellTransitionsEnabled)
-        testSpec.imeWindowIsAlwaysVisible(!isShellTransitionsEnabled)
-    }
+    fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible(!isShellTransitionsEnabled)
 
     @Presubmit
     @Test
@@ -202,8 +194,6 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun appLayerReplacesLauncher() {
-        // This test doesn't work in shell transitions because of b/204574221
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayers {
             this.isVisible(LAUNCHER_COMPONENT)
                 .then()
@@ -219,11 +209,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @FlakyTest(bugId = 206753786)
     @Test
-    fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        testSpec.statusBarLayerRotatesScales()
-    }
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test

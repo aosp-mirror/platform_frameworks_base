@@ -52,6 +52,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -85,6 +86,13 @@ public class DisplayDeviceConfig {
     private static final float INVALID_BRIGHTNESS_IN_CONFIG = -2f;
 
     private static final float NITS_INVALID = -1;
+
+    // Length of the ambient light horizon used to calculate the long term estimate of ambient
+    // light.
+    private static final int AMBIENT_LIGHT_LONG_HORIZON_MILLIS = 10000;
+
+    // Length of the ambient light horizon used to calculate short-term estimate of ambient light.
+    private static final int AMBIENT_LIGHT_SHORT_HORIZON_MILLIS = 2000;
 
     private final Context mContext;
 
@@ -120,6 +128,8 @@ public class DisplayDeviceConfig {
     private float mBrightnessRampFastIncrease = Float.NaN;
     private float mBrightnessRampSlowDecrease = Float.NaN;
     private float mBrightnessRampSlowIncrease = Float.NaN;
+    private int mAmbientHorizonLong = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
+    private int mAmbientHorizonShort = AMBIENT_LIGHT_SHORT_HORIZON_MILLIS;
     private Spline mBrightnessToBacklightSpline;
     private Spline mBacklightToBrightnessSpline;
     private Spline mBacklightToNitsSpline;
@@ -346,6 +356,14 @@ public class DisplayDeviceConfig {
         return mBrightnessRampSlowIncrease;
     }
 
+    public int getAmbientHorizonLong() {
+        return mAmbientHorizonLong;
+    }
+
+    public int getAmbientHorizonShort() {
+        return mAmbientHorizonShort;
+    }
+
     SensorData getAmbientLightSensor() {
         return mAmbientLightSensor;
     }
@@ -405,6 +423,8 @@ public class DisplayDeviceConfig {
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
                 + ", mBrightnessRampSlowDecrease=" + mBrightnessRampSlowDecrease
                 + ", mBrightnessRampSlowIncrease=" + mBrightnessRampSlowIncrease
+                + ", mAmbientHorizonLong=" + mAmbientHorizonLong
+                + ", mAmbientHorizonShort=" + mAmbientHorizonShort
                 + ", mAmbientLightSensor=" + mAmbientLightSensor
                 + ", mProximitySensor=" + mProximitySensor
                 + ", mRefreshRateLimitations= " + Arrays.toString(mRefreshRateLimitations.toArray())
@@ -461,6 +481,7 @@ public class DisplayDeviceConfig {
                 loadBrightnessRamps(config);
                 loadAmbientLightSensorFromDdc(config);
                 loadProxSensorFromDdc(config);
+                loadAmbientHorizonFromDdc(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
             }
@@ -866,6 +887,17 @@ public class DisplayDeviceConfig {
             default:
                 Slog.wtf(TAG, "Unexpected Thermal Status: " + value);
                 return PowerManager.THERMAL_STATUS_NONE;
+        }
+    }
+
+    private void loadAmbientHorizonFromDdc(DisplayConfiguration config) {
+        final BigInteger configLongHorizon = config.getAmbientLightHorizonLong();
+        if (configLongHorizon != null) {
+            mAmbientHorizonLong = configLongHorizon.intValue();
+        }
+        final BigInteger configShortHorizon = config.getAmbientLightHorizonShort();
+        if (configShortHorizon != null) {
+            mAmbientHorizonShort = configShortHorizon.intValue();
         }
     }
 

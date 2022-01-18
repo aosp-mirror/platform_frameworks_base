@@ -308,6 +308,8 @@ interface IAudioService {
 
     List<AudioDeviceAttributes> getDevicesForAttributes(in AudioAttributes attributes);
 
+    List<AudioDeviceAttributes> getDevicesForAttributesUnprotected(in AudioAttributes attributes);
+
     int setAllowedCapturePolicy(in int capturePolicy);
 
     int getAllowedCapturePolicy();

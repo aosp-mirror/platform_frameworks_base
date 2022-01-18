@@ -79,6 +79,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -5645,6 +5646,43 @@ public class AudioManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Get the audio devices that would be used for the routing of the given audio attributes.
+     * These are the devices anticipated to play sound from an {@link AudioTrack} created with
+     * the specified {@link AudioAttributes}.
+     * The audio routing can change if audio devices are physically connected or disconnected or
+     * concurrently through {@link AudioRouting} or {@link MediaRouter}.
+     * @param attributes the {@link AudioAttributes} for which the routing is being queried
+     * @return an empty list if there was an issue with the request, a list of
+     * {@link AudioDeviceInfo} otherwise (typically one device, except for duplicated paths).
+     */
+    public @NonNull List<AudioDeviceInfo> getAudioDevicesForAttributes(
+            @NonNull AudioAttributes attributes) {
+        final List<AudioDeviceAttributes> devicesForAttributes;
+        try {
+            Objects.requireNonNull(attributes);
+            final IAudioService service = getService();
+            devicesForAttributes = service.getDevicesForAttributesUnprotected(attributes);
+        } catch (Exception e) {
+            Log.i(TAG, "No audio devices available for specified attributes.");
+            return Collections.emptyList();
+        }
+
+        // Map from AudioDeviceAttributes to AudioDeviceInfo
+        AudioDeviceInfo[] outputDeviceInfos = getDevicesStatic(GET_DEVICES_OUTPUTS);
+        List<AudioDeviceInfo> deviceInfosForAttributes = new ArrayList<>();
+        for (AudioDeviceAttributes deviceForAttributes : devicesForAttributes) {
+            for (AudioDeviceInfo deviceInfo : outputDeviceInfos) {
+                if (deviceForAttributes.getType() == deviceInfo.getType()
+                        && TextUtils.equals(deviceForAttributes.getAddress(),
+                                deviceInfo.getAddress())) {
+                    deviceInfosForAttributes.add(deviceInfo);
+                }
+            }
+        }
+        return Collections.unmodifiableList(deviceInfosForAttributes);
     }
 
     /**

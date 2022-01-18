@@ -372,8 +372,6 @@ public class HdmiControlService extends SystemService {
     @Nullable
     private HdmiCecController mCecController;
 
-    private HdmiCecMessageValidator mMessageValidator;
-
     private HdmiCecPowerStatusController mPowerStatusController;
 
     @ServiceThreadOnly
@@ -606,9 +604,6 @@ public class HdmiControlService extends SystemService {
         mMhlDevices = Collections.emptyList();
 
         mHdmiCecNetwork.initPortInfo();
-        if (mMessageValidator == null) {
-            mMessageValidator = new HdmiCecMessageValidator(this);
-        }
         mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
                 new HdmiCecConfig.SettingChangeListener() {
                     @Override
@@ -1086,11 +1081,6 @@ public class HdmiControlService extends SystemService {
     }
 
     @VisibleForTesting
-    void setMessageValidator(HdmiCecMessageValidator messageValidator) {
-        mMessageValidator = messageValidator;
-    }
-
-    @VisibleForTesting
     void setCecMessageBuffer(CecMessageBuffer cecMessageBuffer) {
         this.mCecMessageBuffer = cecMessageBuffer;
     }
@@ -1182,7 +1172,8 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     void sendCecCommand(HdmiCecMessage command, @Nullable SendMessageCallback callback) {
         assertRunOnServiceThread();
-        if (mMessageValidator.isValid(command, false) == HdmiCecMessageValidator.OK) {
+        if (command.getValidationResult() == HdmiCecMessageValidator.OK
+                && verifyPhysicalAddresses(command)) {
             mCecController.sendCommand(command, callback);
         } else {
             HdmiLogger.error("Invalid message type:" + command);
@@ -1210,20 +1201,99 @@ public class HdmiControlService extends SystemService {
         mCecController.maySendFeatureAbortCommand(command, reason);
     }
 
+    /**
+     * Returns whether all of the physical addresses in a message could exist in this CEC network.
+     */
+    boolean verifyPhysicalAddresses(HdmiCecMessage message) {
+        byte[] params = message.getParams();
+        switch (message.getOpcode()) {
+            case Constants.MESSAGE_ROUTING_CHANGE:
+                return verifyPhysicalAddress(params, 0)
+                        && verifyPhysicalAddress(params, 2);
+            case Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST:
+                return params.length == 0 || verifyPhysicalAddress(params, 0);
+            case Constants.MESSAGE_ACTIVE_SOURCE:
+            case Constants.MESSAGE_INACTIVE_SOURCE:
+            case Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS:
+            case Constants.MESSAGE_ROUTING_INFORMATION:
+            case Constants.MESSAGE_SET_STREAM_PATH:
+                return verifyPhysicalAddress(params, 0);
+            case Constants.MESSAGE_CLEAR_EXTERNAL_TIMER:
+            case Constants.MESSAGE_SET_EXTERNAL_TIMER:
+                return verifyExternalSourcePhysicalAddress(params, 7);
+            default:
+                return true;
+        }
+    }
+
+    /**
+     * Returns whether a given physical address could exist in this CEC network.
+     * For a TV, the physical address must either be the address of the TV itself,
+     * or the address of a device connected to one of its ports (possibly indirectly).
+     */
+    private boolean verifyPhysicalAddress(byte[] params, int offset) {
+        if (!isTvDevice()) {
+            // If the device is not TV, we can't convert path to port-id, so stop here.
+            return true;
+        }
+        int path = HdmiUtils.twoBytesToInt(params, offset);
+        if (path != Constants.INVALID_PHYSICAL_ADDRESS && path == getPhysicalAddress()) {
+            return true;
+        }
+        int portId = pathToPortId(path);
+        if (portId == Constants.INVALID_PORT_ID) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns whether the physical address of an external source could exist in this network.
+     */
+    private boolean verifyExternalSourcePhysicalAddress(byte[] params, int offset) {
+        int externalSourceSpecifier = params[offset];
+        offset = offset + 1;
+        if (externalSourceSpecifier == 0x05) {
+            if (params.length - offset >= 2) {
+                return verifyPhysicalAddress(params, offset);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns whether the source address of a message is a local logical address.
+     */
+    private boolean sourceAddressIsLocal(HdmiCecMessage message) {
+        for (HdmiCecLocalDevice device : getAllLocalDevices()) {
+            synchronized (device.mLock) {
+                if (message.getSource() == device.getDeviceInfo().getLogicalAddress()
+                        && message.getSource() != Constants.ADDR_UNREGISTERED) {
+                    HdmiLogger.warning(
+                            "Unexpected source: message sent from device itself, " + message);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @ServiceThreadOnly
     @VisibleForTesting
     @Constants.HandleMessageResult
     protected int handleCecCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        int errorCode = mMessageValidator.isValid(message, true);
-        if (errorCode != HdmiCecMessageValidator.OK) {
-            // We'll not response on the messages with the invalid source or destination
-            // or with parameter length shorter than specified in the standard.
-            if (errorCode == HdmiCecMessageValidator.ERROR_PARAMETER) {
-                return Constants.ABORT_INVALID_OPERAND;
-            }
+
+        @HdmiCecMessageValidator.ValidationResult
+        int validationResult = message.getValidationResult();
+        if (validationResult == HdmiCecMessageValidator.ERROR_PARAMETER
+                || !verifyPhysicalAddresses(message)) {
+            return Constants.ABORT_INVALID_OPERAND;
+        } else if (validationResult != HdmiCecMessageValidator.OK
+                || sourceAddressIsLocal(message)) {
             return Constants.HANDLED;
         }
+
         getHdmiCecNetwork().handleCecMessage(message);
 
         @Constants.HandleMessageResult int handleMessageResult =
@@ -1409,9 +1479,16 @@ public class HdmiControlService extends SystemService {
     private HdmiDeviceInfo createDeviceInfo(int logicalAddress, int deviceType, int powerStatus,
             int cecVersion) {
         String displayName = readStringSetting(Global.DEVICE_NAME, Build.MODEL);
-        return new HdmiDeviceInfo(logicalAddress,
-                getPhysicalAddress(), pathToPortId(getPhysicalAddress()), deviceType,
-                getVendorId(), displayName, powerStatus, cecVersion);
+        return HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(logicalAddress)
+                .setPhysicalAddress(getPhysicalAddress())
+                .setPortId(pathToPortId(getPhysicalAddress()))
+                .setDeviceType(deviceType)
+                .setVendorId(getVendorId())
+                .setDisplayName(displayName)
+                .setDevicePowerStatus(powerStatus)
+                .setCecVersion(cecVersion)
+                .build();
     }
 
     // Set the display name in HdmiDeviceInfo of the current devices to content provided by
@@ -1422,10 +1499,9 @@ public class HdmiControlService extends SystemService {
             if (deviceInfo.getDisplayName().equals(newDisplayName)) {
                 continue;
             }
-            device.setDeviceInfo(new HdmiDeviceInfo(
-                    deviceInfo.getLogicalAddress(), deviceInfo.getPhysicalAddress(),
-                    deviceInfo.getPortId(), deviceInfo.getDeviceType(), deviceInfo.getVendorId(),
-                    newDisplayName, deviceInfo.getDevicePowerStatus(), deviceInfo.getCecVersion()));
+            synchronized (device.mLock) {
+                device.setDeviceInfo(deviceInfo.toBuilder().setDisplayName(newDisplayName).build());
+            }
             sendCecCommand(
                     HdmiCecMessageBuilder.buildSetOsdNameCommand(
                             deviceInfo.getLogicalAddress(), Constants.ADDR_TV, newDisplayName));
@@ -2629,7 +2705,7 @@ public class HdmiControlService extends SystemService {
                 return activeSourceInfo;
             }
 
-            return new HdmiDeviceInfo(activeSource.physicalAddress,
+            return HdmiDeviceInfo.hardwarePort(activeSource.physicalAddress,
                     pathToPortId(activeSource.physicalAddress));
         }
 
@@ -2637,7 +2713,7 @@ public class HdmiControlService extends SystemService {
             int activePath = tv().getActivePath();
             if (activePath != HdmiDeviceInfo.PATH_INVALID) {
                 HdmiDeviceInfo info = mHdmiCecNetwork.getSafeDeviceInfoByPath(activePath);
-                return (info != null) ? info : new HdmiDeviceInfo(activePath,
+                return (info != null) ? info : HdmiDeviceInfo.hardwarePort(activePath,
                         tv().getActivePortId());
             }
         }

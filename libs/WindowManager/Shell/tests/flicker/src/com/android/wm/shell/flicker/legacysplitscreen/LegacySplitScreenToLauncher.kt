@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.exitSplitScreen
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
@@ -41,7 +40,6 @@ import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.dockedStackDividerBecomesInvisible
 import com.android.wm.shell.flicker.helpers.SimpleAppHelper
-import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -112,11 +110,7 @@ class LegacySplitScreenToLauncher(
 
     @FlakyTest(bugId = 206753786)
     @Test
-    fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        testSpec.statusBarLayerRotatesScales()
-    }
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test

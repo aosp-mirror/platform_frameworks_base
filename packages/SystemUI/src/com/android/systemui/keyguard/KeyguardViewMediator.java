@@ -894,7 +894,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         delayedActionFilter.addAction(DELAYED_KEYGUARD_ACTION);
         delayedActionFilter.addAction(DELAYED_LOCK_PROFILE_ACTION);
         mContext.registerReceiver(mDelayedLockBroadcastReceiver, delayedActionFilter,
-                SYSTEMUI_PERMISSION, null /* scheduler */);
+                SYSTEMUI_PERMISSION, null /* scheduler */,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
