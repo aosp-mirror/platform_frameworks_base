@@ -38,7 +38,7 @@ interface IVpnManager {
     /** VpnManager APIs */
     boolean provisionVpnProfile(in VpnProfile profile, String packageName);
     void deleteVpnProfile(String packageName);
-    void startVpnProfile(String packageName);
+    String startVpnProfile(String packageName);
     void stopVpnProfile(String packageName);
 
     /** Always-on VPN APIs */
