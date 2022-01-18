@@ -196,7 +196,8 @@ class SharedLibrariesImplTest {
         val newLibSetting = addPackage(STATIC_LIB_PACKAGE_NAME + "_" + 10, 10L,
             staticLibrary = STATIC_LIB_NAME, staticLibraryVersion = 10L)
 
-        val latestInfo = mSharedLibrariesImpl.getLatestSharedLibraVersionLPr(newLibSetting.pkg)!!
+        val latestInfo =
+            mSharedLibrariesImpl.getLatestStaticSharedLibraVersionLPr(newLibSetting.pkg)!!
 
         assertThat(latestInfo).isNotNull()
         assertThat(latestInfo.name).isEqualTo(STATIC_LIB_NAME)

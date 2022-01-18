@@ -1207,17 +1207,33 @@ final class InstallPackageHelper {
             }
 
             PackageSetting ps = mPm.mSettings.getPackageLPr(pkgName);
-            if (ps != null) {
-                if (DEBUG_INSTALL) Slog.d(TAG, "Existing package: " + ps);
+            PackageSetting signatureCheckPs = ps;
+
+            // SDK libs can have other major versions with different package names.
+            if (signatureCheckPs == null && parsedPackage.isSdkLibrary()) {
+                WatchedLongSparseArray<SharedLibraryInfo> libraryInfos =
+                        mSharedLibraries.getSharedLibraryInfos(
+                                parsedPackage.getSdkLibName());
+                if (libraryInfos != null && libraryInfos.size() > 0) {
+                    // Any existing version would do.
+                    SharedLibraryInfo libraryInfo = libraryInfos.valueAt(0);
+                    signatureCheckPs = mPm.mSettings.getPackageLPr(libraryInfo.getPackageName());
+                }
+            }
+
+            if (signatureCheckPs != null) {
+                if (DEBUG_INSTALL) {
+                    Slog.d(TAG,
+                            "Existing package for signature checking: " + signatureCheckPs);
+                }
 
                 // Static shared libs have same package with different versions where
                 // we internally use a synthetic package name to allow multiple versions
                 // of the same package, therefore we need to compare signatures against
                 // the package setting for the latest library version.
-                PackageSetting signatureCheckPs = ps;
                 if (parsedPackage.isStaticSharedLibrary()) {
-                    SharedLibraryInfo libraryInfo = mSharedLibraries.getLatestSharedLibraVersionLPr(
-                            parsedPackage);
+                    SharedLibraryInfo libraryInfo =
+                            mSharedLibraries.getLatestStaticSharedLibraVersionLPr(parsedPackage);
                     if (libraryInfo != null) {
                         signatureCheckPs = mPm.mSettings.getPackageLPr(
                                 libraryInfo.getPackageName());
@@ -1256,6 +1272,10 @@ final class InstallPackageHelper {
                         throw new PrepareFailure(e.error, e.getMessage());
                     }
                 }
+            }
+
+            if (ps != null) {
+                if (DEBUG_INSTALL) Slog.d(TAG, "Existing package: " + ps);
 
                 if (ps.getPkg() != null) {
                     systemApp = ps.getPkg().isSystem();

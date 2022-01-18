@@ -384,7 +384,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
      * @return The latest version of shared library info.
      */
     @GuardedBy("mPm.mLock")
-    @Nullable SharedLibraryInfo getLatestSharedLibraVersionLPr(@NonNull AndroidPackage pkg) {
+    @Nullable SharedLibraryInfo getLatestStaticSharedLibraVersionLPr(@NonNull AndroidPackage pkg) {
         WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(
                 pkg.getStaticSharedLibName());
         if (versionedLib == null) {
@@ -416,7 +416,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         PackageSetting sharedLibPackage = null;
         synchronized (mPm.mLock) {
             final SharedLibraryInfo latestSharedLibraVersionLPr =
-                    getLatestSharedLibraVersionLPr(scanResult.mRequest.mParsedPackage);
+                    getLatestStaticSharedLibraVersionLPr(scanResult.mRequest.mParsedPackage);
             if (latestSharedLibraVersionLPr != null) {
                 sharedLibPackage = mPm.mSettings.getPackageLPr(
                         latestSharedLibraVersionLPr.getPackageName());
