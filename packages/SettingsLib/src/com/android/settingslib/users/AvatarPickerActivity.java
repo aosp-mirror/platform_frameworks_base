@@ -17,11 +17,13 @@
 package com.android.settingslib.users;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,19 +48,38 @@ import com.google.android.setupdesign.util.ThemeHelper;
  */
 public class AvatarPickerActivity extends Activity {
 
-    static final String EXTRA_AVATAR_INDEX = "avatar_index";
+    static final String EXTRA_FILE_AUTHORITY = "file_authority";
+    private static final String KEY_AWAITING_RESULT = "awaiting_result";
+    private static final String KEY_SELECTED_POSITION = "selected_position";
+
+    private boolean mWaitingForActivityResult;
 
     private FooterButton mDoneButton;
     private AvatarAdapter mAdapter;
+
+    private AvatarPhotoController mAvatarPhotoController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ThemeHelper.trySetDynamicColor(this);
         setContentView(R.layout.avatar_picker);
+        setUpButtons();
 
-        GlifLayout glifLayout = findViewById(R.id.glif_layout);
         RecyclerView recyclerView = findViewById(R.id.avatar_grid);
+        mAdapter = new AvatarAdapter();
+        recyclerView.setAdapter(mAdapter);
+        recyclerView.setLayoutManager(new GridLayoutManager(this,
+                getResources().getInteger(R.integer.avatar_picker_columns)));
+
+        restoreState(savedInstanceState);
+
+        mAvatarPhotoController = new AvatarPhotoController(
+                this, mWaitingForActivityResult, getFileAuthority());
+    }
+
+    private void setUpButtons() {
+        GlifLayout glifLayout = findViewById(R.id.glif_layout);
         FooterBarMixin mixin = glifLayout.getMixin(FooterBarMixin.class);
 
         FooterButton secondaryButton =
@@ -70,23 +91,53 @@ public class AvatarPickerActivity extends Activity {
         mDoneButton =
                 new FooterButton.Builder(this)
                         .setText("Done")
-                        .setListener(view -> confirmSelection())
+                        .setListener(view -> returnResult(mAdapter.uriForSelection()))
                         .build();
         mDoneButton.setEnabled(false);
 
         mixin.setSecondaryButton(secondaryButton);
         mixin.setPrimaryButton(mDoneButton);
-
-        mAdapter = new AvatarAdapter();
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.setLayoutManager(new GridLayoutManager(this,
-                getResources().getInteger(R.integer.avatar_picker_columns)));
     }
 
-    private void confirmSelection() {
-        Intent data = new Intent();
-        data.putExtra(EXTRA_AVATAR_INDEX, mAdapter.indexFromPosition(mAdapter.mSelectedPosition));
-        setResult(RESULT_OK, data);
+    private String getFileAuthority() {
+        String authority = getIntent().getStringExtra(EXTRA_FILE_AUTHORITY);
+        if (authority == null) {
+            throw new IllegalStateException("File authority must be provided");
+        }
+        return authority;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        mWaitingForActivityResult = false;
+        mAvatarPhotoController.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putBoolean(KEY_AWAITING_RESULT, mWaitingForActivityResult);
+        outState.putInt(KEY_SELECTED_POSITION, mAdapter.mSelectedPosition);
+        super.onSaveInstanceState(outState);
+    }
+
+    private void restoreState(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            mWaitingForActivityResult = savedInstanceState.getBoolean(KEY_AWAITING_RESULT, false);
+            mAdapter.mSelectedPosition =
+                    savedInstanceState.getInt(KEY_SELECTED_POSITION, AvatarAdapter.NONE);
+        }
+    }
+
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode) {
+        mWaitingForActivityResult = true;
+        super.startActivityForResult(intent, requestCode);
+    }
+
+    void returnResult(Uri uri) {
+        Intent resultData = new Intent();
+        resultData.setData(uri);
+        setResult(RESULT_OK, resultData);
         finish();
     }
 
@@ -98,12 +149,23 @@ public class AvatarPickerActivity extends Activity {
     private class AvatarAdapter extends RecyclerView.Adapter<AvatarViewHolder> {
 
         private static final int NONE = -1;
-        private static final int AVATAR_START_POSITION = 0;
+
+        private final int mTakePhotoPosition;
+        private final int mChoosePhotoPosition;
+        private final int mPreselectedImageStartPosition;
 
         private final TypedArray mImageDrawables;
         private int mSelectedPosition = NONE;
 
         AvatarAdapter() {
+            final boolean canTakePhoto =
+                    PhotoCapabilityUtils.canTakePhoto(AvatarPickerActivity.this);
+            final boolean canChoosePhoto =
+                    PhotoCapabilityUtils.canChoosePhoto(AvatarPickerActivity.this);
+            mTakePhotoPosition = (canTakePhoto ? 0 : NONE);
+            mChoosePhotoPosition = (canChoosePhoto ? (canTakePhoto ? 1 : 0) : NONE);
+            mPreselectedImageStartPosition = (canTakePhoto ? 1 : 0) + (canChoosePhoto ? 1 : 0);
+
             mImageDrawables = getResources().obtainTypedArray(R.array.avatar_images);
         }
 
@@ -117,26 +179,36 @@ public class AvatarPickerActivity extends Activity {
 
         @Override
         public void onBindViewHolder(@NonNull AvatarViewHolder viewHolder, int position) {
-            Drawable drawable = mImageDrawables.getDrawable(indexFromPosition(position));
-            if (drawable instanceof BitmapDrawable) {
-                drawable = circularDrawableFrom((BitmapDrawable) drawable);
-            } else {
-                throw new IllegalStateException("Avatar drawables must be bitmaps");
-            }
-            viewHolder.setSelected(position == mSelectedPosition);
-            viewHolder.setDrawable(drawable);
-            viewHolder.setClickListener(view -> {
-                if (mSelectedPosition == position) {
-                    deselect(position);
+            if (position == mTakePhotoPosition) {
+                viewHolder.setDrawable(getDrawable(R.drawable.avatar_take_photo_circled));
+                viewHolder.setClickListener(view -> mAvatarPhotoController.takePhoto());
+
+            } else if (position == mChoosePhotoPosition) {
+                viewHolder.setDrawable(getDrawable(R.drawable.avatar_choose_photo_circled));
+                viewHolder.setClickListener(view -> mAvatarPhotoController.choosePhoto());
+
+            } else if (position >= mPreselectedImageStartPosition) {
+                Drawable drawable = mImageDrawables.getDrawable(indexFromPosition(position));
+                if (drawable instanceof BitmapDrawable) {
+                    drawable = circularDrawableFrom((BitmapDrawable) drawable);
                 } else {
-                    select(position);
+                    throw new IllegalStateException("Avatar drawables must be bitmaps");
                 }
-            });
+                viewHolder.setSelected(position == mSelectedPosition);
+                viewHolder.setDrawable(drawable);
+                viewHolder.setClickListener(view -> {
+                    if (mSelectedPosition == position) {
+                        deselect(position);
+                    } else {
+                        select(position);
+                    }
+                });
+            }
         }
 
         @Override
         public int getItemCount() {
-            return AVATAR_START_POSITION + mImageDrawables.length();
+            return mPreselectedImageStartPosition + mImageDrawables.length();
         }
 
         private Drawable circularDrawableFrom(BitmapDrawable drawable) {
@@ -150,7 +222,7 @@ public class AvatarPickerActivity extends Activity {
         }
 
         private int indexFromPosition(int position) {
-            return position - AVATAR_START_POSITION;
+            return position - mPreselectedImageStartPosition;
         }
 
         private void select(int position) {
@@ -168,6 +240,24 @@ public class AvatarPickerActivity extends Activity {
             mSelectedPosition = NONE;
             notifyItemChanged(position);
             mDoneButton.setEnabled(false);
+        }
+
+        private Uri uriForSelection() {
+            int resourceId =
+                    mImageDrawables.getResourceId(indexFromPosition(mSelectedPosition), -1);
+            if (resourceId == -1) {
+                throw new IllegalStateException("Preselected avatar images must be resources.");
+            }
+            return uriForResourceId(resourceId);
+        }
+
+        private Uri uriForResourceId(int resourceId) {
+            return new Uri.Builder()
+                    .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                    .authority(getResources().getResourcePackageName(resourceId))
+                    .appendPath(getResources().getResourceTypeName(resourceId))
+                    .appendPath(getResources().getResourceEntryName(resourceId))
+                    .build();
         }
     }
 

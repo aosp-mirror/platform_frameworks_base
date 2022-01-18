@@ -107,4 +107,6 @@
     <dimen name="avatar_picker_padding">6dp</dimen>
     <dimen name="avatar_picker_margin">2dp</dimen>
 
+    <dimen name="avatar_picker_icon_inset">25dp</dimen>
+
 </resources>
