@@ -94,4 +94,16 @@ interface INetworkStatsService {
     /** Registers a network stats provider */
     INetworkStatsProviderCallback registerNetworkStatsProvider(String tag,
             in INetworkStatsProvider provider);
+
+    /** Mark given UID as being in foreground for stats purposes. */
+    void setUidForeground(int uid, boolean uidForeground);
+
+    /** Advise persistence threshold; may be overridden internally. */
+    void advisePersistThreshold(long thresholdBytes);
+
+    /**
+     * Set the warning and limit to all registered custom network stats providers.
+     * Note that invocation of any interface will be sent to all providers.
+     */
+     void setStatsProviderWarningAndLimitAsync(String iface, long warning, long limit);
 }
