@@ -3311,6 +3311,7 @@ public class DisplayPolicy {
     }
 
     void release() {
+        mDisplayContent.mTransitionController.unregisterLegacyListener(mAppTransitionListener);
         mHandler.post(mGestureNavigationSettingsObserver::unregister);
     }
 
