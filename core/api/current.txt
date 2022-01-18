@@ -7286,6 +7286,10 @@ package android.app.admin {
     method @Nullable public java.util.List<java.lang.String> getDelegatePackages(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public java.util.List<java.lang.String> getDelegatedScopes(@Nullable android.content.ComponentName, @NonNull String);
     method public CharSequence getDeviceOwnerLockScreenInfo();
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(int, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(int, int, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(int, int, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(int, int, int, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
     method public CharSequence getEndUserSessionMessage(@NonNull android.content.ComponentName);
     method @NonNull public String getEnrollmentSpecificId();
     method @Nullable public android.app.admin.FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(@Nullable android.content.ComponentName);
@@ -7509,6 +7513,7 @@ package android.app.admin {
     field public static final String ACTION_CHECK_POLICY_COMPLIANCE = "android.app.action.CHECK_POLICY_COMPLIANCE";
     field public static final String ACTION_DEVICE_ADMIN_SERVICE = "android.app.action.DEVICE_ADMIN_SERVICE";
     field public static final String ACTION_DEVICE_OWNER_CHANGED = "android.app.action.DEVICE_OWNER_CHANGED";
+    field public static final String ACTION_DEVICE_POLICY_RESOURCE_UPDATED = "android.app.action.DEVICE_POLICY_RESOURCE_UPDATED";
     field public static final String ACTION_GET_PROVISIONING_MODE = "android.app.action.GET_PROVISIONING_MODE";
     field public static final String ACTION_MANAGED_PROFILE_PROVISIONED = "android.app.action.MANAGED_PROFILE_PROVISIONED";
     field public static final String ACTION_PROFILE_OWNER_CHANGED = "android.app.action.PROFILE_OWNER_CHANGED";
@@ -7584,6 +7589,8 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_WIFI_SECURITY_TYPE = "android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE";
     field public static final String EXTRA_PROVISIONING_WIFI_SSID = "android.app.extra.PROVISIONING_WIFI_SSID";
     field public static final String EXTRA_PROVISIONING_WIFI_USER_CERTIFICATE = "android.app.extra.PROVISIONING_WIFI_USER_CERTIFICATE";
+    field public static final String EXTRA_RESOURCE_ID = "android.app.extra.RESOURCE_ID";
+    field public static final String EXTRA_RESOURCE_TYPE_DRAWABLE = "android.app.extra.RESOURCE_TYPE_DRAWABLE";
     field public static final int FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY = 1; // 0x1
     field public static final int FLAG_MANAGED_CAN_ACCESS_PARENT = 2; // 0x2
     field public static final int FLAG_PARENT_CAN_ACCESS_MANAGED = 1; // 0x1
@@ -7676,6 +7683,35 @@ package android.app.admin {
 
   public static interface DevicePolicyManager.OnClearApplicationUserDataListener {
     method public void onApplicationUserDataCleared(String, boolean);
+  }
+
+  public final class DevicePolicyResources {
+    ctor public DevicePolicyResources();
+  }
+
+  public static final class DevicePolicyResources.Drawable {
+    field public static final int INVALID_ID = -1; // 0xffffffff
+    field public static final int WORK_PROFILE_ICON = 1; // 0x1
+    field public static final int WORK_PROFILE_ICON_BADGE = 0; // 0x0
+    field public static final int WORK_PROFILE_OFF_ICON = 2; // 0x2
+    field public static final int WORK_PROFILE_USER_ICON = 3; // 0x3
+  }
+
+  public static final class DevicePolicyResources.Drawable.Source {
+    field public static final int HOME_WIDGET = 2; // 0x2
+    field public static final int LAUNCHER_OFF_BUTTON = 3; // 0x3
+    field public static final int NOTIFICATION = 0; // 0x0
+    field public static final int PROFILE_SWITCH_ANIMATION = 1; // 0x1
+    field public static final int QUICK_SETTINGS = 4; // 0x4
+    field public static final int STATUS_BAR = 5; // 0x5
+    field public static final int UNDEFINED = -1; // 0xffffffff
+  }
+
+  public static final class DevicePolicyResources.Drawable.Style {
+    field public static final int DEFAULT = -1; // 0xffffffff
+    field public static final int OUTLINE = 2; // 0x2
+    field public static final int SOLID_COLORED = 0; // 0x0
+    field public static final int SOLID_NOT_COLORED = 1; // 0x1
   }
 
   public final class DnsEvent extends android.app.admin.NetworkEvent implements android.os.Parcelable {
