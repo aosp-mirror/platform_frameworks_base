@@ -192,6 +192,7 @@ public abstract class BatteryConsumer {
             POWER_COMPONENT_CPU,
             POWER_COMPONENT_MOBILE_RADIO,
             POWER_COMPONENT_WIFI,
+            POWER_COMPONENT_BLUETOOTH,
     };
 
     static final int COLUMN_INDEX_BATTERY_CONSUMER_TYPE = 0;
