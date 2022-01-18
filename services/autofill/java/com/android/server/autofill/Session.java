@@ -17,6 +17,7 @@
 package com.android.server.autofill;
 
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
+import static android.service.autofill.FillRequest.FLAG_ACTIVITY_START;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
@@ -149,9 +150,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private static final String EXTRA_REQUEST_ID = "android.service.autofill.extra.REQUEST_ID";
 
+    final Object mLock;
+
     private final AutofillManagerServiceImpl mService;
     private final Handler mHandler;
-    private final Object mLock;
     private final AutoFillUI mUi;
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
@@ -428,6 +430,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         /** Whether the client is using {@link android.view.autofill.AutofillRequestCallback}. */
         @GuardedBy("mLock")
         private boolean mClientSuggestionsEnabled;
+
+        /** Whether the fill dialog UI is disabled. */
+        @GuardedBy("mLock")
+        private boolean mFillDialogDisabled;
     }
 
     /**
@@ -860,7 +866,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mService.getRemoteInlineSuggestionRenderServiceLocked();
         if ((mSessionFlags.mInlineSupportedByService || mSessionFlags.mClientSuggestionsEnabled)
                 && remoteRenderService != null
-                && isViewFocusedLocked(flags)) {
+                && (isViewFocusedLocked(flags) || (isRequestFromActivityStarted(flags)))) {
             final Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestConsumer;
             if (mSessionFlags.mClientSuggestionsEnabled) {
                 final int finalRequestId = requestId;
@@ -904,6 +910,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // Now request the assist structure data.
         requestAssistStructureLocked(requestId, flags);
+    }
+
+    private boolean isRequestFromActivityStarted(int flags) {
+        return (flags & FLAG_ACTIVITY_START) != 0;
     }
 
     @GuardedBy("mLock")
@@ -1499,6 +1509,23 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mHandler.sendMessage(obtainMessage(
                 Session::doStartIntentSender,
                 this, intentSender, intent));
+    }
+
+    // AutoFillUiCallback
+    @Override
+    public void requestShowSoftInput(AutofillId id) {
+        IAutoFillManagerClient client = getClient();
+        if (client != null) {
+            try {
+                client.requestShowSoftInput(id);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error sending input show up notification", e);
+            }
+        }
+        synchronized (Session.this.mLock) {
+            // stop to show fill dialog
+            mSessionFlags.mFillDialogDisabled = true;
+        }
     }
 
     private void notifyFillUiHidden(@NonNull AutofillId autofillId) {
@@ -2869,6 +2896,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // View is triggering autofill.
                 mCurrentViewId = viewState.id;
                 viewState.update(value, virtualBounds, flags);
+                if (!isRequestFromActivityStarted(flags)) {
+                    mSessionFlags.mFillDialogDisabled = true;
+                }
                 requestNewFillResponseLocked(viewState, ViewState.STATE_STARTED_SESSION, flags);
                 break;
             case ACTION_VALUE_CHANGED:
@@ -2958,6 +2988,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
 
                 if (isSameViewEntered) {
+                    setFillDialogDisabledAndStartInput();
                     return;
                 }
 
@@ -2968,6 +2999,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (Objects.equals(mCurrentViewId, viewState.id)) {
                     if (sVerbose) Slog.v(TAG, "Exiting view " + id);
                     mUi.hideFillUi(this);
+                    mUi.hideFillDialog(this);
                     hideAugmentedAutofillLocked(viewState);
                     // We don't send an empty response to IME so that it doesn't cause UI flicker
                     // on the IME side if it arrives before the input view is finished on the IME.
@@ -3148,6 +3180,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
+        if (requestShowFillDialog(response, filledId, filterText)) {
+            synchronized (mLock) {
+                final ViewState currentView = mViewStates.get(mCurrentViewId);
+                currentView.setState(ViewState.STATE_FILL_DIALOG_SHOWN);
+                mService.logDatasetShown(id, mClientState);
+            }
+            return;
+        }
+
+        setFillDialogDisabled();
+
         if (response.supportsInlineSuggestions()) {
             synchronized (mLock) {
                 if (requestShowInlineSuggestionsLocked(response, filterText)) {
@@ -3189,6 +3232,81 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 addTaggedDataToRequestLogLocked(response.getRequestId(),
                         MetricsEvent.FIELD_AUTOFILL_DURATION, duration);
             }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void updateFillDialogTriggerIdsLocked() {
+        final FillResponse response = getLastResponseLocked(null);
+
+        if (response == null) return;
+
+        final AutofillId[] ids = response.getFillDialogTriggerIds();
+        notifyClientFillDialogTriggerIds(ids == null ? null : Arrays.asList(ids));
+    }
+
+    private void notifyClientFillDialogTriggerIds(List<AutofillId> fieldIds) {
+        try {
+            if (sVerbose) {
+                Slog.v(TAG, "notifyFillDialogTriggerIds(): " + fieldIds);
+            }
+            getClient().notifyFillDialogTriggerIds(fieldIds);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Cannot set trigger ids for fill dialog", e);
+        }
+    }
+
+    private boolean isFillDialogUiEnabled() {
+        // TODO read from Settings or somewhere
+        final boolean isSettingsEnabledFillDialog = true;
+        synchronized (Session.this.mLock) {
+            return isSettingsEnabledFillDialog && !mSessionFlags.mFillDialogDisabled;
+        }
+    }
+
+    private void setFillDialogDisabled() {
+        synchronized (mLock) {
+            mSessionFlags.mFillDialogDisabled = true;
+        }
+        notifyClientFillDialogTriggerIds(null);
+    }
+
+    private void setFillDialogDisabledAndStartInput() {
+        if (getUiForShowing().isFillDialogShowing()) {
+            setFillDialogDisabled();
+            final AutofillId id;
+            synchronized (mLock) {
+                id = mCurrentViewId;
+            }
+            requestShowSoftInput(id);
+        }
+    }
+
+    private boolean requestShowFillDialog(FillResponse response,
+            AutofillId filledId, String filterText) {
+        if (!isFillDialogUiEnabled()) {
+            // Unsupported fill dialog UI
+            return false;
+        }
+
+        final AutofillId[] ids = response.getFillDialogTriggerIds();
+        if (ids == null || !ArrayUtils.contains(ids, filledId)) {
+            return false;
+        }
+
+        final Drawable serviceIcon = getServiceIcon();
+
+        getUiForShowing().showFillDialog(filledId, response, filterText,
+                mService.getServicePackageName(), mComponentName, serviceIcon, this);
+        return true;
+    }
+
+    @SuppressWarnings("GuardedBy") // ErrorProne says we need to use mService.mLock, but it's
+                                   // actually the same object as mLock.
+                                   // TODO: Expose mService.mLock or redesign instead.
+    private Drawable getServiceIcon() {
+        synchronized (mLock) {
+            return mService.getServiceIconLocked();
         }
     }
 
@@ -3584,9 +3702,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mService.getRemoteInlineSuggestionRenderServiceLocked();
         if (remoteRenderService != null
                 && (mSessionFlags.mAugmentedAutofillOnly
-                || !mSessionFlags.mInlineSupportedByService
-                || mSessionFlags.mExpiredResponse)
-                && isViewFocusedLocked(flags)) {
+                        || !mSessionFlags.mInlineSupportedByService
+                        || mSessionFlags.mExpiredResponse)
+                && isViewFocusedLocked(flags)
+                || isFillDialogUiEnabled()) {
             if (sDebug) Slog.d(TAG, "Create inline request for augmented autofill");
             remoteRenderService.getInlineSuggestionsRendererInfo(new RemoteCallback(
                     (extras) -> {
@@ -3642,6 +3761,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mClientState = newClientState != null ? newClientState : newResponse.getClientState();
 
         setViewStatesLocked(newResponse, ViewState.STATE_FILLABLE, false);
+        updateFillDialogTriggerIdsLocked();
         updateTrackedIdsLocked();
 
         if (mCurrentViewId == null) {

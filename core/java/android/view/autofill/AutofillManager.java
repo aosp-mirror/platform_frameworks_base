@@ -3095,6 +3095,10 @@ public final class AutofillManager {
         client.autofillClientRunOnUiThread(runnable);
     }
 
+    private void setFillDialogTriggerIds(@Nullable List<AutofillId> ids) {
+        mFillDialogTriggerIds = ids;
+    }
+
     /**
      * Checks the id of autofill whether supported the fill dialog.
      *
@@ -3817,6 +3821,13 @@ public final class AutofillManager {
 
                 afm.onFillRequest(request, CancellationSignal.fromTransport(transport),
                         new FillCallback(callback, id));
+            }
+        }
+
+        public void notifyFillDialogTriggerIds(List<AutofillId> ids) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.setFillDialogTriggerIds(ids));
             }
         }
     }

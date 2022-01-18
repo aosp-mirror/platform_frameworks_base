@@ -90,6 +90,7 @@ public final class AutoFillUI {
         void startIntentSender(IntentSender intentSender, Intent intent);
         void dispatchUnhandledKey(AutofillId id, KeyEvent keyEvent);
         void cancelSession();
+        void requestShowSoftInput(AutofillId id);
     }
 
     public AutoFillUI(@NonNull Context context) {
@@ -154,6 +155,12 @@ public final class AutoFillUI {
         mHandler.post(() -> hideFillUiUiThread(callback, true));
     }
 
+    /**
+     * Hides the fill UI.
+     */
+    public void hideFillDialog(@NonNull AutoFillUiCallback callback) {
+        mHandler.post(() -> hideFillDialogUiThread(callback));
+    }
     /**
      * Filters the options in the fill UI.
      *
@@ -369,6 +376,21 @@ public final class AutoFillUI {
     }
 
     /**
+     * Shows the UI asking the user to choose for autofill.
+     */
+    public void showFillDialog(@NonNull AutofillId focusedId, @NonNull FillResponse response,
+            @Nullable String filterText, @Nullable String servicePackageName,
+            @NonNull ComponentName componentName, @Nullable Drawable serviceIcon,
+            @NonNull AutoFillUiCallback callback) {
+        if (sVerbose) {
+            Slog.v(TAG, "showFillDialog for "
+                    + componentName.toShortString() + ": " + response);
+        }
+
+        // TODO show fill dialog
+    }
+
+    /**
      * Executes an operation in the pending save UI, if any.
      */
     public void onPendingSaveUi(int operation, @NonNull IBinder token) {
@@ -398,6 +420,11 @@ public final class AutoFillUI {
 
     public boolean isSaveUiShowing() {
         return mSaveUi == null ? false : mSaveUi.isShowing();
+    }
+
+    public boolean isFillDialogShowing() {
+        // TODO
+        return false;
     }
 
     public void dump(PrintWriter pw) {
@@ -442,6 +469,11 @@ public final class AutoFillUI {
     }
 
     @android.annotation.UiThread
+    private void hideFillDialogUiThread(@Nullable AutoFillUiCallback callback) {
+        // TODO
+    }
+
+    @android.annotation.UiThread
     private void destroySaveUiUiThread(@Nullable PendingUi pendingSaveUi, boolean notifyClient) {
         if (mSaveUi == null) {
             // Calling destroySaveUiUiThread() twice is normal - it usually happens when the
@@ -475,12 +507,14 @@ public final class AutoFillUI {
     private void destroyAllUiThread(@Nullable PendingUi pendingSaveUi,
             @Nullable AutoFillUiCallback callback, boolean notifyClient) {
         hideFillUiUiThread(callback, notifyClient);
+        hideFillDialogUiThread(callback);
         destroySaveUiUiThread(pendingSaveUi, notifyClient);
     }
 
     @android.annotation.UiThread
     private void hideAllUiThread(@Nullable AutoFillUiCallback callback) {
         hideFillUiUiThread(callback, true);
+        hideFillDialogUiThread(callback);
         final PendingUi pendingSaveUi = hideSaveUiUiThread(callback);
         if (pendingSaveUi != null && pendingSaveUi.getState() == PendingUi.STATE_FINISHED) {
             if (sDebug) {
