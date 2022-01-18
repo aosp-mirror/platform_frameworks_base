@@ -1469,6 +1469,18 @@ public class NotifCollectionTest extends SysuiTestCase {
     }
 
     @Test
+    public void testCannotDismissNoClearNotifications() {
+        // GIVEN an no-clear notification
+        final NotificationEntry container = new NotificationEntryBuilder()
+                .setFlag(mContext, FLAG_NO_CLEAR, true)
+                .build();
+
+        // THEN its children are not dismissible
+        assertFalse(mCollection.shouldAutoDismissChildren(
+                container, container.getSbn().getGroupKey()));
+    }
+
+    @Test
     public void testCanDismissFgsNotificationChildren() {
         // GIVEN an FGS but not ongoing notification
         final NotificationEntry container = new NotificationEntryBuilder()
