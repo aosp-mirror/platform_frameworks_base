@@ -19,6 +19,7 @@ package android.os;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.hardware.vibrator.Braking;
@@ -144,6 +145,7 @@ public class VibratorInfoTest {
         assertTrue(
                 new VibratorInfo.Builder(TEST_VIBRATOR_ID).build().getFrequencyProfile().isEmpty());
     }
+
     @Test
     public void testFrequencyProfile_invalidValuesCreatesEmptyProfile() {
         // Invalid, contains NaN values or empty array.
@@ -173,6 +175,31 @@ public class VibratorInfoTest {
     }
 
     @Test
+    public void testGetFrequencyRangeHz_emptyProfileReturnsNull() {
+        assertNull(new VibratorInfo.FrequencyProfile(
+                Float.NaN, 50, 25, TEST_AMPLITUDE_MAP).getFrequencyRangeHz());
+        assertNull(new VibratorInfo.FrequencyProfile(
+                150, Float.NaN, 25, TEST_AMPLITUDE_MAP).getFrequencyRangeHz());
+        assertNull(new VibratorInfo.FrequencyProfile(
+                150, 50, Float.NaN, TEST_AMPLITUDE_MAP).getFrequencyRangeHz());
+        assertNull(new VibratorInfo.FrequencyProfile(150, 50, 25, null).getFrequencyRangeHz());
+    }
+
+    @Test
+    public void testGetFrequencyRangeHz_validProfileReturnsMappedValues() {
+        VibratorInfo.FrequencyProfile profile = new VibratorInfo.FrequencyProfile(
+                /* resonantFrequencyHz= */ 150,
+                /* minFrequencyHz= */ 50,
+                /* frequencyResolutionHz= */ 25,
+                /* maxAmplitudes= */ new float[]{
+                /* 50Hz= */ 0.1f, 0.2f, 0.4f, 0.8f, /* 150Hz= */ 1f, 0.9f,
+                /* 200Hz= */ 0.8f});
+
+        assertEquals(50f, profile.getFrequencyRangeHz().getLower(), TEST_TOLERANCE);
+        assertEquals(200f, profile.getFrequencyRangeHz().getUpper(), TEST_TOLERANCE);
+    }
+
+    @Test
     public void testGetMaxAmplitude_emptyProfileReturnsAlwaysZero() {
         VibratorInfo.FrequencyProfile profile = EMPTY_FREQUENCY_PROFILE;
         assertEquals(0f, profile.getMaxAmplitude(Float.NaN), TEST_TOLERANCE);
@@ -191,7 +218,7 @@ public class VibratorInfoTest {
     }
 
     @Test
-    public void testGetMaxAmplitude_validprofileReturnsMappedValues() {
+    public void testGetMaxAmplitude_validProfileReturnsMappedValues() {
         VibratorInfo.FrequencyProfile profile = new VibratorInfo.FrequencyProfile(
                         /* resonantFrequencyHz= */ 150,
                         /* minFrequencyHz= */ 50,
@@ -200,16 +227,23 @@ public class VibratorInfoTest {
                                 /* 50Hz= */ 0.1f, 0.2f, 0.4f, 0.8f, /* 150Hz= */ 1f, 0.9f,
                                 /* 200Hz= */ 0.8f});
 
+        // Values in the max amplitudes array should return exact measurement.
         assertEquals(1f, profile.getMaxAmplitude(150f), TEST_TOLERANCE);
         assertEquals(0.9f, profile.getMaxAmplitude(175f), TEST_TOLERANCE);
         assertEquals(0.8f, profile.getMaxAmplitude(125f), TEST_TOLERANCE);
+
+        // Min and max frequencies should return exact measurement from array.
         assertEquals(0.8f, profile.getMaxAmplitude(200f), TEST_TOLERANCE);
         assertEquals(0.1f, profile.getMaxAmplitude(50f), TEST_TOLERANCE);
 
-        // 145Hz maps to the max amplitude for 125Hz, which is lower.
-        assertEquals(0.8f, profile.getMaxAmplitude(145f), TEST_TOLERANCE); // 145Hz
-        // 185Hz maps to the max amplitude for 200Hz, which is lower.
-        assertEquals(0.8f, profile.getMaxAmplitude(185f), TEST_TOLERANCE); // 185Hz
+        // Values outside [50Hz, 200Hz] just return 0.
+        assertEquals(0f, profile.getMaxAmplitude(49f), TEST_TOLERANCE);
+        assertEquals(0f, profile.getMaxAmplitude(201f), TEST_TOLERANCE);
+
+        // 145Hz maps to linear value between 125Hz and 150Hz max amplitudes 0.8 and 1.
+        assertEquals(0.96f, profile.getMaxAmplitude(145f), TEST_TOLERANCE);
+        // 185Hz maps to linear value between 175Hz and 200Hz max amplitudes 0.9 and 0.8.
+        assertEquals(0.86f, profile.getMaxAmplitude(185f), TEST_TOLERANCE);
     }
 
     @Test

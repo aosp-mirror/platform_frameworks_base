@@ -573,21 +573,29 @@ public class VibratorInfo implements Parcelable {
          * supported frequency range is empty.
          */
         public float getMaxAmplitude(float frequencyHz) {
-            if (isEmpty() || Float.isNaN(frequencyHz)) {
+            if (isEmpty() || Float.isNaN(frequencyHz) || !mFrequencyRangeHz.contains(frequencyHz)) {
                 // Unsupported frequency requested, vibrator cannot play at this frequency.
                 return 0;
             }
-            float position = (frequencyHz - mMinFrequencyHz) / mFrequencyResolutionHz;
-            int floorIndex = (int) Math.floor(position);
-            int ceilIndex = (int) Math.ceil(position);
-            if (floorIndex < 0 || floorIndex >= mMaxAmplitudes.length) {
-                return 0;
-            }
-            if (floorIndex != ceilIndex && ceilIndex < mMaxAmplitudes.length) {
-                // Value in between two mapped frequency values, use the lowest supported one.
-                return MathUtils.min(mMaxAmplitudes[floorIndex], mMaxAmplitudes[ceilIndex]);
-            }
-            return mMaxAmplitudes[floorIndex];
+
+            // Subtract minFrequencyHz to simplify offset calculations.
+            float mappingFreq = frequencyHz - mMinFrequencyHz;
+
+            // Find the bucket to interpolate within.
+            // Any calculated index should be safe, except exactly equal to max amplitude can be
+            // one step too high, so constrain it to guarantee safety.
+            int startIdx = MathUtils.constrain(
+                    /* amount= */ (int) Math.floor(mappingFreq / mFrequencyResolutionHz),
+                    /* low= */ 0, /* high= */ mMaxAmplitudes.length - 1);
+            int nextIdx = MathUtils.constrain(
+                    /* amount= */ startIdx + 1,
+                    /* low= */ 0, /* high= */ mMaxAmplitudes.length - 1);
+
+            // Linearly interpolate the amplitudes based on the frequency range of the bucket.
+            return MathUtils.constrainedMap(
+                    mMaxAmplitudes[startIdx], mMaxAmplitudes[nextIdx],
+                    startIdx * mFrequencyResolutionHz, nextIdx * mFrequencyResolutionHz,
+                    mappingFreq);
         }
 
         /** Returns the raw list of maximum relative output accelerations from the vibrator. */
