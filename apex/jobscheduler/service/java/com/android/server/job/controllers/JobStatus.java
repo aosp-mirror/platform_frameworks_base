@@ -1139,11 +1139,12 @@ public final class JobStatus {
      */
     public float getFractionRunTime() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
-        if (earliestRunTimeElapsedMillis == 0 && latestRunTimeElapsedMillis == Long.MAX_VALUE) {
+        if (earliestRunTimeElapsedMillis == NO_EARLIEST_RUNTIME
+                && latestRunTimeElapsedMillis == NO_LATEST_RUNTIME) {
             return 1;
-        } else if (earliestRunTimeElapsedMillis == 0) {
+        } else if (earliestRunTimeElapsedMillis == NO_EARLIEST_RUNTIME) {
             return now >= latestRunTimeElapsedMillis ? 1 : 0;
-        } else if (latestRunTimeElapsedMillis == Long.MAX_VALUE) {
+        } else if (latestRunTimeElapsedMillis == NO_LATEST_RUNTIME) {
             return now >= earliestRunTimeElapsedMillis ? 1 : 0;
         } else {
             if (now <= earliestRunTimeElapsedMillis) {
