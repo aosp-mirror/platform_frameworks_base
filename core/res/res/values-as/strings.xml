@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"অসুবিধা নিদিবৰ কনফিগাৰেশ্বনক পঢ়িবলৈ আৰু সালসলনি কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"চোৱাৰ অনুমতিৰ ব্যৱহাৰ আৰম্ভ কৰক"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ধাৰকক কোনো এপৰ বাবে অনুমতিৰ ব্যৱহাৰ আৰম্ভ কৰিবলৈ দিয়ে। সাধাৰণ এপ্‌সমূহৰ বাবে কেতিয়াও প্ৰয়োজন হ’ব নালাগে।"</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"অনুমতিৰ সিদ্ধান্তসমূহ চোৱা আৰম্ভ কৰক"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"ধাৰকক অনুমতিৰ সিদ্ধান্তসমূহ পৰ্যালোচনা কৰিবলৈ স্ক্ৰীন আৰম্ভ কৰিবলৈ দিয়ে। সাধাৰণ এপ্‌সমূহৰ বাবে কেতিয়াও প্ৰয়োজন হ’ব নালাগে।"</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"এপৰ সুবিধাসমূহৰ সম্পর্কীয় তথ্য চোৱাটো আৰম্ভ কৰক"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ধাৰকক কোনো এপৰ সুবিধাসমূহৰ সম্পর্কীয় তথ্য চোৱাটো আৰম্ভ কৰিবলৈ দিয়ে।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"এটা উচ্চ ছেম্পলিঙৰ হাৰত ছেন্সৰৰ ডেটা এক্সেছ কৰে"</string>

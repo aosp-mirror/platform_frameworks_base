@@ -739,10 +739,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Pozwala aplikacji na odczyt i zmianę konfiguracji trybu Nie przeszkadzać."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"rozpocząć wyświetlanie użycia uprawnień"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Umożliwia rozpoczęcie korzystania z uprawnienia dotyczącego danej aplikacji jego posiadaczowi. Zwykłe aplikacje nie powinny potrzebować tego uprawnienia."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"rozpoczęcie wyświetlania decyzji dotyczących uprawnień"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Umożliwia posiadaczowi uruchomienie ekranu w celu przeglądania decyzji dotyczących uprawnień. Zwykłe aplikacje nie powinny tego potrzebować."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"rozpoczęcie wyświetlania funkcji aplikacji"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Umożliwia posiadaczowi rozpoczęcie przeglądania informacji o funkcjach aplikacji."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"dostęp do danych czujnika z wysoką częstotliwością"</string>

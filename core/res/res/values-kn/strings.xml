@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಕಾನ್ಫಿಗರೇಶನ್ ಅನ್ನು ಓದಲು ಮತ್ತು ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ವೀಕ್ಷಣಾ ಅನುಮತಿಯ ಬಳಕೆಯನ್ನು ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ಆ್ಯಪ್‌ಗಾಗಿ ಅನುಮತಿ ಬಳಕೆಯನ್ನು ಪ್ರಾರಂಭಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಆ್ಯಪ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ಅನುಮತಿಯ ನಿರ್ಧಾರಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"ಅನುಮತಿಯ ನಿರ್ಧಾರಗಳನ್ನು ಪರಿಶೀಲಿಸುವುದಕ್ಕಾಗಿ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲು ಬಳಕೆದಾರರನ್ನು ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಆ್ಯಪ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ಆ್ಯಪ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ಆ್ಯಪ್‌ನ ವೈಶಿಷ್ಟ್ಯಗಳ ಮಾಹಿತಿಯನ್ನು ವೀಕ್ಷಿಸಲು ಬಳಕೆದಾರರನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ಹೆಚ್ಚಿನ ನಮೂನೆ ದರದಲ್ಲಿ ಸೆನ್ಸಾರ್ ಡೇಟಾ ಪ್ರವೇಶಿಸಿ"</string>

@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"საშუალებას აძლევს აპს, წაიკითხოს და დაწეროს კონფიგურაცია „არ შემაწუხოთ“."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ნახვის ნებართვის გამოყენების დაწყება"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"მფლობელს საშუალებას აძლევს, დაიწყოს აპის ნებართვის გამოყენება. ჩვეულებრივი აპებისთვის არასოდეს უნდა იყოს საჭირო."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ნებართვის შესახებ გადაწყვეტილებების ნახვის დაწყება"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"მფლობელს საშუალებას აძლევს, გაუშვას ეკრანი ნებართვის შესახებ გადაწყვეტილებების სანახავად. ჩვეულებრივი აპებისთვის არასოდეს უნდა იყოს საჭირო."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"აპის ფუნქციების ნახვის დაწყება"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"მფლობელს საშუალებას აძლევს, დაიწყოს აპის ფუნქციების ინფორმაციის ნახვა."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"სენსორის მონაცემებზე წვდომა სემპლინგის მაღალი სიხშირით"</string>

@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Consente all\'app di leggere e modificare la configurazione della funzione Non disturbare."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"avvio dell\'uso dell\'autorizzazione di visualizzazione"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Consente al titolare di avviare l\'uso delle autorizzazioni per un\'app. Non dovrebbe essere mai necessaria per le normali applicazioni."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"Inizio della visualizzazione delle decisioni relative all\'autorizzazione"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Consente all\'app che ha questa autorizzazione di avviare lo schermo per esaminare le decisioni relative all\'autorizzazione. Non dovrebbe mai essere necessaria per le normali app."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"Inizio della visualizzazione di funzionalità delle app"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Consente all\'app che ha questa autorizzazione di iniziare a visualizzare le informazioni relative alle funzionalità di un\'app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Accesso ai dati dei sensori a una frequenza di campionamento elevata"</string>

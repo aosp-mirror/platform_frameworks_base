@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ermöglicht der App Lese- und Schreibzugriff auf die „Bitte nicht stören“-Konfiguration"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"Mit der Verwendung der Anzeigeberechtigung beginnen"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Ermöglicht dem Inhaber, die Berechtigungsnutzung für eine App zu beginnen. Sollte für normale Apps nie benötigt werden."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"Entscheidungen zu Leseberechtigung starten"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Ermöglicht dem Inhaber, das Display zu starten, um Berechtigungsentscheidungen anzusehen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"App-Funktionen ansehen"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Ermöglicht der App, die Informationen über die Funktionen einer anderen App anzusehen."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Sensordaten mit hoher Frequenz auslesen"</string>

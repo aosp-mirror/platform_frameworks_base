@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite á aplicación ler e escribir a configuración do modo Non molestar."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso de permiso de vista"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite ao propietario iniciar o uso de permisos dunha aplicación. As aplicacións normais non deberían precisalo nunca."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"iniciar vista das decisións sobre os permisos"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Permite que a persoa propietaria acceda a unha pantalla onde poderá examinar as decisións relativas aos permisos. Esta opción nunca debería ser necesaria para as aplicacións normais."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"comezar a ver as funcións da aplicación"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite que o propietario comece a ver a información das funcións dunha aplicación."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"acceder aos datos dos sensores usando unha taxa de mostraxe alta"</string>

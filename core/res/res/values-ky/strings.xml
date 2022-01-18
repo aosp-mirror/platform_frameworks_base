@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Колдонмого \"Тынчымды алба\" режиминин конфигурациясын окуу жана жазуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"уруксаттын колдонулушун көрүп баштоо"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Колдонмонун пайдаланылышына уруксат берүүгө мүмкүнчүлүк берет. Кадимки колдонмолорго эч качан талап кылынбашы керек."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"уруксаттар боюнча кабыл алынган чечимдерди карап чыгуу"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Ээсине уруксаттар боюнча кабыл алынган чечимдерди карап чыгуу үчүн экранды иштетүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбашы керек."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"колдонмонун функцияларын көрүп баштоо"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Колдонуучуга функциялары тууралуу маалыматты көрүп баштоо мүмкүнчүлүгүн берет."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"үлгүнү жаздыруу ылдамдыгы жогору болгон сенсор дайындарынын үлгүсүнө мүмкүнчүлүк алуу"</string>

@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"サイレント モード設定の読み取りと書き込みをアプリに許可します。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"表示権限の使用の開始"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"アプリの権限使用の開始を所有者に許可します。通常のアプリでは不要です。"</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"閲覧権限の許可 / 拒否の開始"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"権限の許可 / 拒否を確認するための画面の開始を所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"アプリ機能の表示の開始"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"アプリの機能情報の表示の開始を所有者に許可します。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"高サンプリング レートでセンサーデータにアクセスする"</string>

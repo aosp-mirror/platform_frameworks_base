@@ -745,10 +745,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"للسماح للتطبيق بقراءة إعداد \"عدم الإزعاج\" وكتابتها."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"بدء استخدام إذن العرض"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"للسماح للمالك ببدء استخدام الإذن لأحد التطبيقات. ولن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"بدء اتخاذ القرارات المتعلقة بالإذن بعرض البيانات"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"يمكنك السماح للمالك ببدء الشاشة لمراجعة القرارات المتعلقة بالأذونات. لا حاجة لذلك مع التطبيقات العادية."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"بدء عرض ميزات التطبيق"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"للسماح للمالك ببدء عرض معلومات عن ميزات التطبيق."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"الوصول إلى بيانات جهاز الاستشعار بمعدّل مرتفع للبيانات في الملف الصوتي"</string>

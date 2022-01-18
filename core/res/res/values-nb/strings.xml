@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Lar appen lese og skrive konfigurasjon av Ikke forstyrr."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"start visning av bruk av tillatelser"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Lar innehaveren starte bruk av tillatelser for en app. Dette skal aldri være nødvendig for vanlige apper."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"starte visning av avgjørelser om tillatelser"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Lar innehaveren starte skjermen for å gjennomgå avgjørelser om tillatelser. Dette skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"starte visning av appfunksjoner"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Lar innehaveren se informasjon om funksjonene for en app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"tilgang til sensordata ved høy samplingfrekvens"</string>

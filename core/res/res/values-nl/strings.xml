@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Hiermee kan de app configuratie voor Niet storen lezen en schrijven."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"rechtengebruik starten"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Hiermee kan de houder het rechtengebruik voor een app starten. Nooit vereist voor normale apps."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"bekijken van rechtenbeslissingen starten"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Hiermee kan de houder het scherm starten om rechtenbeslissingen te bekijken. Nooit vereist voor normale apps."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"app-functies bekijken"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Hiermee kan de houder informatie over functies bekijken voor een app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"toegang krijgen tot sensorgegevens met een hoge samplingsnelheid"</string>

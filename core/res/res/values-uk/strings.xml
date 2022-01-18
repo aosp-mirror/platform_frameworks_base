@@ -739,10 +739,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Додаток зможе переглядати та змінювати конфігурацію режиму \"Не турбувати\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"перегляньте дані про використання дозволів"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Власник зможе використовувати дозволи для цього додатка. Цей дозвіл не потрібен для звичайних додатків."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"почати перегляд рішень щодо дозволів"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"У додатку може відкриватися екран для перегляду рішень щодо дозволів. Звичайні додатки ніколи не використовують цей дозвіл."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"почати перегляд функцій додатка"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дозволяє додатку почати перегляд інформації про функції іншого додатка."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"доступ до даних датчиків із високою частотою дикретизації"</string>
