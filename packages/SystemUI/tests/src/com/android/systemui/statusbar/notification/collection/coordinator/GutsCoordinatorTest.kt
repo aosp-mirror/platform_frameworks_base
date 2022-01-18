@@ -73,43 +73,43 @@ class GutsCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testSimpleLifetimeExtension() {
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry1, 0)).isFalse()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isFalse()
         notifGutsViewListener.onGutsOpen(entry1, mock(NotificationGuts::class.java))
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isTrue()
         notifGutsViewListener.onGutsClose(entry1)
         verify(lifetimeExtenderCallback).onEndLifetimeExtension(notifLifetimeExtender, entry1)
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry1, 0)).isFalse()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isFalse()
     }
 
     @Test
     fun testDoubleOpenLifetimeExtension() {
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry1, 0)).isFalse()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isFalse()
         notifGutsViewListener.onGutsOpen(entry1, mock(NotificationGuts::class.java))
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isTrue()
         notifGutsViewListener.onGutsOpen(entry1, mock(NotificationGuts::class.java))
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isTrue()
         notifGutsViewListener.onGutsClose(entry1)
         verify(lifetimeExtenderCallback).onEndLifetimeExtension(notifLifetimeExtender, entry1)
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry1, 0)).isFalse()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isFalse()
     }
 
     @Test
     fun testTwoEntryLifetimeExtension() {
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry1, 0)).isFalse()
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry2, 0)).isFalse()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isFalse()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry2, 0)).isFalse()
         notifGutsViewListener.onGutsOpen(entry1, mock(NotificationGuts::class.java))
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry1, 0)).isTrue()
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry2, 0)).isFalse()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isTrue()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry2, 0)).isFalse()
         notifGutsViewListener.onGutsOpen(entry2, mock(NotificationGuts::class.java))
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry1, 0)).isTrue()
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry2, 0)).isTrue()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isTrue()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry2, 0)).isTrue()
         notifGutsViewListener.onGutsClose(entry1)
         verify(lifetimeExtenderCallback).onEndLifetimeExtension(notifLifetimeExtender, entry1)
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry1, 0)).isFalse()
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry2, 0)).isTrue()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isFalse()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry2, 0)).isTrue()
         notifGutsViewListener.onGutsClose(entry2)
         verify(lifetimeExtenderCallback).onEndLifetimeExtension(notifLifetimeExtender, entry2)
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry1, 0)).isFalse()
-        assertThat(notifLifetimeExtender.shouldExtendLifetime(entry2, 0)).isFalse()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isFalse()
+        assertThat(notifLifetimeExtender.maybeExtendLifetime(entry2, 0)).isFalse()
     }
 }
