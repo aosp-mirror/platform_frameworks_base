@@ -621,11 +621,15 @@ public class TrustAgentService extends Service {
      *
      * If the user has no auth method specified, then keyguard will still be shown but can be
      * dismissed normally.
-     *
-     * TODO(b/213631675): Implement & make public
-     * @hide
      */
     public final void lockUser() {
+        if (mCallback != null) {
+            try {
+                mCallback.lockUser();
+            } catch (RemoteException e) {
+                onError("calling lockUser");
+            }
+        }
     }
 
     /**

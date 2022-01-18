@@ -245,7 +245,6 @@ public class TrustManagerService extends SystemService {
     }
 
     // Extend unlock config and logic
-
     private final class SettingsObserver extends ContentObserver {
         private final Uri TRUST_AGENTS_EXTEND_UNLOCK =
                 Settings.Secure.getUriFor(Settings.Secure.TRUST_AGENTS_EXTEND_UNLOCK);
@@ -554,6 +553,20 @@ public class TrustManagerService extends SystemService {
 
     public void unlockUserWithToken(long handle, byte[] token, int userId) {
         mLockPatternUtils.unlockUserWithToken(handle, token, userId);
+    }
+
+    /**
+     * Locks the phone and requires some auth (not trust) like a biometric or passcode before
+     * unlocking.
+     */
+    public void lockUser(int userId) {
+        mLockPatternUtils.requireStrongAuth(
+                StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST, userId);
+        try {
+            WindowManagerGlobal.getWindowManagerService().lockNow(null);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error locking screen when called from trust agent");
+        }
     }
 
     void showKeyguardErrorMessage(CharSequence message) {

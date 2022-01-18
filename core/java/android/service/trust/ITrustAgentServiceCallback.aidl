@@ -26,6 +26,7 @@ import android.os.UserHandle;
 oneway interface ITrustAgentServiceCallback {
     void grantTrust(CharSequence message, long durationMs, int flags);
     void revokeTrust();
+    void lockUser();
     void setManagingTrust(boolean managingTrust);
     void onConfigureCompleted(boolean result, IBinder token);
     void addEscrowToken(in byte[] token, int userId);

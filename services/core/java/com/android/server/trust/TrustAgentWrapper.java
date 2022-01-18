@@ -71,6 +71,7 @@ public class TrustAgentWrapper {
     private static final int MSG_ESCROW_TOKEN_STATE = 9;
     private static final int MSG_UNLOCK_USER = 10;
     private static final int MSG_SHOW_KEYGUARD_ERROR_MESSAGE = 11;
+    private static final int MSG_LOCK_USER = 12;
 
     /**
      * Time in uptime millis that we wait for the service connection, both when starting
@@ -296,6 +297,13 @@ public class TrustAgentWrapper {
                     mTrustManagerService.showKeyguardErrorMessage(message);
                     break;
                 }
+                case MSG_LOCK_USER: {
+                    mTrusted = false;
+                    mTrustable = false;
+                    mTrustManagerService.updateTrust(mUserId, 0 /* flags */);
+                    mTrustManagerService.lockUser(mUserId);
+                    break;
+                }
             }
         }
     };
@@ -318,6 +326,11 @@ public class TrustAgentWrapper {
         public void revokeTrust() {
             if (DEBUG) Slog.d(TAG, "revokeTrust()");
             mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
+        }
+
+        @Override
+        public void lockUser() {
+            mHandler.sendEmptyMessage(MSG_LOCK_USER);
         }
 
         @Override
