@@ -2986,6 +2986,54 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_ROLE_HOLDER_CUSTOM_USER_CONSENT_INTENT";
 
     /**
+     * Activity action: attempts to establish network connection
+     *
+     * <p>This intent can be accompanied by any of the relevant provisioning extras related to
+     * network connectivity, such as:
+     * <ul>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_SSID}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_HIDDEN}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_SECURITY_TYPE}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_PASSWORD}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_HOST}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_PORT}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_BYPASS}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_EAP_METHOD}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_PHASE2_AUTH}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_CA_CERTIFICATE}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_USER_CERTIFICATE}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_IDENTITY}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_ANONYMOUS_IDENTITY}</li>
+     *     <li>{@code #EXTRA_PROVISIONING_WIFI_DOMAIN}</li>
+     * </ul>
+     *
+     * <p>If there are provisioning extras related to network connectivity, this activity
+     * attempts to connect to the specified network. Otherwise it prompts the end-user to connect.
+     *
+     * <p>This activity is meant to be started by the provisioning initiator prior to starting
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} or {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}.
+     *
+     * <p>Note that network connectivity is still also handled when provisioning via {@link
+     * #ACTION_PROVISION_MANAGED_PROFILE} or {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}. {@link
+     * #ACTION_ESTABLISH_NETWORK_CONNECTION} should only be used in cases when the provisioning
+     * initiator would like to do some additional logic after the network connectivity step and
+     * before the start of provisioning.
+     *
+     * If network connection is established, {@link Activity#RESULT_OK} will be returned. Otherwise
+     * the result will be {@link Activity#RESULT_CANCELED}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DISPATCH_PROVISIONING_MESSAGE)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_ESTABLISH_NETWORK_CONNECTION =
+            "android.app.action.ESTABLISH_NETWORK_CONNECTION";
+
+    /**
      * Maximum supported password length. Kind-of arbitrary.
      * @hide
      */
