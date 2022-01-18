@@ -539,7 +539,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     }
 
     boolean isVolumeControlEnabled(@NonNull MediaDevice device) {
-        return !device.getFeatures().contains(MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK)
+        // TODO(b/202500642): Also enable volume control for remote non-group sessions.
+        return !isActiveRemoteDevice(device)
             || mVolumeAdjustmentForRemoteGroupSessions;
     }
 
