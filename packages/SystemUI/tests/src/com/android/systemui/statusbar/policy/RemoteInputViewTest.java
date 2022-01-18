@@ -102,7 +102,8 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
         mReceiver = new BlockingQueueIntentReceiver();
         mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION), null,
-                Handler.createAsync(Dependency.get(Dependency.BG_LOOPER)));
+                Handler.createAsync(Dependency.get(Dependency.BG_LOOPER)),
+                Context.RECEIVER_EXPORTED_UNAUDITED);
 
         // Avoid SecurityException RemoteInputView#sendRemoteInput().
         mContext.addMockSystemService(ShortcutManager.class, mShortcutManager);

@@ -76,7 +76,8 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         )
         verify(mFlagManager).restartAction = any()
         mBroadcastReceiver = withArgCaptor {
-            verify(mMockContext).registerReceiver(capture(), any(), nullable(), nullable())
+            verify(mMockContext).registerReceiver(capture(), any(), nullable(), nullable(),
+                any())
         }
         mClearCacheAction = withArgCaptor {
             verify(mFlagManager).clearCacheAction = capture()

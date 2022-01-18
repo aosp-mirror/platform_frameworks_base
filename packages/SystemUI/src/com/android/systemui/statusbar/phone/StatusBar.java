@@ -1003,7 +1003,7 @@ public class StatusBar extends CoreStartable implements
         internalFilter.addAction(BANNER_ACTION_CANCEL);
         internalFilter.addAction(BANNER_ACTION_SETUP);
         mContext.registerReceiver(mBannerActionBroadcastReceiver, internalFilter, PERMISSION_SELF,
-                null);
+                null, Context.RECEIVER_EXPORTED_UNAUDITED);
 
         if (mWallpaperSupported) {
             IWallpaperManager wallpaperManager = IWallpaperManager.Stub.asInterface(
@@ -1332,7 +1332,8 @@ public class StatusBar extends CoreStartable implements
             demoFilter.addAction(ACTION_FAKE_ARTWORK);
         }
         mContext.registerReceiverAsUser(mDemoReceiver, UserHandle.ALL, demoFilter,
-                android.Manifest.permission.DUMP, null);
+                android.Manifest.permission.DUMP, null,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
 
         // listen for USER_SETUP_COMPLETE setting (per-user)
         mDeviceProvisionedController.addCallback(mUserSetupObserver);

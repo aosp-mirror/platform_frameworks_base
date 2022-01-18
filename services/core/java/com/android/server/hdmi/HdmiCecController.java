@@ -47,6 +47,7 @@ import libcore.util.EmptyArray;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -694,7 +695,19 @@ final class HdmiCecController {
     @ServiceThreadOnly
     private void handleIncomingCecCommand(int srcAddress, int dstAddress, byte[] body) {
         assertRunOnServiceThread();
-        HdmiCecMessage command = HdmiCecMessageBuilder.of(srcAddress, dstAddress, body);
+
+        if (body.length == 0) {
+            Slog.e(TAG, "Message with empty body received.");
+            return;
+        }
+
+        HdmiCecMessage command = HdmiCecMessage.build(srcAddress, dstAddress, body[0],
+                Arrays.copyOfRange(body, 1, body.length));
+
+        if (command.getValidationResult() != HdmiCecMessageValidator.OK) {
+            Slog.e(TAG, "Invalid message received: " + command);
+        }
+
         HdmiLogger.debug("[R]:" + command);
         addCecMessageToHistory(true /* isReceived */, command);
 

@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import static android.hardware.hdmi.DeviceFeatures.FEATURE_NOT_SUPPORTED;
+import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
 import static android.hardware.hdmi.HdmiControlManager.CLEAR_TIMER_STATUS_CEC_DISABLE;
 import static android.hardware.hdmi.HdmiControlManager.CLEAR_TIMER_STATUS_CHECK_RECORDER_CONNECTION;
 import static android.hardware.hdmi.HdmiControlManager.CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE;
@@ -31,6 +33,7 @@ import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_DIGI
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_EXTERNAL;
 
 import android.annotation.Nullable;
+import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -346,7 +349,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 if (info == null) {
                     // No CEC/MHL device is present at the port. Attempt to switch to
                     // the hardware port itself for non-CEC devices that may be connected.
-                    info = new HdmiDeviceInfo(path, getActivePortId());
+                    info = HdmiDeviceInfo.hardwarePort(path, getActivePortId());
                 }
             }
             mService.invokeInputChangeListener(info);
@@ -1548,9 +1551,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
-    protected List<Integer> getDeviceFeatures() {
-        List<Integer> deviceFeatures = new ArrayList<>();
-
+    protected DeviceFeatures computeDeviceFeatures() {
         boolean hasArcPort = false;
         List<HdmiPortInfo> ports = mService.getPortInfo();
         for (HdmiPortInfo port : ports) {
@@ -1559,11 +1560,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 break;
             }
         }
-        if (hasArcPort) {
-            deviceFeatures.add(Constants.DEVICE_FEATURE_SINK_SUPPORTS_ARC_TX);
-        }
-        deviceFeatures.add(Constants.DEVICE_FEATURE_TV_SUPPORTS_RECORD_TV_SCREEN);
-        return deviceFeatures;
+
+        return DeviceFeatures.NO_FEATURES_SUPPORTED.toBuilder()
+                .setRecordTvScreenSupport(FEATURE_SUPPORTED)
+                .setArcTxSupport(hasArcPort ? FEATURE_SUPPORTED : FEATURE_NOT_SUPPORTED)
+                .build();
     }
 
     @Override

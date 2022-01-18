@@ -128,7 +128,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
                         update(true /* updateAlways */);
                     }
                 }
-            }, filter, null, null);
+            }, filter, null, null, Context.RECEIVER_EXPORTED_UNAUDITED);
         }
     }
 

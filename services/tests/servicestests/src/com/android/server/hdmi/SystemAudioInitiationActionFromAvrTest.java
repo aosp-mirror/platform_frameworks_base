@@ -64,7 +64,7 @@ public class SystemAudioInitiationActionFromAvrTest {
 
     @Before
     public void SetUp() {
-        mDeviceInfoForTests = new HdmiDeviceInfo(1001, 1234);
+        mDeviceInfoForTests = HdmiDeviceInfo.hardwarePort(1001, 1234);
 
         Context context = InstrumentationRegistry.getTargetContext();
 

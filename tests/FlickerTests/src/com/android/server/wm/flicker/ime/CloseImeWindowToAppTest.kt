@@ -32,7 +32,6 @@ import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.entireScreenCovered
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
@@ -134,11 +133,7 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
 
     @FlakyTest(bugId = 206753786)
     @Test
-    fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        testSpec.statusBarLayerRotatesScales()
-    }
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test

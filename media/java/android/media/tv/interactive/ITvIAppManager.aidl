@@ -43,6 +43,7 @@ interface ITvIAppManager {
     void createBiInteractiveApp(
             in IBinder sessionToken, in Uri biIAppUri, in Bundle params, int userId);
     void destroyBiInteractiveApp(in IBinder sessionToken, in String biIAppId, int userId);
+    void setTeletextAppEnabled(in IBinder sessionToken, boolean enable, int userId);
     void sendCurrentChannelUri(in IBinder sessionToken, in Uri channelUri, int userId);
     void sendCurrentChannelLcn(in IBinder sessionToken, int lcn, int userId);
     void sendStreamVolume(in IBinder sessionToken, float volume, int userId);

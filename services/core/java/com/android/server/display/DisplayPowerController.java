@@ -957,7 +957,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     lightSensorRate, initialLightSensorRate, brighteningLightDebounce,
                     darkeningLightDebounce, autoBrightnessResetAmbientLuxAfterWarmUp,
                     ambientBrightnessThresholds, screenBrightnessThresholds, mContext,
-                    mHbmController, mIdleModeBrightnessMapper);
+                    mHbmController, mIdleModeBrightnessMapper,
+                    mDisplayDeviceConfig.getAmbientHorizonShort(),
+                    mDisplayDeviceConfig.getAmbientHorizonLong());
         } else {
             mUseSoftwareAutoBrightnessConfig = false;
         }

@@ -27,7 +27,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
@@ -1370,16 +1369,6 @@ class RecentTasks {
         switch (task.getWindowingMode()) {
             case WINDOWING_MODE_PINNED:
                 return false;
-            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
-                if (DEBUG_RECENTS_TRIM_TASKS) {
-                    Slog.d(TAG, "\ttop=" + task.getRootTask().getTopMostTask());
-                }
-                final Task rootTask = task.getRootTask();
-                if (rootTask != null && rootTask.getTopMostTask() == task) {
-                    // Only the non-top task of the primary split screen mode is visible
-                    return false;
-                }
-                break;
             case WINDOWING_MODE_MULTI_WINDOW:
                 // Ignore tasks that are always on top
                 if (task.isAlwaysOnTopWhenVisible()) {

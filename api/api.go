@@ -81,6 +81,12 @@ type libraryProps struct {
 	Visibility  []string
 }
 
+type fgProps struct {
+	Name       *string
+	Srcs       []string
+	Visibility []string
+}
+
 // Struct to pass parameters for the various merged [current|removed].txt file modules we create.
 type MergedTxtDefinition struct {
 	// "current.txt" or "removed.txt"
@@ -111,7 +117,7 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 	props.Tools = []string{"metalava"}
 	props.Out = []string{filename}
 	props.Cmd = proptools.StringPtr(metalavaCmd + "$(in) --api $(out)")
-	props.Srcs = createSrcs(txt.BaseTxt, txt.Modules, txt.ModuleTag)
+	props.Srcs = append([]string{txt.BaseTxt}, createSrcs(txt.Modules, txt.ModuleTag)...)
 	props.Dists = []android.Dist{
 		{
 			Targets: []string{"droidcore"},
@@ -134,7 +140,7 @@ func createMergedStubsSrcjar(ctx android.LoadHookContext, modules []string) {
 	props.Tools = []string{"merge_zips"}
 	props.Out = []string{"current.srcjar"}
 	props.Cmd = proptools.StringPtr("$(location merge_zips) $(out) $(in)")
-	props.Srcs = createSrcs(":api-stubs-docs-non-updatable", modules, "{.public.stubs.source}")
+	props.Srcs = append([]string{":api-stubs-docs-non-updatable"}, createSrcs(modules, "{.public.stubs.source}")...)
 	props.Visibility = []string{"//visibility:private"} // Used by make module in //development, mind
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
@@ -150,7 +156,7 @@ func createMergedAnnotations(ctx android.LoadHookContext, modules []string) {
 	props.Out = []string{"annotations.zip"}
 	props.Cmd = proptools.StringPtr("$(location merge_annotation_zips) $(genDir)/out $(in) && " +
 		"$(location soong_zip) -o $(out) -C $(genDir)/out -D $(genDir)/out")
-	props.Srcs = createSrcs(":android-non-updatable-doc-stubs{.annotations.zip}", modules, "{.public.annotations.zip}")
+	props.Srcs = append([]string{":android-non-updatable-doc-stubs{.annotations.zip}"}, createSrcs(modules, "{.public.annotations.zip}")...)
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
 
@@ -172,7 +178,7 @@ func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
 	// Note: order matters: first parameter is the full api-versions.xml
 	// after that the stubs files in any order
 	// stubs files are all modules that export API surfaces EXCEPT ART
-	props.Srcs = createSrcs(":framework-doc-stubs{.api_versions.xml}", modules, ".stubs{.jar}")
+	props.Srcs = append([]string{":framework-doc-stubs{.api_versions.xml}"}, createSrcs(modules, ".stubs{.jar}")...)
 	props.Dists = []android.Dist{{Targets: []string{"sdk"}}}
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
@@ -182,44 +188,18 @@ func createMergedModuleLibStubs(ctx android.LoadHookContext, modules []string) {
 	modules = removeAll(modules, []string{art, conscrypt, i18n})
 	props := libraryProps{}
 	props.Name = proptools.StringPtr("framework-updatable-stubs-module_libs_api")
-	props.Static_libs = appendStr(modules, ".stubs.module_lib")
+	props.Static_libs = transformArray(modules, "", ".stubs.module_lib")
 	props.Sdk_version = proptools.StringPtr("module_current")
 	props.Visibility = []string{"//frameworks/base"}
 	ctx.CreateModule(java.LibraryFactory, &props)
 }
 
-func appendStr(modules []string, s string) []string {
-	a := make([]string, 0, len(modules))
-	for _, module := range modules {
-		a = append(a, module+s)
-	}
-	return a
-}
-
-func createSrcs(base string, modules []string, tag string) []string {
-	a := make([]string, 0, len(modules)+1)
-	a = append(a, base)
-	for _, module := range modules {
-		a = append(a, ":"+module+tag)
-	}
-	return a
-}
-
-func removeAll(s []string, vs []string) []string {
-	for _, v := range vs {
-		s = remove(s, v)
-	}
-	return s
-}
-
-func remove(s []string, v string) []string {
-	s2 := make([]string, 0, len(s))
-	for _, sv := range s {
-		if sv != v {
-			s2 = append(s2, sv)
-		}
-	}
-	return s2
+func createPublicStubsSourceFilegroup(ctx android.LoadHookContext, modules []string) {
+	props := fgProps{}
+	props.Name = proptools.StringPtr("all-modules-public-stubs-source")
+	props.Srcs = createSrcs(modules, "{.public.stubs.source}")
+	props.Visibility = []string{"//frameworks/base"}
+	ctx.CreateModule(android.FileGroupFactory, &props)
 }
 
 func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string) {
@@ -278,6 +258,8 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedAnnotations(ctx, bootclasspath)
 
 	createFilteredApiVersions(ctx, bootclasspath)
+
+	createPublicStubsSourceFilegroup(ctx, bootclasspath)
 }
 
 func combinedApisModuleFactory() android.Module {
@@ -286,4 +268,37 @@ func combinedApisModuleFactory() android.Module {
 	android.InitAndroidModule(module)
 	android.AddLoadHook(module, func(ctx android.LoadHookContext) { module.createInternalModules(ctx) })
 	return module
+}
+
+// Various utility methods below.
+
+// Creates an array of ":<m><tag>" for each m in <modules>.
+func createSrcs(modules []string, tag string) []string {
+	return transformArray(modules, ":", tag)
+}
+
+// Creates an array of "<prefix><m><suffix>", for each m in <modules>.
+func transformArray(modules []string, prefix, suffix string) []string {
+	a := make([]string, 0, len(modules))
+	for _, module := range modules {
+		a = append(a, prefix+module+suffix)
+	}
+	return a
+}
+
+func removeAll(s []string, vs []string) []string {
+	for _, v := range vs {
+		s = remove(s, v)
+	}
+	return s
+}
+
+func remove(s []string, v string) []string {
+	s2 := make([]string, 0, len(s))
+	for _, sv := range s {
+		if sv != v {
+			s2 = append(s2, sv)
+		}
+	}
+	return s2
 }

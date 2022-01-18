@@ -59,10 +59,16 @@ public class HdmiCecLocalDevicePlaybackTest {
             HotplugDetectionAction.POLLING_INTERVAL_MS_FOR_PLAYBACK;
 
     private static final int PORT_1 = 1;
-    private static final HdmiDeviceInfo INFO_TV = new HdmiDeviceInfo(
-            ADDR_TV, 0x0000, PORT_1, HdmiDeviceInfo.DEVICE_TV,
-            0x1234, "TV",
-            HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+    private static final HdmiDeviceInfo INFO_TV = HdmiDeviceInfo.cecDeviceBuilder()
+            .setLogicalAddress(ADDR_TV)
+            .setPhysicalAddress(0x0000)
+            .setPortId(PORT_1)
+            .setDeviceType(HdmiDeviceInfo.DEVICE_TV)
+            .setVendorId(0x1234)
+            .setDisplayName("TV")
+            .setDevicePowerStatus(HdmiControlManager.POWER_STATUS_ON)
+            .setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_1_4_B)
+            .build();
 
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
@@ -138,7 +144,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDevicePlayback);
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
@@ -1691,10 +1696,16 @@ public class HdmiCecLocalDevicePlaybackTest {
     public void hotplugDetectionAction_removeDevice() {
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
-        HdmiDeviceInfo infoPlayback = new HdmiDeviceInfo(
-                Constants.ADDR_PLAYBACK_2, 0x1234, PORT_1,
-                HdmiDeviceInfo.DEVICE_PLAYBACK, 0x1234, "Playback 2",
-                HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+        HdmiDeviceInfo infoPlayback = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(Constants.ADDR_PLAYBACK_2)
+                .setPhysicalAddress(0x1234)
+                .setPortId(PORT_1)
+                .setDeviceType(HdmiDeviceInfo.DEVICE_PLAYBACK)
+                .setVendorId(0x1234)
+                .setDisplayName("Playback 2")
+                .setDevicePowerStatus(HdmiControlManager.POWER_STATUS_ON)
+                .setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_1_4_B)
+                .build();
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(infoPlayback);
         // This logical address (ADDR_PLAYBACK_2) won't acknowledge the poll message sent by the
         // HotplugDetectionAction so it shall be removed.
@@ -1726,8 +1737,15 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void getActiveSource_deviceInNetworkIsActiveSource() {
-        HdmiDeviceInfo externalDevice = new HdmiDeviceInfo(Constants.ADDR_PLAYBACK_3, 0x3000, 0,
-                Constants.ADDR_PLAYBACK_1, 0, "Test Device");
+        HdmiDeviceInfo externalDevice = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(Constants.ADDR_PLAYBACK_3)
+                .setPhysicalAddress(0x3000)
+                .setPortId(0)
+                .setDeviceType(Constants.ADDR_PLAYBACK_1)
+                .setVendorId(0)
+                .setDisplayName("Test Device")
+                .build();
+
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(externalDevice);
         mTestLooper.dispatchAll();
 
@@ -1739,8 +1757,14 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void getActiveSource_unknownDeviceIsActiveSource() {
-        HdmiDeviceInfo externalDevice = new HdmiDeviceInfo(Constants.ADDR_PLAYBACK_3, 0x3000, 0,
-                Constants.ADDR_PLAYBACK_1, 0, "Test Device");
+        HdmiDeviceInfo externalDevice = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(Constants.ADDR_PLAYBACK_3)
+                .setPhysicalAddress(0x3000)
+                .setPortId(0)
+                .setDeviceType(Constants.ADDR_PLAYBACK_1)
+                .setVendorId(0)
+                .setDisplayName("Test Device")
+                .build();
 
         mHdmiControlService.setActiveSource(externalDevice.getLogicalAddress(),
                 externalDevice.getPhysicalAddress(), "HdmiControlServiceTest");
@@ -1933,7 +1957,7 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void doesNotSupportRecordTvScreen() {
-        HdmiCecMessage recordTvScreen = new HdmiCecMessage(ADDR_TV, mPlaybackLogicalAddress,
+        HdmiCecMessage recordTvScreen = HdmiCecMessage.build(ADDR_TV, mPlaybackLogicalAddress,
                 Constants.MESSAGE_RECORD_TV_SCREEN, HdmiCecMessage.EMPTY_PARAM);
 
         mNativeWrapper.onCecMessage(recordTvScreen);
