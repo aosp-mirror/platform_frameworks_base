@@ -305,6 +305,14 @@ public class DozeParameters implements
     }
 
     /**
+     * When this method returns true then moving display state to power save mode will be
+     * delayed for a few seconds. This might be useful to play animations without reducing FPS.
+     */
+    public boolean shouldDelayDisplayDozeTransition() {
+        return mScreenOffAnimationController.shouldDelayDisplayDozeTransition();
+    }
+
+    /**
      * Whether we're capable of controlling the screen off animation if we want to. This isn't
      * possible if AOD isn't even enabled or if the flag is disabled.
      */
