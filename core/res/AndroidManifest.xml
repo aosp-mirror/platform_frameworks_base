@@ -3831,6 +3831,13 @@
     <permission android:name="android.permission.GET_TOP_ACTIVITY_INFO"
         android:protectionLevel="signature|recents" />
 
+    <!-- @SystemApi Allows an application to set the system audio caption and its UI
+     enabled state.
+     <p>Not for use by third-party applications.
+     @hide -->
+    <permission android:name="android.permission.SET_SYSTEM_AUDIO_CAPTION"
+                android:protectionLevel="signature|role" />
+
     <!-- Allows an application to retrieve the current state of keys and
          switches.
          <p>Not for use by third-party applications.

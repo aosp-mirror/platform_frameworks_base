@@ -100,4 +100,14 @@ interface IAccessibilityManager {
     int getFocusColor();
 
     boolean isAudioDescriptionByDefaultEnabled();
+
+    // Requires Manifest.permission.SET_SYSTEM_AUDIO_CAPTION
+    // System process only
+    void setSystemAudioCaptioningRequested(boolean isEnabled, int userId);
+
+    boolean isSystemAudioCaptioningUiRequested(int userId);
+
+    // Requires Manifest.permission.SET_SYSTEM_AUDIO_CAPTION
+    // System process only
+    void setSystemAudioCaptioningUiRequested(boolean isEnabled, int userId);
 }
