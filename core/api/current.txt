@@ -356,6 +356,7 @@ package android {
     field public static final int authorities = 16842776; // 0x1010018
     field public static final int autoAdvanceViewId = 16843535; // 0x101030f
     field public static final int autoCompleteTextViewStyle = 16842859; // 0x101006b
+    field public static final int autoHandwritingEnabled;
     field public static final int autoLink = 16842928; // 0x10100b0
     field public static final int autoMirrored = 16843754; // 0x10103ea
     field public static final int autoRemoveFromRecents = 16843847; // 0x1010447
@@ -50377,6 +50378,7 @@ package android.view {
     method public boolean isAccessibilityHeading();
     method public boolean isActivated();
     method public boolean isAttachedToWindow();
+    method public boolean isAutoHandwritingEnabled();
     method public boolean isClickable();
     method public boolean isContextClickable();
     method public boolean isDirty();
@@ -50560,6 +50562,7 @@ package android.view {
     method public void setAlpha(@FloatRange(from=0.0, to=1.0) float);
     method public void setAnimation(android.view.animation.Animation);
     method public void setAnimationMatrix(@Nullable android.graphics.Matrix);
+    method public void setAutoHandwritingEnabled(boolean);
     method public void setAutofillHints(@Nullable java.lang.String...);
     method public void setAutofillId(@Nullable android.view.autofill.AutofillId);
     method public void setBackground(android.graphics.drawable.Drawable);
