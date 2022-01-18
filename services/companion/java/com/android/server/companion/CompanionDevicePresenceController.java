@@ -48,7 +48,7 @@ import java.util.Objects;
 public class CompanionDevicePresenceController {
     private static final String LOG_TAG = "CompanionDevicePresenceController";
     PerUser<ArrayMap<String, List<BoundService>>> mBoundServices;
-    private static final String META_DATA_KEY_PRIMARY = "primary";
+    private static final String META_DATA_KEY_PRIMARY = "android.companion.primary";
     private final CompanionDeviceManagerService mService;
 
     public CompanionDevicePresenceController(CompanionDeviceManagerService service) {
