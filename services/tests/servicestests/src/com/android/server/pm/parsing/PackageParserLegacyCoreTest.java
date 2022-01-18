@@ -18,7 +18,6 @@ package com.android.server.pm.parsing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.apex.ApexInfo;
@@ -27,16 +26,9 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
 import android.content.pm.SigningDetails;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
-import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.parsing.component.ParsedComponent;
-import android.content.pm.parsing.component.ParsedIntentInfo;
-import android.content.pm.parsing.component.ParsedPermission;
-import android.content.pm.parsing.component.ParsedPermissionUtils;
+import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
@@ -55,6 +47,14 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.component.ParsedActivityUtils;
+import com.android.server.pm.pkg.component.ParsedComponent;
+import com.android.server.pm.pkg.component.ParsedIntentInfo;
+import com.android.server.pm.pkg.component.ParsedPermission;
+import com.android.server.pm.pkg.component.ParsedPermissionUtils;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import com.google.common.truth.Expect;
 
@@ -105,20 +105,19 @@ public class PackageParserLegacyCoreTest {
 
     private void verifyComputeMinSdkVersion(int minSdkVersion, String minSdkCodename,
             boolean isPlatformReleased, int expectedMinSdk) {
-        final String[] outError = new String[1];
-        final int result = PackageParser.computeMinSdkVersion(
+        final ParseTypeImpl input = ParseTypeImpl.forParsingWithoutPlatformCompat();
+        final ParseResult<Integer> result = FrameworkParsingPackageUtils.computeMinSdkVersion(
                 minSdkVersion,
                 minSdkCodename,
                 PLATFORM_VERSION,
                 isPlatformReleased ? CODENAMES_RELEASED : CODENAMES_PRE_RELEASE,
-                outError);
-
-        assertEquals("Error msg: " + outError[0], expectedMinSdk, result);
+                input);
 
         if (expectedMinSdk == -1) {
-            assertNotNull(outError[0]);
+            assertTrue(result.isError());
         } else {
-            assertNull(outError[0]);
+            assertTrue(result.isSuccess());
+            assertEquals(expectedMinSdk, (int) result.getResult());
         }
     }
 
@@ -201,19 +200,18 @@ public class PackageParserLegacyCoreTest {
 
     private void verifyComputeTargetSdkVersion(int targetSdkVersion, String targetSdkCodename,
             boolean isPlatformReleased, int expectedTargetSdk) {
-        final String[] outError = new String[1];
-        final int result = PackageParser.computeTargetSdkVersion(
+        final ParseTypeImpl input = ParseTypeImpl.forParsingWithoutPlatformCompat();
+        final ParseResult<Integer> result = FrameworkParsingPackageUtils.computeTargetSdkVersion(
                 targetSdkVersion,
                 targetSdkCodename,
                 isPlatformReleased ? CODENAMES_RELEASED : CODENAMES_PRE_RELEASE,
-                outError);
-
-        assertEquals(result, expectedTargetSdk);
+                input);
 
         if (expectedTargetSdk == -1) {
-            assertNotNull(outError[0]);
+            assertTrue(result.isError());
         } else {
-            assertNull(outError[0]);
+            assertTrue(result.isSuccess());
+            assertEquals(expectedTargetSdk, (int) result.getResult());
         }
     }
 
@@ -306,34 +304,34 @@ public class PackageParserLegacyCoreTest {
         // Not set in either configChanges or recreateOnConfigChanges.
         int configChanges = 0x0000; // 00000000.
         int recreateOnConfigChanges = 0x0000; // 00000000.
-        int finalConfigChanges =
-                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
+        int finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
+                recreateOnConfigChanges);
         assertEquals(0x0003, finalConfigChanges); // Should be 00000011.
 
         // Not set in configChanges, but set in recreateOnConfigChanges.
         configChanges = 0x0000; // 00000000.
         recreateOnConfigChanges = 0x0003; // 00000011.
-        finalConfigChanges =
-                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
+        finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
+                recreateOnConfigChanges);
         assertEquals(0x0000, finalConfigChanges); // Should be 00000000.
 
         // Set in configChanges.
         configChanges = 0x0003; // 00000011.
         recreateOnConfigChanges = 0X0000; // 00000000.
-        finalConfigChanges =
-                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
+        finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
+                recreateOnConfigChanges);
         assertEquals(0x0003, finalConfigChanges); // Should be 00000011.
 
         recreateOnConfigChanges = 0x0003; // 00000011.
-        finalConfigChanges =
-                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
+        finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
+                recreateOnConfigChanges);
         assertEquals(0x0003, finalConfigChanges); // Should still be 00000011.
 
         // Other bit set in configChanges.
         configChanges = 0x0080; // 10000000, orientation.
         recreateOnConfigChanges = 0x0000; // 00000000.
-        finalConfigChanges =
-                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
+        finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
+                recreateOnConfigChanges);
         assertEquals(0x0083, finalConfigChanges); // Should be 10000011.
     }
 

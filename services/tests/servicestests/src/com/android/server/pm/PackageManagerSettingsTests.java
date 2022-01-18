@@ -22,7 +22,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS;
 import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND;
-import static android.content.pm.parsing.ParsingPackageUtils.parsePublicKey;
+import static android.content.pm.parsing.FrameworkParsingPackageUtils.parsePublicKey;
 import static android.content.res.Resources.ID_NULL;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -43,6 +43,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.os.BaseBundle;
 import android.os.PersistableBundle;
 import android.os.Process;

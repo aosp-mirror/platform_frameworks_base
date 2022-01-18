@@ -29,7 +29,7 @@ import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
-import android.content.pm.parsing.component.ParsedInstrumentation;
+import com.android.server.pm.pkg.component.ParsedInstrumentation;
 import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
 import android.util.Log;

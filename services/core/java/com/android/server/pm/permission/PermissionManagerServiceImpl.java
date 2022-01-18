@@ -73,11 +73,11 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.SigningDetails;
-import android.content.pm.parsing.component.ComponentMutateUtils;
-import android.content.pm.parsing.component.ParsedPermission;
-import android.content.pm.parsing.component.ParsedPermissionGroup;
-import android.content.pm.parsing.component.ParsedPermissionUtils;
-import android.content.pm.permission.CompatibilityPermissionInfo;
+import com.android.server.pm.pkg.component.ComponentMutateUtils;
+import com.android.server.pm.pkg.component.ParsedPermission;
+import com.android.server.pm.pkg.component.ParsedPermissionGroup;
+import com.android.server.pm.pkg.component.ParsedPermissionUtils;
+
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;

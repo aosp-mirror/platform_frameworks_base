@@ -32,7 +32,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackagePartitions;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
-import android.content.pm.parsing.ParsingPackageUtils;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.UserHandle;

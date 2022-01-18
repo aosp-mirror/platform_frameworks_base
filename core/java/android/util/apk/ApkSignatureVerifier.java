@@ -27,7 +27,7 @@ import static android.util.apk.ApkSignatureSchemeV4Verifier.APK_SIGNATURE_SCHEME
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningDetails.SignatureSchemeVersion;
-import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.os.Build;
@@ -380,7 +380,7 @@ public class ApkSignatureVerifier {
             // Gather certs from AndroidManifest.xml, which every APK must have, as an optimization
             // to not need to verify the whole APK when verifyFUll == false.
             final ZipEntry manifestEntry = jarFile.findEntry(
-                    ParsingPackageUtils.ANDROID_MANIFEST_FILENAME);
+                    ApkLiteParseUtils.ANDROID_MANIFEST_FILENAME);
             if (manifestEntry == null) {
                 return input.error(INSTALL_PARSE_FAILED_BAD_MANIFEST,
                         "Package " + apkPath + " has no manifest");
@@ -394,7 +394,7 @@ public class ApkSignatureVerifier {
             if (ArrayUtils.isEmpty(lastCerts)) {
                 return input.error(INSTALL_PARSE_FAILED_NO_CERTIFICATES, "Package "
                         + apkPath + " has no certificates at entry "
-                        + ParsingPackageUtils.ANDROID_MANIFEST_FILENAME);
+                        + ApkLiteParseUtils.ANDROID_MANIFEST_FILENAME);
             }
             lastSigs = convertToSignatures(lastCerts);
 
@@ -407,7 +407,7 @@ public class ApkSignatureVerifier {
 
                     final String entryName = entry.getName();
                     if (entryName.startsWith("META-INF/")) continue;
-                    if (entryName.equals(ParsingPackageUtils.ANDROID_MANIFEST_FILENAME)) continue;
+                    if (entryName.equals(ApkLiteParseUtils.ANDROID_MANIFEST_FILENAME)) continue;
 
                     toVerify.add(entry);
                 }

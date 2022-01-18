@@ -16,15 +16,16 @@
 
 package com.android.server.pm.test.parsing.parcelling
 
-import android.content.pm.parsing.component.ParsedProcess
-import android.content.pm.parsing.component.ParsedProcessImpl
+import com.android.server.pm.pkg.component.ParsedProcess
+import com.android.server.pm.pkg.component.ParsedProcessImpl
 import android.util.ArrayMap
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
 class ParsedProcessTest : ParcelableComponentTest(ParsedProcess::class, ParsedProcessImpl::class) {
 
-    override val defaultImpl = ParsedProcessImpl()
+    override val defaultImpl =
+        ParsedProcessImpl()
     override val creator = ParsedProcessImpl.CREATOR
 
     override val excludedMethods = listOf(

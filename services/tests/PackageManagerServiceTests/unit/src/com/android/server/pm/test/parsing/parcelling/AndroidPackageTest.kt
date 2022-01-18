@@ -23,8 +23,7 @@ import android.content.pm.FeatureGroupInfo
 import android.content.pm.FeatureInfo
 import android.content.pm.PackageManager
 import android.content.pm.SigningDetails
-import android.content.pm.parsing.ParsingPackage
-import android.content.pm.parsing.component.*
+import com.android.server.pm.pkg.parsing.ParsingPackage
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
@@ -34,6 +33,18 @@ import android.util.SparseIntArray
 import com.android.internal.R
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.parsing.pkg.PackageImpl
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedApexSystemServiceImpl
+import com.android.server.pm.pkg.component.ParsedAttributionImpl
+import com.android.server.pm.pkg.component.ParsedComponentImpl
+import com.android.server.pm.pkg.component.ParsedInstrumentationImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
+import com.android.server.pm.pkg.component.ParsedPermissionGroupImpl
+import com.android.server.pm.pkg.component.ParsedPermissionImpl
+import com.android.server.pm.pkg.component.ParsedProcessImpl
+import com.android.server.pm.pkg.component.ParsedProviderImpl
+import com.android.server.pm.pkg.component.ParsedServiceImpl
+import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import java.security.KeyPairGenerator
@@ -281,7 +292,13 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             PackageImpl::addAttribution,
             Triple("testTag", 13, listOf("testInherit")),
             transformGet = { it.singleOrNull()?.let { Triple(it.tag, it.label, it.inheritFrom) } },
-            transformSet = { it?.let { ParsedAttributionImpl(it.first, it.second, it.third) } }
+            transformSet = { it?.let {
+                ParsedAttributionImpl(
+                    it.first,
+                    it.second,
+                    it.third
+                )
+            } }
         ),
         getSetByValue2(
             AndroidPackage::getKeySetMapping,
@@ -294,12 +311,14 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             PackageImpl::addPermissionGroup,
             "test.permission.GROUP",
             transformGet = { it.singleOrNull()?.name },
-            transformSet = { ParsedPermissionGroupImpl().apply { setName(it) } }
+            transformSet = { ParsedPermissionGroupImpl()
+                .apply { setName(it) } }
         ),
         getSetByValue2(
             AndroidPackage::getPreferredActivityFilters,
             PackageImpl::addPreferredActivityFilter,
-            "TestClassName" to ParsedIntentInfoImpl().apply {
+            "TestClassName" to ParsedIntentInfoImpl()
+                .apply {
                 intentFilter.apply {
                     addDataScheme("http")
                     addDataAuthority("test.pm.server.android.com", null)
@@ -348,42 +367,48 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             PackageImpl::addActivity,
             "TestActivityName",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedActivityImpl().apply { name = it }.withMimeGroups() }
+            transformSet = { ParsedActivityImpl()
+                .apply { name = it }.withMimeGroups() }
         ),
         getSetByValue(
             AndroidPackage::getApexSystemServices,
             PackageImpl::addApexSystemService,
             "TestApexSystemServiceName",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedApexSystemServiceImpl().apply { name = it } }
+            transformSet = { ParsedApexSystemServiceImpl()
+                .apply { name = it } }
         ),
         getSetByValue(
             AndroidPackage::getReceivers,
             PackageImpl::addReceiver,
             "TestReceiverName",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedActivityImpl().apply { name = it }.withMimeGroups() }
+            transformSet = { ParsedActivityImpl()
+                .apply { name = it }.withMimeGroups() }
         ),
         getSetByValue(
             AndroidPackage::getServices,
             PackageImpl::addService,
             "TestServiceName",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedServiceImpl().apply { name = it }.withMimeGroups() }
+            transformSet = { ParsedServiceImpl()
+                .apply { name = it }.withMimeGroups() }
         ),
         getSetByValue(
             AndroidPackage::getProviders,
             PackageImpl::addProvider,
             "TestProviderName",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedProviderImpl().apply { name = it }.withMimeGroups() }
+            transformSet = { ParsedProviderImpl()
+                .apply { name = it }.withMimeGroups() }
         ),
         getSetByValue(
             AndroidPackage::getInstrumentations,
             PackageImpl::addInstrumentation,
             "TestInstrumentationName",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedInstrumentationImpl().apply { name = it } }
+            transformSet = { ParsedInstrumentationImpl()
+                .apply { name = it } }
         ),
         getSetByValue(
             AndroidPackage::getConfigPreferences,
@@ -408,7 +433,8 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             PackageImpl::addPermission,
             "test.PERMISSION",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
-            transformSet = { ParsedPermissionImpl().apply { name = it } }
+            transformSet = { ParsedPermissionImpl()
+                .apply { name = it } }
         ),
         getSetByValue(
             AndroidPackage::getUsesPermissions,
@@ -419,7 +445,12 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
                 it.filterNot { it.name == "test.implicit.PERMISSION" }
                     .singleOrNull()?.name.orEmpty()
             },
-            transformSet = { ParsedUsesPermissionImpl(it, 0) }
+            transformSet = {
+                ParsedUsesPermissionImpl(
+                    it,
+                    0
+                )
+            }
         ),
         getSetByValue(
             AndroidPackage::getRequestedFeatures,
@@ -444,7 +475,8 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         getSetByValue(
             AndroidPackage::getProcesses,
             PackageImpl::setProcesses,
-            mapOf("testProcess" to ParsedProcessImpl().apply { name = "testProcessName" }),
+            mapOf("testProcess" to ParsedProcessImpl()
+                .apply { name = "testProcessName" }),
             compare = { first, second ->
                 equalBy(
                     first, second,

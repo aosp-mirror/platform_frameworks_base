@@ -17,7 +17,7 @@
 package com.android.server.pm;
 
 
-import static android.content.pm.parsing.ParsingPackageUtils.parsePublicKey;
+import static android.content.pm.parsing.FrameworkParsingPackageUtils.parsePublicKey;
 
 import android.content.pm.Signature;
 import android.platform.test.annotations.Presubmit;

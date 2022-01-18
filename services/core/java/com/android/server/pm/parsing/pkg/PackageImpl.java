@@ -22,14 +22,8 @@ import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.SELinuxUtil;
+import com.android.server.pm.pkg.SELinuxUtil;
 import android.content.pm.SigningDetails;
-import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageImpl;
-import android.content.pm.parsing.component.ComponentMutateUtils;
-import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedProvider;
-import android.content.pm.parsing.component.ParsedService;
 import android.content.res.TypedArray;
 import android.os.Environment;
 import android.os.Parcel;
@@ -41,6 +35,12 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.server.pm.parsing.PackageInfoUtils;
+import com.android.server.pm.pkg.component.ComponentMutateUtils;
+import com.android.server.pm.pkg.component.ParsedActivity;
+import com.android.server.pm.pkg.component.ParsedProvider;
+import com.android.server.pm.pkg.component.ParsedService;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackageImpl;
 
 import java.io.File;
 
