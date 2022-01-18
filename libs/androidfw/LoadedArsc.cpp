@@ -686,6 +686,12 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         std::unordered_set<uint32_t> finalized_ids;
         const auto lib_alias = child_chunk.header<ResTable_staged_alias_header>();
         if (!lib_alias) {
+          LOG(ERROR) << "RES_TABLE_STAGED_ALIAS_TYPE is too small.";
+          return {};
+        }
+        if ((child_chunk.data_size() / sizeof(ResTable_staged_alias_entry))
+            < dtohl(lib_alias->count)) {
+          LOG(ERROR) << "RES_TABLE_STAGED_ALIAS_TYPE is too small to hold entries.";
           return {};
         }
         const auto entry_begin = child_chunk.data_ptr().convert<ResTable_staged_alias_entry>();
