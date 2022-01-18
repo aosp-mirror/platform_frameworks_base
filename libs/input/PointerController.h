@@ -72,13 +72,31 @@ public:
     void reloadPointerResources();
     void onDisplayViewportsUpdated(std::vector<DisplayViewport>& viewports);
 
-    void onDisplayInfosChanged(const std::vector<gui::DisplayInfo>& displayInfos);
+    void onDisplayInfosChangedLocked(const std::vector<gui::DisplayInfo>& displayInfos)
+            REQUIRES(getLock());
+
+protected:
+    using WindowListenerConsumer =
+            std::function<void(const sp<android::gui::WindowInfosListener>&)>;
+
+    // Constructor used to test WindowInfosListener registration.
+    PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
+                      const sp<SpriteController>& spriteController,
+                      WindowListenerConsumer registerListener,
+                      WindowListenerConsumer unregisterListener);
 
 private:
+    PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
+                      const sp<SpriteController>& spriteController);
+
     friend PointerControllerContext::LooperCallback;
     friend PointerControllerContext::MessageHandler;
 
-    mutable std::mutex mLock;
+    // PointerController's DisplayInfoListener can outlive the PointerController because when the
+    // listener is registered, a strong pointer to the listener (which can extend its lifecycle)
+    // is given away. To avoid the small overhead of using two separate locks in these two objects,
+    // we use the DisplayInfoListener's lock in PointerController.
+    std::mutex& getLock() const;
 
     PointerControllerContext mContext;
 
@@ -89,24 +107,28 @@ private:
 
         std::vector<gui::DisplayInfo> mDisplayInfos;
         std::unordered_map<int32_t /* displayId */, TouchSpotController> spotControllers;
-    } mLocked GUARDED_BY(mLock);
+    } mLocked GUARDED_BY(getLock());
 
     class DisplayInfoListener : public gui::WindowInfosListener {
     public:
-        explicit DisplayInfoListener(PointerController& pc) : mPointerController(pc){};
+        explicit DisplayInfoListener(PointerController* pc) : mPointerController(pc){};
         void onWindowInfosChanged(const std::vector<android::gui::WindowInfo>&,
                                   const std::vector<android::gui::DisplayInfo>&) override;
+        void onPointerControllerDestroyed();
+
+        // This lock is also used by PointerController. See PointerController::getLock().
+        std::mutex mLock;
 
     private:
-        PointerController& mPointerController;
+        PointerController* mPointerController GUARDED_BY(mLock);
     };
+
     sp<DisplayInfoListener> mDisplayInfoListener;
+    const WindowListenerConsumer mUnregisterWindowInfosListener;
 
-    const ui::Transform& getTransformForDisplayLocked(int displayId) const REQUIRES(mLock);
+    const ui::Transform& getTransformForDisplayLocked(int displayId) const REQUIRES(getLock());
 
-    PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-                      const sp<SpriteController>& spriteController);
-    void clearSpotsLocked();
+    void clearSpotsLocked() REQUIRES(getLock());
 };
 
 } // namespace android
