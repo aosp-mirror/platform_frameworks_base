@@ -7597,6 +7597,7 @@ package android.net {
   public class TrafficStats {
     method public static void setThreadStatsTagApp();
     method public static void setThreadStatsTagBackup();
+    method public static void setThreadStatsTagDownload();
     method public static void setThreadStatsTagRestore();
     field public static final int TAG_NETWORK_STACK_IMPERSONATION_RANGE_END = -113; // 0xffffff8f
     field public static final int TAG_NETWORK_STACK_IMPERSONATION_RANGE_START = -128; // 0xffffff80
