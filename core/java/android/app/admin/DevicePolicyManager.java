@@ -15334,4 +15334,45 @@ public class DevicePolicyManager {
         }
         return ParcelableResource.loadDefaultString(defaultStringLoader);
     }
+
+    /**
+     * Returns a boolean for whether the DPC has been downloaded during provisioning.
+     *
+     * <p>If true is returned, then any attempts to begin setup again should result in factory reset
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean isDpcDownloaded() {
+        throwIfParentInstance("isDpcDownloaded");
+        if (mService != null) {
+            try {
+                return mService.isDpcDownloaded();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Use to indicate that the DPC has or has not been downloaded during provisioning.
+     *
+     * @param downloaded {@code true} if the dpc has been downloaded during provisioning. false otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void setDpcDownloaded(boolean downloaded) {
+        throwIfParentInstance("setDpcDownloaded");
+        if (mService != null) {
+            try {
+                mService.setDpcDownloaded(downloaded);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
 }

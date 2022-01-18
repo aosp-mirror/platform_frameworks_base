@@ -554,6 +554,9 @@ interface IDevicePolicyManager {
     void resetDrawables(in String[] drawableIds);
     ParcelableResource getDrawable(String drawableId, String drawableStyle, String drawableSource);
 
+    boolean isDpcDownloaded();
+    void setDpcDownloaded(boolean downloaded);
+
     void setStrings(in List<DevicePolicyStringResource> strings);
     void resetStrings(in String[] stringIds);
     ParcelableResource getString(String stringId);
