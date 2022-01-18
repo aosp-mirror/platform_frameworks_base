@@ -31,6 +31,7 @@ import android.view.DisplayAddress;
 
 import com.android.internal.R;
 import com.android.internal.display.BrightnessSynchronizer;
+import com.android.server.display.config.BrightnessThresholds;
 import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
 import com.android.server.display.config.HbmTiming;
@@ -40,6 +41,7 @@ import com.android.server.display.config.Point;
 import com.android.server.display.config.RefreshRateRange;
 import com.android.server.display.config.SensorDetails;
 import com.android.server.display.config.ThermalStatus;
+import com.android.server.display.config.Thresholds;
 import com.android.server.display.config.XmlParser;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -115,6 +117,10 @@ public class DisplayDeviceConfig {
     private float mBrightnessRampFastIncrease = Float.NaN;
     private float mBrightnessRampSlowDecrease = Float.NaN;
     private float mBrightnessRampSlowIncrease = Float.NaN;
+    private float mScreenBrighteningMinThreshold = 0.0f;     // Retain behaviour as though there is
+    private float mScreenDarkeningMinThreshold = 0.0f;       // no minimum threshold for change in
+    private float mAmbientLuxBrighteningMinThreshold = 0.0f; // screen brightness or ambient
+    private float mAmbientLuxDarkeningMinThreshold = 0.0f;   // brightness.
     private Spline mBrightnessToBacklightSpline;
     private Spline mBacklightToBrightnessSpline;
     private Spline mBacklightToNitsSpline;
@@ -282,6 +288,22 @@ public class DisplayDeviceConfig {
         return mBrightnessRampSlowIncrease;
     }
 
+    public float getScreenBrighteningMinThreshold() {
+        return mScreenBrighteningMinThreshold;
+    }
+
+    public float getScreenDarkeningMinThreshold() {
+        return mScreenDarkeningMinThreshold;
+    }
+
+    public float getAmbientLuxBrighteningMinThreshold() {
+        return mAmbientLuxBrighteningMinThreshold;
+    }
+
+    public float getAmbientLuxDarkeningMinThreshold() {
+        return mAmbientLuxDarkeningMinThreshold;
+    }
+
     SensorData getAmbientLightSensor() {
         return mAmbientLightSensor;
     }
@@ -337,6 +359,10 @@ public class DisplayDeviceConfig {
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
                 + ", mBrightnessRampSlowDecrease=" + mBrightnessRampSlowDecrease
                 + ", mBrightnessRampSlowIncrease=" + mBrightnessRampSlowIncrease
+                + ", mScreenDarkeningMinThreshold=" + mScreenDarkeningMinThreshold
+                + ", mScreenBrighteningMinThreshold=" + mScreenBrighteningMinThreshold
+                + ", mAmbientLuxDarkeningMinThreshold=" + mAmbientLuxDarkeningMinThreshold
+                + ", mAmbientLuxBrighteningMinThreshold=" + mAmbientLuxBrighteningMinThreshold
                 + ", mAmbientLightSensor=" + mAmbientLightSensor
                 + ", mProximitySensor=" + mProximitySensor
                 + ", mRefreshRateLimitations= " + Arrays.toString(mRefreshRateLimitations.toArray())
@@ -392,6 +418,7 @@ public class DisplayDeviceConfig {
                 loadBrightnessRamps(config);
                 loadAmbientLightSensorFromDdc(config);
                 loadProxSensorFromDdc(config);
+                loadBrightnessChangeThresholds(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
             }
@@ -743,6 +770,45 @@ public class DisplayDeviceConfig {
             }
         } else {
             setProxSensorUnspecified();
+        }
+    }
+
+    private void loadBrightnessChangeThresholds(DisplayConfiguration config) {
+        Thresholds displayBrightnessThresholds = config.getDisplayBrightnessChangeThresholds();
+        Thresholds ambientBrightnessThresholds = config.getAmbientBrightnessChangeThresholds();
+
+        if (displayBrightnessThresholds != null) {
+            BrightnessThresholds brighteningScreen =
+                    displayBrightnessThresholds.getBrighteningThresholds();
+            BrightnessThresholds darkeningScreen =
+                    displayBrightnessThresholds.getDarkeningThresholds();
+
+            final BigDecimal screenBrighteningThreshold = brighteningScreen.getMinimum();
+            final BigDecimal screenDarkeningThreshold = darkeningScreen.getMinimum();
+
+            if (screenBrighteningThreshold != null) {
+                mScreenBrighteningMinThreshold = screenBrighteningThreshold.floatValue();
+            }
+            if (screenDarkeningThreshold != null) {
+                mScreenDarkeningMinThreshold = screenDarkeningThreshold.floatValue();
+            }
+        }
+
+        if (ambientBrightnessThresholds != null) {
+            BrightnessThresholds brighteningAmbientLux =
+                    ambientBrightnessThresholds.getBrighteningThresholds();
+            BrightnessThresholds darkeningAmbientLux =
+                    ambientBrightnessThresholds.getDarkeningThresholds();
+
+            final BigDecimal ambientBrighteningThreshold = brighteningAmbientLux.getMinimum();
+            final BigDecimal ambientDarkeningThreshold =  darkeningAmbientLux.getMinimum();
+
+            if (ambientBrighteningThreshold != null) {
+                mAmbientLuxBrighteningMinThreshold = ambientBrighteningThreshold.floatValue();
+            }
+            if (ambientDarkeningThreshold != null) {
+                mAmbientLuxDarkeningMinThreshold = ambientDarkeningThreshold.floatValue();
+            }
         }
     }
 
