@@ -24,8 +24,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -520,16 +518,16 @@ public class WindowOrganizerTests extends WindowTestsBase {
         DisplayContent dc = mWm.mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
 
         Task task1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                dc, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+                dc, WINDOWING_MODE_FULLSCREEN, null);
         RunningTaskInfo info1 = task1.getTaskInfo();
-        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
+        assertEquals(WINDOWING_MODE_FULLSCREEN,
                 info1.configuration.windowConfiguration.getWindowingMode());
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info1.topActivityType);
 
         Task task2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                dc, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
+                dc, WINDOWING_MODE_MULTI_WINDOW, null);
         RunningTaskInfo info2 = task2.getTaskInfo();
-        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW,
                 info2.configuration.windowConfiguration.getWindowingMode());
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info2.topActivityType);
 
@@ -539,7 +537,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(mWm.mAtmService.mTaskOrganizerController.deleteRootTask(info1.token));
         infos = getTasksCreatedByOrganizer(dc);
         assertEquals(1, infos.size());
-        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, infos.get(0).getWindowingMode());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, infos.get(0).getWindowingMode());
     }
 
     @Test
@@ -577,7 +575,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final StubOrganizer listener = new StubOrganizer();
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
         Task task = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, null);
         RunningTaskInfo info1 = task.getTaskInfo();
 
         final Task rootTask = createTask(
@@ -626,7 +624,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
         Task task = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, null);
         RunningTaskInfo info1 = task.getTaskInfo();
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -684,10 +682,10 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
 
         Task task1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, null);
         RunningTaskInfo info1 = task1.getTaskInfo();
         Task task2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, null);
         RunningTaskInfo info2 = task2.getTaskInfo();
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -1056,7 +1054,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     public void testReparentToOrganizedTask() {
         final ITaskOrganizer organizer = registerMockOrganizer();
         Task rootTask = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, null);
         final Task task1 = createRootTask();
         final Task task2 = createTask(rootTask, false /* fakeDraw */);
         WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -1223,7 +1221,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final Task rootTask = activity.getRootTask();
         rootTask.setResizeMode(activity.info.resizeMode);
         final Task splitPrimaryRootTask = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, null);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.reparent(rootTask.mRemoteToken.toWindowContainerToken(),
                 splitPrimaryRootTask.mRemoteToken.toWindowContainerToken(), true /* onTop */);
