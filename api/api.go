@@ -23,6 +23,10 @@ import (
 	"android/soong/genrule"
 )
 
+const art = "art.module.public.api"
+const conscrypt = "conscrypt.module.public.api"
+const i18n = "i18n.module.public.api"
+
 // The intention behind this soong plugin is to generate a number of "merged"
 // API-related modules that would otherwise require a large amount of very
 // similar Android.bp boilerplate to define. For example, the merged current.txt
@@ -130,6 +134,8 @@ func createMergedStubsSrcjar(ctx android.LoadHookContext, modules []string) {
 // This produces the same annotations.zip as framework-doc-stubs, but by using
 // outputs from individual modules instead of all the source code.
 func createMergedAnnotations(ctx android.LoadHookContext, modules []string) {
+	// Conscrypt and i18n currently do not enable annotations
+	modules = removeAll(modules, []string{conscrypt, i18n})
 	props := genruleProps{}
 	props.Name = proptools.StringPtr("sdk-annotations.zip")
 	props.Tools = []string{"merge_annotation_zips", "soong_zip"}
@@ -141,6 +147,15 @@ func createMergedAnnotations(ctx android.LoadHookContext, modules []string) {
 }
 
 func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
+	// For the filtered api versions, we prune all APIs except art module's APIs. because
+	// 1) ART apis are available by default to all modules, while other module-to-module deps are
+	//    explicit and probably receive more scrutiny anyway
+	// 2) The number of ART/libcore APIs is large, so not linting them would create a large gap
+	// 3) It's a compromise. Ideally we wouldn't be filtering out any module APIs, and have
+	//    per-module lint databases that excludes just that module's APIs. Alas, that's more
+	//    difficult to achieve.
+	modules = remove(modules, art)
+
 	props := genruleProps{}
 	props.Name = proptools.StringPtr("api-versions-xml-public-filtered")
 	props.Tools = []string{"api_versions_trimmer"}
@@ -163,6 +178,13 @@ func createSrcs(base string, modules []string, tag string) []string {
 	return a
 }
 
+func removeAll(s []string, vs []string) []string {
+	for _, v := range vs {
+		s = remove(s, v)
+	}
+	return s
+}
+
 func remove(s []string, v string) []string {
 	s2 := make([]string, 0, len(s))
 	for _, sv := range s {
@@ -176,9 +198,7 @@ func remove(s []string, v string) []string {
 func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string) {
 	var textFiles []MergedTxtDefinition
 	// Two module libraries currently do not support @SystemApi so only have the public scope.
-	bcpWithSystemApi := bootclasspath
-	bcpWithSystemApi = remove(bcpWithSystemApi, "conscrypt.module.public.api")
-	bcpWithSystemApi = remove(bcpWithSystemApi, "i18n.module.public.api")
+	bcpWithSystemApi := removeAll(bootclasspath, []string{conscrypt, i18n})
 
 	tagSuffix := []string{".api.txt}", ".removed-api.txt}"}
 	for i, f := range []string{"current.txt", "removed.txt"} {
@@ -226,22 +246,9 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 
 	createMergedStubsSrcjar(ctx, bootclasspath)
 
-	// Conscrypt and i18n currently do not enable annotations
-	annotationModules := bootclasspath
-	annotationModules = remove(annotationModules, "conscrypt.module.public.api")
-	annotationModules = remove(annotationModules, "i18n.module.public.api")
-	createMergedAnnotations(ctx, annotationModules)
+	createMergedAnnotations(ctx, bootclasspath)
 
-	// For the filtered api versions, we prune all APIs except art module's APIs. because
-	// 1) ART apis are available by default to all modules, while other module-to-module deps are
-	//    explicit and probably receive more scrutiny anyway
-	// 2) The number of ART/libcore APIs is large, so not linting them would create a large gap
-	// 3) It's a compromise. Ideally we wouldn't be filtering out any module APIs, and have
-	//    per-module lint databases that excludes just that module's APIs. Alas, that's more
-	//    difficult to achieve.
-	filteredModules := bootclasspath
-	filteredModules = remove(filteredModules, "art.module.public.api")
-	createFilteredApiVersions(ctx, filteredModules)
+	createFilteredApiVersions(ctx, bootclasspath)
 }
 
 func combinedApisModuleFactory() android.Module {
