@@ -50,6 +50,8 @@ import java.util.List;
 public class AccessibilityShortcutInfoTest {
     private static final String SETTINGS_ACTIVITY_NAME =
             "com.example.shortcut.target.SettingsActivity";
+    private static final String TILE_SERVICE_NAME =
+            "com.example.shortcut.target.TileService";
 
     private Context mTargetContext;
     private PackageManager mPackageManager;
@@ -110,9 +112,16 @@ public class AccessibilityShortcutInfoTest {
 
     @Test
     public void testSettingsActivity() {
-        assertThat("Settings Activity is not correct",
+        assertThat("Settings activity is not correct",
                 mShortcutInfo.getSettingsActivityName(), is(SETTINGS_ACTIVITY_NAME));
     }
+
+    @Test
+    public void testTileService() {
+        assertThat("Tile service is not correct",
+                mShortcutInfo.getTileServiceClassName(), is(TILE_SERVICE_NAME));
+    }
+
 
     @Test
     public void testEquals() {

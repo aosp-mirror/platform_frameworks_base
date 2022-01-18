@@ -537,6 +537,13 @@ public class AccessibilityServiceInfo implements Parcelable {
     private String mSettingsActivityName;
 
     /**
+     * The class name of {@link android.service.quicksettings.TileService} is associated with this
+     * accessibility service for one to one mapping. It is used by system settings to remind users
+     * this accessibility service has a {@link android.service.quicksettings.TileService}.
+     */
+    private String mTileServiceClassName;
+
+    /**
      * Bit mask with capabilities of this service.
      */
     private int mCapabilities;
@@ -718,6 +725,8 @@ public class AccessibilityServiceInfo implements Parcelable {
             }
             mIsAccessibilityTool = asAttributes.getBoolean(
                     R.styleable.AccessibilityService_isAccessibilityTool, false);
+            mTileServiceClassName = asAttributes.getString(
+                    com.android.internal.R.styleable.AccessibilityService_tileService);
             asAttributes.recycle();
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException( "Unable to create context for: "
@@ -818,6 +827,17 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public String getSettingsActivityName() {
         return mSettingsActivityName;
+    }
+
+    /**
+     * Gets the class name of {@link android.service.quicksettings.TileService} is associated with
+     * this accessibility service.
+     *
+     * @return The class names of {@link android.service.quicksettings.TileService}.
+     */
+    @Nullable
+    public String getTileServiceClassName() {
+        return mTileServiceClassName;
     }
 
     /**
@@ -1083,6 +1103,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeInt(mHtmlDescriptionRes);
         parcel.writeString(mNonLocalizedDescription);
         parcel.writeBoolean(mIsAccessibilityTool);
+        parcel.writeString(mTileServiceClassName);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -1105,6 +1126,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         mHtmlDescriptionRes = parcel.readInt();
         mNonLocalizedDescription = parcel.readString();
         mIsAccessibilityTool = parcel.readBoolean();
+        mTileServiceClassName = parcel.readString();
     }
 
     @Override
@@ -1156,6 +1178,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         stringBuilder.append("resolveInfo: ").append(mResolveInfo);
         stringBuilder.append(", ");
         stringBuilder.append("settingsActivityName: ").append(mSettingsActivityName);
+        stringBuilder.append(", ");
+        stringBuilder.append("tileServiceClassName: ").append(mTileServiceClassName);
         stringBuilder.append(", ");
         stringBuilder.append("summary: ").append(mNonLocalizedSummary);
         stringBuilder.append(", ");
