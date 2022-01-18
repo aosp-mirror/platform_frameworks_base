@@ -81,6 +81,12 @@ type libraryProps struct {
 	Visibility  []string
 }
 
+type fgProps struct {
+	Name       *string
+	Srcs       []string
+	Visibility []string
+}
+
 // Struct to pass parameters for the various merged [current|removed].txt file modules we create.
 type MergedTxtDefinition struct {
 	// "current.txt" or "removed.txt"
@@ -188,6 +194,14 @@ func createMergedModuleLibStubs(ctx android.LoadHookContext, modules []string) {
 	ctx.CreateModule(java.LibraryFactory, &props)
 }
 
+func createPublicStubsSourceFilegroup(ctx android.LoadHookContext, modules []string) {
+	props := fgProps{}
+	props.Name = proptools.StringPtr("all-modules-public-stubs-source")
+	props.Srcs = createSrcs(modules, "{.public.stubs.source}")
+	props.Visibility = []string{"//frameworks/base"}
+	ctx.CreateModule(android.FileGroupFactory, &props)
+}
+
 func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string) {
 	var textFiles []MergedTxtDefinition
 	// Two module libraries currently do not support @SystemApi so only have the public scope.
@@ -244,6 +258,8 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedAnnotations(ctx, bootclasspath)
 
 	createFilteredApiVersions(ctx, bootclasspath)
+
+	createPublicStubsSourceFilegroup(ctx, bootclasspath)
 }
 
 func combinedApisModuleFactory() android.Module {
