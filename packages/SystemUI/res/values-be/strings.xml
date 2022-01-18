@@ -532,7 +532,7 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"За профілем могуць назіраць"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"За сеткай могуць назіраць"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"За сеткай могуць назіраць"</string>
-    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Гэта прылада знаходзіцца пад кантролем вашых бацькоў"</string>
+    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Гэта прылада знаходзіцца пад кантролем бацькоў"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ваша арганізацыя валодае гэтай прыладай і можа кантраляваць сеткавы трафік"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> валодае гэтай прыладай і можа кантраляваць сеткавы трафік"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Гэта прылада належыць арганізацыі \"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>\""</string>
@@ -586,7 +586,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Ваш адміністратар уключыў вядзенне журнала сеткі, з дапамогай якога адсочваецца трафік на вашай прыладзе.\n\nДля атрымання дадатковай інфармацыі звярніцеся да адміністратара."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Вы далі праграме дазвол на наладжванне злучэння VPN.\n\nГэта праграма можа сачыць за актыўнасцю вашай прылады і вашай сеткавай актыўнасцю, уключаючы электронную пошту, праграмы і вэб-сайты."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Ваш працоўны профіль знаходзіцца пад кіраваннем <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nВаш адміністратар можа сачыць за вашай сеткавай дзейнасцю, уключаючы электронную пошту, праграмы і вэб-сайты.\n\nДля атрымання дадатковай інфармацыі звярніцеся да адміністратара.\n\nВы таксама падключаны да сеткі VPN, якая можа сачыць за вашай сеткавай дзейнасцю."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Гэта прылада знаходзіцца пад кантролем вашых бацькоў. Бацькі могуць праглядаць і кантраляваць вашу інфармацыю, напрыклад пра праграмы, якія вы выкарыстоўваеце, даныя пра ваша месцазнаходжанне і час карыстання прыладай."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Гэта прылада знаходзіцца пад кантролем бацькоў. Бацькі могуць праглядаць і кантраляваць тваю інфармацыю, напрыклад пра праграмы, якія ты выкарыстоўваеш, даныя пра тваё месцазнаходжанне і час карыстання прыладай."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Вы падключаны да праграмы <xliff:g id="APPLICATION">%1$s</xliff:g>, якая можа сачыць за вашай сеткавай актыўнасцю, уключаючы электронную пошту, праграмы і вэб-сайты."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Вы падлучаны да праграмы <xliff:g id="APPLICATION">%1$s</xliff:g>, якая сачыць за вашай асабістай сеткавай актыўнасцю, уключаючы электронную пошту, праграмы і вэб-сайты."</string>
