@@ -142,27 +142,6 @@ filegroup {
 }
 
 java_library {
-    name: "framework-updatable-stubs-module_libs_api",
-    static_libs: [
-        "android.net.ipsec.ike.stubs.module_lib",
-        "framework-appsearch.stubs.module_lib",
-        "framework-connectivity.stubs.module_lib",
-        "framework-graphics.stubs.module_lib",
-        "framework-media.stubs.module_lib",
-        "framework-mediaprovider.stubs.module_lib",
-        "framework-permission.stubs.module_lib",
-        "framework-permission-s.stubs.module_lib",
-        "framework-scheduling.stubs.module_lib",
-        "framework-sdkextensions.stubs.module_lib",
-        "framework-statsd.stubs.module_lib",
-        "framework-tethering.stubs.module_lib",
-        "framework-wifi.stubs.module_lib",
-    ],
-    sdk_version: "module_current",
-    visibility: ["//visibility:private"],
-}
-
-java_library {
     name: "framework-all",
     installable: false,
     static_libs: [

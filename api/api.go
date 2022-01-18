@@ -21,6 +21,7 @@ import (
 
 	"android/soong/android"
 	"android/soong/genrule"
+	"android/soong/java"
 )
 
 const art = "art.module.public.api"
@@ -71,6 +72,13 @@ type genruleProps struct {
 	Srcs       []string
 	Tools      []string
 	Visibility []string
+}
+
+type libraryProps struct {
+	Name        *string
+	Sdk_version *string
+	Static_libs []string
+	Visibility  []string
 }
 
 // Struct to pass parameters for the various merged [current|removed].txt file modules we create.
@@ -169,6 +177,25 @@ func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
 
+func createMergedModuleLibStubs(ctx android.LoadHookContext, modules []string) {
+	// The user of this module compiles against the "core" SDK, so remove core libraries to avoid dupes.
+	modules = removeAll(modules, []string{art, conscrypt, i18n})
+	props := libraryProps{}
+	props.Name = proptools.StringPtr("framework-updatable-stubs-module_libs_api")
+	props.Static_libs = appendStr(modules, ".stubs.module_lib")
+	props.Sdk_version = proptools.StringPtr("module_current")
+	props.Visibility = []string{"//frameworks/base"}
+	ctx.CreateModule(java.LibraryFactory, &props)
+}
+
+func appendStr(modules []string, s string) []string {
+	a := make([]string, 0, len(modules))
+	for _, module := range modules {
+		a = append(a, module+s)
+	}
+	return a
+}
+
 func createSrcs(base string, modules []string, tag string) []string {
 	a := make([]string, 0, len(modules)+1)
 	a = append(a, base)
@@ -245,6 +272,8 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedTxts(ctx, bootclasspath, a.properties.System_server_classpath)
 
 	createMergedStubsSrcjar(ctx, bootclasspath)
+
+	createMergedModuleLibStubs(ctx, bootclasspath)
 
 	createMergedAnnotations(ctx, bootclasspath)
 
