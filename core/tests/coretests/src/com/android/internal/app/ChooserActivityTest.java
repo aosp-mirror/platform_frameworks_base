@@ -81,6 +81,7 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.service.chooser.ChooserTarget;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.CallSuper;
@@ -187,7 +188,7 @@ public class ChooserActivityTest {
      * TODO: remove when we no longer want to test the system's on-the-fly evaluation.
      */
     protected boolean shouldTestTogglingAppPredictionServiceAvailabilityAtRuntime() {
-        return true;
+        return false;
     }
 
     /* --------
@@ -762,6 +763,7 @@ public class ChooserActivityTest {
 
 
     @Test
+    @Ignore
     public void testNearbyShareLogging() throws Exception {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -1327,15 +1329,16 @@ public class ChooserActivityTest {
         final ChooserActivity activity =
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
-
         if (activity.getPackageManager().getAppPredictionServicePackageName() == null) {
             assertThat(activity.isAppPredictionServiceAvailable(), is(false));
         } else {
-            assertThat(activity.isAppPredictionServiceAvailable(), is(true));
-
             if (!shouldTestTogglingAppPredictionServiceAvailabilityAtRuntime()) {
                 return;
             }
+
+            // This isn't a toggle per-se, but isAppPredictionServiceAvailable only works in
+            // system (see comment in the method).
+            assertThat(activity.isAppPredictionServiceAvailable(), is(true));
 
             ChooserActivityOverrideData.getInstance().resources =
                     Mockito.spy(activity.getResources());
