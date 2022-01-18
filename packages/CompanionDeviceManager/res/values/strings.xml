@@ -73,4 +73,15 @@
 
     <!-- Negative button for the device-app association consent dialog [CHAR LIMIT=30] -->
     <string name="consent_no">Don\u2019t allow</string>
+
+    <!-- ================== System data transfer ==================== -->
+    <!-- Title of the permission sync confirmation dialog. [CHAR LIMIT=60] -->
+    <string name="permission_sync_confirmation_title">Transfer app permissions to your
+        watch</string>
+
+    <!-- Text of the permission sync explanation in the confirmation dialog. [CHAR LIMIT=400] -->
+    <string name="permission_sync_summary">To make it easier to set up your watch,
+        apps installed on your watch during setup will use the same permissions as your phone.\n\n
+        These permissions may include access to your watch\u2019s microphone and location.</string>
+
 </resources>
