@@ -1283,6 +1283,7 @@ package android.app.admin {
 
   public class ProvisioningException extends android.util.AndroidException {
     ctor public ProvisioningException(@NonNull Exception, int);
+    ctor public ProvisioningException(@NonNull Exception, int, @Nullable String);
     method public int getProvisioningError();
     field public static final int ERROR_ADMIN_PACKAGE_INSTALLATION_FAILED = 3; // 0x3
     field public static final int ERROR_PRE_CONDITION_FAILED = 1; // 0x1
