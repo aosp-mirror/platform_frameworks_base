@@ -39,6 +39,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -84,7 +85,7 @@ public class SpatializerHelper {
     private int mSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
     private int mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
     private int mActualHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
-    private int mDesiredHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
+    private int mDesiredHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_RELATIVE_WORLD;
     private int mSpatOutput = 0;
     private @Nullable ISpatializer mSpat;
     private @Nullable SpatializerCallback mSpatCallback;
@@ -681,12 +682,13 @@ public class SpatializerHelper {
             return;
         }
         try {
-            if (mode != mDesiredHeadTrackingMode) {
-                mSpat.setDesiredHeadTrackingMode(spatializerIntToHeadTrackingModeType(mode));
+            if (mDesiredHeadTrackingMode != mode) {
                 mDesiredHeadTrackingMode = mode;
                 dispatchDesiredHeadTrackingMode(mode);
             }
-
+            if (mode != headTrackingModeTypeToSpatializerInt(mSpat.getActualHeadTrackingMode())) {
+                mSpat.setDesiredHeadTrackingMode(spatializerIntToHeadTrackingModeType(mode));
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling setDesiredHeadTrackingMode", e);
         }
@@ -937,6 +939,7 @@ public class SpatializerHelper {
         } catch (Exception e) {
             Log.e(TAG, "Error calling setHeadSensor:" + headHandle, e);
         }
+        setDesiredHeadTrackingMode(mDesiredHeadTrackingMode);
     }
 
     //------------------------------------------------------
@@ -982,5 +985,23 @@ public class SpatializerHelper {
             default:
                 throw(new IllegalArgumentException("Unexpected spatializer level:" + level));
         }
+    }
+
+    void dump(PrintWriter pw) {
+        pw.println("SpatializerHelper:");
+        pw.println("\tmState:" + mState);
+        pw.println("\tmSpatLevel:" + mSpatLevel);
+        pw.println("\tmCapableSpatLevel:" + mCapableSpatLevel);
+        pw.println("\tmActualHeadTrackingMode:"
+                + Spatializer.headtrackingModeToString(mActualHeadTrackingMode));
+        pw.println("\tmDesiredHeadTrackingMode:"
+                + Spatializer.headtrackingModeToString(mDesiredHeadTrackingMode));
+        String modesString = "";
+        int[] modes = getSupportedHeadTrackingModes();
+        for (int mode : modes) {
+            modesString += Spatializer.headtrackingModeToString(mode) + " ";
+        }
+        pw.println("\tsupported head tracking modes:" + modesString);
+        pw.println("\tmSpatOutput:" + mSpatOutput);
     }
 }
