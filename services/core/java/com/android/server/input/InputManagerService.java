@@ -2285,14 +2285,8 @@ public class InputManagerService extends IInputManager.Stub
         nativeNotifyPortAssociationsChanged(mPtr);
     }
 
-    /**
-     * Add a runtime association between the input device name and the display unique id.
-     * @param inputDeviceName The name of the input device.
-     * @param displayUniqueId The unique id of the associated display.
-     */
     @Override // Binder call
-    public void addUniqueIdAssociation(@NonNull String inputDeviceName,
-            @NonNull String displayUniqueId) {
+    public void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
         if (!checkCallingPermission(
                 android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY,
                 "addNameAssociation()")) {
@@ -2300,20 +2294,16 @@ public class InputManagerService extends IInputManager.Stub
                     "Requires ASSOCIATE_INPUT_DEVICE_TO_DISPLAY permission");
         }
 
-        Objects.requireNonNull(inputDeviceName);
+        Objects.requireNonNull(inputPort);
         Objects.requireNonNull(displayUniqueId);
         synchronized (mAssociationsLock) {
-            mUniqueIdAssociations.put(inputDeviceName, displayUniqueId);
+            mUniqueIdAssociations.put(inputPort, displayUniqueId);
         }
         nativeChangeUniqueIdAssociation(mPtr);
     }
 
-    /**
-     * Remove the runtime association between the input device and the display.
-     * @param inputDeviceName The port of the input device to be cleared.
-     */
     @Override // Binder call
-    public void removeUniqueIdAssociation(@NonNull String inputDeviceName) {
+    public void removeUniqueIdAssociation(@NonNull String inputPort) {
         if (!checkCallingPermission(
                 android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY,
                 "removeUniqueIdAssociation()")) {
@@ -2321,9 +2311,9 @@ public class InputManagerService extends IInputManager.Stub
                     "Requires ASSOCIATE_INPUT_DEVICE_TO_DISPLAY permission");
         }
 
-        Objects.requireNonNull(inputDeviceName);
+        Objects.requireNonNull(inputPort);
         synchronized (mAssociationsLock) {
-            mUniqueIdAssociations.remove(inputDeviceName);
+            mUniqueIdAssociations.remove(inputPort);
         }
         nativeChangeUniqueIdAssociation(mPtr);
     }
@@ -2592,6 +2582,13 @@ public class InputManagerService extends IInputManager.Stub
                 mRuntimeAssociations.forEach((k, v) -> {
                     pw.print("  port: " + k);
                     pw.println("  display: " + v);
+                });
+            }
+            if (!mUniqueIdAssociations.isEmpty()) {
+                pw.println("Unique Id Associations:");
+                mUniqueIdAssociations.forEach((k, v) -> {
+                    pw.print("  port: " + k);
+                    pw.println("  uniqueId: " + v);
                 });
             }
         }
