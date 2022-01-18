@@ -17,6 +17,7 @@
 package com.android.systemui.dreams.dagger;
 
 import android.content.ContentResolver;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -45,6 +46,9 @@ public abstract class DreamOverlayModule {
     public static final String DREAM_OVERLAY_BATTERY_CONTROLLER =
             "dream_overlay_battery_controller";
     public static final String DREAM_OVERLAY_CONTENT_VIEW = "dream_overlay_content_view";
+    public static final String MAX_BURN_IN_OFFSET = "max_burn_in_offset";
+    public static final String BURN_IN_PROTECTION_UPDATE_INTERVAL =
+            "burn_in_protection_update_interval";
 
     /** */
     @Provides
@@ -103,5 +107,21 @@ public abstract class DreamOverlayModule {
                 mainHandler,
                 contentResolver,
                 batteryController);
+    }
+
+    /** */
+    @Provides
+    @DreamOverlayComponent.DreamOverlayScope
+    @Named(MAX_BURN_IN_OFFSET)
+    static int providesMaxBurnInOffset(@Main Resources resources) {
+        return resources.getDimensionPixelSize(R.dimen.default_burn_in_prevention_offset);
+    }
+
+    /** */
+    @Provides
+    @Named(BURN_IN_PROTECTION_UPDATE_INTERVAL)
+    static long providesBurnInProtectionUpdateInterval(@Main Resources resources) {
+        return resources.getInteger(
+                R.integer.config_dreamOverlayBurnInProtectionUpdateIntervalMillis);
     }
 }
