@@ -799,7 +799,6 @@ package android.app {
   }
 
   public class LocaleManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.READ_APP_SPECIFIC_LOCALES) public android.os.LocaleList getApplicationLocales(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void setApplicationLocales(@NonNull String, @NonNull android.os.LocaleList);
   }
 

@@ -5713,6 +5713,7 @@ package android.app {
 
   public class LocaleManager {
     method @NonNull public android.os.LocaleList getApplicationLocales();
+    method @NonNull @RequiresPermission(value="android.permission.READ_APP_SPECIFIC_LOCALES", conditional=true) public android.os.LocaleList getApplicationLocales(@NonNull String);
     method public void setApplicationLocales(@NonNull android.os.LocaleList);
   }
 

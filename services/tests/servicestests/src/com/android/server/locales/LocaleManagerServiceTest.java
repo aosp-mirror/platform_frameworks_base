@@ -30,6 +30,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -58,6 +59,7 @@ import org.mockito.Mock;
 @RunWith(AndroidJUnit4.class)
 public class LocaleManagerServiceTest {
     private static final String DEFAULT_PACKAGE_NAME = "com.android.myapp";
+    private static final String DEFAULT_INSTALLER_PACKAGE_NAME = "com.android.myapp.installer";
     private static final int DEFAULT_USER_ID = 0;
     private static final int DEFAULT_UID = Binder.getCallingUid() + 100;
     private static final int INVALID_UID = -1;
@@ -66,7 +68,8 @@ public class LocaleManagerServiceTest {
             LocaleList.forLanguageTags(DEFAULT_LOCALE_TAGS);
     private static final InstallSourceInfo DEFAULT_INSTALL_SOURCE_INFO = new InstallSourceInfo(
             /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
-            /* originatingPackageName = */ null, /* installingPackageName = */ null);
+            /* originatingPackageName = */ null,
+            /* installingPackageName = */ DEFAULT_INSTALLER_PACKAGE_NAME);
 
     private LocaleManagerService mLocaleManagerService;
     private LocaleManagerBackupHelper mMockBackupHelper;
@@ -89,7 +92,7 @@ public class LocaleManagerServiceTest {
         mMockActivityManager = mock(ActivityManagerInternal.class);
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
 
-        // For unit tests, set the default (null) installer info
+        // For unit tests, set the default installer info
         PackageManager mockPackageManager = mock(PackageManager.class);
         doReturn(DEFAULT_INSTALL_SOURCE_INFO).when(mockPackageManager)
                 .getInstallSourceInfo(anyString());
@@ -272,6 +275,23 @@ public class LocaleManagerServiceTest {
         LocaleList locales =
                 mLocaleManagerService.getApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
 
+        assertEquals(DEFAULT_LOCALES, locales);
+    }
+
+    @Test
+    public void testGetApplicationLocales_callerIsInstaller_returnsLocales()
+            throws Exception {
+        doReturn(DEFAULT_UID).when(mMockPackageManagerInternal)
+                .getPackageUid(eq(DEFAULT_PACKAGE_NAME), anyLong(), anyInt());
+        doReturn(Binder.getCallingUid()).when(mMockPackageManagerInternal)
+                .getPackageUid(eq(DEFAULT_INSTALLER_PACKAGE_NAME), anyLong(), anyInt());
+        doReturn(new PackageConfig(/* nightMode = */ 0, DEFAULT_LOCALES))
+                .when(mMockActivityTaskManager).getApplicationConfig(anyString(), anyInt());
+
+        LocaleList locales =
+                mLocaleManagerService.getApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+
+        verify(mMockContext, never()).enforceCallingOrSelfPermission(any(), any());
         assertEquals(DEFAULT_LOCALES, locales);
     }
 

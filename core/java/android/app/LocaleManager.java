@@ -95,18 +95,20 @@ public class LocaleManager {
     }
 
     /**
-     * Returns the current UI locales for a specific app (described by package name).
+     * Returns the current UI locales for a specified app (described by package name).
      *
      * <p>Returns a {@link LocaleList#getEmptyLocaleList()} if no app-specific locales are set.
      *
-     * <b>Note:</b> Non-system apps should read Locale information via their in-process
-     * LocaleLists.
+     * <p>This API can be used by an app's installer
+     * (per {@link android.content.pm.InstallSourceInfo#getInstallingPackageName}) to retrieve
+     * the app's locales.
+     * All other cases require {@code android.Manifest.permission#READ_APP_SPECIFIC_LOCALES}.
+     * Apps should generally retrieve their own locales via their in-process LocaleLists,
+     * or by calling {@link #getApplicationLocales()}.
      *
      * @param appPackageName the package name of the app for which to retrieve the locales.
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.READ_APP_SPECIFIC_LOCALES)
+    @RequiresPermission(value = Manifest.permission.READ_APP_SPECIFIC_LOCALES, conditional = true)
     @UserHandleAware
     @NonNull
     public LocaleList getApplicationLocales(@NonNull String appPackageName) {
