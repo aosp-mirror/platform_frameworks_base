@@ -71,6 +71,9 @@ public abstract class ActivityManagerInternal {
     }
 
     // Access modes for handleIncomingUser.
+    /**
+     * Allows access to a caller with {@link android.Manifest.permission#INTERACT_ACROSS_USERS}.
+     */
     public static final int ALLOW_NON_FULL = 0;
     /**
      * Allows access to a caller with {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
@@ -78,13 +81,18 @@ public abstract class ActivityManagerInternal {
      * Otherwise, {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required.
      */
     public static final int ALLOW_NON_FULL_IN_PROFILE = 1;
+    /**
+     * Allows access to a caller only if it has the full
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
+     */
     public static final int ALLOW_FULL_ONLY = 2;
     /**
      * Allows access to a caller with {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES}
-     * or {@link android.Manifest.permission#INTERACT_ACROSS_USERS} if in the same profile group.
-     * Otherwise, {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required.
+     * if in the same profile group.
+     * Otherwise, {@link android.Manifest.permission#INTERACT_ACROSS_USERS} is required and suffices
+     * as in {@link #ALLOW_NON_FULL}.
      */
-    public static final int ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE = 3;
+    public static final int ALLOW_PROFILES_OR_NON_FULL = 3;
 
     /**
      * Returns profile information in free form string in two separate strings.

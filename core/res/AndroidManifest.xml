@@ -716,6 +716,7 @@
 
     <!-- Added in T -->
     <protected-broadcast android:name="android.intent.action.REFRESH_SAFETY_SOURCES" />
+    <protected-broadcast android:name="android.app.action.DEVICE_POLICY_RESOURCE_UPDATED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->

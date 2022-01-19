@@ -291,8 +291,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
         };
 
-        boolean requireBackgroundForTransition = false;
-
+        @ColorInt int backgroundColorForTransition = 0;
         final int wallpaperTransit = getWallpaperTransitType(info);
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
@@ -352,8 +351,19 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
             Animation a = loadAnimation(info, change, wallpaperTransit);
             if (a != null) {
-                if (changeRequiresBackground(info, change)) {
-                    requireBackgroundForTransition = true;
+                if (isTask) {
+                    final @TransitionType int type = info.getType();
+                    final boolean isOpenOrCloseTransition = type == TRANSIT_OPEN
+                            || type == TRANSIT_CLOSE
+                            || type == TRANSIT_TO_FRONT
+                            || type == TRANSIT_TO_BACK;
+                    if (isOpenOrCloseTransition) {
+                        // Use the overview background as the background for the animation
+                        final Context uiContext = ActivityThread.currentActivityThread()
+                                .getSystemUiContext();
+                        backgroundColorForTransition =
+                                uiContext.getColor(R.color.overview_background);
+                    }
                 }
 
                 float cornerRadius = 0;
@@ -363,6 +373,15 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             mDisplayController.getDisplayContext(change.getTaskInfo().displayId);
                     cornerRadius =
                             ScreenDecorationsUtils.getWindowCornerRadius(displayContext);
+                }
+
+                if (a.getShowBackground()) {
+                    // use the window's background color if provided as the background color for the
+                    // animation - the top most window with a valid background color and
+                    // showBackground set takes precedence.
+                    if (change.getBackgroundColor() != 0) {
+                        backgroundColorForTransition = change.getBackgroundColor();
+                    }
                 }
 
                 startSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
@@ -376,8 +395,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             }
         }
 
-        if (requireBackgroundForTransition) {
-            addBackgroundToTransition(info.getRootLeash(), startTransaction, finishTransaction);
+        if (backgroundColorForTransition != 0) {
+            addBackgroundToTransition(info.getRootLeash(), backgroundColorForTransition,
+                    startTransaction, finishTransaction);
         }
 
         startTransaction.apply();
@@ -388,24 +408,13 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         return true;
     }
 
-    private boolean changeRequiresBackground(TransitionInfo info,
-            TransitionInfo.Change change) {
-        final boolean isTask = change.getTaskInfo() != null;
-        final @TransitionType int type = info.getType();
-        final boolean isOpenOrCloseTransition = type == TRANSIT_OPEN || type == TRANSIT_CLOSE
-                || type == TRANSIT_TO_FRONT || type == TRANSIT_TO_BACK;
-        return isTask && isOpenOrCloseTransition;
-    }
-
     private void addBackgroundToTransition(
             @NonNull SurfaceControl rootLeash,
+            @ColorInt int color,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction
     ) {
-        final Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
-        final @ColorInt int overviewBackgroundColor =
-                uiContext.getColor(R.color.overview_background);
-        final Color bgColor = Color.valueOf(overviewBackgroundColor);
+        final Color bgColor = Color.valueOf(color);
         final float[] colorArray = new float[] { bgColor.red(), bgColor.green(), bgColor.blue() };
 
         final SurfaceControl animationBackgroundSurface = new SurfaceControl.Builder()

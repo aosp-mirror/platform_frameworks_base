@@ -712,6 +712,20 @@ public final class Sensor {
     public static final String STRING_TYPE_HINGE_ANGLE = "android.sensor.hinge_angle";
 
     /**
+     * A constant describing a head tracker sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     */
+    public static final int TYPE_HEAD_TRACKER = 37;
+
+    /**
+     * A constant string describing a head tracker sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     */
+    public static final String STRING_TYPE_HEAD_TRACKER = "android.sensor.head_tracker";
+
+    /**
      * A constant describing all sensor types.
      */
 
@@ -831,6 +845,7 @@ public final class Sensor {
             1, // SENSOR_TYPE_LOW_LATENCY_OFFBODY_DETECT
             6, // SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED
             1, // SENSOR_TYPE_HINGE_ANGLE
+            6, // SENSOR_TYPE_HEAD_TRACKER (discontinuity count is excluded)
     };
 
     /**
@@ -1282,6 +1297,9 @@ public final class Sensor {
                 return true;
             case TYPE_HINGE_ANGLE:
                 mStringType = STRING_TYPE_HINGE_ANGLE;
+                return true;
+            case TYPE_HEAD_TRACKER:
+                mStringType = STRING_TYPE_HEAD_TRACKER;
                 return true;
             default:
                 return false;

@@ -738,4 +738,6 @@
     <!-- Class for the communal source connector to be used -->
     <string name="config_communalSourceConnector" translatable="false"></string>
 
+    <!-- How often in milliseconds to jitter the dream overlay in order to avoid burn-in. -->
+    <integer name="config_dreamOverlayBurnInProtectionUpdateIntervalMillis">500</integer>
 </resources>

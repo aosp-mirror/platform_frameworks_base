@@ -1314,6 +1314,7 @@ package android {
     field public static final int shouldDisableView = 16843246; // 0x10101ee
     field public static final int shouldUseDefaultUnfoldTransition = 16844364; // 0x101064c
     field public static final int showAsAction = 16843481; // 0x10102d9
+    field public static final int showBackground;
     field public static final int showClockAndComplications;
     field public static final int showDefault = 16843258; // 0x10101fa
     field public static final int showDividers = 16843561; // 0x1010329
@@ -7286,6 +7287,10 @@ package android.app.admin {
     method @Nullable public java.util.List<java.lang.String> getDelegatePackages(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public java.util.List<java.lang.String> getDelegatedScopes(@Nullable android.content.ComponentName, @NonNull String);
     method public CharSequence getDeviceOwnerLockScreenInfo();
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(int, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(int, int, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(int, int, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(int, int, int, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
     method public CharSequence getEndUserSessionMessage(@NonNull android.content.ComponentName);
     method @NonNull public String getEnrollmentSpecificId();
     method @Nullable public android.app.admin.FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(@Nullable android.content.ComponentName);
@@ -7509,6 +7514,7 @@ package android.app.admin {
     field public static final String ACTION_CHECK_POLICY_COMPLIANCE = "android.app.action.CHECK_POLICY_COMPLIANCE";
     field public static final String ACTION_DEVICE_ADMIN_SERVICE = "android.app.action.DEVICE_ADMIN_SERVICE";
     field public static final String ACTION_DEVICE_OWNER_CHANGED = "android.app.action.DEVICE_OWNER_CHANGED";
+    field public static final String ACTION_DEVICE_POLICY_RESOURCE_UPDATED = "android.app.action.DEVICE_POLICY_RESOURCE_UPDATED";
     field public static final String ACTION_GET_PROVISIONING_MODE = "android.app.action.GET_PROVISIONING_MODE";
     field public static final String ACTION_MANAGED_PROFILE_PROVISIONED = "android.app.action.MANAGED_PROFILE_PROVISIONED";
     field public static final String ACTION_PROFILE_OWNER_CHANGED = "android.app.action.PROFILE_OWNER_CHANGED";
@@ -7584,6 +7590,8 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_WIFI_SECURITY_TYPE = "android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE";
     field public static final String EXTRA_PROVISIONING_WIFI_SSID = "android.app.extra.PROVISIONING_WIFI_SSID";
     field public static final String EXTRA_PROVISIONING_WIFI_USER_CERTIFICATE = "android.app.extra.PROVISIONING_WIFI_USER_CERTIFICATE";
+    field public static final String EXTRA_RESOURCE_ID = "android.app.extra.RESOURCE_ID";
+    field public static final String EXTRA_RESOURCE_TYPE_DRAWABLE = "android.app.extra.RESOURCE_TYPE_DRAWABLE";
     field public static final int FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY = 1; // 0x1
     field public static final int FLAG_MANAGED_CAN_ACCESS_PARENT = 2; // 0x2
     field public static final int FLAG_PARENT_CAN_ACCESS_MANAGED = 1; // 0x1
@@ -7676,6 +7684,35 @@ package android.app.admin {
 
   public static interface DevicePolicyManager.OnClearApplicationUserDataListener {
     method public void onApplicationUserDataCleared(String, boolean);
+  }
+
+  public final class DevicePolicyResources {
+    ctor public DevicePolicyResources();
+  }
+
+  public static final class DevicePolicyResources.Drawable {
+    field public static final int INVALID_ID = -1; // 0xffffffff
+    field public static final int WORK_PROFILE_ICON = 1; // 0x1
+    field public static final int WORK_PROFILE_ICON_BADGE = 0; // 0x0
+    field public static final int WORK_PROFILE_OFF_ICON = 2; // 0x2
+    field public static final int WORK_PROFILE_USER_ICON = 3; // 0x3
+  }
+
+  public static final class DevicePolicyResources.Drawable.Source {
+    field public static final int HOME_WIDGET = 2; // 0x2
+    field public static final int LAUNCHER_OFF_BUTTON = 3; // 0x3
+    field public static final int NOTIFICATION = 0; // 0x0
+    field public static final int PROFILE_SWITCH_ANIMATION = 1; // 0x1
+    field public static final int QUICK_SETTINGS = 4; // 0x4
+    field public static final int STATUS_BAR = 5; // 0x5
+    field public static final int UNDEFINED = -1; // 0xffffffff
+  }
+
+  public static final class DevicePolicyResources.Drawable.Style {
+    field public static final int DEFAULT = -1; // 0xffffffff
+    field public static final int OUTLINE = 2; // 0x2
+    field public static final int SOLID_COLORED = 0; // 0x0
+    field public static final int SOLID_NOT_COLORED = 1; // 0x1
   }
 
   public final class DnsEvent extends android.app.admin.NetworkEvent implements android.os.Parcelable {
@@ -10786,7 +10823,7 @@ package android.content {
     method public boolean bindIsolatedService(@NonNull @RequiresPermission android.content.Intent, int, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.content.ServiceConnection);
     method public abstract boolean bindService(@RequiresPermission android.content.Intent, @NonNull android.content.ServiceConnection, int);
     method public boolean bindService(@NonNull @RequiresPermission android.content.Intent, int, @NonNull java.util.concurrent.Executor, @NonNull android.content.ServiceConnection);
-    method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", android.Manifest.permission.INTERACT_ACROSS_PROFILES}) public boolean bindServiceAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL", android.Manifest.permission.INTERACT_ACROSS_PROFILES}, conditional=true) public boolean bindServiceAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull android.os.UserHandle);
     method @CheckResult(suggest="#enforceCallingOrSelfPermission(String,String)") public abstract int checkCallingOrSelfPermission(@NonNull String);
     method @CheckResult(suggest="#enforceCallingOrSelfUriPermission(Uri,int,String)") public abstract int checkCallingOrSelfUriPermission(android.net.Uri, int);
     method @NonNull public int[] checkCallingOrSelfUriPermissions(@NonNull java.util.List<android.net.Uri>, int);
@@ -15242,6 +15279,11 @@ package android.graphics {
 
   public class BitmapShader extends android.graphics.Shader {
     ctor public BitmapShader(@NonNull android.graphics.Bitmap, @NonNull android.graphics.Shader.TileMode, @NonNull android.graphics.Shader.TileMode);
+    method public int getFilterMode();
+    method public void setFilterMode(int);
+    field public static final int FILTER_MODE_DEFAULT = 0; // 0x0
+    field public static final int FILTER_MODE_LINEAR = 2; // 0x2
+    field public static final int FILTER_MODE_NEAREST = 1; // 0x1
   }
 
   public enum BlendMode {
@@ -16648,6 +16690,7 @@ package android.graphics {
     method public void setFloatUniform(@NonNull String, float, float, float);
     method public void setFloatUniform(@NonNull String, float, float, float, float);
     method public void setFloatUniform(@NonNull String, @NonNull float[]);
+    method public void setInputBuffer(@NonNull String, @NonNull android.graphics.BitmapShader);
     method public void setInputShader(@NonNull String, @NonNull android.graphics.Shader);
     method public void setIntUniform(@NonNull String, int);
     method public void setIntUniform(@NonNull String, int, int);
@@ -18028,6 +18071,7 @@ package android.hardware {
     field public static final String STRING_TYPE_GRAVITY = "android.sensor.gravity";
     field public static final String STRING_TYPE_GYROSCOPE = "android.sensor.gyroscope";
     field public static final String STRING_TYPE_GYROSCOPE_UNCALIBRATED = "android.sensor.gyroscope_uncalibrated";
+    field public static final String STRING_TYPE_HEAD_TRACKER = "android.sensor.head_tracker";
     field public static final String STRING_TYPE_HEART_BEAT = "android.sensor.heart_beat";
     field public static final String STRING_TYPE_HEART_RATE = "android.sensor.heart_rate";
     field public static final String STRING_TYPE_HINGE_ANGLE = "android.sensor.hinge_angle";
@@ -18058,6 +18102,7 @@ package android.hardware {
     field public static final int TYPE_GRAVITY = 9; // 0x9
     field public static final int TYPE_GYROSCOPE = 4; // 0x4
     field public static final int TYPE_GYROSCOPE_UNCALIBRATED = 16; // 0x10
+    field public static final int TYPE_HEAD_TRACKER = 37; // 0x25
     field public static final int TYPE_HEART_BEAT = 31; // 0x1f
     field public static final int TYPE_HEART_RATE = 21; // 0x15
     field public static final int TYPE_HINGE_ANGLE = 36; // 0x24
@@ -18120,6 +18165,7 @@ package android.hardware {
     method public void onFlushCompleted(android.hardware.Sensor);
     method public void onSensorAdditionalInfo(android.hardware.SensorAdditionalInfo);
     method public void onSensorChanged(android.hardware.SensorEvent);
+    method public void onSensorDiscontinuity(@NonNull android.hardware.Sensor);
   }
 
   public interface SensorEventListener {
@@ -48033,13 +48079,31 @@ package android.view {
 
   public final class Choreographer {
     method public static android.view.Choreographer getInstance();
+    method public void postExtendedFrameCallback(@NonNull android.view.Choreographer.ExtendedFrameCallback);
     method public void postFrameCallback(android.view.Choreographer.FrameCallback);
     method public void postFrameCallbackDelayed(android.view.Choreographer.FrameCallback, long);
+    method public void removeExtendedFrameCallback(@Nullable android.view.Choreographer.ExtendedFrameCallback);
     method public void removeFrameCallback(android.view.Choreographer.FrameCallback);
+  }
+
+  public static interface Choreographer.ExtendedFrameCallback {
+    method public void onVsync(@NonNull android.view.Choreographer.FrameData);
   }
 
   public static interface Choreographer.FrameCallback {
     method public void doFrame(long);
+  }
+
+  public static class Choreographer.FrameData {
+    method public long getFrameTimeNanos();
+    method @NonNull public android.view.Choreographer.FrameTimeline[] getFrameTimelines();
+    method @NonNull public android.view.Choreographer.FrameTimeline getPreferredFrameTimeline();
+  }
+
+  public static class Choreographer.FrameTimeline {
+    method public long getDeadlineNanos();
+    method public long getExpectedPresentTimeNanos();
+    method public long getVsyncId();
   }
 
   public interface CollapsibleActionView {
@@ -48185,6 +48249,18 @@ package android.view {
     method public int getSafeInsetRight();
     method public int getSafeInsetTop();
     method @NonNull public android.graphics.Insets getWaterfallInsets();
+  }
+
+  public static final class DisplayCutout.Builder {
+    ctor public DisplayCutout.Builder();
+    method @NonNull public android.view.DisplayCutout build();
+    method @NonNull public android.view.DisplayCutout.Builder setBoundingRectBottom(@NonNull android.graphics.Rect);
+    method @NonNull public android.view.DisplayCutout.Builder setBoundingRectLeft(@NonNull android.graphics.Rect);
+    method @NonNull public android.view.DisplayCutout.Builder setBoundingRectRight(@NonNull android.graphics.Rect);
+    method @NonNull public android.view.DisplayCutout.Builder setBoundingRectTop(@NonNull android.graphics.Rect);
+    method @NonNull public android.view.DisplayCutout.Builder setCutoutPath(@NonNull android.graphics.Path);
+    method @NonNull public android.view.DisplayCutout.Builder setSafeInsets(@NonNull android.graphics.Insets);
+    method @NonNull public android.view.DisplayCutout.Builder setWaterfallInsets(@NonNull android.graphics.Insets);
   }
 
   public final class DragAndDropPermissions implements android.os.Parcelable {
@@ -52454,6 +52530,7 @@ package android.view.animation {
     method public int getRepeatCount();
     method public int getRepeatMode();
     method protected float getScaleFactor();
+    method public boolean getShowBackground();
     method public long getStartOffset();
     method public long getStartTime();
     method public boolean getTransformation(long, android.view.animation.Transformation);
@@ -52479,6 +52556,7 @@ package android.view.animation {
     method public void setInterpolator(android.view.animation.Interpolator);
     method public void setRepeatCount(int);
     method public void setRepeatMode(int);
+    method public void setShowBackground(boolean);
     method public void setStartOffset(long);
     method public void setStartTime(long);
     method public void setZAdjustment(int);
@@ -52984,6 +53062,7 @@ package android.view.inputmethod {
     method public int getCharacterBoundsFlags(int);
     method public CharSequence getComposingText();
     method public int getComposingTextStart();
+    method @Nullable public android.view.inputmethod.EditorBoundsInfo getEditorBoundsInfo();
     method public float getInsertionMarkerBaseline();
     method public float getInsertionMarkerBottom();
     method public int getInsertionMarkerFlags();
@@ -53005,9 +53084,25 @@ package android.view.inputmethod {
     method public android.view.inputmethod.CursorAnchorInfo build();
     method public void reset();
     method public android.view.inputmethod.CursorAnchorInfo.Builder setComposingText(int, CharSequence);
+    method @NonNull public android.view.inputmethod.CursorAnchorInfo.Builder setEditorBoundsInfo(@Nullable android.view.inputmethod.EditorBoundsInfo);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setInsertionMarkerLocation(float, float, float, float, int);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setMatrix(android.graphics.Matrix);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setSelectionRange(int, int);
+  }
+
+  public final class EditorBoundsInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.graphics.RectF getEditorBounds();
+    method @Nullable public android.graphics.RectF getHandwritingBounds();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.EditorBoundsInfo> CREATOR;
+  }
+
+  public static final class EditorBoundsInfo.Builder {
+    ctor public EditorBoundsInfo.Builder();
+    method @NonNull public android.view.inputmethod.EditorBoundsInfo build();
+    method @NonNull public android.view.inputmethod.EditorBoundsInfo.Builder setEditorBounds(@Nullable android.graphics.RectF);
+    method @NonNull public android.view.inputmethod.EditorBoundsInfo.Builder setHandwritingBounds(@Nullable android.graphics.RectF);
   }
 
   public class EditorInfo implements android.text.InputType android.os.Parcelable {

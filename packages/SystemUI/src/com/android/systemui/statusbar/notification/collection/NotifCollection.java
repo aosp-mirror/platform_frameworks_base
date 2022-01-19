@@ -56,7 +56,6 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.Pair;
-import android.util.Slog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -756,6 +755,7 @@ public class NotifCollection implements Dumpable {
                 && !entry.getSbn().getNotification().isGroupSummary()
                 && !hasFlag(entry, Notification.FLAG_ONGOING_EVENT)
                 && !hasFlag(entry, Notification.FLAG_BUBBLE)
+                && !hasFlag(entry, Notification.FLAG_NO_CLEAR)
                 && entry.getDismissState() != DISMISSED;
     }
 

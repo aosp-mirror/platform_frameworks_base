@@ -282,6 +282,18 @@ public class TrafficStats {
     }
 
     /**
+     * Set active tag to use when accounting {@link Socket} traffic originating
+     * from the current thread. The tag used internally is well-defined to
+     * distinguish all download provider traffic.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static void setThreadStatsTagDownload() {
+        setThreadStatsTag(TAG_SYSTEM_DOWNLOAD);
+    }
+
+    /**
      * Get the active tag used when accounting {@link Socket} traffic originating
      * from the current thread. Only one active tag per thread is supported.
      * {@link #tagSocket(Socket)}.

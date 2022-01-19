@@ -9408,6 +9408,7 @@ public class AudioService extends IAudioService.Stub
         pw.println("mHasSpatializerEffect:" + mHasSpatializerEffect);
         pw.println("isSpatializerEnabled:" + isSpatializerEnabled());
         pw.println("isSpatialAudioEnabled:" + isSpatialAudioEnabled());
+        mSpatializerHelper.dump(pw);
 
         mAudioSystem.dump(pw);
     }

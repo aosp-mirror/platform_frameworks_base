@@ -159,7 +159,7 @@ public class CompanionDeviceManagerService extends SystemService
 
     // Persistent data store for all Associations.
     private PersistentDataStore mPersistentStore;
-    private AssociationStoreImpl mAssociationStore;
+    private final AssociationStoreImpl mAssociationStore = new AssociationStoreImpl();
     private AssociationRequestsProcessor mAssociationRequestsProcessor;
 
     private PowerWhitelistManager mPowerWhitelistManager;
@@ -219,16 +219,8 @@ public class CompanionDeviceManagerService extends SystemService
     @Override
     public void onStart() {
         mPersistentStore = new PersistentDataStore();
-        final Set<AssociationInfo> allAssociations = new ArraySet<>();
 
-        synchronized (mPreviouslyUsedIds) {
-            // The data is stored in DE directories, so we can read the data for all users now
-            // (which would not be possible if the data was stored to CE directories).
-            mPersistentStore.readStateForUsers(
-                    mUserManager.getAliveUsers(), allAssociations, mPreviouslyUsedIds);
-        }
-
-        mAssociationStore = new AssociationStoreImpl(allAssociations);
+        loadAssociationsFromDisk();
         mAssociationStore.registerListener(this);
 
         mCompanionDevicePresenceController = new CompanionDevicePresenceController(this);
@@ -237,6 +229,18 @@ public class CompanionDeviceManagerService extends SystemService
         // Publish "binder service"
         final CompanionDeviceManagerImpl impl = new CompanionDeviceManagerImpl();
         publishBinderService(Context.COMPANION_DEVICE_SERVICE, impl);
+    }
+
+    void loadAssociationsFromDisk() {
+        final Set<AssociationInfo> allAssociations = new ArraySet<>();
+        synchronized (mPreviouslyUsedIds) {
+            // The data is stored in DE directories, so we can read the data for all users now
+            // (which would not be possible if the data was stored to CE directories).
+            mPersistentStore.readStateForUsers(
+                    mUserManager.getAliveUsers(), allAssociations, mPreviouslyUsedIds);
+        }
+
+        mAssociationStore.setAssociations(allAssociations);
     }
 
     @Override

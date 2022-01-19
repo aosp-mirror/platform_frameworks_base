@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -148,7 +149,7 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     /**
      * Checks that the focus doesn't change between windows during the transition
      */
-    @FlakyTest
+    @Postsubmit
     @Test
     fun focusDoesNotChange() {
         testSpec.assertEventLog {

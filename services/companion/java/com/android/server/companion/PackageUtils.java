@@ -53,7 +53,7 @@ import java.util.Map;
 final class PackageUtils {
     private static final Intent COMPANION_SERVICE_INTENT =
             new Intent(CompanionDeviceService.SERVICE_INTERFACE);
-    private static final String META_DATA_KEY_PRIMARY = "primary";
+    private static final String META_DATA_PRIMARY_TAG = "android.companion.primary";
 
     static @Nullable PackageInfo getPackageInfo(@NonNull Context context,
             @UserIdInt int userId, @NonNull String packageName) {
@@ -121,6 +121,6 @@ final class PackageUtils {
     }
 
     private static boolean isPrimaryCompanionDeviceService(ServiceInfo service) {
-        return service.metaData != null && service.metaData.getBoolean(META_DATA_KEY_PRIMARY);
+        return service.metaData != null && service.metaData.getBoolean(META_DATA_PRIMARY_TAG);
     }
 }

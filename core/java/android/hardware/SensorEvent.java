@@ -641,6 +641,41 @@ public class SensorEvent {
      *  <li> values[0]: Measured hinge angle between 0 and 360 degrees inclusive</li>
      * </ul>
      *
+     * <h4>{@link android.hardware.Sensor#TYPE_HEAD_TRACKER Sensor.TYPE_HEAD_TRACKER}:</h4>
+     *
+     * A sensor of this type measures the orientation of a user's head relative to an arbitrary
+     * reference frame, as well as the rate of rotation.
+     *
+     * Events produced by this sensor follow a special head-centric coordinate frame, where:
+     * <ul>
+     *  <li> The X axis crosses through the user's ears, with the positive X direction extending
+     *       out of the user's right ear</li>
+     *  <li> The Y axis crosses from the back of the user's head through their nose, with the
+     *       positive direction extending out of the nose, and the X/Y plane being nominally
+     *       parallel to the ground when the user is upright and looking straight ahead</li>
+     *  <li> The Z axis crosses from the neck through the top of the user's head, with the
+     *       positive direction extending out from the top of the head</li>
+     * </ul>
+     *
+     * Data is provided in Euler vector representation, which is a vector whose direction indicates
+     * the axis of rotation and magnitude indicates the angle to rotate around that axis, in
+     * radians.
+     *
+     * The first three elements provide the transform from the (arbitrary, possibly slowly drifting)
+     * reference frame to the head frame. The magnitude of this vector is in range [0, &pi;]
+     * radians, while the value of individual axes is in range [-&pi;, &pi;]. The next three
+     * elements provide the estimated rotational velocity of the user's head relative to itself, in
+     * radians per second.
+     *
+     * <ul>
+     *  <li> values[0] : X component of Euler vector representing rotation</li>
+     *  <li> values[1] : Y component of Euler vector representing rotation</li>
+     *  <li> values[2] : Z component of Euler vector representing rotation</li>
+     *  <li> values[3] : X component of Euler vector representing angular velocity</li>
+     *  <li> values[4] : Y component of Euler vector representing angular velocity</li>
+     *  <li> values[5] : Z component of Euler vector representing angular velocity</li>
+     * </ul>
+     *
      * @see GeomagneticField
      */
     public final float[] values;

@@ -66,7 +66,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         stringExtras: Map<String, String>
     ) {
         super.launchViaIntent(wmHelper, expectedWindowName, action, stringExtras)
-        wmHelper.waitFor("hasPipWindow") { it.wmState.hasPipWindow() }
+        wmHelper.waitPipShown()
     }
 
     private fun focusOnObject(selector: BySelector): Boolean {
@@ -88,7 +88,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         clickObject(ENTER_PIP_BUTTON_ID)
 
         // Wait on WMHelper or simply wait for 3 seconds
-        wmHelper?.waitFor("hasPipWindow") { it.wmState.hasPipWindow() } ?: SystemClock.sleep(3_000)
+        wmHelper?.waitPipShown() ?: SystemClock.sleep(3_000)
         // when entering pip, the dismiss button is visible at the start. to ensure the pip
         // animation is complete, wait until the pip dismiss button is no longer visible. 
         // b/176822698: dismiss-only state will be removed in the future
@@ -148,7 +148,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         }
 
         // Wait for animation to complete.
-        wmHelper.waitFor("!hasPipWindow") { !it.wmState.hasPipWindow() }
+        wmHelper.waitPipGone()
         wmHelper.waitForHomeActivityVisible()
     }
 
@@ -165,7 +165,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
                 ?: error("PIP window expand button not found")
         val expandButtonBounds = expandPipObject.visibleBounds
         uiDevice.click(expandButtonBounds.centerX(), expandButtonBounds.centerY())
-        wmHelper.waitFor("!hasPipWindow") { !it.wmState.hasPipWindow() }
+        wmHelper.waitPipGone()
         wmHelper.waitForAppTransitionIdle()
     }
 
