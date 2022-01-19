@@ -1511,10 +1511,18 @@ public class NotificationStackScrollLayoutController {
     }
 
     /**
-     * Set the amount of pixels we have currently dragged down if we're transitioning to the full
-     * shade. 0.0f means we're not transitioning yet.
+     * @param amount The amount of pixels we have currently dragged down
+     *               for the lockscreen to shade transition. 0f for all other states.
+     * @param fraction The fraction of lockscreen to shade transition.
+     *                 0f for all other states.
+     *
+     * Once the lockscreen to shade transition completes and the shade is 100% open,
+     * LockscreenShadeTransitionController resets amount and fraction to 0, where they remain
+     * until the next lockscreen-to-shade transition.
      */
-    public void setTransitionToFullShadeAmount(float amount) {
+    public void setTransitionToFullShadeAmount(float amount, float fraction) {
+        mView.setFractionToShade(fraction);
+
         float extraTopInset = 0.0f;
         if (mStatusBarStateController.getState() == KEYGUARD) {
             float overallProgress = MathUtils.saturate(amount / mView.getHeight());
