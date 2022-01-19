@@ -91,6 +91,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
@@ -2152,6 +2153,12 @@ final class InstallPackageHelper {
                 final ScanResult scanResult = reconciledPkg.mScanResult;
                 mPm.mPermissionManager.onPackageInstalled(pkg, scanResult.mPreviousAppId,
                         permissionParamsBuilder.build(), userId);
+                // Apply restricted settings on potentially dangerous packages.
+                if (installArgs.mPackageSource == PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE
+                        || installArgs.mPackageSource
+                        == PackageInstaller.PACKAGE_SOURCE_DOWNLOADED_FILE) {
+                    enableRestrictedSettings(pkgName, pkg.getUid());
+                }
             }
             res.mName = pkgName;
             res.mUid = pkg.getUid();
@@ -2164,6 +2171,18 @@ final class InstallPackageHelper {
         }
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+    }
+
+    private void enableRestrictedSettings(String pkgName, int appId) {
+        final AppOpsManager appOpsManager = mPm.mContext.getSystemService(AppOpsManager.class);
+        final int[] allUsersList = mPm.mUserManager.getUserIds();
+        for (int userId : allUsersList) {
+            final int uid = UserHandle.getUid(userId, appId);
+            appOpsManager.setMode(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
+                    uid,
+                    pkgName,
+                    AppOpsManager.MODE_ERRORED);
+        }
     }
 
     /**
@@ -2968,6 +2987,8 @@ final class InstallPackageHelper {
                             PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
                             UserHandle.USER_ALL);
                     mPm.writeSettingsLPrTEMP();
+                    // Since compressed package can be system app only, we do not need to
+                    // set restricted settings on it.
                 }
             } catch (PackageManagerException e) {
                 // Whoops! Something went very wrong; roll back to the stub and disable the package

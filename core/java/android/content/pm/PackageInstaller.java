@@ -418,6 +418,48 @@ public class PackageInstaller {
     @Retention(RetentionPolicy.SOURCE)
     public @interface FileLocation{}
 
+    /**
+     * The installer did not call SessionParams#setPackageSource(int) to specify the package
+     * source.
+     */
+    public static final int PACKAGE_SOURCE_UNSPECIFIED = 0;
+
+    /**
+     * Code indicating that the package being installed is from a source not reflected by any
+     * other package source constant.
+     */
+    public static final int PACKAGE_SOURCE_OTHER = 1;
+
+    /**
+     * Code indicating that the package being installed is from a store. An app store that
+     * installs an app for the user would use this.
+     */
+    public static final int PACKAGE_SOURCE_STORE = 2;
+
+    /**
+     * Code indicating that the package being installed comes from a local file on the device. A
+     * file manager that is facilitating the installation of an APK file would use this.
+     */
+    public static final int PACKAGE_SOURCE_LOCAL_FILE = 3;
+
+    /**
+     * Code indicating that the package being installed comes from a file that was downloaded to
+     * the device by the user. For use in place of PACKAGE_SOURCE_LOCAL_FILE when the installer
+     * knows the package was downloaded.
+     */
+    public static final int PACKAGE_SOURCE_DOWNLOADED_FILE = 4;
+
+    /** @hide */
+    @IntDef(prefix = { "PACKAGE_SOURCE_" }, value = {
+            PACKAGE_SOURCE_UNSPECIFIED,
+            PACKAGE_SOURCE_STORE,
+            PACKAGE_SOURCE_LOCAL_FILE,
+            PACKAGE_SOURCE_DOWNLOADED_FILE,
+            PACKAGE_SOURCE_OTHER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface PackageSourceType{}
+
     /** Default set of checksums - includes all available checksums.
      * @see Session#requestChecksums  */
     private static final int DEFAULT_CHECKSUMS =
@@ -1722,6 +1764,8 @@ public class PackageInstaller {
         /** {@hide} */
         public boolean isMultiPackage;
         /** {@hide} */
+        public int packageSource = PACKAGE_SOURCE_UNSPECIFIED;
+        /** {@hide} */
         public boolean isStaged;
         /** {@hide} */
         public long requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
@@ -1776,6 +1820,7 @@ public class PackageInstaller {
             }
             rollbackDataPolicy = source.readInt();
             requireUserAction = source.readInt();
+            packageSource = source.readInt();
         }
 
         /** {@hide} */
@@ -1805,6 +1850,7 @@ public class PackageInstaller {
             ret.dataLoaderParams = dataLoaderParams;
             ret.rollbackDataPolicy = rollbackDataPolicy;
             ret.requireUserAction = requireUserAction;
+            ret.packageSource = packageSource;
             return ret;
         }
 
@@ -1923,6 +1969,13 @@ public class PackageInstaller {
         public void setGrantedRuntimePermissions(String[] permissions) {
             installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
             this.grantedRuntimePermissions = permissions;
+        }
+
+        /**
+         * Sets the apk package installation source.
+         */
+        public void setPackageSource(@PackageSourceType int packageSource) {
+            this.packageSource = packageSource;
         }
 
         /**
@@ -2289,6 +2342,7 @@ public class PackageInstaller {
             pw.printPair("abiOverride", abiOverride);
             pw.printPair("volumeUuid", volumeUuid);
             pw.printPair("grantedRuntimePermissions", grantedRuntimePermissions);
+            pw.printPair("packageSource", packageSource);
             pw.printPair("whitelistedRestrictedPermissions", whitelistedRestrictedPermissions);
             pw.printPair("autoRevokePermissions", autoRevokePermissionsMode);
             pw.printPair("installerPackageName", installerPackageName);
@@ -2338,6 +2392,7 @@ public class PackageInstaller {
             }
             dest.writeInt(rollbackDataPolicy);
             dest.writeInt(requireUserAction);
+            dest.writeInt(packageSource);
         }
 
         public static final Parcelable.Creator<SessionParams>
@@ -2540,6 +2595,9 @@ public class PackageInstaller {
         public int requireUserAction;
 
         /** {@hide} */
+        public int packageSource = PACKAGE_SOURCE_UNSPECIFIED;
+
+        /** {@hide} */
         public int installerUid;
 
         /** {@hide} */
@@ -2593,6 +2651,7 @@ public class PackageInstaller {
             createdMillis = source.readLong();
             requireUserAction = source.readInt();
             installerUid = source.readInt();
+            packageSource = source.readInt();
         }
 
         /**
@@ -2929,6 +2988,13 @@ public class PackageInstaller {
         }
 
         /**
+         * Gets the apk package installation source.
+         */
+        public @PackageSourceType int getPackageSource() {
+            return packageSource;
+        }
+
+        /**
          * Returns true if this session is a multi-package session containing references to other
          * sessions.
          */
@@ -3163,6 +3229,7 @@ public class PackageInstaller {
             dest.writeLong(createdMillis);
             dest.writeInt(requireUserAction);
             dest.writeInt(installerUid);
+            dest.writeInt(packageSource);
         }
 
         public static final Parcelable.Creator<SessionInfo>

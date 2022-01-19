@@ -847,7 +847,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
         InstallSource installSource = InstallSource.create(installerPackageName,
                 originatingPackageName, requestedInstallerPackageName,
-                installerAttributionTag);
+                installerAttributionTag, params.packageSource);
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
                 mSilentUpdatePolicy, mInstallThread.getLooper(), mStagingManager, sessionId,
                 userId, callingUid, installSource, params, createdMillis, 0L, stageDir, stageCid,

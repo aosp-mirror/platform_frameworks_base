@@ -298,7 +298,8 @@ public final class MovePackageHelper {
                 new File(origin.mResolvedPath), /* flags */ 0);
         final PackageLite lite = ret.isSuccess() ? ret.getResult() : null;
         final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
-                installSource, volumeUuid, user, packageAbiOverride, lite, mPm);
+                installSource, volumeUuid, user, packageAbiOverride,
+                PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED, lite, mPm);
         params.movePackage();
     }
 

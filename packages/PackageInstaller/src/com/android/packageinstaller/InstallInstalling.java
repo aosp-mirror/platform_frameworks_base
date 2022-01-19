@@ -130,8 +130,12 @@ public class InstallInstalling extends AlertActivity {
             } else {
                 PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                         PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+                final Uri referrerUri = getIntent().getParcelableExtra(Intent.EXTRA_REFERRER);
+                params.setPackageSource(
+                        referrerUri != null ? PackageInstaller.PACKAGE_SOURCE_DOWNLOADED_FILE
+                                : PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE);
                 params.setInstallAsInstantApp(false);
-                params.setReferrerUri(getIntent().getParcelableExtra(Intent.EXTRA_REFERRER));
+                params.setReferrerUri(referrerUri);
                 params.setOriginatingUri(getIntent()
                         .getParcelableExtra(Intent.EXTRA_ORIGINATING_URI));
                 params.setOriginatingUid(getIntent().getIntExtra(Intent.EXTRA_ORIGINATING_UID,

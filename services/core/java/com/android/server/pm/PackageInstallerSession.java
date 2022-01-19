@@ -232,6 +232,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_IS_READY = "isReady";
     private static final String ATTR_IS_FAILED = "isFailed";
     private static final String ATTR_IS_APPLIED = "isApplied";
+    private static final String ATTR_PACKAGE_SOURCE = "packageSource";
     private static final String ATTR_SESSION_ERROR_CODE = "errorCode";
     private static final String ATTR_SESSION_ERROR_MESSAGE = "errorMessage";
     private static final String ATTR_MODE = "mode";
@@ -1127,6 +1128,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.updatedMillis = updatedMillis;
             info.requireUserAction = params.requireUserAction;
             info.installerUid = mInstallerUid;
+            info.packageSource = params.packageSource;
         }
         return info;
     }
@@ -2186,7 +2188,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             mInstallerUid = newOwnerAppInfo.uid;
-            mInstallSource = InstallSource.create(packageName, null, packageName, null);
+            mInstallSource = InstallSource.create(packageName, null, packageName, null,
+                    params.packageSource);
         }
     }
 
@@ -4482,6 +4485,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeBooleanAttribute(out, ATTR_IS_READY, mSessionReady);
             writeBooleanAttribute(out, ATTR_IS_FAILED, mSessionFailed);
             writeBooleanAttribute(out, ATTR_IS_APPLIED, mSessionApplied);
+            out.attributeInt(null, ATTR_PACKAGE_SOURCE, params.packageSource);
             out.attributeInt(null, ATTR_SESSION_ERROR_CODE, mSessionErrorCode);
             writeStringAttribute(out, ATTR_SESSION_ERROR_MESSAGE, mSessionErrorMessage);
             // TODO(patb,109941548): avoid writing to xml and instead infer / validate this after
@@ -4656,6 +4660,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         params.abiOverride = readStringAttribute(in, ATTR_ABI_OVERRIDE);
         params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
         params.installReason = in.getAttributeInt(null, ATTR_INSTALL_REASON);
+        params.packageSource = in.getAttributeInt(null, ATTR_PACKAGE_SOURCE);
 
         if (in.getAttributeBoolean(null, ATTR_IS_DATALOADER, false)) {
             params.dataLoaderParams = new DataLoaderParams(
@@ -4784,7 +4789,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,
-                installOriginatingPackageName, installerPackageName, installerAttributionTag);
+                installOriginatingPackageName, installerPackageName, installerAttributionTag,
+                params.packageSource);
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 silentUpdatePolicy, installerThread, stagingManager, sessionId, userId,
                 installerUid, installSource, params, createdMillis, committedMillis, stageDir,
