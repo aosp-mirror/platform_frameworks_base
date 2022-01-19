@@ -8984,6 +8984,15 @@ public final class Settings {
         public static final String UI_NIGHT_MODE = "ui_night_mode";
 
         /**
+         * The current night mode custom type that has been selected by the user.  Owned
+         * and controlled by UiModeManagerService. Constants are as per UiModeManager.
+         * @hide
+         */
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String UI_NIGHT_MODE_CUSTOM_TYPE = "ui_night_mode_custom_type";
+
+        /**
          * The current night mode that has been overridden to turn on by the system.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.
