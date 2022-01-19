@@ -84,6 +84,7 @@ public class LocalBluetoothProfileManagerTest {
         when(mCachedBluetoothDevice.getDevice()).thenReturn(mDevice);
         mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
                 mDeviceManager, mEventManager);
+        mEventManager.registerProfileIntentReceiverForTest();
     }
 
     /**
