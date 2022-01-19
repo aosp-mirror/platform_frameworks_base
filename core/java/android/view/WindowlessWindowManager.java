@@ -27,6 +27,8 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.MergedConfiguration;
+import android.view.InsetsState;
+import android.view.IWindow;
 import android.window.ClientWindowFrames;
 import android.window.IOnBackInvokedCallback;
 
@@ -49,12 +51,14 @@ public class WindowlessWindowManager implements IWindowSession {
         int mDisplayId;
         IBinder mInputChannelToken;
         Region mInputRegion;
+        IWindow mClient;
         State(SurfaceControl sc, WindowManager.LayoutParams p, int displayId,
-                IBinder inputChannelToken) {
+              IBinder inputChannelToken, IWindow client) {
             mSurfaceControl = sc;
             mParams.copyFrom(p);
             mDisplayId = displayId;
             mInputChannelToken = inputChannelToken;
+            mClient = client;
         }
     };
 
@@ -77,6 +81,7 @@ public class WindowlessWindowManager implements IWindowSession {
     private final IWindowSession mRealWm;
     private final IBinder mHostInputToken;
     private final IBinder mFocusGrantToken = new Binder();
+    private InsetsState mInsetsState;
 
     private int mForceHeight = -1;
     private int mForceWidth = -1;
@@ -170,7 +175,7 @@ public class WindowlessWindowManager implements IWindowSession {
         }
 
         final State state = new State(sc, attrs, displayId,
-                outInputChannel != null ? outInputChannel.getToken() : null);
+            outInputChannel != null ? outInputChannel.getToken() : null, window);
         synchronized (this) {
             mStateForWindow.put(window.asBinder(), state);
         }
@@ -316,6 +321,10 @@ public class WindowlessWindowManager implements IWindowSession {
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to update surface input channel: ", e);
             }
+        }
+
+        if (mInsetsState != null) {
+            outInsetsState.set(mInsetsState);
         }
 
         // Include whether the window is in touch mode.
@@ -506,5 +515,16 @@ public class WindowlessWindowManager implements IWindowSession {
     @Override
     public boolean dropForAccessibility(IWindow window, int x, int y) {
         return false;
+    }
+
+    public void setInsetsState(InsetsState state) {
+        mInsetsState = state;
+        for (State s : mStateForWindow.values()) {
+            try {
+                s.mClient.insetsChanged(state, false, false);
+            } catch (RemoteException e) {
+                // Too bad
+            }
+        }
     }
 }

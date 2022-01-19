@@ -22,10 +22,12 @@ import android.annotation.TestApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
+import android.view.InsetsState;
 
 import java.util.Objects;
 
@@ -70,6 +72,16 @@ public class SurfaceControlViewHost {
             mViewRoot.mHandler.post(() -> {
                 release();
             });
+        }
+
+        @Override
+        public void onInsetsChanged(InsetsState state, Rect frame) {
+            if (mViewRoot != null) {
+                mViewRoot.mHandler.post(() -> {
+                    mViewRoot.setOverrideInsetsFrame(frame);
+                });
+            }
+            mWm.setInsetsState(state);
         }
     }
 

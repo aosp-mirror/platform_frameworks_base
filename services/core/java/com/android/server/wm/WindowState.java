@@ -3848,6 +3848,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset state change w=" + this, e);
         }
+        final WindowContainer p = getParent();
+        if (p != null) {
+            p.updateOverlayInsetsState(this);
+        }
     }
 
     @Override
