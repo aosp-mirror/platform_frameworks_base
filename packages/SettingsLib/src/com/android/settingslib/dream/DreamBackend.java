@@ -52,6 +52,7 @@ import java.util.List;
 public class DreamBackend {
     private static final String TAG = "DreamBackend";
     private static final boolean DEBUG = false;
+    private final Drawable mDreamPreviewDefault;
 
     public static class DreamInfo {
         public CharSequence caption;
@@ -111,6 +112,8 @@ public class DreamBackend {
                 .getBoolean(com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
         mDreamsActivatedOnDockByDefault = mContext.getResources()
                 .getBoolean(com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
+        mDreamPreviewDefault = mContext.getResources().getDrawable(
+                com.android.internal.R.drawable.default_dream_preview);
     }
 
     public List<DreamInfo> getDreamInfos() {
@@ -133,11 +136,11 @@ public class DreamBackend {
             dreamInfo.isActive = dreamInfo.componentName.equals(activeDream);
 
             final DreamMetadata dreamMetadata = getDreamMetadata(pm, resolveInfo);
-            if (dreamMetadata != null) {
-                dreamInfo.settingsComponentName = dreamMetadata.mSettingsActivity;
-                dreamInfo.previewImage = dreamMetadata.mPreviewImage;
+            dreamInfo.settingsComponentName = dreamMetadata.mSettingsActivity;
+            dreamInfo.previewImage = dreamMetadata.mPreviewImage;
+            if (dreamInfo.previewImage == null) {
+                dreamInfo.previewImage = mDreamPreviewDefault;
             }
-
             dreamInfos.add(dreamInfo);
         }
         Collections.sort(dreamInfos, mComparator);
