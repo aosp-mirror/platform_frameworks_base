@@ -110,9 +110,9 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     @Retention(RetentionPolicy.SOURCE)
     @LongDef(flag = true, value = {USAGE_CPU_READ_RARELY, USAGE_CPU_READ_OFTEN,
             USAGE_CPU_WRITE_RARELY, USAGE_CPU_WRITE_OFTEN, USAGE_GPU_SAMPLED_IMAGE,
-            USAGE_GPU_COLOR_OUTPUT, USAGE_PROTECTED_CONTENT, USAGE_VIDEO_ENCODE,
-            USAGE_GPU_DATA_BUFFER, USAGE_SENSOR_DIRECT_DATA, USAGE_GPU_CUBE_MAP,
-            USAGE_GPU_MIPMAP_COMPLETE})
+            USAGE_GPU_COLOR_OUTPUT, USAGE_COMPOSER_OVERLAY, USAGE_PROTECTED_CONTENT,
+            USAGE_VIDEO_ENCODE, USAGE_GPU_DATA_BUFFER, USAGE_SENSOR_DIRECT_DATA,
+            USAGE_GPU_CUBE_MAP, USAGE_GPU_MIPMAP_COMPLETE, USAGE_FRONT_BUFFER})
     public @interface Usage {};
 
     @Usage
@@ -151,6 +151,12 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final long USAGE_GPU_CUBE_MAP           = 1 << 25;
     /** Usage: The buffer contains a complete mipmap hierarchy */
     public static final long USAGE_GPU_MIPMAP_COMPLETE    = 1 << 26;
+    /** Usage: The buffer is used for front-buffer rendering. When front-buffering rendering is
+     * specified, different usages may adjust their behavior as a result. For example, when
+     * used as USAGE_GPU_COLOR_OUTPUT the buffer will behave similar to a single-buffered window.
+     * When used with USAGE_COMPOSER_OVERLAY, the system will try to prioritize the buffer
+     * receiving an overlay plane & avoid caching it in intermediate composition buffers. */
+    public static final long USAGE_FRONT_BUFFER           = 1 << 32;
 
     /**
      * Creates a new <code>HardwareBuffer</code> instance.
