@@ -116,8 +116,7 @@ class ActivityRecordInputSink {
     private InputWindowHandle createInputWindowHandle() {
         InputWindowHandle inputWindowHandle = new InputWindowHandle(null,
                 mActivityRecord.getDisplayId());
-        inputWindowHandle.replaceTouchableRegionWithCrop(
-                mActivityRecord.getParentSurfaceControl());
+        inputWindowHandle.replaceTouchableRegionWithCrop = true;
         inputWindowHandle.name = mName;
         inputWindowHandle.ownerUid = Process.myUid();
         inputWindowHandle.ownerPid = Process.myPid();
