@@ -167,7 +167,6 @@ import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
-import android.security.KeyStore;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -5445,7 +5444,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
 
         final int appId = UserHandle.getAppId(pkg.getUid());
-        removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), userId, appId);
+        mAppDataHelper.clearKeystoreData(userId, appId);
 
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
         StorageManagerInternal smInternal = mInjector.getLocalService(StorageManagerInternal.class);
@@ -5515,30 +5514,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         if (!mHandler.hasMessages(SEND_PENDING_BROADCAST)) {
             mHandler.sendEmptyMessageDelayed(SEND_PENDING_BROADCAST, BROADCAST_DELAY);
-        }
-    }
-
-    /**
-     * Remove entries from the keystore daemon. Will only remove it if the
-     * {@code appId} is valid.
-     */
-    static void removeKeystoreDataIfNeeded(UserManagerInternal um, @UserIdInt int userId,
-            @AppIdInt int appId) {
-        if (appId < 0) {
-            return;
-        }
-
-        final KeyStore keyStore = KeyStore.getInstance();
-        if (keyStore != null) {
-            if (userId == UserHandle.USER_ALL) {
-                for (final int individual : um.getUserIds()) {
-                    keyStore.clearUid(UserHandle.getUid(individual, appId));
-                }
-            } else {
-                keyStore.clearUid(UserHandle.getUid(userId, appId));
-            }
-        } else {
-            Slog.w(TAG, "Could not contact keystore to clear entries for app id " + appId);
         }
     }
 

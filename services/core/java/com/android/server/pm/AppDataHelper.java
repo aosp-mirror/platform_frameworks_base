@@ -24,7 +24,6 @@ import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackageManager;
-import com.android.server.pm.pkg.SELinuxUtil;
 import android.content.pm.UserInfo;
 import android.os.CreateAppDataArgs;
 import android.os.Environment;
@@ -35,6 +34,9 @@ import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
+import android.security.AndroidKeyStoreMaintenance;
+import android.system.keystore2.Domain;
+import android.system.keystore2.KeyDescriptor;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -46,6 +48,7 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.SELinuxUtil;
 
 import dalvik.system.VMRuntime;
 
@@ -156,8 +159,7 @@ final class AppDataHelper {
      * <ul>
      * <li>If previousAppId < 0, app data will be migrated to the new app ID
      * <li>If previousAppId == 0, no migration will happen and data will be wiped and recreated
-     * <li>If previousAppId > 0, it will migrate all data owned by previousAppId
-     *     to the new app ID
+     * <li>If previousAppId > 0, app data owned by previousAppId will be migrated to the new app ID
      * </ul>
      */
     private @NonNull CompletableFuture<?> prepareAppData(@NonNull Installer.Batch batch,
@@ -549,6 +551,22 @@ final class AppDataHelper {
         return prepareAppDataFuture;
     }
 
+    public void migrateKeyStoreData(int previousAppId, int appId) {
+        for (int userId : mPm.resolveUserIds(UserHandle.USER_ALL)) {
+            int srcUid = UserHandle.getUid(userId, previousAppId);
+            int destUid = UserHandle.getUid(userId, appId);
+            final KeyDescriptor[] keys = AndroidKeyStoreMaintenance.listEntries(Domain.APP, srcUid);
+            if (keys == null) continue;
+            for (final KeyDescriptor key : keys) {
+                KeyDescriptor dest = new KeyDescriptor();
+                dest.domain = Domain.APP;
+                dest.nspace = destUid;
+                dest.alias = key.alias;
+                AndroidKeyStoreMaintenance.migrateKeyNamespace(key, dest);
+            }
+        }
+    }
+
     void clearAppDataLIF(AndroidPackage pkg, int userId, int flags) {
         if (pkg == null) {
             return;
@@ -632,5 +650,19 @@ final class AppDataHelper {
         PackageManager.Property noAppDataProp =
                 pkg.getProperties().get(PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
         return noAppDataProp == null || !noAppDataProp.getBoolean();
+    }
+
+    /**
+     * Remove entries from the keystore daemon. Will only remove if the {@code appId} is valid.
+     */
+    public void clearKeystoreData(int userId, int appId) {
+        if (appId < 0) {
+            return;
+        }
+
+        for (int realUserId : mPm.resolveUserIds(userId)) {
+            AndroidKeyStoreMaintenance.clearNamespace(
+                    Domain.APP, UserHandle.getUid(realUserId, appId));
+        }
     }
 }
