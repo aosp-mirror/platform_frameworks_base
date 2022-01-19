@@ -36,6 +36,7 @@ import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE;
 import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
+import static android.content.pm.PackageManagerInternal.PACKAGE_SETUP_WIZARD;
 import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.content.pm.parsing.ApkLiteParseUtils.isApkFile;
 import static android.os.PowerExemptionManager.REASON_PACKAGE_REPLACED;
@@ -454,7 +455,8 @@ final class InstallPackageHelper {
             KeySetManagerService ksms = mPm.mSettings.getKeySetManagerService();
             ksms.addScannedPackageLPw(pkg);
 
-            mPm.mComponentResolver.addAllComponents(pkg, chatty);
+            mPm.mComponentResolver.addAllComponents(pkg, chatty, mPm.mSetupWizardPackage,
+                    mPm.snapshotComputer());
             mPm.mAppsFilter.addPackage(pkgSetting, isReplace);
             mPm.addAllPackageProperties(pkg);
 

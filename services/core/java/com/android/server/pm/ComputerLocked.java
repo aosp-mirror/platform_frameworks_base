@@ -48,6 +48,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
+import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
 
@@ -866,6 +867,30 @@ public final class ComputerLocked extends ComputerEngine {
     public ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId) {
         synchronized (mLock) {
             return super.getSharedUserPackages(sharedUserAppId);
+        }
+    }
+
+    @NonNull
+    @Override
+    public ComponentResolverApi getComponentResolver() {
+        synchronized (mLock) {
+            return super.getComponentResolver();
+        }
+    }
+
+    @Nullable
+    @Override
+    public PackageStateInternal getDisabledSystemPackage(@NonNull String packageName) {
+        synchronized (mLock) {
+            return super.getDisabledSystemPackage(packageName);
+        }
+    }
+
+    @Nullable
+    @Override
+    public ResolveInfo getInstantAppInstallerInfo() {
+        synchronized (mLock) {
+            return super.getInstantAppInstallerInfo();
         }
     }
 }

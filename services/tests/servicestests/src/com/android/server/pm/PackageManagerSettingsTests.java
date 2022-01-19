@@ -225,7 +225,11 @@ public class PackageManagerSettingsTests {
         assertThat(packageUserState1.isSuspended(), is(true));
         assertThat(packageUserState1.getSuspendParams().size(), is(1));
         assertThat(packageUserState1.getSuspendParams().keyAt(0), is("android"));
-        assertThat(packageUserState1.getSuspendParams().valueAt(0), is(nullValue()));
+        assertThat(packageUserState1.getSuspendParams().valueAt(0).getAppExtras(), is(nullValue()));
+        assertThat(packageUserState1.getSuspendParams().valueAt(0).getDialogInfo(),
+                is(nullValue()));
+        assertThat(packageUserState1.getSuspendParams().valueAt(0).getLauncherExtras(),
+                is(nullValue()));
 
         // Verify that the snapshot returns the same answers
         ps1 = snapshot.mPackages.get(PACKAGE_NAME_1);
@@ -233,7 +237,11 @@ public class PackageManagerSettingsTests {
         assertThat(packageUserState1.isSuspended(), is(true));
         assertThat(packageUserState1.getSuspendParams().size(), is(1));
         assertThat(packageUserState1.getSuspendParams().keyAt(0), is("android"));
-        assertThat(packageUserState1.getSuspendParams().valueAt(0), is(nullValue()));
+        assertThat(packageUserState1.getSuspendParams().valueAt(0).getAppExtras(), is(nullValue()));
+        assertThat(packageUserState1.getSuspendParams().valueAt(0).getDialogInfo(),
+                is(nullValue()));
+        assertThat(packageUserState1.getSuspendParams().valueAt(0).getLauncherExtras(),
+                is(nullValue()));
 
         PackageSetting ps2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2);
         PackageUserStateInternal packageUserState2 = ps2.readUserState(0);
@@ -315,14 +323,14 @@ public class PackageManagerSettingsTests {
                 .build();
 
         ps1.modifyUserState(0).putSuspendParams( "suspendingPackage1",
-                SuspendParams.getInstanceOrNull(dialogInfo1, appExtras1, launcherExtras1));
+                new SuspendParams(dialogInfo1, appExtras1, launcherExtras1));
         ps1.modifyUserState(0).putSuspendParams( "suspendingPackage2",
-                SuspendParams.getInstanceOrNull(dialogInfo2, appExtras2, launcherExtras2));
+                new SuspendParams(dialogInfo2, appExtras2, launcherExtras2));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
         watcher.verifyChangeReported("put package 1");
 
         ps2.modifyUserState(0).putSuspendParams( "suspendingPackage3",
-                SuspendParams.getInstanceOrNull(null, appExtras1, null));
+                new SuspendParams(null, appExtras1, null));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
         watcher.verifyChangeReported("put package 2");
 
@@ -686,7 +694,7 @@ public class PackageManagerSettingsTests {
                 .setNeutralButtonAction(BUTTON_ACTION_MORE_DETAILS)
                 .build();
         origPkgSetting01.modifyUserState(0).putSuspendParams("suspendingPackage1",
-                SuspendParams.getInstanceOrNull(dialogInfo1, appExtras1, launcherExtras1));
+                new SuspendParams(dialogInfo1, appExtras1, launcherExtras1));
         final PackageSetting testPkgSetting01 = new PackageSetting(
                 PACKAGE_NAME /*pkgName*/,
                 REAL_PACKAGE_NAME /*realPkgName*/,

@@ -68,6 +68,7 @@ import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.pkg.parsing.ParsingPackage
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils
+import com.android.server.pm.resolution.ComponentResolver
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.supplementalprocess.SupplementalProcessManagerLocal
 import com.android.server.testutils.TestHandler
@@ -632,7 +633,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     }
 
     private fun mockQueryActivities(action: String, vararg activities: ActivityInfo) {
-        whenever(mocks.componentResolver.queryActivities(
+        whenever(mocks.componentResolver.queryActivities(any(),
                 argThat { intent: Intent? -> intent != null && (action == intent.action) },
                 nullable(), anyLong(), anyInt())) {
             ArrayList(activities.asList().map { info: ActivityInfo? ->
@@ -642,7 +643,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     }
 
     private fun mockQueryServices(action: String, vararg services: ServiceInfo) {
-        whenever(mocks.componentResolver.queryServices(
+        whenever(mocks.componentResolver.queryServices(any(),
                 argThat { intent: Intent? -> intent != null && (action == intent.action) },
                 nullable(), anyLong(), anyInt())) {
             ArrayList(services.asList().map { info ->

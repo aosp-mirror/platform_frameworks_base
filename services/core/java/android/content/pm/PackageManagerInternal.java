@@ -52,6 +52,7 @@ import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.mutate.PackageStateMutator;
+import com.android.server.pm.snapshot.PackageDataSnapshot;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -718,7 +719,8 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     /**
      * Returns a package object for the disabled system package name.
      */
-    public abstract @Nullable PackageSetting getDisabledSystemPackage(@NonNull String packageName);
+    public abstract @Nullable PackageStateInternal getDisabledSystemPackage(
+            @NonNull String packageName);
 
     /**
      * Returns the package name for the disabled system package.
@@ -1334,4 +1336,12 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     public abstract PackageStateMutator.Result commitPackageStateMutation(
             @Nullable PackageStateMutator.InitialState state,
             @NonNull Consumer<PackageStateMutator> consumer);
+
+    /**
+     * @return package data snapshot for use with other PackageManager infrastructure. This should
+     * only be used as a parameter passed to another PM related class. Do not call methods on this
+     * directly.
+     */
+    @NonNull
+    public abstract PackageDataSnapshot snapshot();
 }

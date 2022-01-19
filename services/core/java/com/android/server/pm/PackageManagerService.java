@@ -111,7 +111,6 @@ import android.content.pm.PackageManager.ModuleInfoFlags;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageManager.PropertyLocation;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageManagerInternal.PrivateResolveFlags;
 import android.content.pm.PackagePartitions;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
@@ -242,6 +241,8 @@ import com.android.server.pm.pkg.mutate.PackageStateMutator;
 import com.android.server.pm.pkg.mutate.PackageStateWrite;
 import com.android.server.pm.pkg.mutate.PackageUserStateWrite;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.pm.resolution.ComponentResolver;
+import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
@@ -791,9 +792,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private final AtomicInteger mNextMoveId = new AtomicInteger();
     final MovePackageHelper.MoveCallbacks mMoveCallbacks;
 
-    // Cache of users who need badging.
-    private final SparseBooleanArray mUserNeedsBadging = new SparseBooleanArray();
-
     /**
      * Token for keys in mPendingVerification.
      * Handler thread only!
@@ -912,6 +910,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     final UserManagerService mUserManager;
 
+    final UserNeedsBadgingCache mUserNeedsBadging;
+
     // Stores a list of users whose package restrictions file needs to be updated
     final ArraySet<Integer> mDirtyUsers = new ArraySet<>();
 
@@ -992,7 +992,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public final ApplicationInfo androidApplication;
         public final String appPredictionServicePackage;
         public final AppsFilter appsFilter;
-        public final ComponentResolver componentResolver;
+        public final ComponentResolverApi componentResolver;
         public final PackageManagerService service;
         public final WatchedArrayMap<String, Integer> frozenPackages;
         public final SharedLibrariesRead sharedLibraries;
@@ -1081,17 +1081,10 @@ public class PackageManagerService extends IPackageManager.Stub
     private final SnapshotStatistics mSnapshotStatistics;
 
     /**
-     * Return the live computer.
-     */
-    Computer liveComputer() {
-        return mLiveComputer;
-    }
-
-    /**
      * Return the cached computer.  The method will rebuild the cached computer if necessary.
      * The live computer will be returned if snapshots are disabled.
      */
-    Computer snapshotComputer() {
+    public Computer snapshotComputer() {
         if (Thread.holdsLock(mLock)) {
             // If the current thread holds mLock then it may have modified state but not
             // yet invalidated the snapshot.  Always give the thread the live computer.
@@ -1171,8 +1164,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void notifyPackagesReplacedReceived(String[] packages) {
-        ArraySet<String> packagesToNotify =
-                mComputer.getNotifyPackagesForReplacedReceived(packages);
+        Computer computer = snapshotComputer();
+        ArraySet<String> packagesToNotify = computer.getNotifyPackagesForReplacedReceived(packages);
         for (int index = 0; index < packagesToNotify.size(); index++) {
             notifyInstallObserver(packagesToNotify.valueAt(index));
         }
@@ -1441,7 +1434,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 context, lock, installer, installLock, new PackageAbiHelperImpl(),
                 backgroundHandler,
                 SYSTEM_PARTITIONS,
-                (i, pm) -> new ComponentResolver(i.getUserManagerService(), pm.mPmInternal, lock),
+                (i, pm) -> new ComponentResolver(i.getUserManagerService(), pm.mUserNeedsBadging),
                 (i, pm) -> PermissionManagerService.create(context,
                         i.getSystemConfig().getAvailableFeatures()),
                 (i, pm) -> new UserManagerService(context, pm,
@@ -1619,6 +1612,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager = injector.getPermissionManagerServiceInternal();
         mSettings = injector.getSettings();
         mUserManager = injector.getUserManagerService();
+        mUserNeedsBadging = new UserNeedsBadgingCache(mUserManager);
         mDomainVerificationManager = injector.getDomainVerificationManagerInternal();
         mHandler = injector.getHandler();
         mSharedLibraries = injector.getSharedLibrariesImpl();
@@ -1744,6 +1738,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mTestUtilityService = LocalServices.getService(TestUtilityService.class);
         LocalServices.addService(PackageManagerInternal.class, mPmInternal);
         mUserManager = injector.getUserManagerService();
+        mUserNeedsBadging = new UserNeedsBadgingCache(mUserManager);
         mComponentResolver = injector.getComponentResolver();
         mPermissionManager = injector.getPermissionManagerServiceInternal();
         mSettings = injector.getSettings();
@@ -1846,7 +1841,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 mAppDataHelper);
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
         mPreferredActivityHelper = new PreferredActivityHelper(this);
-        mResolveIntentHelper = new ResolveIntentHelper(this, mPreferredActivityHelper);
+        mResolveIntentHelper = new ResolveIntentHelper(mContext, mPreferredActivityHelper,
+                injector.getCompatibility(), mUserManager, mDomainVerificationManager,
+                mUserNeedsBadging, () -> mResolveInfo, () -> mInstantAppInstallerActivity);
         mDexOptHelper = new DexOptHelper(this);
         mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mBroadcastHelper,
                 mProtectedPackages);
@@ -1862,6 +1859,7 @@ public class PackageManagerService extends IPackageManager.Stub
             registerObservers(true);
         }
 
+        Computer computer = mLiveComputer;
         // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
         // writer
@@ -1975,12 +1973,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     userIds, startTime);
 
             // Resolve the storage manager.
-            mStorageManagerPackage = getStorageManagerPackageName();
+            mStorageManagerPackage = getStorageManagerPackageName(computer);
 
             // Resolve protected action filters. Only the setup wizard is allowed to
             // have a high priority filter for these actions.
-            mSetupWizardPackage = getSetupWizardPackageNameImpl();
-            mComponentResolver.fixProtectedFilterPriorities();
+            mSetupWizardPackage = getSetupWizardPackageNameImpl(computer);
+            mComponentResolver.fixProtectedFilterPriorities(mPmInternal.getSetupWizardPackageName());
 
             mDefaultTextClassifierPackage = getDefaultTextClassifierPackageName();
             mSystemTextClassifierPackageName = getSystemTextClassifierPackageName();
@@ -2108,13 +2106,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     SystemClock.uptimeMillis());
 
             if (!mOnlyCore) {
-                mRequiredVerifierPackage = getRequiredButNotReallyRequiredVerifierLPr();
-                mRequiredInstallerPackage = getRequiredInstallerLPr();
-                mRequiredUninstallerPackage = getRequiredUninstallerLPr();
+                mRequiredVerifierPackage = getRequiredButNotReallyRequiredVerifierLPr(computer);
+                mRequiredInstallerPackage = getRequiredInstallerLPr(computer);
+                mRequiredUninstallerPackage = getRequiredUninstallerLPr(computer);
                 ComponentName intentFilterVerifierComponent =
-                        getIntentFilterVerifierComponentNameLPr();
+                        getIntentFilterVerifierComponentNameLPr(computer);
                 ComponentName domainVerificationAgent =
-                        getDomainVerificationAgentComponentNameLPr();
+                        getDomainVerificationAgentComponentNameLPr(computer);
 
                 DomainVerificationProxy domainVerificationProxy = DomainVerificationProxy.makeProxy(
                         intentFilterVerifierComponent, domainVerificationAgent, mContext,
@@ -2137,7 +2135,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // PermissionController hosts default permission granting and role management, so it's a
             // critical part of the core system.
-            mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr();
+            mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr(computer);
 
             mSettings.setPermissionControllerVersion(
                     getPackageInfo(mRequiredPermissionControllerPackage, 0,
@@ -2170,7 +2168,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 mInstantAppResolverConnection =
                         mInjector.getInstantAppResolverConnection(instantAppResolverComponent);
                 mInstantAppResolverSettingsComponent =
-                        getInstantAppResolverSettingsLPr(instantAppResolverComponent);
+                        getInstantAppResolverSettingsLPr(computer,
+                                instantAppResolverComponent);
             } else {
                 mInstantAppResolverConnection = null;
                 mInstantAppResolverSettingsComponent = null;
@@ -2258,11 +2257,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 "persist.pm.mock-upgrade", false /* default */);
     }
 
-    private @Nullable String getRequiredButNotReallyRequiredVerifierLPr() {
+    @Nullable
+    private String getRequiredButNotReallyRequiredVerifierLPr(@NonNull Computer computer) {
         final Intent intent = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
 
         final List<ResolveInfo> matches =
-                mResolveIntentHelper.queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
+                mResolveIntentHelper.queryIntentReceiversInternal(computer, intent,
+                        PACKAGE_MIME_TYPE,
                         MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                         UserHandle.USER_SYSTEM, Binder.getCallingUid());
         if (matches.size() == 1) {
@@ -2300,12 +2301,13 @@ public class PackageManagerService extends IPackageManager.Stub
         return servicesExtensionPackage;
     }
 
-    private @NonNull String getRequiredInstallerLPr() {
+    private @NonNull String getRequiredInstallerLPr(@NonNull Computer computer) {
         final Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setDataAndType(Uri.parse("content://com.example/foo.apk"), PACKAGE_MIME_TYPE);
 
-        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
+        final List<ResolveInfo> matches = computer.queryIntentActivitiesInternal(intent,
+                PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                 UserHandle.USER_SYSTEM);
         if (matches.size() == 1) {
@@ -2319,14 +2321,14 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private @NonNull String getRequiredUninstallerLPr() {
+    private @NonNull String getRequiredUninstallerLPr(@NonNull Computer computer) {
         final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setData(Uri.fromParts(PACKAGE_SCHEME, "foo.bar", null));
 
-        final ResolveInfo resolveInfo = resolveIntent(intent, null,
-                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.USER_SYSTEM);
+        final ResolveInfo resolveInfo = mResolveIntentHelper.resolveIntentInternal(computer, intent,
+                null, MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                0 /*privateResolveFlags*/, UserHandle.USER_SYSTEM, false, Binder.getCallingUid());
         if (resolveInfo == null ||
                 mResolveActivity.name.equals(resolveInfo.getComponentInfo().name)) {
             throw new RuntimeException("There must be exactly one uninstaller; found "
@@ -2335,11 +2337,11 @@ public class PackageManagerService extends IPackageManager.Stub
         return resolveInfo.getComponentInfo().packageName;
     }
 
-    private @NonNull String getRequiredPermissionControllerLPr() {
+    private @NonNull String getRequiredPermissionControllerLPr(@NonNull Computer computer) {
         final Intent intent = new Intent(Intent.ACTION_MANAGE_PERMISSIONS);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
 
-        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
+        final List<ResolveInfo> matches = computer.queryIntentActivitiesInternal(intent, null,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                 UserHandle.USER_SYSTEM);
         if (matches.size() == 1) {
@@ -2354,11 +2356,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private @NonNull ComponentName getIntentFilterVerifierComponentNameLPr() {
+    @NonNull
+    private ComponentName getIntentFilterVerifierComponentNameLPr(@NonNull Computer computer) {
         final Intent intent = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION);
 
         final List<ResolveInfo> matches =
-                mResolveIntentHelper.queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
+                mResolveIntentHelper.queryIntentReceiversInternal(computer, intent,
+                        PACKAGE_MIME_TYPE,
                         MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                         UserHandle.USER_SYSTEM, Binder.getCallingUid());
         ResolveInfo best = null;
@@ -2384,10 +2388,10 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Nullable
-    private ComponentName getDomainVerificationAgentComponentNameLPr() {
+    private ComponentName getDomainVerificationAgentComponentNameLPr(@NonNull Computer computer) {
         Intent intent = new Intent(Intent.ACTION_DOMAINS_NEED_VERIFICATION);
         List<ResolveInfo> matches =
-                mResolveIntentHelper.queryIntentReceiversInternal(intent, null,
+                mResolveIntentHelper.queryIntentReceiversInternal(computer, intent, null,
                         MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                         UserHandle.USER_SYSTEM, Binder.getCallingUid());
         ResolveInfo best = null;
@@ -2496,13 +2500,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         | MATCH_DIRECT_BOOT_UNAWARE
                         | Intent.FLAG_IGNORE_EPHEMERAL
                         | (mIsEngBuild ? 0 : MATCH_SYSTEM_ONLY);
+        final Computer computer = snapshotComputer();
         final Intent intent = new Intent();
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
         List<ResolveInfo> matches = null;
         for (String action : orderedActions) {
             intent.setAction(action);
-            matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
+            matches = computer.queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
                     resolveFlags, UserHandle.USER_SYSTEM);
             if (matches.isEmpty()) {
                 if (DEBUG_INSTANT) {
@@ -2532,14 +2537,14 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private @Nullable ComponentName getInstantAppResolverSettingsLPr(
+    private @Nullable ComponentName getInstantAppResolverSettingsLPr(@NonNull Computer computer,
             @NonNull ComponentName resolver) {
         final Intent intent =  new Intent(Intent.ACTION_INSTANT_APP_RESOLVER_SETTINGS)
                 .addCategory(Intent.CATEGORY_DEFAULT)
                 .setPackage(resolver.getPackageName());
         final int resolveFlags = MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
-        List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null, resolveFlags,
-                UserHandle.USER_SYSTEM);
+        List<ResolveInfo> matches = computer.queryIntentActivitiesInternal(intent, null,
+                resolveFlags, UserHandle.USER_SYSTEM);
         if (matches.isEmpty()) {
             return null;
         }
@@ -2942,27 +2947,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * Update given flags when being used to request {@link PackageInfo}.
-     */
-    private long updateFlagsForPackage(long flags, int userId) {
-        return mComputer.updateFlagsForPackage(flags, userId);
-    }
-
-    /**
-     * Update given flags when being used to request {@link ApplicationInfo}.
-     */
-    private long updateFlagsForApplication(long flags, int userId) {
-        return mComputer.updateFlagsForApplication(flags, userId);
-    }
-
-    /**
-     * Update given flags when being used to request {@link ComponentInfo}.
-     */
-    private long updateFlagsForComponent(long flags, int userId) {
-        return mComputer.updateFlagsForComponent(flags, userId);
-    }
-
-    /**
      * Update given flags when being used to request {@link ResolveInfo}.
      * <p>Instant apps are resolved specially, depending upon context. Minimally,
      * {@code}flags{@code} must have the {@link PackageManager#MATCH_INSTANT}
@@ -3314,8 +3298,8 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
-        return mResolveIntentHelper.resolveIntentInternal(intent, resolvedType, flags,
-                0 /*privateResolveFlags*/, userId, false, Binder.getCallingUid());
+        return mResolveIntentHelper.resolveIntentInternal(snapshotComputer(), intent, resolvedType,
+                flags, 0 /*privateResolveFlags*/, userId, false, Binder.getCallingUid());
     }
 
     @Override
@@ -3414,8 +3398,8 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "queryIntentActivities");
 
-            return new ParceledListSlice<>(
-                    queryIntentActivitiesInternal(intent, resolvedType, flags, userId));
+            return new ParceledListSlice<>(snapshotComputer().queryIntentActivitiesInternal(intent,
+                    resolvedType, flags, userId));
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -3429,68 +3413,28 @@ public class PackageManagerService extends IPackageManager.Stub
         return mComputer.getInstantAppPackageName(callingUid);
     }
 
-    @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
-        return mComputer.queryIntentActivitiesInternal(intent,
-                resolvedType, flags, userId);
-    }
-
-    @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
-            @PrivateResolveFlags long privateResolveFlags, int filterCallingUid, int userId,
-            boolean resolveForStart, boolean allowDynamicSplits) {
-        return mComputer.queryIntentActivitiesInternal(intent,
-                resolvedType, flags, privateResolveFlags,
-                filterCallingUid, userId, resolveForStart, allowDynamicSplits);
-    }
-
-    private CrossProfileDomainInfo getCrossProfileDomainPreferredLpr(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int sourceUserId,
-            int parentUserId) {
-        return mComputer.getCrossProfileDomainPreferredLpr(intent,
-                resolvedType, flags, sourceUserId, parentUserId);
-    }
-
-    /**
-     * Filters out ephemeral activities.
-     * <p>When resolving for an ephemeral app, only activities that 1) are defined in the
-     * ephemeral app or 2) marked with {@code visibleToEphemeral} are returned.
-     *
-     * @param resolveInfos The pre-filtered list of resolved activities
-     * @param ephemeralPkgName The ephemeral package name. If {@code null}, no filtering
-     *          is performed.
-     * @param intent
-     * @return A filtered list of resolved activities.
-     */
-    List<ResolveInfo> applyPostResolutionFilter(@NonNull List<ResolveInfo> resolveInfos,
-            String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid,
-            boolean resolveForStart, int userId, Intent intent) {
-        return mComputer.applyPostResolutionFilter(resolveInfos,
-                ephemeralPkgName, allowDynamicSplits, filterCallingUid,
-                resolveForStart, userId, intent);
-    }
-
     @Override
     public @NonNull ParceledListSlice<ResolveInfo> queryIntentActivityOptions(ComponentName caller,
             Intent[] specifics, String[] specificTypes, Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         return new ParceledListSlice<>(mResolveIntentHelper.queryIntentActivityOptionsInternal(
-                caller, specifics, specificTypes, intent, resolvedType, flags, userId));
+                snapshotComputer(), caller, specifics, specificTypes, intent, resolvedType, flags,
+                userId));
     }
 
     @Override
     public @NonNull ParceledListSlice<ResolveInfo> queryIntentReceivers(Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
-        return new ParceledListSlice<>(mResolveIntentHelper.queryIntentReceiversInternal(intent,
-                resolvedType, flags, userId, Binder.getCallingUid()));
+        return new ParceledListSlice<>(mResolveIntentHelper.queryIntentReceiversInternal(
+                snapshotComputer(), intent, resolvedType, flags, userId, Binder.getCallingUid()));
     }
 
     @Override
     public ResolveInfo resolveService(Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         final int callingUid = Binder.getCallingUid();
-        return mResolveIntentHelper.resolveServiceInternal(intent, resolvedType, flags, userId,
-                callingUid);
+        return mResolveIntentHelper.resolveServiceInternal(snapshotComputer(), intent, resolvedType,
+                flags, userId, callingUid);
     }
 
     @Override
@@ -3513,7 +3457,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public @NonNull ParceledListSlice<ResolveInfo> queryIntentContentProviders(Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         return new ParceledListSlice<>(mResolveIntentHelper.queryIntentContentProvidersInternal(
-                intent, resolvedType, flags, userId));
+                snapshotComputer(), intent, resolvedType, flags, userId));
     }
 
     @Override
@@ -3907,15 +3851,9 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             mPackageUsage.writeNow(mSettings.getPackagesLocked());
 
-            // This is the last chance to write out pending restriction settings
-            if (mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
-                mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
-                synchronized (mDirtyUsers) {
-                    for (int userId : mDirtyUsers) {
-                        mSettings.writePackageRestrictionsLPr(userId);
-                    }
-                    mDirtyUsers.clear();
-                }
+            if (mHandler.hasMessages(WRITE_SETTINGS)) {
+                mHandler.removeMessages(WRITE_SETTINGS);
+                writeSettings();
             }
         }
     }
@@ -5409,7 +5347,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
             }
-            resolver.addFilter(newFilter);
+            resolver.addFilter(snapshotComputer(), newFilter);
         }
         scheduleWritePackageRestrictions(sourceUserId);
     }
@@ -5498,11 +5436,11 @@ public class PackageManagerService extends IPackageManager.Stub
         mPreferredActivityHelper.setHomeActivity(comp, userId);
     }
 
-    private @Nullable String getSetupWizardPackageNameImpl() {
+    private @Nullable String getSetupWizardPackageNameImpl(@NonNull Computer computer) {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_SETUP_WIZARD);
 
-        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
+        final List<ResolveInfo> matches = computer.queryIntentActivitiesInternal(intent, null,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
                         | MATCH_DISABLED_COMPONENTS,
                 UserHandle.myUserId());
@@ -5515,10 +5453,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private @Nullable String getStorageManagerPackageName() {
+    private @Nullable String getStorageManagerPackageName(@NonNull Computer computer) {
         final Intent intent = new Intent(StorageManager.ACTION_MANAGE_STORAGE);
 
-        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
+        final List<ResolveInfo> matches = computer.queryIntentActivitiesInternal(intent, null,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
                         | MATCH_DISABLED_COMPONENTS,
                 UserHandle.myUserId());
@@ -6784,21 +6722,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     boolean userNeedsBadging(int userId) {
-        int index = mUserNeedsBadging.indexOfKey(userId);
-        if (index < 0) {
-            final UserInfo userInfo;
-            final long token = Binder.clearCallingIdentity();
-            try {
-                userInfo = mUserManager.getUserInfo(userId);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-            final boolean b;
-            b = userInfo != null && userInfo.isManagedProfile();
-            mUserNeedsBadging.put(userId, b);
-            return b;
-        }
-        return mUserNeedsBadging.valueAt(index);
+        return mUserNeedsBadging.get(userId);
     }
 
     @Nullable
@@ -7034,16 +6958,14 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public PackageSetting getDisabledSystemPackage(@NonNull String packageName) {
-            synchronized (mLock) {
-                return mSettings.getDisabledSystemPkgLPr(packageName);
-            }
+        public PackageStateInternal getDisabledSystemPackage(@NonNull String packageName) {
+            return snapshotComputer().getDisabledSystemPackage(packageName);
         }
 
         @Override
         public @Nullable
         String getDisabledSystemPackageName(@NonNull String packageName) {
-            PackageSetting disabledPkgSetting = getDisabledSystemPackage(
+            PackageStateInternal disabledPkgSetting = getDisabledSystemPackage(
                     packageName);
             AndroidPackage disabledPkg = disabledPkgSetting == null
                     ? null : disabledPkgSetting.getPkg();
@@ -7183,9 +7105,8 @@ public class PackageManagerService extends IPackageManager.Stub
         public List<ResolveInfo> queryIntentActivities(
                 Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
                 int filterCallingUid, int userId) {
-            return PackageManagerService.this
-                    .queryIntentActivitiesInternal(intent, resolvedType, flags, 0, filterCallingUid,
-                            userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
+            return snapshotComputer().queryIntentActivitiesInternal(intent, resolvedType, flags,
+                    userId);
         }
 
         @Override
@@ -7193,7 +7114,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
                 int filterCallingUid, int userId) {
             return PackageManagerService.this.mResolveIntentHelper.queryIntentReceiversInternal(
-                    intent, resolvedType, flags, userId, filterCallingUid);
+                    snapshotComputer(), intent, resolvedType, flags, userId, filterCallingUid);
         }
 
         @Override
@@ -7436,7 +7357,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 @PackageManager.ResolveInfoFlagsBits long flags,
                 @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags, int userId,
                 boolean resolveForStart, int filterCallingUid) {
-            return mResolveIntentHelper.resolveIntentInternal(
+            return mResolveIntentHelper.resolveIntentInternal(snapshotComputer(),
                     intent, resolvedType, flags, privateResolveFlags, userId, resolveForStart,
                     filterCallingUid);
         }
@@ -7444,8 +7365,8 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public ResolveInfo resolveService(Intent intent, String resolvedType,
                 @PackageManager.ResolveInfoFlagsBits long flags, int userId, int callingUid) {
-            return mResolveIntentHelper.resolveServiceInternal(intent, resolvedType, flags, userId,
-                    callingUid);
+            return mResolveIntentHelper.resolveServiceInternal(snapshotComputer(), intent,
+                    resolvedType, flags, userId, callingUid);
         }
 
         @Override
@@ -7900,6 +7821,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 @NonNull Consumer<PackageStateMutator> consumer) {
             return PackageManagerService.this.commitPackageStateMutation(state, consumer);
         }
+
+        @NonNull
+        @Override
+        public Computer snapshot() {
+            return snapshotComputer();
+        }
     }
 
     private boolean setEnabledOverlayPackages(@UserIdInt int userId,
@@ -8346,16 +8273,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void applyMimeGroupChanges(String packageName, String mimeGroup) {
-        if (mComponentResolver.updateMimeGroup(packageName, mimeGroup)) {
-            Binder.withCleanCallingIdentity(() ->
-                    mPreferredActivityHelper.clearPackagePreferredActivities(packageName,
-                            UserHandle.USER_ALL));
-        }
-
-        mPmInternal.writeSettings(false);
-    }
-
     @Override
     public void setMimeGroup(String packageName, String mimeGroup, List<String> mimeTypes) {
         enforceOwnerRights(packageName, Binder.getCallingUid());
@@ -8375,7 +8292,13 @@ public class PackageManagerService extends IPackageManager.Stub
         commitPackageStateMutation(null, packageName, packageStateWrite -> {
             packageStateWrite.setMimeGroup(mimeGroup, mimeTypesSet);
         });
-        applyMimeGroupChanges(packageName, mimeGroup);
+        if (mComponentResolver.updateMimeGroup(snapshotComputer(), packageName, mimeGroup)) {
+            Binder.withCleanCallingIdentity(() ->
+                    mPreferredActivityHelper.clearPackagePreferredActivities(packageName,
+                            UserHandle.USER_ALL));
+        }
+
+        scheduleWriteSettings();
     }
 
     @Override
@@ -8607,8 +8530,8 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public IntentSender getLaunchIntentSenderForPackage(String packageName, String callingPackage,
             String featureId, int userId) throws RemoteException {
-        return mResolveIntentHelper.getLaunchIntentSenderForPackage(packageName, callingPackage,
-                featureId, userId);
+        return mResolveIntentHelper.getLaunchIntentSenderForPackage(snapshotComputer(),
+                packageName, callingPackage, featureId, userId);
     }
 
     @Override

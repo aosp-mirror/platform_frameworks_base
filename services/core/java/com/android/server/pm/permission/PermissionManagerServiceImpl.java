@@ -3364,7 +3364,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             // For updated system applications, a privileged/oem permission
             // is granted only if it had been defined by the original application.
             if (pkgSetting.getTransientState().isUpdatedSystemApp()) {
-                final PackageSetting disabledPs = mPackageManagerInt
+                final PackageStateInternal disabledPs = mPackageManagerInt
                         .getDisabledSystemPackage(pkg.getPackageName());
                 final AndroidPackage disabledPkg = disabledPs == null ? null : disabledPs.getPkg();
                 if (disabledPkg != null
@@ -3762,7 +3762,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             return;
         }
 
-        PackageSetting disabledPs = mPackageManagerInt.getDisabledSystemPackage(
+        PackageStateInternal disabledPs = mPackageManagerInt.getDisabledSystemPackage(
                 pkg.getPackageName());
         boolean isShadowingSystemPkg = disabledPs != null && disabledPs.getAppId() == pkg.getUid();
 
@@ -4104,7 +4104,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     private boolean isPermissionDeclaredByDisabledSystemPkg(@NonNull Permission permission) {
-        final PackageSetting disabledSourcePs = mPackageManagerInt.getDisabledSystemPackage(
+        final PackageStateInternal disabledSourcePs = mPackageManagerInt.getDisabledSystemPackage(
                     permission.getPackageName());
         if (disabledSourcePs != null && disabledSourcePs.getPkg() != null) {
             final String permissionName = permission.getName();

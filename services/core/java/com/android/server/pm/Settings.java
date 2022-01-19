@@ -120,6 +120,7 @@ import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.component.ParsedPermission;
 import com.android.server.pm.pkg.component.ParsedProcess;
 import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
+import com.android.server.pm.resolution.ComponentResolver;
 import com.android.server.pm.verify.domain.DomainVerificationLegacySettings;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationPersistence;
@@ -1551,7 +1552,7 @@ public final class Settings implements Watchable, Snappable {
                 if (pa.mPref.getParseError() == null) {
                     final PreferredIntentResolver resolver = editPreferredActivitiesLPw(userId);
                     if (resolver.shouldAddPreferredActivity(pa)) {
-                        resolver.addFilter(pa);
+                        resolver.addFilter(null, pa);
                     }
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -1579,7 +1580,7 @@ public final class Settings implements Watchable, Snappable {
             String tagName = parser.getName();
             if (tagName.equals(TAG_ITEM)) {
                 PersistentPreferredActivity ppa = new PersistentPreferredActivity(parser);
-                editPersistentPreferredActivitiesLPw(userId).addFilter(ppa);
+                editPersistentPreferredActivitiesLPw(userId).addFilter(null, ppa);
             } else {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Unknown element under <" + TAG_PERSISTENT_PREFERRED_ACTIVITIES + ">: "
@@ -1601,7 +1602,7 @@ public final class Settings implements Watchable, Snappable {
             final String tagName = parser.getName();
             if (tagName.equals(TAG_ITEM)) {
                 CrossProfileIntentFilter cpif = new CrossProfileIntentFilter(parser);
-                editCrossProfileIntentResolverLPw(userId).addFilter(cpif);
+                editCrossProfileIntentResolverLPw(userId).addFilter(null, cpif);
             } else {
                 String msg = "Unknown element under " +  TAG_CROSS_PROFILE_INTENT_FILTERS + ": " +
                         tagName;
@@ -1868,8 +1869,7 @@ public final class Settings implements Watchable, Snappable {
                                 .build();
                     }
                     if (suspended && suspendParamsMap == null) {
-                        final SuspendParams suspendParams =
-                                SuspendParams.getInstanceOrNull(
+                        final SuspendParams suspendParams = new SuspendParams(
                                         oldSuspendDialogInfo,
                                         suspendedAppExtras,
                                         suspendedLauncherExtras);
@@ -3517,7 +3517,7 @@ public final class Settings implements Watchable, Snappable {
                 removeFilters(pir, filter, existing);
             }
             PreferredActivity pa = new PreferredActivity(filter, systemMatch, set, cn, true);
-            pir.addFilter(pa);
+            pir.addFilter(null, pa);
         } else if (haveNonSys == null) {
             StringBuilder sb = new StringBuilder();
             sb.append("No component ");

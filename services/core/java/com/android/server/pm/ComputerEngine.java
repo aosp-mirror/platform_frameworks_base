@@ -49,7 +49,6 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
-import static com.android.server.pm.ComponentResolver.RESOLVE_PRIORITY_SORTER;
 import static com.android.server.pm.PackageManagerService.DEBUG_DOMAIN_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTANT;
@@ -59,6 +58,7 @@ import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.HIDE_EPHEMERAL_APIS;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
+import static com.android.server.pm.resolution.ComponentResolver.RESOLVE_PRIORITY_SORTER;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -143,6 +143,7 @@ import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.component.ParsedProvider;
 import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
+import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationUtils;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -362,7 +363,7 @@ public class ComputerEngine implements Computer {
     private final PermissionManagerServiceInternal mPermissionManager;
     private final ApexManager mApexManager;
     private final PackageManagerServiceInjector mInjector;
-    private final ComponentResolver mComponentResolver;
+    private final ComponentResolverApi mComponentResolver;
     private final InstantAppResolverConnection mInstantAppResolverConnection;
     private final DefaultAppProvider mDefaultAppProvider;
     private final DomainVerificationManagerInternal mDomainVerificationManager;
@@ -644,7 +645,7 @@ public class ComputerEngine implements Computer {
         // reader
         String pkgName = intent.getPackage();
         if (pkgName == null) {
-            final List<ResolveInfo> resolveInfos = mComponentResolver.queryServices(intent,
+            final List<ResolveInfo> resolveInfos = mComponentResolver.queryServices(this, intent,
                     resolvedType, flags, userId);
             if (resolveInfos == null) {
                 return Collections.emptyList();
@@ -654,7 +655,7 @@ public class ComputerEngine implements Computer {
         }
         final AndroidPackage pkg = mPackages.get(pkgName);
         if (pkg != null) {
-            final List<ResolveInfo> resolveInfos = mComponentResolver.queryServices(intent,
+            final List<ResolveInfo> resolveInfos = mComponentResolver.queryServices(this, intent,
                     resolvedType, flags, pkg.getServices(),
                     userId);
             if (resolveInfos == null) {
@@ -691,7 +692,7 @@ public class ComputerEngine implements Computer {
             }
 
             // Check for results in the current profile.
-            result = filterIfNotSystemUser(mComponentResolver.queryActivities(
+            result = filterIfNotSystemUser(mComponentResolver.queryActivities(this,
                     intent, resolvedType, flags, userId), userId);
             addInstant = isInstantAppResolutionAllowed(intent, result, userId,
                     false /*skipPackageCheck*/, flags);
@@ -753,7 +754,7 @@ public class ComputerEngine implements Computer {
             result = null;
             if (setting != null && setting.getAndroidPackage() != null && (resolveForStart
                     || !shouldFilterApplication(setting, filterCallingUid, userId))) {
-                result = filterIfNotSystemUser(mComponentResolver.queryActivities(
+                result = filterIfNotSystemUser(mComponentResolver.queryActivities(this,
                         intent, resolvedType, flags, setting.getAndroidPackage().getActivities(),
                         userId), userId);
             }
@@ -1181,7 +1182,7 @@ public class ComputerEngine implements Computer {
                 sourceUserId)) {
             return null;
         }
-        List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(intent,
+        List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(this, intent,
                 resolvedType, flags, parentUserId);
 
         if (resultTargetUser == null || resultTargetUser.isEmpty()) {
@@ -1232,7 +1233,7 @@ public class ComputerEngine implements Computer {
             Intent intent, String resolvedType, int userId) {
         CrossProfileIntentResolver resolver = mSettings.getCrossProfileIntentResolver(userId);
         if (resolver != null) {
-            return resolver.queryIntent(intent, resolvedType, false /*defaultOnly*/, userId);
+            return resolver.queryIntent(this, intent, resolvedType, false /*defaultOnly*/, userId);
         }
         return null;
     }
@@ -1447,7 +1448,7 @@ public class ComputerEngine implements Computer {
         ResolveInfo localInstantApp = null;
         boolean blockResolution = false;
         if (!alreadyResolvedLocally) {
-            final List<ResolveInfo> instantApps = mComponentResolver.queryActivities(
+            final List<ResolveInfo> instantApps = mComponentResolver.queryActivities(this,
                     intent,
                     resolvedType,
                     flags
@@ -1493,8 +1494,8 @@ public class ComputerEngine implements Computer {
                                 null /*callingFeatureId*/, isRequesterInstantApp, userId,
                                 null /*verificationBundle*/, resolveForStart,
                                 digest.getDigestPrefixSecure(), token);
-                auxiliaryResponse = InstantAppResolver.doInstantAppResolutionPhaseOne(
-                        mInstantAppResolverConnection, requestObject);
+                auxiliaryResponse = InstantAppResolver.doInstantAppResolutionPhaseOne(this,
+                        mUserManager, mInstantAppResolverConnection, requestObject);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             } else {
                 // we have an instant application locally, but, we can't admit that since
@@ -1830,7 +1831,7 @@ public class ComputerEngine implements Computer {
             return null;
         }
 
-        List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(intent,
+        List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(this, intent,
                 resolvedType, flags, targetUserId);
         if (CollectionUtils.isEmpty(resultTargetUser)) {
             return null;
@@ -2586,7 +2587,7 @@ public class ComputerEngine implements Computer {
                 mSettings.getPersistentPreferredActivities(userId);
         //TODO(b/158003772): Remove double query
         List<PersistentPreferredActivity> pprefs = ppir != null
-                ? ppir.queryIntent(intent, resolvedType,
+                ? ppir.queryIntent(this, intent, resolvedType,
                 (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0,
                 userId)
                 : new ArrayList<>();
@@ -3244,7 +3245,7 @@ public class ComputerEngine implements Computer {
         // Get the list of preferred activities that handle the intent
         if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Looking for preferred activities...");
         List<PreferredActivity> prefs = pir != null
-                ? pir.queryIntent(intent, resolvedType,
+                ? pir.queryIntent(this, intent, resolvedType,
                 (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0,
                 userId)
                 : null;
@@ -3376,7 +3377,7 @@ public class ComputerEngine implements Computer {
                                         pa.mPref.mComponent,
                                         pa.mPref.mAlways);
                                 pir.removeFilter(pa);
-                                pir.addFilter(freshPa);
+                                pir.addFilter(this, freshPa);
                                 result.mChanged = true;
                             } else {
                                 if (DEBUG_PREFERRED) {
@@ -3399,7 +3400,7 @@ public class ComputerEngine implements Computer {
                                 PreferredActivity lastChosen = new PreferredActivity(
                                         pa, pa.mPref.mMatch, null, pa.mPref.mComponent,
                                         false);
-                                pir.addFilter(lastChosen);
+                                pir.addFilter(this, lastChosen);
                                 result.mChanged = true;
                             }
                             result.mPreferredResolveInfo = null;
@@ -3454,7 +3455,7 @@ public class ComputerEngine implements Computer {
             Slog.v(TAG, "Looking for persistent preferred activities...");
         }
         List<PersistentPreferredActivity> pprefs = ppir != null
-                ? ppir.queryIntent(intent, resolvedType,
+                ? ppir.queryIntent(this, intent, resolvedType,
                 (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0,
                 userId)
                 : null;
@@ -4661,7 +4662,8 @@ public class ComputerEngine implements Computer {
             int callingUid) {
         if (!mUserManager.exists(userId)) return null;
         flags = updateFlagsForComponent(flags, userId);
-        final ProviderInfo providerInfo = mComponentResolver.queryProvider(name, flags, userId);
+        final ProviderInfo providerInfo = mComponentResolver.queryProvider(this, name, flags,
+                userId);
         boolean checkedGrants = false;
         if (providerInfo != null) {
             // Looking for cross-user grants before enforcing the typical cross-users permissions
@@ -4739,7 +4741,7 @@ public class ComputerEngine implements Computer {
         final List<String> names = new ArrayList<>();
         final List<ProviderInfo> infos = new ArrayList<>();
         final int callingUserId = UserHandle.getCallingUserId();
-        mComponentResolver.querySyncProviders(names, infos, safeMode, callingUserId);
+        mComponentResolver.querySyncProviders(this, names, infos, safeMode, callingUserId);
         for (int i = infos.size() - 1; i >= 0; i--) {
             final ProviderInfo providerInfo = infos.get(i);
             final PackageStateInternal ps = mSettings.getPackage(providerInfo.packageName);
@@ -4771,8 +4773,8 @@ public class ComputerEngine implements Computer {
         if (!mUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForComponent(flags, userId);
         ArrayList<ProviderInfo> finalList = null;
-        final List<ProviderInfo> matchList =
-                mComponentResolver.queryProviders(processName, metaDataKey, uid, flags, userId);
+        final List<ProviderInfo> matchList = mComponentResolver.queryProviders(this, processName,
+                metaDataKey, uid, flags, userId);
         final int listSize = (matchList == null ? 0 : matchList.size());
         for (int i = 0; i < listSize; i++) {
             final ProviderInfo providerInfo = matchList.get(i);
@@ -5673,5 +5675,23 @@ public class ComputerEngine implements Computer {
     @Override
     public ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId) {
         return mSettings.getSharedUserPackages(sharedUserAppId);
+    }
+
+    @NonNull
+    @Override
+    public ComponentResolverApi getComponentResolver() {
+        return mComponentResolver;
+    }
+
+    @Nullable
+    @Override
+    public PackageStateInternal getDisabledSystemPackage(@NonNull String packageName) {
+        return mSettings.getDisabledSystemPkg(packageName);
+    }
+
+    @Nullable
+    @Override
+    public ResolveInfo getInstantAppInstallerInfo() {
+        return mInstantAppInstallerInfo;
     }
 }

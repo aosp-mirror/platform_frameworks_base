@@ -112,7 +112,7 @@ public final class SuspendPackageHelper {
         }
 
         final SuspendParams newSuspendParams =
-                SuspendParams.getInstanceOrNull(dialogInfo, appExtras, launcherExtras);
+                new SuspendParams(dialogInfo, appExtras, launcherExtras);
 
         final List<String> changedPackagesList = new ArrayList<>(packageNames.length);
         final IntArray changedUids = new IntArray(packageNames.length);
@@ -148,13 +148,12 @@ public final class SuspendPackageHelper {
 
                 final WatchedArrayMap<String, SuspendParams> suspendParamsMap =
                         packageState.getUserStateOrDefault(userId).getSuspendParams();
-                final SuspendParams suspendParams = suspendParamsMap == null
-                        ? null : suspendParamsMap.get(packageName);
-                boolean hasSuspension = suspendParams != null;
                 if (suspended) {
-                    if (hasSuspension) {
+                    if (suspendParamsMap != null && suspendParamsMap.containsKey(packageName)) {
+                        final SuspendParams suspendParams = suspendParamsMap.get(packageName);
                         // Skip if there's no changes
-                        if (Objects.equals(suspendParams.getDialogInfo(), dialogInfo)
+                        if (suspendParams != null
+                                && Objects.equals(suspendParams.getDialogInfo(), dialogInfo)
                                 && Objects.equals(suspendParams.getAppExtras(), appExtras)
                                 && Objects.equals(suspendParams.getLauncherExtras(),
                                 launcherExtras)) {

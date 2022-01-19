@@ -29,6 +29,7 @@ import com.android.server.pm.*
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
+import com.android.server.pm.resolution.ComponentResolver
 import com.android.server.pm.test.override.PackageManagerComponentLabelIconOverrideTest.Companion.Params.AppType
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.mock
@@ -46,6 +47,8 @@ import org.junit.runners.Parameterized
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.intThat
 import org.mockito.Mockito.never
 import org.mockito.Mockito.same
@@ -337,8 +340,8 @@ class PackageManagerComponentLabelIconOverrideTest {
         val mockSettings = Settings(mockedPkgSettings)
         val mockComponentResolver: ComponentResolver = mockThrowOnUnmocked {
             params.componentName?.let {
-                whenever(this.componentExists(same(it))) { mockActivity != null }
-                whenever(this.getActivity(same(it))) { mockActivity }
+                doReturn(mockActivity != null).`when`(this).componentExists(same(it))
+                doReturn(mockActivity).`when`(this).getActivity(same(it))
             }
             whenever(this.snapshot()) { this@mockThrowOnUnmocked }
             whenever(registerObserver(any())).thenCallRealMethod()
