@@ -311,6 +311,14 @@ class ContextImpl extends Context {
     @ContextType
     private int mContextType;
 
+    /**
+     * {@code true} to indicate that the {@link Context} owns the {@link #getWindowContextToken()}
+     * and is responsible for detaching the token when the Context is released.
+     *
+     * @see #finalize()
+     */
+    private boolean mOwnsToken = false;
+
     @GuardedBy("mSync")
     private File mDatabasesDir;
     @GuardedBy("mSync")
@@ -2979,7 +2987,7 @@ class ContextImpl extends Context {
         // WindowContainer. We should detach from WindowContainer when the Context is finalized
         // if this Context is not a WindowContext. WindowContext finalization is handled in
         // WindowContext class.
-        if (mToken instanceof WindowTokenClient && mContextType != CONTEXT_TYPE_WINDOW_CONTEXT) {
+        if (mToken instanceof WindowTokenClient && mOwnsToken) {
             ((WindowTokenClient) mToken).detachFromWindowContainerIfNeeded();
         }
         super.finalize();
@@ -3010,6 +3018,7 @@ class ContextImpl extends Context {
         token.attachContext(context);
         token.attachToDisplayContent(displayId);
         context.mContextType = CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI;
+        context.mOwnsToken = true;
 
         return context;
     }
