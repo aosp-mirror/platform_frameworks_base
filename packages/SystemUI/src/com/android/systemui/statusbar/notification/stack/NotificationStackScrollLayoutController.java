@@ -185,6 +185,7 @@ public class NotificationStackScrollLayoutController {
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final InteractionJankMonitor mJankMonitor;
     private final StackStateLogger mStackStateLogger;
+    private final NotificationStackScrollLogger mLogger;
 
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
@@ -662,8 +663,10 @@ public class NotificationStackScrollLayoutController {
             VisualStabilityManager visualStabilityManager,
             ShadeController shadeController,
             InteractionJankMonitor jankMonitor,
-            StackStateLogger stackLogger) {
+            StackStateLogger stackLogger,
+            NotificationStackScrollLogger logger) {
         mStackStateLogger = stackLogger;
+        mLogger = logger;
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mVisibilityProvider = visibilityProvider;
@@ -717,6 +720,7 @@ public class NotificationStackScrollLayoutController {
         mView = view;
         mView.setLogger(mStackStateLogger);
         mView.setController(this);
+        mView.setLogger(mLogger);
         mView.setTouchHandler(new TouchHandler());
         mView.setStatusBar(mStatusBar);
         mView.setClearAllAnimationListener(this::onAnimationEnd);
