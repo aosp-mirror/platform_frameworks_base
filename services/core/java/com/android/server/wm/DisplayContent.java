@@ -1050,8 +1050,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mAppTransition = new AppTransition(mWmService.mContext, mWmService, this);
         mAppTransition.registerListenerLocked(mWmService.mActivityManagerAppTransitionNotifier);
-        mTransitionController.registerLegacyListener(
-                mWmService.mActivityManagerAppTransitionNotifier);
         mAppTransition.registerListenerLocked(mFixedRotationTransitionListener);
         mAppTransitionController = new AppTransitionController(mWmService, this);
         mUnknownAppVisibilityController = new UnknownAppVisibilityController(mWmService, this);
