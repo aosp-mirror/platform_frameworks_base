@@ -59,5 +59,6 @@
         <permission name="android.permission.READ_DREAM_STATE"/>
         <permission name="android.permission.READ_DREAM_SUPPRESSION"/>
         <permission name="android.permission.RESTART_WIFI_SUBSYSTEM"/>
+        <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
     </privapp-permissions>
 </permissions>
