@@ -1864,6 +1864,12 @@ public class AudioSystem
 
     /**
      * @hide
+     * @see AudioManager#isUltrasoundSupported()
+     */
+    public static native boolean isUltrasoundSupported();
+
+    /**
+     * @hide
      * Send audio HAL server process pids to native audioserver process for use
      * when generating audio HAL servers tombstones
      */
