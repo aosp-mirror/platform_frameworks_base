@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -37,13 +36,13 @@ import java.util.function.Supplier;
  * Fingerprint-specific removal client supporting the
  * {@link android.hardware.biometrics.fingerprint.IFingerprint} interface.
  */
-class FingerprintRemovalClient extends RemovalClient<Fingerprint, ISession> {
+class FingerprintRemovalClient extends RemovalClient<Fingerprint, AidlSession> {
     private static final String TAG = "FingerprintRemovalClient";
 
     private final int[] mBiometricIds;
 
     FingerprintRemovalClient(@NonNull Context context,
-            @NonNull Supplier<ISession> lazyDaemon, @NonNull IBinder token,
+            @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token,
             @Nullable ClientMonitorCallbackConverter listener, int[] biometricIds, int userId,
             @NonNull String owner, @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
             @NonNull Map<Integer, Long> authenticatorIds) {
@@ -55,7 +54,7 @@ class FingerprintRemovalClient extends RemovalClient<Fingerprint, ISession> {
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().removeEnrollments(mBiometricIds);
+            getFreshDaemon().getSession().removeEnrollments(mBiometricIds);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting remove", e);
             mCallback.onClientFinished(this, false /* success */);

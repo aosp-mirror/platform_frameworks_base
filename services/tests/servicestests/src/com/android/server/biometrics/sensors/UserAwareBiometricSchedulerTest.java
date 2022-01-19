@@ -217,7 +217,7 @@ public class UserAwareBiometricSchedulerTest {
         int numInvocations;
 
         @Override
-        public void onUserStarted(int newUserId, Object newObject) {
+        public void onUserStarted(int newUserId, Object newObject, int halInterfaceVersion) {
             numInvocations++;
             mCurrentUserId = newUserId;
         }
@@ -270,7 +270,8 @@ public class UserAwareBiometricSchedulerTest {
 
             mCallback = callback;
             if (mShouldFinish) {
-                mUserStartedCallback.onUserStarted(getTargetUserId(), new Object());
+                mUserStartedCallback.onUserStarted(
+                        getTargetUserId(), new Object(), 1 /* halInterfaceVersion */);
                 callback.onClientFinished(this, true /* success */);
             }
         }

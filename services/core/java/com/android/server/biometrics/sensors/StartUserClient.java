@@ -39,7 +39,7 @@ public abstract class StartUserClient<T, U>  extends HalClientMonitor<T> {
      * @param <U> New user object.
      */
     public interface UserStartedCallback<U> {
-        void onUserStarted(int newUserId, U newUser);
+        void onUserStarted(int newUserId, U newUser, int halInterfaceVersion);
     }
 
     @NonNull @VisibleForTesting

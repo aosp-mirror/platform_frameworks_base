@@ -55,10 +55,12 @@ public class FingerprintStartUserClient extends StartUserClient<IFingerprint, IS
     @Override
     protected void startHalOperation() {
         try {
-            final ISession newSession = getFreshDaemon().createSession(getSensorId(),
+            final IFingerprint hal = getFreshDaemon();
+            final int version = hal.getInterfaceVersion();
+            final ISession newSession = hal.createSession(getSensorId(),
                     getTargetUserId(), mSessionCallback);
             Binder.allowBlocking(newSession.asBinder());
-            mUserStartedCallback.onUserStarted(getTargetUserId(), newSession);
+            mUserStartedCallback.onUserStarted(getTargetUserId(), newSession, version);
             getCallback().onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
@@ -68,6 +70,5 @@ public class FingerprintStartUserClient extends StartUserClient<IFingerprint, IS
 
     @Override
     public void unableToStart() {
-
     }
 }

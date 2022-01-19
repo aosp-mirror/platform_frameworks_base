@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.IFace;
-import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -35,11 +34,11 @@ import java.util.function.Supplier;
 /**
  * Face-specific internal enumerate client for the {@link IFace} AIDL HAL interface.
  */
-class FaceInternalEnumerateClient extends InternalEnumerateClient<ISession> {
+class FaceInternalEnumerateClient extends InternalEnumerateClient<AidlSession> {
     private static final String TAG = "FaceInternalEnumerateClient";
 
     FaceInternalEnumerateClient(@NonNull Context context,
-            @NonNull Supplier<ISession> lazyDaemon, @NonNull IBinder token, int userId,
+            @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token, int userId,
             @NonNull String owner, @NonNull List<Face> enrolledList,
             @NonNull BiometricUtils<Face> utils, int sensorId) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
@@ -49,7 +48,7 @@ class FaceInternalEnumerateClient extends InternalEnumerateClient<ISession> {
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().enumerateEnrollments();
+            getFreshDaemon().getSession().enumerateEnrollments();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enumerate", e);
             mCallback.onClientFinished(this, false /* success */);

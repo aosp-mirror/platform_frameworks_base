@@ -54,11 +54,6 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
     private boolean mShouldSendErrorToClient = true;
     private boolean mAlreadyCancelled;
 
-    /**
-     * Stops the HAL operation specific to the ClientMonitor subclass.
-     */
-    protected abstract void stopHalOperation();
-
     public AcquisitionClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, boolean shouldVibrate,
@@ -68,6 +63,11 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         mPowerManager = context.getSystemService(PowerManager.class);
         mShouldVibrate = shouldVibrate;
     }
+
+    /**
+     * Stops the HAL operation specific to the ClientMonitor subclass.
+     */
+    protected abstract void stopHalOperation();
 
     @Override
     public void unableToStart() {

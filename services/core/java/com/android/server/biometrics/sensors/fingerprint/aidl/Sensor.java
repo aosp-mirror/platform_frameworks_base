@@ -86,24 +86,8 @@ class Sensor {
     @NonNull private final LockoutCache mLockoutCache;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
 
-    @Nullable private Session mCurrentSession;
-    @NonNull private final Supplier<ISession> mLazySession;
-
-    static class Session {
-        @NonNull private final String mTag;
-        @NonNull private final ISession mSession;
-        private final int mUserId;
-        @NonNull final HalSessionCallback mHalSessionCallback;
-
-        Session(@NonNull String tag, @NonNull ISession session, int userId,
-                @NonNull HalSessionCallback halSessionCallback) {
-            mTag = tag;
-            mSession = session;
-            mUserId = userId;
-            mHalSessionCallback = halSessionCallback;
-            Slog.d(mTag, "New session created for user: " + userId);
-        }
-    }
+    @Nullable private AidlSession mCurrentSession;
+    @NonNull private final Supplier<AidlSession> mLazySession;
 
     static class HalSessionCallback extends ISessionCallback.Stub {
 
@@ -452,7 +436,7 @@ class Sensor {
         mScheduler = new UserAwareBiometricScheduler(tag,
                 BiometricScheduler.sensorTypeFromFingerprintProperties(mSensorProperties),
                 gestureAvailabilityDispatcher,
-                () -> mCurrentSession != null ? mCurrentSession.mUserId : UserHandle.USER_NULL,
+                () -> mCurrentSession != null ? mCurrentSession.getUserId() : UserHandle.USER_NULL,
                 new UserAwareBiometricScheduler.UserSwitchCallback() {
                     @NonNull
                     @Override
@@ -464,20 +448,21 @@ class Sensor {
                     @NonNull
                     @Override
                     public StartUserClient<?, ?> getStartUserClient(int newUserId) {
-                        final HalSessionCallback.Callback callback = () -> {
-                            Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
-                            mCurrentSession = null;
-                        };
-
                         final int sensorId = mSensorProperties.sensorId;
 
                         final HalSessionCallback resultController = new HalSessionCallback(mContext,
                                 mHandler, mTag, mScheduler, sensorId, newUserId, mLockoutCache,
-                                lockoutResetDispatcher, callback);
+                                lockoutResetDispatcher, () -> {
+                            Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
+                            mCurrentSession = null;
+                        });
 
                         final StartUserClient.UserStartedCallback<ISession> userStartedCallback =
-                                (userIdStarted, newSession) -> {
-                                    mCurrentSession = new Session(mTag,
+                                (userIdStarted, newSession, halInterfaceVersion) -> {
+                                    Slog.d(mTag, "New session created for user: "
+                                            + userIdStarted + " with hal version: "
+                                            + halInterfaceVersion);
+                                    mCurrentSession = new AidlSession(halInterfaceVersion,
                                             newSession, userIdStarted, resultController);
                                     if (FingerprintUtils.getInstance(sensorId)
                                             .isInvalidationInProgress(mContext, userIdStarted)) {
@@ -497,10 +482,10 @@ class Sensor {
                     }
                 });
         mAuthenticatorIds = new HashMap<>();
-        mLazySession = () -> mCurrentSession != null ? mCurrentSession.mSession : null;
+        mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
     }
 
-    @NonNull Supplier<ISession> getLazySession() {
+    @NonNull Supplier<AidlSession> getLazySession() {
         return mLazySession;
     }
 
@@ -508,8 +493,8 @@ class Sensor {
         return mSensorProperties;
     }
 
-    @Nullable Session getSessionForUser(int userId) {
-        if (mCurrentSession != null && mCurrentSession.mUserId == userId) {
+    @Nullable AidlSession getSessionForUser(int userId) {
+        if (mCurrentSession != null && mCurrentSession.getUserId() == userId) {
             return mCurrentSession;
         } else {
             return null;
@@ -539,10 +524,10 @@ class Sensor {
         if (enabled != mTestHalEnabled) {
             // The framework should retrieve a new session from the HAL.
             try {
-                if (mCurrentSession != null && mCurrentSession.mSession != null) {
+                if (mCurrentSession != null) {
                     // TODO(181984005): This should be scheduled instead of directly invoked
                     Slog.d(mTag, "Closing old session");
-                    mCurrentSession.mSession.close();
+                    mCurrentSession.getSession().close();
                 }
             } catch (RemoteException e) {
                 Slog.e(mTag, "RemoteException", e);

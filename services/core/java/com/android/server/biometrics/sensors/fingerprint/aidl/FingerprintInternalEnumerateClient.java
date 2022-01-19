@@ -19,7 +19,6 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -35,11 +34,11 @@ import java.util.function.Supplier;
  * Fingerprint-specific internal client supporting the
  * {@link android.hardware.biometrics.fingerprint.IFingerprint} AIDL interface.
  */
-class FingerprintInternalEnumerateClient extends InternalEnumerateClient<ISession> {
+class FingerprintInternalEnumerateClient extends InternalEnumerateClient<AidlSession> {
     private static final String TAG = "FingerprintInternalEnumerateClient";
 
     protected FingerprintInternalEnumerateClient(@NonNull Context context,
-            @NonNull Supplier<ISession> lazyDaemon, @NonNull IBinder token, int userId,
+            @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token, int userId,
             @NonNull String owner, @NonNull List<Fingerprint> enrolledList,
             @NonNull BiometricUtils<Fingerprint> utils, int sensorId) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
@@ -49,7 +48,7 @@ class FingerprintInternalEnumerateClient extends InternalEnumerateClient<ISessio
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().enumerateEnrollments();
+            getFreshDaemon().getSession().enumerateEnrollments();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enumerate", e);
             mCallback.onClientFinished(this, false /* success */);

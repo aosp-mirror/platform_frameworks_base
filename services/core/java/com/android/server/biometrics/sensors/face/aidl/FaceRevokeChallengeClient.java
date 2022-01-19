@@ -19,7 +19,6 @@ package com.android.server.biometrics.sensors.face.aidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.face.IFace;
-import android.hardware.biometrics.face.ISession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -31,14 +30,14 @@ import java.util.function.Supplier;
 /**
  * Face-specific revokeChallenge client for the {@link IFace} AIDL HAL interface.
  */
-public class FaceRevokeChallengeClient extends RevokeChallengeClient<ISession> {
+public class FaceRevokeChallengeClient extends RevokeChallengeClient<AidlSession> {
 
     private static final String TAG = "FaceRevokeChallengeClient";
 
     private final long mChallenge;
 
     FaceRevokeChallengeClient(@NonNull Context context,
-            @NonNull Supplier<ISession> lazyDaemon, @NonNull IBinder token,
+            @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token,
             int userId, @NonNull String owner, int sensorId, long challenge) {
         super(context, lazyDaemon, token, userId, owner, sensorId);
         mChallenge = challenge;
@@ -47,7 +46,7 @@ public class FaceRevokeChallengeClient extends RevokeChallengeClient<ISession> {
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().revokeChallenge(mChallenge);
+            getFreshDaemon().getSession().revokeChallenge(mChallenge);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to revokeChallenge", e);
             mCallback.onClientFinished(this, false /* success */);

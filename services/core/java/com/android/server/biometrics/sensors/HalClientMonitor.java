@@ -29,19 +29,7 @@ import java.util.function.Supplier;
  * @param <T> HAL template
  */
 public abstract class HalClientMonitor<T> extends BaseClientMonitor {
-
-    /**
-     * Starts the HAL operation specific to the ClientMonitor subclass.
-     */
-    protected abstract void startHalOperation();
-
-    /**
-     * Invoked if the scheduler is unable to start the ClientMonitor (for example the HAL is null).
-     * If such a problem is detected, the scheduler will not invoke
-     * {@link #start(ClientMonitorCallback)}.
-     */
-    public abstract void unableToStart();
-
+    
     @NonNull
     protected final Supplier<T> mLazyDaemon;
 
@@ -71,4 +59,16 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
     public T getFreshDaemon() {
         return mLazyDaemon.get();
     }
+
+    /**
+     * Starts the HAL operation specific to the ClientMonitor subclass.
+     */
+    protected abstract void startHalOperation();
+
+    /**
+     * Invoked if the scheduler is unable to start the ClientMonitor (for example the HAL is null).
+     * If such a problem is detected, the scheduler will not invoke
+     * {@link #start(ClientMonitorCallback)}.
+     */
+    public abstract void unableToStart();
 }

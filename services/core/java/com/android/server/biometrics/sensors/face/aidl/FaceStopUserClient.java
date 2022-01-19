@@ -19,7 +19,6 @@ package com.android.server.biometrics.sensors.face.aidl;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.face.ISession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -29,10 +28,10 @@ import com.android.server.biometrics.sensors.StopUserClient;
 
 import java.util.function.Supplier;
 
-public class FaceStopUserClient extends StopUserClient<ISession> {
+public class FaceStopUserClient extends StopUserClient<AidlSession> {
     private static final String TAG = "FaceStopUserClient";
 
-    public FaceStopUserClient(@NonNull Context context, @NonNull Supplier<ISession> lazyDaemon,
+    public FaceStopUserClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @Nullable IBinder token, int userId, int sensorId,
             @NonNull UserStoppedCallback callback) {
         super(context, lazyDaemon, token, userId, sensorId, callback);
@@ -47,7 +46,7 @@ public class FaceStopUserClient extends StopUserClient<ISession> {
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().close();
+            getFreshDaemon().getSession().close();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
             getCallback().onClientFinished(this, false /* success */);
@@ -56,6 +55,5 @@ public class FaceStopUserClient extends StopUserClient<ISession> {
 
     @Override
     public void unableToStart() {
-
     }
 }

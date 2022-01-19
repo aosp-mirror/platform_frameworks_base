@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.IFace;
-import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.IBinder;
 
@@ -36,10 +35,10 @@ import java.util.function.Supplier;
 /**
  * Face-specific internal cleanup client for the {@link IFace} AIDL HAL interface.
  */
-class FaceInternalCleanupClient extends InternalCleanupClient<Face, ISession> {
+class FaceInternalCleanupClient extends InternalCleanupClient<Face, AidlSession> {
 
     FaceInternalCleanupClient(@NonNull Context context,
-            @NonNull Supplier<ISession> lazyDaemon, int userId, @NonNull String owner,
+            @NonNull Supplier<AidlSession> lazyDaemon, int userId, @NonNull String owner,
             int sensorId, @NonNull List<Face> enrolledList, @NonNull BiometricUtils<Face> utils,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId, BiometricsProtoEnums.MODALITY_FACE,
@@ -47,16 +46,16 @@ class FaceInternalCleanupClient extends InternalCleanupClient<Face, ISession> {
     }
 
     @Override
-    protected InternalEnumerateClient<ISession> getEnumerateClient(Context context,
-            Supplier<ISession> lazyDaemon, IBinder token, int userId, String owner,
+    protected InternalEnumerateClient<AidlSession> getEnumerateClient(Context context,
+            Supplier<AidlSession> lazyDaemon, IBinder token, int userId, String owner,
             List<Face> enrolledList, BiometricUtils<Face> utils, int sensorId) {
         return new FaceInternalEnumerateClient(context, lazyDaemon, token, userId, owner,
                 enrolledList, utils, sensorId);
     }
 
     @Override
-    protected RemovalClient<Face, ISession> getRemovalClient(Context context,
-            Supplier<ISession> lazyDaemon, IBinder token,
+    protected RemovalClient<Face, AidlSession> getRemovalClient(Context context,
+            Supplier<AidlSession> lazyDaemon, IBinder token,
             int biometricId, int userId, String owner, BiometricUtils<Face> utils, int sensorId,
             Map<Integer, Long> authenticatorIds) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)

@@ -19,7 +19,6 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.fingerprint.IFingerprint;
-import android.hardware.biometrics.fingerprint.ISession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -32,11 +31,11 @@ import java.util.function.Supplier;
 /**
  * Fingerprint-specific generateChallenge client for the {@link IFingerprint} AIDL HAL interface.
  */
-class FingerprintGenerateChallengeClient extends GenerateChallengeClient<ISession> {
+class FingerprintGenerateChallengeClient extends GenerateChallengeClient<AidlSession> {
     private static final String TAG = "FingerprintGenerateChallengeClient";
 
     FingerprintGenerateChallengeClient(@NonNull Context context,
-            @NonNull Supplier<ISession> lazyDaemon,
+            @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener,
             int userId, @NonNull String owner, int sensorId) {
@@ -46,7 +45,7 @@ class FingerprintGenerateChallengeClient extends GenerateChallengeClient<ISessio
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().generateChallenge();
+            getFreshDaemon().getSession().generateChallenge();
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to generateChallenge", e);
             mCallback.onClientFinished(this, false /* success */);

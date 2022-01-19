@@ -19,7 +19,6 @@ package com.android.server.biometrics.sensors.face.aidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.face.ISession;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -30,13 +29,14 @@ import com.android.server.biometrics.sensors.HalClientMonitor;
 import java.util.Map;
 import java.util.function.Supplier;
 
-class FaceGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
+class FaceGetAuthenticatorIdClient extends HalClientMonitor<AidlSession> {
 
     private static final String TAG = "FaceGetAuthenticatorIdClient";
 
     private final Map<Integer, Long> mAuthenticatorIds;
 
-    FaceGetAuthenticatorIdClient(@NonNull Context context, @NonNull Supplier<ISession> lazyDaemon,
+    FaceGetAuthenticatorIdClient(@NonNull Context context,
+            @NonNull Supplier<AidlSession> lazyDaemon,
             int userId, @NonNull String opPackageName, int sensorId,
             Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, opPackageName,
@@ -58,7 +58,7 @@ class FaceGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().getAuthenticatorId();
+            getFreshDaemon().getSession().getAuthenticatorId();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }

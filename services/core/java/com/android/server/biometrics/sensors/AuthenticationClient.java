@@ -90,22 +90,6 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     //  the state. We should think of a way to improve this in the future.
     protected @State int mState = STATE_NEW;
 
-    /**
-     * Handles lifecycle, e.g. {@link BiometricScheduler},
-     * {@link ClientMonitorCallback} after authentication
-     * results are known. Note that this happens asynchronously from (but shortly after)
-     * {@link #onAuthenticated(BiometricAuthenticator.Identifier, boolean, ArrayList)} and allows
-     * {@link CoexCoordinator} a chance to invoke/delay this event.
-     * @param authenticated
-     */
-    protected abstract void handleLifecycleAfterAuth(boolean authenticated);
-
-    /**
-     * @return true if a user was detected (i.e. face was found, fingerprint sensor was touched.
-     *         etc)
-     */
-    public abstract boolean wasUserDetected();
-
     public AuthenticationClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int targetUserId, long operationId, boolean restricted, @NonNull String owner,
@@ -474,6 +458,22 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
         }
     }
+
+    /**
+     * Handles lifecycle, e.g. {@link BiometricScheduler},
+     * {@link com.android.server.biometrics.sensors.BaseClientMonitor.Callback} after authentication
+     * results are known. Note that this happens asynchronously from (but shortly after)
+     * {@link #onAuthenticated(BiometricAuthenticator.Identifier, boolean, ArrayList)} and allows
+     * {@link CoexCoordinator} a chance to invoke/delay this event.
+     * @param authenticated
+     */
+    protected abstract void handleLifecycleAfterAuth(boolean authenticated);
+
+    /**
+     * @return true if a user was detected (i.e. face was found, fingerprint sensor was touched.
+     *         etc)
+     */
+    public abstract boolean wasUserDetected();
 
     public @State int getState() {
         return mState;
