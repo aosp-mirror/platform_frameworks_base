@@ -41,6 +41,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_IME;
@@ -84,6 +85,7 @@ import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityRecord.State.STARTED;
 import static com.android.server.wm.ActivityRecord.State.STOPPED;
 import static com.android.server.wm.ActivityRecord.State.STOPPING;
+import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
@@ -3257,6 +3259,29 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         assertEquals(activity.getCameraCompatControlState(),
                 CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
+    }
+
+    @Test // b/162542125
+    public void testInputDispatchTimeout() throws RemoteException {
+        final ActivityRecord activity = createActivityWithTask();
+        final WindowProcessController wpc = activity.app;
+        spyOn(wpc);
+        doReturn(true).when(wpc).isInstrumenting();
+        final ActivityRecord instrumentingActivity = createActivityOnDisplay(
+                true /* defaultDisplay */, wpc);
+        assertEquals(INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS,
+                instrumentingActivity.mInputDispatchingTimeoutMillis);
+
+        doReturn(false).when(wpc).isInstrumenting();
+        final ActivityRecord nonInstrumentingActivity = createActivityOnDisplay(
+                true /* defaultDisplay */, wpc);
+        assertEquals(DEFAULT_DISPATCHING_TIMEOUT_MILLIS,
+                nonInstrumentingActivity.mInputDispatchingTimeoutMillis);
+
+        final ActivityRecord noProcActivity = createActivityOnDisplay(true /* defaultDisplay */,
+                null);
+        assertEquals(DEFAULT_DISPATCHING_TIMEOUT_MILLIS,
+                noProcActivity.mInputDispatchingTimeoutMillis);
     }
 
     private ICompatCameraControlCallback getCompatCameraControlCallback() {
