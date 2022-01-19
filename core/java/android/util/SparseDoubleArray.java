@@ -105,7 +105,7 @@ public class SparseDoubleArray implements Cloneable {
      * <p>This differs from {@link #put} because instead of replacing any previous value, it adds
      * (in the numerical sense) to it.
      */
-    public void add(int key, double summand) {
+    public void incrementValue(int key, double summand) {
         final double oldValue = get(key);
         put(key, oldValue + summand);
     }

@@ -12828,7 +12828,7 @@ public class BatteryStatsImpl extends BatteryStats {
                             }
                         }
 
-                        uidEstimatedConsumptionMah.add(u.getUid(),
+                        uidEstimatedConsumptionMah.incrementValue(u.getUid(),
                                 mWifiPowerCalculator.calcPowerWithoutControllerDataMah(
                                         entry.rxPackets, entry.txPackets,
                                         uidRunningMs, uidScanMs, uidBatchScanMs));
@@ -12955,7 +12955,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     if (uidEstimatedConsumptionMah != null) {
                         double uidEstMah = mWifiPowerCalculator.calcPowerFromControllerDataMah(
                                 scanRxTimeSinceMarkMs, scanTxTimeSinceMarkMs, myIdleTimeMs);
-                        uidEstimatedConsumptionMah.add(uid.getUid(), uidEstMah);
+                        uidEstimatedConsumptionMah.incrementValue(uid.getUid(), uidEstMah);
                     }
                 }
 
@@ -12977,7 +12977,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     uid.getOrCreateWifiControllerActivityLocked().getOrCreateTxTimeCounters()[0]
                             .increment(myTxTimeMs, elapsedRealtimeMs);
                     if (uidEstimatedConsumptionMah != null) {
-                        uidEstimatedConsumptionMah.add(uid.getUid(),
+                        uidEstimatedConsumptionMah.incrementValue(uid.getUid(),
                                 mWifiPowerCalculator.calcPowerFromControllerDataMah(
                                         0, myTxTimeMs, 0));
                     }
@@ -12996,7 +12996,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     uid.getOrCreateWifiControllerActivityLocked().getOrCreateRxTimeCounter()
                             .increment(myRxTimeMs, elapsedRealtimeMs);
                     if (uidEstimatedConsumptionMah != null) {
-                        uidEstimatedConsumptionMah.add(uid.getUid(),
+                        uidEstimatedConsumptionMah.incrementValue(uid.getUid(),
                                 mWifiPowerCalculator.calcPowerFromControllerDataMah(
                                         myRxTimeMs, 0, 0));
                     }
@@ -13224,7 +13224,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         // Distribute measured mobile radio charge consumption based on app radio
                         // active time
                         if (uidEstimatedConsumptionMah != null) {
-                            uidEstimatedConsumptionMah.add(u.getUid(),
+                            uidEstimatedConsumptionMah.incrementValue(u.getUid(),
                                     mMobileRadioPowerCalculator.calcPowerFromRadioActiveDurationMah(
                                             appRadioTimeUs / 1000));
                         }
@@ -13479,7 +13479,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         .increment(scanTimeTxSinceMarkMs, elapsedRealtimeMs);
 
                 if (uidEstimatedConsumptionMah != null) {
-                    uidEstimatedConsumptionMah.add(u.getUid(),
+                    uidEstimatedConsumptionMah.incrementValue(u.getUid(),
                             mBluetoothPowerCalculator.calculatePowerMah(
                                     scanTimeRxSinceMarkMs, scanTimeTxSinceMarkMs, 0));
                 }
@@ -13546,7 +13546,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     counter.getOrCreateRxTimeCounter().increment(timeRxMs, elapsedRealtimeMs);
 
                     if (uidEstimatedConsumptionMah != null) {
-                        uidEstimatedConsumptionMah.add(u.getUid(),
+                        uidEstimatedConsumptionMah.incrementValue(u.getUid(),
                                 mBluetoothPowerCalculator.calculatePowerMah(timeRxMs, 0, 0));
                     }
                 }
@@ -13560,7 +13560,7 @@ public class BatteryStatsImpl extends BatteryStats {
                             .increment(timeTxMs, elapsedRealtimeMs);
 
                     if (uidEstimatedConsumptionMah != null) {
-                        uidEstimatedConsumptionMah.add(u.getUid(),
+                        uidEstimatedConsumptionMah.incrementValue(u.getUid(),
                                 mBluetoothPowerCalculator.calculatePowerMah(0, timeTxMs, 0));
                     }
                 }
