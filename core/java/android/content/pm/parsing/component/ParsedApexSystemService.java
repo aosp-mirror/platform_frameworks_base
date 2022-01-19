@@ -35,6 +35,4 @@ public interface ParsedApexSystemService extends Parcelable {
     @Nullable
     String getMaxSdkVersion();
 
-    int getInitOrder();
-
 }

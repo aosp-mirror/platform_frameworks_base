@@ -98,7 +98,7 @@ class EnterPipToOtherOrientationTest(
                 // Enter PiP, and assert that the PiP is within bounds now that the device is back
                 // in portrait
                 broadcastActionTrigger.doAction(ACTION_ENTER_PIP)
-                wmHelper.waitFor { it.wmState.hasPipWindow() }
+                wmHelper.waitPipShown()
                 wmHelper.waitForAppTransitionIdle()
                 // during rotation the status bar becomes invisible and reappears at the end
                 wmHelper.waitForNavBarStatusBarVisible()

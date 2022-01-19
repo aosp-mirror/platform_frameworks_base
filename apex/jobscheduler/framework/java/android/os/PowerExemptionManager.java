@@ -258,6 +258,12 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED = 207;
+    /**
+     * Broadcast {@link android.content.Intent#ACTION_REFRESH_SAFETY_SOURCES}.
+     * @hide
+     */
+    public static final int REASON_ACTION_REFRESH_SAFETY_SOURCES = 208;
+
     /* Reason code range 300-399 are reserved for other internal reasons */
     /**
      * Device idle system allow list, including EXCEPT-IDLE
@@ -398,6 +404,7 @@ public class PowerExemptionManager {
             REASON_TIME_CHANGED,
             REASON_LOCALE_CHANGED,
             REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED,
+            REASON_ACTION_REFRESH_SAFETY_SOURCES,
             REASON_SYSTEM_ALLOW_LISTED,
             REASON_ALARM_MANAGER_ALARM_CLOCK,
             REASON_ALARM_MANAGER_WHILE_IDLE,
@@ -681,6 +688,8 @@ public class PowerExemptionManager {
                 return "LOCALE_CHANGED";
             case REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED:
                 return "REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED";
+            case REASON_ACTION_REFRESH_SAFETY_SOURCES:
+                return "REASON_ACTION_REFRESH_SAFETY_SOURCES";
             case REASON_SYSTEM_ALLOW_LISTED:
                 return "SYSTEM_ALLOW_LISTED";
             case REASON_ALARM_MANAGER_ALARM_CLOCK:

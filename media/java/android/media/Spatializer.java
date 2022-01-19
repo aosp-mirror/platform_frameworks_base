@@ -215,6 +215,29 @@ public class Spatializer {
     public static final int HEAD_TRACKING_MODE_RELATIVE_DEVICE = 2;
 
     /**
+     * @hide
+     * Head tracking mode to string conversion
+     * @param mode a valid head tracking mode
+     * @return a string containing the matching constant name
+     */
+    public static final String headtrackingModeToString(int mode) {
+        switch(mode) {
+            case HEAD_TRACKING_MODE_UNSUPPORTED:
+                return "HEAD_TRACKING_MODE_UNSUPPORTED";
+            case HEAD_TRACKING_MODE_DISABLED:
+                return "HEAD_TRACKING_MODE_DISABLED";
+            case HEAD_TRACKING_MODE_OTHER:
+                return "HEAD_TRACKING_MODE_OTHER";
+            case HEAD_TRACKING_MODE_RELATIVE_WORLD:
+                return "HEAD_TRACKING_MODE_RELATIVE_WORLD";
+            case HEAD_TRACKING_MODE_RELATIVE_DEVICE:
+                return "HEAD_TRACKING_MODE_RELATIVE_DEVICE";
+            default:
+                return "head tracking mode unknown " + mode;
+        }
+    }
+
+    /**
      * Return the level of support for the spatialization feature on this device.
      * This level of support is independent of whether the {@code Spatializer} is currently
      * enabled or available and will not change over time.

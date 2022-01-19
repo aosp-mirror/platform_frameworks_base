@@ -1271,10 +1271,13 @@
     <string name="wifi_status_mac_randomized">MAC is randomized</string>
 
     <!-- Summary to show how many devices are connected in wifi hotspot [CHAR LIMIT=NONE] -->
-    <plurals name="wifi_tether_connected_summary">
-        <item quantity="one">%1$d device connected</item>
-        <item quantity="other">%1$d devices connected</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary">
+        {count, plural,
+            =0    {0 device connected}
+            =1    {1 device connected}
+            other {# devices connected}
+        }
+    </string>
 
     <!-- Content description of zen mode time condition plus button (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_manual_zen_more_time">More time.</string>

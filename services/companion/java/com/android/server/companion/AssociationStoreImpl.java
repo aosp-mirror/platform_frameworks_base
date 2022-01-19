@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * Implementation of the {@link AssociationStore}, with addition of the methods for modification.
@@ -58,32 +59,14 @@ class AssociationStoreImpl implements AssociationStore {
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
-    private final Map<Integer, AssociationInfo> mIdMap;
+    private final Map<Integer, AssociationInfo> mIdMap = new HashMap<>();
     @GuardedBy("mLock")
-    private final Map<MacAddress, Set<Integer>> mAddressMap;
+    private final Map<MacAddress, Set<Integer>> mAddressMap = new HashMap<>();
     @GuardedBy("mLock")
     private final SparseArray<List<AssociationInfo>> mCachedPerUser = new SparseArray<>();
 
     @GuardedBy("mListeners")
     private final Set<OnChangeListener> mListeners = new LinkedHashSet<>();
-
-    AssociationStoreImpl(Collection<AssociationInfo> associations) {
-        synchronized (mLock) {
-            final int size = associations.size();
-            mIdMap = new HashMap<>(size);
-            mAddressMap = new HashMap<>(size);
-
-            for (AssociationInfo association : associations) {
-                final int id = association.getId();
-                mIdMap.put(id, association);
-
-                final MacAddress address = association.getDeviceMacAddress();
-                if (address != null) {
-                    mAddressMap.computeIfAbsent(address, it -> new HashSet<>()).add(id);
-                }
-            }
-        }
-    }
 
     void addAssociation(@NonNull AssociationInfo association) {
         final int id = association.getId();
@@ -300,5 +283,39 @@ class AssociationStoreImpl implements AssociationStore {
                 }
             }
         }
+    }
+
+    void setAssociations(Collection<AssociationInfo> allAssociations) {
+        if (DEBUG) {
+            Log.i(TAG, "setAssociations() n=" + allAssociations.size());
+            final StringJoiner stringJoiner = new StringJoiner(", ");
+            allAssociations.forEach(assoc -> stringJoiner.add(assoc.toShortString()));
+            Log.v(TAG, "  associations=" + stringJoiner);
+        }
+        synchronized (mLock) {
+            setAssociationsLocked(allAssociations);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void setAssociationsLocked(Collection<AssociationInfo> associations) {
+        clearLocked();
+
+        for (AssociationInfo association : associations) {
+            final int id = association.getId();
+            mIdMap.put(id, association);
+
+            final MacAddress address = association.getDeviceMacAddress();
+            if (address != null) {
+                mAddressMap.computeIfAbsent(address, it -> new HashSet<>()).add(id);
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void clearLocked() {
+        mIdMap.clear();
+        mAddressMap.clear();
+        mCachedPerUser.clear();
     }
 }

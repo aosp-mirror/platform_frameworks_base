@@ -461,6 +461,12 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getCountLocked(int which);
 
         /**
+         * Returns the count accumulated by this Counter for the specified process state.
+         * If the counter does not support per-procstate tracking, returns 0.
+         */
+        public abstract long getCountForProcessState(@BatteryConsumer.ProcessState int procState);
+
+        /**
          * Temporary for debugging.
          */
         public abstract void logState(Printer pw, String prefix);
@@ -1094,6 +1100,17 @@ public abstract class BatteryStats implements Parcelable {
          * {@hide}
          */
         public abstract long getWifiMeasuredBatteryConsumptionUC();
+
+        /**
+         * Returns the battery consumption (in microcoulombs) of the uid's wifi usage when in the
+         * specified process state.
+         * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+         *
+         * {@hide}
+         */
+        public abstract long getWifiMeasuredBatteryConsumptionUC(
+                @BatteryConsumer.ProcessState int processState);
+
 
         /**
          * Returns the battery consumption (in microcoulombs) used by this uid for each

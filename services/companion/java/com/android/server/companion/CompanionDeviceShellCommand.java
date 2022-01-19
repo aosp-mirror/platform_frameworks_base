@@ -82,7 +82,10 @@ class CompanionDeviceShellCommand extends android.os.ShellCommand {
                     mService.onDeviceDisconnected(getNextArgRequired());
                 }
                 break;
-
+                case "clear-association-memory-cache": {
+                    mService.loadAssociationsFromDisk();
+                }
+                break;
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -110,5 +113,8 @@ class CompanionDeviceShellCommand extends android.os.ShellCommand {
         pw.println("      Create a new Association.");
         pw.println("  disassociate USER_ID PACKAGE MAC_ADDRESS");
         pw.println("      Remove an existing Association.");
+        pw.println("  clear-association-memory-cache");
+        pw.println("      Clear the in-memory association cache and reload all association "
+                + "information from persistent storage. USE FOR DEBUGGING PURPOSES ONLY.");
     }
 }

@@ -217,9 +217,9 @@ public class TrustManager {
      * Clears authentication by the specified biometric type for all users.
      */
     @RequiresPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE)
-    public void clearAllBiometricRecognized(BiometricSourceType source) {
+    public void clearAllBiometricRecognized(BiometricSourceType source, int unlockedUser) {
         try {
-            mService.clearAllBiometricRecognized(source);
+            mService.clearAllBiometricRecognized(source, unlockedUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

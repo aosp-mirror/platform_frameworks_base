@@ -19,10 +19,13 @@ package com.android.systemui.dreams;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
+import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +48,8 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     private static final int DREAM_OVERLAY_NOTIFICATIONS_DRAG_AREA_HEIGHT = 100;
+    private static final int MAX_BURN_IN_OFFSET = 20;
+    private static final long BURN_IN_PROTECTION_UPDATE_INTERVAL = 10;
 
     @Mock
     Resources mResources;
@@ -61,6 +66,9 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     @Mock
     ViewGroup mDreamOverlayContentView;
 
+    @Mock
+    Handler mHandler;
+
     DreamOverlayContainerViewController mController;
 
     @Before
@@ -74,8 +82,12 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         when(mDreamOverlayContainerView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
 
         mController = new DreamOverlayContainerViewController(
-                mDreamOverlayContainerView, mDreamOverlayContentView,
-                mDreamOverlayStatusBarViewController);
+                mDreamOverlayContainerView,
+                mDreamOverlayContentView,
+                mDreamOverlayStatusBarViewController,
+                mHandler,
+                MAX_BURN_IN_OFFSET,
+                BURN_IN_PROTECTION_UPDATE_INTERVAL);
     }
 
     @Test
@@ -128,5 +140,38 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         final ViewTreeObserver.InternalInsetsInfo info = new ViewTreeObserver.InternalInsetsInfo();
         computeInsetsListenerCapture.getValue().onComputeInternalInsets(info);
         assertNotNull(info.touchableRegion);
+    }
+
+    @Test
+    public void testBurnInProtectionStartsWhenContentViewAttached() {
+        mController.onViewAttached();
+        verify(mHandler).postDelayed(any(Runnable.class), eq(BURN_IN_PROTECTION_UPDATE_INTERVAL));
+    }
+
+    @Test
+    public void testBurnInProtectionStopsWhenContentViewDetached() {
+        mController.onViewDetached();
+        verify(mHandler).removeCallbacks(any(Runnable.class));
+    }
+
+    @Test
+    public void testBurnInProtectionUpdatesPeriodically() {
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        mController.onViewAttached();
+        verify(mHandler).postDelayed(
+                runnableCaptor.capture(), eq(BURN_IN_PROTECTION_UPDATE_INTERVAL));
+        runnableCaptor.getValue().run();
+        verify(mDreamOverlayContainerView).setTranslationX(anyFloat());
+        verify(mDreamOverlayContainerView).setTranslationY(anyFloat());
+    }
+
+    @Test
+    public void testBurnInProtectionReschedulesUpdate() {
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        mController.onViewAttached();
+        verify(mHandler).postDelayed(
+                runnableCaptor.capture(), eq(BURN_IN_PROTECTION_UPDATE_INTERVAL));
+        runnableCaptor.getValue().run();
+        verify(mHandler).postDelayed(runnableCaptor.getValue(), BURN_IN_PROTECTION_UPDATE_INTERVAL);
     }
 }
