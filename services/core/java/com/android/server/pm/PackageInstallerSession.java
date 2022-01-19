@@ -1734,61 +1734,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @WorkerThread
     private void handleStreamValidateAndCommit() {
-        PackageManagerException unrecoverableFailure = null;
-        // This will track whether the session and any children were validated and are ready to
-        // progress to the next phase of install
-        boolean allSessionsReady = false;
         try {
-            allSessionsReady = streamValidateAndCommit();
+            // This will track whether the session and any children were validated and are ready to
+            // progress to the next phase of install
+            boolean allSessionsReady = true;
+            for (PackageInstallerSession child : getChildSessions()) {
+                allSessionsReady &= child.streamValidateAndCommit();
+            }
+            if (allSessionsReady && streamValidateAndCommit()) {
+                mHandler.obtainMessage(MSG_INSTALL).sendToTarget();
+            }
         } catch (PackageManagerException e) {
-            unrecoverableFailure = e;
+            destroy();
+            String msg = ExceptionUtils.getCompleteMessage(e);
+            dispatchSessionFinished(e.error, msg, null);
+            maybeFinishChildSessions(e.error, msg);
         }
-
-        if (isMultiPackage()) {
-            final List<PackageInstallerSession> childSessions;
-            synchronized (mLock) {
-                childSessions = getChildSessionsLocked();
-            }
-            int childCount = childSessions.size();
-
-            // This will contain all child sessions that do not encounter an unrecoverable failure
-            ArrayList<PackageInstallerSession> nonFailingSessions = new ArrayList<>(childCount);
-
-            for (int i = childCount - 1; i >= 0; --i) {
-                // commit all children, regardless if any of them fail; we'll throw/return
-                // as appropriate once all children have been processed
-                try {
-                    PackageInstallerSession session = childSessions.get(i);
-                    allSessionsReady &= session.streamValidateAndCommit();
-                    nonFailingSessions.add(session);
-                } catch (PackageManagerException e) {
-                    allSessionsReady = false;
-                    if (unrecoverableFailure == null) {
-                        unrecoverableFailure = e;
-                    }
-                }
-            }
-            // If we encountered any unrecoverable failures, destroy all other sessions including
-            // the parent
-            if (unrecoverableFailure != null) {
-                // {@link #streamValidateAndCommit()} calls
-                // {@link #onSessionValidationFailure(PackageManagerException)}, but we don't
-                // expect it to ever do so for parent sessions. Call that on this parent to clean
-                // it up and notify listeners of the error.
-                onSessionValidationFailure(unrecoverableFailure);
-                // fail other child sessions that did not already fail
-                for (int i = nonFailingSessions.size() - 1; i >= 0; --i) {
-                    PackageInstallerSession session = nonFailingSessions.get(i);
-                    session.onSessionValidationFailure(unrecoverableFailure);
-                }
-            }
-        }
-
-        if (!allSessionsReady) {
-            return;
-        }
-
-        mHandler.obtainMessage(MSG_INSTALL).sendToTarget();
     }
 
     private final class FileSystemConnector extends
@@ -2026,11 +1987,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             return true;
         } catch (PackageManagerException e) {
-            throw onSessionValidationFailure(e);
+            throw e;
         } catch (Throwable e) {
             // Convert all exceptions into package manager exceptions as only those are handled
             // in the code above.
-            throw onSessionValidationFailure(new PackageManagerException(e));
+            throw new PackageManagerException(e);
         }
     }
 
