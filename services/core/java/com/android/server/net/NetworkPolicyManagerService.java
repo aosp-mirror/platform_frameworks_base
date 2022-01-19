@@ -3472,7 +3472,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
      */
     @Override
-    public void onStatsProviderWarningOrLimitReached() {
+    public void notifyStatsProviderWarningOrLimitReached() {
         enforceAnyPermissionOf(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
         // This API may be called before the system is ready.
         synchronized (mNetworkPoliciesSecondLock) {
