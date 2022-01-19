@@ -47,6 +47,9 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserInfoTracker;
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController;
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherFeatureController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -99,6 +102,12 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private ArgumentCaptor<ConfigurationListener> mConfigurationListenerCaptor;
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardCallbackCaptor;
+    @Mock
+    private StatusBarUserSwitcherFeatureController mStatusBarUserSwitcherFeatureController;
+    @Mock
+    private StatusBarUserSwitcherController mStatusBarUserSwitcherController;
+    @Mock
+    private StatusBarUserInfoTracker mStatusBarUserInfoTracker;
 
     private TestNotificationPanelViewStateProvider mNotificationPanelViewStateProvider;
     private KeyguardStatusBarView mKeyguardStatusBarView;
@@ -117,7 +126,11 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                             .inflate(R.layout.keyguard_status_bar, null));
         });
 
-        mController = new KeyguardStatusBarViewController(
+        mController = createController();
+    }
+
+    private KeyguardStatusBarViewController createController() {
+        return new KeyguardStatusBarViewController(
                 mKeyguardStatusBarView,
                 mCarrierTextController,
                 mConfigurationController,
@@ -134,7 +147,10 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mBiometricUnlockController,
                 mStatusBarStateController,
                 mStatusBarContentInsetsProvider,
-                mUserManager
+                mUserManager,
+                mStatusBarUserSwitcherFeatureController,
+                mStatusBarUserSwitcherController,
+                mStatusBarUserInfoTracker
         );
     }
 
@@ -354,6 +370,32 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mController.updateForHeadsUp(/* animate= */ false);
 
         assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void testNewUserSwitcherDisablesAvatar_newUiOn() {
+        // GIVEN the status bar user switcher chip is enabled
+        when(mStatusBarUserSwitcherFeatureController.isStatusBarUserSwitcherFeatureEnabled())
+                .thenReturn(true);
+
+        // WHEN the controller is created
+        mController = createController();
+
+        // THEN keyguard status bar view avatar is disabled
+        assertThat(mKeyguardStatusBarView.isKeyguardUserAvatarEnabled()).isFalse();
+    }
+
+    @Test
+    public void testNewUserSwitcherDisablesAvatar_newUiOff() {
+        // GIVEN the status bar user switcher chip is disabled
+        when(mStatusBarUserSwitcherFeatureController.isStatusBarUserSwitcherFeatureEnabled())
+                .thenReturn(false);
+
+        // WHEN the controller is created
+        mController = createController();
+
+        // THEN keyguard status bar view avatar is enabled
+        assertThat(mKeyguardStatusBarView.isKeyguardUserAvatarEnabled()).isTrue();
     }
 
     private void updateStateToNotKeyguard() {
