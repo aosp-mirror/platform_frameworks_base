@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors;
+package com.android.server.biometrics.log;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,70 +29,27 @@ import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.Utils;
 
 /**
- * Abstract class that adds logging functionality to the ClientMonitor classes.
+ * Logger for all reported Biometric framework events.
  */
-public abstract class LoggableMonitor {
+public class BiometricLogger {
 
-    public static final String TAG = "Biometrics/LoggableMonitor";
+    public static final String TAG = "BiometricLogger";
     public static final boolean DEBUG = false;
 
-    final int mStatsModality;
+    private final int mStatsModality;
     private final int mStatsAction;
     private final int mStatsClient;
+    private final BiometricFrameworkStatsLogger mSink;
     @NonNull private final SensorManager mSensorManager;
+
     private long mFirstAcquireTimeMs;
     private boolean mLightSensorEnabled = false;
     private boolean mShouldLogMetrics = true;
-
-    /**
-     * Probe for loggable attributes that can be continuously monitored, such as ambient light.
-     *
-     * Disable probes when the sensors are in states that are not interesting for monitoring
-     * purposes to save power.
-     */
-    protected interface Probe {
-        /** Ensure the probe is actively sampling for new data. */
-        void enable();
-        /** Stop sampling data. */
-        void disable();
-    }
-
-    /**
-     * Client monitor callback that exposes a probe.
-     *
-     * Disables the probe when the operation completes.
-     */
-    protected static class CallbackWithProbe<T extends Probe>
-            implements BaseClientMonitor.Callback {
-        private final boolean mStartWithClient;
-        private final T mProbe;
-
-        public CallbackWithProbe(@NonNull T probe, boolean startWithClient) {
-            mProbe = probe;
-            mStartWithClient = startWithClient;
-        }
-
-        @Override
-        public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
-            if (mStartWithClient) {
-                mProbe.enable();
-            }
-        }
-
-        @Override
-        public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
-            mProbe.disable();
-        }
-
-        @NonNull
-        public T getProbe() {
-            return mProbe;
-        }
-    }
 
     private class ALSProbe implements Probe {
         @Override
@@ -128,26 +85,30 @@ public abstract class LoggableMonitor {
      * @param statsAction One of {@link BiometricsProtoEnums} ACTION_* constants.
      * @param statsClient One of {@link BiometricsProtoEnums} CLIENT_* constants.
      */
-    public LoggableMonitor(@NonNull Context context, int statsModality, int statsAction,
-            int statsClient) {
+    public BiometricLogger(
+            @NonNull Context context, int statsModality, int statsAction, int statsClient) {
+        this(statsModality, statsAction, statsClient,
+                BiometricFrameworkStatsLogger.getInstance(),
+                context.getSystemService(SensorManager.class));
+    }
+
+    @VisibleForTesting
+    BiometricLogger(
+            int statsModality, int statsAction, int statsClient,
+            BiometricFrameworkStatsLogger logSink, SensorManager sensorManager) {
         mStatsModality = statsModality;
         mStatsAction = statsAction;
         mStatsClient = statsClient;
-        mSensorManager = context.getSystemService(SensorManager.class);
+        mSink = logSink;
+        mSensorManager = sensorManager;
     }
 
-    /**
-     * Only valid for AuthenticationClient.
-     * @return true if the client is authenticating for a crypto operation.
-     */
-    protected boolean isCryptoOperation() {
-        return false;
+    /** Disable logging metrics and only log critical events, such as system health issues. */
+    public void disableMetrics() {
+        mShouldLogMetrics = false;
     }
 
-    protected void setShouldLog(boolean shouldLog) {
-        mShouldLogMetrics = shouldLog;
-    }
-
+    /** {@link BiometricsProtoEnums} CLIENT_* constants */
     public int getStatsClient() {
         return mStatsClient;
     }
@@ -171,8 +132,9 @@ public abstract class LoggableMonitor {
         return shouldSkipLogging;
     }
 
-    protected final void logOnAcquired(Context context, int acquiredInfo, int vendorCode,
-            int targetUserId) {
+    /** Log an acquisition event. */
+    public void logOnAcquired(Context context,
+            int acquiredInfo, int vendorCode, boolean isCrypto, int targetUserId) {
         if (!mShouldLogMetrics) {
             return;
         }
@@ -192,7 +154,7 @@ public abstract class LoggableMonitor {
         if (DEBUG) {
             Slog.v(TAG, "Acquired! Modality: " + mStatsModality
                     + ", User: " + targetUserId
-                    + ", IsCrypto: " + isCryptoOperation()
+                    + ", IsCrypto: " + isCrypto
                     + ", Action: " + mStatsAction
                     + ", Client: " + mStatsClient
                     + ", AcquiredInfo: " + acquiredInfo
@@ -203,19 +165,14 @@ public abstract class LoggableMonitor {
             return;
         }
 
-        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ACQUIRED,
-                mStatsModality,
-                targetUserId,
-                isCryptoOperation(),
-                mStatsAction,
-                mStatsClient,
-                acquiredInfo,
-                vendorCode,
+        mSink.acquired(mStatsModality, mStatsAction, mStatsClient,
                 Utils.isDebugEnabled(context, targetUserId),
-                -1 /* sensorId */);
+                acquiredInfo, vendorCode, isCrypto, targetUserId);
     }
 
-    protected final void logOnError(Context context, int error, int vendorCode, int targetUserId) {
+    /** Log an error during an operation. */
+    public void logOnError(Context context,
+            int error, int vendorCode, boolean isCrypto, int targetUserId) {
         if (!mShouldLogMetrics) {
             return;
         }
@@ -226,7 +183,7 @@ public abstract class LoggableMonitor {
         if (DEBUG) {
             Slog.v(TAG, "Error! Modality: " + mStatsModality
                     + ", User: " + targetUserId
-                    + ", IsCrypto: " + isCryptoOperation()
+                    + ", IsCrypto: " + isCrypto
                     + ", Action: " + mStatsAction
                     + ", Client: " + mStatsClient
                     + ", Error: " + error
@@ -240,21 +197,15 @@ public abstract class LoggableMonitor {
             return;
         }
 
-        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
-                mStatsModality,
-                targetUserId,
-                isCryptoOperation(),
-                mStatsAction,
-                mStatsClient,
-                error,
-                vendorCode,
-                Utils.isDebugEnabled(context, targetUserId),
-                sanitizeLatency(latency),
-                -1 /* sensorId */);
+        mSink.error(mStatsModality, mStatsAction, mStatsClient,
+                Utils.isDebugEnabled(context, targetUserId), latency,
+                error, vendorCode, isCrypto, targetUserId);
     }
 
-    protected final void logOnAuthenticated(Context context, boolean authenticated,
-            boolean requireConfirmation, int targetUserId, boolean isBiometricPrompt) {
+    /** Log authentication attempt. */
+    public void logOnAuthenticated(Context context,
+            boolean authenticated, boolean requireConfirmation, boolean isCrypto,
+            int targetUserId, boolean isBiometricPrompt) {
         if (!mShouldLogMetrics) {
             return;
         }
@@ -279,7 +230,7 @@ public abstract class LoggableMonitor {
         if (DEBUG) {
             Slog.v(TAG, "Authenticated! Modality: " + mStatsModality
                     + ", User: " + targetUserId
-                    + ", IsCrypto: " + isCryptoOperation()
+                    + ", IsCrypto: " + isCrypto
                     + ", Client: " + mStatsClient
                     + ", RequireConfirmation: " + requireConfirmation
                     + ", State: " + authState
@@ -293,20 +244,14 @@ public abstract class LoggableMonitor {
             return;
         }
 
-        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
-                mStatsModality,
-                targetUserId,
-                isCryptoOperation(),
-                mStatsClient,
-                requireConfirmation,
-                authState,
-                sanitizeLatency(latency),
+        mSink.authenticate(mStatsModality, mStatsAction, mStatsClient,
                 Utils.isDebugEnabled(context, targetUserId),
-                -1 /* sensorId */,
-                mLastAmbientLux /* ambientLightLux */);
+                latency, authenticated, authState, requireConfirmation, isCrypto,
+                targetUserId, isBiometricPrompt, mLastAmbientLux);
     }
 
-    protected final void logOnEnrolled(int targetUserId, long latency, boolean enrollSuccessful) {
+    /** Log enrollment outcome. */
+    public void logOnEnrolled(int targetUserId, long latency, boolean enrollSuccessful) {
         if (!mShouldLogMetrics) {
             return;
         }
@@ -326,25 +271,30 @@ public abstract class LoggableMonitor {
             return;
         }
 
-        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ENROLLED,
-                mStatsModality,
-                targetUserId,
-                sanitizeLatency(latency),
-                enrollSuccessful,
-                -1, /* sensorId */
-                mLastAmbientLux /* ambientLightLux */);
+        mSink.enroll(mStatsModality, mStatsAction, mStatsClient,
+                targetUserId, latency, enrollSuccessful, mLastAmbientLux);
     }
 
-    private long sanitizeLatency(long latency) {
-        if (latency < 0) {
-            Slog.w(TAG, "found a negative latency : " + latency);
-            return -1;
+    /** Report unexpected enrollment reported by the HAL. */
+    public void logUnknownEnrollmentInHal() {
+        if (shouldSkipLogging()) {
+            return;
         }
-        return latency;
+
+        mSink.reportUnknownTemplateEnrolledHal(mStatsModality);
+    }
+
+    /** Report unknown enrollment in framework settings */
+    public void logUnknownEnrollmentInFramework() {
+        if (shouldSkipLogging()) {
+            return;
+        }
+
+        mSink.reportUnknownTemplateEnrolledFramework(mStatsModality);
     }
 
     /**
-     * Get a callback to start/stop ALS capture when client runs.
+     * Get a callback to start/stop ALS capture when a client runs.
      *
      * If the probe should not run for the entire operation, do not set startWithClient and
      * start/stop the problem when needed.
@@ -352,7 +302,7 @@ public abstract class LoggableMonitor {
      * @param startWithClient if probe should start automatically when the operation starts.
      */
     @NonNull
-    protected CallbackWithProbe<Probe> createALSCallback(boolean startWithClient) {
+    public CallbackWithProbe<Probe> createALSCallback(boolean startWithClient) {
         return new CallbackWithProbe<>(new ALSProbe(), startWithClient);
     }
 

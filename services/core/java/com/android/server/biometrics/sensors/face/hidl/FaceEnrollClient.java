@@ -70,7 +70,8 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
     @NonNull
     @Override
     protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(createALSCallback(true /* startWithClient */), callback);
+        return new CompositeCallback(
+                getLogger().createALSCallback(true /* startWithClient */), callback);
     }
 
     @Override

@@ -364,7 +364,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
             final ClientMonitorCallbackConverter listener = client.getListener();
             final String opPackageName = client.getOwnerString();
             final boolean restricted = authClient.isRestricted();
-            final int statsClient = client.getStatsClient();
+            final int statsClient = client.getLogger().getStatsClient();
             final boolean isKeyguard = authClient.isKeyguard();
 
             // Don't actually send cancel() to the HAL, since successful auth already finishes

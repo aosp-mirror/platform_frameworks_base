@@ -23,7 +23,6 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.util.Slog;
 
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.BiometricsProto;
 
 import java.util.ArrayList;
@@ -128,10 +127,9 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
         mCurrentTask = getRemovalClient(getContext(), mLazyDaemon, getToken(),
                 template.mIdentifier.getBiometricId(), template.mUserId,
                 getContext().getPackageName(), mBiometricUtils, getSensorId(), mAuthenticatorIds);
-        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
-                mStatsModality,
-                BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_HAL,
-                -1 /* sensorId */);
+
+        getLogger().logUnknownEnrollmentInHal();
+
         mCurrentTask.start(mRemoveCallback);
     }
 
