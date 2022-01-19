@@ -20,10 +20,10 @@ import android.content.res.Configuration;
 
 import androidx.annotation.NonNull;
 
-class TestComponentCallbacks2 implements ComponentCallbacks2 {
-    android.content.res.Configuration mConfiguration;
-    boolean mLowMemoryCalled;
-    int mLevel;
+public class TestComponentCallbacks2 implements ComponentCallbacks2 {
+    public Configuration mConfiguration = null;
+    public boolean mLowMemoryCalled = false;
+    public int mLevel = 0;
 
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {

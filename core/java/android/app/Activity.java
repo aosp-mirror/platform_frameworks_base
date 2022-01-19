@@ -47,7 +47,9 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
+import android.content.ComponentCallbacksController;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -982,6 +984,8 @@ public class Activity extends ContextThemeWrapper
     @Nullable
     private DumpableContainerImpl mDumpableContainer;
 
+    private ComponentCallbacksController mCallbacksController;
+
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
         /**
@@ -1320,6 +1324,28 @@ public class Activity extends ContextThemeWrapper
             @NonNull Application.ActivityLifecycleCallbacks callback) {
         synchronized (mActivityLifecycleCallbacks) {
             mActivityLifecycleCallbacks.remove(callback);
+        }
+    }
+
+    @Override
+    public void registerComponentCallbacks(ComponentCallbacks callback) {
+        if (CompatChanges.isChangeEnabled(OVERRIDABLE_COMPONENT_CALLBACKS)
+                && mCallbacksController == null) {
+            mCallbacksController = new ComponentCallbacksController();
+        }
+        if (mCallbacksController != null) {
+            mCallbacksController.registerCallbacks(callback);
+        } else {
+            super.registerComponentCallbacks(callback);
+        }
+    }
+
+    @Override
+    public void unregisterComponentCallbacks(ComponentCallbacks callback) {
+        if (mCallbacksController != null) {
+            mCallbacksController.unregisterCallbacks(callback);
+        } else {
+            super.unregisterComponentCallbacks(callback);
         }
     }
 
@@ -2668,9 +2694,11 @@ public class Activity extends ContextThemeWrapper
         if (mUiTranslationController != null) {
             mUiTranslationController.onActivityDestroyed();
         }
-
         if (mDefaultBackCallback != null) {
             getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mDefaultBackCallback);
+        }
+        if (mCallbacksController != null) {
+            mCallbacksController.clearCallbacks();
         }
     }
 
@@ -2991,6 +3019,9 @@ public class Activity extends ContextThemeWrapper
         }
 
         dispatchActivityConfigurationChanged();
+        if (mCallbacksController != null) {
+            mCallbacksController.dispatchConfigurationChanged(newConfig);
+        }
     }
 
     /**
@@ -3162,12 +3193,18 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onLowMemory " + this);
         mCalled = true;
         mFragments.dispatchLowMemory();
+        if (mCallbacksController != null) {
+            mCallbacksController.dispatchLowMemory();
+        }
     }
 
     public void onTrimMemory(int level) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onTrimMemory " + this + ": " + level);
         mCalled = true;
         mFragments.dispatchTrimMemory(level);
+        if (mCallbacksController != null) {
+            mCallbacksController.dispatchTrimMemory(level);
+        }
     }
 
     /**
