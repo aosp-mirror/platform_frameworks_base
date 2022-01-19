@@ -19,11 +19,12 @@ package com.android.systemui.privacy
 import android.Manifest
 import android.app.ActivityManager
 import android.app.Dialog
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.UserHandle
-import android.permission.PermGroupUsage
+import android.permission.PermissionGroupUsage
 import android.permission.PermissionManager
 import android.util.Log
 import androidx.annotation.MainThread
@@ -45,11 +46,12 @@ private val defaultDialogProvider = object : PrivacyDialogController.DialogProvi
     override fun makeDialog(
         context: Context,
         list: List<PrivacyDialog.PrivacyElement>,
-        starter: (String, Int) -> Unit
+        starter: (String, Int, CharSequence?, Intent?) -> Unit
     ): PrivacyDialog {
         return PrivacyDialog(context, list, starter)
     }
 }
+
 /**
  * Controller for [PrivacyDialog].
  *
@@ -115,12 +117,19 @@ class PrivacyDialogController(
     }
 
     @MainThread
-    private fun startActivity(packageName: String, userId: Int) {
-        val intent = Intent(Intent.ACTION_MANAGE_APP_PERMISSIONS)
-        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName)
-        intent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
+    private fun startActivity(
+        packageName: String,
+        userId: Int,
+        attributionTag: CharSequence?,
+        navigationIntent: Intent?
+    ) {
+        val intent = if (navigationIntent == null) {
+            getDefaultManageAppPermissionsIntent(packageName, userId)
+        } else {
+            navigationIntent
+        }
         uiEventLogger.log(PrivacyDialogEvent.PRIVACY_DIALOG_ITEM_CLICKED_TO_APP_SETTINGS,
-                userId, packageName)
+            userId, packageName)
         privacyLogger.logStartSettingsActivityFromDialog(packageName, userId)
         if (!keyguardStateController.isUnlocked) {
             // If we are locked, hide the dialog so the user can unlock
@@ -137,7 +146,39 @@ class PrivacyDialogController(
     }
 
     @WorkerThread
-    private fun permGroupUsage(): List<PermGroupUsage> {
+    private fun getManagePermissionIntent(
+        packageName: String,
+        userId: Int,
+        permGroupName: CharSequence,
+        attributionTag: CharSequence?
+    ): Intent
+    {
+        lateinit var intent: Intent
+        if (attributionTag != null) {
+            intent = Intent(Intent.ACTION_MANAGE_PERMISSION_USAGE)
+            intent.setPackage(packageName)
+            intent.putExtra(Intent.EXTRA_PERMISSION_GROUP_NAME, permGroupName.toString())
+            intent.putExtra(Intent.EXTRA_ATTRIBUTION_TAGS, arrayOf(attributionTag.toString()))
+            intent.putExtra(Intent.EXTRA_SHOWING_ATTRIBUTION, true)
+            val resolveInfo = packageManager.resolveActivity(
+                intent, PackageManager.ResolveInfoFlags.of(0))
+                ?: return getDefaultManageAppPermissionsIntent(packageName, userId)
+            intent.component = ComponentName(packageName, resolveInfo.activityInfo.name)
+            return intent
+        } else {
+            return getDefaultManageAppPermissionsIntent(packageName, userId)
+        }
+    }
+
+    fun getDefaultManageAppPermissionsIntent(packageName: String, userId: Int): Intent {
+        val intent = Intent(Intent.ACTION_MANAGE_APP_PERMISSIONS)
+        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName)
+        intent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
+        return intent
+    }
+
+    @WorkerThread
+    private fun permGroupUsage(): List<PermissionGroupUsage> {
         return permissionManager.getIndicatorAppOpUsageData(appOpsController.isMicMuted)
     }
 
@@ -160,7 +201,7 @@ class PrivacyDialogController(
             val userInfos = userTracker.userProfiles
             privacyLogger.logUnfilteredPermGroupUsage(usage)
             val items = usage.mapNotNull {
-                val type = filterType(permGroupToPrivacyType(it.permGroupName))
+                val type = filterType(permGroupToPrivacyType(it.permissionGroupName))
                 val userInfo = userInfos.firstOrNull { ui -> ui.id == UserHandle.getUserId(it.uid) }
                 if (userInfo != null || it.isPhoneCall) {
                     type?.let { t ->
@@ -170,17 +211,24 @@ class PrivacyDialogController(
                         } else {
                             getLabelForPackage(it.packageName, it.uid)
                         }
+                        val userId = UserHandle.getUserId(it.uid)
                         PrivacyDialog.PrivacyElement(
                                 t,
                                 it.packageName,
-                                UserHandle.getUserId(it.uid),
+                                userId,
                                 appName,
-                                it.attribution,
-                                it.lastAccess,
+                                it.attributionTag,
+                                it.attributionLabel,
+                                it.proxyLabel,
+                                it.lastAccessTimeMillis,
                                 it.isActive,
                                 // If there's no user info, we're in a phoneCall in secondary user
                                 userInfo?.isManagedProfile ?: false,
-                                it.isPhoneCall
+                                it.isPhoneCall,
+                                it.permissionGroupName,
+                                getManagePermissionIntent(it.packageName, userId,
+                                    it.permissionGroupName,
+                                it.attributionTag)
                         )
                     }
                 } else {
@@ -215,8 +263,8 @@ class PrivacyDialogController(
     private fun getLabelForPackage(packageName: String, uid: Int): CharSequence {
         return try {
             packageManager
-                    .getApplicationInfoAsUser(packageName, 0, UserHandle.getUserId(uid))
-                    .loadLabel(packageManager)
+                .getApplicationInfoAsUser(packageName, 0, UserHandle.getUserId(uid))
+                .loadLabel(packageManager)
         } catch (_: PackageManager.NameNotFoundException) {
             Log.w(TAG, "Label not found for: $packageName")
             packageName
@@ -235,7 +283,7 @@ class PrivacyDialogController(
     private fun filterType(type: PrivacyType?): PrivacyType? {
         return type?.let {
             if ((it == PrivacyType.TYPE_CAMERA || it == PrivacyType.TYPE_MICROPHONE) &&
-                    privacyItemController.micCameraAvailable) {
+                privacyItemController.micCameraAvailable) {
                 it
             } else if (it == PrivacyType.TYPE_LOCATION && privacyItemController.locationAvailable) {
                 it
@@ -278,7 +326,7 @@ class PrivacyDialogController(
         fun makeDialog(
             context: Context,
             list: List<PrivacyDialog.PrivacyElement>,
-            starter: (String, Int) -> Unit
+            starter: (String, Int, CharSequence?, Intent?) -> Unit
         ): PrivacyDialog
     }
 }

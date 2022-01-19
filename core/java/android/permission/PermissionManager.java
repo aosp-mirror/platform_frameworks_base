@@ -177,6 +177,17 @@ public final class PermissionManager {
      */
     public static final boolean DEBUG_TRACE_PERMISSION_UPDATES = false;
 
+    /**
+     * Intent extra: List of PermissionGroupUsages
+     * <p>
+     * Type: {@code List<PermissionGroupUsage>}
+     * </p>
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PERMISSION_USAGES =
+            "android.permission.extra.PERMISSION_USAGES";
+
     private final @NonNull Context mContext;
 
     private final IPackageManager mPackageManager;
@@ -1092,7 +1103,7 @@ public final class PermissionManager {
     @TestApi
     @NonNull
     @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
-    public List<PermGroupUsage> getIndicatorAppOpUsageData() {
+    public List<PermissionGroupUsage> getIndicatorAppOpUsageData() {
         return getIndicatorAppOpUsageData(new AudioManager().isMicrophoneMute());
     }
 
@@ -1106,7 +1117,7 @@ public final class PermissionManager {
     @TestApi
     @NonNull
     @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
-    public List<PermGroupUsage> getIndicatorAppOpUsageData(boolean micMuted) {
+    public List<PermissionGroupUsage> getIndicatorAppOpUsageData(boolean micMuted) {
         // Lazily initialize the usage helper
         initializeUsageHelper();
         return mUsageHelper.getOpUsageData(micMuted);
