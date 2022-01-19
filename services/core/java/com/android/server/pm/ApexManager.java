@@ -45,6 +45,7 @@ import android.os.Trace;
 import android.sysprop.ApexProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.PrintWriterPrinter;
 import android.util.Singleton;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -1171,6 +1172,10 @@ public abstract class ApexManager {
                 ipw.println("Path: " + pi.applicationInfo.sourceDir);
                 ipw.println("IsActive: " + isActive(pi));
                 ipw.println("IsFactory: " + isFactory(pi));
+                ipw.println("ApplicationInfo: ");
+                ipw.increaseIndent();
+                pi.applicationInfo.dump(new PrintWriterPrinter(ipw), "");
+                ipw.decreaseIndent();
                 ipw.decreaseIndent();
             }
             ipw.decreaseIndent();
