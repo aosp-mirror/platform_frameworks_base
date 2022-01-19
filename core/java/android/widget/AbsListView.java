@@ -2656,6 +2656,27 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
+    /**
+     * Returns whether the selected child view (from the adapter's getView) is enabled.
+     *
+     * @return true if enabled
+     */
+    public boolean isSelectedChildViewEnabled() {
+        return mIsChildViewEnabled;
+    }
+
+    /**
+     * Set whether the selected child view (from the adapter's getView) is enabled.
+     *
+     * When refreshDrawableState is called, AbsListView will control the "enabled" state
+     * of the selector based on this.
+     *
+     * @param selectedChildViewEnabled true if enabled
+     */
+    public void setSelectedChildViewEnabled(boolean selectedChildViewEnabled) {
+        mIsChildViewEnabled = selectedChildViewEnabled;
+    }
+
     @Override
     protected void dispatchDraw(Canvas canvas) {
         int saveCount = 0;

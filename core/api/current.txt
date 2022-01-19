@@ -55251,6 +55251,7 @@ package android.widget {
     method protected boolean isInFilterMode();
     method public boolean isItemChecked(int);
     method public boolean isScrollingCacheEnabled();
+    method public boolean isSelectedChildViewEnabled();
     method public boolean isSmoothScrollbarEnabled();
     method public boolean isStackFromBottom();
     method public boolean isTextFilterEnabled();
@@ -55286,6 +55287,7 @@ package android.widget {
     method public void setRemoteViewsAdapter(android.content.Intent);
     method public void setScrollIndicators(android.view.View, android.view.View);
     method public void setScrollingCacheEnabled(boolean);
+    method public void setSelectedChildViewEnabled(boolean);
     method public void setSelectionFromTop(int, int);
     method public void setSelector(@DrawableRes int);
     method public void setSelector(android.graphics.drawable.Drawable);
