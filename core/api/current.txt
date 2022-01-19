@@ -48079,31 +48079,13 @@ package android.view {
 
   public final class Choreographer {
     method public static android.view.Choreographer getInstance();
-    method public void postExtendedFrameCallback(@NonNull android.view.Choreographer.ExtendedFrameCallback);
     method public void postFrameCallback(android.view.Choreographer.FrameCallback);
     method public void postFrameCallbackDelayed(android.view.Choreographer.FrameCallback, long);
-    method public void removeExtendedFrameCallback(@Nullable android.view.Choreographer.ExtendedFrameCallback);
     method public void removeFrameCallback(android.view.Choreographer.FrameCallback);
-  }
-
-  public static interface Choreographer.ExtendedFrameCallback {
-    method public void onVsync(@NonNull android.view.Choreographer.FrameData);
   }
 
   public static interface Choreographer.FrameCallback {
     method public void doFrame(long);
-  }
-
-  public static class Choreographer.FrameData {
-    method public long getFrameTimeNanos();
-    method @NonNull public android.view.Choreographer.FrameTimeline[] getFrameTimelines();
-    method @NonNull public android.view.Choreographer.FrameTimeline getPreferredFrameTimeline();
-  }
-
-  public static class Choreographer.FrameTimeline {
-    method public long getDeadlineNanos();
-    method public long getExpectedPresentTimeNanos();
-    method public long getVsyncId();
   }
 
   public interface CollapsibleActionView {
