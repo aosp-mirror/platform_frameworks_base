@@ -37,6 +37,7 @@ import android.provider.Settings;
 import com.android.settingslib.RestrictedLockUtils;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -66,6 +67,7 @@ public class BiometricActionDisabledByAdminControllerTest {
     }
 
     @Test
+    @Ignore
     public void buttonClicked() {
         ComponentName componentName = mock(ComponentName.class);
         RestrictedLockUtils.EnforcedAdmin enforcedAdmin = new RestrictedLockUtils.EnforcedAdmin(

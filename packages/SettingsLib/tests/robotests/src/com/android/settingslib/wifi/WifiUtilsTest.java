@@ -44,6 +44,7 @@ import androidx.test.core.app.ApplicationProvider;
 import com.android.settingslib.R;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -77,6 +78,7 @@ public class WifiUtilsTest {
     }
 
     @Test
+    @Ignore
     public void testVerboseSummaryString_showsScanResultSpeedLabel() {
         WifiTracker.sVerboseLogging = true;
 
