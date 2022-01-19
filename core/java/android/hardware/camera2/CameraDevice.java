@@ -402,7 +402,9 @@ public abstract class CameraDevice implements AutoCloseable {
      *                                  registered surfaces do not meet the device-specific
      *                                  extension requirements such as dimensions and/or
      *                                  (output format)/(surface type), or if the extension is not
-     *                                  supported.
+     *                                  supported, or if any of the output configurations select
+     *                                  a dynamic range different from
+     *                                  {@link android.hardware.camera2.params.DynamicRangeProfiles#STANDARD}
      * @see CameraExtensionCharacteristics#getSupportedExtensions
      * @see CameraExtensionCharacteristics#getExtensionSupportedSizes
      */
@@ -822,7 +824,36 @@ public abstract class CameraDevice implements AutoCloseable {
      * be chosen from. {@code DEFAULT} refers to the default sensor pixel mode {@link
      * StreamConfigurationMap} and {@code MAX_RES} refers to the maximum resolution {@link
      * StreamConfigurationMap}. The same capture request must not mix targets from
-     * {@link StreamConfigurationMap}s corresponding to different sensor pixel modes.
+     * {@link StreamConfigurationMap}s corresponding to different sensor pixel modes. </p>
+     *
+     * <p> 10-bit output capable
+     * {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT}
+     * devices support at least the following stream combinations: </p>
+     * <table>
+     * <tr><th colspan="7">10-bit output additional guaranteed configurations</th></tr>
+     * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> }</td> <td colspan="4" id="rb"></td> <td>Simple preview, GPU video processing, or no-preview video recording.</td> </tr>
+     * <tr> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> }</td> <td colspan="4" id="rb"></td> <td>In-application video/image processing.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM }</td> <td colspan="2" id="rb"></td> <td>Standard still imaging.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code MAXIMUM }</td> <td colspan="2" id="rb"></td> <td>Maximum-resolution in-app processing with preview.</td> </tr>
+     * <tr> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM }</td> <td colspan="2" id="rb"></td> <td>Maximum-resolution two-input in-app processing.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV}</td><td id="rb">{@code RECORD }</td> <td colspan="2" id="rb"></td> <td>High-resolution video recording with preview.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV}</td><td id="rb">{@code RECORD }</td> <td>{@code YUV}</td><td id="rb">{@code RECORD }</td> <td>High-resolution recording with in-app snapshot.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV }</td><td id="rb">{@code RECORD }</td> <td>{@code JPEG}</td><td id="rb">{@code RECORD }</td> <td>High-resolution recording with video snapshot.</td> </tr>
+     * </table><br>
+     * <p>Here PRIV can be either 8 or 10-bit {@link android.graphics.ImageFormat#PRIVATE} pixel
+     * format. YUV can be either {@link android.graphics.ImageFormat#YUV_420_888} or
+     * {@link android.graphics.ImageFormat#YCBCR_P010}.
+     * For the maximum size column, PREVIEW refers to the best size match to the device's screen
+     * resolution, or to 1080p (1920x1080), whichever is smaller. RECORD refers to the camera
+     * device's maximum supported recording resolution, as determined by
+     * {@link android.media.CamcorderProfile}. MAXIMUM refers to the camera device's maximum output
+     * resolution for that format or target from {@link StreamConfigurationMap#getOutputSizes(int)}.
+     * Do note that invalid combinations such as having a camera surface configured to use pixel
+     * format {@link android.graphics.ImageFormat#YUV_420_888} with a 10-bit profile
+     * will cause a capture session initialization failure.
+     * </p>
      *
      * <p>Since the capabilities of camera devices vary greatly, a given camera device may support
      * target combinations with sizes outside of these guarantees, but this can only be tested for
@@ -906,6 +937,13 @@ public abstract class CameraDevice implements AutoCloseable {
      * and use the tables under {@link #createCaptureSession createCaptureSession} to determine the
      * guaranteed output targets that can be submitted in a regular or reprocess
      * {@link CaptureRequest} simultaneously.</p>
+     *
+     * <p>Reprocessing with 10-bit output targets on 10-bit capable
+     * {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT} devices is
+     * not supported. Trying to initialize a repreocessable capture session with one ore more
+     * output configurations set {@link OutputConfiguration#setDynamicRangeProfile(int)} to use
+     * a 10-bit dynamic range profile {@link android.hardware.camera2.params.DynamicRangeProfiles}
+     * will trigger {@link IllegalArgumentException}.</p>
      *
      * <style scoped>
      *  #rb { border-right-width: thick; }
@@ -1083,13 +1121,17 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * @throws IllegalArgumentException In case the session configuration is invalid; or the output
      *                                  configurations are empty; or the session configuration
-     *                                  executor is invalid.
+     *                                  executor is invalid;
+     *                                  or the output dynamic range combination is
+     *                                  invalid/unsupported.
      * @throws CameraAccessException In case the camera device is no longer connected or has
      *                               encountered a fatal error.
      * @see #createCaptureSession(List, CameraCaptureSession.StateCallback, Handler)
      * @see #createCaptureSessionByOutputConfigurations
      * @see #createReprocessableCaptureSession
      * @see #createConstrainedHighSpeedCaptureSession
+     * @see OutputConfiguration#setDynamicRangeProfile(int)
+     * @see android.hardware.camera2.params.DynamicRangeProfiles
      */
     public void createCaptureSession(
             SessionConfiguration config) throws CameraAccessException {

@@ -461,7 +461,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     public @Nullable RecommendedStreamConfigurationMap getRecommendedStreamConfigurationMap(
             @RecommendedStreamConfigurationMap.RecommendedUsecase int usecase) {
         if (((usecase >= RecommendedStreamConfigurationMap.USECASE_PREVIEW) &&
-                (usecase <= RecommendedStreamConfigurationMap.USECASE_LOW_LATENCY_SNAPSHOT)) ||
+                (usecase <= RecommendedStreamConfigurationMap.USECASE_10BIT_OUTPUT)) ||
                 ((usecase >= RecommendedStreamConfigurationMap.USECASE_VENDOR_START) &&
                 (usecase < RecommendedStreamConfigurationMap.MAX_USECASE_COUNT))) {
             if (mRecommendedConfigurations == null) {
@@ -2213,6 +2213,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING OFFLINE_PROCESSING}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR ULTRA_HIGH_RESOLUTION_SENSOR}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING REMOSAIC_REPROCESSING}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT DYNAMIC_RANGE_TEN_BIT}</li>
      * </ul>
      *
      * <p>This key is available on all devices.</p>
@@ -2236,6 +2237,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR
      * @see #REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT
      */
     @PublicKey
     @NonNull
@@ -2377,6 +2379,86 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public static final Key<int[]> REQUEST_CHARACTERISTIC_KEYS_NEEDING_PERMISSION =
             new Key<int[]>("android.request.characteristicKeysNeedingPermission", int[].class);
+
+    /**
+     * <p>Devices supporting the 10-bit output capability
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT }
+     * must list their supported dynamic range profiles along with capture request
+     * constraints for specific profile combinations.</p>
+     * <p>Camera clients can retrieve the list of supported 10-bit dynamic range profiles by calling
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles#getSupportedProfiles }.
+     * Any of them can be configured by setting OutputConfiguration dynamic range profile in
+     * {@link android.hardware.camera2.params.OutputConfiguration#setDynamicRangeProfile }.
+     * Clients can also check if there are any constraints that limit the combination
+     * of supported profiles that can be referenced within a single capture request by calling
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints }.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.DynamicRangeProfiles> REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES =
+            new Key<android.hardware.camera2.params.DynamicRangeProfiles>("android.request.availableDynamicRangeProfiles", android.hardware.camera2.params.DynamicRangeProfiles.class);
+
+    /**
+     * <p>A map of all available 10-bit dynamic range profiles along with their
+     * capture request constraints.</p>
+     * <p>Devices supporting the 10-bit output capability
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT }
+     * must list their supported dynamic range profiles. In case the camera is not able to
+     * support every possible profile combination within a single capture request, then the
+     * constraints must be listed here as well.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_STANDARD STANDARD}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_HLG10 HLG10}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_HDR10 HDR10}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_HDR10_PLUS HDR10_PLUS}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_REF DOLBY_VISION_10B_HDR_REF}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_REF_PO DOLBY_VISION_10B_HDR_REF_PO}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_OEM DOLBY_VISION_10B_HDR_OEM}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_OEM_PO DOLBY_VISION_10B_HDR_OEM_PO}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_REF DOLBY_VISION_8B_HDR_REF}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_REF_PO DOLBY_VISION_8B_HDR_REF_PO}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_OEM DOLBY_VISION_8B_HDR_OEM}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_OEM_PO DOLBY_VISION_8B_HDR_OEM_PO}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_MAX MAX}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_STANDARD
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_HLG10
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_HDR10
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_HDR10_PLUS
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_REF
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_REF_PO
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_OEM
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_OEM_PO
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_REF
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_REF_PO
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_OEM
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_OEM_PO
+     * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_MAX
+     * @hide
+     */
+    public static final Key<int[]> REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP =
+            new Key<int[]>("android.request.availableDynamicRangeProfilesMap", int[].class);
+
+    /**
+     * <p>Recommended 10-bit dynamic range profile.</p>
+     * <p>Devices supporting the 10-bit output capability
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT }
+     * must list a 10-bit supported dynamic range profile that is expected to perform
+     * optimally in terms of image quality, power and performance.
+     * The value advertised can be used as a hint by camera clients when configuring the dynamic
+     * range profile when calling
+     * {@link android.hardware.camera2.params.OutputConfiguration#setDynamicRangeProfile }.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE =
+            new Key<Integer>("android.request.recommendedTenBitDynamicRangeProfile", int.class);
 
     /**
      * <p>The list of image formats that are supported by this
@@ -3338,6 +3420,32 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @SyntheticKey
     public static final Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_MAXIMUM_RESOLUTION_STREAM_COMBINATIONS =
             new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryMaximumResolutionStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
+
+    /**
+     * <p>An array of mandatory stream combinations which are applicable when device support the
+     * 10-bit output capability
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT }
+     * This is an app-readable conversion of the maximum resolution mandatory stream combination
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
+     * <p>The array of
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination combinations} is
+     * generated according to the documented
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession guideline} for each
+     * device which has the
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT }
+     * capability.
+     * Clients can use the array as a quick reference to find an appropriate camera stream
+     * combination.
+     * The mandatory stream combination array will be {@code null} in case the device is not an
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT }
+     * device.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_TEN_BIT_OUTPUT_STREAM_COMBINATIONS =
+            new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryTenBitOutputStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
 
     /**
      * <p>Whether the camera device supports multi-resolution input or output streams</p>

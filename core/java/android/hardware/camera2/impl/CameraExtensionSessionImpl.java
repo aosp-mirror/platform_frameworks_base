@@ -39,6 +39,7 @@ import android.hardware.camera2.extension.IPreviewExtenderImpl;
 import android.hardware.camera2.extension.IRequestUpdateProcessorImpl;
 import android.hardware.camera2.extension.ParcelImage;
 import android.hardware.camera2.TotalCaptureResult;
+import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
@@ -143,6 +144,13 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 config.getOutputConfigurations().size() > 2) {
             throw new IllegalArgumentException("Unexpected amount of output surfaces, received: " +
                     config.getOutputConfigurations().size() + " expected <= 2");
+        }
+
+        for (OutputConfiguration c : config.getOutputConfigurations()) {
+            if (c.getDynamicRangeProfile() != DynamicRangeProfiles.STANDARD) {
+                throw new IllegalArgumentException("Unsupported dynamic range profile: " +
+                        c.getDynamicRangeProfile());
+            }
         }
 
         Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
