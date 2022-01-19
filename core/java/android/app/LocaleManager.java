@@ -55,6 +55,9 @@ public class LocaleManager {
      *
      * <p>Pass a {@link LocaleList#getEmptyLocaleList()} to reset to the system locale.
      *
+     * <p><b>Note:</b> The set locales are persisted; they are backed up if the user has enabled
+     * Backup & Restore.
+     *
      * @param locales the desired locales for the calling app.
      */
     @UserHandleAware
@@ -66,6 +69,9 @@ public class LocaleManager {
      * Sets the UI locales for a specified app (described by package name).
      *
      * <p>Pass a {@link LocaleList#getEmptyLocaleList()} to reset to the system locale.
+     *
+     * <p><b>Note:</b> The set locales are persisted; they are backed up if the user has enabled
+     * Backup & Restore.
      *
      * @param appPackageName the package name of the app for which to set the locales.
      * @param locales the desired locales for the specified app.
