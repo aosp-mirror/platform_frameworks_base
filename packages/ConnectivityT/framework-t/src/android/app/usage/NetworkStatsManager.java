@@ -157,6 +157,11 @@ public class NetworkStatsManager {
         setAugmentWithSubscriptionPlan(true);
     }
 
+    /** @hide */
+    public INetworkStatsService getBinder() {
+        return mService;
+    }
+
     /**
      * Set poll on open flag to indicate the poll is needed before service gets statistics
      * result. This is default enabled. However, for any non-privileged caller, the poll might
