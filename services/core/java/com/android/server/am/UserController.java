@@ -2903,7 +2903,7 @@ class UserController implements Handler.Callback {
              */
             mHandler.removeMessages(CLEAR_USER_JOURNEY_SESSION_MSG);
             mHandler.sendMessageDelayed(mHandler.obtainMessage(CLEAR_USER_JOURNEY_SESSION_MSG,
-                    target.id), USER_JOURNEY_TIMEOUT_MS);
+                    target.id, /* arg2= */ 0), USER_JOURNEY_TIMEOUT_MS);
         }
 
         FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, newSessionId,
