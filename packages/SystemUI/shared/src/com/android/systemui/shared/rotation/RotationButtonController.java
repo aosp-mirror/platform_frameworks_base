@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.rotation;
 
+import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.internal.view.RotationPolicy.NATURAL_ROTATION;
@@ -200,7 +201,7 @@ public class RotationButtonController {
     }
 
     public void registerListeners() {
-        if (mListenersRegistered) {
+        if (mListenersRegistered || getContext().getPackageManager().hasSystemFeature(FEATURE_PC)) {
             return;
         }
 
@@ -414,6 +415,9 @@ public class RotationButtonController {
     }
 
     public void onTaskbarStateChange(boolean visible, boolean stashed) {
+        if (getRotationButton() == null) {
+            return;
+        }
         getRotationButton().onTaskbarStateChanged(visible, stashed);
     }
 
