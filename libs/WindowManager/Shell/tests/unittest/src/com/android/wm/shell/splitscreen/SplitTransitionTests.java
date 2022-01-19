@@ -251,7 +251,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
-    public void testDismissToHome() {
+    public void testEnterRecents() {
         enterSplit();
 
         ActivityManager.RunningTaskInfo homeTask = new TestRunningTaskInfoBuilder()
@@ -264,7 +264,7 @@ public class SplitTransitionTests extends ShellTestCase {
         IBinder transition = mock(IBinder.class);
         WindowContainerTransaction result = mStageCoordinator.handleRequest(transition, request);
 
-        assertTrue(containsSplitExit(result));
+        assertTrue(result.isEmpty());
 
         // make sure we haven't made any local changes yet (need to wait until transition is ready)
         assertTrue(mStageCoordinator.isSplitScreenVisible());
@@ -284,7 +284,7 @@ public class SplitTransitionTests extends ShellTestCase {
                 mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class),
                 mock(Transitions.TransitionFinishCallback.class));
-        assertFalse(mStageCoordinator.isSplitScreenVisible());
+        assertTrue(mStageCoordinator.isSplitScreenVisible());
     }
 
     @Test
