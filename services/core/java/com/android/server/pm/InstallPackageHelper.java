@@ -1221,23 +1221,22 @@ final class InstallPackageHelper {
                 }
             }
 
+            // Static shared libs have same package with different versions where
+            // we internally use a synthetic package name to allow multiple versions
+            // of the same package, therefore we need to compare signatures against
+            // the package setting for the latest library version.
+            if (parsedPackage.isStaticSharedLibrary()) {
+                SharedLibraryInfo libraryInfo =
+                        mSharedLibraries.getLatestStaticSharedLibraVersionLPr(parsedPackage);
+                if (libraryInfo != null) {
+                    signatureCheckPs = mPm.mSettings.getPackageLPr(libraryInfo.getPackageName());
+                }
+            }
+
             if (signatureCheckPs != null) {
                 if (DEBUG_INSTALL) {
                     Slog.d(TAG,
                             "Existing package for signature checking: " + signatureCheckPs);
-                }
-
-                // Static shared libs have same package with different versions where
-                // we internally use a synthetic package name to allow multiple versions
-                // of the same package, therefore we need to compare signatures against
-                // the package setting for the latest library version.
-                if (parsedPackage.isStaticSharedLibrary()) {
-                    SharedLibraryInfo libraryInfo =
-                            mSharedLibraries.getLatestStaticSharedLibraVersionLPr(parsedPackage);
-                    if (libraryInfo != null) {
-                        signatureCheckPs = mPm.mSettings.getPackageLPr(
-                                libraryInfo.getPackageName());
-                    }
                 }
 
                 // Quick validity check that we're signed correctly if updating;
