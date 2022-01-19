@@ -44,6 +44,7 @@ import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipMediaController.ActionListener;
 import com.android.wm.shell.pip.PipMenuController;
+import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.io.PrintWriter;
@@ -118,6 +119,7 @@ public class PhonePipMenuController implements PipMenuController {
     private final ArrayList<Listener> mListeners = new ArrayList<>();
     private final SystemWindows mSystemWindows;
     private final Optional<SplitScreenController> mSplitScreenController;
+    private final PipUiEventLogger mPipUiEventLogger;
     private ParceledListSlice<RemoteAction> mAppActions;
     private ParceledListSlice<RemoteAction> mMediaActions;
     private SyncRtSurfaceTransactionApplier mApplier;
@@ -150,6 +152,7 @@ public class PhonePipMenuController implements PipMenuController {
     public PhonePipMenuController(Context context, PipBoundsState pipBoundsState,
             PipMediaController mediaController, SystemWindows systemWindows,
             Optional<SplitScreenController> splitScreenOptional,
+            PipUiEventLogger pipUiEventLogger,
             ShellExecutor mainExecutor, Handler mainHandler) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
@@ -158,6 +161,7 @@ public class PhonePipMenuController implements PipMenuController {
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
         mSplitScreenController = splitScreenOptional;
+        mPipUiEventLogger = pipUiEventLogger;
     }
 
     public boolean isMenuVisible() {
@@ -187,7 +191,7 @@ public class PhonePipMenuController implements PipMenuController {
             detachPipMenuView();
         }
         mPipMenuView = new PipMenuView(mContext, this, mMainExecutor, mMainHandler,
-                mSplitScreenController);
+                mSplitScreenController, mPipUiEventLogger);
         mSystemWindows.addView(mPipMenuView,
                 getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
                 0, SHELL_ROOT_LAYER_PIP);

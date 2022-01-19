@@ -246,10 +246,11 @@ public class WMShellModule {
             PipBoundsState pipBoundsState, PipMediaController pipMediaController,
             SystemWindows systemWindows,
             Optional<SplitScreenController> splitScreenOptional,
+            PipUiEventLogger pipUiEventLogger,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
         return new PhonePipMenuController(context, pipBoundsState, pipMediaController,
-                systemWindows, splitScreenOptional, mainExecutor, mainHandler);
+                systemWindows, splitScreenOptional, pipUiEventLogger, mainExecutor, mainHandler);
     }
 
     @WMSingleton
