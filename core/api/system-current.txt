@@ -13203,6 +13203,7 @@ package android.telephony.data {
     field public static final String TYPE_DEFAULT_STRING = "default";
     field public static final String TYPE_DUN_STRING = "dun";
     field public static final String TYPE_EMERGENCY_STRING = "emergency";
+    field public static final String TYPE_ENTERPRISE_STRING = "enterprise";
     field public static final String TYPE_FOTA_STRING = "fota";
     field public static final String TYPE_HIPRI_STRING = "hipri";
     field public static final String TYPE_IA_STRING = "ia";
