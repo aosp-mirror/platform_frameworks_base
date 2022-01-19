@@ -28,6 +28,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 class FingerprintGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
 
@@ -36,7 +37,7 @@ class FingerprintGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
     private final Map<Integer, Long> mAuthenticatorIds;
 
     FingerprintGetAuthenticatorIdClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, int userId, @NonNull String owner,
+            @NonNull Supplier<ISession> lazyDaemon, int userId, @NonNull String owner,
             int sensorId, Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_FINGERPRINT,

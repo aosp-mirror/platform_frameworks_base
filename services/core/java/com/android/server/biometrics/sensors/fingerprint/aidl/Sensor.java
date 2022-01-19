@@ -51,7 +51,6 @@ import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
-import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -66,6 +65,7 @@ import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDisp
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Maintains the state of a single sensor within an instance of the
@@ -87,7 +87,7 @@ class Sensor {
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
 
     @Nullable private Session mCurrentSession;
-    @NonNull private final HalClientMonitor.LazyDaemon<ISession> mLazySession;
+    @NonNull private final Supplier<ISession> mLazySession;
 
     static class Session {
         @NonNull private final String mTag;
@@ -500,7 +500,7 @@ class Sensor {
         mLazySession = () -> mCurrentSession != null ? mCurrentSession.mSession : null;
     }
 
-    @NonNull HalClientMonitor.LazyDaemon<ISession> getLazySession() {
+    @NonNull Supplier<ISession> getLazySession() {
         return mLazySession;
     }
 

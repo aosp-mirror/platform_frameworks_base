@@ -29,6 +29,7 @@ import android.util.Slog;
 import com.android.server.biometrics.BiometricsProto;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 /**
  * A class to keep track of the enrollment state for a given client.
@@ -49,7 +50,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
      */
     protected abstract boolean hasReachedEnrollmentLimit();
 
-    public EnrollClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public EnrollClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
             int timeoutSec, int statsModality, int sensorId, boolean shouldVibrate) {

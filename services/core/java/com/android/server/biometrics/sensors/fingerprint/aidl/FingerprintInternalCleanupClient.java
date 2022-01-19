@@ -31,6 +31,7 @@ import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Fingerprint-specific internal cleanup client supporting the
@@ -39,7 +40,7 @@ import java.util.Map;
 class FingerprintInternalCleanupClient extends InternalCleanupClient<Fingerprint, ISession> {
 
     FingerprintInternalCleanupClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, int userId, @NonNull String owner,
+            @NonNull Supplier<ISession> lazyDaemon, int userId, @NonNull String owner,
             int sensorId, @NonNull List<Fingerprint> enrolledList,
             @NonNull FingerprintUtils utils, @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId,
@@ -48,7 +49,7 @@ class FingerprintInternalCleanupClient extends InternalCleanupClient<Fingerprint
 
     @Override
     protected InternalEnumerateClient<ISession> getEnumerateClient(Context context,
-            LazyDaemon<ISession> lazyDaemon, IBinder token, int userId, String owner,
+            Supplier<ISession> lazyDaemon, IBinder token, int userId, String owner,
             List<Fingerprint> enrolledList, BiometricUtils<Fingerprint> utils, int sensorId) {
         return new FingerprintInternalEnumerateClient(context, lazyDaemon, token, userId, owner,
                 enrolledList, utils, sensorId);
@@ -56,7 +57,7 @@ class FingerprintInternalCleanupClient extends InternalCleanupClient<Fingerprint
 
     @Override
     protected RemovalClient<Fingerprint, ISession> getRemovalClient(Context context,
-            LazyDaemon<ISession> lazyDaemon, IBinder token, int biometricId, int userId,
+            Supplier<ISession> lazyDaemon, IBinder token, int biometricId, int userId,
             String owner, BiometricUtils<Fingerprint> utils, int sensorId,
             Map<Integer, Long> authenticatorIds) {
         return new FingerprintRemovalClient(context, lazyDaemon, token,

@@ -34,6 +34,8 @@ import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
+import java.util.function.Supplier;
+
 /**
  * Fingerprint-specific resetLockout client for the {@link IFingerprint} AIDL HAL interface.
  * Updates the framework's lockout cache and notifies clients such as Keyguard when lockout is
@@ -48,7 +50,7 @@ class FingerprintResetLockoutClient extends HalClientMonitor<ISession> implement
     private final LockoutResetDispatcher mLockoutResetDispatcher;
 
     FingerprintResetLockoutClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, int userId, String owner, int sensorId,
+            @NonNull Supplier<ISession> lazyDaemon, int userId, String owner, int sensorId,
             @NonNull byte[] hardwareAuthToken, @NonNull LockoutCache lockoutTracker,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,

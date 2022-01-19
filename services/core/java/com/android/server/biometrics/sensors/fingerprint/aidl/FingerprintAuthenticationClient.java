@@ -47,6 +47,7 @@ import com.android.server.biometrics.sensors.SensorOverlays;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 /**
  * Fingerprint-specific authentication client supporting the
@@ -65,7 +66,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     private boolean mIsPointerDown;
 
     FingerprintAuthenticationClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon,
+            @NonNull Supplier<ISession> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,

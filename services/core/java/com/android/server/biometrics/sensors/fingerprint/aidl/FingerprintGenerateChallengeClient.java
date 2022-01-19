@@ -27,6 +27,8 @@ import android.util.Slog;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.GenerateChallengeClient;
 
+import java.util.function.Supplier;
+
 /**
  * Fingerprint-specific generateChallenge client for the {@link IFingerprint} AIDL HAL interface.
  */
@@ -34,7 +36,7 @@ class FingerprintGenerateChallengeClient extends GenerateChallengeClient<ISessio
     private static final String TAG = "FingerprintGenerateChallengeClient";
 
     FingerprintGenerateChallengeClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon,
+            @NonNull Supplier<ISession> lazyDaemon,
             @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener,
             int userId, @NonNull String owner, int sensorId) {

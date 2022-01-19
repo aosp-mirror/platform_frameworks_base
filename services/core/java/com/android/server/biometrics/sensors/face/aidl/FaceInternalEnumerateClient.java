@@ -30,6 +30,7 @@ import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.InternalEnumerateClient;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Face-specific internal enumerate client for the {@link IFace} AIDL HAL interface.
@@ -38,7 +39,7 @@ class FaceInternalEnumerateClient extends InternalEnumerateClient<ISession> {
     private static final String TAG = "FaceInternalEnumerateClient";
 
     FaceInternalEnumerateClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token, int userId,
+            @NonNull Supplier<ISession> lazyDaemon, @NonNull IBinder token, int userId,
             @NonNull String owner, @NonNull List<Face> enrolledList,
             @NonNull BiometricUtils<Face> utils, int sensorId) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,

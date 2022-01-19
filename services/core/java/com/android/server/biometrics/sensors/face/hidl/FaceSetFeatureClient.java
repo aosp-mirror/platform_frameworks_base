@@ -31,6 +31,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 /**
  * Face-specific setFeature client supporting the {@link android.hardware.biometrics.face.V1_0}
@@ -45,7 +46,7 @@ public class FaceSetFeatureClient extends HalClientMonitor<IBiometricsFace> {
     private final ArrayList<Byte> mHardwareAuthToken;
     private final int mFaceId;
 
-    FaceSetFeatureClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
+    FaceSetFeatureClient(@NonNull Context context, @NonNull Supplier<IBiometricsFace> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId, int feature, boolean enabled,
             byte[] hardwareAuthToken, int faceId) {

@@ -42,6 +42,7 @@ import com.android.server.biometrics.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * A class to keep track of the authentication state for a given client.
@@ -105,7 +106,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
      */
     public abstract boolean wasUserDetected();
 
-    public AuthenticationClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public AuthenticationClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int targetUserId, long operationId, boolean restricted, @NonNull String owner,
             int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,

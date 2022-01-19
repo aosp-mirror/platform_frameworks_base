@@ -25,11 +25,13 @@ import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
 
+import java.util.function.Supplier;
+
 public abstract class GenerateChallengeClient<T> extends HalClientMonitor<T> {
 
     private static final String TAG = "GenerateChallengeClient";
 
-    public GenerateChallengeClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public GenerateChallengeClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int userId, @NonNull String owner, int sensorId) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,

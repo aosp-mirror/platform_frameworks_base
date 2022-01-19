@@ -35,6 +35,8 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.DetectionConsumer;
 import com.android.server.biometrics.sensors.SensorOverlays;
 
+import java.util.function.Supplier;
+
 /**
  * Performs fingerprint detection without exposing any matching information (e.g. accept/reject
  * have the same haptic, lockout counter is not increased).
@@ -47,7 +49,7 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> implements Det
     @NonNull private final SensorOverlays mSensorOverlays;
     @Nullable private ICancellationSignal mCancellationSignal;
 
-    FingerprintDetectClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    FingerprintDetectClient(@NonNull Context context, @NonNull Supplier<ISession> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId,

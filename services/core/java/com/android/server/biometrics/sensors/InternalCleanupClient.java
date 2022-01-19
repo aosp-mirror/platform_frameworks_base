@@ -28,6 +28,7 @@ import com.android.server.biometrics.BiometricsProto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Wraps {@link InternalEnumerateClient} and {@link RemovalClient}. Keeps track of all the
@@ -99,14 +100,14 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     };
 
     protected abstract InternalEnumerateClient<T> getEnumerateClient(Context context,
-            LazyDaemon<T> lazyDaemon, IBinder token, int userId, String owner,
+            Supplier<T> lazyDaemon, IBinder token, int userId, String owner,
             List<S> enrolledList, BiometricUtils<S> utils, int sensorId);
 
     protected abstract RemovalClient<S, T> getRemovalClient(Context context,
-            LazyDaemon<T> lazyDaemon, IBinder token, int biometricId, int userId, String owner,
+            Supplier<T> lazyDaemon, IBinder token, int biometricId, int userId, String owner,
             BiometricUtils<S> utils, int sensorId, Map<Integer, Long> authenticatorIds);
 
-    protected InternalCleanupClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    protected InternalCleanupClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             int userId, @NonNull String owner, int sensorId, int statsModality,
             @NonNull List<S> enrolledList, @NonNull BiometricUtils<S> utils,
             @NonNull Map<Integer, Long> authenticatorIds) {

@@ -27,6 +27,8 @@ import android.util.Slog;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.GenerateChallengeClient;
 
+import java.util.function.Supplier;
+
 /**
  * Face-specific generateChallenge client for the {@link IFace} AIDL HAL interface.
  */
@@ -34,7 +36,7 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<ISessio
     private static final String TAG = "FaceGenerateChallengeClient";
 
     FaceGenerateChallengeClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
+            @NonNull Supplier<ISession> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
             int sensorId) {
         super(context, lazyDaemon, token, listener, userId, owner, sensorId);

@@ -47,6 +47,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.function.Supplier;
+
 @Presubmit
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -223,7 +225,7 @@ public class UserAwareBiometricSchedulerTest {
 
     private static class TestStopUserClient extends StopUserClient<Object> {
         public TestStopUserClient(@NonNull Context context,
-                @NonNull LazyDaemon<Object> lazyDaemon, @Nullable IBinder token, int userId,
+                @NonNull Supplier<Object> lazyDaemon, @Nullable IBinder token, int userId,
                 int sensorId, @NonNull UserStoppedCallback callback) {
             super(context, lazyDaemon, token, userId, sensorId, callback);
         }
@@ -251,7 +253,7 @@ public class UserAwareBiometricSchedulerTest {
         ClientMonitorCallback mCallback;
 
         public TestStartUserClient(@NonNull Context context,
-                @NonNull LazyDaemon<Object> lazyDaemon, @Nullable IBinder token, int userId,
+                @NonNull Supplier<Object> lazyDaemon, @Nullable IBinder token, int userId,
                 int sensorId, @NonNull UserStartedCallback<Object> callback, boolean shouldFinish) {
             super(context, lazyDaemon, token, userId, sensorId, callback);
             mShouldFinish = shouldFinish;

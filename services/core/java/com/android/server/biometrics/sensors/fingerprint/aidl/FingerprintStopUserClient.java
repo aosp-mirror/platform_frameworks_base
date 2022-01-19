@@ -27,11 +27,13 @@ import android.util.Slog;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.StopUserClient;
 
+import java.util.function.Supplier;
+
 public class FingerprintStopUserClient extends StopUserClient<ISession> {
     private static final String TAG = "FingerprintStopUserClient";
 
     public FingerprintStopUserClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @Nullable IBinder token, int userId,
+            @NonNull Supplier<ISession> lazyDaemon, @Nullable IBinder token, int userId,
             int sensorId, @NonNull UserStoppedCallback callback) {
         super(context, lazyDaemon, token, userId, sensorId, callback);
     }

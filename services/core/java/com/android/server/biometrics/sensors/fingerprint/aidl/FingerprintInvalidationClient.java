@@ -27,12 +27,13 @@ import android.util.Slog;
 import com.android.server.biometrics.sensors.InvalidationClient;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class FingerprintInvalidationClient extends InvalidationClient<Fingerprint, ISession> {
     private static final String TAG = "FingerprintInvalidationClient";
 
     public FingerprintInvalidationClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, int userId, int sensorId,
+            @NonNull Supplier<ISession> lazyDaemon, int userId, int sensorId,
             @NonNull Map<Integer, Long> authenticatorIds, @NonNull IInvalidationCallback callback) {
         super(context, lazyDaemon, userId, sensorId, authenticatorIds, callback);
     }

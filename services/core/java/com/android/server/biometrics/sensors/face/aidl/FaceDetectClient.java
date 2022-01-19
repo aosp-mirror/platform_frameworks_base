@@ -34,6 +34,8 @@ import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.DetectionConsumer;
 
+import java.util.function.Supplier;
+
 /**
  * Performs face detection without exposing any matching information (e.g. accept/reject have the
  * same haptic, lockout counter is not increased).
@@ -46,7 +48,7 @@ public class FaceDetectClient extends AcquisitionClient<ISession> implements Det
     @Nullable private ICancellationSignal mCancellationSignal;
     @Nullable private SensorPrivacyManager mSensorPrivacyManager;
 
-    public FaceDetectClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    public FaceDetectClient(@NonNull Context context, @NonNull Supplier<ISession> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId, boolean isStrongBiometric, int statsClient) {

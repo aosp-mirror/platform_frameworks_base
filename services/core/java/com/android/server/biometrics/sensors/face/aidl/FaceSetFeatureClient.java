@@ -33,6 +33,8 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
+import java.util.function.Supplier;
+
 /**
  * Face-specific get feature client for the {@link IFace} AIDL HAL interface.
  */
@@ -44,7 +46,7 @@ public class FaceSetFeatureClient extends HalClientMonitor<ISession> implements 
     private final boolean mEnabled;
     private final HardwareAuthToken mHardwareAuthToken;
 
-    FaceSetFeatureClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    FaceSetFeatureClient(@NonNull Context context, @NonNull Supplier<ISession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId, int feature, boolean enabled,
             byte[] hardwareAuthToken) {

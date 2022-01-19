@@ -46,6 +46,8 @@ import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
+import java.util.function.Supplier;
+
 class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
 
     private static final String TAG = "FingerprintEnrollClient";
@@ -59,7 +61,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     private boolean mIsPointerDown;
 
     FingerprintEnrollClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token, long requestId,
+            @NonNull Supplier<ISession> lazyDaemon, @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int sensorId,

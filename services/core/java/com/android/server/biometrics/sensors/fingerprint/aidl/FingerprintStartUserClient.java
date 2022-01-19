@@ -30,13 +30,15 @@ import android.util.Slog;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.StartUserClient;
 
+import java.util.function.Supplier;
+
 public class FingerprintStartUserClient extends StartUserClient<IFingerprint, ISession> {
     private static final String TAG = "FingerprintStartUserClient";
 
     @NonNull private final ISessionCallback mSessionCallback;
 
     public FingerprintStartUserClient(@NonNull Context context,
-            @NonNull LazyDaemon<IFingerprint> lazyDaemon,
+            @NonNull Supplier<IFingerprint> lazyDaemon,
             @Nullable IBinder token, int userId, int sensorId,
             @NonNull ISessionCallback sessionCallback,
             @NonNull UserStartedCallback<ISession> callback) {

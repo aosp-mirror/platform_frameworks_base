@@ -31,6 +31,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.RemovalClient;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Face-specific removal client for the {@link IFace} AIDL HAL interface.
@@ -40,7 +41,7 @@ class FaceRemovalClient extends RemovalClient<Face, ISession> {
 
     final int[] mBiometricIds;
 
-    FaceRemovalClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    FaceRemovalClient(@NonNull Context context, @NonNull Supplier<ISession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int[] biometricIds, int userId, @NonNull String owner,
             @NonNull BiometricUtils<Face> utils, int sensorId,

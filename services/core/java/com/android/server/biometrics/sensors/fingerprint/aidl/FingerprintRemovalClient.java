@@ -31,6 +31,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.RemovalClient;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Fingerprint-specific removal client supporting the
@@ -42,7 +43,7 @@ class FingerprintRemovalClient extends RemovalClient<Fingerprint, ISession> {
     private final int[] mBiometricIds;
 
     FingerprintRemovalClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
+            @NonNull Supplier<ISession> lazyDaemon, @NonNull IBinder token,
             @Nullable ClientMonitorCallbackConverter listener, int[] biometricIds, int userId,
             @NonNull String owner, @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
             @NonNull Map<Integer, Long> authenticatorIds) {

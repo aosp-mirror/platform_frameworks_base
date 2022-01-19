@@ -51,6 +51,7 @@ import com.android.server.biometrics.sensors.face.FaceUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Face-specific enroll client for the {@link IFace} AIDL HAL interface.
@@ -82,7 +83,7 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
                 }
             };
 
-    FaceEnrollClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    FaceEnrollClient(@NonNull Context context, @NonNull Supplier<ISession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String opPackageName, long requestId,
             @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,

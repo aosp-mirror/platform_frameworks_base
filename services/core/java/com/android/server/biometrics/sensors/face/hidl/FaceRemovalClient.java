@@ -30,6 +30,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.RemovalClient;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Face-specific removal client supporting the {@link android.hardware.biometrics.face.V1_0}
@@ -40,7 +41,7 @@ class FaceRemovalClient extends RemovalClient<Face, IBiometricsFace> {
 
     private final int mBiometricId;
 
-    FaceRemovalClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
+    FaceRemovalClient(@NonNull Context context, @NonNull Supplier<IBiometricsFace> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int biometricId, int userId, @NonNull String owner, @NonNull BiometricUtils<Face> utils,
             int sensorId, @NonNull Map<Integer, Long> authenticatorIds) {

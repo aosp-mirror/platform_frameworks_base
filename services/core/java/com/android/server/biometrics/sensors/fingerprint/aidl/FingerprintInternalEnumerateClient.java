@@ -29,6 +29,7 @@ import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.InternalEnumerateClient;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Fingerprint-specific internal client supporting the
@@ -38,7 +39,7 @@ class FingerprintInternalEnumerateClient extends InternalEnumerateClient<ISessio
     private static final String TAG = "FingerprintInternalEnumerateClient";
 
     protected FingerprintInternalEnumerateClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token, int userId,
+            @NonNull Supplier<ISession> lazyDaemon, @NonNull IBinder token, int userId,
             @NonNull String owner, @NonNull List<Fingerprint> enrolledList,
             @NonNull BiometricUtils<Fingerprint> utils, int sensorId) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,

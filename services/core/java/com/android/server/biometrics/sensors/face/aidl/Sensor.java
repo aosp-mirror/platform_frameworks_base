@@ -53,7 +53,6 @@ import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
-import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
@@ -67,6 +66,7 @@ import com.android.server.biometrics.sensors.face.FaceUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Maintains the state of a single sensor within an instance of the {@link IFace} HAL.
@@ -84,7 +84,7 @@ public class Sensor {
     @NonNull private final UserAwareBiometricScheduler mScheduler;
     @NonNull private final LockoutCache mLockoutCache;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
-    @NonNull private final HalClientMonitor.LazyDaemon<ISession> mLazySession;
+    @NonNull private final Supplier<ISession> mLazySession;
     @Nullable private Session mCurrentSession;
 
     static class Session {
@@ -545,7 +545,7 @@ public class Sensor {
         mLazySession = () -> mCurrentSession != null ? mCurrentSession.mSession : null;
     }
 
-    @NonNull HalClientMonitor.LazyDaemon<ISession> getLazySession() {
+    @NonNull Supplier<ISession> getLazySession() {
         return mLazySession;
     }
 

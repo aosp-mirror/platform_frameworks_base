@@ -28,6 +28,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 class FaceGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
 
@@ -35,7 +36,7 @@ class FaceGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
 
     private final Map<Integer, Long> mAuthenticatorIds;
 
-    FaceGetAuthenticatorIdClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    FaceGetAuthenticatorIdClient(@NonNull Context context, @NonNull Supplier<ISession> lazyDaemon,
             int userId, @NonNull String opPackageName, int sensorId,
             Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, opPackageName,

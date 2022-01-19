@@ -26,6 +26,8 @@ import android.util.Slog;
 
 import com.android.server.biometrics.sensors.RevokeChallengeClient;
 
+import java.util.function.Supplier;
+
 /**
  * Face-specific revokeChallenge client for the {@link IFace} AIDL HAL interface.
  */
@@ -36,7 +38,7 @@ public class FaceRevokeChallengeClient extends RevokeChallengeClient<ISession> {
     private final long mChallenge;
 
     FaceRevokeChallengeClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
+            @NonNull Supplier<ISession> lazyDaemon, @NonNull IBinder token,
             int userId, @NonNull String owner, int sensorId, long challenge) {
         super(context, lazyDaemon, token, userId, owner, sensorId);
         mChallenge = challenge;

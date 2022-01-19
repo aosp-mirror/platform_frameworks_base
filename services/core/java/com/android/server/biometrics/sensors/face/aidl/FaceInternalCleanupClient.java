@@ -31,6 +31,7 @@ import com.android.server.biometrics.sensors.RemovalClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Face-specific internal cleanup client for the {@link IFace} AIDL HAL interface.
@@ -38,7 +39,7 @@ import java.util.Map;
 class FaceInternalCleanupClient extends InternalCleanupClient<Face, ISession> {
 
     FaceInternalCleanupClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, int userId, @NonNull String owner,
+            @NonNull Supplier<ISession> lazyDaemon, int userId, @NonNull String owner,
             int sensorId, @NonNull List<Face> enrolledList, @NonNull BiometricUtils<Face> utils,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId, BiometricsProtoEnums.MODALITY_FACE,
@@ -47,7 +48,7 @@ class FaceInternalCleanupClient extends InternalCleanupClient<Face, ISession> {
 
     @Override
     protected InternalEnumerateClient<ISession> getEnumerateClient(Context context,
-            LazyDaemon<ISession> lazyDaemon, IBinder token, int userId, String owner,
+            Supplier<ISession> lazyDaemon, IBinder token, int userId, String owner,
             List<Face> enrolledList, BiometricUtils<Face> utils, int sensorId) {
         return new FaceInternalEnumerateClient(context, lazyDaemon, token, userId, owner,
                 enrolledList, utils, sensorId);
@@ -55,7 +56,7 @@ class FaceInternalCleanupClient extends InternalCleanupClient<Face, ISession> {
 
     @Override
     protected RemovalClient<Face, ISession> getRemovalClient(Context context,
-            LazyDaemon<ISession> lazyDaemon, IBinder token,
+            Supplier<ISession> lazyDaemon, IBinder token,
             int biometricId, int userId, String owner, BiometricUtils<Face> utils, int sensorId,
             Map<Integer, Long> authenticatorIds) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)

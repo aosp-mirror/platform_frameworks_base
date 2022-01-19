@@ -36,6 +36,7 @@ import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Face-specific get feature client for the {@link IFace} AIDL HAL interface.
@@ -46,7 +47,7 @@ public class FaceGetFeatureClient extends HalClientMonitor<ISession> implements 
 
     private final int mUserId;
 
-    FaceGetFeatureClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    FaceGetFeatureClient(@NonNull Context context, @NonNull Supplier<ISession> lazyDaemon,
             @NonNull IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,

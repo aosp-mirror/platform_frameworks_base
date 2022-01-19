@@ -29,6 +29,8 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Slog;
 
+import java.util.function.Supplier;
+
 /**
  * Abstract {@link HalClientMonitor} subclass that operations eligible/interested in acquisition
  * messages should extend.
@@ -57,7 +59,7 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
      */
     protected abstract void stopHalOperation();
 
-    public AcquisitionClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public AcquisitionClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, boolean shouldVibrate,
             int statsModality, int statsAction, int statsClient) {
