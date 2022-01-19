@@ -65,11 +65,11 @@ static jlong nInitBuilder(CRITICAL_JNI_PARAMS) {
 
 // Regular JNI
 static void nAddStyleRun(JNIEnv* /* unused */, jclass /* unused */, jlong builderPtr,
-                         jlong paintPtr, jint start, jint end, jboolean isRtl) {
+                         jlong paintPtr, jint lbStyle, jint start, jint end, jboolean isRtl) {
     Paint* paint = toPaint(paintPtr);
     const Typeface* typeface = Typeface::resolveDefault(paint->getAndroidTypeface());
     minikin::MinikinPaint minikinPaint = MinikinUtils::prepareMinikinPaint(paint, typeface);
-    toBuilder(builderPtr)->addStyleRun(start, end, std::move(minikinPaint), isRtl);
+    toBuilder(builderPtr)->addStyleRun(start, end, std::move(minikinPaint), lbStyle, isRtl);
 }
 
 // Regular JNI
@@ -144,7 +144,7 @@ static jint nGetMemoryUsage(CRITICAL_JNI_PARAMS_COMMA jlong ptr) {
 static const JNINativeMethod gMTBuilderMethods[] = {
         // MeasuredParagraphBuilder native functions.
         {"nInitBuilder", "()J", (void*)nInitBuilder},
-        {"nAddStyleRun", "(JJIIZ)V", (void*)nAddStyleRun},
+        {"nAddStyleRun", "(JJIIIZ)V", (void*)nAddStyleRun},
         {"nAddReplacementRun", "(JJIIF)V", (void*)nAddReplacementRun},
         {"nBuildMeasuredText", "(JJ[CZZZ)J", (void*)nBuildMeasuredText},
         {"nFreeBuilder", "(J)V", (void*)nFreeBuilder},

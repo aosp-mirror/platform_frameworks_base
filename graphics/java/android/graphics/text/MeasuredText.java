@@ -239,11 +239,33 @@ public class MeasuredText {
          */
         public @NonNull Builder appendStyleRun(@NonNull Paint paint, @IntRange(from = 0) int length,
                 boolean isRtl) {
+            return appendStyleRun(paint, null, length, isRtl);
+        }
+
+        /**
+         * Apply styles to the given length.
+         *
+         * Keeps an internal offset which increases at every append. The initial value for this
+         * offset is zero. After the style is applied the internal offset is moved to {@code offset
+         * + length}, and next call will start from this new position.
+         *
+         * @param paint a paint
+         * @param lineBreakConfig a line break configuration.
+         * @param length a length to be applied with a given paint, can not exceed the length of the
+         *               text
+         * @param isRtl true if the text is in RTL context, otherwise false.
+         */
+        public @NonNull Builder appendStyleRun(@NonNull Paint paint,
+                @Nullable LineBreakConfig lineBreakConfig, @IntRange(from = 0) int length,
+                boolean isRtl) {
             Preconditions.checkNotNull(paint);
             Preconditions.checkArgument(length > 0, "length can not be negative");
             final int end = mCurrentOffset + length;
             Preconditions.checkArgument(end <= mText.length, "Style exceeds the text length");
-            nAddStyleRun(mNativePtr, paint.getNativeInstance(), mCurrentOffset, end, isRtl);
+            int lbStyle = (lineBreakConfig != null) ? lineBreakConfig.getLineBreakStyle() :
+                    LineBreakConfig.LINE_BREAK_STYLE_NONE;
+            nAddStyleRun(mNativePtr, paint.getNativeInstance(), lbStyle, mCurrentOffset, end,
+                    isRtl);
             mCurrentOffset = end;
             return this;
         }
@@ -423,12 +445,14 @@ public class MeasuredText {
          *
          * @param nativeBuilderPtr The native MeasuredParagraph builder pointer.
          * @param paintPtr The native paint pointer to be applied.
+         * @param lineBreakStyle The line break style of the text.
          * @param start The start offset in the copied buffer.
          * @param end The end offset in the copied buffer.
          * @param isRtl True if the text is RTL.
          */
         private static native void nAddStyleRun(/* Non Zero */ long nativeBuilderPtr,
                                                 /* Non Zero */ long paintPtr,
+                                                int lineBreakStyle,
                                                 @IntRange(from = 0) int start,
                                                 @IntRange(from = 0) int end,
                                                 boolean isRtl);
