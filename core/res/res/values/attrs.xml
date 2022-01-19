@@ -5030,6 +5030,10 @@
         <attr name="fontFeatureSettings" format="string" />
         <!-- Font variation settings. -->
         <attr name="fontVariationSettings" format="string"/>
+        <!-- Specifies the strictness of line-breaking rules applied within an element. -->
+        <attr name="lineBreakStyle" />
+        <!-- Specifies the phrase-based breaking opportunities. -->
+        <attr name="lineBreakWordStyle" />
     </declare-styleable>
     <declare-styleable name="TextClock">
         <!-- Specifies the formatting pattern used to show the time and/or date
@@ -5427,6 +5431,13 @@
             <enum name="normal" value="2" />
             <!-- ndicates breaking text with the most strictest line-breaking rules. -->
             <enum name="strict" value="3" />
+        </attr>
+        <!-- Specify the phrase-based line break can be used when calculating the text wrapping.-->
+        <attr name="lineBreakWordStyle">
+            <!-- No line break word style specific. -->
+            <enum name="none" value="0" />
+            <!-- Specify the phrase based breaking. -->
+            <enum name="phrase" value="1" />
         </attr>
         <!-- Specify the type of auto-size. Note that this feature is not supported by EditText,
         works only for TextView. -->
