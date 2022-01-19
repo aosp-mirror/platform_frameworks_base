@@ -3474,8 +3474,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
         @Nullable
         private ParcelFileDescriptor getShortcutIconParcelFileDescriptor(
-                @NonNull final ShortcutInfo shortcutInfo) {
-            if (!shortcutInfo.hasIconFile()) {
+                @Nullable final ShortcutInfo shortcutInfo) {
+            if (shortcutInfo == null || !shortcutInfo.hasIconFile()) {
                 return null;
             }
             final String path = mShortcutBitmapSaver.getBitmapPathMayWaitLocked(shortcutInfo);
