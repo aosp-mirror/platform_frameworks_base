@@ -17,6 +17,7 @@
 package android.widget;
 
 import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
+import static android.widget.TextView.ACCESSIBILITY_ACTION_SMART_START_ID;
 
 import android.R;
 import android.animation.ValueAnimator;
@@ -84,6 +85,7 @@ import android.text.style.URLSpan;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
@@ -112,6 +114,7 @@ import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
@@ -448,11 +451,14 @@ public class Editor {
     private int mLineChangeSlopMax;
     private int mLineChangeSlopMin;
 
+    private final AccessibilitySmartActions mA11ySmartActions;
+
     Editor(TextView textView) {
         mTextView = textView;
         // Synchronize the filter list, which places the undo input filter at the end.
         mTextView.setFilters(mTextView.getFilters());
         mProcessTextIntentActionsHandler = new ProcessTextIntentActionsHandler(this);
+        mA11ySmartActions = new AccessibilitySmartActions(mTextView);
         mHapticTextHandleEnabled = mTextView.getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_enableHapticTextHandle);
 
@@ -4380,6 +4386,7 @@ public class Editor {
             item.setShowAsAction(showAsAction);
             mAssistClickHandlers.put(item,
                     TextClassification.createIntentOnClickListener(action.getActionIntent()));
+            mA11ySmartActions.addAction(action);
             return item;
         }
 
@@ -4393,6 +4400,7 @@ public class Editor {
                 }
                 i++;
             }
+            mA11ySmartActions.reset();
         }
 
         private boolean hasLegacyAssistItem(TextClassification classification) {
@@ -7649,7 +7657,7 @@ public class Editor {
         private final PackageManager mPackageManager;
         private final String mPackageName;
         private final SparseArray<Intent> mAccessibilityIntents = new SparseArray<>();
-        private final SparseArray<AccessibilityNodeInfo.AccessibilityAction> mAccessibilityActions =
+        private final SparseArray<AccessibilityAction> mAccessibilityActions =
                 new SparseArray<>();
         private final List<ResolveInfo> mSupportedActivities = new ArrayList<>();
 
@@ -7699,8 +7707,7 @@ public class Editor {
                 int actionId = TextView.ACCESSIBILITY_ACTION_PROCESS_TEXT_START_ID + i++;
                 mAccessibilityActions.put(
                         actionId,
-                        new AccessibilityNodeInfo.AccessibilityAction(
-                                actionId, getLabel(resolveInfo)));
+                        new AccessibilityAction(actionId, getLabel(resolveInfo)));
                 mAccessibilityIntents.put(
                         actionId, createProcessTextIntentForResolveInfo(resolveInfo));
             }
@@ -7777,6 +7784,65 @@ public class Editor {
         private CharSequence getLabel(ResolveInfo resolveInfo) {
             return resolveInfo.loadLabel(mPackageManager);
         }
+    }
+
+    /**
+     * Accessibility helper for "smart" (i.e. textAssist) actions.
+     * Helps ensure that "smart" actions are shown in the accessibility menu.
+     * NOTE that these actions are only available when an action mode is live.
+     *
+     * @hide
+     */
+    private static final class AccessibilitySmartActions {
+
+        private final TextView mTextView;
+        private final SparseArray<Pair<AccessibilityAction, RemoteAction>> mActions =
+                new SparseArray<>();
+
+        private AccessibilitySmartActions(TextView textView) {
+            mTextView = Objects.requireNonNull(textView);
+        }
+
+        private void addAction(RemoteAction action) {
+            final int actionId = ACCESSIBILITY_ACTION_SMART_START_ID + mActions.size();
+            mActions.put(actionId,
+                    new Pair(new AccessibilityAction(actionId, action.getTitle()), action));
+        }
+
+        private void reset() {
+            mActions.clear();
+        }
+
+        void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo nodeInfo) {
+            for (int i = 0; i < mActions.size(); i++) {
+                nodeInfo.addAction(mActions.valueAt(i).first);
+            }
+        }
+
+        boolean performAccessibilityAction(int actionId) {
+            final Pair<AccessibilityAction, RemoteAction> pair = mActions.get(actionId);
+            if (pair != null) {
+                TextClassification.createIntentOnClickListener(pair.second.getActionIntent())
+                        .onClick(mTextView);
+                return true;
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Initializes the nodeInfo with smart actions.
+     */
+    void onInitializeSmartActionsAccessibilityNodeInfo(AccessibilityNodeInfo nodeInfo) {
+        mA11ySmartActions.onInitializeAccessibilityNodeInfo(nodeInfo);
+    }
+
+    /**
+     * Handles the accessibility action if it is an active smart action.
+     * Return false if this method does not hanle the action.
+     */
+    boolean performSmartActionsAccessibilityAction(int actionId) {
+        return mA11ySmartActions.performAccessibilityAction(actionId);
     }
 
     static void logCursor(String location, @Nullable String msgFormat, Object ... msgArgs) {

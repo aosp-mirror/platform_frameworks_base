@@ -440,6 +440,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Accessibility action start id for "process text" actions.
     static final int ACCESSIBILITY_ACTION_PROCESS_TEXT_START_ID = 0x10000100;
 
+    /** Accessibility action start id for "smart" actions. @hide */
+    static final int ACCESSIBILITY_ACTION_SMART_START_ID = 0x10001000;
+
     /**
      * @hide
      */
@@ -12174,6 +12177,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             if (canProcessText()) {  // also implies mEditor is not null.
                 mEditor.mProcessTextIntentActionsHandler.onInitializeAccessibilityNodeInfo(info);
+                mEditor.onInitializeSmartActionsAccessibilityNodeInfo(info);
             }
         }
 
@@ -12377,9 +12381,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @Override
     public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
-        if (mEditor != null
-                && mEditor.mProcessTextIntentActionsHandler.performAccessibilityAction(action)) {
-            return true;
+        if (mEditor != null) {
+            if (mEditor.mProcessTextIntentActionsHandler.performAccessibilityAction(action)
+                    || mEditor.performSmartActionsAccessibilityAction(action)) {
+                return true;
+            }
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
