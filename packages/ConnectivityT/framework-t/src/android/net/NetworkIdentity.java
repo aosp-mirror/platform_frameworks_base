@@ -160,11 +160,6 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
 
         // Not dumping mSubType, subtypes are no longer supported.
 
-        if (mSubscriberId != null) {
-            proto.write(NetworkIdentityProto.SUBSCRIBER_ID,
-                    NetworkIdentityUtils.scrubSubscriberId(mSubscriberId));
-        }
-        proto.write(NetworkIdentityProto.NETWORK_ID, mNetworkId);
         proto.write(NetworkIdentityProto.ROAMING, mRoaming);
         proto.write(NetworkIdentityProto.METERED, mMetered);
         proto.write(NetworkIdentityProto.DEFAULT_NETWORK, mDefaultNetwork);
