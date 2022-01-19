@@ -13145,6 +13145,7 @@ package android.telephony {
   }
 
   public final class UiccSlotMapping implements android.os.Parcelable {
+    ctor public UiccSlotMapping(int, int, int);
     method public int describeContents();
     method @IntRange(from=0) public int getLogicalSlotIndex();
     method @IntRange(from=0) public int getPhysicalSlotIndex();
