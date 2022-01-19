@@ -2540,6 +2540,12 @@ interface ITelephony {
     boolean isRcsProvisioningRequiredForCapability(int subId, int capability, int tech);
 
     /**
+     * Sets a voice service state from telecom based on the current PhoneAccounts registered. See
+     * PhoneAccount#CAPABILITY_VOICE_CALLING_AVAILABLE.
+     */
+    void setVoiceServiceStateOverride(int subId, boolean hasService, String callingPackage);
+
+    /**
      * Returns the package name that provides the {@link CarrierService} implementation for the
      * specified {@code logicalSlotIndex}, or {@code null} if no package with carrier privileges
      * declares one.
