@@ -27,6 +27,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
+import android.app.ActivityManager;
+import android.app.TaskInfo;
+import android.app.TaskInfo.CameraCompatControlState;
 import android.content.res.Configuration;
 import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
@@ -83,7 +86,7 @@ public class CompatUILayoutTest extends ShellTestCase {
         spyOn(mWindowManager);
         spyOn(mCompatUILayout);
         doReturn(mViewHost).when(mWindowManager).createSurfaceViewHost();
-        doReturn(mCompatUILayout).when(mWindowManager).inflateCompatUILayout();
+        doReturn(mCompatUILayout).when(mWindowManager).inflateLayout();
     }
 
     @Test
@@ -107,8 +110,8 @@ public class CompatUILayoutTest extends ShellTestCase {
 
     @Test
     public void testOnClickForSizeCompatHint() {
-        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.createLayout(true /* show */, createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_HIDDEN));
         final LinearLayout sizeCompatHint = mCompatUILayout.findViewById(R.id.size_compat_hint);
         sizeCompatHint.performClick();
 
@@ -117,8 +120,8 @@ public class CompatUILayoutTest extends ShellTestCase {
 
     @Test
     public void testUpdateCameraTreatmentButton_treatmentAppliedByDefault() {
-        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
+        mWindowManager.createLayout(true /* show */, createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED));
         final ImageButton button =
                 mCompatUILayout.findViewById(R.id.camera_compat_treatment_button);
         button.performClick();
@@ -135,8 +138,8 @@ public class CompatUILayoutTest extends ShellTestCase {
 
     @Test
     public void testUpdateCameraTreatmentButton_treatmentSuggestedByDefault() {
-        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        mWindowManager.createLayout(true /* show */, createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED));
         final ImageButton button =
                 mCompatUILayout.findViewById(R.id.camera_compat_treatment_button);
         button.performClick();
@@ -153,8 +156,8 @@ public class CompatUILayoutTest extends ShellTestCase {
 
     @Test
     public void testOnCameraDismissButtonClicked() {
-        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        mWindowManager.createLayout(true /* show */, createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED));
         final ImageButton button =
                 mCompatUILayout.findViewById(R.id.camera_compat_dismiss_button);
         button.performClick();
@@ -188,11 +191,19 @@ public class CompatUILayoutTest extends ShellTestCase {
 
     @Test
     public void testOnClickForCameraCompatHint() {
-        mWindowManager.createLayout(true /* show */, false /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        mWindowManager.createLayout(true /* show */, createTaskInfo(false /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED));
         final LinearLayout hint = mCompatUILayout.findViewById(R.id.camera_compat_hint);
         hint.performClick();
 
         verify(mCompatUILayout).setCameraCompatHintVisibility(/* show= */ false);
+    }
+
+    private static TaskInfo createTaskInfo(boolean hasSizeCompat,
+            @CameraCompatControlState int cameraCompatControlState) {
+        ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
+        taskInfo.topActivityInSizeCompat = hasSizeCompat;
+        taskInfo.cameraCompatControlState = cameraCompatControlState;
+        return taskInfo;
     }
 }
