@@ -94,7 +94,7 @@ import java.util.function.Predicate;
  * pruning installed instant apps and meta-data for uninstalled instant apps
  * when free space is needed.
  */
-class InstantAppRegistry implements Watchable, Snappable {
+public class InstantAppRegistry implements Watchable, Snappable {
     private static final boolean DEBUG = false;
 
     private static final String LOG_TAG = "InstantAppRegistry";

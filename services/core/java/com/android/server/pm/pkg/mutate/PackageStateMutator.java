@@ -178,6 +178,13 @@ public class PackageStateMutator {
         }
 
         @Override
+        public void onChanged() {
+            if (mState != null) {
+                mState.onChanged();
+            }
+        }
+
+        @Override
         public PackageStateWrite setLastPackageUsageTime(int reason, long timeInMillis) {
             if (mState != null) {
                 mState.getTransientState().setLastPackageUsageTimeInMills(reason, timeInMillis);

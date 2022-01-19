@@ -88,7 +88,7 @@ public abstract class SettingBase implements Watchable, Snappable {
     /**
      * Notify listeners that this object has changed.
      */
-    protected void onChanged() {
+    public void onChanged() {
         PackageStateMutator.onPackageStateChanged();
         dispatchChange(this);
     }

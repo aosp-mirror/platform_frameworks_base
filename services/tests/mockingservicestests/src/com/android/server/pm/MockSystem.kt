@@ -192,7 +192,9 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val packageParser: PackageParser2 = mock()
         val keySetManagerService: KeySetManagerService = mock()
         val packageAbiHelper: PackageAbiHelper = mock()
-        val appsFilter: AppsFilter = mock()
+        val appsFilter: AppsFilter = mock {
+            whenever(snapshot()) { this@mock }
+        }
         val dexManager: DexManager = mock()
         val installer: Installer = mock()
         val displayMetrics: DisplayMetrics = mock()

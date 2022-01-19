@@ -1143,7 +1143,7 @@ public final class OverlayManagerService extends SystemService {
         public ArrayMap<String, AndroidPackage> initializeForUser(final int userId) {
             if (!mInitializedUsers.contains(userId)) {
                 mInitializedUsers.add(userId);
-                mPackageManagerInternal.forEachInstalledPackage(false /*locked*/,
+                mPackageManagerInternal.forEachInstalledPackage(
                         (pkg) -> addPackageUser(pkg, userId), userId);
             }
 

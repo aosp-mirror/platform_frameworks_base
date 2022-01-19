@@ -18,10 +18,10 @@ package com.android.server.pm.parsing;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import com.android.server.pm.pkg.component.ParsedComponent;
 import android.util.Pair;
 
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.component.ParsedComponent;
 
 /**
  * For exposing internal fields to the rest of the server, enforcing that any overridden state from

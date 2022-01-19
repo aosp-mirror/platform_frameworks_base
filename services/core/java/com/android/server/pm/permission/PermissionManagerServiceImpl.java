@@ -4486,7 +4486,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     @Override
     public void readLegacyPermissionStateTEMP() {
         final int[] userIds = getAllUserIds();
-        mPackageManagerInt.forEachPackageState(false, ps -> {
+        mPackageManagerInt.forEachPackageState(ps -> {
             final int appId = ps.getAppId();
             final LegacyPermissionState legacyState = ps.getLegacyPermissionState();
 

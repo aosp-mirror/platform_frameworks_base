@@ -189,7 +189,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     private boolean forceQueryableOverride;
 
     @NonNull
-    private PackageStateUnserialized pkgState = new PackageStateUnserialized();
+    private final PackageStateUnserialized pkgState = new PackageStateUnserialized(this);
 
     @NonNull
     private UUID mDomainSetId;

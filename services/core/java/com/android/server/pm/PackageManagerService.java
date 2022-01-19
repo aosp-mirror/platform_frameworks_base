@@ -600,9 +600,6 @@ public class PackageManagerService extends IPackageManager.Stub
     // Lock alias for doing package state mutation
     private final PackageManagerTracedLock mPackageStateWriteLock;
 
-    // Lock alias to track syncing a consistent Computer
-    private final PackageManagerTracedLock mLiveComputerSyncLock;
-
     private final PackageStateMutator mPackageStateMutator = new PackageStateMutator(
             this::getPackageSettingForMutation,
             this::getDisabledPackageSettingForMutation);
@@ -729,21 +726,11 @@ public class PackageManagerService extends IPackageManager.Stub
             ApplicationPackageManager.invalidateGetPackagesForUidCache();
             ApplicationPackageManager.disableGetPackagesForUidCache();
             ApplicationPackageManager.invalidateHasSystemFeatureCache();
-
-            // Avoid invalidation-thrashing by preventing cache invalidations from causing property
-            // writes if the cache isn't enabled yet.  We re-enable writes later when we're
-            // done initializing.
-            sSnapshotCorked.incrementAndGet();
             PackageManager.corkPackageInfoCache();
         }
 
         @Override
         public void enablePackageCaches() {
-            // Uncork cache invalidations and allow clients to cache package information.
-            int corking = sSnapshotCorked.decrementAndGet();
-            if (TRACE_SNAPSHOTS && corking == 0) {
-                Log.i(TAG, "snapshot: corking returns to 0");
-            }
             PackageManager.uncorkPackageInfoCache();
         }
     }
@@ -899,8 +886,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int INTEGRITY_VERIFICATION_COMPLETE = 25;
     static final int CHECK_PENDING_INTEGRITY_VERIFICATION = 26;
     static final int DOMAIN_VERIFICATION = 27;
-    static final int SNAPSHOT_UNCORK = 28;
-    static final int PRUNE_UNUSED_STATIC_SHARED_LIBRARIES = 29;
+    static final int PRUNE_UNUSED_STATIC_SHARED_LIBRARIES = 28;
 
     static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
     private static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
@@ -1013,7 +999,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 isolatedOwners = mIsolatedOwnersSnapshot.snapshot();
                 packages = mPackagesSnapshot.snapshot();
                 instrumentation = mInstrumentationSnapshot.snapshot();
-                resolveComponentName = mResolveComponentName.clone();
+                resolveComponentName = mResolveComponentName == null
+                        ? null : mResolveComponentName.clone();
                 resolveActivity = new ActivityInfo(mResolveActivity);
                 instantAppInstallerActivity =
                         (mInstantAppInstallerActivity == null)
@@ -1070,10 +1057,6 @@ public class PackageManagerService extends IPackageManager.Stub
     // should only be set true while holding mLock.  However, the attribute id guaranteed
     // to be set false only while mLock and mSnapshotLock are both held.
     private static final AtomicBoolean sSnapshotInvalid = new AtomicBoolean(true);
-    // If true, the snapshot is corked.  Do not create a new snapshot but use the live
-    // computer.  This throttles snapshot creation during periods of churn in Package
-    // Manager.
-    static final AtomicInteger sSnapshotCorked = new AtomicInteger(0);
 
     static final ThreadLocal<ThreadComputer> sThreadComputer =
             ThreadLocal.withInitial(ThreadComputer::new);
@@ -1090,15 +1073,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * The snapshot statistics.  These are collected to track performance and to identify
      * situations in which the snapshots are misbehaving.
      */
+    @Nullable
     private final SnapshotStatistics mSnapshotStatistics;
-
-    // The snapshot disable/enable switch.  An image with the flag set true uses snapshots
-    // and an image with the flag set false does not use snapshots.
-    private static final boolean SNAPSHOT_ENABLED = true;
-
-    // The per-instance snapshot disable/enable flag.  This is generally set to false in
-    // test instances and set to SNAPSHOT_ENABLED in operational instances.
-    private final boolean mSnapshotEnabled;
 
     /**
      * Return the live computer.
@@ -1112,16 +1088,9 @@ public class PackageManagerService extends IPackageManager.Stub
      * The live computer will be returned if snapshots are disabled.
      */
     Computer snapshotComputer() {
-        if (!mSnapshotEnabled) {
-            return mLiveComputer;
-        }
         if (Thread.holdsLock(mLock)) {
             // If the current thread holds mLock then it may have modified state but not
             // yet invalidated the snapshot.  Always give the thread the live computer.
-            return mLiveComputer;
-        } else if (sSnapshotCorked.get() > 0) {
-            // Snapshots are corked, which means new ones should not be built right now.
-            mSnapshotStatistics.corked();
             return mLiveComputer;
         }
         synchronized (mSnapshotLock) {
@@ -1163,7 +1132,9 @@ public class PackageManagerService extends IPackageManager.Stub
         mSnapshotComputer = new ComputerEngine(args);
         final long done = SystemClock.currentTimeMicro();
 
-        mSnapshotStatistics.rebuild(now, done, hits);
+        if (mSnapshotStatistics != null) {
+            mSnapshotStatistics.rebuild(now, done, hits);
+        }
     }
 
     /**
@@ -1529,7 +1500,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         PackageManagerService m = new PackageManagerService(injector, onlyCore, factoryTest,
                 PackagePartitions.FINGERPRINT, Build.IS_ENG, Build.IS_USERDEBUG,
-                Build.VERSION.SDK_INT, Build.VERSION.INCREMENTAL, SNAPSHOT_ENABLED);
+                Build.VERSION.SDK_INT, Build.VERSION.INCREMENTAL);
         t.traceEnd(); // "create package manager"
 
         final CompatChange.ChangeListener selinuxChangeListener = packageName -> {
@@ -1582,20 +1553,43 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     // Link watchables to the class
-    private void registerObserver() {
-        mPackages.registerObserver(mWatcher);
-        mSharedLibraries.registerObserver(mWatcher);
-        mInstrumentation.registerObserver(mWatcher);
-        mWebInstantAppsDisabled.registerObserver(mWatcher);
-        mAppsFilter.registerObserver(mWatcher);
-        mInstantAppRegistry.registerObserver(mWatcher);
-        mSettings.registerObserver(mWatcher);
-        mIsolatedOwners.registerObserver(mWatcher);
-        mComponentResolver.registerObserver(mWatcher);
-        mFrozenPackages.registerObserver(mWatcher);
-        // If neither "build" attribute is true then this may be a mockito test, and verification
-        // can fail as a false positive.
-        Watchable.verifyWatchedAttributes(this, mWatcher, !(mIsEngBuild || mIsUserDebugBuild));
+    private void registerObservers(boolean verify) {
+        // Null check to handle nullable test parameters
+        if (mPackages != null) {
+            mPackages.registerObserver(mWatcher);
+        }
+        if (mSharedLibraries != null) {
+            mSharedLibraries.registerObserver(mWatcher);
+        }
+        if (mInstrumentation != null) {
+            mInstrumentation.registerObserver(mWatcher);
+        }
+        if (mWebInstantAppsDisabled != null) {
+            mWebInstantAppsDisabled.registerObserver(mWatcher);
+        }
+        if (mAppsFilter != null) {
+            mAppsFilter.registerObserver(mWatcher);
+        }
+        if (mInstantAppRegistry != null) {
+            mInstantAppRegistry.registerObserver(mWatcher);
+        }
+        if (mSettings != null) {
+            mSettings.registerObserver(mWatcher);
+        }
+        if (mIsolatedOwners != null) {
+            mIsolatedOwners.registerObserver(mWatcher);
+        }
+        if (mComponentResolver != null) {
+            mComponentResolver.registerObserver(mWatcher);
+        }
+        if (mFrozenPackages != null) {
+            mFrozenPackages.registerObserver(mWatcher);
+        }
+        if (verify) {
+            // If neither "build" attribute is true then this may be a mockito test,
+            // and verification can fail as a false positive.
+            Watchable.verifyWatchedAttributes(this, mWatcher, !(mIsEngBuild || mIsUserDebugBuild));
+        }
     }
 
     /**
@@ -1617,7 +1611,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mInstallLock = injector.getInstallLock();
         mLock = injector.getLock();
         mPackageStateWriteLock = mLock;
-        mLiveComputerSyncLock = mLock;
         mPermissionManager = injector.getPermissionManagerServiceInternal();
         mSettings = injector.getSettings();
         mUserManager = injector.getUserManagerService();
@@ -1677,10 +1670,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
         mResolveComponentName = testParams.resolveComponentName;
 
-        // Disable snapshots in this instance of PackageManagerService, which is only used
-        // for testing.  The instance still needs a live computer.  The snapshot computer
-        // is set to null since it must never be used by this instance.
-        mSnapshotEnabled = false;
         mLiveComputer = createLiveComputer();
         mSnapshotComputer = null;
         mSnapshotStatistics = null;
@@ -1706,13 +1695,13 @@ public class PackageManagerService extends IPackageManager.Stub
         mSuspendPackageHelper = testParams.suspendPackageHelper;
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
 
+        registerObservers(false);
         invalidatePackageInfoCache();
     }
 
     public PackageManagerService(PackageManagerServiceInjector injector, boolean onlyCore,
             boolean factoryTest, final String buildFingerprint, final boolean isEngBuild,
-            final boolean isUserDebugBuild, final int sdkVersion, final String incrementalVersion,
-            boolean snapshotEnabled) {
+            final boolean isUserDebugBuild, final int sdkVersion, final String incrementalVersion) {
         mIsEngBuild = isEngBuild;
         mIsUserDebugBuild = isUserDebugBuild;
         mSdkVersion = sdkVersion;
@@ -1727,7 +1716,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mInjector.bootstrap(this);
         mLock = injector.getLock();
         mPackageStateWriteLock = mLock;
-        mLiveComputerSyncLock = mLock;
         mInstallLock = injector.getInstallLock();
         LockGuard.installLock(mLock, LockGuard.INDEX_PACKAGES);
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
@@ -1859,16 +1847,12 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             // Create the computer as soon as the state objects have been installed.  The
             // cached computer is the same as the live computer until the end of the
-            // constructor, at which time the invalidation method updates it.  The cache is
-            // corked initially to ensure a cached computer is not built until the end of the
-            // constructor.
+            // constructor, at which time the invalidation method updates it.
             mSnapshotStatistics = new SnapshotStatistics();
-            sSnapshotCorked.set(1);
             sSnapshotInvalid.set(true);
             mLiveComputer = createLiveComputer();
             mSnapshotComputer = null;
-            mSnapshotEnabled = snapshotEnabled;
-            registerObserver();
+            registerObservers(true);
         }
 
         // CHECKSTYLE:OFF IndentationCheck
@@ -4672,6 +4656,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (allowed) {
                             commitPackageStateMutation(null, targetPackage,
                                     state -> state.setInstaller(installerPackageName));
+                        } else {
+                            return;
                         }
                     }
                 }
@@ -6460,19 +6446,17 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     void dumpSnapshotStats(PrintWriter pw, boolean isBrief) {
-        if (!mSnapshotEnabled) {
-            pw.println("  Snapshots disabled");
-        } else {
-            int hits = 0;
-            int level = sSnapshotCorked.get();
-            synchronized (mSnapshotLock) {
-                if (mSnapshotComputer != null) {
-                    hits = mSnapshotComputer.getUsed();
-                }
-            }
-            final long now = SystemClock.currentTimeMicro();
-            mSnapshotStatistics.dump(pw, "  ", now, hits, level, isBrief);
+        if (mSnapshotStatistics == null) {
+            return;
         }
+        int hits = 0;
+        synchronized (mSnapshotLock) {
+            if (mSnapshotComputer != null) {
+                hits = mSnapshotComputer.getUsed();
+            }
+        }
+        final long now = SystemClock.currentTimeMicro();
+        mSnapshotStatistics.dump(pw, "  ", now, hits, -1, isBrief);
     }
 
     /**
@@ -6960,7 +6944,7 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public PackageList getPackageList(@Nullable PackageListObserver observer) {
             final ArrayList<String> list = new ArrayList<>();
-            forEachPackageState(false, packageState -> {
+            forEachPackageState(packageState -> {
                 AndroidPackage pkg = packageState.getPkg();
                 if (pkg != null) {
                     list.add(pkg.getPackageName());
@@ -7343,7 +7327,7 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public List<PackageInfo> getOverlayPackages(int userId) {
             final ArrayList<PackageInfo> overlayPackages = new ArrayList<>();
-            forEachPackageState(false, packageState -> {
+            forEachPackageState(packageState -> {
                 final AndroidPackage pkg = packageState.getPkg();
                 if (pkg != null && pkg.getOverlayTarget() != null) {
                     PackageInfo pkgInfo = generatePackageInfo(packageState, 0, userId);
@@ -7359,7 +7343,7 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public List<String> getTargetPackageNames(int userId) {
             List<String> targetPackages = new ArrayList<>();
-            forEachPackageState(false, packageState -> {
+            forEachPackageState(packageState -> {
                 final AndroidPackage pkg = packageState.getPkg();
                 if (pkg != null && !pkg.isOverlay()) {
                     targetPackages.add(pkg.getPackageName());
@@ -7489,8 +7473,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void forEachPackageState(boolean locked, Consumer<PackageStateInternal> action) {
-            PackageManagerService.this.forEachPackageState(locked, action);
+        public void forEachPackageState(Consumer<PackageStateInternal> action) {
+            PackageManagerService.this.forEachPackageState(action);
         }
 
         @Override
@@ -7499,15 +7483,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void forEachInstalledPackage(@NonNull Consumer<AndroidPackage> actionLocked,
+        public void forEachInstalledPackage(@NonNull Consumer<AndroidPackage> action,
                 @UserIdInt int userId) {
-            forEachInstalledPackage(true, actionLocked, userId);
-        }
-
-        @Override
-        public void forEachInstalledPackage(boolean locked,
-                @NonNull Consumer<AndroidPackage> action, int userId) {
-            PackageManagerService.this.forEachInstalledPackage(locked, action, userId);
+            PackageManagerService.this.forEachInstalledPackage(action, userId);
         }
 
         @Override
@@ -7983,58 +7961,19 @@ public class PackageManagerService extends IPackageManager.Stub
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     @Nullable
     PackageStateInternal getPackageStateInternal(String packageName) {
-        Computer computer = snapshotComputer();
-        if (computer == mLiveComputer) {
-            synchronized (mLiveComputerSyncLock) {
-                PackageSetting pkgSetting =
-                        (PackageSetting) computer.getPackageStateInternal(packageName);
-                if (pkgSetting == null) {
-                    return null;
-                }
-
-                return new PackageSetting(pkgSetting);
-            }
-        } else {
-            return computer.getPackageStateInternal(packageName);
-        }
+        return mComputer.getPackageStateInternal(packageName);
     }
 
     @Nullable
     PackageStateInternal getPackageStateInternal(String packageName, int callingUid) {
-        Computer computer = snapshotComputer();
-        if (computer == mLiveComputer) {
-            synchronized (mLiveComputerSyncLock) {
-                PackageSetting pkgSetting =
-                        (PackageSetting) computer.getPackageStateInternal(packageName, callingUid);
-                if (pkgSetting == null) {
-                    return null;
-                }
-
-                return new PackageSetting(pkgSetting);
-            }
-        } else {
-            return computer.getPackageStateInternal(packageName, callingUid);
-        }
+        return mComputer.getPackageStateInternal(packageName, callingUid);
     }
 
     @Nullable
     PackageStateInternal getPackageStateInstalledFiltered(@NonNull String packageName,
             int callingUid, @UserIdInt int userId) {
-        Computer computer = snapshotComputer();
-        if (computer == mLiveComputer) {
-            synchronized (mLiveComputerSyncLock) {
-                PackageSetting pkgSetting =
-                        (PackageSetting) filterPackageStateForInstalledAndFiltered(computer,
-                                packageName, callingUid, userId);
-                if (pkgSetting == null) {
-                    return null;
-                }
-                return new PackageSetting(pkgSetting);
-            }
-        } else {
-            return filterPackageStateForInstalledAndFiltered(computer, packageName, callingUid,
-                    userId);
-        }
+        return filterPackageStateForInstalledAndFiltered(mComputer, packageName, callingUid,
+                userId);
     }
 
     @Nullable
@@ -8076,31 +8015,19 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void forEachPackageState(boolean locked, Consumer<PackageStateInternal> action) {
-        if (locked) {
-            synchronized (mLiveComputerSyncLock) {
-                forEachPackageState(mComputer.getPackageStates(), action);
-            }
-        } else {
-            Computer computer = snapshotComputer();
-            if (computer == mLiveComputer) {
-                synchronized (mLiveComputerSyncLock) {
-                    forEachPackageState(computer.getPackageStates(), action);
-                }
-            } else {
-                forEachPackageState(computer.getPackageStates(), action);
-            }
-        }
+    void forEachPackageState(Consumer<PackageStateInternal> consumer) {
+        forEachPackageState(mComputer.getPackageStates(), consumer);
     }
 
-    void forEachPackage(Consumer<AndroidPackage> action) {
-        Computer computer = snapshotComputer();
-        if (computer == mLiveComputer) {
-            synchronized (mLiveComputerSyncLock) {
-                forEachPackage(computer.getPackageStates(), action);
+    void forEachPackage(Consumer<AndroidPackage> consumer) {
+        final ArrayMap<String, ? extends PackageStateInternal> packageStates =
+                mComputer.getPackageStates();
+        int size = packageStates.size();
+        for (int index = 0; index < size; index++) {
+            PackageStateInternal packageState = packageStates.valueAt(index);
+            if (packageState.getPkg() != null) {
+                consumer.accept(packageState.getPkg());
             }
-        } else {
-            forEachPackage(computer.getPackageStates(), action);
         }
     }
 
@@ -8114,19 +8041,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void forEachPackage(
-            @NonNull ArrayMap<String, ? extends PackageStateInternal> packageStates,
-            @NonNull Consumer<AndroidPackage> consumer) {
-        int size = packageStates.size();
-        for (int index = 0; index < size; index++) {
-            PackageStateInternal packageState = packageStates.valueAt(index);
-            if (packageState.getPkg() != null) {
-                consumer.accept(packageState.getPkg());
-            }
-        }
-    }
-
-    void forEachInstalledPackage(boolean locked, @NonNull Consumer<AndroidPackage> action,
+    void forEachInstalledPackage(@NonNull Consumer<AndroidPackage> action,
             @UserIdInt int userId) {
         Consumer<PackageStateInternal> actionWrapped = packageState -> {
             if (packageState.getPkg() != null
@@ -8134,85 +8049,37 @@ public class PackageManagerService extends IPackageManager.Stub
                 action.accept(packageState.getPkg());
             }
         };
-        if (locked) {
-            synchronized (mLiveComputerSyncLock) {
-                forEachPackageState(mComputer.getPackageStates(), actionWrapped);
-            }
-        } else {
-            Computer computer = snapshotComputer();
-            if (computer == mLiveComputer) {
-                synchronized (mLiveComputerSyncLock) {
-                    forEachPackageState(computer.getPackageStates(), actionWrapped);
-                }
-            } else {
-                forEachPackageState(computer.getPackageStates(), actionWrapped);
-            }
-        }
+        forEachPackageState(mComputer.getPackageStates(), actionWrapped);
     }
 
     // TODO: Make private
     void executeWithConsistentComputer(
             @NonNull FunctionalUtils.ThrowingConsumer<Computer> consumer) {
-        Computer computer = snapshotComputer();
-        if (computer == mLiveComputer) {
-            synchronized (mLiveComputerSyncLock) {
-                consumer.accept(computer);
-            }
-        } else {
-            consumer.accept(computer);
-        }
+        consumer.accept(snapshotComputer());
     }
 
     private <T> T executeWithConsistentComputerReturning(
             @NonNull FunctionalUtils.ThrowingFunction<Computer, T> function) {
-        Computer computer = snapshotComputer();
-        if (computer == mLiveComputer) {
-            synchronized (mLiveComputerSyncLock) {
-                return function.apply(computer);
-            }
-        } else {
-            return function.apply(computer);
-        }
+        return function.apply(snapshotComputer());
     }
 
     private <ExceptionType extends Exception> void executeWithConsistentComputerThrowing(
             @NonNull FunctionalUtils.ThrowingCheckedConsumer<Computer, ExceptionType> consumer)
             throws ExceptionType {
-        Computer computer = snapshotComputer();
-        if (computer == mLiveComputer) {
-            synchronized (mLiveComputerSyncLock) {
-                consumer.accept(computer);
-            }
-        } else {
-            consumer.accept(computer);
-        }
+        consumer.accept(snapshotComputer());
     }
 
     private <ExceptionOne extends Exception, ExceptionTwo extends Exception> void
     executeWithConsistentComputerThrowing2(
             @NonNull FunctionalUtils.ThrowingChecked2Consumer<Computer, ExceptionOne,
                     ExceptionTwo> consumer) throws ExceptionOne, ExceptionTwo {
-        Computer computer = snapshotComputer();
-        if (computer == mLiveComputer) {
-            synchronized (mLiveComputerSyncLock) {
-                consumer.accept(computer);
-            }
-        } else {
-            consumer.accept(computer);
-        }
+        consumer.accept(snapshotComputer());
     }
 
     private <T, ExceptionType extends Exception> T executeWithConsistentComputerReturningThrowing(
             @NonNull FunctionalUtils.ThrowingCheckedFunction<Computer, T, ExceptionType> function)
             throws ExceptionType {
-        Computer computer = snapshotComputer();
-        if (computer == mLiveComputer) {
-            synchronized (mLiveComputerSyncLock) {
-                return function.apply(computer);
-            }
-        } else {
-            return function.apply(computer);
-        }
+        return function.apply(snapshotComputer());
     }
 
     boolean isHistoricalPackageUsageAvailable() {
@@ -8976,7 +8843,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 consumer.accept(state);
             }
 
-            onChanged();
+            state.onChanged();
         }
 
         return PackageStateMutator.Result.SUCCESS;

@@ -34,9 +34,7 @@ import static com.android.server.pm.PackageManagerService.PACKAGE_VERIFIED;
 import static com.android.server.pm.PackageManagerService.POST_INSTALL;
 import static com.android.server.pm.PackageManagerService.PRUNE_UNUSED_STATIC_SHARED_LIBRARIES;
 import static com.android.server.pm.PackageManagerService.SEND_PENDING_BROADCAST;
-import static com.android.server.pm.PackageManagerService.SNAPSHOT_UNCORK;
 import static com.android.server.pm.PackageManagerService.TAG;
-import static com.android.server.pm.PackageManagerService.TRACE_SNAPSHOTS;
 import static com.android.server.pm.PackageManagerService.WRITE_PACKAGE_LIST;
 import static com.android.server.pm.PackageManagerService.WRITE_PACKAGE_RESTRICTIONS;
 import static com.android.server.pm.PackageManagerService.WRITE_SETTINGS;
@@ -377,13 +375,6 @@ final class PackageHandler extends Handler {
                 int messageCode = msg.arg1;
                 Object object = msg.obj;
                 mPm.mDomainVerificationManager.runMessage(messageCode, object);
-                break;
-            }
-            case SNAPSHOT_UNCORK: {
-                int corking = mPm.sSnapshotCorked.decrementAndGet();
-                if (TRACE_SNAPSHOTS && corking == 0) {
-                    Log.e(TAG, "snapshot: corking goes to zero in message handler");
-                }
                 break;
             }
             case PRUNE_UNUSED_STATIC_SHARED_LIBRARIES: {

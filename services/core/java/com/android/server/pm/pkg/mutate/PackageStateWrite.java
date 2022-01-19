@@ -25,6 +25,8 @@ import android.util.ArraySet;
 
 public interface PackageStateWrite {
 
+    void onChanged();
+
     @NonNull
     PackageUserStateWrite userState(@UserIdInt int userId);
 

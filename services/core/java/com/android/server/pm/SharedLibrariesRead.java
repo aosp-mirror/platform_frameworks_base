@@ -30,7 +30,7 @@ import java.io.PrintWriter;
  * An interface implemented by {@link SharedLibrariesImpl} for {@link Computer} to get current
  * shared libraries on the device.
  */
-interface SharedLibrariesRead {
+public interface SharedLibrariesRead {
 
     /**
      * Returns all shared libraries on the device.

@@ -292,7 +292,7 @@ final class DexOptHelper {
 
     public ArraySet<String> getOptimizablePackages() {
         ArraySet<String> pkgs = new ArraySet<>();
-        mPm.forEachPackageState(false /*locked*/, packageState -> {
+        mPm.forEachPackageState(packageState -> {
             if (mPm.mPackageDexOptimizer.canOptimizePackage(packageState.getPkg())) {
                 pkgs.add(packageState.getPackageName());
             }

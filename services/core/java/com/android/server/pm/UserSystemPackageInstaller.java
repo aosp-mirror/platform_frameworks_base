@@ -223,7 +223,7 @@ class UserSystemPackageInstaller {
 
             // If null, run for all packages
             if (userWhitelist == null) {
-                pmInt.forEachPackageState(false, packageState -> {
+                pmInt.forEachPackageState(packageState -> {
                     if (packageState.getPkg() == null) {
                         return;
                     }
