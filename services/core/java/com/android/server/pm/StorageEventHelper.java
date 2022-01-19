@@ -32,7 +32,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackagePartitions;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.UserHandle;
@@ -48,6 +47,7 @@ import android.util.Slog;
 import com.android.internal.policy.AttributeCache;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -150,7 +150,7 @@ public final class StorageEventHelper extends StorageEventListener {
                 final AndroidPackage pkg;
                 try {
                     pkg = installPackageHelper.scanSystemPackageTracedLI(
-                            ps.getPath(), parseFlags, SCAN_INITIAL, 0, null);
+                            ps.getPath(), parseFlags, SCAN_INITIAL, null);
                     loaded.add(pkg);
 
                 } catch (PackageManagerException e) {
