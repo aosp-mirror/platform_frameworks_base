@@ -592,7 +592,11 @@ public abstract class TvInputService extends Service {
             });
         }
 
-        /** @hide */
+        /**
+         * Informs the application that this session has been tuned to the given channel.
+         *
+         * @param channelUri The URI of the tuned channel.
+         */
         public void notifyTuned(@NonNull Uri channelUri) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
