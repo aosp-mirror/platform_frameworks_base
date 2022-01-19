@@ -40053,8 +40053,10 @@ package android.speech {
     ctor public RecognitionService();
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected abstract void onCancel(android.speech.RecognitionService.Callback);
+    method public void onCheckRecognitionSupport(@NonNull android.content.Intent, @NonNull android.speech.RecognitionService.SupportCallback);
     method protected abstract void onStartListening(android.content.Intent, android.speech.RecognitionService.Callback);
     method protected abstract void onStopListening(android.speech.RecognitionService.Callback);
+    method public void triggerModelDownload(@NonNull android.content.Intent);
     field public static final String SERVICE_INTERFACE = "android.speech.RecognitionService";
     field public static final String SERVICE_META_DATA = "android.speech";
   }
@@ -40070,6 +40072,36 @@ package android.speech {
     method public void readyForSpeech(android.os.Bundle) throws android.os.RemoteException;
     method public void results(android.os.Bundle) throws android.os.RemoteException;
     method public void rmsChanged(float) throws android.os.RemoteException;
+  }
+
+  public static class RecognitionService.SupportCallback {
+    method public void onError(int);
+    method public void onSupportResult(@NonNull android.speech.RecognitionSupport);
+  }
+
+  public final class RecognitionSupport implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getInstalledLanguages();
+    method @NonNull public java.util.List<java.lang.String> getPendingLanguages();
+    method @NonNull public java.util.List<java.lang.String> getSupportedLanguages();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.speech.RecognitionSupport> CREATOR;
+  }
+
+  public static final class RecognitionSupport.Builder {
+    ctor public RecognitionSupport.Builder();
+    method @NonNull public android.speech.RecognitionSupport.Builder addInstalledLanguages(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport.Builder addPendingLanguages(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport.Builder addSupportedLanguages(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport build();
+    method @NonNull public android.speech.RecognitionSupport.Builder setInstalledLanguages(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.speech.RecognitionSupport.Builder setPendingLanguages(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.speech.RecognitionSupport.Builder setSupportedLanguages(@NonNull java.util.List<java.lang.String>);
+  }
+
+  public interface RecognitionSupportCallback {
+    method public void onError(int);
+    method public void onSupportResult(@NonNull android.speech.RecognitionSupport);
   }
 
   public class RecognizerIntent {
@@ -40121,6 +40153,7 @@ package android.speech {
 
   public class SpeechRecognizer {
     method @MainThread public void cancel();
+    method public void checkRecognitionSupport(@NonNull android.content.Intent, @NonNull android.speech.RecognitionSupportCallback);
     method @MainThread @NonNull public static android.speech.SpeechRecognizer createOnDeviceSpeechRecognizer(@NonNull android.content.Context);
     method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context);
     method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context, android.content.ComponentName);
@@ -40130,8 +40163,10 @@ package android.speech {
     method @MainThread public void setRecognitionListener(android.speech.RecognitionListener);
     method @MainThread public void startListening(android.content.Intent);
     method @MainThread public void stopListening();
+    method public void triggerModelDownload(@NonNull android.content.Intent);
     field public static final String CONFIDENCE_SCORES = "confidence_scores";
     field public static final int ERROR_AUDIO = 3; // 0x3
+    field public static final int ERROR_CANNOT_CHECK_SUPPORT = 14; // 0xe
     field public static final int ERROR_CLIENT = 5; // 0x5
     field public static final int ERROR_INSUFFICIENT_PERMISSIONS = 9; // 0x9
     field public static final int ERROR_LANGUAGE_NOT_SUPPORTED = 12; // 0xc
