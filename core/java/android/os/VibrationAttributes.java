@@ -136,6 +136,7 @@ public final class VibrationAttributes implements Parcelable {
      */
     @IntDef(prefix = { "FLAG_" }, flag = true, value = {
             FLAG_BYPASS_INTERRUPTION_POLICY,
+            FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flag{}
@@ -146,10 +147,22 @@ public final class VibrationAttributes implements Parcelable {
     public static final int FLAG_BYPASS_INTERRUPTION_POLICY = 0x1;
 
     /**
+     * Flag requesting vibration effect to be played even when user settings are disabling it.
+     *
+     * <p>Flag introduced to represent
+     * {@link android.view.HapticFeedbackConstants#FLAG_IGNORE_GLOBAL_SETTING} and
+     * {@link AudioAttributes#FLAG_BYPASS_MUTE}.
+     *
+     * @hide
+     */
+    public static final int FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF = 0x2;
+
+    /**
      * All flags supported by vibrator service, update it when adding new flag.
      * @hide
      */
-    public static final int FLAG_ALL_SUPPORTED = FLAG_BYPASS_INTERRUPTION_POLICY;
+    public static final int FLAG_ALL_SUPPORTED =
+            FLAG_BYPASS_INTERRUPTION_POLICY | FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
 
     /** Creates a new {@link VibrationAttributes} instance with given usage. */
     public static @NonNull VibrationAttributes createForUsage(int usage) {
@@ -396,6 +409,11 @@ public final class VibrationAttributes implements Parcelable {
         private void setFlags(@NonNull AudioAttributes audio) {
             if ((audio.getAllFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0) {
                 mFlags |= FLAG_BYPASS_INTERRUPTION_POLICY;
+            }
+            if ((audio.getAllFlags() & AudioAttributes.FLAG_BYPASS_MUTE) != 0) {
+                // Muted audio stream translates to vibration usage having the value
+                // Vibrator.VIBRATION_INTENSITY_OFF set in the user setting.
+                mFlags |= FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
             }
         }
 

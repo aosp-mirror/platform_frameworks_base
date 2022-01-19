@@ -36231,7 +36231,7 @@ package android.provider {
     field public static final String DTMF_TONE_WHEN_DIALING = "dtmf_tone";
     field public static final String END_BUTTON_BEHAVIOR = "end_button_behavior";
     field public static final String FONT_SCALE = "font_scale";
-    field public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
+    field @Deprecated public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
     field @Deprecated public static final String HTTP_PROXY = "http_proxy";
     field @Deprecated public static final String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
     field @Deprecated public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
@@ -36275,7 +36275,7 @@ package android.provider {
     field public static final String USER_ROTATION = "user_rotation";
     field @Deprecated public static final String USE_GOOGLE_MAIL = "use_google_mail";
     field public static final String VIBRATE_ON = "vibrate_on";
-    field public static final String VIBRATE_WHEN_RINGING = "vibrate_when_ringing";
+    field @Deprecated public static final String VIBRATE_WHEN_RINGING = "vibrate_when_ringing";
     field @Deprecated public static final String WAIT_FOR_DEBUGGER = "wait_for_debugger";
     field @Deprecated public static final String WALLPAPER_ACTIVITY = "wallpaper_activity";
     field @Deprecated public static final String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
@@ -48473,7 +48473,7 @@ package android.view {
     field public static final int CLOCK_TICK = 4; // 0x4
     field public static final int CONFIRM = 16; // 0x10
     field public static final int CONTEXT_CLICK = 6; // 0x6
-    field public static final int FLAG_IGNORE_GLOBAL_SETTING = 2; // 0x2
+    field @Deprecated public static final int FLAG_IGNORE_GLOBAL_SETTING = 2; // 0x2
     field public static final int FLAG_IGNORE_VIEW_SETTING = 1; // 0x1
     field public static final int GESTURE_END = 13; // 0xd
     field public static final int GESTURE_START = 12; // 0xc

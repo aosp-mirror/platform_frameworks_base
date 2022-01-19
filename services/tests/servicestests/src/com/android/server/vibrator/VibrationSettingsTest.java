@@ -330,6 +330,8 @@ public class VibrationSettingsTest {
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
             }
+            assertVibrationNotIgnoredForUsageAndFlags(usage,
+                    VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF);
         }
     }
 
@@ -363,6 +365,8 @@ public class VibrationSettingsTest {
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
             }
+            assertVibrationNotIgnoredForUsageAndFlags(usage,
+                    VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF);
         }
     }
 
@@ -376,6 +380,8 @@ public class VibrationSettingsTest {
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
             }
+            assertVibrationNotIgnoredForUsageAndFlags(usage,
+                    VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF);
         }
     }
 
@@ -389,6 +395,8 @@ public class VibrationSettingsTest {
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
             }
+            assertVibrationNotIgnoredForUsageAndFlags(usage,
+                    VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF);
         }
     }
 
@@ -402,6 +410,8 @@ public class VibrationSettingsTest {
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
             }
+            assertVibrationNotIgnoredForUsageAndFlags(usage,
+                    VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF);
         }
     }
 
@@ -419,6 +429,8 @@ public class VibrationSettingsTest {
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
             }
+            assertVibrationNotIgnoredForUsageAndFlags(usage,
+                    VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF);
         }
     }
 
@@ -522,9 +534,17 @@ public class VibrationSettingsTest {
     }
 
     private void assertVibrationNotIgnoredForUsage(@VibrationAttributes.Usage int usage) {
+        assertVibrationNotIgnoredForUsageAndFlags(usage, /* flags= */ 0);
+    }
+
+    private void assertVibrationNotIgnoredForUsageAndFlags(@VibrationAttributes.Usage int usage,
+            @VibrationAttributes.Flag int flags) {
         assertNull(errorMessageForUsage(usage),
                 mVibrationSettings.shouldIgnoreVibration(UID,
-                        VibrationAttributes.createForUsage(usage)));
+                        new VibrationAttributes.Builder()
+                                .setUsage(usage)
+                                .setFlags(flags, VibrationAttributes.FLAG_ALL_SUPPORTED)
+                                .build()));
     }
 
     private String errorMessageForUsage(int usage) {
