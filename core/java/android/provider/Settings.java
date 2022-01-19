@@ -10567,6 +10567,14 @@ public final class Settings {
                 "communal_mode_trusted_networks";
 
         /**
+         * Setting to allow Fast Pair scans to be enabled.
+         * @hide
+         */
+        @SystemApi
+        @Readable
+        public static final String FAST_PAIR_SCAN_ENABLED = "fast_pair_scan_enabled";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */
