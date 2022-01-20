@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2021 The Android Open Source Project
+  Copyright (C) 2022 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,12 +14,10 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/content_parent"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
-
-    <include layout="@layout/collapsing_toolbar_content_layout"/>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+<resources>
+    <declare-styleable name="CollapsingCoordinatorLayout">
+        <!-- assign a title of collapsing toolbar title. -->
+        <attr name="collapsing_toolbar_title" format="string" />
+        <attr name="content_frame_height_match_parent" format="boolean" />
+    </declare-styleable>
+</resources>
