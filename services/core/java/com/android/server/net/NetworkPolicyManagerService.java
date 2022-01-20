@@ -2687,7 +2687,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final List<WifiConfiguration> configs = wm.getConfiguredNetworks();
         for (int i = 0; i < configs.size(); ++i) {
             final WifiConfiguration config = configs.get(i);
-            for (String key : config.getAllPersistableNetworkKeys()) {
+            for (String key : config.getAllNetworkKeys()) {
                 final Boolean metered = wifiNetworkKeys.get(key);
                 if (metered != null) {
                     Slog.d(TAG, "Found network " + key + "; upgrading metered hint");
