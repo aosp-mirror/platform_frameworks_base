@@ -5098,7 +5098,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     // make sure stats are recorded frequently enough; we aim
                     // for 2MB threshold for 2GB/month rules.
                     final long persistThreshold = lowestRule / 1000;
-                    mNetworkStats.advisePersistThreshold(persistThreshold);
+                    // TODO: Sync internal naming with the API surface.
+                    mNetworkStats.setDefaultGlobalAlert(persistThreshold);
                     return true;
                 }
                 case MSG_UPDATE_INTERFACE_QUOTAS: {
