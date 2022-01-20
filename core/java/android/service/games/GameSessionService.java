@@ -22,8 +22,12 @@ import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
+import android.hardware.display.DisplayManager;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.view.Display;
+import android.view.SurfaceControlViewHost;
 
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -62,14 +66,25 @@ public abstract class GameSessionService extends Service {
 
     private final IGameSessionService mInterface = new IGameSessionService.Stub() {
         @Override
-        public void create(CreateGameSessionRequest createGameSessionRequest,
+        public void create(
+                CreateGameSessionRequest createGameSessionRequest,
+                GameSessionViewHostConfiguration gameSessionViewHostConfiguration,
                 AndroidFuture gameSessionFuture) {
             Handler.getMain().post(PooledLambda.obtainRunnable(
                     GameSessionService::doCreate, GameSessionService.this,
                     createGameSessionRequest,
+                    gameSessionViewHostConfiguration,
                     gameSessionFuture));
         }
     };
+
+    private DisplayManager mDisplayManager;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mDisplayManager = this.getSystemService(DisplayManager.class);
+    }
 
     @Override
     @Nullable
@@ -85,12 +100,36 @@ public abstract class GameSessionService extends Service {
         return mInterface.asBinder();
     }
 
-    private void doCreate(CreateGameSessionRequest createGameSessionRequest,
-            AndroidFuture<IBinder> gameSessionFuture) {
+    private void doCreate(
+            CreateGameSessionRequest createGameSessionRequest,
+            GameSessionViewHostConfiguration gameSessionViewHostConfiguration,
+            AndroidFuture<CreateGameSessionResult> createGameSessionResultFuture) {
         GameSession gameSession = onNewSession(createGameSessionRequest);
         Objects.requireNonNull(gameSession);
 
-        gameSessionFuture.complete(gameSession.mInterface.asBinder());
+        Display display = mDisplayManager.getDisplay(gameSessionViewHostConfiguration.mDisplayId);
+        if (display == null) {
+            createGameSessionResultFuture.completeExceptionally(
+                    new IllegalStateException("No display found for id: "
+                            + gameSessionViewHostConfiguration.mDisplayId));
+            return;
+        }
+
+        IBinder hostToken = new Binder();
+        SurfaceControlViewHost surfaceControlViewHost =
+                new SurfaceControlViewHost(this, display, hostToken);
+
+        gameSession.attach(this,
+                surfaceControlViewHost,
+                gameSessionViewHostConfiguration.mWidthPx,
+                gameSessionViewHostConfiguration.mHeightPx);
+
+        CreateGameSessionResult createGameSessionResult =
+                new CreateGameSessionResult(gameSession.mInterface,
+                        surfaceControlViewHost.getSurfacePackage());
+
+        createGameSessionResultFuture.complete(createGameSessionResult);
+
 
         gameSession.doCreate();
     }
