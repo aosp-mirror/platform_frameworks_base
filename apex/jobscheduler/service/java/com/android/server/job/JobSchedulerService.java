@@ -1209,18 +1209,16 @@ public class JobSchedulerService extends com.android.server.SystemService
         synchronized (mLock) {
             mStartedUsers = ArrayUtils.appendInt(mStartedUsers, user.getUserIdentifier());
         }
-        // The user is starting but credential encrypted storage is still locked.
-        // Only direct-boot-aware jobs can safely run.
-        // Let's kick off any eligible jobs for this user.
-        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
     }
 
+    /** Start jobs after user is available, delayed by a few seconds since non-urgent. */
     @Override
-    public void onUserUnlocked(@NonNull TargetUser user) {
-        // The user is fully unlocked and credential encrypted storage is now decrypted.
-        // Direct-boot-UNaware jobs can now safely run.
-        // Let's kick off any outstanding jobs for this user.
-        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+    public void onUserCompletedEvent(@NonNull TargetUser user, UserCompletedEventType eventType) {
+        if (eventType.includesOnUserStarting() || eventType.includesOnUserUnlocked()) {
+            // onUserStarting: direct-boot-aware jobs can safely run
+            // onUserUnlocked: direct-boot-UNaware jobs can safely run.
+            mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+        }
     }
 
     @Override
