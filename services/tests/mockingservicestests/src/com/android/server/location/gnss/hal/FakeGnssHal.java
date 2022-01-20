@@ -109,15 +109,19 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     public static class GnssHalBatchingMode {
 
         public final long PeriodNanos;
+        public final float MinUpdateDistanceMeters;
         public final boolean WakeOnFifoFull;
 
         GnssHalBatchingMode() {
             PeriodNanos = 0;
+            MinUpdateDistanceMeters = 0.0f;
             WakeOnFifoFull = false;
         }
 
-        public GnssHalBatchingMode(long periodNanos, boolean wakeOnFifoFull) {
+        public GnssHalBatchingMode(long periodNanos, float minUpdateDistanceMeters,
+                boolean wakeOnFifoFull) {
             PeriodNanos = periodNanos;
+            MinUpdateDistanceMeters = minUpdateDistanceMeters;
             WakeOnFifoFull = wakeOnFifoFull;
         }
 
@@ -132,12 +136,13 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
 
             GnssHalBatchingMode that = (GnssHalBatchingMode) o;
             return PeriodNanos == that.PeriodNanos
+                    && MinUpdateDistanceMeters == that.MinUpdateDistanceMeters
                     && WakeOnFifoFull == that.WakeOnFifoFull;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(PeriodNanos, WakeOnFifoFull);
+            return Objects.hash(PeriodNanos, MinUpdateDistanceMeters, WakeOnFifoFull);
         }
     }
 
@@ -570,9 +575,11 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     protected void cleanupBatching() {}
 
     @Override
-    protected boolean startBatch(long periodNanos, boolean wakeOnFifoFull) {
+    protected boolean startBatch(long periodNanos, float minUpdateDistanceMeters,
+            boolean wakeOnFifoFull) {
         mState.mBatchingStarted = true;
-        mState.mBatchingMode = new GnssHalBatchingMode(periodNanos, wakeOnFifoFull);
+        mState.mBatchingMode = new GnssHalBatchingMode(periodNanos, minUpdateDistanceMeters,
+                wakeOnFifoFull);
         return true;
     }
 

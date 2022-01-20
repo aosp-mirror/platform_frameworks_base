@@ -47,9 +47,12 @@ jint GnssBatching::getBatchSize() {
     return size;
 }
 
-jboolean GnssBatching::start(long periodNanos, bool wakeOnFifoFull) {
-    int flags = (wakeOnFifoFull) ? IGnssBatching::WAKEUP_ON_FIFO_FULL : 0;
-    auto status = mIGnssBatching->start(periodNanos, flags);
+jboolean GnssBatching::start(long periodNanos, float minUpdateDistanceMeters, bool wakeOnFifoFull) {
+    IGnssBatching::Options options;
+    options.flags = (wakeOnFifoFull) ? IGnssBatching::WAKEUP_ON_FIFO_FULL : 0;
+    options.periodNanos = periodNanos;
+    options.minDistanceMeters = minUpdateDistanceMeters;
+    auto status = mIGnssBatching->start(options);
     return checkAidlStatus(status, "IGnssBatchingAidl start() failed.");
 }
 
@@ -88,9 +91,13 @@ jint GnssBatching_V1_0::getBatchSize() {
     return static_cast<jint>(result);
 }
 
-jboolean GnssBatching_V1_0::start(long periodNanos, bool wakeOnFifoFull) {
+jboolean GnssBatching_V1_0::start(long periodNanos, float minUpdateDistanceMeters,
+                                  bool wakeOnFifoFull) {
     IGnssBatching_V1_0::Options options;
     options.periodNanos = periodNanos;
+    if (minUpdateDistanceMeters > 0) {
+        ALOGW("minUpdateDistanceMeters is not supported in 1.0 GNSS HAL.");
+    }
     if (wakeOnFifoFull) {
         options.flags = static_cast<uint8_t>(IGnssBatching_V1_0::Flag::WAKEUP_ON_FIFO_FULL);
     } else {
