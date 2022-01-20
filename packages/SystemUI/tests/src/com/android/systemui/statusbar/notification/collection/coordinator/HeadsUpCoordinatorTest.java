@@ -142,7 +142,7 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
         addHUN(mEntry);
         when(mHeadsUpManager.canRemoveImmediately(anyString())).thenReturn(false, true);
         when(mHeadsUpManager.getEarliestRemovalTime(anyString())).thenReturn(1000L, 0L);
-        assertTrue(mNotifLifetimeExtender.shouldExtendLifetime(mEntry, 0));
+        assertTrue(mNotifLifetimeExtender.maybeExtendLifetime(mEntry, 0));
         mClock.advanceTime(1000L);
         mExecutor.runAllReady();
         verify(mHeadsUpManager, times(0))
@@ -156,7 +156,7 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
         when(mHeadsUpManager.isSticky(anyString())).thenReturn(true);
         addHUN(mEntry);
         when(mHeadsUpManager.getEarliestRemovalTime(anyString())).thenReturn(1000L, 500L);
-        assertTrue(mNotifLifetimeExtender.shouldExtendLifetime(mEntry, 0));
+        assertTrue(mNotifLifetimeExtender.maybeExtendLifetime(mEntry, 0));
         mClock.advanceTime(1000L);
         mExecutor.runAllReady();
         verify(mHeadsUpManager, times(0))
@@ -170,7 +170,7 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
         when(mHeadsUpManager.isSticky(anyString())).thenReturn(false);
         addHUN(mEntry);
         when(mHeadsUpManager.getEarliestRemovalTime(anyString())).thenReturn(1000L, 500L);
-        assertTrue(mNotifLifetimeExtender.shouldExtendLifetime(mEntry, 0));
+        assertTrue(mNotifLifetimeExtender.maybeExtendLifetime(mEntry, 0));
         mClock.advanceTime(1000L);
         mExecutor.runAllReady();
         verify(mHeadsUpManager, times(1))
@@ -216,8 +216,8 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
             return true;
         });
         // THEN only the current HUN, mEntry, should be lifetimeExtended
-        assertTrue(mNotifLifetimeExtender.shouldExtendLifetime(mEntry, /* cancellationReason */ 0));
-        assertFalse(mNotifLifetimeExtender.shouldExtendLifetime(
+        assertTrue(mNotifLifetimeExtender.maybeExtendLifetime(mEntry, /* cancellationReason */ 0));
+        assertFalse(mNotifLifetimeExtender.maybeExtendLifetime(
                 new NotificationEntryBuilder()
                         .setPkg("test-package")
                         .build(), /* cancellationReason */ 0));

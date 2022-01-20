@@ -50,6 +50,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.dex.ArtManager;
+import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -88,6 +89,7 @@ import com.android.internal.util.DataClass;
 
 import dalvik.system.VMRuntime;
 
+import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.cert.Certificate;
@@ -7891,8 +7893,7 @@ public abstract class PackageManager {
     @Deprecated
     @Nullable
     public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath, int flags) {
-        throw new UnsupportedOperationException(
-                "getPackageArchiveInfo() not implemented in subclass");
+        return getPackageArchiveInfo(archiveFilePath, PackageInfoFlags.of(flags));
     }
 
     /**
@@ -7901,8 +7902,29 @@ public abstract class PackageManager {
     @Nullable
     public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath,
             @NonNull PackageInfoFlags flags) {
-        throw new UnsupportedOperationException(
-                "getPackageArchiveInfo() not implemented in subclass");
+        long flagsBits = flags.getValue();
+        final PackageParser parser = new PackageParser();
+        parser.setCallback(new PackageParser.CallbackImpl(this));
+        final File apkFile = new File(archiveFilePath);
+        try {
+            if ((flagsBits & (MATCH_DIRECT_BOOT_UNAWARE | MATCH_DIRECT_BOOT_AWARE)) != 0) {
+                // Caller expressed an explicit opinion about what encryption
+                // aware/unaware components they want to see, so fall through and
+                // give them what they want
+            } else {
+                // Caller expressed no opinion, so match everything
+                flagsBits |= MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
+            }
+
+            PackageParser.Package pkg = parser.parsePackage(apkFile, 0, false);
+            if ((flagsBits & GET_SIGNATURES) != 0) {
+                PackageParser.collectCertificates(pkg, false /* skipVerify */);
+            }
+            return PackageParser.generatePackageInfo(pkg, null, (int) flagsBits, 0, 0, null,
+                    FrameworkPackageUserState.DEFAULT);
+        } catch (PackageParser.PackageParserException e) {
+            return null;
+        }
     }
 
     /**

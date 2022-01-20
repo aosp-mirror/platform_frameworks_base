@@ -366,6 +366,7 @@ void GnssMeasurementCallbackAidl::translateAndSetGnssData(const GnssData& data) 
 
     env->DeleteLocalRef(clock);
     env->DeleteLocalRef(measurementArray);
+    env->DeleteLocalRef(gnssAgcArray);
 }
 
 void GnssMeasurementCallbackAidl::translateSingleGnssMeasurement(JNIEnv* env,

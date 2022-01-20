@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"व्यत्यय आणू नका कॉंफिगरेशन वाचण्यासाठी आणि लिहिण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"व्ह्यू परवानगी वापर सुरू करा"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"धारकास अ‍ॅपसाठी परवानगी वापरणे सुरू करण्याची अनुमती देते. सामान्य अ‍ॅप्ससाठी कधीही आवश्यकता नसते."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"परवानगीशी संबंधित निर्णय पाहणे सुरू करा"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"होल्डरला परवानगीशी संबंधित निर्णयांचे पुनरावलोकन करण्यासाठी स्क्रीन सुरू करण्याची अनुमती देते. सामान्य ॲप्ससाठी कधीही आवश्यक नसते."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ॲप वैशिष्ट्ये पाहणे सुरू करा"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"होल्डरला ॲपसाठी वैशिष्ट्यांची माहिती पाहण्यास सुरू करण्याची अनुमती देते."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"उच्च नमुना दराने सेन्सर डेटा अ‍ॅक्सेस करते"</string>

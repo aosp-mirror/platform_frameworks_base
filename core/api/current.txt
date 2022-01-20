@@ -949,6 +949,7 @@ package android {
     field public static final int left = 16843181; // 0x10101ad
     field public static final int letterSpacing = 16843958; // 0x10104b6
     field public static final int level = 16844032; // 0x1010500
+    field public static final int lineBreakStyle = 16844365; // 0x101064d
     field public static final int lineHeight = 16844159; // 0x101057f
     field public static final int lineSpacingExtra = 16843287; // 0x1010217
     field public static final int lineSpacingMultiplier = 16843288; // 0x1010218
@@ -5712,6 +5713,7 @@ package android.app {
 
   public class LocaleManager {
     method @NonNull public android.os.LocaleList getApplicationLocales();
+    method @NonNull @RequiresPermission(value="android.permission.READ_APP_SPECIFIC_LOCALES", conditional=true) public android.os.LocaleList getApplicationLocales(@NonNull String);
     method public void setApplicationLocales(@NonNull android.os.LocaleList);
   }
 
@@ -7563,6 +7565,7 @@ package android.app.admin {
     field @Deprecated public static final String EXTRA_PROVISIONING_EMAIL_ADDRESS = "android.app.extra.PROVISIONING_EMAIL_ADDRESS";
     field public static final String EXTRA_PROVISIONING_IMEI = "android.app.extra.PROVISIONING_IMEI";
     field public static final String EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION = "android.app.extra.PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION";
+    field public static final String EXTRA_PROVISIONING_KEEP_SCREEN_ON = "android.app.extra.PROVISIONING_KEEP_SCREEN_ON";
     field public static final String EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED = "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED";
     field public static final String EXTRA_PROVISIONING_LOCALE = "android.app.extra.PROVISIONING_LOCALE";
     field public static final String EXTRA_PROVISIONING_LOCAL_TIME = "android.app.extra.PROVISIONING_LOCAL_TIME";
@@ -17576,6 +17579,17 @@ package android.graphics.pdf {
 
 package android.graphics.text {
 
+  public final class LineBreakConfig {
+    ctor public LineBreakConfig();
+    method public int getLineBreakStyle();
+    method public void set(@Nullable android.graphics.text.LineBreakConfig);
+    method public void setLineBreakStyle(int);
+    field public static final int LINE_BREAK_STYLE_LOOSE = 1; // 0x1
+    field public static final int LINE_BREAK_STYLE_NONE = 0; // 0x0
+    field public static final int LINE_BREAK_STYLE_NORMAL = 2; // 0x2
+    field public static final int LINE_BREAK_STYLE_STRICT = 3; // 0x3
+  }
+
   public class LineBreaker {
     method @NonNull public android.graphics.text.LineBreaker.Result computeLineBreaks(@NonNull android.graphics.text.MeasuredText, @NonNull android.graphics.text.LineBreaker.ParagraphConstraints, @IntRange(from=0) int);
     field public static final int BREAK_STRATEGY_BALANCED = 2; // 0x2
@@ -17631,6 +17645,7 @@ package android.graphics.text {
     ctor public MeasuredText.Builder(@NonNull android.graphics.text.MeasuredText);
     method @NonNull public android.graphics.text.MeasuredText.Builder appendReplacementRun(@NonNull android.graphics.Paint, @IntRange(from=0) int, @FloatRange(from=0) @Px float);
     method @NonNull public android.graphics.text.MeasuredText.Builder appendStyleRun(@NonNull android.graphics.Paint, @IntRange(from=0) int, boolean);
+    method @NonNull public android.graphics.text.MeasuredText.Builder appendStyleRun(@NonNull android.graphics.Paint, @Nullable android.graphics.text.LineBreakConfig, @IntRange(from=0) int, boolean);
     method @NonNull public android.graphics.text.MeasuredText build();
     method @Deprecated @NonNull public android.graphics.text.MeasuredText.Builder setComputeHyphenation(boolean);
     method @NonNull public android.graphics.text.MeasuredText.Builder setComputeHyphenation(int);
@@ -18521,12 +18536,14 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REPROCESS_MAX_CAPTURE_STALL;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> REQUEST_AVAILABLE_CAPABILITIES;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.DynamicRangeProfiles> REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_MAX_NUM_INPUT_STREAMS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_MAX_NUM_OUTPUT_PROC;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_MAX_NUM_OUTPUT_PROC_STALLING;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_MAX_NUM_OUTPUT_RAW;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_PARTIAL_RESULT_COUNT;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Byte> REQUEST_PIPELINE_MAX_DEPTH;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SCALER_CROPPING_TYPE;
@@ -18534,6 +18551,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_MAXIMUM_RESOLUTION_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_STREAM_COMBINATIONS;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_TEN_BIT_OUTPUT_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MultiResolutionStreamConfigurationMap> SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION;
@@ -18850,6 +18868,7 @@ package android.hardware.camera2 {
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE = 6; // 0x6
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO = 9; // 0x9
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT = 8; // 0x8
+    field public static final int REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT = 18; // 0x12
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA = 11; // 0xb
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING = 2; // 0x2
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 1; // 0x1
@@ -19203,6 +19222,25 @@ package android.hardware.camera2.params {
     field public static final long NORMAL = 0L; // 0x0L
   }
 
+  public final class DynamicRangeProfiles {
+    ctor public DynamicRangeProfiles(@NonNull int[]);
+    method @NonNull public java.util.Set<java.lang.Integer> getProfileCaptureRequestConstraints(int);
+    method @NonNull public java.util.Set<java.lang.Integer> getSupportedProfiles();
+    field public static final int DOLBY_VISION_10B_HDR_OEM = 64; // 0x40
+    field public static final int DOLBY_VISION_10B_HDR_OEM_PO = 128; // 0x80
+    field public static final int DOLBY_VISION_10B_HDR_REF = 16; // 0x10
+    field public static final int DOLBY_VISION_10B_HDR_REF_PO = 32; // 0x20
+    field public static final int DOLBY_VISION_8B_HDR_OEM = 1024; // 0x400
+    field public static final int DOLBY_VISION_8B_HDR_OEM_PO = 2048; // 0x800
+    field public static final int DOLBY_VISION_8B_HDR_REF = 256; // 0x100
+    field public static final int DOLBY_VISION_8B_HDR_REF_PO = 512; // 0x200
+    field public static final int HDR10 = 4; // 0x4
+    field public static final int HDR10_PLUS = 8; // 0x8
+    field public static final int HLG10 = 2; // 0x2
+    field public static final int PUBLIC_MAX = 4096; // 0x1000
+    field public static final int STANDARD = 1; // 0x1
+  }
+
   public final class ExtensionSessionConfiguration {
     ctor public ExtensionSessionConfiguration(int, @NonNull java.util.List<android.hardware.camera2.params.OutputConfiguration>, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.StateCallback);
     method @NonNull public java.util.concurrent.Executor getExecutor();
@@ -19249,8 +19287,10 @@ package android.hardware.camera2.params {
   }
 
   public static final class MandatoryStreamCombination.MandatoryStreamInformation {
+    method public int get10BitFormat();
     method @NonNull public java.util.List<android.util.Size> getAvailableSizes();
     method public int getFormat();
+    method public boolean is10BitCapable();
     method public boolean isInput();
     method public boolean isMaximumSize();
     method public boolean isUltraHighResolution();
@@ -19304,12 +19344,14 @@ package android.hardware.camera2.params {
     method @NonNull public static java.util.Collection<android.hardware.camera2.params.OutputConfiguration> createInstancesForMultiResolutionOutput(@NonNull android.hardware.camera2.MultiResolutionImageReader);
     method public int describeContents();
     method public void enableSurfaceSharing();
+    method public int getDynamicRangeProfile();
     method public int getMaxSharedSurfaceCount();
     method @Nullable public android.view.Surface getSurface();
     method public int getSurfaceGroupId();
     method @NonNull public java.util.List<android.view.Surface> getSurfaces();
     method public void removeSensorPixelModeUsed(int);
     method public void removeSurface(@NonNull android.view.Surface);
+    method public void setDynamicRangeProfile(int);
     method public void setPhysicalCameraId(@Nullable String);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.camera2.params.OutputConfiguration> CREATOR;
@@ -19335,6 +19377,7 @@ package android.hardware.camera2.params {
     method @Nullable public java.util.Set<java.lang.Integer> getValidOutputFormatsForInput(int);
     method public boolean isOutputSupportedFor(int);
     method public boolean isOutputSupportedFor(@NonNull android.view.Surface);
+    field public static final int USECASE_10BIT_OUTPUT = 8; // 0x8
     field public static final int USECASE_LOW_LATENCY_SNAPSHOT = 6; // 0x6
     field public static final int USECASE_PREVIEW = 0; // 0x0
     field public static final int USECASE_RAW = 5; // 0x5
@@ -36216,7 +36259,7 @@ package android.provider {
     field public static final String DTMF_TONE_WHEN_DIALING = "dtmf_tone";
     field public static final String END_BUTTON_BEHAVIOR = "end_button_behavior";
     field public static final String FONT_SCALE = "font_scale";
-    field public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
+    field @Deprecated public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
     field @Deprecated public static final String HTTP_PROXY = "http_proxy";
     field @Deprecated public static final String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
     field @Deprecated public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
@@ -36260,7 +36303,7 @@ package android.provider {
     field public static final String USER_ROTATION = "user_rotation";
     field @Deprecated public static final String USE_GOOGLE_MAIL = "use_google_mail";
     field public static final String VIBRATE_ON = "vibrate_on";
-    field public static final String VIBRATE_WHEN_RINGING = "vibrate_when_ringing";
+    field @Deprecated public static final String VIBRATE_WHEN_RINGING = "vibrate_when_ringing";
     field @Deprecated public static final String WAIT_FOR_DEBUGGER = "wait_for_debugger";
     field @Deprecated public static final String WALLPAPER_ACTIVITY = "wallpaper_activity";
     field @Deprecated public static final String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
@@ -40039,8 +40082,10 @@ package android.speech {
     ctor public RecognitionService();
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected abstract void onCancel(android.speech.RecognitionService.Callback);
+    method public void onCheckRecognitionSupport(@NonNull android.content.Intent, @NonNull android.speech.RecognitionService.SupportCallback);
     method protected abstract void onStartListening(android.content.Intent, android.speech.RecognitionService.Callback);
     method protected abstract void onStopListening(android.speech.RecognitionService.Callback);
+    method public void triggerModelDownload(@NonNull android.content.Intent);
     field public static final String SERVICE_INTERFACE = "android.speech.RecognitionService";
     field public static final String SERVICE_META_DATA = "android.speech";
   }
@@ -40056,6 +40101,36 @@ package android.speech {
     method public void readyForSpeech(android.os.Bundle) throws android.os.RemoteException;
     method public void results(android.os.Bundle) throws android.os.RemoteException;
     method public void rmsChanged(float) throws android.os.RemoteException;
+  }
+
+  public static class RecognitionService.SupportCallback {
+    method public void onError(int);
+    method public void onSupportResult(@NonNull android.speech.RecognitionSupport);
+  }
+
+  public final class RecognitionSupport implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getInstalledLanguages();
+    method @NonNull public java.util.List<java.lang.String> getPendingLanguages();
+    method @NonNull public java.util.List<java.lang.String> getSupportedLanguages();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.speech.RecognitionSupport> CREATOR;
+  }
+
+  public static final class RecognitionSupport.Builder {
+    ctor public RecognitionSupport.Builder();
+    method @NonNull public android.speech.RecognitionSupport.Builder addInstalledLanguages(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport.Builder addPendingLanguages(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport.Builder addSupportedLanguages(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport build();
+    method @NonNull public android.speech.RecognitionSupport.Builder setInstalledLanguages(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.speech.RecognitionSupport.Builder setPendingLanguages(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.speech.RecognitionSupport.Builder setSupportedLanguages(@NonNull java.util.List<java.lang.String>);
+  }
+
+  public interface RecognitionSupportCallback {
+    method public void onError(int);
+    method public void onSupportResult(@NonNull android.speech.RecognitionSupport);
   }
 
   public class RecognizerIntent {
@@ -40107,6 +40182,7 @@ package android.speech {
 
   public class SpeechRecognizer {
     method @MainThread public void cancel();
+    method public void checkRecognitionSupport(@NonNull android.content.Intent, @NonNull android.speech.RecognitionSupportCallback);
     method @MainThread @NonNull public static android.speech.SpeechRecognizer createOnDeviceSpeechRecognizer(@NonNull android.content.Context);
     method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context);
     method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context, android.content.ComponentName);
@@ -40116,8 +40192,10 @@ package android.speech {
     method @MainThread public void setRecognitionListener(android.speech.RecognitionListener);
     method @MainThread public void startListening(android.content.Intent);
     method @MainThread public void stopListening();
+    method public void triggerModelDownload(@NonNull android.content.Intent);
     field public static final String CONFIDENCE_SCORES = "confidence_scores";
     field public static final int ERROR_AUDIO = 3; // 0x3
+    field public static final int ERROR_CANNOT_CHECK_SUPPORT = 14; // 0xe
     field public static final int ERROR_CLIENT = 5; // 0x5
     field public static final int ERROR_INSUFFICIENT_PERMISSIONS = 9; // 0x9
     field public static final int ERROR_LANGUAGE_NOT_SUPPORTED = 12; // 0xc
@@ -43416,6 +43494,7 @@ package android.telephony {
     field public static final int RESULT_RIL_BLOCKED_DUE_TO_CALL = 123; // 0x7b
     field public static final int RESULT_RIL_CANCELLED = 119; // 0x77
     field public static final int RESULT_RIL_ENCODING_ERR = 109; // 0x6d
+    field public static final int RESULT_RIL_GENERIC_ERROR = 124; // 0x7c
     field public static final int RESULT_RIL_INTERNAL_ERR = 113; // 0x71
     field public static final int RESULT_RIL_INVALID_ARGUMENTS = 104; // 0x68
     field public static final int RESULT_RIL_INVALID_MODEM_STATE = 115; // 0x73
@@ -44224,6 +44303,7 @@ package android.telephony.data {
     field public static final int TYPE_DEFAULT = 17; // 0x11
     field public static final int TYPE_DUN = 8; // 0x8
     field public static final int TYPE_EMERGENCY = 512; // 0x200
+    field public static final int TYPE_ENTERPRISE = 16384; // 0x4000
     field public static final int TYPE_FOTA = 32; // 0x20
     field public static final int TYPE_HIPRI = 16; // 0x10
     field public static final int TYPE_IA = 256; // 0x100
@@ -44420,7 +44500,7 @@ package android.telephony.euicc {
     method public boolean isEnabled();
     method public boolean isSimPortAvailable(int);
     method public void startResolutionActivity(android.app.Activity, int, android.content.Intent, android.app.PendingIntent) throws android.content.IntentSender.SendIntentException;
-    method @Deprecated @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, android.app.PendingIntent);
+    method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, android.app.PendingIntent);
     method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, int, @NonNull android.app.PendingIntent);
     method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void updateSubscriptionNickname(int, @Nullable String, @NonNull android.app.PendingIntent);
     field public static final String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS = "android.telephony.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
@@ -44440,6 +44520,7 @@ package android.telephony.euicc {
     field public static final int ERROR_INSTALL_PROFILE = 10009; // 0x2719
     field public static final int ERROR_INVALID_ACTIVATION_CODE = 10001; // 0x2711
     field public static final int ERROR_INVALID_CONFIRMATION_CODE = 10002; // 0x2712
+    field public static final int ERROR_INVALID_PORT = 10017; // 0x2721
     field public static final int ERROR_INVALID_RESPONSE = 10015; // 0x271f
     field public static final int ERROR_NO_PROFILES_AVAILABLE = 10013; // 0x271d
     field public static final int ERROR_OPERATION_BUSY = 10016; // 0x2720
@@ -45434,6 +45515,7 @@ package android.text {
   public static final class PrecomputedText.Params {
     method public int getBreakStrategy();
     method public int getHyphenationFrequency();
+    method @Nullable public android.graphics.text.LineBreakConfig getLineBreakConfig();
     method @NonNull public android.text.TextDirectionHeuristic getTextDirection();
     method @NonNull public android.text.TextPaint getTextPaint();
   }
@@ -45444,6 +45526,7 @@ package android.text {
     method @NonNull public android.text.PrecomputedText.Params build();
     method public android.text.PrecomputedText.Params.Builder setBreakStrategy(int);
     method public android.text.PrecomputedText.Params.Builder setHyphenationFrequency(int);
+    method @NonNull public android.text.PrecomputedText.Params.Builder setLineBreakConfig(@NonNull android.graphics.text.LineBreakConfig);
     method public android.text.PrecomputedText.Params.Builder setTextDirection(@NonNull android.text.TextDirectionHeuristic);
   }
 
@@ -45604,6 +45687,7 @@ package android.text {
     method @NonNull public android.text.StaticLayout.Builder setIncludePad(boolean);
     method @NonNull public android.text.StaticLayout.Builder setIndents(@Nullable int[], @Nullable int[]);
     method @NonNull public android.text.StaticLayout.Builder setJustificationMode(int);
+    method @NonNull public android.text.StaticLayout.Builder setLineBreakConfig(@NonNull android.graphics.text.LineBreakConfig);
     method @NonNull public android.text.StaticLayout.Builder setLineSpacing(float, @FloatRange(from=0.0) float);
     method @NonNull public android.text.StaticLayout.Builder setMaxLines(@IntRange(from=0) int);
     method public android.text.StaticLayout.Builder setText(CharSequence);
@@ -48079,13 +48163,31 @@ package android.view {
 
   public final class Choreographer {
     method public static android.view.Choreographer getInstance();
+    method public void postExtendedFrameCallback(@NonNull android.view.Choreographer.ExtendedFrameCallback);
     method public void postFrameCallback(android.view.Choreographer.FrameCallback);
     method public void postFrameCallbackDelayed(android.view.Choreographer.FrameCallback, long);
+    method public void removeExtendedFrameCallback(@Nullable android.view.Choreographer.ExtendedFrameCallback);
     method public void removeFrameCallback(android.view.Choreographer.FrameCallback);
+  }
+
+  public static interface Choreographer.ExtendedFrameCallback {
+    method public void onVsync(@NonNull android.view.Choreographer.FrameData);
   }
 
   public static interface Choreographer.FrameCallback {
     method public void doFrame(long);
+  }
+
+  public static class Choreographer.FrameData {
+    method public long getFrameTimeNanos();
+    method @NonNull public android.view.Choreographer.FrameTimeline[] getFrameTimelines();
+    method @NonNull public android.view.Choreographer.FrameTimeline getPreferredFrameTimeline();
+  }
+
+  public static class Choreographer.FrameTimeline {
+    method public long getDeadlineNanos();
+    method public long getExpectedPresentTimeNanos();
+    method public long getVsyncId();
   }
 
   public interface CollapsibleActionView {
@@ -48399,7 +48501,7 @@ package android.view {
     field public static final int CLOCK_TICK = 4; // 0x4
     field public static final int CONFIRM = 16; // 0x10
     field public static final int CONTEXT_CLICK = 6; // 0x6
-    field public static final int FLAG_IGNORE_GLOBAL_SETTING = 2; // 0x2
+    field @Deprecated public static final int FLAG_IGNORE_GLOBAL_SETTING = 2; // 0x2
     field public static final int FLAG_IGNORE_VIEW_SETTING = 1; // 0x1
     field public static final int GESTURE_END = 13; // 0xd
     field public static final int GESTURE_START = 12; // 0xc
@@ -52442,6 +52544,8 @@ package android.view.accessibility {
     method @NonNull public android.view.accessibility.CaptioningManager.CaptionStyle getUserStyle();
     method public boolean isCallCaptioningEnabled();
     method public final boolean isEnabled();
+    method public final boolean isSystemAudioCaptioningRequested();
+    method public final boolean isSystemAudioCaptioningUiRequested();
     method public void removeCaptioningChangeListener(@NonNull android.view.accessibility.CaptioningManager.CaptioningChangeListener);
   }
 
@@ -52470,6 +52574,8 @@ package android.view.accessibility {
     method public void onEnabledChanged(boolean);
     method public void onFontScaleChanged(float);
     method public void onLocaleChanged(@Nullable java.util.Locale);
+    method public void onSystemAudioCaptioningChanged(boolean);
+    method public void onSystemAudioCaptioningUiChanged(boolean);
     method public void onUserStyleChanged(@NonNull android.view.accessibility.CaptioningManager.CaptionStyle);
   }
 
@@ -55213,6 +55319,7 @@ package android.widget {
     method protected boolean isInFilterMode();
     method public boolean isItemChecked(int);
     method public boolean isScrollingCacheEnabled();
+    method public boolean isSelectedChildViewEnabled();
     method public boolean isSmoothScrollbarEnabled();
     method public boolean isStackFromBottom();
     method public boolean isTextFilterEnabled();
@@ -55248,6 +55355,7 @@ package android.widget {
     method public void setRemoteViewsAdapter(android.content.Intent);
     method public void setScrollIndicators(android.view.View, android.view.View);
     method public void setScrollingCacheEnabled(boolean);
+    method public void setSelectedChildViewEnabled(boolean);
     method public void setSelectionFromTop(int, int);
     method public void setSelector(@DrawableRes int);
     method public void setSelector(android.graphics.drawable.Drawable);
@@ -57660,6 +57768,7 @@ package android.widget {
     method public final android.text.Layout getLayout();
     method public float getLetterSpacing();
     method public int getLineBounds(int, android.graphics.Rect);
+    method @NonNull public android.graphics.text.LineBreakConfig getLineBreakConfig();
     method public int getLineCount();
     method public int getLineHeight();
     method public float getLineSpacingExtra();
@@ -57787,6 +57896,7 @@ package android.widget {
     method public void setKeyListener(android.text.method.KeyListener);
     method public void setLastBaselineToBottomHeight(@IntRange(from=0) @Px int);
     method public void setLetterSpacing(float);
+    method public void setLineBreakConfig(@NonNull android.graphics.text.LineBreakConfig);
     method public void setLineHeight(@IntRange(from=0) @Px int);
     method public void setLineSpacing(float, float);
     method public void setLines(int);

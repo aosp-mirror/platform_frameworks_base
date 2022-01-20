@@ -28,6 +28,7 @@ import android.view.View.OnLayoutChangeListener;
 
 import androidx.annotation.Nullable;
 
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSTile;
@@ -41,7 +42,6 @@ import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
-import com.android.wm.shell.animation.Interpolators;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -301,6 +301,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         TouchAnimator.Builder qqsTranslationYBuilder = new Builder();
         TouchAnimator.Builder translationXBuilder = new Builder();
         TouchAnimator.Builder nonFirstPageAlphaBuilder = new Builder();
+        TouchAnimator.Builder quadraticInterpolatorBuilder = new Builder()
+                .setInterpolator(Interpolators.ACCELERATE);
 
         Collection<QSTile> tiles = mHost.getTiles();
         int count = 0;
@@ -413,7 +415,13 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                             qqsTranslationYBuilder
                     );
 
-                    firstPageBuilder.addFloat(quickTileView.getSecondaryLabel(), "alpha", 0, 1);
+                    // Secondary labels on tiles not in QQS have two alpha animation applied:
+                    // * on the tile themselves
+                    // * on TileLayout
+                    // Therefore, we use a quadratic interpolator animator to animate the alpha
+                    // for tiles in QQS to match.
+                    quadraticInterpolatorBuilder
+                            .addFloat(quickTileView.getSecondaryLabel(), "alpha", 0, 1);
                     nonFirstPageAlphaBuilder
                             .addFloat(quickTileView.getSecondaryLabel(), "alpha", 0, 0);
 
@@ -461,6 +469,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             mFirstPageAnimator = firstPageBuilder
                     // Fade in the tiles/labels as we reach the final position.
                     .addFloat(tileLayout, "alpha", 0, 1)
+                    .addFloat(quadraticInterpolatorBuilder.build(), "position", 0, 1)
                     .setListener(this)
                     .build();
 
@@ -535,7 +544,11 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             builder.addFloat(tileView.getSecondaryIcon(), "translationY", -centerDiff, 0);
             // The labels have different apparent size in QQS vs QS (no secondary label), so the
             // translation needs to account for that.
-            int labelDiff = centerDiff - tileView.getSecondaryLabel().getMeasuredHeight() / 2;
+            int secondaryLabelOffset = 0;
+            if (tileView.getSecondaryLabel().getVisibility() == View.VISIBLE) {
+                secondaryLabelOffset = tileView.getSecondaryLabel().getMeasuredHeight() / 2;
+            }
+            int labelDiff = centerDiff - secondaryLabelOffset;
             builder.addFloat(tileView.getLabelContainer(), "translationY", -labelDiff, 0);
             builder.addFloat(tileView.getSecondaryLabel(), "alpha", 0, 0.3f, 1);
 

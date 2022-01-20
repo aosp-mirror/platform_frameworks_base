@@ -18,8 +18,6 @@ package android.hardware.camera2.params;
 
 import static android.hardware.camera2.params.StreamConfigurationMap.checkArgumentFormat;
 
-import static com.android.internal.util.Preconditions.*;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.ImageFormat;
@@ -28,7 +26,6 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.media.CamcorderProfile;
 import android.util.Log;
@@ -40,6 +37,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -64,6 +62,7 @@ public final class MandatoryStreamCombination {
         private final boolean mIsInput;
         private final boolean mIsUltraHighResolution;
         private final boolean mIsMaximumSize;
+        private final boolean mIs10BitCapable;
 
         /**
          * Create a new {@link MandatoryStreamInformation}.
@@ -119,6 +118,29 @@ public final class MandatoryStreamCombination {
          */
         public MandatoryStreamInformation(@NonNull List<Size> availableSizes, @Format int format,
                 boolean isMaximumSize, boolean isInput, boolean isUltraHighResolution) {
+            this(availableSizes, format, isMaximumSize, isInput, isUltraHighResolution,
+                    /*is10bitCapable*/ false);
+        }
+
+        /**
+         * Create a new {@link MandatoryStreamInformation}.
+         *
+         * @param availableSizes List of possible stream sizes.
+         * @param format Image format.
+         * @param isMaximumSize Whether this is a maximum size stream.
+         * @param isInput Flag indicating whether this stream is input.
+         * @param isUltraHighResolution Flag indicating whether this is a ultra-high resolution
+         *                              stream.
+         * @param is10BitCapable Flag indicating whether this stream is able to support 10-bit
+         *
+         * @throws IllegalArgumentException
+         *              if sizes is empty or if the format was not user-defined in
+         *              ImageFormat/PixelFormat.
+         * @hide
+         */
+        public MandatoryStreamInformation(@NonNull List<Size> availableSizes, @Format int format,
+                boolean isMaximumSize, boolean isInput, boolean isUltraHighResolution,
+                boolean is10BitCapable) {
             if (availableSizes.isEmpty()) {
                 throw new IllegalArgumentException("No available sizes");
             }
@@ -127,6 +149,7 @@ public final class MandatoryStreamCombination {
             mIsMaximumSize = isMaximumSize;
             mIsInput = isInput;
             mIsUltraHighResolution = isUltraHighResolution;
+            mIs10BitCapable = is10BitCapable;
         }
 
         /**
@@ -180,6 +203,27 @@ public final class MandatoryStreamCombination {
         }
 
         /**
+         * Indicates whether this stream is able to support 10-bit output.
+         *
+         * <p>10-bit capable streams can be configured to output 10-bit sample data via calls to
+         * {@link android.hardware.camera2.params.OutputConfiguration#setDynamicRangeProfile} and
+         * selecting the appropriate output Surface pixel format which can be queried via
+         * {@link #get10BitFormat()} and will be either
+         * {@link ImageFormat#PRIVATE} (the default for Surfaces initialized by
+         * {@link android.view.SurfaceView}, {@link android.view.TextureView},
+         * {@link android.media.MediaRecorder}, {@link android.media.MediaCodec} etc.) or
+         * {@link ImageFormat#YCBCR_P010}.</p>
+         *
+         * @return true if stream is able to output 10-bit pixels
+         *
+         * @see android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT
+         * @see OutputConfiguration#setDynamicRangeProfile(int)
+         */
+        public boolean is10BitCapable() {
+            return mIs10BitCapable;
+        }
+
+        /**
          * Return the list of available sizes for this mandatory stream.
          *
          * <p>Per documented {@link CameraDevice#createCaptureSession guideline} the largest
@@ -201,6 +245,29 @@ public final class MandatoryStreamCombination {
          * @return integer format.
          */
         public @Format int getFormat() {
+            // P010 YUV streams must be supported along with SDR 8-bit YUV streams
+            if ((mIs10BitCapable)  && (mFormat == ImageFormat.YCBCR_P010)) {
+                return ImageFormat.YUV_420_888;
+            }
+            return mFormat;
+        }
+
+        /**
+         * Retrieve the mandatory stream 10-bit {@code format} for 10-bit capable streams.
+         *
+         * <p>In case {@link #is10BitCapable()} returns {@code true}, then this method
+         * will return the corresponding 10-bit output Surface pixel format. Depending on
+         * the stream type it will be either {@link ImageFormat#PRIVATE} or
+         * {@link ImageFormat#YCBCR_P010}.</p>
+         *
+         * @return integer format.
+         * @throws UnsupportedOperationException in case the stream is not capable of 10-bit output
+         * @see #is10BitCapable()
+         */
+        public @Format int get10BitFormat() {
+            if (!mIs10BitCapable) {
+                throw new UnsupportedOperationException("10-bit output is not supported!");
+            }
             return mFormat;
         }
 
@@ -932,6 +999,41 @@ public final class MandatoryStreamCombination {
                 /*reprocessType*/ ReprocessType.PRIVATE),
     };
 
+    private static StreamCombinationTemplate s10BitOutputStreamCombinations[] = {
+            new StreamCombinationTemplate(new StreamTemplate [] {
+                    new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.MAXIMUM)},
+                    "Simple preview, GPU video processing, or no-preview video recording"),
+            new StreamCombinationTemplate(new StreamTemplate [] {
+                    new StreamTemplate(ImageFormat.YCBCR_P010, SizeThreshold.MAXIMUM)},
+                    "In-application video/image processing"),
+            new StreamCombinationTemplate(new StreamTemplate [] {
+                    new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM),
+                    new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                    "Standard still imaging"),
+            new StreamCombinationTemplate(new StreamTemplate [] {
+                    new StreamTemplate(ImageFormat.YCBCR_P010, SizeThreshold.MAXIMUM),
+                    new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                    "Maximum-resolution in-app processing with preview"),
+            new StreamCombinationTemplate(new StreamTemplate [] {
+                    new StreamTemplate(ImageFormat.YCBCR_P010, SizeThreshold.MAXIMUM),
+                    new StreamTemplate(ImageFormat.YCBCR_P010, SizeThreshold.PREVIEW)},
+                    "Maximum-resolution two-input in-app processing"),
+            new StreamCombinationTemplate(new StreamTemplate [] {
+                    new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD),
+                    new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                    "High-resolution video recording with preview"),
+            new StreamCombinationTemplate(new StreamTemplate [] {
+                    new StreamTemplate(ImageFormat.YCBCR_P010, SizeThreshold.RECORD),
+                    new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD),
+                    new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                    "High-resolution recording with in-app snapshot"),
+            new StreamCombinationTemplate(new StreamTemplate [] {
+                    new StreamTemplate(ImageFormat.JPEG, SizeThreshold.RECORD),
+                    new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD),
+                    new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                    "High-resolution recording with video snapshot"),
+    };
+
     /**
      * Helper builder class to generate a list of available mandatory stream combinations.
      * @hide
@@ -968,6 +1070,86 @@ public final class MandatoryStreamCombination {
             mHwLevel = hwLevel;
             mIsHiddenPhysicalCamera =
                     CameraManager.isHiddenPhysicalCamera(Integer.toString(mCameraId));
+        }
+
+        /**
+         * Retrieve a list of all available mandatory 10-bit output capable stream combinations.
+         *
+         * @return a non-modifiable list of supported mandatory 10-bit capable stream combinations,
+         *         null in case device is not 10-bit output capable.
+         */
+        public @NonNull List<MandatoryStreamCombination>
+        getAvailableMandatory10BitStreamCombinations() {
+            // Since 10-bit streaming support is optional, we mandate these stream
+            // combinations regardless of camera device capabilities.
+
+            StreamCombinationTemplate []chosenStreamCombinations = s10BitOutputStreamCombinations;
+            if (!is10BitOutputSupported()) {
+                Log.v(TAG, "Device is not able to output 10-bit!");
+                return null;
+            }
+
+            HashMap<Pair<SizeThreshold, Integer>, List<Size>> availableSizes =
+                    enumerateAvailableSizes();
+            if (availableSizes == null) {
+                Log.e(TAG, "Available size enumeration failed!");
+                return null;
+            }
+
+            ArrayList<MandatoryStreamCombination> availableStreamCombinations = new ArrayList<>();
+            availableStreamCombinations.ensureCapacity(chosenStreamCombinations.length);
+            for (StreamCombinationTemplate combTemplate : chosenStreamCombinations) {
+                ArrayList<MandatoryStreamInformation> streamsInfo = new ArrayList<>();
+                streamsInfo.ensureCapacity(combTemplate.mStreamTemplates.length);
+                for (StreamTemplate template : combTemplate.mStreamTemplates) {
+                    List<Size> sizes = null;
+                    Pair<SizeThreshold, Integer> pair;
+                    pair = new Pair<>(template.mSizeThreshold, new Integer(template.mFormat));
+                    sizes = availableSizes.get(pair);
+                    if (template.mFormat == ImageFormat.YCBCR_P010) {
+                        // Make sure that exactly the same 10 and 8-bit YUV streams sizes are
+                        // supported
+                        pair = new Pair<>(template.mSizeThreshold,
+                                new Integer(ImageFormat.YUV_420_888));
+                        HashSet<Size> sdrYuvSizes = new HashSet<>(availableSizes.get(pair));
+                        if (!sdrYuvSizes.equals(new HashSet<>(sizes))) {
+                            Log.e(TAG, "The supported 10-bit YUV sizes are different from the"
+                                    + " supported 8-bit YUV sizes!");
+                            return null;
+                        }
+                    }
+
+                    MandatoryStreamInformation streamInfo;
+                    boolean isMaximumSize =
+                            (template.mSizeThreshold == SizeThreshold.MAXIMUM);
+                    try {
+                        streamInfo = new MandatoryStreamInformation(sizes, template.mFormat,
+                                isMaximumSize, /*isInput*/ false,
+                                /*isUltraHighResolution*/ false,
+                                /*is10BitCapable*/ template.mFormat != ImageFormat.JPEG);
+                    } catch (IllegalArgumentException e) {
+                        Log.e(TAG, "No available sizes found for format: " + template.mFormat +
+                                " size threshold: " + template.mSizeThreshold + " combination: " +
+                                combTemplate.mDescription);
+                        return null;
+                    }
+                    streamsInfo.add(streamInfo);
+                }
+
+                MandatoryStreamCombination streamCombination;
+                try {
+                    streamCombination = new MandatoryStreamCombination(streamsInfo,
+                            combTemplate.mDescription, /*isReprocessable*/ false);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "No stream information for mandatory combination: "
+                            + combTemplate.mDescription);
+                    return null;
+                }
+
+                availableStreamCombinations.add(streamCombination);
+            }
+
+            return Collections.unmodifiableList(availableStreamCombinations);
         }
 
         /**
@@ -1444,7 +1626,8 @@ public final class MandatoryStreamCombination {
             final int[] formats = {
                 ImageFormat.PRIVATE,
                 ImageFormat.YUV_420_888,
-                ImageFormat.JPEG
+                ImageFormat.JPEG,
+                ImageFormat.YCBCR_P010
             };
             Size recordingMaxSize = new Size(0, 0);
             Size previewMaxSize = new Size(0, 0);
@@ -1464,7 +1647,11 @@ public final class MandatoryStreamCombination {
             HashMap<Integer, Size[]> allSizes = new HashMap<Integer, Size[]>();
             for (int format : formats) {
                 Integer intFormat = new Integer(format);
-                allSizes.put(intFormat, mStreamConfigMap.getOutputSizes(format));
+                Size[] sizes = mStreamConfigMap.getOutputSizes(format);
+                if (sizes == null) {
+                    sizes = new Size[0];
+                }
+                allSizes.put(intFormat, sizes);
             }
 
             List<Size> previewSizes = getSizesWithinBound(
@@ -1643,6 +1830,14 @@ public final class MandatoryStreamCombination {
         private boolean isColorOutputSupported() {
             return isCapabilitySupported(
                     CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE);
+        }
+
+        /**
+         * Check whether the current device supports 10-bit output.
+         */
+        private boolean is10BitOutputSupported() {
+            return isCapabilitySupported(
+                    CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT);
         }
 
         /**

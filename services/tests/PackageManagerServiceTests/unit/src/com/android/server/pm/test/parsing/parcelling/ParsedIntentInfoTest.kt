@@ -16,8 +16,8 @@
 
 package com.android.server.pm.test.parsing.parcelling
 
-import android.content.pm.parsing.component.ParsedIntentInfo
-import android.content.pm.parsing.component.ParsedIntentInfoImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfo
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import android.os.Parcelable
 import android.os.PatternMatcher
 import kotlin.contracts.ExperimentalContracts
@@ -28,7 +28,8 @@ class ParsedIntentInfoTest : ParcelableComponentTest(
     ParsedIntentInfoImpl::class,
 ) {
 
-    override val defaultImpl = ParsedIntentInfoImpl()
+    override val defaultImpl =
+        ParsedIntentInfoImpl()
     override val creator = ParsedIntentInfoImpl.CREATOR
 
     override val excludedMethods = listOf(
@@ -43,7 +44,8 @@ class ParsedIntentInfoTest : ParcelableComponentTest(
         ParsedIntentInfo::getNonLocalizedLabel,
     )
 
-    override fun initialObject() = ParsedIntentInfoImpl().apply {
+    override fun initialObject() = ParsedIntentInfoImpl()
+        .apply {
         intentFilter.apply {
             addAction("test.ACTION")
             addDataAuthority("testAuthority", "404")

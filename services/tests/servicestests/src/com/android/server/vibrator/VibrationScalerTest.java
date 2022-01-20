@@ -133,13 +133,14 @@ public class VibrationScalerTest {
                 mVibrationScaler.getExternalVibrationScale(USAGE_TOUCH));
 
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
-        // Unexpected vibration intensity will be treated as SCALE_NONE.
+        // Vibration setting being bypassed will use default setting and not scale.
         assertEquals(IExternalVibratorService.SCALE_NONE,
                 mVibrationScaler.getExternalVibrationScale(USAGE_TOUCH));
     }
 
     @Test
     public void scale_withPrebakedSegment_setsEffectStrengthBasedOnSettings() {
+        setDefaultIntensity(USAGE_NOTIFICATION, VIBRATION_INTENSITY_MEDIUM);
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_HIGH);
         PrebakedSegment effect = new PrebakedSegment(VibrationEffect.EFFECT_CLICK,
                 /* shouldFallback= */ false, VibrationEffect.EFFECT_STRENGTH_MEDIUM);
@@ -158,35 +159,33 @@ public class VibrationScalerTest {
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_OFF);
         scaled = mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
-        // Unexpected intensity setting will be mapped to STRONG.
-        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_STRONG);
+        // Vibration setting being bypassed will use default setting.
+        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_MEDIUM);
     }
 
     @Test
     public void scale_withPrebakedEffect_setsEffectStrengthBasedOnSettings() {
+        setDefaultIntensity(USAGE_NOTIFICATION, VIBRATION_INTENSITY_LOW);
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_HIGH);
         VibrationEffect effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
 
-        PrebakedSegment scaled = getFirstSegment(mVibrationScaler.scale(
-                effect, USAGE_NOTIFICATION));
+        PrebakedSegment scaled =
+                getFirstSegment(mVibrationScaler.scale(effect, USAGE_NOTIFICATION));
         assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_STRONG);
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 VIBRATION_INTENSITY_MEDIUM);
-        scaled = getFirstSegment(mVibrationScaler.scale(
-                effect, USAGE_NOTIFICATION));
+        scaled = getFirstSegment(mVibrationScaler.scale(effect, USAGE_NOTIFICATION));
         assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_MEDIUM);
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_LOW);
-        scaled = getFirstSegment(mVibrationScaler.scale(
-                effect, USAGE_NOTIFICATION));
+        scaled = getFirstSegment(mVibrationScaler.scale(effect, USAGE_NOTIFICATION));
         assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_LIGHT);
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_OFF);
-        scaled = getFirstSegment(mVibrationScaler.scale(
-                effect, USAGE_NOTIFICATION));
-        // Unexpected intensity setting will be mapped to STRONG.
-        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_STRONG);
+        scaled = getFirstSegment(mVibrationScaler.scale(effect, USAGE_NOTIFICATION));
+        // Vibration setting being bypassed will use default setting.
+        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_LIGHT);
     }
 
     @Test

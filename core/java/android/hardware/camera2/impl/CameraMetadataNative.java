@@ -51,6 +51,7 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfiguration
 import android.hardware.camera2.marshal.impl.MarshalQueryableString;
 import android.hardware.camera2.params.Capability;
 import android.hardware.camera2.params.DeviceStateSensorOrientationMap;
+import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.HighSpeedVideoConfiguration;
 import android.hardware.camera2.params.LensShadingMap;
@@ -331,6 +332,7 @@ public class CameraMetadataNative implements Parcelable {
     private static final int MANDATORY_STREAM_CONFIGURATIONS_DEFAULT = 0;
     private static final int MANDATORY_STREAM_CONFIGURATIONS_MAX_RESOLUTION = 1;
     private static final int MANDATORY_STREAM_CONFIGURATIONS_CONCURRENT = 2;
+    private static final int MANDATORY_STREAM_CONFIGURATIONS_10BIT = 3;
 
     private static String translateLocationProviderToProcess(final String provider) {
         if (provider == null) {
@@ -678,6 +680,16 @@ public class CameraMetadataNative implements Parcelable {
                 });
 
         sGetCommandMap.put(
+                CameraCharacteristics.SCALER_MANDATORY_TEN_BIT_OUTPUT_STREAM_COMBINATIONS.getNativeKey(),
+                new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMandatory10BitStreamCombinations();
+                    }
+                });
+
+        sGetCommandMap.put(
                 CameraCharacteristics.SCALER_MANDATORY_MAXIMUM_RESOLUTION_STREAM_COMBINATIONS.getNativeKey(),
                         new GetCommand() {
                     @Override
@@ -768,6 +780,15 @@ public class CameraMetadataNative implements Parcelable {
                     @SuppressWarnings("unchecked")
                     public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
                         return (T) metadata.getDeviceStateOrientationMap();
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getDynamicRangeProfiles();
                     }
                 });
         sGetCommandMap.put(
@@ -1013,6 +1034,17 @@ public class CameraMetadataNative implements Parcelable {
 
         DeviceStateSensorOrientationMap map = new DeviceStateSensorOrientationMap(mapArray);
         return map;
+    }
+
+    private DynamicRangeProfiles getDynamicRangeProfiles() {
+        int[] profileArray = getBase(
+                CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP);
+
+        if (profileArray == null) {
+            return null;
+        }
+
+        return new DynamicRangeProfiles(profileArray);
     }
 
     private Location getGpsLocation() {
@@ -1378,6 +1410,9 @@ public class CameraMetadataNative implements Parcelable {
             case MANDATORY_STREAM_CONFIGURATIONS_MAX_RESOLUTION:
                 combs = build.getAvailableMandatoryMaximumResolutionStreamCombinations();
                 break;
+            case MANDATORY_STREAM_CONFIGURATIONS_10BIT:
+                combs = build.getAvailableMandatory10BitStreamCombinations();
+                break;
             default:
                 combs = build.getAvailableMandatoryStreamCombinations();
         }
@@ -1387,6 +1422,10 @@ public class CameraMetadataNative implements Parcelable {
             return combArray;
         }
         return null;
+    }
+
+    private MandatoryStreamCombination[] getMandatory10BitStreamCombinations() {
+        return getMandatoryStreamCombinationsHelper(MANDATORY_STREAM_CONFIGURATIONS_10BIT);
     }
 
     private MandatoryStreamCombination[] getMandatoryConcurrentStreamCombinations() {

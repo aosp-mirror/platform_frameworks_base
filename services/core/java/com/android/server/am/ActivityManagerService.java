@@ -233,11 +233,11 @@ import android.content.pm.ProcessInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ProviderInfoList;
 import android.content.pm.ResolveInfo;
-import android.content.pm.SELinuxUtil;
+import com.android.server.pm.pkg.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
-import android.content.pm.parsing.ParsingPackageUtils;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -10360,10 +10360,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (thread != null) {
                 pw.println("\n\n** Cache info for pid " + pid + " [" + r.processName + "] **");
                 pw.flush();
-                if (pid == MY_PID) {
-                    PropertyInvalidatedCache.dumpCacheInfo(fd, args);
-                    continue;
-                }
                 try {
                     TransferPipe tp = new TransferPipe();
                     try {

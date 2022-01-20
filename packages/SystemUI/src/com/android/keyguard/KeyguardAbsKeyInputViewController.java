@@ -98,7 +98,6 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     protected void onViewAttached() {
         super.onViewAttached();
         mView.setKeyDownListener(mKeyDownListener);
-        mView.setEnableHaptics(mLockPatternUtils.isTactileFeedbackEnabled());
         mEmergencyButtonController.setEmergencyButtonCallback(mEmergencyButtonCallback);
     }
 

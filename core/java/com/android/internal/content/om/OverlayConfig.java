@@ -19,7 +19,6 @@ package com.android.internal.content.om;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackagePartitions;
-import android.content.pm.parsing.ParsingPackageRead;
 import android.os.Build;
 import android.os.Trace;
 import android.util.ArrayMap;
@@ -82,7 +81,22 @@ public class OverlayConfig {
     public interface PackageProvider {
 
         /** Performs the given action for each package. */
-        void forEachPackage(TriConsumer<ParsingPackageRead, Boolean, File> p);
+        void forEachPackage(TriConsumer<Package, Boolean, File> p);
+
+        interface Package {
+
+            String getBaseApkPath();
+
+            int getOverlayPriority();
+
+            String getOverlayTarget();
+
+            String getPackageName();
+
+            int getTargetSdkVersion();
+
+            boolean isOverlayIsStatic();
+        }
     }
 
     private static final Comparator<ParsedConfiguration> sStaticOverlayComparator = (c1, c2) -> {
@@ -304,7 +318,7 @@ public class OverlayConfig {
     private static Map<String, ParsedOverlayInfo> getOverlayPackageInfos(
             @NonNull PackageProvider packageManager) {
         final HashMap<String, ParsedOverlayInfo> overlays = new HashMap<>();
-        packageManager.forEachPackage((ParsingPackageRead p, Boolean isSystem,
+        packageManager.forEachPackage((PackageProvider.Package p, Boolean isSystem,
                 @Nullable File preInstalledApexPath) -> {
             if (p.getOverlayTarget() != null && isSystem) {
                 overlays.put(p.getPackageName(), new ParsedOverlayInfo(p.getPackageName(),

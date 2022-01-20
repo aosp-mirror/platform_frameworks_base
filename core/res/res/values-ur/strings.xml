@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ایپ کو ڈسٹرب نہ کریں کنفیگریشن لکھنے اور پڑھنے کے قابل کرتا ہے۔"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"اجازت کی استعمال کا ملاحظہ شروع کریں"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"حامل کو ایپ کی اجازت کے استعمال کو شروع کرنے کی اجازت دیتا ہے۔ عام ایپس کے لیے کبھی بھی درکار نہیں ہونا چاہیے۔"</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"اجازت کے فیصلوں کو دیکھنا شروع کریں"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"ہولڈر کو اجازت کے فیصلوں کے جائزے کے لیے اسکرین شروع کرنے کی اجازت دیتا ہے۔ عام ایپس کے لیے کبھی بھی اس کی ضرورت نہيں ہونی چاہیے۔"</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ایپ کی خصوصیات کا ملاحظہ شروع کریں"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ہولڈر کو ایپ کے لیے خصوصیات کی معلومات دیکھنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"نمونہ کاری کی اعلی شرح پر سینسر کے ڈیٹا تک رسائی حاصل کریں"</string>

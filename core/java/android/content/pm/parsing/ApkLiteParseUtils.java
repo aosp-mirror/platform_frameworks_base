@@ -18,13 +18,6 @@ package android.content.pm.parsing;
 
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
-import static android.content.pm.parsing.ParsingPackageUtils.PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY;
-import static android.content.pm.parsing.ParsingPackageUtils.checkRequiredSystemProperties;
-import static android.content.pm.parsing.ParsingPackageUtils.parsePublicKey;
-import static android.content.pm.parsing.ParsingPackageUtils.validateName;
-import static android.content.pm.parsing.ParsingUtils.ANDROID_RES_NAMESPACE;
-import static android.content.pm.parsing.ParsingUtils.DEFAULT_MIN_SDK_VERSION;
-import static android.content.pm.parsing.ParsingUtils.DEFAULT_TARGET_SDK_VERSION;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import android.annotation.NonNull;
@@ -37,6 +30,7 @@ import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.ApkAssets;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -66,7 +60,7 @@ import java.util.Set;
 /** @hide */
 public class ApkLiteParseUtils {
 
-    private static final String TAG = ParsingUtils.TAG;
+    private static final String TAG = "ApkLiteParseUtils";
 
     private static final int PARSE_DEFAULT_INSTALL_LOCATION =
             PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
@@ -74,6 +68,26 @@ public class ApkLiteParseUtils {
     private static final Comparator<String> sSplitNameComparator = new SplitNameComparator();
 
     public static final String APK_FILE_EXTENSION = ".apk";
+
+
+    // Constants copied from services.jar side since they're not accessible
+    private static final String ANDROID_RES_NAMESPACE =
+            "http://schemas.android.com/apk/res/android";
+    private static final int DEFAULT_MIN_SDK_VERSION = 1;
+    private static final int DEFAULT_TARGET_SDK_VERSION = 0;
+    public static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
+    private static final int PARSE_IS_SYSTEM_DIR = 1 << 4;
+    private static final int PARSE_COLLECT_CERTIFICATES = 1 << 5;
+    private static final String TAG_APPLICATION = "application";
+    private static final String TAG_PACKAGE_VERIFIER = "package-verifier";
+    private static final String TAG_PROFILEABLE = "profileable";
+    private static final String TAG_RECEIVER = "receiver";
+    private static final String TAG_OVERLAY = "overlay";
+    private static final String TAG_USES_SDK = "uses-sdk";
+    private static final String TAG_USES_SPLIT = "uses-split";
+    private static final String TAG_MANIFEST = "manifest";
+    private static final int SDK_VERSION = Build.VERSION.SDK_INT;
+    private static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
 
     /**
      * Parse only lightweight details about the package at the given location.
@@ -312,15 +326,16 @@ public class ApkLiteParseUtils {
                         "Failed to parse " + apkPath, e);
             }
 
-            parser = apkAssets.openXml(ParsingPackageUtils.ANDROID_MANIFEST_FILENAME);
+            parser = apkAssets.openXml(ANDROID_MANIFEST_FILENAME);
 
             final SigningDetails signingDetails;
-            if ((flags & ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES) != 0) {
-                final boolean skipVerify = (flags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0;
+            if ((flags & PARSE_COLLECT_CERTIFICATES) != 0) {
+                final boolean skipVerify = (flags & PARSE_IS_SYSTEM_DIR) != 0;
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
                 try {
                     final ParseResult<SigningDetails> result =
-                            ParsingPackageUtils.getSigningDetails(input, apkFile.getAbsolutePath(),
+                            FrameworkParsingPackageUtils.getSigningDetails(input,
+                                    apkFile.getAbsolutePath(),
                                     skipVerify, /* isStaticSharedLibrary */ false,
                                     SigningDetails.UNKNOWN, DEFAULT_TARGET_SDK_VERSION);
                     if (result.isError()) {
@@ -417,12 +432,12 @@ public class ApkLiteParseUtils {
                 continue;
             }
 
-            if (ParsingPackageUtils.TAG_PACKAGE_VERIFIER.equals(parser.getName())) {
+            if (TAG_PACKAGE_VERIFIER.equals(parser.getName())) {
                 final VerifierInfo verifier = parseVerifier(parser);
                 if (verifier != null) {
                     verifiers.add(verifier);
                 }
-            } else if (ParsingPackageUtils.TAG_APPLICATION.equals(parser.getName())) {
+            } else if (TAG_APPLICATION.equals(parser.getName())) {
                 debuggable = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE, "debuggable",
                         false);
                 multiArch = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE, "multiArch",
@@ -453,15 +468,15 @@ public class ApkLiteParseUtils {
                         continue;
                     }
 
-                    if (ParsingPackageUtils.TAG_PROFILEABLE.equals(parser.getName())) {
+                    if (TAG_PROFILEABLE.equals(parser.getName())) {
                         profilableByShell = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
                                 "shell", profilableByShell);
-                    } else if (ParsingPackageUtils.TAG_RECEIVER.equals(parser.getName())) {
+                    } else if (TAG_RECEIVER.equals(parser.getName())) {
                         hasDeviceAdminReceiver |= isDeviceAdminReceiver(
                                 parser, hasBindDeviceAdminPermission);
                     }
                 }
-            } else if (ParsingPackageUtils.TAG_OVERLAY.equals(parser.getName())) {
+            } else if (TAG_OVERLAY.equals(parser.getName())) {
                 requiredSystemPropertyName = parser.getAttributeValue(ANDROID_RES_NAMESPACE,
                         "requiredSystemPropertyName");
                 requiredSystemPropertyValue = parser.getAttributeValue(ANDROID_RES_NAMESPACE,
@@ -470,7 +485,7 @@ public class ApkLiteParseUtils {
                 overlayIsStatic = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE, "isStatic",
                         false);
                 overlayPriority = parser.getAttributeIntValue(ANDROID_RES_NAMESPACE, "priority", 0);
-            } else if (ParsingPackageUtils.TAG_USES_SPLIT.equals(parser.getName())) {
+            } else if (TAG_USES_SPLIT.equals(parser.getName())) {
                 if (usesSplitName != null) {
                     Slog.w(TAG, "Only one <uses-split> permitted. Ignoring others.");
                     continue;
@@ -481,8 +496,8 @@ public class ApkLiteParseUtils {
                     return input.error(PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
                             "<uses-split> tag requires 'android:name' attribute");
                 }
-            } else if (ParsingPackageUtils.TAG_USES_SDK.equals(parser.getName())) {
-                // Mirrors ParsingPackageUtils#parseUsesSdk until lite and full parsing is combined
+            } else if (TAG_USES_SDK.equals(parser.getName())) {
+                // Mirrors FrameworkParsingPackageUtils#parseUsesSdk until lite and full parsing is combined
                 String minSdkVersionString = parser.getAttributeValue(ANDROID_RES_NAMESPACE,
                         "minSdkVersion");
                 String targetSdkVersionString = parser.getAttributeValue(ANDROID_RES_NAMESPACE,
@@ -515,16 +530,15 @@ public class ApkLiteParseUtils {
                     targetCode = minCode;
                 }
 
-                ParseResult<Integer> targetResult = ParsingPackageUtils.computeTargetSdkVersion(
-                        targetVer, targetCode, ParsingPackageUtils.SDK_CODENAMES, input);
+                ParseResult<Integer> targetResult = FrameworkParsingPackageUtils.computeTargetSdkVersion(
+                        targetVer, targetCode, SDK_CODENAMES, input);
                 if (targetResult.isError()) {
                     return input.error(targetResult);
                 }
                 targetSdkVersion = targetResult.getResult();
 
-                ParseResult<Integer> minResult = ParsingPackageUtils.computeMinSdkVersion(
-                        minVer, minCode, ParsingPackageUtils.SDK_VERSION,
-                        ParsingPackageUtils.SDK_CODENAMES, input);
+                ParseResult<Integer> minResult = FrameworkParsingPackageUtils.computeMinSdkVersion(
+                        minVer, minCode, SDK_VERSION, SDK_CODENAMES, input);
                 if (minResult.isError()) {
                     return input.error(minResult);
                 }
@@ -533,9 +547,9 @@ public class ApkLiteParseUtils {
         }
 
         // Check to see if overlay should be excluded based on system property condition
-        if ((flags & PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY) == 0
-                && !checkRequiredSystemProperties(
-                        requiredSystemPropertyName, requiredSystemPropertyValue)) {
+        if ((flags & FrameworkParsingPackageUtils.PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY)
+                == 0 && !FrameworkParsingPackageUtils.checkRequiredSystemProperties(
+                requiredSystemPropertyName, requiredSystemPropertyValue)) {
             String message = "Skipping target and overlay pair " + targetPackage + " and "
                     + codePath + ": overlay ignored due to required system property: "
                     + requiredSystemPropertyName + " with value: " + requiredSystemPropertyValue;
@@ -600,14 +614,15 @@ public class ApkLiteParseUtils {
             return input.error(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
                     "No start tag found");
         }
-        if (!parser.getName().equals(ParsingPackageUtils.TAG_MANIFEST)) {
+        if (!parser.getName().equals(TAG_MANIFEST)) {
             return input.error(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
                     "No <manifest> tag");
         }
 
         final String packageName = parser.getAttributeValue(null, "package");
         if (!"android".equals(packageName)) {
-            final ParseResult<?> nameResult = validateName(input, packageName, true, true);
+            final ParseResult<?> nameResult = FrameworkParsingPackageUtils.validateName(input,
+                    packageName, true, true);
             if (nameResult.isError()) {
                 return input.error(INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME,
                         "Invalid manifest package: " + nameResult.getErrorMessage());
@@ -619,7 +634,8 @@ public class ApkLiteParseUtils {
             if (splitName.length() == 0) {
                 splitName = null;
             } else {
-                final ParseResult<?> nameResult = validateName(input, splitName, false, false);
+                final ParseResult<?> nameResult = FrameworkParsingPackageUtils.validateName(input,
+                        splitName, false, false);
                 if (nameResult.isError()) {
                     return input.error(INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME,
                             "Invalid manifest split: " + nameResult.getErrorMessage());
@@ -666,7 +682,7 @@ public class ApkLiteParseUtils {
             final String type = value.trim();
             // Using requireFilename as true because it limits length of the name to the
             // {@link #MAX_FILE_NAME_SIZE}.
-            final ParseResult<?> nameResult = validateName(input, type,
+            final ParseResult<?> nameResult = FrameworkParsingPackageUtils.validateName(input, type,
                     false /* requireSeparator */, true /* requireFilename */);
             if (nameResult.isError()) {
                 return input.error(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
@@ -688,7 +704,7 @@ public class ApkLiteParseUtils {
             return null;
         }
 
-        final PublicKey publicKey = parsePublicKey(encodedPublicKey);
+        final PublicKey publicKey = FrameworkParsingPackageUtils.parsePublicKey(encodedPublicKey);
         if (publicKey == null) {
             Slog.i(TAG, "Unable to parse verifier public key for " + packageName);
             return null;

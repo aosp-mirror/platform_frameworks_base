@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ivumela izinhlelo zokusebenza ukufunda nokubhala ukulungiswa kokuthi Ungaphazamisi."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"qala ukusetshenziswa kokubuka imvume"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Ivumela umphathi ukuthi aqale ukusetshenziswa kwemvume kohlelo lokusebenza. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"qala ukubuka izinqumo zemvume"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Ivumela obambile ukuthi aqale isikrini ukuze abuyekeze izinqumo zemvume. Akufanele idingeke ngama-app avamile."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"qala ukubuka izakhi ze-app"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Vumela isibambi ukuthi siqale ukubuka ulwazi lwezakhi lwe-app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"finyelela idatha yenzwa ngenani eliphezulu lokwenza isampuli"</string>

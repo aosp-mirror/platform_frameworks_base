@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Inaruhusu programu kusoma na kuandika usanidi wa kipengee cha Usinisumbue."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"anzisha kipengele cha kuona matumizi ya ruhusa"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Huruhusu kishikiliaji kuanzisha matumizi ya ruhusa ya programu. Haipaswi kuhitajika kwa ajili ya programu za kawaida."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"kuanzisha uamuzi wa ruhusa za kuangalia"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Humruhusu mmiliki kuanzisha skrini ili kukagua uamuzi wa ruhusa. Haipaswi kuhitajika kwenye programu za kawaida."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"anzisha kipengele cha kuangalia vipengele vya programu"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Huruhusu mmiliki kuanza kuangalia maelezo ya vipengele vya programu."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"fikia data ya vitambuzi kwa kasi ya juu ya sampuli"</string>

@@ -397,8 +397,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
-        mPipUiEventLoggerLogger.log(
-                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_EXPAND_TO_FULLSCREEN);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         if (ENABLE_SHELL_TRANSITIONS) {

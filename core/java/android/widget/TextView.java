@@ -79,6 +79,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
+import android.graphics.text.LineBreakConfig;
 import android.icu.text.DecimalFormatSymbols;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -348,6 +349,7 @@ import java.util.function.Supplier;
  * @attr ref android.R.styleable#TextView_fontVariationSettings
  * @attr ref android.R.styleable#TextView_breakStrategy
  * @attr ref android.R.styleable#TextView_hyphenationFrequency
+ * @attr ref android.R.styleable#TextView_lineBreakStyle
  * @attr ref android.R.styleable#TextView_autoSizeTextType
  * @attr ref android.R.styleable#TextView_autoSizeMinTextSize
  * @attr ref android.R.styleable#TextView_autoSizeMaxTextSize
@@ -775,6 +777,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Layout mLayout;
     private boolean mLocalesChanged = false;
     private int mTextSizeUnit = -1;
+    private LineBreakConfig mLineBreakConfig = new LineBreakConfig();
 
     // This is used to reflect the current user preference for changing font weight and making text
     // more bold.
@@ -1440,6 +1443,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 case com.android.internal.R.styleable.TextView_hyphenationFrequency:
                     mHyphenationFrequency = a.getInt(attr, Layout.HYPHENATION_FREQUENCY_NONE);
+                    break;
+
+                case com.android.internal.R.styleable.TextView_lineBreakStyle:
+                    mLineBreakConfig.setLineBreakStyle(
+                            a.getInt(attr, LineBreakConfig.LINE_BREAK_STYLE_NONE));
                     break;
 
                 case com.android.internal.R.styleable.TextView_autoSizeTextType:
@@ -4788,13 +4796,50 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Sets line break configuration indicates which strategy needs to be used when calculating the
+     * text wrapping. There are thee strategies for the line break style(lb):
+     * {@link LineBreakConfig#LINE_BREAK_STYLE_LOOSE},
+     * {@link LineBreakConfig#LINE_BREAK_STYLE_NORMAL} and
+     * {@link LineBreakConfig#LINE_BREAK_STYLE_STRICT}.
+     * The default value of the line break style is {@link LineBreakConfig#LINE_BREAK_STYLE_NONE},
+     * which means no line break style is specified.
+     * See <a href="https://drafts.csswg.org/css-text/#line-break-property">
+     *         the line-break property</a>
+     *
+     * @param lineBreakConfig the line break config for text wrapping.
+     */
+    public void setLineBreakConfig(@NonNull LineBreakConfig lineBreakConfig) {
+        if (mLineBreakConfig.equals(lineBreakConfig)) {
+            return;
+        }
+        mLineBreakConfig.set(lineBreakConfig);
+        if (mLayout != null) {
+            nullLayouts();
+            requestLayout();
+            invalidate();
+        }
+    }
+
+    /**
+     * Get the current line break configuration for text wrapping.
+     *
+     * @return the current line break configuration to be used for text wrapping.
+     */
+    public @NonNull LineBreakConfig getLineBreakConfig() {
+        LineBreakConfig lbConfig = new LineBreakConfig();
+        lbConfig.set(mLineBreakConfig);
+        return lbConfig;
+    }
+
+    /**
      * Gets the parameters for text layout precomputation, for use with {@link PrecomputedText}.
      *
      * @return a current {@link PrecomputedText.Params}
      * @see PrecomputedText
      */
     public @NonNull PrecomputedText.Params getTextMetricsParams() {
-        return new PrecomputedText.Params(new TextPaint(mTextPaint), getTextDirectionHeuristic(),
+        return new PrecomputedText.Params(new TextPaint(mTextPaint), mLineBreakConfig,
+                getTextDirectionHeuristic(),
                 mBreakStrategy, mHyphenationFrequency);
     }
 
@@ -4810,6 +4855,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mTextDir = params.getTextDirection();
         mBreakStrategy = params.getBreakStrategy();
         mHyphenationFrequency = params.getHyphenationFrequency();
+        mLineBreakConfig.set(params.getLineBreakConfig());
         if (mLayout != null) {
             nullLayouts();
             requestLayout();
@@ -6348,7 +6394,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             final @PrecomputedText.Params.CheckResultUsableResult int checkResult =
                     precomputed.getParams().checkResultUsable(getPaint(), mTextDir, mBreakStrategy,
-                            mHyphenationFrequency);
+                            mHyphenationFrequency, mLineBreakConfig);
             switch (checkResult) {
                 case PrecomputedText.Params.UNUSABLE:
                     throw new IllegalArgumentException(
@@ -9244,7 +9290,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setBreakStrategy(mBreakStrategy)
                         .setHyphenationFrequency(mHyphenationFrequency)
                         .setJustificationMode(mJustificationMode)
-                        .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+                        .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
+                        .setLineBreakConfig(mLineBreakConfig);
                 if (shouldEllipsize) {
                     builder.setEllipsize(mEllipsize)
                             .setEllipsizedWidth(ellipsisWidth);
@@ -9358,7 +9405,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setBreakStrategy(mBreakStrategy)
                     .setHyphenationFrequency(mHyphenationFrequency)
                     .setJustificationMode(mJustificationMode)
-                    .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+                    .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
+                    .setLineBreakConfig(mLineBreakConfig);
             if (shouldEllipsize) {
                 builder.setEllipsize(effectiveEllipsize)
                         .setEllipsizedWidth(ellipsisWidth);
@@ -9725,7 +9773,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 .setHyphenationFrequency(getHyphenationFrequency())
                 .setJustificationMode(getJustificationMode())
                 .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
-                .setTextDirection(getTextDirectionHeuristic());
+                .setTextDirection(getTextDirectionHeuristic())
+                .setLineBreakConfig(mLineBreakConfig);
 
         final StaticLayout layout = layoutBuilder.build();
 

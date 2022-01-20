@@ -312,10 +312,11 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
     @Test
     public void testUpdateChildToSummaryDoesNotTransfer() {
+        final String tag = "fooTag";
         NotificationEntry summaryEntry =
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationEntry childEntry =
-                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY, 47);
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY, 47, tag);
         mockHasHeadsUpContentView(childEntry, false);
 
         mHeadsUpManager.showNotification(summaryEntry);
@@ -327,7 +328,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         StatusBarNotification oldNotification = childEntry.getSbn();
         childEntry.setSbn(
                 mGroupTestHelper.createSummaryNotification(
-                        Notification.GROUP_ALERT_SUMMARY, 47).getSbn());
+                        Notification.GROUP_ALERT_SUMMARY, 47, tag).getSbn());
         mGroupManager.onEntryUpdated(childEntry, oldNotification);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));

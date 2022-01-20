@@ -18,9 +18,9 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.parsing.component.ComponentMutateUtils;
-import android.content.pm.parsing.component.ParsedProcess;
-import android.content.pm.parsing.component.ParsedProcessImpl;
+import com.android.server.pm.pkg.component.ComponentMutateUtils;
+import com.android.server.pm.pkg.component.ParsedProcess;
+import com.android.server.pm.pkg.component.ParsedProcessImpl;
 import android.service.pm.PackageServiceDumpProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;

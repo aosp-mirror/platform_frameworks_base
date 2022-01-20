@@ -119,14 +119,13 @@ public class KeyguardIndicationRotateTextViewController extends
             return;
         }
         long minShowDuration = getMinVisibilityMillis(mIndicationMessages.get(mCurrIndicationType));
-        final boolean hasPreviousIndication = mIndicationMessages.get(type) != null
-                && !TextUtils.isEmpty(mIndicationMessages.get(type).getMessage());
-        final boolean hasNewIndication = newIndication != null;
+        final boolean hasNewIndication = newIndication != null
+                && !TextUtils.isEmpty(newIndication.getMessage());
         if (!hasNewIndication) {
             mIndicationMessages.remove(type);
             mIndicationQueue.removeIf(x -> x == type);
         } else {
-            if (!hasPreviousIndication) {
+            if (!mIndicationQueue.contains(type)) {
                 mIndicationQueue.add(type);
             }
 
@@ -230,6 +229,7 @@ public class KeyguardIndicationRotateTextViewController extends
     public void clearMessages() {
         mCurrIndicationType = INDICATION_TYPE_NONE;
         mIndicationQueue.clear();
+        mIndicationMessages.clear();
         mView.clearMessages();
     }
 
@@ -310,7 +310,7 @@ public class KeyguardIndicationRotateTextViewController extends
                     if (mIsDozing) {
                         showIndication(INDICATION_TYPE_NONE);
                     } else if (mIndicationQueue.size() > 0) {
-                        showIndication(mIndicationQueue.remove(0));
+                        showIndication(mIndicationQueue.get(0));
                     }
                 }
             };
@@ -327,7 +327,7 @@ public class KeyguardIndicationRotateTextViewController extends
         ShowNextIndication(long delay) {
             mShowIndicationRunnable = () -> {
                 int type = mIndicationQueue.size() == 0
-                        ? INDICATION_TYPE_NONE : mIndicationQueue.remove(0);
+                        ? INDICATION_TYPE_NONE : mIndicationQueue.get(0);
                 showIndication(type);
             };
             mCancelDelayedRunnable = mExecutor.executeDelayed(mShowIndicationRunnable, delay);

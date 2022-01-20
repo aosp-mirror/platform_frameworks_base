@@ -34,18 +34,23 @@ license {
 android_app {
     name: "PrintSpooler",
     defaults: ["platform_app_defaults"],
+    resource_dirs: [],
+    platform_apis: true,
+    jni_libs: ["libprintspooler_jni"],
+    static_libs: [
+        "PrintSpoolerLib",
+    ],
+}
 
+android_library {
+    name: "PrintSpoolerLib",
     resource_dirs: ["res"],
-
     srcs: [
         "src/**/*.java",
         "src/com/android/printspooler/renderer/IPdfRenderer.aidl",
         "src/com/android/printspooler/renderer/IPdfEditor.aidl",
     ],
-
     platform_apis: true,
-
-    jni_libs: ["libprintspooler_jni"],
     static_libs: [
         "android-support-v7-recyclerview",
         "android-support-compat",
@@ -55,4 +60,5 @@ android_app {
         "android-support-fragment",
         "android-support-annotations",
     ],
+    manifest: "AndroidManifest.xml",
 }

@@ -32,6 +32,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.CallbackWithProbe;
+import com.android.server.biometrics.log.Probe;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -80,7 +82,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
         mLockoutFrameworkImpl = lockoutTracker;
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
         mSensorProps = sensorProps;
-        mALSProbeCallback = createALSCallback(false /* startWithClient */);
+        mALSProbeCallback = getLogger().createALSCallback(false /* startWithClient */);
     }
 
     @Override

@@ -115,7 +115,6 @@ import com.android.server.biometrics.sensors.iris.IrisService;
 import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.camera.CameraServiceProxy;
 import com.android.server.clipboard.ClipboardService;
-import com.android.server.communal.CommunalManagerService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.compat.PlatformCompatNative;
 import com.android.server.connectivity.PacProxyService;
@@ -2746,12 +2745,6 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("AppCompatOverridesService");
         mSystemServiceManager.startService(APP_COMPAT_OVERRIDES_SERVICE_CLASS);
         t.traceEnd();
-
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_COMMUNAL_MODE)) {
-            t.traceBegin("CommunalManagerService");
-            mSystemServiceManager.startService(CommunalManagerService.class);
-            t.traceEnd();
-        }
 
         // These are needed to propagate to the runnable below.
         final NetworkManagementService networkManagementF = networkManagement;

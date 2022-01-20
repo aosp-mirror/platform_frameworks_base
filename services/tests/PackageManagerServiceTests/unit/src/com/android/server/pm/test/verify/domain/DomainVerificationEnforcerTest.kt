@@ -20,8 +20,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.SigningDetails
-import android.content.pm.parsing.component.ParsedActivityImpl
-import android.content.pm.parsing.component.ParsedIntentInfoImpl
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
@@ -308,7 +308,8 @@ class DomainVerificationEnforcerTest {
                 listOf(
                     ParsedActivityImpl().apply {
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     autoVerify = true
                                     addAction(Intent.ACTION_VIEW)

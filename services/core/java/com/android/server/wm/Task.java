@@ -4629,25 +4629,7 @@ class Task extends TaskFragment {
     }
 
     void moveToFront(String reason, Task task) {
-        if (inSplitScreenSecondaryWindowingMode()) {
-            // If the root task is in split-screen secondary mode, we need to make sure we move the
-            // primary split-screen root task forward in the case it is currently behind a
-            // fullscreen root task so both halves of the split-screen appear on-top and the
-            // fullscreen root task isn't cutting between them.
-            // TODO(b/70677280): This is a workaround until we can fix as part of b/70677280.
-            final TaskDisplayArea taskDisplayArea = getDisplayArea();
-            final Task topFullScreenRootTask =
-                    taskDisplayArea.getTopRootTaskInWindowingMode(WINDOWING_MODE_FULLSCREEN);
-            if (topFullScreenRootTask != null) {
-                final Task primarySplitScreenRootTask =
-                        taskDisplayArea.getRootSplitScreenPrimaryTask();
-                if (primarySplitScreenRootTask != null
-                        && topFullScreenRootTask.compareTo(primarySplitScreenRootTask) > 0) {
-                    primarySplitScreenRootTask.moveToFrontInner(reason + " splitScreenToTop",
-                            null /* task */);
-                }
-            }
-        } else if (mMoveAdjacentTogether && getAdjacentTaskFragment() != null) {
+        if (mMoveAdjacentTogether && getAdjacentTaskFragment() != null) {
             final Task adjacentTask = getAdjacentTaskFragment().asTask();
             if (adjacentTask != null) {
                 adjacentTask.moveToFrontInner(reason + " adjacentTaskToTop", null /* task */);

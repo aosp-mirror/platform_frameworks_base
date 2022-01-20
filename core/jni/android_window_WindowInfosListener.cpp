@@ -72,25 +72,29 @@ struct WindowInfosListener : public gui::WindowInfosListener {
             return;
         }
 
-        jobjectArray jWindowHandlesArray =
-                env->NewObjectArray(windowInfos.size(), gInputWindowHandleClass, nullptr);
+        ScopedLocalRef<jobjectArray>
+                jWindowHandlesArray(env,
+                                    env->NewObjectArray(windowInfos.size(), gInputWindowHandleClass,
+                                                        nullptr));
         for (int i = 0; i < windowInfos.size(); i++) {
             ScopedLocalRef<jobject>
                     jWindowHandle(env,
                                   android_view_InputWindowHandle_fromWindowInfo(env,
                                                                                 windowInfos[i]));
-            env->SetObjectArrayElement(jWindowHandlesArray, i, jWindowHandle.get());
+            env->SetObjectArrayElement(jWindowHandlesArray.get(), i, jWindowHandle.get());
         }
 
-        jobjectArray jDisplayInfoArray =
-                env->NewObjectArray(displayInfos.size(), gDisplayInfoClassInfo.clazz, nullptr);
+        ScopedLocalRef<jobjectArray>
+                jDisplayInfoArray(env,
+                                  env->NewObjectArray(displayInfos.size(),
+                                                      gDisplayInfoClassInfo.clazz, nullptr));
         for (int i = 0; i < displayInfos.size(); i++) {
             ScopedLocalRef<jobject> jDisplayInfo(env, fromDisplayInfo(env, displayInfos[i]));
-            env->SetObjectArrayElement(jDisplayInfoArray, i, jDisplayInfo.get());
+            env->SetObjectArrayElement(jDisplayInfoArray.get(), i, jDisplayInfo.get());
         }
 
-        env->CallVoidMethod(listener, gListenerClassInfo.onWindowInfosChanged, jWindowHandlesArray,
-                            jDisplayInfoArray);
+        env->CallVoidMethod(listener, gListenerClassInfo.onWindowInfosChanged,
+                            jWindowHandlesArray.get(), jDisplayInfoArray.get());
         env->DeleteGlobalRef(listener);
 
         if (env->ExceptionCheck()) {

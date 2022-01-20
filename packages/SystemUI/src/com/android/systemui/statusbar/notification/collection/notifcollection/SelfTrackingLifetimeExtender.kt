@@ -73,7 +73,7 @@ abstract class SelfTrackingLifetimeExtender(
 
     final override fun getName(): String = name
 
-    final override fun shouldExtendLifetime(entry: NotificationEntry, reason: Int): Boolean {
+    final override fun maybeExtendLifetime(entry: NotificationEntry, reason: Int): Boolean {
         val shouldExtend = queryShouldExtendLifetime(entry)
         if (debug) {
             Log.d(tag, "$name.shouldExtendLifetime(key=${entry.key}, reason=$reason)" +

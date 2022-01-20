@@ -24,6 +24,7 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_LOGOUT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_RESTING;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRANSIENT;
@@ -86,7 +87,6 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
-import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -131,8 +131,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private KeyguardIndicationTextView mIndicationAreaBottom;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
-    @Mock
-    private LockIcon mLockIcon;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -736,6 +734,41 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // THEN the owner info should be hidden
         verifyHideIndication(INDICATION_TYPE_OWNER_INFO);
+    }
+
+    @Test
+    public void testOnKeyguardShowingChanged_notShowing_resetsMessages() {
+        createController();
+
+        // GIVEN keyguard isn't showing
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+
+        // WHEN keyguard showing changed called
+        mKeyguardStateControllerCallback.onKeyguardShowingChanged();
+
+        // THEN messages are reset
+        verify(mRotateTextViewController).clearMessages();
+        assertThat(mTextView.getText()).isEqualTo("");
+    }
+
+    @Test
+    public void testOnKeyguardShowingChanged_showing_updatesPersistentMessages() {
+        createController();
+
+        // GIVEN keyguard is showing
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+
+        // WHEN keyguard showing changed called
+        mKeyguardStateControllerCallback.onKeyguardShowingChanged();
+
+        // THEN persistent messages are updated (in this case, most messages are hidden since
+        // no info is provided) - verify that this happens
+        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_DISCLOSURE);
+        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_OWNER_INFO);
+        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_BATTERY);
+        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_TRUST);
+        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_ALIGNMENT);
+        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_LOGOUT);
     }
 
     private void sendUpdateDisclosureBroadcast() {

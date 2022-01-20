@@ -1077,7 +1077,9 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * Releases any acquired resources. Call it when done with the object.
      *
      * @throws IOException When an {@link IOException} is thrown while closing a {@link
-     * MediaDataSource} passed to {@link #setDataSource(MediaDataSource)}.
+     * MediaDataSource} passed to {@link #setDataSource(MediaDataSource)}. This throws clause exists
+     * since API 33, but this method can throw in earlier API versions where the exception is not
+     * declared.
      */
     @Override
     public void close() throws IOException {
@@ -1088,7 +1090,9 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * Releases any acquired resources. Call it when done with the object.
      *
      * @throws IOException When an {@link IOException} is thrown while closing a {@link
-     * MediaDataSource} passed to {@link #setDataSource(MediaDataSource)}.
+     * MediaDataSource} passed to {@link #setDataSource(MediaDataSource)}. This throws clause exists
+     * since API 33, but this method can throw in earlier API versions where the exception is not
+     * declared.
      */
     public native void release() throws IOException;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)

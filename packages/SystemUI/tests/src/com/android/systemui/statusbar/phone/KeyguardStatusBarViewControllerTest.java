@@ -354,18 +354,12 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         TestNotificationPanelViewStateProvider() {}
 
         private float mPanelViewExpandedHeight = 100f;
-        private float mQsExpansionFraction = 0f;
         private boolean mShouldHeadsUpBeVisible = false;
         private float mLockscreenShadeDragProgress = 0f;
 
         @Override
         public float getPanelViewExpandedHeight() {
             return mPanelViewExpandedHeight;
-        }
-
-        @Override
-        public float getQsExpansionFraction() {
-            return mQsExpansionFraction;
         }
 
         @Override
@@ -380,10 +374,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
         public void setPanelViewExpandedHeight(float panelViewExpandedHeight) {
             this.mPanelViewExpandedHeight = panelViewExpandedHeight;
-        }
-
-        public void setQsExpansionFraction(float qsExpansionFraction) {
-            this.mQsExpansionFraction = qsExpansionFraction;
         }
 
         public void setShouldHeadsUpBeVisible(boolean shouldHeadsUpBeVisible) {

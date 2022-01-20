@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.overlay.OverlayPaths;
-import android.content.pm.pkg.FrameworkPackageUserState;
 import android.os.UserHandle;
 
 import java.util.Map;
@@ -34,7 +33,7 @@ import java.util.Set;
  */
 // TODO(b/173807334): Expose API
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface PackageUserState extends FrameworkPackageUserState {
+public interface PackageUserState {
 
     PackageUserState DEFAULT = PackageUserStateInternal.DEFAULT;
 

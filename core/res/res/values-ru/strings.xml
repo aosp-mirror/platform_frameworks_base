@@ -739,10 +739,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Открывает приложению доступ к настройкам режима \"Не беспокоить\" и позволяет изменять их."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"Просмотр данных об используемых разрешениях"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Приложение получит доступ к данным об используемых разрешениях. Это разрешение не требуется обычным приложениям."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"Просмотр действий с разрешениями"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Позволяет просматривать действия с разрешениями. Не используется обычными приложениями."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"Просмотр функций приложения"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Позволяет просматривать информацию о функциях приложения."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Доступ к данным датчиков при высокой частоте дискретизации"</string>

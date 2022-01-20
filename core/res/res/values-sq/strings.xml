@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Lejon aplikacionin të lexojë dhe shkruajë konfigurimin e \"Mos shqetëso\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"nis përdorimin e lejes për shikimin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Lejon që mbajtësi të nisë përdorimin e lejeve për një aplikacion. Nuk duhet të nevojitet asnjëherë për aplikacionet normale."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"nisë shikimin e vendimeve për lejet"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Lejon që zotëruesi të nisë ekranin për shqyrtimin e vendimeve për lejet. Nuk duhet të nevojitet asnjëherë për aplikacionet normale."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"fillojë shikimin e veçorive të aplikacionit"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Lejon që zotëruesi të fillojë të shikojë informacionin e veçorive për një aplikacion."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"qasu te të dhënat e sensorit me një shpejtësi kampionimi më të lartë"</string>

@@ -63,6 +63,7 @@ import android.widget.LinearLayout;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
@@ -121,8 +122,9 @@ public class PipMenuView extends FrameLayout {
     private int mBetweenActionPaddingLand;
 
     private AnimatorSet mMenuContainerAnimator;
-    private PhonePipMenuController mController;
-    private Optional<SplitScreenController> mSplitScreenControllerOptional;
+    private final PhonePipMenuController mController;
+    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
+    private final PipUiEventLogger mPipUiEventLogger;
 
     private ValueAnimator.AnimatorUpdateListener mMenuBgUpdateListener =
             new ValueAnimator.AnimatorUpdateListener() {
@@ -152,13 +154,15 @@ public class PipMenuView extends FrameLayout {
 
     public PipMenuView(Context context, PhonePipMenuController controller,
             ShellExecutor mainExecutor, Handler mainHandler,
-            Optional<SplitScreenController> splitScreenController) {
+            Optional<SplitScreenController> splitScreenController,
+            PipUiEventLogger pipUiEventLogger) {
         super(context, null, 0);
         mContext = context;
         mController = controller;
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
         mSplitScreenControllerOptional = splitScreenController;
+        mPipUiEventLogger = pipUiEventLogger;
 
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         inflate(context, R.layout.pip_menu, this);
@@ -539,6 +543,8 @@ public class PipMenuView extends FrameLayout {
         // handles the message
         hideMenu(mController::onPipExpand, false /* notifyMenuVisibility */, true /* resize */,
                 ANIM_TYPE_HIDE);
+        mPipUiEventLogger.log(
+                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_EXPAND_TO_FULLSCREEN);
     }
 
     private void dismissPip() {
@@ -547,6 +553,7 @@ public class PipMenuView extends FrameLayout {
             // any other dismissal that will update the touch state and fade out the PIP task
             // and the menu view at the same time.
             mController.onPipDismiss();
+            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_TAP_TO_REMOVE);
         }
     }
 
@@ -566,6 +573,7 @@ public class PipMenuView extends FrameLayout {
                     Uri.fromParts("package", topPipActivityInfo.first.getPackageName(), null));
             settingsIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
             mContext.startActivityAsUser(settingsIntent, UserHandle.of(topPipActivityInfo.second));
+            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_SHOW_SETTINGS);
         }
     }
 

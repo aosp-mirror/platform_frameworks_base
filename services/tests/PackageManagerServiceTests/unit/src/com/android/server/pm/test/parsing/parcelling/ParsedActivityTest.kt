@@ -17,8 +17,8 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.ActivityInfo
-import android.content.pm.parsing.component.ParsedActivity
-import android.content.pm.parsing.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedActivity
+import com.android.server.pm.pkg.component.ParsedActivityImpl
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
@@ -27,7 +27,8 @@ class ParsedActivityTest : ParsedMainComponentTest(
     ParsedActivityImpl::class
 ) {
 
-    override val defaultImpl = ParsedActivityImpl()
+    override val defaultImpl =
+        ParsedActivityImpl()
     override val creator = ParsedActivityImpl.CREATOR
 
     override val mainComponentSubclassBaseParams = listOf(

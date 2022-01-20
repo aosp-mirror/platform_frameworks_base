@@ -26,8 +26,6 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
-import android.app.communal.CommunalManager;
-import android.app.communal.ICommunalManager;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.JobSchedulerFrameworkInitializer;
@@ -130,6 +128,7 @@ import android.media.tv.interactive.ITvIAppManager;
 import android.media.tv.interactive.TvIAppManager;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
+import android.nearby.NearbyFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializerTiramisu;
 import android.net.EthernetManager;
@@ -1519,21 +1518,6 @@ public final class SystemServiceRegistry {
                     }
                 });
 
-        registerService(Context.COMMUNAL_SERVICE, CommunalManager.class,
-                new CachedServiceFetcher<CommunalManager>() {
-                    @Override
-                    public CommunalManager createService(ContextImpl ctx) {
-                        if (!ctx.getPackageManager().hasSystemFeature(
-                                PackageManager.FEATURE_COMMUNAL_MODE)) {
-                            return null;
-                        }
-                        IBinder iBinder =
-                                ServiceManager.getService(Context.COMMUNAL_SERVICE);
-                        return iBinder != null ? new CommunalManager(
-                                ICommunalManager.Stub.asInterface(iBinder)) : null;
-                    }
-                });
-
         sInitializing = true;
         try {
             // Note: the following functions need to be @SystemApis, once they become mainline
@@ -1554,6 +1538,7 @@ public final class SystemServiceRegistry {
             UwbFrameworkInitializer.registerServiceWrappers();
             SafetyCenterFrameworkInitializer.registerServiceWrappers();
             ConnectivityFrameworkInitializerTiramisu.registerServiceWrappers();
+            NearbyFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...

@@ -89,7 +89,8 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
 
         if (remaining == 0) {
             mBiometricUtils.addBiometricForUser(getContext(), getTargetUserId(), identifier);
-            logOnEnrolled(getTargetUserId(), System.currentTimeMillis() - mEnrollmentStartTimeMs,
+            getLogger().logOnEnrolled(getTargetUserId(),
+                    System.currentTimeMillis() - mEnrollmentStartTimeMs,
                     true /* enrollSuccessful */);
             mCallback.onClientFinished(this, true /* success */);
         }
@@ -116,7 +117,8 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
      */
     @Override
     public void onError(int error, int vendorCode) {
-        logOnEnrolled(getTargetUserId(), System.currentTimeMillis() - mEnrollmentStartTimeMs,
+        getLogger().logOnEnrolled(getTargetUserId(),
+                System.currentTimeMillis() - mEnrollmentStartTimeMs,
                 false /* enrollSuccessful */);
         super.onError(error, vendorCode);
     }

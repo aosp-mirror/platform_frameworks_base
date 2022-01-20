@@ -112,11 +112,6 @@ import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.VerifierInfo;
 import android.content.pm.dex.DexMetadataHelper;
-import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.parsing.component.ComponentMutateUtils;
-import android.content.pm.parsing.component.ParsedInstrumentation;
-import android.content.pm.parsing.component.ParsedPermission;
-import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.net.Uri;
@@ -162,6 +157,11 @@ import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.Permission;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.component.ComponentMutateUtils;
+import com.android.server.pm.pkg.component.ParsedInstrumentation;
+import com.android.server.pm.pkg.component.ParsedPermission;
+import com.android.server.pm.pkg.component.ParsedPermissionGroup;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
@@ -1207,21 +1207,36 @@ final class InstallPackageHelper {
             }
 
             PackageSetting ps = mPm.mSettings.getPackageLPr(pkgName);
-            if (ps != null) {
-                if (DEBUG_INSTALL) Slog.d(TAG, "Existing package: " + ps);
+            PackageSetting signatureCheckPs = ps;
 
-                // Static shared libs have same package with different versions where
-                // we internally use a synthetic package name to allow multiple versions
-                // of the same package, therefore we need to compare signatures against
-                // the package setting for the latest library version.
-                PackageSetting signatureCheckPs = ps;
-                if (parsedPackage.isStaticSharedLibrary()) {
-                    SharedLibraryInfo libraryInfo = mSharedLibraries.getLatestSharedLibraVersionLPr(
-                            parsedPackage);
-                    if (libraryInfo != null) {
-                        signatureCheckPs = mPm.mSettings.getPackageLPr(
-                                libraryInfo.getPackageName());
-                    }
+            // SDK libs can have other major versions with different package names.
+            if (signatureCheckPs == null && parsedPackage.isSdkLibrary()) {
+                WatchedLongSparseArray<SharedLibraryInfo> libraryInfos =
+                        mSharedLibraries.getSharedLibraryInfos(
+                                parsedPackage.getSdkLibName());
+                if (libraryInfos != null && libraryInfos.size() > 0) {
+                    // Any existing version would do.
+                    SharedLibraryInfo libraryInfo = libraryInfos.valueAt(0);
+                    signatureCheckPs = mPm.mSettings.getPackageLPr(libraryInfo.getPackageName());
+                }
+            }
+
+            // Static shared libs have same package with different versions where
+            // we internally use a synthetic package name to allow multiple versions
+            // of the same package, therefore we need to compare signatures against
+            // the package setting for the latest library version.
+            if (parsedPackage.isStaticSharedLibrary()) {
+                SharedLibraryInfo libraryInfo =
+                        mSharedLibraries.getLatestStaticSharedLibraVersionLPr(parsedPackage);
+                if (libraryInfo != null) {
+                    signatureCheckPs = mPm.mSettings.getPackageLPr(libraryInfo.getPackageName());
+                }
+            }
+
+            if (signatureCheckPs != null) {
+                if (DEBUG_INSTALL) {
+                    Slog.d(TAG,
+                            "Existing package for signature checking: " + signatureCheckPs);
                 }
 
                 // Quick validity check that we're signed correctly if updating;
@@ -1256,6 +1271,10 @@ final class InstallPackageHelper {
                         throw new PrepareFailure(e.error, e.getMessage());
                     }
                 }
+            }
+
+            if (ps != null) {
+                if (DEBUG_INSTALL) Slog.d(TAG, "Existing package: " + ps);
 
                 if (ps.getPkg() != null) {
                     systemApp = ps.getPkg().isSystem();

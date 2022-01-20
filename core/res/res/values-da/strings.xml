@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Giver appen tilladelse til at læse og redigere konfigurationen af Forstyr ikke."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"start brugen at tilladelsesvisning"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Tillader, at brugeren kan bruge en tilladelse for en app. Dette bør aldrig være nødvendigt for almindelige apps."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"starte visningen af beslutninger om tilladelser"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Giver modtageren mulighed for at åbne skærmen til gennemgang af beslutninger om tilladelser. Dette bør aldrig være nødvendigt for standardapps."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"se appfunktioner"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Giver den app, som har tilladelsen, mulighed for at se oplysninger om en apps funktioner."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"få adgang til sensordata ved høj samplingfrekvens"</string>

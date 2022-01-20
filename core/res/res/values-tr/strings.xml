@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Uygulamaya, Rahatsız Etmeyin yapılandırmasını okuma ve yazma izni verir."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"izin kullanımı görüntülemeye başlama"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"İzin sahibinin bir uygulama için izin kullanımı başlatmasına olanak tanır. Normal uygulamalar için hiçbir zaman kullanılmamalıdır."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"izin kararlarını görüntülemeye başlama"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"İzin sahibinin, izin kararlarını incelemek için ekranı başlatmasına izin verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"uygulama özelliklerini görüntülemeye başlama"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"İzin sahibinin, bir uygulamanın özellik bilgilerini görüntülemeye başlamasına izin verir."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"sensör verilerine daha yüksek örnekleme hızında eriş"</string>

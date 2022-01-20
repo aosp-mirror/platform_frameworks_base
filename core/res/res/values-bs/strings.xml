@@ -736,10 +736,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Omogućava aplikaciji da čita i upisuje konfiguraciju načina rada Ne ometaj."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"pokrenuti korištenje odobrenja za pregled"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Dozvoljava vlasniku da pokrene korištenje odobrenja za aplikaciju. Ne bi trebalo biti potrebno za obične aplikacije."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"prikažite odluke o odobrenjima"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Dozvoljava vlasniku da pokrene ekran radi pregleda odluka o odobrenju. Obično nije potrebno za obične aplikacije."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"pokretanje pregleda funkcija aplikacije"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Dozvoljava vlasniku da pokrene pregled informacija o funkcijama za aplikaciju."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"pristup podacima senzora velikom brzinom uzorkovanja"</string>

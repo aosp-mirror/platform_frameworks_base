@@ -17,11 +17,11 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
-import static android.content.pm.parsing.ParsingPackageUtils.parsePublicKey;
 
 import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
 
 import android.annotation.NonNull;
+import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Base64;
@@ -340,9 +340,10 @@ public class KeySetManagerService {
         if (p == null || p.getKeySetData() == null) {
             return null;
         }
-        Long keySetId = p.getKeySetData().getAliases().get(alias);
+        final ArrayMap<String, Long> aliases = p.getKeySetData().getAliases();
+        Long keySetId = aliases.get(alias);
         if (keySetId == null) {
-            throw new IllegalArgumentException("Unknown KeySet alias: " + alias);
+            throw new IllegalArgumentException("Unknown KeySet alias: " + alias + ", aliases = " + aliases);
         }
         return mKeySets.get(keySetId);
     }
@@ -811,7 +812,7 @@ public class KeySetManagerService {
         long identifier = parser.getAttributeLong(null, "identifier");
         int refCount = 0;
         byte[] publicKey = parser.getAttributeBytesBase64(null, "value", null);
-        PublicKey pub = parsePublicKey(publicKey);
+        PublicKey pub = FrameworkParsingPackageUtils.parsePublicKey(publicKey);
         if (pub != null) {
             PublicKeyHandle pkh = new PublicKeyHandle(identifier, refCount, pub);
             mPublicKeys.put(identifier, pkh);

@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Թույլ է տալիս հավելվածին փոփոխել «Չանհանգստացնել» գործառույթի կազմաձևումը:"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"թույլտվությունների մասին տվյալների հասանելիություն"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Հավելվածին հասանելի կդառնան թույլտվությունների մասին տվյալները։ Այս թույլտվությունն անհրաժեշտ չէ սովորական հավելվածներին։"</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"սկսել թույլտվությունների հետ գործողությունների դիտումը"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Թույլ է տալիս դիտել թույլտվությունների հետ գործողությունները։ Սովորական հավելվածների համար երբևէ չպետք է անհրաժեշտ լինի։"</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"հավելվածի գործառույթների դիտում"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Թույլ է տալիս դիտել հավելվածի գործառույթների մասին տեղեկությունները։"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"օգտագործել սենսորների տվյալները բարձր հաճախականության վրա"</string>

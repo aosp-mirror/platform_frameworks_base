@@ -30,7 +30,6 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.SigningDetails.CertCapabilities;
 import android.content.pm.overlay.OverlayPaths;
-import android.content.pm.parsing.component.ParsedMainComponent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -50,6 +49,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.mutate.PackageStateMutator;
 
 import java.io.IOException;

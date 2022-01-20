@@ -1190,6 +1190,135 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING = 17;
 
+    /**
+     * <p>The device supports one or more 10-bit camera outputs according to the dynamic range
+     * profiles specified in
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles#getSupportedProfiles }.
+     * They can be configured as part of the capture session initialization via
+     * {@link android.hardware.camera2.params.OutputConfiguration#setDynamicRangeProfile }.
+     * Cameras that enable this capability must also support the following:
+     * * Profile {@link android.hardware.camera2.params.DynamicRangeProfiles#HLG10 }
+     * * All mandatory stream combinations for this specific capability as per
+     *   documentation {@link android.hardware.camera2.CameraDevice#createCaptureSession }
+     * * In case the device is not able to capture some combination of supported
+     *   standard 8-bit and/or 10-bit dynamic range profiles within the same capture request,
+     *   then those constraints must be listed in
+     *   {@link android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints }
+     * * Recommended dynamic range profile listed in
+     *   {@link android.hardware.camera2.CameraCharacteristics#REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE }.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT = 18;
+
+    //
+    // Enumeration values for CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+    //
+
+    /**
+     * <p>8-bit SDR profile which is the default for all non 10-bit output capable devices.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_STANDARD = 0x1;
+
+    /**
+     * <p>10-bit pixel samples encoded using the Hybrid log-gamma transfer function.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_HLG10 = 0x2;
+
+    /**
+     * <p>10-bit pixel samples encoded using the SMPTE ST 2084 transfer function.
+     * This profile utilizes internal static metadata to increase the quality
+     * of the capture.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_HDR10 = 0x4;
+
+    /**
+     * <p>10-bit pixel samples encoded using the SMPTE ST 2084 transfer function.
+     * In contrast to HDR10, this profile uses internal per-frame metadata
+     * to further enhance the quality of the capture.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_HDR10_PLUS = 0x8;
+
+    /**
+     * <p>This is a camera mode for Dolby Vision capture optimized for a more scene
+     * accurate capture. This would typically differ from what a specific device
+     * might want to tune for a consumer optimized Dolby Vision general capture.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_REF = 0x10;
+
+    /**
+     * <p>This is the power optimized mode for 10-bit Dolby Vision HDR Reference Mode.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_REF_PO = 0x20;
+
+    /**
+     * <p>This is the camera mode for the default Dolby Vision capture mode for the
+     * specific device. This would be tuned by each specific device for consumer
+     * pleasing results that resonate with their particular audience. We expect
+     * that each specific device would have a different look for their default
+     * Dolby Vision capture.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_OEM = 0x40;
+
+    /**
+     * <p>This is the power optimized mode for 10-bit Dolby Vision HDR device specific
+     * capture Mode.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_OEM_PO = 0x80;
+
+    /**
+     * <p>This is the 8-bit version of the Dolby Vision reference capture mode optimized
+     * for scene accuracy.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_REF = 0x100;
+
+    /**
+     * <p>This is the power optimized mode for 8-bit Dolby Vision HDR Reference Mode.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_REF_PO = 0x200;
+
+    /**
+     * <p>This is the 8-bit version of device specific tuned and optimized Dolby Vision
+     * capture mode.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_OEM = 0x400;
+
+    /**
+     * <p>This is the power optimized mode for 8-bit Dolby Vision HDR device specific
+     * capture Mode.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_OEM_PO = 0x800;
+
+    /**
+     *
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_MAX = 0x1000;
+
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
     //

@@ -29,6 +29,8 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.MultiResolutionImageReader;
+import android.hardware.camera2.params.DynamicRangeProfiles;
+import android.hardware.camera2.params.DynamicRangeProfiles.Profile;
 import android.hardware.camera2.params.MultiResolutionStreamInfo;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
@@ -258,6 +260,39 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
+     * Set a specific device supported dynamic range profile.
+     *
+     * <p>Clients can choose from any profile advertised as supported in
+     * CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES
+     * queried using {@link DynamicRangeProfiles#getSupportedProfiles()}.
+     * If this is not explicitly set, then the default profile will be
+     * {@link DynamicRangeProfiles#STANDARD}.</p>
+     *
+     * <p>Do note that invalid combinations between the registered output
+     * surface pixel format and the configured dynamic range profile will
+     * cause capture session initialization failure. Invalid combinations
+     * include any 10-bit dynamic range profile advertised in
+     * {@link DynamicRangeProfiles#getSupportedProfiles()} combined with
+     * an output Surface pixel format different from {@link ImageFormat#PRIVATE}
+     * (the default for Surfaces initialized by {@link android.view.SurfaceView},
+     * {@link android.view.TextureView}, {@link android.media.MediaRecorder},
+     * {@link android.media.MediaCodec} etc.)
+     * or {@link ImageFormat#YCBCR_P010}.</p>
+     */
+    public void setDynamicRangeProfile(@Profile int profile) {
+        mDynamicRangeProfile = profile;
+    }
+
+    /**
+     * Return current dynamic range profile.
+     *
+     * @return the currently set dynamic range profile
+     */
+    public @Profile int getDynamicRangeProfile() {
+        return mDynamicRangeProfile;
+    }
+
+    /**
      * Create a new {@link OutputConfiguration} instance.
      *
      * <p>This constructor takes an argument for desired camera rotation</p>
@@ -319,6 +354,7 @@ public final class OutputConfiguration implements Parcelable {
         mPhysicalCameraId = null;
         mIsMultiResolution = false;
         mSensorPixelModesUsed = new ArrayList<Integer>();
+        mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
     }
 
     /**
@@ -416,6 +452,7 @@ public final class OutputConfiguration implements Parcelable {
         mPhysicalCameraId = null;
         mIsMultiResolution = false;
         mSensorPixelModesUsed = new ArrayList<Integer>();
+        mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
     }
 
     /**
@@ -718,6 +755,7 @@ public final class OutputConfiguration implements Parcelable {
         this.mPhysicalCameraId = other.mPhysicalCameraId;
         this.mIsMultiResolution = other.mIsMultiResolution;
         this.mSensorPixelModesUsed = other.mSensorPixelModesUsed;
+        this.mDynamicRangeProfile = other.mDynamicRangeProfile;
     }
 
     /**
@@ -737,6 +775,8 @@ public final class OutputConfiguration implements Parcelable {
         boolean isMultiResolutionOutput = source.readInt() == 1;
         int[] sensorPixelModesUsed = source.createIntArray();
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
+        int dynamicRangeProfile = source.readInt();
+        DynamicRangeProfiles.checkProfileValue(dynamicRangeProfile);
 
         mSurfaceGroupId = surfaceSetId;
         mRotation = rotation;
@@ -760,6 +800,7 @@ public final class OutputConfiguration implements Parcelable {
         mPhysicalCameraId = physicalCameraId;
         mIsMultiResolution = isMultiResolutionOutput;
         mSensorPixelModesUsed = convertIntArrayToIntegerList(sensorPixelModesUsed);
+        mDynamicRangeProfile = dynamicRangeProfile;
     }
 
     /**
@@ -875,6 +916,7 @@ public final class OutputConfiguration implements Parcelable {
         dest.writeInt(mIsMultiResolution ? 1 : 0);
         // writeList doesn't seem to work well with Integer list.
         dest.writeIntArray(convertIntegerToIntList(mSensorPixelModesUsed));
+        dest.writeInt(mDynamicRangeProfile);
     }
 
     /**
@@ -920,6 +962,9 @@ public final class OutputConfiguration implements Parcelable {
                 if (mSurfaces.get(i) != other.mSurfaces.get(i))
                     return false;
             }
+            if (mDynamicRangeProfile != other.mDynamicRangeProfile) {
+                return false;
+            }
 
             return true;
         }
@@ -939,7 +984,8 @@ public final class OutputConfiguration implements Parcelable {
                     mRotation, mConfiguredSize.hashCode(), mConfiguredFormat, mConfiguredDataspace,
                     mSurfaceGroupId, mSurfaceType, mIsShared ? 1 : 0,
                     mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
-                    mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode());
+                    mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
+                    mDynamicRangeProfile);
         }
 
         return HashCodeHelpers.hashCode(
@@ -947,7 +993,8 @@ public final class OutputConfiguration implements Parcelable {
                 mConfiguredSize.hashCode(), mConfiguredFormat,
                 mConfiguredDataspace, mSurfaceGroupId, mIsShared ? 1 : 0,
                 mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
-                mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode());
+                mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
+                mDynamicRangeProfile);
     }
 
     private static final String TAG = "OutputConfiguration";
@@ -979,4 +1026,6 @@ public final class OutputConfiguration implements Parcelable {
     private boolean mIsMultiResolution;
     // The sensor pixel modes that this OutputConfiguration will use
     private ArrayList<Integer> mSensorPixelModesUsed;
+    // Dynamic range profile
+    private int mDynamicRangeProfile;
 }

@@ -315,7 +315,9 @@ final class VibrationSettings {
             }
 
             int intensity = getCurrentIntensity(usage);
-            if (intensity == Vibrator.VIBRATION_INTENSITY_OFF) {
+            if ((intensity == Vibrator.VIBRATION_INTENSITY_OFF)
+                    && !attrs.isFlagSet(
+                            VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)) {
                 return Vibration.Status.IGNORED_FOR_SETTINGS;
             }
 

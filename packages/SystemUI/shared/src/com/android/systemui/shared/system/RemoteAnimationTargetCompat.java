@@ -17,7 +17,6 @@
 package com.android.systemui.shared.system;
 
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
-import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -140,22 +139,11 @@ public class RemoteAnimationTargetCompat {
         // changes should be ordered top-to-bottom in z
         final int mode = change.getMode();
 
-        // Don't move anything that isn't independent within its parents
-        if (!TransitionInfo.isIndependent(change, info)) {
-            if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT || mode == TRANSIT_CHANGE) {
-                t.show(leash);
-                t.setPosition(leash, change.getEndRelOffset().x, change.getEndRelOffset().y);
-            }
-            return;
-        }
+        // Launcher animates leaf tasks directly, so always reparent all task leashes to root leash.
+        t.reparent(leash, info.getRootLeash());
+        t.setPosition(leash, change.getStartAbsBounds().left - info.getRootOffset().x,
+                change.getStartAbsBounds().top - info.getRootOffset().y);
 
-        boolean hasParent = change.getParent() != null;
-
-        if (!hasParent) {
-            t.reparent(leash, info.getRootLeash());
-            t.setPosition(leash, change.getStartAbsBounds().left - info.getRootOffset().x,
-                    change.getStartAbsBounds().top - info.getRootOffset().y);
-        }
         t.show(leash);
         // Put all the OPEN/SHOW on top
         if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
@@ -266,14 +254,15 @@ public class RemoteAnimationTargetCompat {
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
         final ArrayList<RemoteAnimationTargetCompat> out = new ArrayList<>();
         for (int i = 0; i < info.getChanges().size(); i++) {
-            boolean changeIsWallpaper =
-                    (info.getChanges().get(i).getFlags() & TransitionInfo.FLAG_IS_WALLPAPER) != 0;
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            final boolean changeIsWallpaper =
+                    (change.getFlags() & TransitionInfo.FLAG_IS_WALLPAPER) != 0;
             if (wallpapers != changeIsWallpaper) continue;
-            out.add(new RemoteAnimationTargetCompat(info.getChanges().get(i),
-                    info.getChanges().size() - i, info, t));
-            if (leashMap == null) continue;
-            leashMap.put(info.getChanges().get(i).getLeash(),
-                    out.get(out.size() - 1).leash);
+
+            out.add(new RemoteAnimationTargetCompat(change, info.getChanges().size() - i, info, t));
+            if (leashMap != null) {
+                leashMap.put(change.getLeash(), out.get(out.size() - 1).leash);
+            }
         }
         return out.toArray(new RemoteAnimationTargetCompat[out.size()]);
     }

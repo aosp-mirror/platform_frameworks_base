@@ -1028,15 +1028,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * @return Whether tactile feedback for the pattern is enabled.
-     */
-    @UnsupportedAppUsage
-    public boolean isTactileFeedbackEnabled() {
-        return Settings.System.getIntForUser(mContentResolver,
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
-    }
-
-    /**
      * Set and store the lockout deadline, meaning the user can't attempt their unlock
      * pattern until the deadline has passed.
      * @return the chosen deadline.

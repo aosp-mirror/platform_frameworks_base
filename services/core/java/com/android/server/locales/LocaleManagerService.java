@@ -239,18 +239,13 @@ public class LocaleManagerService extends SystemService {
      */
     private void notifyInstallerOfAppWhoseLocaleChanged(String appPackageName, int userId,
             LocaleList locales) {
-        try {
-            String installingPackageName = mContext.getPackageManager()
-                    .getInstallSourceInfo(appPackageName).getInstallingPackageName();
-            if (installingPackageName != null) {
-                Intent intent = createBaseIntent(Intent.ACTION_APPLICATION_LOCALE_CHANGED,
-                        appPackageName, locales);
-                //Set package name to ensure that only installer of the app receives this intent.
-                intent.setPackage(installingPackageName);
-                mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.w(TAG, "Package not found " + appPackageName);
+        String installingPackageName = getInstallingPackageName(appPackageName);
+        if (installingPackageName != null) {
+            Intent intent = createBaseIntent(Intent.ACTION_APPLICATION_LOCALE_CHANGED,
+                    appPackageName, locales);
+            //Set package name to ensure that only installer of the app receives this intent.
+            intent.setPackage(installingPackageName);
+            mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
         }
     }
 
@@ -291,8 +286,7 @@ public class LocaleManagerService extends SystemService {
      */
     private boolean isPackageOwnedByCaller(String appPackageName, int userId,
             @Nullable AppLocaleChangedAtomRecord atomRecordForMetrics) {
-        final int uid = mPackageManagerInternal
-                .getPackageUid(appPackageName, /* flags */ 0, userId);
+        final int uid = getPackageUid(appPackageName, userId);
         if (uid < 0) {
             Slog.w(TAG, "Unknown package " + appPackageName + " for user " + userId);
             if (atomRecordForMetrics != null) {
@@ -336,13 +330,17 @@ public class LocaleManagerService extends SystemService {
                 false /* allowAll */, ActivityManagerInternal.ALLOW_NON_FULL,
                 "getApplicationLocales", appPackageName);
 
-        // This function handles two types of query operations:
+        // This function handles three types of query operations:
         // 1.) A normal, non-privileged app querying its own locale.
-        // 2.) A privileged system service querying locales of another package.
+        // 2.) The installer of the given app querying locales of a package installed
+        // by said installer.
+        // 3.) A privileged system service querying locales of another package.
         // The least privileged case is a normal app performing a query, so check that first and
-        // get locales if the package name is owned by the app. Next, check if the caller has the
-        // necessary permission and get locales.
-        if (!isPackageOwnedByCaller(appPackageName, userId)) {
+        // get locales if the package name is owned by the app. Next check if the calling app
+        // is the installer of the given app and get locales. If neither conditions matched,
+        // check if the caller has the necessary permission and fetch locales.
+        if (!isPackageOwnedByCaller(appPackageName, userId)
+                && !isCallerInstaller(appPackageName, userId)) {
             enforceReadAppSpecificLocalesPermission();
         }
         final long token = Binder.clearCallingIdentity();
@@ -374,10 +372,39 @@ public class LocaleManagerService extends SystemService {
         return locales != null ? locales : LocaleList.getEmptyLocaleList();
     }
 
+    /**
+     * Checks if the calling app is the installer of the app whose locale changed.
+     */
+    private boolean isCallerInstaller(String appPackageName, int userId) {
+        String installingPackageName = getInstallingPackageName(appPackageName);
+        if (installingPackageName != null) {
+            // Get the uid of installer-on-record to compare with the calling uid.
+            int installerUid = getPackageUid(installingPackageName, userId);
+            return installerUid >= 0 && UserHandle.isSameApp(Binder.getCallingUid(), installerUid);
+        }
+        return false;
+    }
+
     private void enforceReadAppSpecificLocalesPermission() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.READ_APP_SPECIFIC_LOCALES,
                 "getApplicationLocales");
+    }
+
+    private int getPackageUid(String appPackageName, int userId) {
+        return mPackageManagerInternal
+                .getPackageUid(appPackageName, /* flags */ 0, userId);
+    }
+
+    @Nullable
+    private String getInstallingPackageName(String packageName) {
+        try {
+            return mContext.getPackageManager()
+                    .getInstallSourceInfo(packageName).getInstallingPackageName();
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Package not found " + packageName);
+        }
+        return null;
     }
 
     /**

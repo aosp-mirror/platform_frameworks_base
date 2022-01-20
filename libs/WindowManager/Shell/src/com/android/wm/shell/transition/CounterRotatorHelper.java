@@ -18,7 +18,9 @@ package com.android.wm.shell.transition;
 
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
+import android.graphics.Rect;
 import android.util.ArrayMap;
+import android.util.RotationUtils;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
@@ -35,11 +37,21 @@ import java.util.List;
  */
 public class CounterRotatorHelper {
     private final ArrayMap<WindowContainerToken, CounterRotator> mRotatorMap = new ArrayMap<>();
+    private final Rect mLastDisplayBounds = new Rect();
+    private int mLastRotationDelta;
 
     /** Puts the surface controls of closing changes to counter-rotated surfaces. */
     public void handleClosingChanges(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
-            int rotateDelta, int displayW, int displayH) {
+            @NonNull TransitionInfo.Change displayRotationChange) {
+        final int rotationDelta = RotationUtils.deltaRotation(
+                displayRotationChange.getStartRotation(), displayRotationChange.getEndRotation());
+        final Rect displayBounds = displayRotationChange.getEndAbsBounds();
+        final int displayW = displayBounds.width();
+        final int displayH = displayBounds.height();
+        mLastRotationDelta = rotationDelta;
+        mLastDisplayBounds.set(displayBounds);
+
         final List<TransitionInfo.Change> changes = info.getChanges();
         final int numChanges = changes.size();
         for (int i = numChanges - 1; i >= 0; --i) {
@@ -53,7 +65,7 @@ public class CounterRotatorHelper {
             CounterRotator crot = mRotatorMap.get(parent);
             if (crot == null) {
                 crot = new CounterRotator();
-                crot.setup(startTransaction, info.getChange(parent).getLeash(), rotateDelta,
+                crot.setup(startTransaction, info.getChange(parent).getLeash(), rotationDelta,
                         displayW, displayH);
                 final SurfaceControl rotatorSc = crot.getSurface();
                 if (rotatorSc != null) {
@@ -70,6 +82,18 @@ public class CounterRotatorHelper {
     }
 
     /**
+     * Returns the rotated end bounds if the change is put in previous rotation. Otherwise the
+     * original end bounds are returned.
+     */
+    @NonNull
+    public Rect getEndBoundsInStartRotation(@NonNull TransitionInfo.Change change) {
+        if (mLastRotationDelta == 0) return change.getEndAbsBounds();
+        final Rect rotatedBounds = new Rect(change.getEndAbsBounds());
+        RotationUtils.rotateBounds(rotatedBounds, mLastDisplayBounds, mLastRotationDelta);
+        return rotatedBounds;
+    }
+
+    /**
      * Removes the counter rotation surface in the finish transaction. No need to reparent the
      * children as the finish transaction should have already taken care of that.
      *
@@ -80,5 +104,6 @@ public class CounterRotatorHelper {
             mRotatorMap.valueAt(i).cleanUp(finishTransaction);
         }
         mRotatorMap.clear();
+        mLastRotationDelta = 0;
     }
 }
