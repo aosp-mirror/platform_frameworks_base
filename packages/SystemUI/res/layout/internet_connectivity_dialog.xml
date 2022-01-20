@@ -378,7 +378,8 @@
                         android:clickable="true"/>
                 </LinearLayout>
             </LinearLayout>
-            <FrameLayout
+
+            <LinearLayout
                 android:id="@+id/button_layout"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -390,9 +391,10 @@
                 android:clickable="false"
                 android:focusable="false">
 
-                <FrameLayout
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:layout_gravity="start|center_vertical"
                     android:orientation="vertical">
                     <Button
@@ -401,12 +403,13 @@
                         android:layout_height="wrap_content"
                         android:text="@string/turn_off_airplane_mode"
                         android:ellipsize="end"
+                        android:maxLines="1"
                         style="@style/Widget.Dialog.Button.BorderButton"
                         android:clickable="true"
                         android:focusable="true"/>
-                </FrameLayout>
+                </LinearLayout>
 
-                <FrameLayout
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
@@ -417,10 +420,13 @@
                         android:layout_height="wrap_content"
                         android:text="@string/inline_done_button"
                         style="@style/Widget.Dialog.Button"
+                        android:maxLines="1"
+                        android:ellipsize="end"
                         android:clickable="true"
                         android:focusable="true"/>
-                </FrameLayout>
-            </FrameLayout>
+                </LinearLayout>
+            </LinearLayout>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>
