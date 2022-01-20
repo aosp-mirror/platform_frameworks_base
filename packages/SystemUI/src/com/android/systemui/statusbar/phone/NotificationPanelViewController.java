@@ -4596,7 +4596,14 @@ public class NotificationPanelViewController extends PanelViewController {
 
             // Can affect multi-user switcher visibility as it depends on screen size by default:
             // it is enabled only for devices with large screens (see config_keyguardUserSwitcher)
-            reInflateViews();
+            boolean prevKeyguardUserSwitcherEnabled = mKeyguardUserSwitcherEnabled;
+            boolean prevKeyguardQsUserSwitchEnabled = mKeyguardQsUserSwitchEnabled;
+            updateUserSwitcherFlags();
+            if (prevKeyguardUserSwitcherEnabled != mKeyguardUserSwitcherEnabled
+                    || prevKeyguardQsUserSwitchEnabled != mKeyguardQsUserSwitchEnabled) {
+                reInflateViews();
+            }
+
             Trace.endSection();
         }
 
