@@ -264,8 +264,8 @@ interface IDevicePolicyManager {
     int startUserInBackground(in ComponentName who, in UserHandle userHandle);
     int stopUser(in ComponentName who, in UserHandle userHandle);
     int logoutUser(in ComponentName who);
+    int logoutUserInternal(); // AIDL doesn't allow overloading name (logoutUser())
     int getLogoutUserId();
-    void clearLogoutUser();
     List<UserHandle> getSecondaryUsers(in ComponentName who);
     void acknowledgeNewUserDisclaimer();
 

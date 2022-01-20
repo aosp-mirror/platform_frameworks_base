@@ -10977,7 +10977,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getLogoutUserId() {
-        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity()));
+        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity())
+                || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS));
 
         return getLogoutUserIdUnchecked();
     }
@@ -10992,16 +10993,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    @Override
-    public void clearLogoutUser() {
-        CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(canManageUsers(caller));
-
-        Slogf.i(LOG_TAG, "Clearing logout user as requested by %s", caller);
-        clearLogoutUserUnchecked();
-    }
-
-    private void clearLogoutUserUnchecked() {
+    private void clearLogoutUser() {
         if (!mInjector.userManagerIsHeadlessSystemUserMode()) return; // ignore
 
         synchronized (getLockObject()) {
@@ -11102,6 +11094,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return stopUserUnchecked(callingUserId);
         }
 
+        return logoutUserUnchecked(/* userIdToStop= */ callingUserId);
+    }
+
+    @Override
+    public int logoutUserInternal() {
+        CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                canManageUsers(caller) || hasCallingOrSelfPermission(permission.CREATE_USERS));
+
+        int result = logoutUserUnchecked(getCurrentForegroundUserId());
+        Slogf.d(LOG_TAG, "logout called by uid %d. Result: %d", caller.getUid(), result);
+        return result;
+    }
+
+    private int logoutUserUnchecked(@UserIdInt int userIdToStop) {
         int logoutUserId = getLogoutUserIdUnchecked();
         if (logoutUserId == UserHandle.USER_NULL) {
             // Could happen on devices using headless system user mode when called before calling
@@ -11117,7 +11124,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // This should never happen as target user is determined by getPreviousUserId()
                 return UserManager.USER_OPERATION_ERROR_UNKNOWN;
             }
-            clearLogoutUserUnchecked();
+            clearLogoutUser();
         } catch (RemoteException e) {
             // Same process, should not happen.
             return UserManager.USER_OPERATION_ERROR_UNKNOWN;
@@ -11125,7 +11132,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mInjector.binderRestoreCallingIdentity(id);
         }
 
-        return stopUserUnchecked(callingUserId);
+        return stopUserUnchecked(userIdToStop);
     }
 
     private int stopUserUnchecked(@UserIdInt int userId) {
