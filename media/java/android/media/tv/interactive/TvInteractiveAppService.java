@@ -245,14 +245,12 @@ public abstract class TvInteractiveAppService extends Service {
 
     /**
      * Registers App link info.
-     * @hide
      */
     public void onRegisterAppLinkInfo(@NonNull AppLinkInfo appLinkInfo) {
     }
 
     /**
      * Unregisters App link info.
-     * @hide
      */
     public void onUnregisterAppLinkInfo(@NonNull AppLinkInfo appLinkInfo) {
     }
