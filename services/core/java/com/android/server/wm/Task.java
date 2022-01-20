@@ -2731,10 +2731,14 @@ class Task extends TaskFragment {
     }
 
     boolean isResizeable() {
+        return isResizeable(/* checkPictureInPictureSupport */ true);
+    }
+
+    boolean isResizeable(boolean checkPictureInPictureSupport) {
         final boolean forceResizable = mAtmService.mForceResizableActivities
                 && getActivityType() == ACTIVITY_TYPE_STANDARD;
         return forceResizable || ActivityInfo.isResizeableMode(mResizeMode)
-                || mSupportsPictureInPicture;
+                || (mSupportsPictureInPicture && checkPictureInPictureSupport);
     }
 
     /**
