@@ -42,6 +42,7 @@ public class FooterPreference extends Preference {
     @VisibleForTesting
     View.OnClickListener mLearnMoreListener;
     private CharSequence mContentDescription;
+    private CharSequence mLearnMoreText;
     private CharSequence mLearnMoreContentDescription;
     private FooterLearnMoreSpan mLearnMoreSpan;
 
@@ -69,7 +70,12 @@ public class FooterPreference extends Preference {
         TextView learnMore = holder.itemView.findViewById(R.id.settingslib_learn_more);
         if (learnMore != null && mLearnMoreListener != null) {
             learnMore.setVisibility(View.VISIBLE);
-            SpannableString learnMoreText = new SpannableString(learnMore.getText());
+            if (TextUtils.isEmpty(mLearnMoreText)) {
+                mLearnMoreText = learnMore.getText();
+            } else {
+                learnMore.setText(mLearnMoreText);
+            }
+            SpannableString learnMoreText = new SpannableString(mLearnMoreText);
             if (mLearnMoreSpan != null) {
                 learnMoreText.removeSpan(mLearnMoreSpan);
             }
@@ -120,6 +126,18 @@ public class FooterPreference extends Preference {
     @VisibleForTesting
     CharSequence getContentDescription() {
         return mContentDescription;
+    }
+
+    /**
+     * Sets the learn more text.
+     *
+     * @param learnMoreText The string of the learn more text.
+     */
+    public void setLearnMoreText(CharSequence learnMoreText) {
+        if (!TextUtils.equals(mLearnMoreText, learnMoreText)) {
+            mLearnMoreText = learnMoreText;
+            notifyChanged();
+        }
     }
 
     /**
