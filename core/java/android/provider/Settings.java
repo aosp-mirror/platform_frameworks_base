@@ -4501,6 +4501,13 @@ public final class Settings {
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 
         /**
+         * The amount of time in milliseconds before the device goes to sleep or begins to dream
+         * after a period of inactivity while it is docked.
+         * @hide
+         */
+        public static final String SCREEN_OFF_TIMEOUT_DOCKED = "screen_off_timeout_docked";
+
+        /**
          * The screen backlight brightness between 0 and 255.
          */
         @Readable
