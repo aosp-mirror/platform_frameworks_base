@@ -29,7 +29,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
-import static android.content.pm.PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
@@ -1968,16 +1967,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void onSessionVerificationFailure(int error, String msg) {
-        final String msgWithErrorCode = PackageManager.installStatusToString(error, msg);
-        Slog.e(TAG, "Failed to verify session " + sessionId + " [" + msgWithErrorCode + "]");
+        Slog.e(TAG, "Failed to verify session " + sessionId);
         if (isStaged()) {
-            // This will clean up the session when it reaches the terminal state
-            mStagedSession.setSessionFailed(
-                    SessionInfo.SESSION_VERIFICATION_FAILED, msgWithErrorCode);
             mStagedSession.notifyEndPreRebootVerification();
-        } else {
-            // Session is sealed and committed but could not be verified, we need to destroy it.
-            destroy();
         }
         // Dispatch message to remove session from PackageInstallerService.
         dispatchSessionFinished(error, msg, null);
@@ -2198,7 +2190,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             verifyNonStaged();
         } catch (PackageManagerException e) {
             final String completeMsg = ExceptionUtils.getCompleteMessage(e);
-            onSessionVerificationFailure(e.error, completeMsg);
+            final String errorMsg = PackageManager.installStatusToString(e.error, completeMsg);
+            setSessionFailed(e.error, errorMsg);
+            onSessionVerificationFailure(e.error, errorMsg);
         }
     }
 
@@ -2341,7 +2335,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // the flag.
             mStageDirInUse = true;
         }
-        mSessionProvider.getSessionVerifier().verifyNonStaged(this, (error, msg) -> {
+        mSessionProvider.getSessionVerifier().verify(this, (error, msg) -> {
             mHandler.post(() -> {
                 if (error == INSTALL_SUCCEEDED) {
                     onVerificationComplete();
@@ -2431,23 +2425,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @WorkerThread
     private void onVerificationComplete() {
-        // APK verification is done. Continue the installation depending on whether it is a
-        // staged session or not. For a staged session, we will hand it over to the staging
-        // manager to complete the installation.
         if (isStaged()) {
-            mSessionProvider.getSessionVerifier().verifyStaged(mStagedSession, (error, msg) -> {
-                mStagedSession.notifyEndPreRebootVerification();
-                if (error == SessionInfo.SESSION_NO_ERROR) {
-                    mStagingManager.commitSession(mStagedSession);
-                    sendUpdateToRemoteStatusReceiver(INSTALL_SUCCEEDED, "Session staged", null);
-                } else {
-                    dispatchSessionFinished(INSTALL_FAILED_VERIFICATION_FAILURE, msg, null);
-                    maybeFinishChildSessions(INSTALL_FAILED_VERIFICATION_FAILURE, msg);
-                }
-            });
+            mStagedSession.notifyEndPreRebootVerification();
+            mStagingManager.commitSession(mStagedSession);
+            sendUpdateToRemoteStatusReceiver(INSTALL_SUCCEEDED, "Session staged", null);
             return;
         }
-
         install();
     }
 
@@ -4055,7 +4038,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private void setSessionReady() {
+    void setSessionReady() {
         synchronized (mLock) {
             // Do not allow destroyed/failed session to change state
             if (mDestroyed || mSessionFailed) return;
@@ -4068,7 +4051,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mCallback.onSessionChanged(this);
     }
 
-    private void setSessionFailed(int errorCode, String errorMessage) {
+    void setSessionFailed(int errorCode, String errorMessage) {
         synchronized (mLock) {
             // Do not allow destroyed/failed session to change state
             if (mDestroyed || mSessionFailed) return;
