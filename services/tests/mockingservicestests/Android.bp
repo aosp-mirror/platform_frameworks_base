@@ -14,7 +14,7 @@
 java_defaults {
     name: "FrameworkMockingServicesTests-jni-defaults",
     jni_libs: [
-        "libactivitymanagermockingservicestestjni",
+        "libmockingservicestestjni",
     ],
 }
 
