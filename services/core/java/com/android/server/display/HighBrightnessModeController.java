@@ -91,6 +91,7 @@ class HighBrightnessModeController {
     private int mHeight;
     private float mAmbientLux;
     private int mDisplayStatsId;
+    private int mHbmStatsState = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_OFF;
 
     /**
      * If HBM is currently running, this is the start time for the current HBM session.
@@ -278,6 +279,7 @@ class HighBrightnessModeController {
         pw.println("  mHbmMode=" + BrightnessInfo.hbmToString(mHbmMode)
                 + (mHbmMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
                 ? "(" + getHdrBrightnessValue() + ")" : ""));
+        pw.println("  mHbmStatsState=" + hbmStatsStateToString(mHbmStatsState));
         pw.println("  mHbmData=" + mHbmData);
         pw.println("  mAmbientLux=" + mAmbientLux
                 + (mIsAutoBrightnessEnabled ? "" : " (old/invalid)"));
@@ -444,8 +446,8 @@ class HighBrightnessModeController {
 
     private void updateHbmMode() {
         int newHbmMode = calculateHighBrightnessMode();
+        updateHbmStats(mHbmMode, newHbmMode);
         if (mHbmMode != newHbmMode) {
-            updateHbmStats(mHbmMode, newHbmMode);
             mHbmMode = newHbmMode;
             mHbmChangeCallback.run();
         }
@@ -453,11 +455,16 @@ class HighBrightnessModeController {
 
     private void updateHbmStats(int mode, int newMode) {
         int state = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_OFF;
-        if (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR) {
+        if (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
+                && getHdrBrightnessValue() > mHbmData.transitionPoint) {
             state = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_HDR;
         } else if (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT) {
             state = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT;
         }
+        if (state == mHbmStatsState) {
+            return;
+        }
+        mHbmStatsState = state;
 
         int reason =
                 FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_TRANSITION_REASON_UNKNOWN;
@@ -489,6 +496,19 @@ class HighBrightnessModeController {
         }
 
         mInjector.reportHbmStateChange(mDisplayStatsId, state, reason);
+    }
+
+    private String hbmStatsStateToString(int hbmStatsState) {
+        switch (hbmStatsState) {
+        case FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_OFF:
+            return "HBM_OFF";
+        case FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_HDR:
+            return "HBM_ON_HDR";
+        case FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT:
+            return "HBM_ON_SUNLIGHT";
+        default:
+            return String.valueOf(hbmStatsState);
+        }
     }
 
     private int calculateHighBrightnessMode() {

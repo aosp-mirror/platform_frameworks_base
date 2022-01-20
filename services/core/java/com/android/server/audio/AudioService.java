@@ -4384,12 +4384,6 @@ public class AudioService extends IAudioService.Stub
         if (!mHasVibrator) {
             return false;
         }
-        final boolean hapticsDisabled = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) == 0;
-        if (hapticsDisabled) {
-            return false;
-        }
-
         if (effect == null) {
             return false;
         }

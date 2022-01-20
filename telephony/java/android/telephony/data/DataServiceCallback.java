@@ -253,8 +253,10 @@ public class DataServiceCallback {
                 return "RESULT_ERROR_BUSY";
             case RESULT_ERROR_ILLEGAL_STATE:
                 return "RESULT_ERROR_ILLEGAL_STATE";
+            case RESULT_ERROR_TEMPORARILY_UNAVAILABLE:
+                return "RESULT_ERROR_TEMPORARILY_UNAVAILABLE";
             default:
-                return "Missing case for result code=" + resultCode;
+                return "Unknown(" + resultCode + ")";
         }
     }
 

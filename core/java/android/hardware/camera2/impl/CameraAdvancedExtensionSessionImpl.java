@@ -35,7 +35,6 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.extension.CameraOutputConfig;
 import android.hardware.camera2.extension.CameraSessionConfig;
-import android.hardware.camera2.extension.CaptureStageImpl;
 import android.hardware.camera2.extension.IAdvancedExtenderImpl;
 import android.hardware.camera2.extension.ICaptureCallback;
 import android.hardware.camera2.extension.IImageProcessorImpl;
@@ -49,6 +48,7 @@ import android.hardware.camera2.extension.ParcelCaptureResult;
 import android.hardware.camera2.extension.ParcelImage;
 import android.hardware.camera2.extension.ParcelTotalCaptureResult;
 import android.hardware.camera2.extension.Request;
+import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
@@ -128,6 +128,13 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 config.getOutputConfigurations().size() > 2) {
             throw new IllegalArgumentException("Unexpected amount of output surfaces, received: " +
                     config.getOutputConfigurations().size() + " expected <= 2");
+        }
+
+        for (OutputConfiguration c : config.getOutputConfigurations()) {
+            if (c.getDynamicRangeProfile() != DynamicRangeProfiles.STANDARD) {
+                throw new IllegalArgumentException("Unsupported dynamic range profile: " +
+                        c.getDynamicRangeProfile());
+            }
         }
 
         int suitableSurfaceCount = 0;

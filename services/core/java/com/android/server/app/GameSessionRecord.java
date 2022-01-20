@@ -25,33 +25,69 @@ import java.util.Objects;
 
 final class GameSessionRecord {
 
+    private enum State {
+        // Game task is running, but GameSession not created.
+        NO_GAME_SESSION_REQUESTED,
+        // Game Service provider requested a Game Session and we are in the
+        // process of creating it. GameSessionRecord.getGameSession() == null;
+        GAME_SESSION_REQUESTED,
+        // A Game Session is created and attached.
+        // GameSessionRecord.getGameSession() != null.
+        GAME_SESSION_ATTACHED,
+    }
+
     private final int mTaskId;
     private final ComponentName mRootComponentName;
     @Nullable
     private final IGameSession mIGameSession;
+    private final State mState;
 
-    static GameSessionRecord pendingGameSession(int taskId, ComponentName rootComponentName) {
-        return new GameSessionRecord(taskId, rootComponentName, /* gameSession= */ null);
+    static GameSessionRecord awaitingGameSessionRequest(int taskId,
+            ComponentName rootComponentName) {
+        return new GameSessionRecord(taskId, rootComponentName, /* gameSession= */ null,
+                State.NO_GAME_SESSION_REQUESTED);
     }
 
     private GameSessionRecord(
             int taskId,
             @NonNull ComponentName rootComponentName,
-            @Nullable IGameSession gameSession) {
+            @Nullable IGameSession gameSession,
+            @NonNull State state) {
         this.mTaskId = taskId;
         this.mRootComponentName = rootComponentName;
         this.mIGameSession = gameSession;
+        this.mState = state;
+    }
+
+    public boolean isAwaitingGameSessionRequest() {
+        return mState == State.NO_GAME_SESSION_REQUESTED;
+    }
+
+    @NonNull
+    public GameSessionRecord withGameSessionRequested() {
+        return new GameSessionRecord(mTaskId, mRootComponentName, /* gameSession=*/ null,
+                State.GAME_SESSION_REQUESTED);
+    }
+
+    public boolean isGameSessionRequested() {
+        return mState == State.GAME_SESSION_REQUESTED;
     }
 
     @NonNull
     public GameSessionRecord withGameSession(@NonNull IGameSession gameSession) {
         Objects.requireNonNull(gameSession);
-        return new GameSessionRecord(mTaskId, mRootComponentName, gameSession);
+        return new GameSessionRecord(mTaskId, mRootComponentName, gameSession,
+                State.GAME_SESSION_ATTACHED);
     }
 
     @Nullable
     public IGameSession getGameSession() {
         return mIGameSession;
+    }
+
+    @NonNull
+    public ComponentName getComponentName() {
+        return mRootComponentName;
     }
 
     @Override
@@ -63,6 +99,8 @@ final class GameSessionRecord {
                 + mRootComponentName
                 + ", mIGameSession="
                 + mIGameSession
+                + ", mState="
+                + mState
                 + '}';
     }
 
@@ -78,11 +116,11 @@ final class GameSessionRecord {
 
         GameSessionRecord that = (GameSessionRecord) o;
         return mTaskId == that.mTaskId && mRootComponentName.equals(that.mRootComponentName)
-                && Objects.equals(mIGameSession, that.mIGameSession);
+                && Objects.equals(mIGameSession, that.mIGameSession) && mState == that.mState;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTaskId, mRootComponentName, mIGameSession);
+        return Objects.hash(mTaskId, mRootComponentName, mIGameSession, mState);
     }
 }

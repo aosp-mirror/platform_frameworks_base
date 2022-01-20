@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
+import android.security.keystore.KeyProperties;
 import android.security.maintenance.IKeystoreMaintenance;
 import android.system.keystore2.Domain;
 import android.system.keystore2.KeyDescriptor;
@@ -157,6 +158,11 @@ public class AndroidKeyStoreMaintenance {
      * Migrates a key given by the source descriptor to the location designated by the destination
      * descriptor.
      *
+     * If Domain::APP is selected in either source or destination, nspace must be set to
+     * {@link KeyProperties#NAMESPACE_APPLICATION}, implying the caller's UID.
+     * If the caller has the MIGRATE_ANY_KEY permission, Domain::APP may be used with
+     * other nspace values which then indicates the UID of a different application.
+     *
      * @param source - The key to migrate may be specified by Domain.APP, Domain.SELINUX, or
      *               Domain.KEY_ID. The caller needs the permissions use, delete, and grant for the
      *               source namespace.
@@ -181,6 +187,22 @@ public class AndroidKeyStoreMaintenance {
         } catch (Exception e) {
             Log.e(TAG, "Can not connect to keystore", e);
             return SYSTEM_ERROR;
+        }
+    }
+
+    /**
+     * @see IKeystoreMaintenance#listEntries(int, long)
+     */
+    @Nullable
+    public static KeyDescriptor[] listEntries(int domain, long nspace) {
+        try {
+            return getService().listEntries(domain, nspace);
+        } catch (ServiceSpecificException e) {
+            Log.e(TAG, "listEntries failed", e);
+            return null;
+        } catch (Exception e) {
+            Log.e(TAG, "Can not connect to keystore", e);
+            return null;
         }
     }
 }

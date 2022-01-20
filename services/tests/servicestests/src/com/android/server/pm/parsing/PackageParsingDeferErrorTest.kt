@@ -18,8 +18,8 @@ package com.android.server.pm.parsing
 
 import android.annotation.RawRes
 import android.content.Context
-import android.content.pm.parsing.ParsingPackage
-import android.content.pm.parsing.ParsingPackageUtils
+import com.android.server.pm.pkg.parsing.ParsingPackage
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import android.content.pm.parsing.result.ParseResult
 import android.platform.test.annotations.Presubmit
 import androidx.test.InstrumentationRegistry

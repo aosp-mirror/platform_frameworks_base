@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"అంతరాయం కలిగించవద్దు ఎంపిక కాన్ఫిగరేషన్ చదవడానికి మరియు రాయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"వీక్షణ అనుమతి వినియోగాన్ని ప్రారంభించండి"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"యాప్‌నకు అనుమతి వినియోగాన్ని ప్రారంభించడానికి హోల్డర్‌‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ ఇటువంటి అనుమతి అవసరం ఉండదు."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"వీక్షణ అనుమతి నిర్ణయాలను ప్రారంభించండి"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"అనుమతి నిర్ణయాలను రివ్యూ చేయడానికి స్క్రీన్‌ను ప్రారంభించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"యాప్ ఫీచర్‌లను చూడటాన్ని ప్రారంభించండి"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"యాప్ ఫీచర్‌ల సమాచారాన్ని చూడటాన్ని ప్రారంభించడానికి హోల్డర్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"అధిక శాంపిల్ రేటు వద్ద సెన్సార్ డేటాను యాక్సెస్ చేయండి"</string>

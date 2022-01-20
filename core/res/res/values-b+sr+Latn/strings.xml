@@ -736,10 +736,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Dozvoljava aplikaciji da čita i upisuje konfiguraciju podešavanja Ne uznemiravaj."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"početak korišćenja dozvole za pregled"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Dozvoljava vlasniku da započne korišćenje dozvole za aplikaciju. Nikada ne bi trebalo da bude potrebna za uobičajene aplikacije."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"pokretanje pregleda odluka o dozvolama"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Dozvoljava vlasniku da pokrene ekran za proveru odluka o dozvolama. Nikada ne bi trebalo da bude potrebno za obične aplikacije."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"pokretanje prikaza funkcija aplikacije"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Dozvoljava nosiocu dozvole da započne pregledanje informacija o funkcijama aplikacije."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"pristup podacima senzora pri velikoj brzini uzorkovanja"</string>
@@ -1552,7 +1550,7 @@
     <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Veza sa uvek uključenim VPN-om je prekinuta"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"Povezivanje na stalno uključeni VPN nije uspelo"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Promenite podešavanja VPN-a"</string>
-    <string name="upload_file" msgid="8651942222301634271">"Odaberi datoteku"</string>
+    <string name="upload_file" msgid="8651942222301634271">"Odaberi fajl"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Nije izabrana nijedna datoteka"</string>
     <string name="reset" msgid="3865826612628171429">"Resetuj"</string>
     <string name="submit" msgid="862795280643405865">"Pošalji"</string>

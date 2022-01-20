@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"অ্যাপটিকে \'বিরক্ত করবে না\' কনফিগারেশন পড়া এবং লেখার অনুমতি দেয়।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"দেখার অনুমতি কাজে লাগানো শুরু করুন"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"কোনও অ্যাপের কোনও নির্দিষ্ট অনুমতির ব্যবহার শুরু করার ক্ষেত্রে হোল্ডারকে সাহায্য করে। সাধারণ অ্যাপের জন্য এটির পরিবর্তন হওয়ার কথা নয়।"</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"অনুমতি সংক্রান্ত সিদ্ধান্ত দেখা শুরু করুন"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"অনুমতি সংক্রান্ত সিদ্ধান্ত পর্যালোচনা করার জন্য, হোল্ডারকে স্ক্রিন চালু করতে দেয়। সাধারণ অ্যাপের জন্য কখনই প্রয়োজন হওয়া উচিত নয়।"</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"অ্যাপের ফিচার দেখা শুরু করুন"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"কোনও অ্যাপের ফিচার সম্পর্কিত তথ্য দেখা শুরু করতে অনুমতি দেয়।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"হাই স্যাম্পলিং রেটে সেন্সর ডেটা অ্যাক্সেস করুন"</string>

@@ -736,10 +736,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Дозвољава апликацији да чита и уписује конфигурацију подешавања Не узнемиравај."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"почетак коришћења дозволе за преглед"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Дозвољава власнику да започне коришћење дозволе за апликацију. Никада не би требало да буде потребна за уобичајене апликације."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"покретање прегледа одлука о дозволама"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Дозвољава власнику да покрене екран за проверу одлука о дозволама. Никада не би требало да буде потребно за обичне апликације."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"покретање приказа функција апликације"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дозвољава носиоцу дозволе да започне прегледање информација о функцијама апликације."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"приступ подацима сензора при великој брзини узорковања"</string>
@@ -1552,7 +1550,7 @@
     <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Веза са увек укљученим VPN-ом је прекинута"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"Повезивање на стално укључени VPN није успело"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Промените подешавања VPN-а"</string>
-    <string name="upload_file" msgid="8651942222301634271">"Одабери датотеку"</string>
+    <string name="upload_file" msgid="8651942222301634271">"Одабери фајл"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Није изабрана ниједна датотека"</string>
     <string name="reset" msgid="3865826612628171429">"Ресетуј"</string>
     <string name="submit" msgid="862795280643405865">"Пошаљи"</string>

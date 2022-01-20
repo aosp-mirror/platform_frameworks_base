@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Cho phép ứng dụng đọc và ghi cấu hình Không làm phiền."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"cấp quyền xem"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Cho phép chủ sở hữu cấp quyền cho một ứng dụng. Các ứng dụng thông thường sẽ không bao giờ cần quyền này."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"bắt đầu xem các quyết định cấp quyền"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Cho phép chủ sở hữu bắt đầu kiểm tra để xem xét các quyết định cấp quyền. Việc này hoàn toàn không cần thiết đối với các ứng dụng thông thường."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"bắt đầu xem các tính năng của ứng dụng"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Cho phép chủ sở hữu bắt đầu xem thông tin về tính năng của một ứng dụng."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"truy cập vào dữ liệu cảm biến ở tốc độ lấy mẫu cao"</string>

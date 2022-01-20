@@ -2439,7 +2439,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mSplitShadeHeaderController.setShadeExpandedFraction(shadeExpandedFraction);
         mSplitShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
         mSplitShadeHeaderController.setShadeExpanded(mQsVisible);
-
+        mKeyguardStatusBarViewController.updateViewState();
 
         if (mCommunalViewController != null) {
             mCommunalViewController.updateQsExpansion(qsExpansionFraction);
@@ -4736,8 +4736,6 @@ public class NotificationPanelViewController extends PanelViewController {
     public interface NotificationPanelViewStateProvider {
         /** Returns the expanded height of the panel view. */
         float getPanelViewExpandedHeight();
-        /** Returns the fraction of QS that's expanded. */
-        float getQsExpansionFraction();
         /**
          * Returns true if heads up should be visible.
          *
@@ -4758,18 +4756,15 @@ public class NotificationPanelViewController extends PanelViewController {
                 }
 
                 @Override
-                public float getQsExpansionFraction() {
-                    return computeQsExpansionFraction();
-                }
-
-                @Override
                 public boolean shouldHeadsUpBeVisible() {
                     return mHeadsUpAppearanceController.shouldBeVisible();
                 }
 
                 @Override
                 public float getLockscreenShadeDragProgress() {
-                    return mLockscreenShadeTransitionController.getQSDragProgress();
+                    return mTransitioningToFullShadeProgress > 0
+                            ? mLockscreenShadeTransitionController.getQSDragProgress()
+                            : computeQsExpansionFraction();
                 }
             };
 

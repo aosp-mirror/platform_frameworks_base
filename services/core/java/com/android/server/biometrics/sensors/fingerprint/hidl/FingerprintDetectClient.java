@@ -127,8 +127,8 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
     @Override
     public void onAuthenticated(BiometricAuthenticator.Identifier identifier, boolean authenticated,
             ArrayList<Byte> hardwareAuthToken) {
-        logOnAuthenticated(getContext(), authenticated, false /* requireConfirmation */,
-                getTargetUserId(), false /* isBiometricPrompt */);
+        getLogger().logOnAuthenticated(getContext(), authenticated, false /* requireConfirmation */,
+                isCryptoOperation(), getTargetUserId(), false /* isBiometricPrompt */);
 
         // Do not distinguish between success/failures.
         vibrateSuccess();

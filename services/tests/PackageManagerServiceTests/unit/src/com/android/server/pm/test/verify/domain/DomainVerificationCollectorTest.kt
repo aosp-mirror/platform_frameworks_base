@@ -18,8 +18,8 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.parsing.component.ParsedActivityImpl
-import android.content.pm.parsing.component.ParsedIntentInfoImpl
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import android.os.Build
 import android.os.PatternMatcher
 import android.util.ArraySet
@@ -94,7 +94,8 @@ class DomainVerificationCollectorTest {
             val activityList = listOf(
                 ParsedActivityImpl().apply {
                     addIntent(
-                        ParsedIntentInfoImpl().apply {
+                        ParsedIntentInfoImpl()
+                            .apply {
                             intentFilter.apply {
                                 addAction(Intent.ACTION_VIEW)
                                 addCategory(Intent.CATEGORY_BROWSABLE)
@@ -110,7 +111,8 @@ class DomainVerificationCollectorTest {
                 },
                 ParsedActivityImpl().apply {
                     addIntent(
-                        ParsedIntentInfoImpl().apply {
+                        ParsedIntentInfoImpl()
+                            .apply {
                             intentFilter.apply {
                                 setAutoVerify(true)
                                 addAction(Intent.ACTION_VIEW)
@@ -270,7 +272,8 @@ class DomainVerificationCollectorTest {
             val activityList = listOf(
                     ParsedActivityImpl().apply {
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addAction(Intent.ACTION_VIEW)
@@ -285,7 +288,8 @@ class DomainVerificationCollectorTest {
                             }
                         )
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     addAction(Intent.ACTION_VIEW)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
@@ -300,7 +304,8 @@ class DomainVerificationCollectorTest {
                     },
                     ParsedActivityImpl().apply {
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addAction(Intent.ACTION_VIEW)
@@ -316,7 +321,8 @@ class DomainVerificationCollectorTest {
                     },
                     ParsedActivityImpl().apply {
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addAction(Intent.ACTION_VIEW)
@@ -329,7 +335,8 @@ class DomainVerificationCollectorTest {
                             }
                         )
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addAction(Intent.ACTION_VIEW)
@@ -342,7 +349,8 @@ class DomainVerificationCollectorTest {
                             }
                         )
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
@@ -355,7 +363,8 @@ class DomainVerificationCollectorTest {
                             }
                         )
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
@@ -365,7 +374,8 @@ class DomainVerificationCollectorTest {
                             }
                         )
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
@@ -375,7 +385,8 @@ class DomainVerificationCollectorTest {
                             }
                         )
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addCategory(Intent.CATEGORY_BROWSABLE)

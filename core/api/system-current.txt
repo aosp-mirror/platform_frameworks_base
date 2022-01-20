@@ -293,6 +293,7 @@ package android {
     field public static final String SET_ORIENTATION = "android.permission.SET_ORIENTATION";
     field public static final String SET_POINTER_SPEED = "android.permission.SET_POINTER_SPEED";
     field public static final String SET_SCREEN_COMPATIBILITY = "android.permission.SET_SCREEN_COMPATIBILITY";
+    field public static final String SET_SYSTEM_AUDIO_CAPTION = "android.permission.SET_SYSTEM_AUDIO_CAPTION";
     field public static final String SET_VOLUME_KEY_LONG_PRESS_LISTENER = "android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER";
     field public static final String SET_WALLPAPER_COMPONENT = "android.permission.SET_WALLPAPER_COMPONENT";
     field public static final String SHOW_KEYGUARD_MESSAGE = "android.permission.SHOW_KEYGUARD_MESSAGE";
@@ -798,7 +799,6 @@ package android.app {
   }
 
   public class LocaleManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.READ_APP_SPECIFIC_LOCALES) public android.os.LocaleList getApplicationLocales(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void setApplicationLocales(@NonNull String, @NonNull android.os.LocaleList);
   }
 
@@ -919,15 +919,21 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE) public void addOnProjectionStateChangedListener(int, @NonNull java.util.concurrent.Executor, @NonNull android.app.UiModeManager.OnProjectionStateChangedListener);
     method @RequiresPermission(android.Manifest.permission.ENTER_CAR_MODE_PRIORITIZED) public void enableCarMode(@IntRange(from=0) int, int);
     method @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE) public int getActiveProjectionTypes();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE) public int getNightModeCustomType();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE) public java.util.Set<java.lang.String> getProjectingPackages(int);
     method @RequiresPermission(value=android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION, conditional=true) public boolean releaseProjection(int);
     method @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE) public void removeOnProjectionStateChangedListener(@NonNull android.app.UiModeManager.OnProjectionStateChangedListener);
     method @RequiresPermission(value=android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION, conditional=true) public boolean requestProjection(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE) public boolean setNightModeActivatedForCustomMode(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE) public void setNightModeCustomType(int);
     field public static final String ACTION_ENTER_CAR_MODE_PRIORITIZED = "android.app.action.ENTER_CAR_MODE_PRIORITIZED";
     field public static final String ACTION_EXIT_CAR_MODE_PRIORITIZED = "android.app.action.EXIT_CAR_MODE_PRIORITIZED";
     field public static final int DEFAULT_PRIORITY = 0; // 0x0
     field public static final String EXTRA_CALLING_PACKAGE = "android.app.extra.CALLING_PACKAGE";
     field public static final String EXTRA_PRIORITY = "android.app.extra.PRIORITY";
+    field public static final int MODE_NIGHT_CUSTOM_TYPE_BEDTIME = 1; // 0x1
+    field public static final int MODE_NIGHT_CUSTOM_TYPE_SCHEDULE = 0; // 0x0
+    field public static final int MODE_NIGHT_CUSTOM_TYPE_UNKNOWN = -1; // 0xffffffff
     field public static final int PROJECTION_TYPE_ALL = -1; // 0xffffffff
     field public static final int PROJECTION_TYPE_AUTOMOTIVE = 1; // 0x1
     field public static final int PROJECTION_TYPE_NONE = 0; // 0x0
@@ -1419,13 +1425,6 @@ package android.app.backup {
     ctor public SelectBackupTransportCallback();
     method public void onFailure(int);
     method public void onSuccess(String);
-  }
-
-}
-
-package android.app.communal {
-
-  public final class CommunalManager {
   }
 
 }
@@ -2646,7 +2645,6 @@ package android.content {
     field public static final String BATTERY_STATS_SERVICE = "batterystats";
     field @Deprecated public static final int BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS = 1048576; // 0x100000
     field public static final int BIND_ALLOW_FOREGROUND_SERVICE_STARTS_FROM_BACKGROUND = 262144; // 0x40000
-    field public static final String COMMUNAL_SERVICE = "communal";
     field public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
     field public static final String CONTEXTHUB_SERVICE = "contexthub";
     field public static final String ETHERNET_SERVICE = "ethernet";
@@ -10885,9 +10883,11 @@ package android.service.games {
 
   public class GameService extends android.app.Service {
     ctor public GameService();
+    method public final void createGameSession(@IntRange(from=0) int);
     method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method public void onConnected();
     method public void onDisconnected();
+    method public void onGameStarted(@NonNull android.service.games.GameStartedEvent);
     field public static final String ACTION_GAME_SERVICE = "android.service.games.action.GAME_SERVICE";
     field public static final String SERVICE_META_DATA = "android.game_service";
   }
@@ -10903,6 +10903,15 @@ package android.service.games {
     method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method @NonNull public abstract android.service.games.GameSession onNewSession(@NonNull android.service.games.CreateGameSessionRequest);
     field public static final String ACTION_GAME_SESSION_SERVICE = "android.service.games.action.GAME_SESSION_SERVICE";
+  }
+
+  public final class GameStartedEvent implements android.os.Parcelable {
+    ctor public GameStartedEvent(@IntRange(from=0) int, @NonNull String);
+    method public int describeContents();
+    method @NonNull public String getPackageName();
+    method @IntRange(from=0) public int getTaskId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.games.GameStartedEvent> CREATOR;
   }
 
 }
@@ -13152,6 +13161,7 @@ package android.telephony {
   }
 
   public final class UiccSlotMapping implements android.os.Parcelable {
+    ctor public UiccSlotMapping(int, int, int);
     method public int describeContents();
     method @IntRange(from=0) public int getLogicalSlotIndex();
     method @IntRange(from=0) public int getPhysicalSlotIndex();
@@ -13209,6 +13219,7 @@ package android.telephony.data {
     field public static final String TYPE_DEFAULT_STRING = "default";
     field public static final String TYPE_DUN_STRING = "dun";
     field public static final String TYPE_EMERGENCY_STRING = "emergency";
+    field public static final String TYPE_ENTERPRISE_STRING = "enterprise";
     field public static final String TYPE_FOTA_STRING = "fota";
     field public static final String TYPE_HIPRI_STRING = "hipri";
     field public static final String TYPE_IA_STRING = "ia";
@@ -15208,6 +15219,11 @@ package android.view.accessibility {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void performAccessibilityShortcut();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void registerSystemAction(@NonNull android.app.RemoteAction, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void unregisterSystemAction(int);
+  }
+
+  public class CaptioningManager {
+    method @RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION) public final void setSystemAudioCaptioningRequested(boolean);
+    method @RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION) public final void setSystemAudioCaptioningUiRequested(boolean);
   }
 
 }

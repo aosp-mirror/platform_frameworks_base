@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Mengizinkan aplikasi membaca dan menulis konfigurasi status Jangan Ganggu."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"mulai melihat penggunaan izin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Memungkinkan pemegang memulai penggunaan izin untuk aplikasi. Tidak diperlukan untuk aplikasi normal."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"mulai melihat keputusan izin"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Mengizinkan pemegang memulai layar untuk meninjau keputusan izin. Tidak pernah dibutuhkan untuk aplikasi normal."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"mulai lihat fitur aplikasi"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Memungkinkan pemegang mulai melihat info fitur untuk aplikasi."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mengakses data sensor pada frekuensi pengambilan sampel yang tinggi"</string>

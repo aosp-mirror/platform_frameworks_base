@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
@@ -29,7 +30,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastPrintWriter;
 
-import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -355,11 +355,12 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     private final int mMaxEntries;
 
     /**
-     * Make a new property invalidated cache.
+     * Make a new property invalidated cache.  This constructor names the cache after the
+     * property name.  New clients should prefer the constructor that takes an explicit
+     * cache name.
      *
      * @param maxEntries Maximum number of entries to cache; LRU discard
-     * @param propertyName Name of the system property holding the cache invalidation nonce
-     * Defaults the cache name to the property name.
+     * @param propertyName Name of the system property holding the cache invalidation nonce.
      */
     public PropertyInvalidatedCache(int maxEntries, @NonNull String propertyName) {
         this(maxEntries, propertyName, propertyName);
@@ -418,7 +419,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * Enable or disable testing.  The testing property map is cleared every time this
      * method is called.
      */
-    @VisibleForTesting
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static void setTestMode(boolean mode) {
         sTesting = mode;
         synchronized (sTestingPropertyMap) {
@@ -426,12 +427,12 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         }
     }
 
-  /**
-   * Enable testing the specific cache key.  Only keys in the map are subject to testing.
-   * There is no method to stop testing a property name.  Just disable the test mode.
-   */
-    @VisibleForTesting
-    public static void testPropertyName(String name) {
+    /**
+     * Enable testing the specific cache key.  Only keys in the map are subject to testing.
+     * There is no method to stop testing a property name.  Just disable the test mode.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static void testPropertyName(@NonNull String name) {
         synchronized (sTestingPropertyMap) {
             sTestingPropertyMap.put(name, (long) NONCE_UNSET);
         }
@@ -505,21 +506,23 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * block. If this function returns null, the result of the cache query is null. There is no
      * "negative cache" in the query: we don't cache null results at all.
      */
-    public abstract Result recompute(Query query);
+    public abstract @NonNull Result recompute(@NonNull Query query);
 
     /**
      * Return true if the query should bypass the cache.  The default behavior is to
      * always use the cache but the method can be overridden for a specific class.
      */
-    public boolean bypass(Query query) {
+    public boolean bypass(@NonNull Query query) {
         return false;
     }
 
     /**
-     * Determines if a pair of responses are considered equal. Used to determine whether
-     * a cache is inadvertently returning stale results when VERIFY is set to true.
+     * Determines if a pair of responses are considered equal. Used to determine whether a
+     * cache is inadvertently returning stale results when VERIFY is set to true.  Some
+     * existing clients override this method, but it is now deprecated in favor of a valid
+     * equals() method on the Result class.
      */
-    protected boolean resultEquals(Result cachedResult, Result fetchedResult) {
+    public boolean resultEquals(Result cachedResult, Result fetchedResult) {
         // If a service crashes and returns a null result, the cached value remains valid.
         if (fetchedResult != null) {
             return Objects.equals(cachedResult, fetchedResult);
@@ -544,8 +547,11 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     }
 
     /**
-     * Disable the use of this cache in this process.
+     * Disable the use of this cache in this process.  This method is using during
+     * testing.  To disable a cache in normal code, use disableLocal().
+     * @hide
      */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public final void disableInstance() {
         synchronized (mLock) {
             mDisabled = true;
@@ -558,7 +564,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * using the key will be disabled now, and all future cache instances that use the key will be
      * disabled in their constructor.
      */
-    public static final void disableLocal(@NonNull String name) {
+    private static final void disableLocal(@NonNull String name) {
         synchronized (sCorkLock) {
             sDisabledKeys.add(name);
             for (PropertyInvalidatedCache cache : sCaches.keySet()) {
@@ -570,7 +576,21 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     }
 
     /**
+     * Stop disabling local caches with a particular name.  Any caches that are currently
+     * disabled remain disabled (the "disabled" setting is sticky).  However, new caches
+     * with this name will not be disabled.  It is not an error if the cache name is not
+     * found in the list of disabled caches.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public final void clearDisableLocal() {
+        synchronized (sCorkLock) {
+            sDisabledKeys.remove(mCacheName);
+        }
+    }
+
+    /**
      * Disable this cache in the current process, and all other caches that use the same
+     * name.  This does not affect caches that have a different name but use the same
      * property.
      */
     public final void disableLocal() {
@@ -580,6 +600,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     /**
      * Return whether the cache is disabled in this process.
      */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public final boolean isDisabledLocal() {
         return mDisabled || !sEnabled;
     }
@@ -587,7 +608,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     /**
      * Get a value from the cache or recompute it.
      */
-    public Result query(Query query) {
+    public @NonNull Result query(@NonNull Query query) {
         // Let access to mDisabled race: it's atomic anyway.
         long currentNonce = (!isDisabledLocal()) ? getCurrentNonce() : NONCE_DISABLED;
         if (bypass(query)) {
@@ -704,6 +725,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * the cache objects to invalidate all of the cache objects becomes confusing and you should
      * just use the static version of this function.
      */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public final void disableSystemWide() {
         disableSystemWide(mPropertyName);
     }
@@ -714,7 +736,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      *
      * @param name Name of the cache-key property to invalidate
      */
-    public static void disableSystemWide(@NonNull String name) {
+    private static void disableSystemWide(@NonNull String name) {
         if (!sEnabled) {
             return;
         }
@@ -784,8 +806,8 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                     "invalidating cache [%s]: [%s] -> [%s]",
                     name, nonce, Long.toString(newValue)));
         }
-        // TODO(dancol): add an atomic compare and exchange property set operation to avoid a
-        // small race with concurrent disable here.
+        // There is a small race with concurrent disables here.  A compare-and-exchange
+        // property operation would be required to eliminate the race condition.
         setNonce(name, newValue);
         long invalidateCount = sInvalidates.getOrDefault(name, (long) 0);
         sInvalidates.put(name, ++invalidateCount);
@@ -990,6 +1012,10 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         }
     }
 
+    /**
+     * Return the result generated by a given query to the cache, performing debugging checks when
+     * enabled.
+     */
     private Result maybeCheckConsistency(Query query, Result proposedResult) {
         if (VERIFY) {
             Result resultToCompare = recompute(query);
@@ -1007,24 +1033,27 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     }
 
     /**
-     * Return the name of the cache, to be used in debug messages.  The
-     * method is public so clients can use it.
+     * Return the name of the cache, to be used in debug messages.
      */
-    public String cacheName() {
+    private final @NonNull String cacheName() {
         return mCacheName;
     }
 
     /**
-     * Return the query as a string, to be used in debug messages.  The
-     * method is public so clients can use it in external debug messages.
+     * Return the query as a string, to be used in debug messages.  New clients should not
+     * override this, but should instead add the necessary toString() method to the Query
+     * class.
      */
-    public String queryToString(Query query) {
+    protected @NonNull String queryToString(@NonNull Query query) {
         return Objects.toString(query);
     }
 
     /**
-     * Disable all caches in the local process.  Once disabled it is not
-     * possible to re-enable caching in the current process.
+     * Disable all caches in the local process.  This is primarily useful for testing when
+     * the test needs to bypass the cache or when the test is for a server, and the test
+     * process does not have privileges to write SystemProperties. Once disabled it is not
+     * possible to re-enable caching in the current process.  If a client wants to
+     * temporarily disable caching, use the corking mechanism.
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static void disableForTestMode() {
@@ -1044,7 +1073,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     /**
      * Returns a list of caches alive at the current time.
      */
-    public static ArrayList<PropertyInvalidatedCache> getActiveCaches() {
+    private static @NonNull ArrayList<PropertyInvalidatedCache> getActiveCaches() {
         synchronized (sCorkLock) {
             return new ArrayList<PropertyInvalidatedCache>(sCaches.keySet());
         }
@@ -1053,7 +1082,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     /**
      * Returns a list of the active corks in a process.
      */
-    public static ArrayList<Map.Entry<String, Integer>> getActiveCorks() {
+    private static @NonNull ArrayList<Map.Entry<String, Integer>> getActiveCorks() {
         synchronized (sCorkLock) {
             return new ArrayList<Map.Entry<String, Integer>>(sCorks.entrySet());
         }
@@ -1104,14 +1133,14 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     }
 
     /**
-     * Dumps contents of every cache in the process to the provided FileDescriptor.
+     * Dumps the contents of every cache in the process to the provided ParcelFileDescriptor.
      */
-    public static void dumpCacheInfo(FileDescriptor fd, String[] args) {
+    public static void dumpCacheInfo(@NonNull ParcelFileDescriptor pfd, @NonNull String[] args) {
         ArrayList<PropertyInvalidatedCache> activeCaches;
         ArrayList<Map.Entry<String, Integer>> activeCorks;
 
         try  (
-            FileOutputStream fout = new FileOutputStream(fd);
+            FileOutputStream fout = new FileOutputStream(pfd.getFileDescriptor());
             PrintWriter pw = new FastPrintWriter(fout);
         ) {
             if (!sEnabled) {
@@ -1140,6 +1169,15 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             }
         } catch (IOException e) {
             Log.e(TAG, "Failed to dump PropertyInvalidatedCache instances");
+        }
+    }
+
+    /**
+     * Trim memory by clearing all the caches.
+     */
+    public static void onTrimMemory() {
+        for (PropertyInvalidatedCache pic : getActiveCaches()) {
+            pic.clear();
         }
     }
 }

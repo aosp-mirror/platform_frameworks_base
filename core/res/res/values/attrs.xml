@@ -5417,6 +5417,17 @@
              ignores some hyphen character related typographic features, e.g. kerning. -->
             <enum name="fullFast" value="4" />
         </attr>
+        <!-- Indicates the line break strategies can be used when calculating the text wrapping. -->
+        <attr name="lineBreakStyle">
+            <!-- No line break style specific. -->
+            <enum name="none" value="0" />
+            <!-- Use the least restrictive rule for line-breaking. -->
+            <enum name="loose" value="1" />
+            <!-- Indicate breaking text with the most comment set of line-breaking rules. -->
+            <enum name="normal" value="2" />
+            <!-- ndicates breaking text with the most strictest line-breaking rules. -->
+            <enum name="strict" value="3" />
+        </attr>
         <!-- Specify the type of auto-size. Note that this feature is not supported by EditText,
         works only for TextView. -->
         <attr name="autoSizeTextType" format="enum">

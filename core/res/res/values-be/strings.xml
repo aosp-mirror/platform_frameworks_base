@@ -739,10 +739,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Дазваляе праграме чытаць і выконваць запіс у канфігурацыю рэжыму «Не турбаваць»."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"запусціць выкарыстанне дазволаў на прагляд"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Дазваляе трымальніку запусціць выкарыстанне дазволаў праграмай. Не патрэбна для звычайных праграм."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"запускаць прагляд рашэнняў наконт дазволаў"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Дазваляе ўладальніку запускаць экран, на якім можна праглядаць рашэнні наконт дазволаў. Ніколі не павінна патрабавацца для звычайных праграм."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"запусціць прагляд функцый праграмы"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дазваляе трымальніку запусціць прагляд інфармацыі пра функцыі для праграмы."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"атрымліваць даныя датчыка з высокай частатой дыскрэтызацыі"</string>

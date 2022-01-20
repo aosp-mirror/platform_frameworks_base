@@ -5401,18 +5401,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!mVibrator.hasVibrator()) {
             return false;
         }
-        final boolean hapticsDisabled = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) == 0;
-        if (hapticsDisabled && !always) {
-            return false;
-        }
-
         VibrationEffect effect = getVibrationEffect(effectId);
         if (effect == null) {
             return false;
         }
-
-        mVibrator.vibrate(uid, packageName, effect, reason, getVibrationAttributes(effectId));
+        VibrationAttributes attrs = getVibrationAttributes(effectId);
+        if (always) {
+            attrs = new VibrationAttributes.Builder(attrs)
+                    .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF,
+                            VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
+                    .build();
+        }
+        mVibrator.vibrate(uid, packageName, effect, reason, attrs);
         return true;
     }
 

@@ -43,7 +43,6 @@ package android {
     field public static final String TEST_BIOMETRIC = "android.permission.TEST_BIOMETRIC";
     field public static final String TEST_MANAGE_ROLLBACKS = "android.permission.TEST_MANAGE_ROLLBACKS";
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
-    field public static final String WRITE_COMMUNAL_STATE = "android.permission.WRITE_COMMUNAL_STATE";
     field public static final String WRITE_DEVICE_CONFIG = "android.permission.WRITE_DEVICE_CONFIG";
     field @Deprecated public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
@@ -553,14 +552,6 @@ package android.app.blob {
     method @NonNull public String getPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.blob.LeaseInfo> CREATOR;
-  }
-
-}
-
-package android.app.communal {
-
-  public final class CommunalManager {
-    method @RequiresPermission(android.Manifest.permission.WRITE_COMMUNAL_STATE) public void setCommunalViewShowing(boolean);
   }
 
 }

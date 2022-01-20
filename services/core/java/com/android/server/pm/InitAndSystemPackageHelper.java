@@ -32,7 +32,6 @@ import static com.android.server.pm.PackageManagerService.SYSTEM_PARTITIONS;
 import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.Nullable;
-import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -47,6 +46,7 @@ import com.android.server.EventLogTags;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.WatchedArrayMap;
 
 import java.io.File;

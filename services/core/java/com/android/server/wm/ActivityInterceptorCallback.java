@@ -53,7 +53,6 @@ public abstract class ActivityInterceptorCallback {
      */
     @IntDef(suffix = { "_ORDERED_ID" }, value = {
             FIRST_ORDERED_ID,
-            COMMUNAL_MODE_ORDERED_ID,
             PERMISSION_POLICY_ORDERED_ID,
             VIRTUAL_DEVICE_SERVICE_ORDERED_ID,
             LAST_ORDERED_ID // Update this when adding new ids
@@ -67,14 +66,9 @@ public abstract class ActivityInterceptorCallback {
     static final int FIRST_ORDERED_ID = 0;
 
     /**
-     * The identifier for {@link com.android.server.communal.CommunalManagerService} interceptor.
-     */
-    public static final int COMMUNAL_MODE_ORDERED_ID = 1;
-
-    /**
      * The identifier for {@link com.android.server.policy.PermissionPolicyService} interceptor
      */
-    public static final int PERMISSION_POLICY_ORDERED_ID = 2;
+    public static final int PERMISSION_POLICY_ORDERED_ID = 1;
 
     /**
      * The identifier for {@link com.android.server.companion.virtual.VirtualDeviceManagerService}

@@ -3211,6 +3211,7 @@
   </staging-public-group-final>
 
   <public type="attr" name="shouldUseDefaultUnfoldTransition" id="0x0101064c" />
+  <public type="attr" name="lineBreakStyle" id="0x0101064d" />
 
   <staging-public-group-final type="id" first-id="0x01fe0000">
     <public name="accessibilityActionDragStart" />

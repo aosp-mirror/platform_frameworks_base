@@ -93,7 +93,6 @@ import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.NotificationGroup;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.OnGroupChangeListener;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
@@ -688,11 +687,6 @@ public class NotificationStackScrollLayoutController {
         groupManager.registerGroupExpansionChangeListener(
                 (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
         legacyGroupManager.registerGroupChangeListener(new OnGroupChangeListener() {
-            @Override
-            public void onGroupCreatedFromChildren(NotificationGroup group) {
-                mStatusBar.requestNotificationUpdate("onGroupCreatedFromChildren");
-            }
-
             @Override
             public void onGroupsChanged() {
                 mStatusBar.requestNotificationUpdate("onGroupsChanged");

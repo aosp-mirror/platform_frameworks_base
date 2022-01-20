@@ -177,6 +177,10 @@ public class HapticFeedbackConstants {
      * Flag for {@link View#performHapticFeedback(int, int)
      * View.performHapticFeedback(int, int)}: Ignore the global setting
      * for whether to perform haptic feedback, do it always.
+     *
+     * @deprecated Starting from {@link android.os.Build.VERSION_CODES#TIRAMISU} only privileged
+     * apps can ignore user settings for touch feedback.
      */
+    @Deprecated
     public static final int FLAG_IGNORE_GLOBAL_SETTING = 0x0002;
 }

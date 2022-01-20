@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permet que l\'aplicació llegeixi la configuració No molestis i hi escrigui."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"comença a utilitzar el permís de visualització"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permet que un propietari comenci a utilitzar el permís amb una aplicació. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"inicia la visualització de les decisions sobre permisos"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Permet que l\'aplicació en qüestió iniciï la pantalla per revisar les decisions sobre permisos. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"iniciar la visualització de les funcions d\'una aplicació"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permet que el propietari vegi la informació de les funcions d\'una aplicació."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"accedir a les dades del sensor a una freqüència de mostratge alta"</string>

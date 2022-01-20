@@ -175,7 +175,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // FGS notification was shown before the FGS finishes, or it wasn't deferred in the first place.
     boolean mFgsNotificationShown;
     // Whether FGS package has permissions to show notifications.
-    // TODO(b/194833441): Output this field to logs in ActiveServices#logFGSStateChangeLocked.
     boolean mFgsHasNotificationPermission;
 
     // allow the service becomes foreground service? Service started from background may not be
@@ -593,6 +592,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         userId = UserHandle.getUserId(appInfo.uid);
         createdFromFg = callerIsFg;
         updateKeepWarmLocked();
+        // initialize notification permission state; this'll be updated whenever there's an attempt
+        // to post or update a notification, but that doesn't cover the time before the first
+        // notification
+        updateFgsHasNotificationPermission();
     }
 
     public ServiceState getTracker() {
@@ -948,6 +951,25 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             lastStartId = 1;
         }
         return lastStartId;
+    }
+
+    private void updateFgsHasNotificationPermission() {
+        // Do asynchronous communication with notification manager to avoid deadlocks.
+        final String localPackageName = packageName;
+        final int appUid = appInfo.uid;
+
+        ams.mHandler.post(new Runnable() {
+            public void run() {
+                NotificationManagerInternal nm = LocalServices.getService(
+                        NotificationManagerInternal.class);
+                if (nm == null) {
+                    return;
+                }
+                // Record whether the package has permission to notify the user
+                mFgsHasNotificationPermission = nm.areNotificationsEnabledForPackage(
+                        localPackageName, appUid);
+            }
+        });
     }
 
     public void postNotification() {

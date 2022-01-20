@@ -17,6 +17,8 @@
 package android.app;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 
 import androidx.test.filters.SmallTest;
 
@@ -25,7 +27,9 @@ import org.junit.Test;
 
 /**
  * Test for verifying the behavior of {@link PropertyInvalidatedCache}.  This test does
- * not use any actual binder calls - it is entirely self-contained.
+ * not use any actual binder calls - it is entirely self-contained.  This test also relies
+ * on the test mode of {@link PropertyInvalidatedCache} because Android SELinux rules do
+ * not grant test processes the permission to set system properties.
  * <p>
  * Build/Install/Run:
  *  atest FrameworksCoreTests:PropertyInvalidatedCacheTests
@@ -33,6 +37,8 @@ import org.junit.Test;
 @SmallTest
 public class PropertyInvalidatedCacheTests {
 
+    // This property is never set.  The test process does not have permission to set any
+    // properties.
     static final String CACHE_PROPERTY = "cache_key.cache_test_a";
 
     // This class is a proxy for binder calls.  It contains a counter that increments
@@ -58,7 +64,8 @@ public class PropertyInvalidatedCacheTests {
         }
     }
 
-    // Clear the test mode after every test, in case this process is used for other tests.
+    // Clear the test mode after every test, in case this process is used for other
+    // tests. This also resets the test property map.
     @After
     public void tearDown() throws Exception {
         PropertyInvalidatedCache.setTestMode(false);
@@ -176,5 +183,161 @@ public class PropertyInvalidatedCacheTests {
                     }
                 };
         assertEquals(true, cache1.getDisabledState());
+
+        // Remove the record of caches being locally disabled.  This is a clean-up step.
+        cache1.clearDisableLocal();
+        assertEquals(true, cache1.getDisabledState());
+        assertEquals(true, cache2.getDisabledState());
+        assertEquals(false, cache3.getDisabledState());
+
+        // Create a new cache1.  Verify that the new instance is not disabled.
+        cache1 = new PropertyInvalidatedCache<>(4, CACHE_PROPERTY) {
+                    @Override
+                    public Boolean recompute(Integer x) {
+                        return tester.query(x);
+                    }
+                };
+        assertEquals(false, cache1.getDisabledState());
+    }
+
+    private static final String UNSET_KEY = "Aiw7woh6ie4toh7W";
+
+    private static class TestCache extends PropertyInvalidatedCache<Integer, String> {
+        TestCache() {
+            this(CACHE_PROPERTY);
+        }
+
+        TestCache(String key) {
+            super(4, key);
+            setTestMode(true);
+            testPropertyName(key);
+        }
+
+        @Override
+        public String recompute(Integer qv) {
+            mRecomputeCount += 1;
+            return "foo" + qv.toString();
+        }
+
+        int getRecomputeCount() {
+            return mRecomputeCount;
+        }
+
+        private int mRecomputeCount = 0;
+    }
+
+    @Test
+    public void testCacheRecompute() {
+        TestCache cache = new TestCache();
+        cache.invalidateCache();
+        assertEquals(cache.isDisabledLocal(), false);
+        assertEquals("foo5", cache.query(5));
+        assertEquals(1, cache.getRecomputeCount());
+        assertEquals("foo5", cache.query(5));
+        assertEquals(1, cache.getRecomputeCount());
+        assertEquals("foo6", cache.query(6));
+        assertEquals(2, cache.getRecomputeCount());
+        cache.invalidateCache();
+        assertEquals("foo5", cache.query(5));
+        assertEquals("foo5", cache.query(5));
+        assertEquals(3, cache.getRecomputeCount());
+    }
+
+    @Test
+    public void testCacheInitialState() {
+        TestCache cache = new TestCache();
+        assertEquals("foo5", cache.query(5));
+        assertEquals("foo5", cache.query(5));
+        assertEquals(2, cache.getRecomputeCount());
+        cache.invalidateCache();
+        assertEquals("foo5", cache.query(5));
+        assertEquals("foo5", cache.query(5));
+        assertEquals(3, cache.getRecomputeCount());
+    }
+
+    @Test
+    public void testCachePropertyUnset() {
+        TestCache cache = new TestCache(UNSET_KEY);
+        assertEquals("foo5", cache.query(5));
+        assertEquals("foo5", cache.query(5));
+        assertEquals(2, cache.getRecomputeCount());
+    }
+
+    @Test
+    public void testCacheDisableState() {
+        TestCache cache = new TestCache();
+        assertEquals("foo5", cache.query(5));
+        assertEquals("foo5", cache.query(5));
+        assertEquals(2, cache.getRecomputeCount());
+        cache.invalidateCache();
+        assertEquals("foo5", cache.query(5));
+        assertEquals("foo5", cache.query(5));
+        assertEquals(3, cache.getRecomputeCount());
+        cache.disableSystemWide();
+        assertEquals("foo5", cache.query(5));
+        assertEquals("foo5", cache.query(5));
+        assertEquals(5, cache.getRecomputeCount());
+        cache.invalidateCache();  // Should not reenable
+        assertEquals("foo5", cache.query(5));
+        assertEquals("foo5", cache.query(5));
+        assertEquals(7, cache.getRecomputeCount());
+    }
+
+    @Test
+    public void testRefreshSameObject() {
+        int[] refreshCount = new int[1];
+        TestCache cache = new TestCache() {
+            @Override
+            public String refresh(String oldResult, Integer query) {
+                refreshCount[0] += 1;
+                return oldResult;
+            }
+        };
+        cache.invalidateCache();
+        String result1 = cache.query(5);
+        assertEquals("foo5", result1);
+        String result2 = cache.query(5);
+        assertSame(result1, result2);
+        assertEquals(1, cache.getRecomputeCount());
+        assertEquals(1, refreshCount[0]);
+        assertEquals("foo5", cache.query(5));
+        assertEquals(2, refreshCount[0]);
+    }
+
+    @Test
+    public void testRefreshInvalidateRace() {
+        int[] refreshCount = new int[1];
+        TestCache cache = new TestCache() {
+            @Override
+            public String refresh(String oldResult, Integer query) {
+                refreshCount[0] += 1;
+                invalidateCache();
+                return new String(oldResult);
+            }
+        };
+        cache.invalidateCache();
+        String result1 = cache.query(5);
+        assertEquals("foo5", result1);
+        String result2 = cache.query(5);
+        assertEquals(result1, result2);
+        assertNotSame(result1, result2);
+        assertEquals(2, cache.getRecomputeCount());
+    }
+
+    @Test
+    public void testLocalProcessDisable() {
+        TestCache cache = new TestCache();
+        assertEquals(cache.isDisabledLocal(), false);
+        cache.invalidateCache();
+        assertEquals("foo5", cache.query(5));
+        assertEquals(1, cache.getRecomputeCount());
+        assertEquals("foo5", cache.query(5));
+        assertEquals(1, cache.getRecomputeCount());
+        assertEquals(cache.isDisabledLocal(), false);
+        cache.disableLocal();
+        assertEquals(cache.isDisabledLocal(), true);
+        assertEquals("foo5", cache.query(5));
+        assertEquals("foo5", cache.query(5));
+        assertEquals(3, cache.getRecomputeCount());
     }
 }

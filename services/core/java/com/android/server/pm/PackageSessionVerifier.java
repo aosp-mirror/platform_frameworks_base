@@ -28,7 +28,7 @@ import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.SigningDetails;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.rollback.RollbackInfo;

@@ -178,7 +178,7 @@ public class HeadsUpCoordinator implements Coordinator {
         }
 
         @Override
-        public boolean shouldExtendLifetime(@NonNull NotificationEntry entry, int reason) {
+        public boolean maybeExtendLifetime(@NonNull NotificationEntry entry, int reason) {
             boolean extend = !mHeadsUpManager.canRemoveImmediately(entry.getKey());
             if (extend) {
                 if (isSticky(entry)) {

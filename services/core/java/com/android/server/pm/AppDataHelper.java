@@ -24,7 +24,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackageManager;
-import android.content.pm.SELinuxUtil;
+import com.android.server.pm.pkg.SELinuxUtil;
 import android.content.pm.UserInfo;
 import android.os.CreateAppDataArgs;
 import android.os.Environment;

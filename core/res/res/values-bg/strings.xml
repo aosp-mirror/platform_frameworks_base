@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Предоставя на приложението достъп за четене и запис до конфигурацията на „Не безпокойте“."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"стартиране на прегледа на използваните разрешения"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Разрешава на притежателя да стартира прегледа на използваните разрешения за дадено приложение. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"стартиране на прегледа на решенията за разрешенията"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Дава възможност на притежателя да стартира екрана с цел преглед на решенията за разрешенията. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"стартиране на прегледа на функциите на приложението"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Разрешава на притежателя да стартира прегледа на информацията за функциите на дадено приложение."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"осъществяване на достъп до данните от сензорите при висока скорост на семплиране"</string>

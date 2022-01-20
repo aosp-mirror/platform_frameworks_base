@@ -105,7 +105,8 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     @NonNull
     @Override
     protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(createALSCallback(true /* startWithClient */), callback);
+        return new CompositeCallback(
+                getLogger().createALSCallback(true /* startWithClient */), callback);
     }
 
     @Override
@@ -241,7 +242,8 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_TIMED);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFaceConstants.FACE_ERROR_LOCKOUT;
-        logOnError(getContext(), error, 0 /* vendorCode */, getTargetUserId());
+        getLogger().logOnError(getContext(), error, 0 /* vendorCode */,
+                isCryptoOperation(), getTargetUserId());
 
         try {
             getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
@@ -256,7 +258,8 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_PERMANENT);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
-        logOnError(getContext(), error, 0 /* vendorCode */, getTargetUserId());
+        getLogger().logOnError(getContext(), error, 0 /* vendorCode */,
+                isCryptoOperation(), getTargetUserId());
 
         try {
             getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);

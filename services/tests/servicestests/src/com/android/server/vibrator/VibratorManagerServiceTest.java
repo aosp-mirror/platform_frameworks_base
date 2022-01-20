@@ -1207,6 +1207,33 @@ public class VibratorManagerServiceTest {
         assertNotEquals(IExternalVibratorService.SCALE_MUTE, scale);
     }
 
+    @Test
+    public void onExternalVibration_withBypassMuteAudioFlag_ignoresUserSettings() {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        setUserSetting(Settings.System.ALARM_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_OFF);
+        AudioAttributes audioAttrs = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .build();
+        AudioAttributes flaggedAudioAttrs = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setFlags(AudioAttributes.FLAG_BYPASS_MUTE)
+                .build();
+        createSystemReadyService();
+
+        int scale = mExternalVibratorService.onExternalVibrationStart(
+                new ExternalVibration(UID, PACKAGE_NAME, audioAttrs,
+                        mock(IExternalVibrationController.class)));
+        assertEquals(IExternalVibratorService.SCALE_MUTE, scale);
+
+        createSystemReadyService();
+        scale = mExternalVibratorService.onExternalVibrationStart(
+                new ExternalVibration(UID, PACKAGE_NAME, flaggedAudioAttrs,
+                        mock(IExternalVibrationController.class)));
+        assertNotEquals(IExternalVibratorService.SCALE_MUTE, scale);
+    }
+
     private VibrationEffectSegment expectedPrebaked(int effectId) {
         return new PrebakedSegment(effectId, false, VibrationEffect.EFFECT_STRENGTH_MEDIUM);
     }

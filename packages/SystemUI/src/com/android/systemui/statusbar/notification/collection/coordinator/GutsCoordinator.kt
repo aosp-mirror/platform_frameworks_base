@@ -84,7 +84,7 @@ class GutsCoordinator @Inject constructor(
             onEndLifetimeExtensionCallback = callback
         }
 
-        override fun shouldExtendLifetime(entry: NotificationEntry, reason: Int): Boolean {
+        override fun maybeExtendLifetime(entry: NotificationEntry, reason: Int): Boolean {
             val isShowingGuts = isCurrentlyShowingGuts(entry)
             if (isShowingGuts) {
                 notifsExtendingLifetime.add(entry.key)

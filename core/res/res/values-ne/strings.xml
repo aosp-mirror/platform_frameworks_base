@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"बाधा नपुर्याउँनुहोस् कन्फिगरेसन पढ्न र लेख्‍नको लागि एपलाई अनुमति दिनुहोस्।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"हेर्ने अनुमतिको प्रयोग सुरु गर्नुहोस्"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"वाहकलाई कुनै एपसम्बन्धी अनुमतिको प्रयोग सुरु गर्न दिन्छ। साधारण एपहरूलाई कहिल्यै आवश्यक नपर्नु पर्ने हो।"</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"अनुमतिसम्बन्धी निर्णयहरू हेर्न सुरु गर्नुहोस्"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"होल्डरलाई अनुमतिसम्बन्धी निर्णयहरू समीक्षा गर्ने स्क्रिन सुरु गर्न दिन्छ। सामान्य एपहरूलाई कहिल्यै पनि नचाहिनु पर्ने हो।"</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"एपका सुविधासम्बन्धी जानकारी हेर्न थाल्नुहोस्"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"होल्डरलाई एपका सुविधासम्बन्धी जानकारी हेर्न दिन्छ।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"नमुना लिने उच्च दरमा सेन्सरसम्बन्धी डेटा प्रयोग गर्ने"</string>

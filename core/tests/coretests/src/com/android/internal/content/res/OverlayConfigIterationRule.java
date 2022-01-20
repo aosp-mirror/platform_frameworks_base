@@ -20,8 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
-import android.content.pm.parsing.ParsingPackageRead;
-import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -80,7 +79,7 @@ public class OverlayConfigIterationRule implements TestRule {
         }
 
         public boolean isMatchRequiredSystemProperty() {
-            return ParsingPackageUtils.checkRequiredSystemProperties(
+            return FrameworkParsingPackageUtils.checkRequiredSystemProperties(
                     requiredSystemPropertyName, requiredSystemPropertyValue);
         }
     }
@@ -174,11 +173,12 @@ public class OverlayConfigIterationRule implements TestRule {
                 mIteration = Iteration.SYSTEM_SERVER;
                 doAnswer((InvocationOnMock invocation) -> {
                     final Object[] args = invocation.getArguments();
-                    final TriConsumer<ParsingPackageRead, Boolean, File> f =
-                            (TriConsumer<ParsingPackageRead, Boolean, File>) args[0];
+                    final TriConsumer<PackageProvider.Package, Boolean, File> f =
+                            (TriConsumer<PackageProvider.Package, Boolean, File>) args[0];
                     for (Map.Entry<File, TestOverlayInfo> overlay :
                             mTestOverlayInfos.entrySet()) {
-                        final ParsingPackageRead a = Mockito.mock(ParsingPackageRead.class);
+                        final PackageProvider.Package a =
+                                Mockito.mock(PackageProvider.Package.class);
                         final TestOverlayInfo info = overlay.getValue();
                         if ((!TextUtils.isEmpty(info.requiredSystemPropertyName)
                                 || !TextUtils.isEmpty(info.requiredSystemPropertyValue))

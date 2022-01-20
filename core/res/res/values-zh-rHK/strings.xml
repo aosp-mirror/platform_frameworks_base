@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"允許應用程式讀取和寫入「請勿騷擾」設定。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"開始查看權限使用情況"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"允許應用程式開始查看應用程式的權限使用情況 (一般應用程式並不需要)。"</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"開始檢視權限決定"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"允許擁有者啟用螢幕以查看權限決定。不建議一般應用程式使用。"</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"開始查看應用程式功能"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"允許擁有者開始查看應用程式的功能資料。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"以高取樣率存取感應器資料"</string>

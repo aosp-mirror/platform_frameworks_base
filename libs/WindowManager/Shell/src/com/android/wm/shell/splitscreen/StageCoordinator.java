@@ -20,6 +20,7 @@ import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -236,7 +237,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         deviceStateManager.registerCallback(taskOrganizer.getExecutor(),
                 new DeviceStateManager.FoldStateListener(mContext, this::onFoldedStateChanged));
         mSplitTransitions = new SplitScreenTransitions(transactionPool, transitions,
-                mOnTransitionAnimationComplete);
+                mOnTransitionAnimationComplete, this);
         mDisplayController.addDisplayWindowListener(this);
         mDisplayLayout = new DisplayLayout(displayController.getDisplayLayout(displayId));
         transitions.addHandler(this);
@@ -266,7 +267,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mRootTDAOrganizer.registerListener(displayId, this);
         mSplitLayout = splitLayout;
         mSplitTransitions = new SplitScreenTransitions(transactionPool, transitions,
-                mOnTransitionAnimationComplete);
+                mOnTransitionAnimationComplete, this);
         mMainUnfoldController = unfoldControllerProvider.get().orElse(null);
         mSideUnfoldController = unfoldControllerProvider.get().orElse(null);
         mLogger = logger;
@@ -1271,13 +1272,16 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 final int activityType = triggerTask.getActivityType();
                 if (activityType == ACTIVITY_TYPE_ASSISTANT) {
                     // We don't want assistant panel to dismiss split screen, so do nothing.
+                } else if (activityType == ACTIVITY_TYPE_HOME
+                        || activityType == ACTIVITY_TYPE_RECENTS) {
+                    // Enter overview panel, so start recent transition.
+                    mSplitTransitions.startRecentTransition(transition, out, this,
+                            request.getRemoteTransition());
                 } else {
-                    // Going home or occluded by the other fullscreen task, so dismiss both.
+                    // Occluded by the other fullscreen task, so dismiss both.
                     prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, out);
-                    final int exitReason = activityType == ACTIVITY_TYPE_HOME
-                            ? EXIT_REASON_RETURN_HOME : EXIT_REASON_UNKNOWN;
                     mSplitTransitions.startDismissTransition(transition, out, this,
-                            STAGE_TYPE_UNDEFINED, exitReason);
+                            STAGE_TYPE_UNDEFINED, EXIT_REASON_UNKNOWN);
                 }
             }
         } else {
@@ -1307,13 +1311,14 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        if (transition != mSplitTransitions.mPendingEnter && (
-                mSplitTransitions.mPendingDismiss == null
+        if (transition != mSplitTransitions.mPendingEnter
+                && transition != mSplitTransitions.mPendingRecent
+                && (mSplitTransitions.mPendingDismiss == null
                         || mSplitTransitions.mPendingDismiss.mTransition != transition)) {
             // Not entering or exiting, so just do some house-keeping and validation.
 
             // If we're not in split-mode, just abort so something else can handle it.
-            if (!isSplitScreenVisible()) return false;
+            if (!mMainStage.isActive()) return false;
 
             for (int iC = 0; iC < info.getChanges().size(); ++iC) {
                 final TransitionInfo.Change change = info.getChanges().get(iC);
@@ -1356,6 +1361,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         boolean shouldAnimate = true;
         if (mSplitTransitions.mPendingEnter == transition) {
             shouldAnimate = startPendingEnterAnimation(transition, info, startTransaction);
+        } else if (mSplitTransitions.mPendingRecent == transition) {
+            shouldAnimate = startPendingRecentAnimation(transition, info, startTransaction);
         } else if (mSplitTransitions.mPendingDismiss != null
                 && mSplitTransitions.mPendingDismiss.mTransition == transition) {
             shouldAnimate = startPendingDismissAnimation(
@@ -1498,6 +1505,23 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         finishT.hide(mMainStage.mDimLayer);
         finishT.hide(mSideStage.mDimLayer);
         return true;
+    }
+
+    private boolean startPendingRecentAnimation(@NonNull IBinder transition,
+            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction t) {
+        setDividerVisibility(false, t);
+        return true;
+    }
+
+    void finishRecentAnimation(boolean toHome) {
+        if (toHome) {
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, wct);
+            mSplitTransitions.startDismissTransition(null /* transition */, wct, this,
+                    STAGE_TYPE_UNDEFINED, EXIT_REASON_RETURN_HOME);
+        } else {
+            setDividerVisibility(true, null /* t */);
+        }
     }
 
     private void addDividerBarToTransition(@NonNull TransitionInfo info,

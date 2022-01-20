@@ -462,6 +462,10 @@ class TransitionController {
         mLegacyListeners.add(listener);
     }
 
+    void unregisterLegacyListener(WindowManagerInternal.AppTransitionListener listener) {
+        mLegacyListeners.remove(listener);
+    }
+
     void dispatchLegacyAppTransitionPending() {
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
             mLegacyListeners.get(i).onAppTransitionPendingLocked();

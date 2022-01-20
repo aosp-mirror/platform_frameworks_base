@@ -18,10 +18,9 @@ package com.android.server.pm.parsing;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.parsing.component.ParsedComponent;
+import com.android.server.pm.pkg.component.ParsedComponent;
 import android.util.Pair;
 
-import com.android.server.pm.PackageSetting;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 /**

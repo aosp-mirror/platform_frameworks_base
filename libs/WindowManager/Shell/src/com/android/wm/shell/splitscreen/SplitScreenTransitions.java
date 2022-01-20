@@ -44,6 +44,7 @@ import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
+import android.window.WindowContainerTransactionCallback;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.TransactionPool;
@@ -66,28 +67,26 @@ class SplitScreenTransitions {
 
     DismissTransition mPendingDismiss = null;
     IBinder mPendingEnter = null;
+    IBinder mPendingRecent = null;
 
     private IBinder mAnimatingTransition = null;
     private OneShotRemoteHandler mRemoteHandler = null;
 
-    private Transitions.TransitionFinishCallback mRemoteFinishCB = (wct, wctCB) -> {
-        if (wct != null || wctCB != null) {
-            throw new UnsupportedOperationException("finish transactions not supported yet.");
-        }
-        onFinish();
-    };
+    private final Transitions.TransitionFinishCallback mRemoteFinishCB = this::onFinish;
 
     /** Keeps track of currently running animations */
     private final ArrayList<Animator> mAnimations = new ArrayList<>();
+    private final StageCoordinator mStageCoordinator;
 
     private Transitions.TransitionFinishCallback mFinishCallback = null;
     private SurfaceControl.Transaction mFinishTransaction;
 
     SplitScreenTransitions(@NonNull TransactionPool pool, @NonNull Transitions transitions,
-            @NonNull Runnable onFinishCallback) {
+            @NonNull Runnable onFinishCallback, StageCoordinator stageCoordinator) {
         mTransactionPool = pool;
         mTransitions = transitions;
         mOnFinish = onFinishCallback;
+        mStageCoordinator = stageCoordinator;
     }
 
     void playAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
@@ -166,7 +165,7 @@ class SplitScreenTransitions {
             }
         }
         t.apply();
-        onFinish();
+        onFinish(null /* wct */, null /* wctCB */);
     }
 
     /** Starts a transition to enter split with a remote transition animator. */
@@ -203,7 +202,26 @@ class SplitScreenTransitions {
         return transition;
     }
 
-    void onFinish() {
+    IBinder startRecentTransition(@Nullable IBinder transition, WindowContainerTransaction wct,
+            Transitions.TransitionHandler handler, @Nullable RemoteTransition remoteTransition) {
+        if (transition == null) {
+            transition = mTransitions.startTransition(TRANSIT_OPEN, wct, handler);
+        }
+        mPendingRecent = transition;
+
+        if (remoteTransition != null) {
+            // Wrapping it for ease-of-use (OneShot handles all the binder linking/death stuff)
+            mRemoteHandler = new OneShotRemoteHandler(
+                    mTransitions.getMainExecutor(), remoteTransition);
+            mRemoteHandler.setTransition(transition);
+        }
+
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
+                        + " deduced Enter recent panel");
+        return transition;
+    }
+
+    void onFinish(WindowContainerTransaction wct, WindowContainerTransactionCallback wctCB) {
         if (!mAnimations.isEmpty()) return;
         mOnFinish.run();
         if (mFinishTransaction != null) {
@@ -211,13 +229,22 @@ class SplitScreenTransitions {
             mTransactionPool.release(mFinishTransaction);
             mFinishTransaction = null;
         }
-        mFinishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
-        mFinishCallback = null;
+        if (mFinishCallback != null) {
+            mFinishCallback.onTransitionFinished(wct /* wct */, wctCB /* wctCB */);
+            mFinishCallback = null;
+        }
         if (mAnimatingTransition == mPendingEnter) {
             mPendingEnter = null;
         }
         if (mPendingDismiss != null && mPendingDismiss.mTransition == mAnimatingTransition) {
             mPendingDismiss = null;
+        }
+        if (mAnimatingTransition == mPendingRecent) {
+            // If the wct is not null while finishing recent transition, it indicates it's not
+            // returning to home and hence needing the wct to reorder tasks.
+            final boolean toHome = wct == null;
+            mStageCoordinator.finishRecentAnimation(toHome);
+            mPendingRecent = null;
         }
         mAnimatingTransition = null;
     }
@@ -240,7 +267,7 @@ class SplitScreenTransitions {
             mTransactionPool.release(transaction);
             mTransitions.getMainExecutor().execute(() -> {
                 mAnimations.remove(va);
-                onFinish();
+                onFinish(null /* wct */, null /* wctCB */);
             });
         };
         va.addListener(new Animator.AnimatorListener() {
@@ -288,7 +315,7 @@ class SplitScreenTransitions {
             mTransactionPool.release(transaction);
             mTransitions.getMainExecutor().execute(() -> {
                 mAnimations.remove(va);
-                onFinish();
+                onFinish(null /* wct */, null /* wctCB */);
             });
         };
         va.addListener(new AnimatorListenerAdapter() {

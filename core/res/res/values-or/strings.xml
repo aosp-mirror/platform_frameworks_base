@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" କନଫିଗରେଶନ୍‍ ପଢ଼ିବା ତଥା ଲେଖିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ଅନୁମତି ବ୍ୟବହାର ଦେଖିବା ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ଏକ ଆପ୍ ପାଇଁ ଅନୁମତିର ବ୍ୟବହାର ଆରମ୍ଭ କରିବାକୁ ଧାରକକୁ ଅନୁମତି ଦେଇଥାଏ। ସାଧାରଣ ଆପ୍‌ଗୁଡ଼ିକ ପାଇଁ ଏହା ଆବଶ୍ୟକ ନୁହେଁ।"</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ଅନୁମତି ନିଷ୍ପତ୍ତିଗୁଡ଼ିକ ଦେଖିବା ଆରମ୍ଭ କରନ୍ତୁ"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"ଅନୁମତି ନିଷ୍ପତ୍ତିଗୁଡ଼ିକର ସମୀକ୍ଷା କରିବାକୁ ସ୍କ୍ରିନ ଚାଲୁ କରିବା ପାଇଁ ହୋଲଡରଙ୍କୁ ଅନୁମତି ଦିଏ। ସାଧାରଣ ଆପଗୁଡ଼ିକ ପାଇଁ ଏହା କେବେ ବି ଆବଶ୍ୟକ ହେବ ନାହିଁ।"</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ଆପର ଫିଚରଗୁଡ଼ିକୁ ଦେଖିବା ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"କୌଣସି ଆପ ପାଇଁ ଫିଚରଗୁଡ଼ିକ ବିଷୟରେ ସୂଚନା ଦେଖିବା ଆରମ୍ଭ କରିବାକୁ ହୋଲଡରଙ୍କୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ଏକ ଉଚ୍ଚ ନମୁନାକରଣ ରେଟରେ ସେନ୍ସର୍ ଡାଟାକୁ ଆକ୍ସେସ୍ କରନ୍ତୁ"</string>

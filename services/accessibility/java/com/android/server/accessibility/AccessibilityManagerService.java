@@ -48,6 +48,7 @@ import android.accessibilityservice.MagnificationConfig;
 import android.accessibilityservice.TouchInteractionController;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -262,6 +263,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final UiAutomationManager mUiAutomationManager = new UiAutomationManager(mLock);
     private final AccessibilityTraceManager mTraceManager;
+    private final CaptioningManagerImpl mCaptioningManagerImpl;
 
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
 
@@ -339,6 +341,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mA11yDisplayListener = a11yDisplayListener;
         mMagnificationController = magnificationController;
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
+        mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
         if (inputFilter != null) {
             mInputFilter = inputFilter;
             mHasInputFilter = true;
@@ -373,6 +376,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mMagnificationController = new MagnificationController(this, mLock, mContext,
                 new MagnificationScaleProvider(mContext));
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
+        mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
         init();
     }
 
@@ -3455,6 +3459,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             return userState.isAudioDescriptionByDefaultEnabledLocked();
         }
+    }
+
+    @Override
+    @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
+    public void setSystemAudioCaptioningRequested(boolean isEnabled, int userId) {
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.SET_SYSTEM_AUDIO_CAPTION,
+                "setSystemAudioCaptioningRequested");
+
+        mCaptioningManagerImpl.setSystemAudioCaptioningRequested(isEnabled, userId);
+    }
+
+    @Override
+    public boolean isSystemAudioCaptioningUiRequested(int userId) {
+        return mCaptioningManagerImpl.isSystemAudioCaptioningUiRequested(userId);
+    }
+
+    @Override
+    @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
+    public void setSystemAudioCaptioningUiRequested(boolean isEnabled, int userId) {
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.SET_SYSTEM_AUDIO_CAPTION,
+                "setSystemAudioCaptioningUiRequested");
+
+        mCaptioningManagerImpl.setSystemAudioCaptioningUiRequested(isEnabled, userId);
     }
 
     @Override

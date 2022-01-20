@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Tətbiqə \"Narahat Etməyin\" konfiqurasiyasını oxumağa və yazmağa icazə verin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"Baxış icazəsinin istifadəsinə başlayın"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Sahibinə tətbiqin icazədən istifadəsinə başlamağa imkan verir. Adi tətbiqlər üçün heç vaxt tələb edilmir."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"icazə qərarlarına baxışı başladın"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Sahibin icazə qərarlarını nəzərdən keçirmək üçün ekranı başlatmasına icazə verir. Normal tətbiqlər tərəfindən heç vaxt tələb edilmir."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"tətbiqin funksiyalarını görməyə başlamaq"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"İstifadəçinin tətbiqin funksiyaları barədə məlumatları görməyə başlamasına icazə verir."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"sensor datasına yüksək ölçmə sürəti ilə giriş etmək"</string>

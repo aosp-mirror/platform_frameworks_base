@@ -80,6 +80,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private static final boolean DEBUG = false;
     private static final VibrationAttributes DEFAULT_ATTRIBUTES =
             new VibrationAttributes.Builder().build();
+    private static final int ATTRIBUTES_ALL_BYPASS_FLAGS =
+            VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY
+                    | VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
 
     /** Lifecycle responsible for initializing this class at the right system server phases. */
     public static class Lifecycle extends SystemService {
@@ -975,12 +978,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             usage = VibrationAttributes.USAGE_TOUCH;
         }
         int flags = attrs.getFlags();
-        if (attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY)) {
+        if ((flags & ATTRIBUTES_ALL_BYPASS_FLAGS) != 0) {
             if (!(hasPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
                     || hasPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
                     || hasPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING))) {
-                // Remove bypass policy flag from attributes if the app does not have permissions.
-                flags &= ~VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
+                // Remove bypass flags from attributes if the app does not have permissions.
+                flags &= ~ATTRIBUTES_ALL_BYPASS_FLAGS;
             }
         }
         if ((usage == attrs.getUsage()) && (flags == attrs.getFlags())) {

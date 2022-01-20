@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Membenarkan apl membaca dan menulis konfigurasi Jangan Ganggu."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"mulakan lihat penggunaan kebenaran"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Membenarkan pemegang memulakan penggunaan kebenaran untuk apl. Tidak sekali-kali diperlukan untuk apl biasa."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"mula melihat keputusan kebenaran"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Membenarkan pemegang memulakan skrin untuk menyemak keputusan kebenaran. Tidak diperlukan untuk apl biasa."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"mula melihat ciri apl"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Membenarkan pemegang mula melihat maklumat ciri untuk apl."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"akses data penderia pada data pensampelan yang tinggi"</string>

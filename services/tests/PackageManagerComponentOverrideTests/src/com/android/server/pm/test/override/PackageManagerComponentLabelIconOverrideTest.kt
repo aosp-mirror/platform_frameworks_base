@@ -20,7 +20,7 @@ import android.app.PropertyInvalidatedCache
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.pm.parsing.component.ParsedActivity
+import com.android.server.pm.pkg.component.ParsedActivity
 import android.os.Binder
 import android.os.UserHandle
 import android.util.ArrayMap

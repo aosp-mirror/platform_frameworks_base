@@ -739,10 +739,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Umožňuje aplikaci číst a zapisovat konfiguraci režimu Nerušit."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"zahájení zobrazení využití oprávnění"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Umožňuje přístup zahájit využití oprávnění jiné aplikace. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"zobrazit rozhodnutí o oprávnění"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Umožňuje držiteli aktivovat obrazovku a zkontrolovat rozhodnutí o oprávnění. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"zobrazení informací o funkcích aplikace"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Umožňuje držiteli zobrazit informace o funkcích aplikace."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"přístup k datům ze senzorů s vyšší vzorkovací frekvencí"</string>

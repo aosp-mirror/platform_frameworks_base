@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permet à l\'application de consulter et de modifier la configuration du mode Ne pas déranger."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"démarrer l\'affichage de l\'usage des autorisations"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permet au détenteur de démarrer l\'usage des autorisations pour une application. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"démarrer les décisions d\'autorisation de lecture"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Permet au détenteur de démarrer l\'écran pour revoir les décisions d\'autorisation. Ne devrait pas être requis pour les applications standards."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"démarrer l\'affichage des fonctionnalités de l\'application"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permet au détenteur de commencer à afficher les renseignements sur les fonctionnalités d\'une application."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"accéder aux données des capteurs à un taux d’échantillonnage élevé"</string>

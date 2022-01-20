@@ -733,10 +733,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Дозволува апликацијата да чита и пишува конфигурација Не вознемирувај."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"започнете со користење на дозволата за приказ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Дозволува сопственикот да почне со користење на дозволата за апликација. Не треба да се користи за стандардни апликации."</string>
-    <!-- no translation found for permlab_startReviewPermissionDecisions (8690578688476599284) -->
-    <skip />
-    <!-- no translation found for permdesc_startReviewPermissionDecisions (2775556853503004236) -->
-    <skip />
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"да го стартува приказот за одлуки за дозволи"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Му дозволува на сопственикот да го стартува екранот за прегледување одлуки за дозволи. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"да почне со прегледување на функциите на апликацијата"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"му дозволува на сопственикот да почне со прегледување на податоците за функциите за некоја апликација"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"пристапува до податоците со висока фреквенција на семпл"</string>

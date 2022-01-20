@@ -17,14 +17,10 @@
 package com.android.server.wm;
 
 import static android.app.AppOpsManager.OP_NONE;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -66,15 +62,14 @@ import static org.mockito.Mockito.mock;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
-import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
@@ -1515,64 +1510,55 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     static class TestSplitOrganizer extends WindowOrganizerTests.StubOrganizer {
         final ActivityTaskManagerService mService;
+        final TaskDisplayArea mDefaultTDA;
         Task mPrimary;
         Task mSecondary;
-        boolean mInSplit = false;
-        // moves everything to secondary. Most tests expect this since sysui usually does it.
-        boolean mMoveToSecondaryOnEnter = true;
         int mDisplayId;
-        private static final int[] CONTROLLED_ACTIVITY_TYPES = {
-                ACTIVITY_TYPE_STANDARD,
-                ACTIVITY_TYPE_HOME,
-                ACTIVITY_TYPE_RECENTS,
-                ACTIVITY_TYPE_UNDEFINED
-        };
-        private static final int[] CONTROLLED_WINDOWING_MODES = {
-                WINDOWING_MODE_FULLSCREEN,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
-                WINDOWING_MODE_UNDEFINED
-        };
+
         TestSplitOrganizer(ActivityTaskManagerService service, DisplayContent display) {
             mService = service;
+            mDefaultTDA = display.getDefaultTaskDisplayArea();
             mDisplayId = display.mDisplayId;
             mService.mTaskOrganizerController.registerTaskOrganizer(this);
             mPrimary = mService.mTaskOrganizerController.createRootTask(
-                    display, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+                    display, WINDOWING_MODE_MULTI_WINDOW, null);
             mSecondary = mService.mTaskOrganizerController.createRootTask(
-                    display, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);;
+                    display, WINDOWING_MODE_MULTI_WINDOW, null);
+
+            mPrimary.setAdjacentTaskFragment(mSecondary, true);
+            display.getDefaultTaskDisplayArea().setLaunchAdjacentFlagRootTask(mSecondary);
+
+            final Rect primaryBounds = new Rect();
+            final Rect secondaryBounds = new Rect();
+            display.getBounds().splitVertically(primaryBounds, secondaryBounds);
+            mPrimary.setBounds(primaryBounds);
+            mSecondary.setBounds(secondaryBounds);
         }
+
         TestSplitOrganizer(ActivityTaskManagerService service) {
             this(service, service.mTaskSupervisor.mRootWindowContainer.getDefaultDisplay());
         }
-        public void setMoveToSecondaryOnEnter(boolean move) {
-            mMoveToSecondaryOnEnter = move;
+
+        public Task createTaskToPrimary(boolean onTop) {
+            final Task primaryTask = mDefaultTDA.createRootTask(
+                    WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, onTop);
+            putTaskToPrimary(primaryTask, onTop);
+            return primaryTask;
         }
 
-        @Override
-        public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
-            if (mInSplit) {
-                return;
-            }
-            if (info.topActivityType == ACTIVITY_TYPE_UNDEFINED) {
-                // Not populated
-                return;
-            }
-            if (info.configuration.windowConfiguration.getWindowingMode()
-                    != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                return;
-            }
-            mInSplit = true;
-            if (!mMoveToSecondaryOnEnter) {
-                return;
-            }
-            DisplayContent dc = mService.mRootWindowContainer.getDisplayContent(mDisplayId);
-            dc.getDefaultTaskDisplayArea().setLaunchRootTask(
-                    mSecondary, CONTROLLED_WINDOWING_MODES, CONTROLLED_ACTIVITY_TYPES);
-            dc.forAllRootTasks(rootTask -> {
-                if (!WindowConfiguration.isSplitScreenWindowingMode(rootTask.getWindowingMode())) {
-                    rootTask.reparent(mSecondary, POSITION_BOTTOM);
-                }
-            });
+        public Task createTaskToSecondary(boolean onTop) {
+            final Task secondaryTask = mDefaultTDA.createRootTask(
+                    WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, onTop);
+            putTaskToSecondary(secondaryTask, onTop);
+            return secondaryTask;
+        }
+
+        public void putTaskToPrimary(Task task, boolean onTop) {
+            task.reparent(mPrimary, onTop ? POSITION_TOP : POSITION_BOTTOM);
+        }
+
+        public void putTaskToSecondary(Task task, boolean onTop) {
+            task.reparent(mSecondary, onTop ? POSITION_TOP : POSITION_BOTTOM);
         }
     }
 
