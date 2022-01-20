@@ -383,6 +383,95 @@ public final class NetworkStats implements Parcelable {
             this.operations += another.operations;
         }
 
+        /**
+         * @return interface name of this entry.
+         * @hide
+         */
+        @Nullable public String getIface() {
+            return iface;
+        }
+
+        /**
+         * @return the uid of this entry.
+         */
+        public int getUid() {
+            return uid;
+        }
+
+        /**
+         * @return the set state of this entry. Should be one of the following
+         * values: {@link #SET_DEFAULT}, {@link #SET_FOREGROUND}.
+         */
+        @State public int getSet() {
+            return set;
+        }
+
+        /**
+         * @return the tag value of this entry.
+         */
+        public int getTag() {
+            return tag;
+        }
+
+        /**
+         * @return the metered state. Should be one of the following
+         * values: {link #METERED_YES}, {link #METERED_NO}.
+         */
+        @Meteredness public int getMetered() {
+            return metered;
+        }
+
+        /**
+         * @return the roaming state. Should be one of the following
+         * values: {link #ROAMING_YES}, {link #ROAMING_NO}.
+         */
+        @Roaming public int getRoaming() {
+            return roaming;
+        }
+
+        /**
+         * @return the default network state. Should be one of the following
+         * values: {link #DEFAULT_NETWORK_YES}, {link #DEFAULT_NETWORK_NO}.
+         */
+        @DefaultNetwork public int getDefaultNetwork() {
+            return defaultNetwork;
+        }
+
+        /**
+         * @return the number of received bytes.
+         */
+        public long getRxBytes() {
+            return rxBytes;
+        }
+
+        /**
+         * @return the number of received packets.
+         */
+        public long getRxPackets() {
+            return rxPackets;
+        }
+
+        /**
+         * @return the number of transmitted bytes.
+         */
+        public long getTxBytes() {
+            return txBytes;
+        }
+
+        /**
+         * @return the number of transmitted packets.
+         */
+        public long getTxPackets() {
+            return txPackets;
+        }
+
+        /**
+         * @return the count of network operations performed for this entry.
+         */
+        public long getOperations() {
+            return operations;
+        }
+
         @Override
         public String toString() {
             final StringBuilder builder = new StringBuilder();
@@ -593,7 +682,7 @@ public final class NetworkStats implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
-    public Entry getValues(int i, Entry recycle) {
+    public Entry getValues(int i, @Nullable Entry recycle) {
         final Entry entry = recycle != null ? recycle : new Entry();
         entry.iface = iface[i];
         entry.uid = uid[i];

@@ -2459,6 +2459,10 @@ public class CarrierConfigManager {
      *
      * Note: If {@code *} is specified for the original code, any ImsReasonInfo with the matching
      * {@code MESSAGE} will be remapped to {@code NEW_CODE}.
+     * If {@code *} is specified for the message, any ImsReasonInfo with the matching
+     * {@code ORIGINAL_CODE} will be remapped to {@code NEW_CODE}.
+     * The wildcard for {@code ORIGINAL_CODE} takes precedence to the wildcard for {@code MESSAGE}.
+     * A mapping with both wildcards has no effect.
      *
      * Example: "501|call completion elsewhere|1014"
      * When the {@link ImsReasonInfo#getCode()} is {@link ImsReasonInfo#CODE_USER_TERMINATED} and
@@ -4724,7 +4728,7 @@ public class CarrierConfigManager {
         /**
          * A priority list of ePDG addresses to be used. Possible values are {@link
          * #EPDG_ADDRESS_STATIC}, {@link #EPDG_ADDRESS_PLMN}, {@link #EPDG_ADDRESS_PCO}, {@link
-         * #EPDG_ADDRESS_CELLULAR_LOC}
+         * #EPDG_ADDRESS_CELLULAR_LOC}, {@link #EPDG_ADDRESS_VISITED_COUNTRY}
          */
         public static final String KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY =
                 KEY_PREFIX + "epdg_address_priority_int_array";
@@ -4899,7 +4903,8 @@ public class CarrierConfigManager {
             EPDG_ADDRESS_STATIC,
             EPDG_ADDRESS_PLMN,
             EPDG_ADDRESS_PCO,
-            EPDG_ADDRESS_CELLULAR_LOC
+            EPDG_ADDRESS_CELLULAR_LOC,
+            EPDG_ADDRESS_VISITED_COUNTRY
         })
         public @interface EpdgAddressType {}
 
@@ -4913,6 +4918,8 @@ public class CarrierConfigManager {
         public static final int EPDG_ADDRESS_PCO = 2;
         /** Use cellular location to chose epdg server */
         public static final int EPDG_ADDRESS_CELLULAR_LOC = 3;
+        /* Use Visited Country FQDN rule*/
+        public static final int EPDG_ADDRESS_VISITED_COUNTRY = 4;
 
         /** @hide */
         @IntDef({ID_TYPE_FQDN, ID_TYPE_RFC822_ADDR, ID_TYPE_KEY_ID})
@@ -5846,10 +5853,10 @@ public class CarrierConfigManager {
         /* Default value is 2 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 2000);
         sDefaults.putBoolean(KEY_ENABLE_4G_OPPORTUNISTIC_NETWORK_SCAN_BOOL, true);
-        sDefaults.putInt(KEY_TIME_TO_SWITCH_BACK_TO_PRIMARY_IF_OPPORTUNISTIC_OOS_LONG, 60000);
-        sDefaults.putInt(
+        sDefaults.putLong(KEY_TIME_TO_SWITCH_BACK_TO_PRIMARY_IF_OPPORTUNISTIC_OOS_LONG, 60000L);
+        sDefaults.putLong(
                 KEY_OPPORTUNISTIC_TIME_TO_SCAN_AFTER_CAPABILITY_SWITCH_TO_PRIMARY_LONG,
-                120000);
+                120000L);
         sDefaults.putAll(ImsServiceEntitlement.getDefaults());
         sDefaults.putAll(Gps.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,

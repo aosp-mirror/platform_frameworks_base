@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.net.vcn;
 
-package android.net.annotations;
-
-import android.annotation.IntDef;
-import android.net.IpSecManager;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-/**
- * IPsec traffic direction.
- * @hide
- */
-@IntDef(value = {IpSecManager.DIRECTION_IN, IpSecManager.DIRECTION_OUT})
-@Retention(RetentionPolicy.SOURCE)
-public @interface PolicyDirection {}
+public class VcnUnderlyingNetworkTemplateTestBase {
+    // Public for use in NetworkPriorityClassifierTest
+    public static final int TEST_MIN_ENTRY_UPSTREAM_BANDWIDTH_KBPS = 200;
+    public static final int TEST_MIN_EXIT_UPSTREAM_BANDWIDTH_KBPS = 100;
+    public static final int TEST_MIN_ENTRY_DOWNSTREAM_BANDWIDTH_KBPS = 400;
+    public static final int TEST_MIN_EXIT_DOWNSTREAM_BANDWIDTH_KBPS = 300;
+}

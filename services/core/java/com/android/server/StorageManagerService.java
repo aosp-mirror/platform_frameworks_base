@@ -79,6 +79,7 @@ import android.content.res.Configuration;
 import android.content.res.ObbInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.DropBoxManager;
 import android.os.Environment;
@@ -158,6 +159,8 @@ import com.android.server.storage.StorageSessionController.ExternalStorageServic
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal.ScreenObserver;
 
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
@@ -339,7 +342,44 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Nullable public static String sMediaStoreAuthorityProcessName;
 
+    // Run period in hour for smart idle maintenance
+    static final int SMART_IDLE_MAINT_PERIOD = 1;
+
     private final AtomicFile mSettingsFile;
+    private final AtomicFile mHourlyWriteFile;
+
+    private static final int MAX_HOURLY_WRITE_RECORDS = 72;
+
+    /**
+     * Default config values for smart idle maintenance
+     * Actual values will be controlled by DeviceConfig
+     */
+    // Decide whether smart idle maintenance is enabled or not
+    private static final boolean DEFAULT_SMART_IDLE_MAINT_ENABLED = false;
+    // Storage lifetime percentage threshold to decide to turn off the feature
+    private static final int DEFAULT_LIFETIME_PERCENT_THRESHOLD = 70;
+    // Minimum required number of dirty + free segments to trigger GC
+    private static final int DEFAULT_MIN_SEGMENTS_THRESHOLD = 512;
+    // Determine how much portion of current dirty segments will be GCed
+    private static final float DEFAULT_DIRTY_RECLAIM_RATE = 0.5F;
+    // Multiplier to amplify the target segment number for GC
+    private static final float DEFAULT_SEGMENT_RECLAIM_WEIGHT = 1.0F;
+    // Low battery level threshold to decide to turn off the feature
+    private static final float DEFAULT_LOW_BATTERY_LEVEL = 20F;
+    // Decide whether charging is required to turn on the feature
+    private static final boolean DEFAULT_CHARGING_REQUIRED = true;
+
+    private volatile int mLifetimePercentThreshold;
+    private volatile int mMinSegmentsThreshold;
+    private volatile float mDirtyReclaimRate;
+    private volatile float mSegmentReclaimWeight;
+    private volatile float mLowBatteryLevel;
+    private volatile boolean mChargingRequired;
+    private volatile boolean mNeedGC;
+
+    private volatile boolean mPassedLifetimeThresh;
+    // Tracking storage hourly write amounts
+    private volatile int[] mStorageHourlyWrites;
 
     /**
      * <em>Never</em> hold the lock while performing downcalls into vold, since
@@ -901,6 +941,10 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void handleSystemReady() {
+        if (prepareSmartIdleMaint()) {
+            SmartStorageMaintIdler.scheduleSmartIdlePass(mContext, SMART_IDLE_MAINT_PERIOD);
+        }
+
         // Start scheduling nominally-daily fstrim operations
         MountServiceIdler.scheduleIdlePass(mContext);
 
@@ -1907,6 +1951,10 @@ class StorageManagerService extends IStorageManager.Stub
 
         mSettingsFile = new AtomicFile(
                 new File(Environment.getDataSystemDirectory(), "storage.xml"), "storage-settings");
+        mHourlyWriteFile = new AtomicFile(
+                new File(Environment.getDataSystemDirectory(), "storage-hourly-writes"));
+
+        mStorageHourlyWrites = new int[MAX_HOURLY_WRITE_RECORDS];
 
         synchronized (mLock) {
             readSettingsLocked();
@@ -2572,7 +2620,7 @@ class StorageManagerService extends IStorageManager.Stub
             // fstrim time is still updated. If file based checkpoints are used, we run
             // idle maintenance (GC + fstrim) regardless of checkpoint status.
             if (!needsCheckpoint() || !supportsBlockCheckpoint()) {
-                mVold.runIdleMaint(new IVoldTaskListener.Stub() {
+                mVold.runIdleMaint(mNeedGC, new IVoldTaskListener.Stub() {
                     @Override
                     public void onStatus(int status, PersistableBundle extras) {
                         // Not currently used
@@ -2621,6 +2669,176 @@ class StorageManagerService extends IStorageManager.Stub
     @Override
     public void abortIdleMaintenance() {
         abortIdleMaint(null);
+    }
+
+    private boolean prepareSmartIdleMaint() {
+        /**
+         * We can choose whether going with a new storage smart idle maintenance job
+         * or falling back to the traditional way using DeviceConfig
+         */
+        boolean smartIdleMaintEnabled = DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+            "smart_idle_maint_enabled",
+            DEFAULT_SMART_IDLE_MAINT_ENABLED);
+        if (smartIdleMaintEnabled) {
+            mLifetimePercentThreshold = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                "lifetime_threshold", DEFAULT_LIFETIME_PERCENT_THRESHOLD);
+            mMinSegmentsThreshold = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                "min_segments_threshold", DEFAULT_MIN_SEGMENTS_THRESHOLD);
+            mDirtyReclaimRate = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                "dirty_reclaim_rate", DEFAULT_DIRTY_RECLAIM_RATE);
+            mSegmentReclaimWeight = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                "segment_reclaim_weight", DEFAULT_SEGMENT_RECLAIM_WEIGHT);
+            mLowBatteryLevel = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                "low_battery_level", DEFAULT_LOW_BATTERY_LEVEL);
+            mChargingRequired = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                "charging_required", DEFAULT_CHARGING_REQUIRED);
+
+            // If we use the smart idle maintenance, we need to turn off GC in the traditional idle
+            // maintenance to avoid the conflict
+            mNeedGC = false;
+
+            loadStorageHourlyWrites();
+            try {
+                mVold.refreshLatestWrite();
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+            }
+            refreshLifetimeConstraint();
+        }
+        return smartIdleMaintEnabled;
+    }
+
+    // Return whether storage lifetime exceeds the threshold
+    public boolean isPassedLifetimeThresh() {
+        return mPassedLifetimeThresh;
+    }
+
+    private void loadStorageHourlyWrites() {
+        FileInputStream fis = null;
+
+        try {
+            fis = mHourlyWriteFile.openRead();
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            mStorageHourlyWrites = (int[])ois.readObject();
+        } catch (FileNotFoundException e) {
+            // Missing data is okay, probably first boot
+        } catch (Exception e) {
+            Slog.wtf(TAG, "Failed reading write records", e);
+        } finally {
+            IoUtils.closeQuietly(fis);
+        }
+    }
+
+    private int getAverageHourlyWrite() {
+        return Arrays.stream(mStorageHourlyWrites).sum() / MAX_HOURLY_WRITE_RECORDS;
+    }
+
+    private void updateStorageHourlyWrites(int latestWrite) {
+        FileOutputStream fos = null;
+
+        System.arraycopy(mStorageHourlyWrites,0, mStorageHourlyWrites, 1,
+                     MAX_HOURLY_WRITE_RECORDS - 1);
+        mStorageHourlyWrites[0] = latestWrite;
+        try {
+            fos = mHourlyWriteFile.startWrite();
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(mStorageHourlyWrites);
+            mHourlyWriteFile.finishWrite(fos);
+        } catch (IOException e) {
+            if (fos != null) {
+                mHourlyWriteFile.failWrite(fos);
+            }
+        }
+    }
+
+    private boolean checkChargeStatus() {
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = mContext.registerReceiver(null, ifilter);
+
+        if (mChargingRequired) {
+            int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+            if (status != BatteryManager.BATTERY_STATUS_CHARGING &&
+                status != BatteryManager.BATTERY_STATUS_FULL) {
+                Slog.w(TAG, "Battery is not being charged");
+                return false;
+            }
+        }
+
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        float chargePercent = level * 100f / (float)scale;
+
+        if (chargePercent < mLowBatteryLevel) {
+            Slog.w(TAG, "Battery level is " + chargePercent + ", which is lower than threshold: " +
+                        mLowBatteryLevel);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean refreshLifetimeConstraint() {
+        int storageLifeTime = 0;
+
+        try {
+            storageLifeTime = mVold.getStorageLifeTime();
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
+            return false;
+        }
+
+        if (storageLifeTime == -1) {
+            Slog.w(TAG, "Failed to get storage lifetime");
+            return false;
+        } else if (storageLifeTime > mLifetimePercentThreshold) {
+            Slog.w(TAG, "Ended smart idle maintenance, because of lifetime(" + storageLifeTime +
+                        ")" + ", lifetime threshold(" + mLifetimePercentThreshold + ")");
+            mPassedLifetimeThresh = true;
+            return false;
+        }
+        Slog.i(TAG, "Storage lifetime: " + storageLifeTime);
+        return true;
+    }
+
+    void runSmartIdleMaint(Runnable callback) {
+        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+
+        try {
+            // Block based checkpoint process runs fstrim. So, if checkpoint is in progress
+            // (first boot after OTA), We skip the smart idle maintenance
+            if (!needsCheckpoint() || !supportsBlockCheckpoint()) {
+                if (!refreshLifetimeConstraint() || !checkChargeStatus()) {
+                    return;
+                }
+
+                int latestHourlyWrite = mVold.getWriteAmount();
+                if (latestHourlyWrite == -1) {
+                    Slog.w(TAG, "Failed to get storage hourly write");
+                    return;
+                }
+
+                updateStorageHourlyWrites(latestHourlyWrite);
+                int avgHourlyWrite = getAverageHourlyWrite();
+
+                Slog.i(TAG, "Set smart idle maintenance: " + "latest hourly write: " +
+                            latestHourlyWrite + ", average hourly write: " + avgHourlyWrite +
+                            ", min segment threshold: " + mMinSegmentsThreshold +
+                            ", dirty reclaim rate: " + mDirtyReclaimRate +
+                            ", segment reclaim weight:" + mSegmentReclaimWeight);
+                mVold.setGCUrgentPace(avgHourlyWrite, mMinSegmentsThreshold, mDirtyReclaimRate,
+                                      mSegmentReclaimWeight);
+            } else {
+                Slog.i(TAG, "Skipping smart idle maintenance - block based checkpoint in progress");
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
+        } finally {
+            if (callback != null) {
+                callback.run();
+            }
+        }
     }
 
     @Override

@@ -138,6 +138,7 @@ package android {
     field public static final String MANAGE_APP_PREDICTIONS = "android.permission.MANAGE_APP_PREDICTIONS";
     field public static final String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";
     field public static final String MANAGE_AUTO_FILL = "android.permission.MANAGE_AUTO_FILL";
+    field public static final String MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED = "android.permission.MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED";
     field public static final String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
     field public static final String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
     field public static final String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
@@ -273,6 +274,7 @@ package android {
     field public static final String SIGNAL_REBOOT_READINESS = "android.permission.SIGNAL_REBOOT_READINESS";
     field public static final String SOUND_TRIGGER_RUN_IN_BATTERY_SAVER = "android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER";
     field public static final String START_ACTIVITIES_FROM_BACKGROUND = "android.permission.START_ACTIVITIES_FROM_BACKGROUND";
+    field public static final String START_CROSS_PROFILE_ACTIVITIES = "android.permission.START_CROSS_PROFILE_ACTIVITIES";
     field public static final String STATUS_BAR_SERVICE = "android.permission.STATUS_BAR_SERVICE";
     field public static final String STOP_APP_SWITCHES = "android.permission.STOP_APP_SWITCHES";
     field public static final String SUBSTITUTE_NOTIFICATION_APP_NAME = "android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME";
@@ -5880,6 +5882,7 @@ package android.media.tv {
 
   public static final class TvInputManager.Hardware {
     method public void overrideAudioSink(int, String, int, int, int);
+    method public void overrideAudioSink(@NonNull android.media.AudioDeviceInfo, @IntRange(from=0) int, int, int);
     method public void setStreamVolume(float);
     method public boolean setSurface(android.view.Surface, android.media.tv.TvStreamConfig);
   }
@@ -7548,6 +7551,17 @@ package android.net {
 
   public static class NetworkStats.Entry {
     ctor public NetworkStats.Entry(@Nullable String, int, int, int, int, int, int, long, long, long, long, long);
+    method public int getDefaultNetwork();
+    method public int getMetered();
+    method public long getOperations();
+    method public int getRoaming();
+    method public long getRxBytes();
+    method public long getRxPackets();
+    method public int getSet();
+    method public int getTag();
+    method public long getTxBytes();
+    method public long getTxPackets();
+    method public int getUid();
   }
 
   public class RssiCurve implements android.os.Parcelable {
@@ -7584,6 +7598,7 @@ package android.net {
   public class TrafficStats {
     method public static void setThreadStatsTagApp();
     method public static void setThreadStatsTagBackup();
+    method public static void setThreadStatsTagDownload();
     method public static void setThreadStatsTagRestore();
     field public static final int TAG_NETWORK_STACK_IMPERSONATION_RANGE_END = -113; // 0xffffff8f
     field public static final int TAG_NETWORK_STACK_IMPERSONATION_RANGE_START = -128; // 0xffffff80
@@ -8506,6 +8521,7 @@ package android.os {
     field public static final int EVENT_UNSPECIFIED = 0; // 0x0
     field public static final int REASON_ACCOUNT_TRANSFER = 104; // 0x68
     field public static final int REASON_ACTIVITY_RECOGNITION = 103; // 0x67
+    field public static final int REASON_BLUETOOTH_BROADCAST = 203; // 0xcb
     field public static final int REASON_GEOFENCING = 100; // 0x64
     field public static final int REASON_LOCATION_PROVIDER = 312; // 0x138
     field public static final int REASON_OTHER = 1; // 0x1
