@@ -23,11 +23,8 @@ import android.apex.ApexSessionInfo;
 import android.apex.ApexSessionParams;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.IIntentReceiver;
-import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.content.pm.ApexStagedEvent;
 import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageInstaller;
@@ -36,7 +33,6 @@ import android.content.pm.PackageInstaller.SessionInfo.SessionErrorCode;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.StagedApexInfo;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -78,8 +74,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 /**
@@ -807,35 +801,6 @@ public class StagingManager {
     void onBootCompletedBroadcastReceived() {
         mBootCompleted.complete(null);
         BackgroundThread.getExecutor().execute(() -> logFailedApexSessionsIfNecessary());
-    }
-
-    private static class LocalIntentReceiverSync {
-        private final LinkedBlockingQueue<Intent> mResult = new LinkedBlockingQueue<>();
-
-        private final IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
-            @Override
-            public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
-                    IIntentReceiver finishedReceiver, String requiredPermission,
-                    Bundle options) {
-                try {
-                    mResult.offer(intent, 5, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-
-        public IntentSender getIntentSender() {
-            return new IntentSender((IIntentSender) mLocalSender);
-        }
-
-        public Intent getResult() {
-            try {
-                return mResult.take();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     private StagedSession getStagedSession(int sessionId) {
