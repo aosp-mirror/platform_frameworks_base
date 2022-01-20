@@ -99,6 +99,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
@@ -131,6 +132,7 @@ import android.view.IWindowManager;
 import android.view.IWindowSession;
 import android.view.InsetsSource;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.Surface;
@@ -147,6 +149,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
@@ -3074,6 +3077,50 @@ public class ActivityRecordTests extends WindowTestsBase {
         state = mDisplayContent.getInsetsPolicy().getInsetsForWindow(app);
         assertTrue(state.getSource(ITYPE_IME).isVisible());
         assertEquals(state.getSource(ITYPE_IME).getFrame(), imeSource.getFrame());
+    }
+
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @Test
+    public void testImeInsetsFrozenFlag_noDispatchVisibleInsetsWhenAppNotRequest()
+            throws RemoteException {
+        final WindowState app1 = createWindow(null, TYPE_APPLICATION, "app1");
+        final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
+
+        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindow(
+                mImeWindow, null, null);
+        mImeWindow.getControllableInsetProvider().setServerVisible(true);
+
+        // Simulate app2 is closing and let app1 is visible to be IME targets.
+        makeWindowVisibleAndDrawn(app1, mImeWindow);
+        mDisplayContent.setImeLayeringTarget(app1);
+        mDisplayContent.updateImeInputAndControlTarget(app1);
+        app2.mActivityRecord.commitVisibility(false, false);
+
+        // app1 requests IME visible.
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_IME, true);
+        app1.setRequestedVisibilities(requestedVisibilities);
+        mDisplayContent.getInsetsStateController().onInsetsModified(app1);
+
+        // Verify app1's IME insets is visible and app2's IME insets frozen flag set.
+        assertTrue(app1.getInsetsState().peekSource(ITYPE_IME).isVisible());
+        assertTrue(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+
+        // Simulate switching to app2 to make it visible to be IME targets.
+        makeWindowVisibleAndDrawn(app2);
+        spyOn(app2);
+        spyOn(app2.mClient);
+        ArgumentCaptor<InsetsState> insetsStateCaptor = ArgumentCaptor.forClass(InsetsState.class);
+        doReturn(true).when(app2).isReadyToDispatchInsetsState();
+        mDisplayContent.setImeLayeringTarget(app2);
+        mDisplayContent.updateImeInputAndControlTarget(app2);
+
+        // Verify after unfreezing app2's IME insets state, we won't dispatch visible IME insets
+        // to client if the app didn't request IME visible.
+        assertFalse(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+        verify(app2.mClient, atLeastOnce()).insetsChanged(insetsStateCaptor.capture(), anyBoolean(),
+                anyBoolean());
+        assertFalse(insetsStateCaptor.getAllValues().get(0).peekSource(ITYPE_IME).isVisible());
     }
 
     @Test
