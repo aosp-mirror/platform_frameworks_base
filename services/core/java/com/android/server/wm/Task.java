@@ -3434,6 +3434,9 @@ class Task extends TaskFragment {
         // Whether the direct top activity is in size compat mode on foreground.
         info.topActivityInSizeCompat = isTopActivityResumed
                 && mReuseActivitiesReport.top.inSizeCompatMode();
+        // Whether the direct top activity is eligible for letterbox education.
+        info.topActivityEligibleForLetterboxEducation = isTopActivityResumed
+                && mReuseActivitiesReport.top.isEligibleForLetterboxEducation();
         // Whether the direct top activity requested showing camera compat control.
         info.cameraCompatControlState = isTopActivityResumed
                 ? mReuseActivitiesReport.top.getCameraCompatControlState()

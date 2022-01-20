@@ -715,6 +715,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Nullable
     private Rect mLetterboxBoundsForFixedOrientationAndAspectRatio;
 
+    // Whether the activity is eligible to be letterboxed for fixed orientation with respect to its
+    // requested orientation, even when it's letterbox for another reason (e.g., size compat mode)
+    // and therefore #isLetterboxedForFixedOrientationAndAspectRatio returns false.
+    private boolean mIsEligibleForFixedOrientationLetterbox;
+
     // State of the Camera app compat control which is used to correct stretched viewfinder
     // in apps that don't handle all possible configurations and changes between them correctly.
     @CameraCompatControlState
@@ -7617,6 +7622,24 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
+     * Whether this activity is eligible for letterbox eduction.
+     *
+     * <p>Conditions that need to be met:
+     *
+     * <ul>
+     *     <li>{@link LetterboxConfiguration#getIsEducationEnabled} is true.
+     *     <li>The activity is eligible for fixed orientation letterbox.
+     *     <li>The activity is in fullscreen.
+     * </ul>
+     */
+    // TODO(b/215316431): Add tests
+    boolean isEligibleForLetterboxEducation() {
+        return mWmService.mLetterboxConfiguration.getIsEducationEnabled()
+                && mIsEligibleForFixedOrientationLetterbox
+                && getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
+    }
+
+    /**
      * In some cases, applying insets to bounds changes the orientation. For example, if a
      * close-to-square display rotates to portrait to respect a portrait orientation activity, after
      * insets such as the status and nav bars are applied, the activity may actually have a
@@ -7678,6 +7701,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig,
             int windowingMode) {
         mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
+        mIsEligibleForFixedOrientationLetterbox = false;
         final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
         final Rect stableBounds = new Rect();
         // If orientation is respected when insets are applied, then stableBounds will be empty.
@@ -7717,8 +7741,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // make it fit the available bounds by scaling down its bounds.
         final int forcedOrientation = getRequestedConfigurationOrientation();
 
-        if (forcedOrientation == ORIENTATION_UNDEFINED
-                || (forcedOrientation == parentOrientation && orientationRespectedWithInsets)) {
+        mIsEligibleForFixedOrientationLetterbox = forcedOrientation != ORIENTATION_UNDEFINED
+                && forcedOrientation != parentOrientation;
+
+        if (!mIsEligibleForFixedOrientationLetterbox && (forcedOrientation == ORIENTATION_UNDEFINED
+                || orientationRespectedWithInsets)) {
             return;
         }
 

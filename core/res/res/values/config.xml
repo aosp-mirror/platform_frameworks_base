@@ -5134,6 +5134,9 @@
         If given value is outside of this range, the option 1 (center) is assummed. -->
     <integer name="config_letterboxDefaultPositionForReachability">1</integer>
 
+    <!-- Whether displaying letterbox education is enabled for letterboxed fullscreen apps. -->
+    <bool name="config_letterboxIsEducationEnabled">false</bool>
+
     <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
          treatment for stretched issues in camera viewfinder. -->
     <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>
