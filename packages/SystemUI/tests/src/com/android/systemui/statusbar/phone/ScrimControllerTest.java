@@ -647,8 +647,15 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setRawPanelExpansionFraction(0.3f);
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
-                mNotificationsScrim, SEMI_TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
                 mScrimBehind, SEMI_TRANSPARENT));
+
+        // Then, notification scrim should fade in
+        mScrimController.setRawPanelExpansionFraction(0.7f);
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, SEMI_TRANSPARENT,
+                mScrimBehind, OPAQUE));
     }
 
 
@@ -1132,6 +1139,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testScrimsVisible_whenShadeVisible() {
+        mScrimController.setClipsQsScrim(true);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         mScrimController.setRawPanelExpansionFraction(0.3f);
         // notifications scrim alpha change require calling setQsPosition
