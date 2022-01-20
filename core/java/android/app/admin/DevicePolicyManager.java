@@ -622,6 +622,32 @@ public class DevicePolicyManager {
             "android.app.extra.FORCE_UPDATE_ROLE_HOLDER";
 
     /**
+     * A boolean extra indicating whether offline provisioning is allowed.
+     *
+     * <p>For the online provisioning flow, there will be an attempt to download and install
+     * the latest version of the device management role holder. The platform will then delegate
+     * provisioning to the device management role holder via role holder-specific provisioning
+     * actions.
+     *
+     * <p>For the offline provisioning flow, the provisioning flow will always be handled by
+     * the platform.
+     *
+     * <p>If this extra is set to {@code false}, the provisioning flow will enforce that an
+     * internet connection is established, which will start the online provisioning flow. If an
+     * internet connection cannot be established, provisioning will fail.
+     *
+     * <p>If this extra is set to {@code true}, the provisioning flow will still try to connect to
+     * the internet, but if it fails it will start the offline provisioning flow.
+     *
+     * <p>The default value is {@code false}.
+     *
+     * <p>This extra is respected when provided via the provisioning intent actions such as {@link
+     * #ACTION_PROVISION_MANAGED_PROFILE}.
+     */
+    public static final String EXTRA_PROVISIONING_ALLOW_OFFLINE =
+            "android.app.extra.PROVISIONING_ALLOW_OFFLINE";
+
+    /**
      * Action: Bugreport sharing with device owner has been accepted by the user.
      *
      * @hide
