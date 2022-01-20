@@ -68,7 +68,7 @@ class UnfoldLatencyTrackerTest : SysuiTestCase() {
             context.mainExecutor,
             context,
             screenLifecycle
-        )
+        ).apply { init() }
         deviceStates = FoldableTestUtils.findDeviceStates(context)
 
         verify(deviceStateManager).registerCallback(any(), foldStateListenerCaptor.capture())
