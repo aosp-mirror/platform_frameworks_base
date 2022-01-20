@@ -16,6 +16,11 @@
 
 package com.android.server.job.controllers;
 
+import static android.app.job.JobInfo.PRIORITY_DEFAULT;
+import static android.app.job.JobInfo.PRIORITY_HIGH;
+import static android.app.job.JobInfo.PRIORITY_LOW;
+import static android.app.job.JobInfo.PRIORITY_MIN;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -269,14 +274,14 @@ public class QuotaControllerTest {
     }
 
     private void setCharging() {
-        doReturn(true).when(mJobSchedulerService).isBatteryCharging();
+        when(mJobSchedulerService.isBatteryCharging()).thenReturn(true);
         synchronized (mQuotaController.mLock) {
             mQuotaController.onBatteryStateChangedLocked();
         }
     }
 
     private void setDischarging() {
-        doReturn(false).when(mJobSchedulerService).isBatteryCharging();
+        when(mJobSchedulerService.isBatteryCharging()).thenReturn(false);
         synchronized (mQuotaController.mLock) {
             mQuotaController.onBatteryStateChangedLocked();
         }
@@ -401,6 +406,14 @@ public class QuotaControllerTest {
 
     private void setDeviceConfigInt(String key, int val) {
         mDeviceConfigPropertiesBuilder.setInt(key, val);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.prepareForUpdatedConstantsLocked();
+            mQcConstants.processConstantLocked(mDeviceConfigPropertiesBuilder.build(), key);
+        }
+    }
+
+    private void setDeviceConfigFloat(String key, float val) {
+        mDeviceConfigPropertiesBuilder.setFloat(key, val);
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForUpdatedConstantsLocked();
             mQcConstants.processConstantLocked(mDeviceConfigPropertiesBuilder.build(), key);
@@ -839,7 +852,7 @@ public class QuotaControllerTest {
                         SOURCE_USER_ID, SOURCE_PACKAGE, inputStats);
                 assertEquals(expectedStats, inputStats);
                 assertTrue(mQuotaController.isWithinQuotaLocked(
-                        SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX));
+                        SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX, PRIORITY_DEFAULT));
             }
             assertTrue("Job not ready: " + jobStatus, jobStatus.isReady());
         }
@@ -863,7 +876,7 @@ public class QuotaControllerTest {
             assertEquals(expectedStats, inputStats);
             assertFalse(
                     mQuotaController.isWithinQuotaLocked(
-                            SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX));
+                            SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX, PRIORITY_DEFAULT));
         }
 
         // Quota should be exceeded due to activity in active timer.
@@ -888,7 +901,7 @@ public class QuotaControllerTest {
             assertEquals(expectedStats, inputStats);
             assertFalse(
                     mQuotaController.isWithinQuotaLocked(
-                            SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX));
+                            SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX, PRIORITY_DEFAULT));
             assertFalse("Job unexpectedly ready: " + jobStatus, jobStatus.isReady());
         }
     }
@@ -1484,7 +1497,7 @@ public class QuotaControllerTest {
                             SOURCE_USER_ID, SOURCE_PACKAGE));
             assertEquals(MINUTE_IN_MILLIS,
                     mQuotaController.getTimeUntilQuotaConsumedLocked(
-                            SOURCE_USER_ID, SOURCE_PACKAGE));
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
         }
 
         setStandbyBucket(FREQUENT_INDEX);
@@ -1494,7 +1507,7 @@ public class QuotaControllerTest {
                             SOURCE_USER_ID, SOURCE_PACKAGE));
             assertEquals(MINUTE_IN_MILLIS,
                     mQuotaController.getTimeUntilQuotaConsumedLocked(
-                            SOURCE_USER_ID, SOURCE_PACKAGE));
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
         }
 
         setStandbyBucket(WORKING_INDEX);
@@ -1504,7 +1517,7 @@ public class QuotaControllerTest {
                             SOURCE_USER_ID, SOURCE_PACKAGE));
             assertEquals(7 * MINUTE_IN_MILLIS,
                     mQuotaController.getTimeUntilQuotaConsumedLocked(
-                            SOURCE_USER_ID, SOURCE_PACKAGE));
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
         }
 
         // ACTIVE window = allowed time, so jobs can essentially run non-stop until they reach the
@@ -1516,7 +1529,7 @@ public class QuotaControllerTest {
                             SOURCE_USER_ID, SOURCE_PACKAGE));
             assertEquals(mQcConstants.MAX_EXECUTION_TIME_MS - 9 * MINUTE_IN_MILLIS,
                     mQuotaController.getTimeUntilQuotaConsumedLocked(
-                            SOURCE_USER_ID, SOURCE_PACKAGE));
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
         }
     }
 
@@ -1540,7 +1553,7 @@ public class QuotaControllerTest {
             // Max time will phase out, so should use bucket limit.
             assertEquals(10 * MINUTE_IN_MILLIS,
                     mQuotaController.getTimeUntilQuotaConsumedLocked(
-                            SOURCE_USER_ID, SOURCE_PACKAGE));
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
         }
 
         mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE).clear();
@@ -1556,7 +1569,7 @@ public class QuotaControllerTest {
                             SOURCE_USER_ID, SOURCE_PACKAGE));
             assertEquals(10 * MINUTE_IN_MILLIS,
                     mQuotaController.getTimeUntilQuotaConsumedLocked(
-                            SOURCE_USER_ID, SOURCE_PACKAGE));
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
         }
 
         mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE).clear();
@@ -1573,7 +1586,7 @@ public class QuotaControllerTest {
                             SOURCE_USER_ID, SOURCE_PACKAGE));
             assertEquals(3 * MINUTE_IN_MILLIS,
                     mQuotaController.getTimeUntilQuotaConsumedLocked(
-                            SOURCE_USER_ID, SOURCE_PACKAGE));
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
         }
     }
 
@@ -1606,7 +1619,7 @@ public class QuotaControllerTest {
             // window time.
             assertEquals(10 * MINUTE_IN_MILLIS,
                     mQuotaController.getTimeUntilQuotaConsumedLocked(
-                            SOURCE_USER_ID, SOURCE_PACKAGE));
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
         }
 
         mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE).clear();
@@ -1633,15 +1646,115 @@ public class QuotaControllerTest {
             // Max time only has one minute phase out. Bucket time has 2 minute phase out.
             assertEquals(9 * MINUTE_IN_MILLIS,
                     mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
+        }
+    }
+
+    /**
+     * Test getTimeUntilQuotaConsumedLocked when the determination is based on the job's priority.
+     */
+    @Test
+    public void testGetTimeUntilQuotaConsumedLocked_Priority() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        // Close to RARE boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (24 * HOUR_IN_MILLIS - 30 * SECOND_IN_MILLIS),
+                        150 * SECOND_IN_MILLIS, 5), false);
+        // Far away from FREQUENT boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (7 * HOUR_IN_MILLIS), 2 * MINUTE_IN_MILLIS, 5), false);
+        // Overlap WORKING_SET boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (2 * HOUR_IN_MILLIS + MINUTE_IN_MILLIS),
+                        2 * MINUTE_IN_MILLIS, 5), false);
+        // Close to ACTIVE boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (9 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), false);
+
+        setStandbyBucket(RARE_INDEX);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(30 * SECOND_IN_MILLIS,
+                    mQuotaController.getRemainingExecutionTimeLocked(
                             SOURCE_USER_ID, SOURCE_PACKAGE));
+            assertEquals(3 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_HIGH));
+            assertEquals(3 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
+            assertEquals(0,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_LOW));
+            assertEquals(0,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_MIN));
+        }
+
+        setStandbyBucket(FREQUENT_INDEX);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(3 * MINUTE_IN_MILLIS,
+                    mQuotaController.getRemainingExecutionTimeLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE));
+            assertEquals(3 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_HIGH));
+            assertEquals(3 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
+            assertEquals(30 * SECOND_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_LOW));
+            assertEquals(0,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_MIN));
+        }
+
+        setStandbyBucket(WORKING_INDEX);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(6 * MINUTE_IN_MILLIS,
+                    mQuotaController.getRemainingExecutionTimeLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE));
+            assertEquals(7 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_HIGH));
+            assertEquals(7 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
+            assertEquals(4 * MINUTE_IN_MILLIS + 30 * SECOND_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_LOW));
+            assertEquals(2 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_MIN));
+        }
+
+        // ACTIVE window = allowed time, so jobs can essentially run non-stop until they reach the
+        // max execution time.
+        setStandbyBucket(ACTIVE_INDEX);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(7 * MINUTE_IN_MILLIS,
+                    mQuotaController.getRemainingExecutionTimeLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE));
+            assertEquals(mQcConstants.MAX_EXECUTION_TIME_MS - 7 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_HIGH));
+            assertEquals(mQcConstants.MAX_EXECUTION_TIME_MS - 7 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
+            assertEquals(mQcConstants.MAX_EXECUTION_TIME_MS - 7 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_LOW));
+            assertEquals(mQcConstants.MAX_EXECUTION_TIME_MS - 7 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_MIN));
         }
     }
 
     @Test
     public void testIsWithinQuotaLocked_NeverApp() {
         synchronized (mQuotaController.mLock) {
-            assertFalse(
-                    mQuotaController.isWithinQuotaLocked(0, "com.android.test.never", NEVER_INDEX));
+            assertFalse(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test.never", NEVER_INDEX, PRIORITY_DEFAULT));
         }
     }
 
@@ -1649,7 +1762,8 @@ public class QuotaControllerTest {
     public void testIsWithinQuotaLocked_Charging() {
         setCharging();
         synchronized (mQuotaController.mLock) {
-            assertTrue(mQuotaController.isWithinQuotaLocked(0, "com.android.test", RARE_INDEX));
+            assertTrue(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", RARE_INDEX, PRIORITY_DEFAULT));
         }
     }
 
@@ -1663,7 +1777,8 @@ public class QuotaControllerTest {
                 createTimingSession(now - (5 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), false);
         synchronized (mQuotaController.mLock) {
             mQuotaController.incrementJobCountLocked(0, "com.android.test", 5);
-            assertTrue(mQuotaController.isWithinQuotaLocked(0, "com.android.test", WORKING_INDEX));
+            assertTrue(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", WORKING_INDEX, PRIORITY_DEFAULT));
         }
     }
 
@@ -1680,7 +1795,7 @@ public class QuotaControllerTest {
         synchronized (mQuotaController.mLock) {
             mQuotaController.incrementJobCountLocked(0, "com.android.test.spam", jobCount);
             assertFalse(mQuotaController.isWithinQuotaLocked(
-                    0, "com.android.test.spam", WORKING_INDEX));
+                    0, "com.android.test.spam", WORKING_INDEX, PRIORITY_DEFAULT));
         }
 
         mQuotaController.saveTimingSession(0, "com.android.test.frequent",
@@ -1690,7 +1805,7 @@ public class QuotaControllerTest {
                 createTimingSession(now - (HOUR_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 500), false);
         synchronized (mQuotaController.mLock) {
             assertFalse(mQuotaController.isWithinQuotaLocked(
-                    0, "com.android.test.frequent", FREQUENT_INDEX));
+                    0, "com.android.test.frequent", FREQUENT_INDEX, PRIORITY_DEFAULT));
         }
     }
 
@@ -1706,7 +1821,8 @@ public class QuotaControllerTest {
                 createTimingSession(now - (5 * MINUTE_IN_MILLIS), 4 * MINUTE_IN_MILLIS, 5), false);
         synchronized (mQuotaController.mLock) {
             mQuotaController.incrementJobCountLocked(0, "com.android.test", 5);
-            assertFalse(mQuotaController.isWithinQuotaLocked(0, "com.android.test", WORKING_INDEX));
+            assertFalse(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", WORKING_INDEX, PRIORITY_DEFAULT));
         }
     }
 
@@ -1722,7 +1838,8 @@ public class QuotaControllerTest {
                 false);
         synchronized (mQuotaController.mLock) {
             mQuotaController.incrementJobCountLocked(0, "com.android.test", jobCount);
-            assertFalse(mQuotaController.isWithinQuotaLocked(0, "com.android.test", WORKING_INDEX));
+            assertFalse(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", WORKING_INDEX, PRIORITY_DEFAULT));
         }
     }
 
@@ -1875,18 +1992,62 @@ public class QuotaControllerTest {
 
                 assertEquals("Rare has incorrect quota status with " + (i + 1) + " sessions",
                         i < 2,
-                        mQuotaController.isWithinQuotaLocked(0, "com.android.test", RARE_INDEX));
+                        mQuotaController.isWithinQuotaLocked(
+                                0, "com.android.test", RARE_INDEX, PRIORITY_DEFAULT));
                 assertEquals("Frequent has incorrect quota status with " + (i + 1) + " sessions",
                         i < 3,
                         mQuotaController.isWithinQuotaLocked(
-                                0, "com.android.test", FREQUENT_INDEX));
+                                0, "com.android.test", FREQUENT_INDEX, PRIORITY_DEFAULT));
                 assertEquals("Working has incorrect quota status with " + (i + 1) + " sessions",
                         i < 4,
-                        mQuotaController.isWithinQuotaLocked(0, "com.android.test", WORKING_INDEX));
+                        mQuotaController.isWithinQuotaLocked(
+                                0, "com.android.test", WORKING_INDEX, PRIORITY_DEFAULT));
                 assertEquals("Active has incorrect quota status with " + (i + 1) + " sessions",
                         i < 5,
-                        mQuotaController.isWithinQuotaLocked(0, "com.android.test", ACTIVE_INDEX));
+                        mQuotaController.isWithinQuotaLocked(
+                                0, "com.android.test", ACTIVE_INDEX, PRIORITY_DEFAULT));
             }
+        }
+    }
+
+    @Test
+    public void testIsWithinQuotaLocked_Priority() {
+        setDischarging();
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (7 * HOUR_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), false);
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (HOUR_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), false);
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (5 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), false);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.incrementJobCountLocked(0, "com.android.test", 5);
+            assertTrue(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", FREQUENT_INDEX, PRIORITY_HIGH));
+            assertTrue(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", FREQUENT_INDEX, PRIORITY_DEFAULT));
+            assertFalse(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", FREQUENT_INDEX, PRIORITY_LOW));
+            assertFalse(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", FREQUENT_INDEX, PRIORITY_MIN));
+
+            assertTrue(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", WORKING_INDEX, PRIORITY_HIGH));
+            assertTrue(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", WORKING_INDEX, PRIORITY_DEFAULT));
+            assertTrue(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", WORKING_INDEX, PRIORITY_LOW));
+            assertFalse(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", WORKING_INDEX, PRIORITY_MIN));
+
+            assertTrue(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", ACTIVE_INDEX, PRIORITY_HIGH));
+            assertTrue(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", ACTIVE_INDEX, PRIORITY_DEFAULT));
+            assertTrue(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", ACTIVE_INDEX, PRIORITY_LOW));
+            assertTrue(mQuotaController.isWithinQuotaLocked(
+                    0, "com.android.test", ACTIVE_INDEX, PRIORITY_MIN));
         }
     }
 
@@ -2116,6 +2277,12 @@ public class QuotaControllerTest {
         final int standbyBucket = ACTIVE_INDEX;
         setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
 
+        JobStatus jobStatus = createJobStatus("testMaybeScheduleStartAlarmLocked_Active", 1);
+        setStandbyBucket(standbyBucket, jobStatus);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+        }
+
         // No sessions saved yet.
         synchronized (mQuotaController.mLock) {
             mQuotaController.maybeScheduleStartAlarmLocked(
@@ -2150,10 +2317,7 @@ public class QuotaControllerTest {
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
-        JobStatus jobStatus = createJobStatus("testMaybeScheduleStartAlarmLocked_Active", 1);
-        setStandbyBucket(standbyBucket, jobStatus);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
             mQuotaController.prepareForExecutionLocked(jobStatus);
         }
         advanceElapsedClock(5 * MINUTE_IN_MILLIS);
@@ -2179,19 +2343,24 @@ public class QuotaControllerTest {
         // Working set window size is 2 hours.
         final int standbyBucket = WORKING_INDEX;
 
+        JobStatus jobStatus = createJobStatus("testMaybeScheduleStartAlarmLocked_WorkingSet", 1);
+        setStandbyBucket(standbyBucket, jobStatus);
         synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
             // No sessions saved yet.
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Test with timing sessions out of window.
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - 10 * HOUR_IN_MILLIS, 5 * MINUTE_IN_MILLIS, 1), false);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
@@ -2201,37 +2370,41 @@ public class QuotaControllerTest {
         // Counting backwards, the quota will come back one minute before the end.
         final long expectedAlarmTime =
                 end - MINUTE_IN_MILLIS + 2 * HOUR_IN_MILLIS + mQcConstants.IN_QUOTA_BUFFER_MS;
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 new TimingSession(now - 2 * HOUR_IN_MILLIS, end, 1), false);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Add some more sessions, but still in quota.
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - HOUR_IN_MILLIS, MINUTE_IN_MILLIS, 1), false);
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - (50 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 1), false);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Test when out of quota.
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - 30 * MINUTE_IN_MILLIS, 5 * MINUTE_IN_MILLIS, 1), false);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Alarm already scheduled, so make sure it's not scheduled again.
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
@@ -2244,22 +2417,29 @@ public class QuotaControllerTest {
         spyOn(mQuotaController);
         doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
 
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(
+                    createJobStatus("testMaybeScheduleStartAlarmLocked_Frequent", 1), null);
+        }
+
         // Frequent window size is 8 hours.
         final int standbyBucket = FREQUENT_INDEX;
 
         // No sessions saved yet.
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Test with timing sessions out of window.
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - 10 * HOUR_IN_MILLIS, 5 * MINUTE_IN_MILLIS, 1), false);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
@@ -2267,37 +2447,41 @@ public class QuotaControllerTest {
         // Test with timing sessions in window but still in quota.
         final long start = now - (6 * HOUR_IN_MILLIS);
         final long expectedAlarmTime = start + 8 * HOUR_IN_MILLIS + mQcConstants.IN_QUOTA_BUFFER_MS;
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(start, 5 * MINUTE_IN_MILLIS, 1), false);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Add some more sessions, but still in quota.
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - 3 * HOUR_IN_MILLIS, MINUTE_IN_MILLIS, 1), false);
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - HOUR_IN_MILLIS, 3 * MINUTE_IN_MILLIS, 1), false);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Test when out of quota.
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - HOUR_IN_MILLIS, MINUTE_IN_MILLIS, 1), false);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Alarm already scheduled, so make sure it's not scheduled again.
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
@@ -2313,6 +2497,11 @@ public class QuotaControllerTest {
         // because it schedules an alarm too. Prevent it from doing so.
         spyOn(mQuotaController);
         doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
+
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(
+                    createJobStatus("testMaybeScheduleStartAlarmLocked_Never", 1), null);
+        }
 
         // The app is really in the NEVER bucket but is elevated somehow (eg via uidActive).
         setStandbyBucket(NEVER_INDEX);
@@ -2390,22 +2579,30 @@ public class QuotaControllerTest {
         // Rare window size is 24 hours.
         final int standbyBucket = RARE_INDEX;
 
+        JobStatus jobStatus = createJobStatus("testMaybeScheduleStartAlarmLocked_Rare", 1);
+        setStandbyBucket(standbyBucket, jobStatus);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+        }
+
         // Prevent timing session throttling from affecting the test.
         setDeviceConfigInt(QcConstants.KEY_MAX_SESSION_COUNT_RARE, 50);
 
         // No sessions saved yet.
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Test with timing sessions out of window.
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - 25 * HOUR_IN_MILLIS, 5 * MINUTE_IN_MILLIS, 1), false);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
@@ -2417,40 +2614,166 @@ public class QuotaControllerTest {
         final long expectedAlarmTime =
                 start + MINUTE_IN_MILLIS + 24 * HOUR_IN_MILLIS
                         + mQcConstants.IN_QUOTA_BUFFER_MS;
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(start, 5 * MINUTE_IN_MILLIS, 1), false);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Add some more sessions, but still in quota.
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - 3 * HOUR_IN_MILLIS, MINUTE_IN_MILLIS, 1), false);
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - HOUR_IN_MILLIS, 3 * MINUTE_IN_MILLIS, 1), false);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(0)).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Test when out of quota.
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - HOUR_IN_MILLIS, 2 * MINUTE_IN_MILLIS, 1), false);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Alarm already scheduled, so make sure it's not scheduled again.
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, standbyBucket);
         }
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+    }
+
+    @Test
+    public void testMaybeScheduleStartAlarmLocked_Priority() {
+        // saveTimingSession calls maybeScheduleCleanupAlarmLocked which interferes with these tests
+        // because it schedules an alarm too. Prevent it from doing so.
+        spyOn(mQuotaController);
+        doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
+
+        setDeviceConfigInt(QcConstants.KEY_MAX_SESSION_COUNT_RARE, 5);
+
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (24 * HOUR_IN_MILLIS), MINUTE_IN_MILLIS, 1), false);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (7 * HOUR_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 1), false);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (HOUR_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 1), false);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (5 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 1), false);
+
+        InOrder inOrder = inOrder(mAlarmManager);
+
+        JobStatus jobDef = createJobStatus("testMaybeScheduleStartAlarmLocked_Priority",
+                SOURCE_PACKAGE, CALLING_UID,
+                new JobInfo.Builder(1, new ComponentName(mContext, "TestQuotaJobService"))
+                        .setPriority(PRIORITY_DEFAULT)
+                        .build());
+        JobStatus jobLow = createJobStatus("testMaybeScheduleStartAlarmLocked_Priority",
+                SOURCE_PACKAGE, CALLING_UID,
+                new JobInfo.Builder(2, new ComponentName(mContext, "TestQuotaJobService"))
+                        .setPriority(PRIORITY_LOW)
+                        .build());
+        JobStatus jobMin = createJobStatus("testMaybeScheduleStartAlarmLocked_Priority",
+                SOURCE_PACKAGE, CALLING_UID,
+                new JobInfo.Builder(3, new ComponentName(mContext, "TestQuotaJobService"))
+                        .setPriority(PRIORITY_MIN)
+                        .build());
+
+        setStandbyBucket(RARE_INDEX, jobDef, jobLow, jobMin);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(jobMin, null);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX);
+            // Min job requires 5 mins of surplus.
+            long expectedAlarmTime = now + 23 * HOUR_IN_MILLIS + MINUTE_IN_MILLIS;
+            inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
+                    anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+            mQuotaController.maybeStartTrackingJobLocked(jobLow, null);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX);
+            // Low job requires 2.5 mins of surplus.
+            expectedAlarmTime = now + 17 * HOUR_IN_MILLIS + 90 * SECOND_IN_MILLIS;
+            inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
+                    anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+            mQuotaController.maybeStartTrackingJobLocked(jobDef, null);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX);
+            // Default+ jobs require IN_QUOTA_BUFFER_MS.
+            expectedAlarmTime = now + mQcConstants.IN_QUOTA_BUFFER_MS;
+            inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
+                    anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+            mQuotaController.maybeStopTrackingJobLocked(jobMin, null, false);
+            mQuotaController.maybeStopTrackingJobLocked(jobLow, null, false);
+            mQuotaController.maybeStopTrackingJobLocked(jobDef, null, false);
+
+            setStandbyBucket(FREQUENT_INDEX, jobDef, jobLow, jobMin);
+
+            mQuotaController.maybeStartTrackingJobLocked(jobMin, null);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, FREQUENT_INDEX);
+            // Min job requires 5 mins of surplus.
+            expectedAlarmTime = now + 7 * HOUR_IN_MILLIS + MINUTE_IN_MILLIS;
+            inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
+                    anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+            mQuotaController.maybeStartTrackingJobLocked(jobLow, null);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, FREQUENT_INDEX);
+            // Low job requires 2.5 mins of surplus.
+            expectedAlarmTime = now + HOUR_IN_MILLIS + 90 * SECOND_IN_MILLIS;
+            inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
+                    anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+            mQuotaController.maybeStartTrackingJobLocked(jobDef, null);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, FREQUENT_INDEX);
+            // Default+ jobs already have enough quota.
+            inOrder.verify(mAlarmManager, timeout(1000).times(0)).setWindow(
+                    anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+            mQuotaController.maybeStopTrackingJobLocked(jobMin, null, false);
+            mQuotaController.maybeStopTrackingJobLocked(jobLow, null, false);
+            mQuotaController.maybeStopTrackingJobLocked(jobDef, null, false);
+
+            setStandbyBucket(WORKING_INDEX, jobDef, jobLow, jobMin);
+
+            mQuotaController.maybeStartTrackingJobLocked(jobMin, null);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, WORKING_INDEX);
+            // Min job requires 5 mins of surplus.
+            expectedAlarmTime = now + HOUR_IN_MILLIS + MINUTE_IN_MILLIS;
+            inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
+                    anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+            mQuotaController.maybeStartTrackingJobLocked(jobLow, null);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, WORKING_INDEX);
+            // Low job has enough surplus.
+            inOrder.verify(mAlarmManager, timeout(1000).times(0)).setWindow(
+                    anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+            mQuotaController.maybeStartTrackingJobLocked(jobDef, null);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, WORKING_INDEX);
+            // Default+ jobs already have enough quota.
+            inOrder.verify(mAlarmManager, timeout(1000).times(0)).setWindow(
+                    anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+        }
     }
 
     /** Tests that the start alarm is properly rescheduled if the app's bucket is changed. */
@@ -2464,24 +2787,29 @@ public class QuotaControllerTest {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
         // Affects rare bucket
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - 12 * HOUR_IN_MILLIS, 9 * MINUTE_IN_MILLIS, 3), false);
         // Affects frequent and rare buckets
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - 4 * HOUR_IN_MILLIS, 4 * MINUTE_IN_MILLIS, 3), false);
         // Affects working, frequent, and rare buckets
         final long outOfQuotaTime = now - HOUR_IN_MILLIS;
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(outOfQuotaTime, 7 * MINUTE_IN_MILLIS, 10), false);
         // Affects all buckets
-        mQuotaController.saveTimingSession(0, "com.android.test",
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - 5 * MINUTE_IN_MILLIS, 3 * MINUTE_IN_MILLIS, 3), false);
 
         InOrder inOrder = inOrder(mAlarmManager);
 
+        JobStatus jobStatus = createJobStatus("testMaybeScheduleStartAlarmLocked_BucketChange", 1);
+
         // Start in ACTIVE bucket.
+        setStandbyBucket(ACTIVE_INDEX, jobStatus);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", ACTIVE_INDEX);
+            mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, ACTIVE_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
                 .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
@@ -2492,8 +2820,10 @@ public class QuotaControllerTest {
         final long expectedWorkingAlarmTime =
                 outOfQuotaTime + (2 * HOUR_IN_MILLIS)
                         + mQcConstants.IN_QUOTA_BUFFER_MS;
+        setStandbyBucket(WORKING_INDEX, jobStatus);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", WORKING_INDEX);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, WORKING_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
@@ -2502,8 +2832,10 @@ public class QuotaControllerTest {
         final long expectedFrequentAlarmTime =
                 outOfQuotaTime + (8 * HOUR_IN_MILLIS)
                         + mQcConstants.IN_QUOTA_BUFFER_MS;
+        setStandbyBucket(FREQUENT_INDEX, jobStatus);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", FREQUENT_INDEX);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, FREQUENT_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedFrequentAlarmTime), anyLong(),
@@ -2512,29 +2844,37 @@ public class QuotaControllerTest {
         final long expectedRareAlarmTime =
                 outOfQuotaTime + (24 * HOUR_IN_MILLIS)
                         + mQcConstants.IN_QUOTA_BUFFER_MS;
+        setStandbyBucket(RARE_INDEX, jobStatus);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", RARE_INDEX);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedRareAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // And back up again.
+        setStandbyBucket(FREQUENT_INDEX, jobStatus);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", FREQUENT_INDEX);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, FREQUENT_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedFrequentAlarmTime), anyLong(),
                 eq(TAG_QUOTA_CHECK), any(), any());
 
+        setStandbyBucket(WORKING_INDEX, jobStatus);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", WORKING_INDEX);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, WORKING_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
                 eq(TAG_QUOTA_CHECK), any(), any());
 
+        setStandbyBucket(ACTIVE_INDEX, jobStatus);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", ACTIVE_INDEX);
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, ACTIVE_INDEX);
         }
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
                 .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
@@ -2551,6 +2891,13 @@ public class QuotaControllerTest {
 
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
         final int standbyBucket = WORKING_INDEX;
+
+        JobStatus jobStatus = createJobStatus("testMaybeScheduleStartAlarmLocked", 1);
+        setStandbyBucket(standbyBucket, jobStatus);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+        }
+
         ExecutionStats stats;
         synchronized (mQuotaController.mLock) {
             stats = mQuotaController.getExecutionStatsLocked(
@@ -2646,6 +2993,11 @@ public class QuotaControllerTest {
         spyOn(mQuotaController);
         doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
 
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(
+                    createJobStatus("testMaybeScheduleStartAlarmLocked", 1), null);
+        }
+
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
         // Working set window size is 2 hours.
         final int standbyBucket = WORKING_INDEX;
@@ -2671,12 +3023,16 @@ public class QuotaControllerTest {
                 anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
     }
 
-
     private void runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_MaxTimeCheck() {
         // saveTimingSession calls maybeScheduleCleanupAlarmLocked which interferes with these tests
         // because it schedules an alarm too. Prevent it from doing so.
         spyOn(mQuotaController);
         doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
+
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(
+                    createJobStatus("testMaybeScheduleStartAlarmLocked", 1), null);
+        }
 
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
         // Working set window size is 2 hours.
@@ -2708,6 +3064,8 @@ public class QuotaControllerTest {
     public void testConstantsUpdating_ValidValues() {
         setDeviceConfigLong(QcConstants.KEY_ALLOWED_TIME_PER_PERIOD_MS, 5 * MINUTE_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_IN_QUOTA_BUFFER_MS, 2 * MINUTE_IN_MILLIS);
+        setDeviceConfigFloat(QcConstants.KEY_ALLOWED_TIME_SURPLUS_PRIORITY_LOW, .7f);
+        setDeviceConfigFloat(QcConstants.KEY_ALLOWED_TIME_SURPLUS_PRIORITY_MIN, .2f);
         setDeviceConfigLong(QcConstants.KEY_WINDOW_SIZE_ACTIVE_MS, 15 * MINUTE_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_WINDOW_SIZE_WORKING_MS, 30 * MINUTE_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_WINDOW_SIZE_FREQUENT_MS, 45 * MINUTE_IN_MILLIS);
@@ -2748,6 +3106,8 @@ public class QuotaControllerTest {
 
         assertEquals(5 * MINUTE_IN_MILLIS, mQuotaController.getAllowedTimePerPeriodMs());
         assertEquals(2 * MINUTE_IN_MILLIS, mQuotaController.getInQuotaBufferMs());
+        assertEquals(.7f, mQuotaController.getAllowedTimeSurplusPriorityLow(), 1e-6);
+        assertEquals(.2f, mQuotaController.getAllowedTimeSurplusPriorityMin(), 1e-6);
         assertEquals(15 * MINUTE_IN_MILLIS, mQuotaController.getBucketWindowSizes()[ACTIVE_INDEX]);
         assertEquals(30 * MINUTE_IN_MILLIS, mQuotaController.getBucketWindowSizes()[WORKING_INDEX]);
         assertEquals(45 * MINUTE_IN_MILLIS,
@@ -2793,6 +3153,8 @@ public class QuotaControllerTest {
         // Test negatives/too low.
         setDeviceConfigLong(QcConstants.KEY_ALLOWED_TIME_PER_PERIOD_MS, -MINUTE_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_IN_QUOTA_BUFFER_MS, -MINUTE_IN_MILLIS);
+        setDeviceConfigFloat(QcConstants.KEY_ALLOWED_TIME_SURPLUS_PRIORITY_LOW, -.1f);
+        setDeviceConfigFloat(QcConstants.KEY_ALLOWED_TIME_SURPLUS_PRIORITY_MIN, -.01f);
         setDeviceConfigLong(QcConstants.KEY_WINDOW_SIZE_ACTIVE_MS, -MINUTE_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_WINDOW_SIZE_WORKING_MS, -MINUTE_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_WINDOW_SIZE_FREQUENT_MS, -MINUTE_IN_MILLIS);
@@ -2831,6 +3193,8 @@ public class QuotaControllerTest {
 
         assertEquals(MINUTE_IN_MILLIS, mQuotaController.getAllowedTimePerPeriodMs());
         assertEquals(0, mQuotaController.getInQuotaBufferMs());
+        assertEquals(0f, mQuotaController.getAllowedTimeSurplusPriorityLow(), 1e-6);
+        assertEquals(0f, mQuotaController.getAllowedTimeSurplusPriorityMin(), 1e-6);
         assertEquals(MINUTE_IN_MILLIS, mQuotaController.getBucketWindowSizes()[ACTIVE_INDEX]);
         assertEquals(MINUTE_IN_MILLIS, mQuotaController.getBucketWindowSizes()[WORKING_INDEX]);
         assertEquals(MINUTE_IN_MILLIS, mQuotaController.getBucketWindowSizes()[FREQUENT_INDEX]);
@@ -2878,6 +3242,8 @@ public class QuotaControllerTest {
         // Test larger than a day. Controller should cap at one day.
         setDeviceConfigLong(QcConstants.KEY_ALLOWED_TIME_PER_PERIOD_MS, 25 * HOUR_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_IN_QUOTA_BUFFER_MS, 25 * HOUR_IN_MILLIS);
+        setDeviceConfigFloat(QcConstants.KEY_ALLOWED_TIME_SURPLUS_PRIORITY_LOW, 1f);
+        setDeviceConfigFloat(QcConstants.KEY_ALLOWED_TIME_SURPLUS_PRIORITY_MIN, .95f);
         setDeviceConfigLong(QcConstants.KEY_WINDOW_SIZE_ACTIVE_MS, 25 * HOUR_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_WINDOW_SIZE_WORKING_MS, 25 * HOUR_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_WINDOW_SIZE_FREQUENT_MS, 25 * HOUR_IN_MILLIS);
@@ -2905,6 +3271,8 @@ public class QuotaControllerTest {
 
         assertEquals(24 * HOUR_IN_MILLIS, mQuotaController.getAllowedTimePerPeriodMs());
         assertEquals(5 * MINUTE_IN_MILLIS, mQuotaController.getInQuotaBufferMs());
+        assertEquals(.9f, mQuotaController.getAllowedTimeSurplusPriorityLow(), 1e-6);
+        assertEquals(.9f, mQuotaController.getAllowedTimeSurplusPriorityMin(), 1e-6);
         assertEquals(24 * HOUR_IN_MILLIS, mQuotaController.getBucketWindowSizes()[ACTIVE_INDEX]);
         assertEquals(24 * HOUR_IN_MILLIS, mQuotaController.getBucketWindowSizes()[WORKING_INDEX]);
         assertEquals(24 * HOUR_IN_MILLIS, mQuotaController.getBucketWindowSizes()[FREQUENT_INDEX]);
@@ -3669,8 +4037,8 @@ public class QuotaControllerTest {
 
         // Wait for some extra time to allow for job processing.
         inOrder.verify(mJobSchedulerService,
-                timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(0))
-                .onControllerStateChanged(any());
+                        timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(0))
+                .onControllerStateChanged(argThat(jobs -> jobs.size() > 0));
         synchronized (mQuotaController.mLock) {
             assertEquals(remainingTimeMs / 2,
                     mQuotaController.getRemainingExecutionTimeLocked(jobBg));
@@ -3681,8 +4049,8 @@ public class QuotaControllerTest {
         setProcessState(ActivityManager.PROCESS_STATE_TOP_SLEEPING);
         advanceElapsedClock(remainingTimeMs / 2 + 1);
         inOrder.verify(mJobSchedulerService,
-                timeout(remainingTimeMs / 2 + 2 * SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged(any());
+                        timeout(remainingTimeMs / 2 + 2 * SECOND_IN_MILLIS).times(1))
+                .onControllerStateChanged(argThat(jobs -> jobs.size() == 1));
         // Top job should still be allowed to run.
         assertFalse(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
         assertTrue(jobTop.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
@@ -3696,7 +4064,7 @@ public class QuotaControllerTest {
         advanceElapsedClock(20 * SECOND_IN_MILLIS);
         setProcessState(ActivityManager.PROCESS_STATE_TOP);
         inOrder.verify(mJobSchedulerService, timeout(SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged(any());
+                .onControllerStateChanged(argThat(jobs -> jobs.size() == 1));
         trackJobs(jobFg, jobTop);
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobTop);
@@ -3715,7 +4083,7 @@ public class QuotaControllerTest {
         advanceElapsedClock(20 * SECOND_IN_MILLIS);
         setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
         inOrder.verify(mJobSchedulerService, timeout(SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged(any());
+                .onControllerStateChanged(argThat(jobs -> jobs.size() == 2));
         // App is now in background and out of quota. Fg should now change to out of quota since it
         // wasn't started. Top should remain in quota since it started when the app was in TOP.
         assertTrue(jobTop.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
@@ -3753,7 +4121,7 @@ public class QuotaControllerTest {
         // Wait for some extra time to allow for job processing.
         verify(mJobSchedulerService,
                 timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged(any());
+                .onControllerStateChanged(argThat(jobs -> jobs.size() == 1));
         assertFalse(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
         assertEquals(JobSchedulerService.sElapsedRealtimeClock.millis(),
                 jobStatus.getWhenStandbyDeferred());
@@ -3797,7 +4165,7 @@ public class QuotaControllerTest {
         // Wait for some extra time to allow for job processing.
         verify(mJobSchedulerService,
                 timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(0))
-                .onControllerStateChanged(any());
+                .onControllerStateChanged(argThat(jobs -> jobs.size() > 0));
         assertTrue(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
         // The job used up the remaining quota, but in that time, the same amount of time in the
         // old TimingSession also fell out of the quota window, so it should still have the same
@@ -3819,7 +4187,7 @@ public class QuotaControllerTest {
         // Wait for some extra time to allow for job processing.
         verify(mJobSchedulerService,
                 timeout(12 * SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged(any());
+                .onControllerStateChanged(argThat(jobs -> jobs.size() == 1));
         assertFalse(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
         verify(handler, never()).sendMessageDelayed(any(), anyInt());
     }
@@ -4406,6 +4774,11 @@ public class QuotaControllerTest {
         spyOn(mQuotaController);
         doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
 
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(
+                    createJobStatus("testMaybeScheduleStartAlarmLocked_EJ", 1), null);
+        }
+
         final int standbyBucket = WORKING_INDEX;
         setStandbyBucket(standbyBucket);
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_WORKING_MS, 20 * MINUTE_IN_MILLIS);
@@ -4481,6 +4854,11 @@ public class QuotaControllerTest {
         // because it schedules an alarm too. Prevent it from doing so.
         spyOn(mQuotaController);
         doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
+
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(
+                    createJobStatus("testMaybeScheduleStartAlarmLocked_Ej_BucketChange", 1), null);
+        }
 
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_ACTIVE_MS, 30 * MINUTE_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_WORKING_MS, 20 * MINUTE_IN_MILLIS);
@@ -4589,6 +4967,11 @@ public class QuotaControllerTest {
         // because it schedules an alarm too. Prevent it from doing so.
         spyOn(mQuotaController);
         doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
+
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(
+                    createJobStatus("testMaybeScheduleStartAlarmLocked_Ej_SRQ", 1), null);
+        }
 
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
         setStandbyBucket(WORKING_INDEX);
@@ -5437,8 +5820,8 @@ public class QuotaControllerTest {
 
         // Wait for some extra time to allow for job processing.
         inOrder.verify(mJobSchedulerService,
-                timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(0))
-                .onControllerStateChanged(any());
+                        timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(0))
+                .onControllerStateChanged(argThat(jobs -> jobs.size() > 0));
         synchronized (mQuotaController.mLock) {
             assertEquals(remainingTimeMs / 2,
                     mQuotaController.getRemainingEJExecutionTimeLocked(
@@ -5448,8 +5831,8 @@ public class QuotaControllerTest {
         setProcessState(ActivityManager.PROCESS_STATE_TOP_SLEEPING);
         advanceElapsedClock(remainingTimeMs / 2 + 1);
         inOrder.verify(mJobSchedulerService,
-                timeout(remainingTimeMs / 2 + 2 * SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged(any());
+                        timeout(remainingTimeMs / 2 + 2 * SECOND_IN_MILLIS).times(1))
+                .onControllerStateChanged(argThat(jobs -> jobs.size() == 2));
         // Top should still be "in quota" since it started before the app ran on top out of quota.
         assertFalse(jobBg.isExpeditedQuotaApproved());
         assertTrue(jobTop.isExpeditedQuotaApproved());
@@ -5473,7 +5856,7 @@ public class QuotaControllerTest {
         setProcessState(ActivityManager.PROCESS_STATE_TOP);
         // Confirm QC recognizes that jobUnstarted has changed from out-of-quota to in-quota.
         inOrder.verify(mJobSchedulerService, timeout(SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged(any());
+                .onControllerStateChanged(argThat(jobs -> jobs.size() == 2));
         trackJobs(jobTop2, jobFg);
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobTop2);
@@ -5494,7 +5877,7 @@ public class QuotaControllerTest {
         advanceElapsedClock(20 * SECOND_IN_MILLIS);
         setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
         inOrder.verify(mJobSchedulerService, timeout(SECOND_IN_MILLIS).times(1))
-                .onControllerStateChanged(any());
+                .onControllerStateChanged(argThat(jobs -> jobs.size() == 3));
         // App is now in background and out of quota. Fg should now change to out of quota since it
         // wasn't started. Top should remain in quota since it started when the app was in TOP.
         assertTrue(jobTop2.isExpeditedQuotaApproved());
@@ -5633,7 +6016,7 @@ public class QuotaControllerTest {
         // Wait for some extra time to allow for job processing.
         verify(mJobSchedulerService,
                 timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(0))
-                .onControllerStateChanged(any());
+                .onControllerStateChanged(argThat(jobs -> jobs.size() > 0));
         assertTrue(jobStatus.isExpeditedQuotaApproved());
         // The job used up the remaining quota, but in that time, the same amount of time in the
         // old TimingSession also fell out of the quota window, so it should still have the same
