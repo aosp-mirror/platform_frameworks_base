@@ -263,24 +263,6 @@ class AssociationStoreImpl implements AssociationStore {
         synchronized (mListeners) {
             for (OnChangeListener listener : mListeners) {
                 listener.onAssociationChanged(changeType, association);
-
-                switch (changeType) {
-                    case CHANGE_TYPE_ADDED:
-                        listener.onAssociationAdded(association);
-                        break;
-
-                    case CHANGE_TYPE_REMOVED:
-                        listener.onAssociationRemoved(association);
-                        break;
-
-                    case CHANGE_TYPE_UPDATED_ADDRESS_CHANGED:
-                        listener.onAssociationUpdated(association, true);
-                        break;
-
-                    case CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED:
-                        listener.onAssociationUpdated(association, false);
-                        break;
-                }
             }
         }
     }
