@@ -9068,6 +9068,7 @@ package android.bluetooth {
     field public static final int SOURCE_CODEC_TYPE_APTX = 2; // 0x2
     field public static final int SOURCE_CODEC_TYPE_APTX_HD = 3; // 0x3
     field public static final int SOURCE_CODEC_TYPE_INVALID = 1000000; // 0xf4240
+    field public static final int SOURCE_CODEC_TYPE_LC3 = 5; // 0x5
     field public static final int SOURCE_CODEC_TYPE_LDAC = 4; // 0x4
     field public static final int SOURCE_CODEC_TYPE_SBC = 0; // 0x0
   }
