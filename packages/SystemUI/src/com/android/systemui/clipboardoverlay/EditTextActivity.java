@@ -22,9 +22,12 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.android.systemui.R;
 
@@ -32,8 +35,11 @@ import com.android.systemui.R;
  * Lightweight activity for editing text clipboard contents
  */
 public class EditTextActivity extends Activity {
+    private static final String TAG = "EditTextActivity";
+
     private EditText mEditText;
     private ClipboardManager mClipboardManager;
+    private TextView mAttribution;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +48,7 @@ public class EditTextActivity extends Activity {
         findViewById(R.id.copy_button).setOnClickListener((v) -> saveToClipboard());
         findViewById(R.id.share).setOnClickListener((v) -> share());
         mEditText = findViewById(R.id.edit_text);
+        mAttribution = findViewById(R.id.attribution);
         mClipboardManager = requireNonNull(getSystemService(ClipboardManager.class));
     }
 
@@ -53,7 +60,15 @@ public class EditTextActivity extends Activity {
             finish();
             return;
         }
-        // TODO: put clip attribution in R.id.attribution TextView
+        PackageManager pm = getApplicationContext().getPackageManager();
+        try {
+            CharSequence label = pm.getApplicationLabel(
+                    pm.getApplicationInfo(mClipboardManager.getPrimaryClipSource(),
+                            PackageManager.ApplicationInfoFlags.of(0)));
+            mAttribution.setText(getResources().getString(R.string.clipboard_edit_source, label));
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Package not found: " + mClipboardManager.getPrimaryClipSource(), e);
+        }
         mEditText.setText(clip.getItemAt(0).getText());
         mEditText.requestFocus();
     }
