@@ -853,7 +853,9 @@ public final class BatteryService extends SystemService {
         pw.println("Battery service (battery) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  set [-f] [ac|usb|wireless|status|level|temp|present|invalid] <value>");
+        pw.println("  get [-f] [ac|usb|wireless|status|level|temp|present|counter|invalid]");
+        pw.println(
+                "  set [-f] [ac|usb|wireless|status|level|temp|present|counter|invalid] <value>");
         pw.println("    Force a battery property value, freezing battery state.");
         pw.println("    -f: force a battery change broadcast be sent, prints new sequence.");
         pw.println("  unplug [-f]");
@@ -863,7 +865,7 @@ public final class BatteryService extends SystemService {
         pw.println("    Unfreeze battery state, returning to current hardware values.");
         pw.println("    -f: force a battery change broadcast be sent, prints new sequence.");
         if (Build.IS_DEBUGGABLE) {
-            pw.println("  disable_charge");
+            pw.println("  suspend_input");
             pw.println("    Suspend charging even if plugged in. ");
         }
     }
@@ -892,6 +894,46 @@ public final class BatteryService extends SystemService {
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
                 unplugBattery(/* forceUpdate= */ (opts & OPTION_FORCE_UPDATE) != 0, pw);
+            } break;
+            case "get": {
+                final String key = shell.getNextArg();
+                if (key == null) {
+                    pw.println("No property specified");
+                    return -1;
+
+                }
+                switch (key) {
+                    case "present":
+                        pw.println(mHealthInfo.batteryPresent);
+                        break;
+                    case "ac":
+                        pw.println(mHealthInfo.chargerAcOnline);
+                        break;
+                    case "usb":
+                        pw.println(mHealthInfo.chargerUsbOnline);
+                        break;
+                    case "wireless":
+                        pw.println(mHealthInfo.chargerWirelessOnline);
+                        break;
+                    case "status":
+                        pw.println(mHealthInfo.batteryStatus);
+                        break;
+                    case "level":
+                        pw.println(mHealthInfo.batteryLevel);
+                        break;
+                    case "counter":
+                        pw.println(mHealthInfo.batteryChargeCounterUah);
+                        break;
+                    case "temp":
+                        pw.println(mHealthInfo.batteryTemperatureTenthsCelsius);
+                        break;
+                    case "invalid":
+                        pw.println(mInvalidCharger);
+                        break;
+                    default:
+                        pw.println("Unknown get option: " + key);
+                        break;
+                }
             } break;
             case "set": {
                 int opts = parseOptions(shell);
