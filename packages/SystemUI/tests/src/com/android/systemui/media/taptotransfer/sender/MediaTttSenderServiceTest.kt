@@ -95,6 +95,20 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
     }
 
     @Test
+    fun transferToThisDeviceSucceeded_controllerTriggeredWithCorrectState() {
+        val undoCallback = object : IUndoTransferCallback.Stub() {
+            override fun onUndoTriggered() {}
+        }
+        service.transferToThisDeviceSucceeded(mediaInfo, DeviceInfo("name"), undoCallback)
+
+        val chipStateCaptor = argumentCaptor<TransferToThisDeviceSucceeded>()
+        verify(controller).displayChip(capture(chipStateCaptor))
+
+        val chipState = chipStateCaptor.value!!
+        assertThat(chipState.undoCallback).isEqualTo(undoCallback)
+    }
+
+    @Test
     fun transferFailed_controllerTriggeredWithTransferFailedState() {
         service.transferFailed(mediaInfo, DeviceInfo("Fake name"))
 

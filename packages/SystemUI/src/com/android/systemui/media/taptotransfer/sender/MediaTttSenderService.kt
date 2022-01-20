@@ -78,6 +78,16 @@ class MediaTttSenderService @Inject constructor(
                 mediaInfo, otherDeviceInfo, undoCallback
             )
         }
+
+        override fun transferToThisDeviceSucceeded(
+            mediaInfo: MediaRoute2Info,
+            otherDeviceInfo: DeviceInfo,
+            undoCallback: IUndoTransferCallback
+        ) {
+            this@MediaTttSenderService.transferToThisDeviceSucceeded(
+                mediaInfo, otherDeviceInfo, undoCallback
+            )
+        }
     }
 
     // TODO(b/203800643): Use the app icon from the media info instead of a fake one.
@@ -139,6 +149,18 @@ class MediaTttSenderService @Inject constructor(
         mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo, undoCallback: IUndoTransferCallback
     ) {
         val chipState = TransferToReceiverSucceeded(
+            appIconDrawable = fakeAppIconDrawable,
+            appIconContentDescription = mediaInfo.name.toString(),
+            otherDeviceName = otherDeviceInfo.name,
+            undoCallback = undoCallback
+        )
+        controller.displayChip(chipState)
+    }
+
+    private fun transferToThisDeviceSucceeded(
+        mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo, undoCallback: IUndoTransferCallback
+    ) {
+        val chipState = TransferToThisDeviceSucceeded(
             appIconDrawable = fakeAppIconDrawable,
             appIconContentDescription = mediaInfo.name.toString(),
             otherDeviceName = otherDeviceInfo.name,

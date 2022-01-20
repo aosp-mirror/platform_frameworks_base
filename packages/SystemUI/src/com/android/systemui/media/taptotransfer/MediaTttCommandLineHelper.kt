@@ -36,6 +36,7 @@ import com.android.systemui.media.taptotransfer.sender.MoveCloserToEndCast
 import com.android.systemui.media.taptotransfer.sender.MoveCloserToStartCast
 import com.android.systemui.media.taptotransfer.sender.TransferFailed
 import com.android.systemui.media.taptotransfer.sender.TransferToReceiverTriggered
+import com.android.systemui.media.taptotransfer.sender.TransferToThisDeviceSucceeded
 import com.android.systemui.media.taptotransfer.sender.TransferToThisDeviceTriggered
 import com.android.systemui.media.taptotransfer.sender.TransferToReceiverSucceeded
 import com.android.systemui.shared.mediattt.DeviceInfo
@@ -108,7 +109,7 @@ class MediaTttCommandLineHelper @Inject constructor(
                 TRANSFER_TO_RECEIVER_SUCCEEDED_COMMAND_NAME -> {
                     val undoCallback = object : IUndoTransferCallback.Stub() {
                         override fun onUndoTriggered() {
-                            Log.i(TAG, "Undo callback triggered")
+                            Log.i(TAG, "Undo transfer to receiver callback triggered")
                             // The external services that implement this callback would kick off a
                             // transfer back to this device, so mimic that here.
                             runOnService { senderService ->
@@ -120,6 +121,23 @@ class MediaTttCommandLineHelper @Inject constructor(
                     runOnService { senderService ->
                         senderService
                             .transferToReceiverSucceeded(mediaInfo, otherDeviceInfo, undoCallback)
+                    }
+                }
+                TRANSFER_TO_THIS_DEVICE_SUCCEEDED_COMMAND_NAME -> {
+                    val undoCallback = object : IUndoTransferCallback.Stub() {
+                        override fun onUndoTriggered() {
+                            Log.i(TAG, "Undo transfer to this device callback triggered")
+                            // The external services that implement this callback would kick off a
+                            // transfer back to the receiver, so mimic that here.
+                            runOnService { senderService ->
+                                senderService
+                                    .transferToReceiverTriggered(mediaInfo, otherDeviceInfo)
+                            }
+                        }
+                    }
+                    runOnService { senderService ->
+                        senderService
+                            .transferToThisDeviceSucceeded(mediaInfo, otherDeviceInfo, undoCallback)
                     }
                 }
                 TRANSFER_FAILED_COMMAND_NAME -> {
@@ -134,6 +152,7 @@ class MediaTttCommandLineHelper @Inject constructor(
                             "$TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME, " +
                             "$TRANSFER_TO_THIS_DEVICE_TRIGGERED_COMMAND_NAME, " +
                             "$TRANSFER_TO_RECEIVER_SUCCEEDED_COMMAND_NAME, " +
+                            "$TRANSFER_TO_THIS_DEVICE_SUCCEEDED_COMMAND_NAME, " +
                             TRANSFER_FAILED_COMMAND_NAME
                     )
                 }
@@ -244,6 +263,9 @@ val TRANSFER_TO_THIS_DEVICE_TRIGGERED_COMMAND_NAME =
     TransferToThisDeviceTriggered::class.simpleName!!
 @VisibleForTesting
 val TRANSFER_TO_RECEIVER_SUCCEEDED_COMMAND_NAME = TransferToReceiverSucceeded::class.simpleName!!
+@VisibleForTesting
+val TRANSFER_TO_THIS_DEVICE_SUCCEEDED_COMMAND_NAME =
+    TransferToThisDeviceSucceeded::class.simpleName!!
 @VisibleForTesting
 val TRANSFER_FAILED_COMMAND_NAME = TransferFailed::class.simpleName!!
 

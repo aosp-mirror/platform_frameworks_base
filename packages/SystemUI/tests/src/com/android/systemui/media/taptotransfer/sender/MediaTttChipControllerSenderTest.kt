@@ -170,6 +170,67 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
+    fun transferToThisDeviceSucceeded_appIcon_deviceName_noLoadingIcon_noFailureIcon() {
+        val state = transferToThisDeviceSucceeded()
+        controllerSender.displayChip(state)
+
+        val chipView = getChipView()
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
+        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
+        assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
+        assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
+        assertThat(chipView.getFailureIcon().visibility).isEqualTo(View.GONE)
+    }
+
+    @Test
+    fun transferToThisDeviceSucceeded_nullUndoRunnable_noUndo() {
+        controllerSender.displayChip(transferToThisDeviceSucceeded(undoCallback = null))
+
+        val chipView = getChipView()
+        assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
+    }
+
+    @Test
+    fun transferToThisDeviceSucceeded_withUndoRunnable_undoWithClick() {
+        val undoCallback = object : IUndoTransferCallback.Stub() {
+            override fun onUndoTriggered() {}
+        }
+        controllerSender.displayChip(transferToThisDeviceSucceeded(undoCallback))
+
+        val chipView = getChipView()
+        assertThat(chipView.getUndoButton().visibility).isEqualTo(View.VISIBLE)
+        assertThat(chipView.getUndoButton().hasOnClickListeners()).isTrue()
+    }
+
+    @Test
+    fun transferToThisDeviceSucceeded_withUndoRunnable_undoButtonClickRunsRunnable() {
+        var undoCallbackCalled = false
+        val undoCallback = object : IUndoTransferCallback.Stub() {
+            override fun onUndoTriggered() {
+                undoCallbackCalled = true
+            }
+        }
+
+        controllerSender.displayChip(transferToThisDeviceSucceeded(undoCallback))
+        getChipView().getUndoButton().performClick()
+
+        assertThat(undoCallbackCalled).isTrue()
+    }
+
+    @Test
+    fun transferToThisDeviceSucceeded_undoButtonClick_switchesToTransferToReceiverTriggered() {
+        val undoCallback = object : IUndoTransferCallback.Stub() {
+            override fun onUndoTriggered() {}
+        }
+        controllerSender.displayChip(transferToThisDeviceSucceeded(undoCallback))
+
+        getChipView().getUndoButton().performClick()
+
+        assertThat(getChipView().getChipText())
+            .isEqualTo(transferToReceiverTriggered().getChipTextString(context))
+    }
+
+    @Test
     fun transferFailed_appIcon_noDeviceName_noLoadingIcon_noUndo_failureIcon() {
         val state = transferFailed()
         controllerSender.displayChip(state)
@@ -266,6 +327,12 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferToReceiverSucceeded(undoCallback: IUndoTransferCallback? = null) =
         TransferToReceiverSucceeded(
+            appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoCallback
+        )
+
+    /** Helper method providing default parameters to not clutter up the tests. */
+    private fun transferToThisDeviceSucceeded(undoCallback: IUndoTransferCallback? = null) =
+        TransferToThisDeviceSucceeded(
             appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoCallback
         )
 

@@ -53,30 +53,10 @@ class MediaTttChipControllerSender @Inject constructor(
             if (chipState.showLoading()) { View.VISIBLE } else { View.GONE }
 
         // Undo
-        val undoClickListener: View.OnClickListener? =
-            if (chipState is TransferToReceiverSucceeded && chipState.undoCallback != null)
-                View.OnClickListener {
-                    chipState.undoCallback.onUndoTriggered()
-                    // The external service should eventually send us a
-                    // TransferToThisDeviceTriggered state, but that may take too long to go through
-                    // the binder and the user may be confused as to why the UI hasn't changed yet.
-                    // So, we immediately change the UI here.
-                    displayChip(
-                        TransferToThisDeviceTriggered(
-                            chipState.appIconDrawable,
-                            chipState.appIconContentDescription
-                        )
-                    )
-                }
-            else
-                null
         val undoView = currentChipView.requireViewById<View>(R.id.undo)
-        undoView.visibility = if (undoClickListener != null) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
+        val undoClickListener = chipState.undoClickListener(this)
         undoView.setOnClickListener(undoClickListener)
+        undoView.visibility = if (undoClickListener != null) { View.VISIBLE } else { View.GONE }
 
         // Failure
         val showFailure = chipState is TransferFailed

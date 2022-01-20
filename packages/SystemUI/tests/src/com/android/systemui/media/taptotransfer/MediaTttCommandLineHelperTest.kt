@@ -167,6 +167,18 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     }
 
     @Test
+    fun sender_transferToThisDeviceSucceeded_chipDisplayWithCorrectState() {
+        commandRegistry.onShellCommand(pw, getTransferToThisDeviceSucceededCommand())
+
+        assertThat(context.isBound(mediaSenderServiceComponentName)).isTrue()
+
+        val deviceInfoCaptor = argumentCaptor<DeviceInfo>()
+        verify(mediaSenderService)
+            .transferToThisDeviceSucceeded(any(), capture(deviceInfoCaptor), any())
+        assertThat(deviceInfoCaptor.value!!.name).isEqualTo(DEVICE_NAME)
+    }
+
+    @Test
     fun sender_transferFailed_serviceCallbackCalled() {
         commandRegistry.onShellCommand(pw, getTransferFailedCommand())
 
@@ -228,6 +240,13 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
             ADD_CHIP_COMMAND_SENDER_TAG,
             DEVICE_NAME,
             TRANSFER_TO_RECEIVER_SUCCEEDED_COMMAND_NAME
+        )
+
+    private fun getTransferToThisDeviceSucceededCommand(): Array<String> =
+        arrayOf(
+            ADD_CHIP_COMMAND_SENDER_TAG,
+            DEVICE_NAME,
+            TRANSFER_TO_THIS_DEVICE_SUCCEEDED_COMMAND_NAME
         )
 
     private fun getTransferFailedCommand(): Array<String> =
