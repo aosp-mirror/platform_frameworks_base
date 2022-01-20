@@ -872,7 +872,6 @@ public abstract class TvInputService extends Service {
          * Notifies response for broadcast info.
          *
          * @param response broadcast info response.
-         * @hide
          */
         public void notifyBroadcastInfoResponse(@NonNull final BroadcastInfoResponse response) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1111,13 +1110,12 @@ public abstract class TvInputService extends Service {
          * called when broadcast info is requested.
          *
          * @param request broadcast info request
-         * @hide
          */
         public void onRequestBroadcastInfo(@NonNull BroadcastInfoRequest request) {
         }
 
         /**
-         * @hide
+         * called when broadcast info is removed.
          */
         public void onRemoveBroadcastInfo(int requestId) {
         }

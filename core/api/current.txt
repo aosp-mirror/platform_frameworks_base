@@ -24933,6 +24933,42 @@ package android.media.tv {
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.AitInfo> CREATOR;
   }
 
+  public abstract class BroadcastInfoRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getOption();
+    method public int getRequestId();
+    method public int getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.BroadcastInfoRequest> CREATOR;
+    field public static final int REQUEST_OPTION_AUTO_UPDATE = 1; // 0x1
+    field public static final int REQUEST_OPTION_REPEAT = 0; // 0x0
+  }
+
+  public abstract class BroadcastInfoResponse implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getRequestId();
+    method public int getResponseResult();
+    method public int getSequence();
+    method public int getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.BroadcastInfoResponse> CREATOR;
+    field public static final int RESPONSE_RESULT_CANCEL = 3; // 0x3
+    field public static final int RESPONSE_RESULT_ERROR = 1; // 0x1
+    field public static final int RESPONSE_RESULT_OK = 2; // 0x2
+  }
+
+  public final class TsRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public TsRequest(int, int, int);
+    method public int getTsPid();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TsRequest> CREATOR;
+  }
+
+  public final class TsResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public TsResponse(int, int, int, @NonNull String);
+    method @Nullable public String getSharedFilterToken();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TsResponse> CREATOR;
+  }
+
   public final class TvContentRating {
     method public boolean contains(@NonNull android.media.tv.TvContentRating);
     method public static android.media.tv.TvContentRating createRating(String, String, String, java.lang.String...);
@@ -25419,6 +25455,14 @@ package android.media.tv {
     field public static final String ACTION_QUERY_CONTENT_RATING_SYSTEMS = "android.media.tv.action.QUERY_CONTENT_RATING_SYSTEMS";
     field public static final String ACTION_SETUP_INPUTS = "android.media.tv.action.SETUP_INPUTS";
     field public static final String ACTION_VIEW_RECORDING_SCHEDULES = "android.media.tv.action.VIEW_RECORDING_SCHEDULES";
+    field public static final int BROADCAST_INFO_STREAM_EVENT = 5; // 0x5
+    field public static final int BROADCAST_INFO_TYPE_COMMAND = 7; // 0x7
+    field public static final int BROADCAST_INFO_TYPE_DSMCC = 6; // 0x6
+    field public static final int BROADCAST_INFO_TYPE_PES = 4; // 0x4
+    field public static final int BROADCAST_INFO_TYPE_SECTION = 3; // 0x3
+    field public static final int BROADCAST_INFO_TYPE_TABLE = 2; // 0x2
+    field public static final int BROADCAST_INFO_TYPE_TIMELINE = 8; // 0x8
+    field public static final int BROADCAST_INFO_TYPE_TS = 1; // 0x1
     field public static final int INPUT_STATE_CONNECTED = 0; // 0x0
     field public static final int INPUT_STATE_CONNECTED_STANDBY = 1; // 0x1
     field public static final int INPUT_STATE_DISCONNECTED = 2; // 0x2
@@ -25508,6 +25552,7 @@ package android.media.tv {
     method public void layoutSurface(int, int, int, int);
     method public void notifyAdResponse(@NonNull android.media.tv.AdResponse);
     method public void notifyAitInfoUpdated(@NonNull android.media.tv.AitInfo);
+    method public void notifyBroadcastInfoResponse(@NonNull android.media.tv.BroadcastInfoResponse);
     method public void notifyChannelRetuned(android.net.Uri);
     method public void notifyContentAllowed();
     method public void notifyContentBlocked(@NonNull android.media.tv.TvContentRating);
@@ -25527,7 +25572,9 @@ package android.media.tv {
     method public boolean onKeyUp(int, android.view.KeyEvent);
     method public void onOverlayViewSizeChanged(int, int);
     method public abstract void onRelease();
+    method public void onRemoveBroadcastInfo(int);
     method public void onRequestAd(@NonNull android.media.tv.AdRequest);
+    method public void onRequestBroadcastInfo(@NonNull android.media.tv.BroadcastInfoRequest);
     method public boolean onSelectTrack(int, @Nullable String);
     method public abstract void onSetCaptionEnabled(boolean);
     method public void onSetInteractiveAppNotificationEnabled(boolean);
@@ -25792,6 +25839,7 @@ package android.media.tv.interactive {
     method public void notifySessionStateChanged(int, int);
     method public final void notifyTeletextAppStateChanged(int);
     method public void onAdResponse(@NonNull android.media.tv.AdResponse);
+    method public void onBroadcastInfoResponse(@NonNull android.media.tv.BroadcastInfoResponse);
     method public void onContentAllowed();
     method public void onContentBlocked(@NonNull android.media.tv.TvContentRating);
     method public void onCreateBiInteractiveApp(@NonNull android.net.Uri, @Nullable android.os.Bundle);
@@ -25823,7 +25871,9 @@ package android.media.tv.interactive {
     method public void onTuned(@NonNull android.net.Uri);
     method public void onVideoAvailable();
     method public void onVideoUnavailable(int);
+    method public void removeBroadcastInfo(int);
     method public void requestAd(@NonNull android.media.tv.AdRequest);
+    method public void requestBroadcastInfo(@NonNull android.media.tv.BroadcastInfoRequest);
     method public void requestCurrentChannelLcn();
     method public void requestCurrentChannelUri();
     method public void requestCurrentTvInputId();
