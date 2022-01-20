@@ -1782,8 +1782,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         com.android.internal.R.bool.show_ongoing_ime_switcher);
                 if (mShowOngoingImeSwitcherForPhones) {
                     mWindowManagerInternal.setOnHardKeyboardStatusChangeListener(available -> {
-                        mHandler.obtainMessage(MSG_HARD_KEYBOARD_SWITCH_CHANGED, available ? 1 : 0)
-                                .sendToTarget();
+                        mHandler.obtainMessage(MSG_HARD_KEYBOARD_SWITCH_CHANGED,
+                                available ? 1 : 0, 0 /* unused */).sendToTarget();
                     });
                 }
 
