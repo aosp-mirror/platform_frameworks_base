@@ -213,11 +213,9 @@ class AssociationStoreImpl implements AssociationStore {
             final Set<Integer> ids = mAddressMap.get(address);
             if (ids == null) return Collections.emptyList();
 
-            final List<AssociationInfo> associations = new ArrayList<>();
-            for (AssociationInfo association : mIdMap.values()) {
-                if (address.equals(association.getDeviceMacAddress())) {
-                    associations.add(association);
-                }
+            final List<AssociationInfo> associations = new ArrayList<>(ids.size());
+            for (Integer id : ids) {
+                associations.add(mIdMap.get(id));
             }
 
             return Collections.unmodifiableList(associations);
