@@ -52,6 +52,7 @@ android_test {
         "service-blobstore",
         "service-jobscheduler",
         "service-permission.impl",
+        "service-supplementalprocess.impl",
         "services.core",
         "services.devicepolicy",
         "services.net",

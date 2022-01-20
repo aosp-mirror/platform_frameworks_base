@@ -245,6 +245,7 @@ import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
 import com.android.server.storage.DeviceStorageMonitorInternal;
+import com.android.server.supplementalprocess.SupplementalProcessManagerLocal;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.utils.Watchable;
@@ -932,6 +933,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mOverlayConfigSignaturePackage;
     final @Nullable String mRecentsPackage;
     final @Nullable String mAmbientContextDetectionPackage;
+    private final @NonNull String mRequiredSupplementalProcessPackage;
 
     @GuardedBy("mLock")
     private final PackageUsage mPackageUsage = new PackageUsage();
@@ -1669,6 +1671,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mSharedSystemSharedLibraryPackageName = testParams.sharedSystemSharedLibraryPackageName;
         mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
         mResolveComponentName = testParams.resolveComponentName;
+        mRequiredSupplementalProcessPackage = testParams.requiredSupplementalProcessPackage;
 
         mLiveComputer = createLiveComputer();
         mSnapshotComputer = null;
@@ -1693,6 +1696,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mResolveIntentHelper = testParams.resolveIntentHelper;
         mDexOptHelper = testParams.dexOptHelper;
         mSuspendPackageHelper = testParams.suspendPackageHelper;
+
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
 
         registerObservers(false);
@@ -2135,6 +2139,9 @@ public class PackageManagerService extends IPackageManager.Stub
             mSettings.setPermissionControllerVersion(
                     getPackageInfo(mRequiredPermissionControllerPackage, 0,
                             UserHandle.USER_SYSTEM).getLongVersionCode());
+
+            // Resolve the supplemental process
+            mRequiredSupplementalProcessPackage = getRequiredSupplementalProcessPackageName();
 
             // Initialize InstantAppRegistry's Instant App list for all users.
             for (AndroidPackage pkg : mPackages.values()) {
@@ -3119,6 +3126,11 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         throw new IllegalStateException("PermissionController is not found");
+    }
+
+    @Override
+    public String getSupplementalProcessPackageName() {
+        return mRequiredSupplementalProcessPackage;
     }
 
     String getPackageInstallerPackageName() {
@@ -5483,6 +5495,24 @@ public class PackageManagerService extends IPackageManager.Stub
             Slog.w(TAG, "There should probably be exactly one storage manager; found "
                     + matches.size() + ": matches=" + matches);
             return null;
+        }
+    }
+
+    private @NonNull String getRequiredSupplementalProcessPackageName() {
+        final Intent intent = new Intent(SupplementalProcessManagerLocal.SERVICE_INTERFACE);
+
+        final List<ResolveInfo> matches = queryIntentServicesInternal(
+                intent,
+                /* resolvedType= */ null,
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM,
+                /* callingUid= */ Process.myUid(),
+                /* includeInstantApps= */ false);
+        if (matches.size() == 1) {
+            return matches.get(0).getComponentInfo().packageName;
+        } else {
+            throw new RuntimeException("There should exactly one supplemental process; found "
+                    + matches.size() + ": matches=" + matches);
         }
     }
 

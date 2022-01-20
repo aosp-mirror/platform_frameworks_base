@@ -126,6 +126,7 @@ package android.content.pm {
 
   public abstract class PackageManager {
     method @NonNull public String getPermissionControllerPackageName();
+    method @NonNull public String getSupplementalProcessPackageName();
   }
 
 }

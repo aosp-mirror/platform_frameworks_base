@@ -5691,6 +5691,20 @@ public abstract class PackageManager {
     }
 
     /**
+     * Returns the package name of the component implementing supplemental process service.
+     *
+     * @return the package name of the component implementing supplemental process service
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    public String getSupplementalProcessPackageName() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Add a new dynamic permission to the system.  For this to work, your
      * package must have defined a permission tree through the
      * {@link android.R.styleable#AndroidManifestPermissionTree
