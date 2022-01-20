@@ -26,9 +26,6 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.util.Log;
 
@@ -93,16 +90,9 @@ public final class IpSecTransform implements AutoCloseable {
         mResourceId = INVALID_RESOURCE_ID;
     }
 
-    private IIpSecService getIpSecService() {
-        IBinder b = ServiceManager.getService(android.content.Context.IPSEC_SERVICE);
-        if (b == null) {
-            throw new RemoteException("Failed to connect to IpSecService")
-                    .rethrowAsRuntimeException();
-        }
-
-        return IIpSecService.Stub.asInterface(b);
+    private IpSecManager getIpSecManager(Context context) {
+        return context.getSystemService(IpSecManager.class);
     }
-
     /**
      * Checks the result status and throws an appropriate exception if the status is not Status.OK.
      */
@@ -130,8 +120,7 @@ public final class IpSecTransform implements AutoCloseable {
                     IpSecManager.SpiUnavailableException {
         synchronized (this) {
             try {
-                IIpSecService svc = getIpSecService();
-                IpSecTransformResponse result = svc.createTransform(
+                IpSecTransformResponse result = getIpSecManager(mContext).createTransform(
                         mConfig, new Binder(), mContext.getOpPackageName());
                 int status = result.status;
                 checkResultStatus(status);
@@ -140,8 +129,6 @@ public final class IpSecTransform implements AutoCloseable {
                 mCloseGuard.open("build");
             } catch (ServiceSpecificException e) {
                 throw IpSecManager.rethrowUncheckedExceptionFromServiceSpecificException(e);
-            } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
             }
         }
 
@@ -177,10 +164,7 @@ public final class IpSecTransform implements AutoCloseable {
             return;
         }
         try {
-            IIpSecService svc = getIpSecService();
-            svc.deleteTransform(mResourceId);
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            getIpSecManager(mContext).deleteTransform(mResourceId);
         } catch (Exception e) {
             // On close we swallow all random exceptions since failure to close is not
             // actionable by the user.
