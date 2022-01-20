@@ -45,6 +45,7 @@ import android.os.BatteryConsumer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.BluetoothBatteryStats;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBatteryPropertiesRegistrar;
@@ -1194,6 +1195,48 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
         return new WakeLockStats(uidWakeLockStats);
+    }
+
+    @Override
+    @GuardedBy("this")
+    public BluetoothBatteryStats getBluetoothBatteryStats() {
+        final long elapsedRealtimeUs = mClock.elapsedRealtime() * 1000;
+        ArrayList<BluetoothBatteryStats.UidStats> uidStats = new ArrayList<>();
+        for (int i = mUidStats.size() - 1; i >= 0; i--) {
+            final Uid uid = mUidStats.valueAt(i);
+            final Timer scanTimer = uid.getBluetoothScanTimer();
+            final long scanTimeMs =
+                    scanTimer != null ? scanTimer.getTotalTimeLocked(
+                            elapsedRealtimeUs, STATS_SINCE_CHARGED) / 1000 : 0;
+
+            final Timer unoptimizedScanTimer = uid.getBluetoothUnoptimizedScanTimer();
+            final long unoptimizedScanTimeMs =
+                    unoptimizedScanTimer != null ? unoptimizedScanTimer.getTotalTimeLocked(
+                            elapsedRealtimeUs, STATS_SINCE_CHARGED) / 1000 : 0;
+
+            final Counter scanResultCounter = uid.getBluetoothScanResultCounter();
+            final int scanResultCount =
+                    scanResultCounter != null ? scanResultCounter.getCountLocked(
+                            STATS_SINCE_CHARGED) : 0;
+
+            final ControllerActivityCounter counter = uid.getBluetoothControllerActivity();
+            final long rxTimeMs =  counter != null ? counter.getRxTimeCounter().getCountLocked(
+                    STATS_SINCE_CHARGED) : 0;
+            final long txTimeMs =  counter != null ? counter.getTxTimeCounters()[0].getCountLocked(
+                    STATS_SINCE_CHARGED) : 0;
+
+            if (scanTimeMs != 0 || unoptimizedScanTimeMs != 0 || scanResultCount != 0
+                    || rxTimeMs != 0 || txTimeMs != 0) {
+                uidStats.add(new BluetoothBatteryStats.UidStats(uid.getUid(),
+                        scanTimeMs,
+                        unoptimizedScanTimeMs,
+                        scanResultCount,
+                        rxTimeMs,
+                        txTimeMs));
+            }
+        }
+
+        return new BluetoothBatteryStats(uidStats);
     }
 
     String mLastWakeupReason = null;
