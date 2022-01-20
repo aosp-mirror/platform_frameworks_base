@@ -64,6 +64,7 @@ import com.android.settingslib.testutils.shadow.ShadowUserManager;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -435,6 +436,7 @@ public class ApplicationsStateRoboTest {
     }
 
     @Test
+    @Ignore
     public void noAppRemoved_noWorkprofile_doResumeIfNeededLocked_shouldNotClearEntries()
             throws RemoteException {
         // scenario: only owner user
@@ -628,6 +630,7 @@ public class ApplicationsStateRoboTest {
     }
 
     @Test
+    @Ignore
     public void noAppRemoved_workprofileExists_doResumeIfNeededLocked_shouldNotClearEntries()
             throws RemoteException {
         if (!MU_ENABLED) {

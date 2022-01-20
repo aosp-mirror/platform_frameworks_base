@@ -33,6 +33,7 @@ import android.os.Handler;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -54,6 +55,7 @@ public class ConnectivityPreferenceControllerTest {
     }
 
     @Test
+    @Ignore
     public void testBroadcastReceiver() {
         final AbstractConnectivityPreferenceController preferenceController =
                 spy(new ConcreteConnectivityPreferenceController(mContext, mLifecycle));
