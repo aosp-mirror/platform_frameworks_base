@@ -753,7 +753,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
      * Set whether the GnssLocationProvider is suspended. This method was added to help support
      * power management use cases on automotive devices.
      */
-    public void setAutoGnssSuspended(boolean suspended) {
+    public void setAutomotiveGnssSuspended(boolean suspended) {
         synchronized (mLock) {
             mAutomotiveSuspend = suspended;
         }
@@ -764,7 +764,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
      * Return whether the GnssLocationProvider is suspended or not. This method was added to help
      * support power management use cases on automotive devices.
      */
-    public boolean isAutoGnssSuspended() {
+    public boolean isAutomotiveGnssSuspended() {
         synchronized (mLock) {
             return mAutomotiveSuspend && !mGpsEnabled;
         }
