@@ -454,6 +454,52 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
      * </ul>
      *
+     * <p>Once the device admin app is set as the device owner, the following APIs are available for
+     * managing polices on the device:
+     * <ul>
+     * <li>{@link #isDeviceManaged()}</li>
+     * <li>{@link #isUninstallBlocked(ComponentName, String)}</li>
+     * <li>{@link #setUninstallBlocked(ComponentName, String, boolean)}</li>
+     * <li>{@link #setUserControlDisabledPackages(ComponentName, List)}</li>
+     * <li>{@link #getUserControlDisabledPackages(ComponentName)}</li>
+     * <li>{@link #setOrganizationName(ComponentName, CharSequence)}</li>
+     * <li>{@link #setShortSupportMessage(ComponentName, CharSequence)}</li>
+     * <li>{@link #isBackupServiceEnabled(ComponentName)}</li>
+     * <li>{@link #setBackupServiceEnabled(ComponentName, boolean)}</li>
+     * <li>{@link #isLockTaskPermitted(String)}</li>
+     * <li>{@link #setLockTaskFeatures(ComponentName, int)}, where the following lock task features
+     * can be set (otherwise a {@link SecurityException} will be thrown):</li>
+     * <ul>
+     *     <li>{@link #LOCK_TASK_FEATURE_SYSTEM_INFO}</li>
+     *     <li>{@link #LOCK_TASK_FEATURE_KEYGUARD}</li>
+     *     <li>{@link #LOCK_TASK_FEATURE_HOME}</li>
+     *     <li>{@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS}</li>
+     *     <li>{@link #LOCK_TASK_FEATURE_NOTIFICATIONS}</li>
+     * </ul>
+     * <li>{@link #setLockTaskPackages(ComponentName, String[])}</li>
+     * <li>{@link #addPersistentPreferredActivity(ComponentName, IntentFilter, ComponentName)}</li>
+     * <li>{@link #clearPackagePersistentPreferredActivities(ComponentName, String)} </li>
+     * <li>{@link #wipeData(int)}</li>
+     * <li>{@link #isDeviceOwnerApp(String)}</li>
+     * <li>{@link #clearDeviceOwnerApp(String)}</li>
+     * <li>{@link #setPermissionGrantState(ComponentName, String, String, int)}, where
+     * {@link permission#READ_PHONE_STATE} is the <b>only</b> permission that can be
+     * {@link #PERMISSION_GRANT_STATE_GRANTED}, {@link #PERMISSION_GRANT_STATE_DENIED}, or
+     * {@link #PERMISSION_GRANT_STATE_DEFAULT} and can <b>only</b> be applied to the device admin
+     * app (otherwise a {@link SecurityException} will be thrown)</li>
+     * <li>{@link #addUserRestriction(ComponentName, String)}, where the following user restrictions
+     * are permitted (otherwise a {@link SecurityException} will be thrown):</li>
+     * <ul>
+     *     <li>{@link UserManager#DISALLOW_ADD_USER}</li>
+     *     <li>{@link UserManager#DISALLOW_DEBUGGING_FEATURES}</li>
+     *     <li>{@link UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES}</li>
+     *     <li>{@link UserManager#DISALLOW_SAFE_BOOT}</li>
+     *     <li>{@link UserManager#DISALLOW_CONFIG_DATE_TIME}</li>
+     *     <li>{@link UserManager#DISALLOW_OUTGOING_CALLS}</li>
+     * </ul>
+     * <li>{@link #clearUserRestriction(ComponentName, String)}</li>
+     * </ul>
+     *
      * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -14577,6 +14623,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public void setDeviceOwnerType(@NonNull ComponentName admin,
             @DeviceOwnerType int deviceOwnerType) {
         throwIfParentInstance("setDeviceOwnerType");
@@ -14600,6 +14647,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     @DeviceOwnerType
     public int getDeviceOwnerType(@NonNull ComponentName admin) {
         throwIfParentInstance("getDeviceOwnerType");
