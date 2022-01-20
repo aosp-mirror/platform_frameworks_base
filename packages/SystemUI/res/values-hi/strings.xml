@@ -233,8 +233,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"वाई-फ़ाई कनेक्ट नहीं है"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"स्क्रीन की रोशनी"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"रंग बदलने की सुविधा"</string>
-    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
-    <skip />
+    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"रंग में सुधार करने की सुविधा"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"और सेटिंग"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"उपयोगकर्ता सेटिंग"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"हो गया"</string>
@@ -450,8 +449,10 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"इस्तेमाल करने के लिए, डिवाइस अनलॉक करें"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"आपके कार्ड की जानकारी पाने में कोई समस्या हुई है. कृपया बाद में कोशिश करें"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"लॉक स्क्रीन की सेटिंग"</string>
-    <string name="qr_code_scanner_title" msgid="1598912458255252498">"क्यूआर कोड स्कैन करें"</string>
-    <string name="qr_code_scanner_description" msgid="7452098243938659945">"क्यूआर कोड स्कैन करने के लिए क्लिक करें"</string>
+    <!-- no translation found for qr_code_scanner_title (5660820608548306581) -->
+    <skip />
+    <!-- no translation found for qr_code_scanner_description (7937603775306661863) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"वर्क प्रोफ़ाइल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"हवाई जहाज़ मोड"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"आपको <xliff:g id="WHEN">%1$s</xliff:g> पर अपना अगला अलार्म नहीं सुनाई देगा"</string>
@@ -792,7 +793,8 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> पर, <xliff:g id="ARTIST_NAME">%2$s</xliff:g> का <xliff:g id="SONG_NAME">%1$s</xliff:g> चलाएं"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> पर, <xliff:g id="SONG_NAME">%1$s</xliff:g> चलाएं"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"पहले जैसा करें"</string>
-    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"<xliff:g id="DEVICENAME">%1$s</xliff:g> पर गाने चलाने के लिए उसके पास जाएं"</string>
+    <!-- no translation found for media_move_closer_to_start_cast (2673104707465013176) -->
+    <skip />
     <string name="media_transfer_playing" msgid="3760048096352107789">"<xliff:g id="DEVICENAME">%1$s</xliff:g> पर चल रहा है"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"काम नहीं कर रहा, ऐप जांचें"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"कंट्रोल नहीं है"</string>
@@ -880,4 +882,8 @@
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"उपयोगकर्ता चुनें"</string>
     <string name="fgs_manager_dialog_title" msgid="656091833603337197">"बैकग्राउंड में चल रहे ऐप्लिकेशन"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"बंद करें"</string>
+    <!-- no translation found for clipboard_edit_text_copy (770856373439969178) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_text_copied (1872624400464891363) -->
+    <skip />
 </resources>

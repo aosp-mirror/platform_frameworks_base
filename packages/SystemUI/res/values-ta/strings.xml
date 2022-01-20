@@ -233,8 +233,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"வைஃபை இணைக்கப்படவில்லை"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ஒளிர்வு"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"கலர் இன்வெர்ஷன்"</string>
-    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
-    <skip />
+    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"கலர் கரெக்‌ஷன்"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"அமைப்பில் மாற்று"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"பயனர் அமைப்புகள்"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"முடிந்தது"</string>
@@ -450,8 +449,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"பயன்படுத்துவதற்கு அன்லாக் செய்க"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"உங்கள் கார்டுகளின் விவரங்களைப் பெறுவதில் சிக்கல் ஏற்பட்டது, பிறகு முயலவும்"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"பூட்டுத் திரை அமைப்புகள்"</string>
-    <string name="qr_code_scanner_title" msgid="1598912458255252498">"QR குறியீட்டை ஸ்கேன் செய்யுங்கள்"</string>
-    <string name="qr_code_scanner_description" msgid="7452098243938659945">"QR குறியீட்டை ஸ்கேன் செய்யக் கிளிக் செய்யவும்"</string>
+    <string name="qr_code_scanner_title" msgid="5660820608548306581">"QR குறியீடு"</string>
+    <string name="qr_code_scanner_description" msgid="7937603775306661863">"ஸ்கேன் செய்யத் தட்டவும்"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"பணிக் கணக்கு"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"விமானப் பயன்முறை"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"அடுத்த அலாரத்தை <xliff:g id="WHEN">%1$s</xliff:g> மணிக்கு கேட்க மாட்டீர்கள்"</string>
@@ -792,7 +791,8 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> இன் <xliff:g id="SONG_NAME">%1$s</xliff:g> பாடலை <xliff:g id="APP_LABEL">%3$s</xliff:g> ஆப்ஸில் பிளேசெய்"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> பாடலை <xliff:g id="APP_LABEL">%2$s</xliff:g> ஆப்ஸில் பிளேசெய்"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"செயல்தவிர்"</string>
-    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"<xliff:g id="DEVICENAME">%1$s</xliff:g> சாதனத்தில் பிளே செய்ய உங்கள் சாதனத்தை அருகில் எடுத்துச் செல்லவும்"</string>
+    <!-- no translation found for media_move_closer_to_start_cast (2673104707465013176) -->
+    <skip />
     <string name="media_transfer_playing" msgid="3760048096352107789">"<xliff:g id="DEVICENAME">%1$s</xliff:g> சாதனத்தில் பிளே ஆகிறது"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"செயலில் இல்லை , சரிபார்க்கவும்"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"இல்லை"</string>
@@ -880,4 +880,8 @@
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"பயனரைத் தேர்வுசெய்க"</string>
     <string name="fgs_manager_dialog_title" msgid="656091833603337197">"பின்னணியில் இயங்கும் ஆப்ஸ்"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"நிறுத்து"</string>
+    <!-- no translation found for clipboard_edit_text_copy (770856373439969178) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_text_copied (1872624400464891363) -->
+    <skip />
 </resources>
