@@ -76,6 +76,7 @@ import android.window.TaskFragmentCreationParams;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
@@ -94,7 +95,7 @@ import java.util.Map;
  * @see android.window.WindowOrganizer
  */
 class WindowOrganizerController extends IWindowOrganizerController.Stub
-    implements BLASTSyncEngine.TransactionReadyListener {
+        implements BLASTSyncEngine.TransactionReadyListener, BLASTSyncEngine.SyncEngineListener {
 
     private static final String TAG = "WindowOrganizerController";
 
@@ -116,6 +117,21 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private final HashMap<Integer, IWindowContainerTransactionCallback>
             mTransactionCallbacksByPendingSyncId = new HashMap();
+
+    /**
+     * A queue of transaction waiting for their turn to sync. Currently {@link BLASTSyncEngine} only
+     * supports 1 sync at a time, so we have to queue them.
+     *
+     * WMCore has enough information to ensure that it won't end up collecting multiple transitions
+     * in parallel by itself; however, Shell can start transitions/apply sync transaction at
+     * arbitrary times via {@link WindowOrganizerController#startTransition} and
+     * {@link WindowOrganizerController#applySyncTransaction}, so we have to support those coming in
+     * at any time (even while already syncing).
+     *
+     * This is really just a back-up for unrealistic situations (eg. during tests). In practice,
+     * this shouldn't ever happen.
+     */
+    private final ArrayList<PendingTransaction> mPendingTransactions = new ArrayList<>();
 
     final TaskOrganizerController mTaskOrganizerController;
     final DisplayAreaOrganizerController mDisplayAreaOrganizerController;
@@ -140,6 +156,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     void setWindowManager(WindowManagerService wms) {
         mTransitionController = new TransitionController(mService, wms.mTaskSnapshotController);
         mTransitionController.registerLegacyListener(wms.mActivityManagerAppTransitionNotifier);
+        wms.mSyncEngine.setSyncEngineListener(this);
     }
 
     TransitionController getTransitionController() {
@@ -184,6 +201,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                if (callback == null) {
+                    applyTransaction(t, -1 /* syncId*/, null /*transition*/, caller);
+                    return -1;
+                }
+
                 /**
                  * If callback is non-null we are looking to synchronize this transaction by
                  * collecting all the results in to a SurfaceFlinger transaction and then delivering
@@ -196,13 +218,25 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                  * all the WindowContainers will eventually finish applying their changes and notify
                  * the BLASTSyncEngine which will deliver the Transaction to the callback.
                  */
-                int syncId = -1;
-                if (callback != null) {
-                    syncId = startSyncWithOrganizer(callback);
-                }
-                applyTransaction(t, syncId, null /*transition*/, caller);
-                if (syncId >= 0) {
+                final BLASTSyncEngine.SyncGroup syncGroup = prepareSyncWithOrganizer(callback);
+                final int syncId = syncGroup.mSyncId;
+                if (!mService.mWindowManager.mSyncEngine.hasActiveSync()) {
+                    mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup);
+                    applyTransaction(t, syncId, null /*transition*/, caller);
                     setSyncReady(syncId);
+                } else {
+                    // Because the BLAST engine only supports one sync at a time, queue the
+                    // transaction.
+                    final PendingTransaction pt = new PendingTransaction();
+                    // Start sync group immediately when the SyncEngine is free.
+                    pt.setStartSync(() ->
+                            mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup));
+                    // Those will be post so that it won't interrupt ongoing transition.
+                    pt.setStartTransaction(() -> {
+                        applyTransaction(t, syncId, null /*transition*/, caller);
+                        setSyncReady(syncId);
+                    });
+                    mPendingTransactions.add(pt);
                 }
                 return syncId;
             }
@@ -244,17 +278,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // return that. The actual start and apply will then be deferred until that
                     // transition starts collecting. This should almost never happen except during
                     // tests.
-                    if (mTransitionController.isCollecting()) {
+                    if (mService.mWindowManager.mSyncEngine.hasActiveSync()) {
                         Slog.e(TAG, "startTransition() while one is already collecting.");
                         final TransitionController.PendingStartTransition pt =
                                 mTransitionController.createPendingTransition(type);
-                        pt.setOnStartCollecting(mService.mH, () -> {
+                        // Those will be post so that it won't interrupt ongoing transition.
+                        pt.setStartTransaction(() -> {
                             pt.mTransition.start();
                             applyTransaction(wct, -1 /*syncId*/, pt.mTransition, caller);
                             if (needsSetReady) {
                                 pt.mTransition.setAllReady();
                             }
                         });
+                        mPendingTransactions.add(pt);
                         return pt.mTransition;
                     }
                     transition = mTransitionController.createTransition(type);
@@ -1052,11 +1088,24 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return mTaskFragmentOrganizerController;
     }
 
+    /**
+     * This will prepare a {@link BLASTSyncEngine.SyncGroup} for the organizer to track, but the
+     * {@link BLASTSyncEngine.SyncGroup} may not be active until the {@link BLASTSyncEngine} is
+     * free.
+     */
+    private BLASTSyncEngine.SyncGroup prepareSyncWithOrganizer(
+            IWindowContainerTransactionCallback callback) {
+        final BLASTSyncEngine.SyncGroup s = mService.mWindowManager.mSyncEngine
+                .prepareSyncSet(this, "");
+        mTransactionCallbacksByPendingSyncId.put(s.mSyncId, callback);
+        return s;
+    }
+
     @VisibleForTesting
     int startSyncWithOrganizer(IWindowContainerTransactionCallback callback) {
-        int id = mService.mWindowManager.mSyncEngine.startSyncSet(this);
-        mTransactionCallbacksByPendingSyncId.put(id, callback);
-        return id;
+        final BLASTSyncEngine.SyncGroup s = prepareSyncWithOrganizer(callback);
+        mService.mWindowManager.mSyncEngine.startSyncSet(s);
+        return s.mSyncId;
     }
 
     @VisibleForTesting
@@ -1085,6 +1134,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         mTransactionCallbacksByPendingSyncId.remove(syncId);
+    }
+
+    @Override
+    public void onSyncEngineFree() {
+        if (mPendingTransactions.isEmpty()) {
+            return;
+        }
+
+        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "PendingStartTransaction found");
+        final PendingTransaction pt = mPendingTransactions.remove(0);
+        pt.startSync();
+        // Post this so that the now-playing transition setup isn't interrupted.
+        mService.mH.post(pt::startTransaction);
     }
 
     @Override
@@ -1343,6 +1405,40 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             default:
                 return new AndroidRuntimeException("Start activity failed with error code : "
                         + result + " when starting " + intent);
+        }
+    }
+
+    /**
+     *  Represents a sync {@link WindowContainerTransaction} call made while there is other active
+     *  {@link BLASTSyncEngine.SyncGroup}.
+     */
+    static class PendingTransaction {
+        private Runnable mStartSync;
+        private Runnable mStartTransaction;
+
+        /**
+         * The callback will be called immediately when the {@link BLASTSyncEngine} is free. One
+         * should call {@link BLASTSyncEngine#startSyncSet(BLASTSyncEngine.SyncGroup)} here to
+         * reserve the {@link BLASTSyncEngine}.
+         */
+        void setStartSync(@NonNull Runnable callback) {
+            mStartSync = callback;
+        }
+
+        /**
+         * The callback will be post to the main handler after the {@link BLASTSyncEngine} is free
+         * to apply the pending {@link WindowContainerTransaction}.
+         */
+        void setStartTransaction(@NonNull Runnable callback) {
+            mStartTransaction = callback;
+        }
+
+        private void startSync() {
+            mStartSync.run();
+        }
+
+        private void startTransaction() {
+            mStartTransaction.run();
         }
     }
 }

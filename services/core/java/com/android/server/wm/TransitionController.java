@@ -30,7 +30,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
@@ -91,20 +90,6 @@ class TransitionController {
 
     /** The transition currently being constructed (collecting participants). */
     private Transition mCollectingTransition = null;
-
-    /**
-     * A queue of transitions waiting for their turn to collect. We can only collect 1 transition
-     * at a time because BLASTSyncEngine only supports 1 sync at a time, so we have to queue them.
-     *
-     * WMCore has enough information to ensure that it won't end up collecting multiple transitions
-     * in parallel by itself; however, Shell can start transitions at arbitrary times via
-     * {@link WindowOrganizerController#startTransition}, so we have to support those coming in
-     * at any time (even while already collecting).
-     *
-     * This is really just a back-up for unrealistic situations (eg. during tests). In practice,
-     * this shouldn't ever happen.
-     */
-    private final ArrayList<PendingStartTransition> mPendingStartTransitions = new ArrayList<>();
 
     // TODO(b/188595497): remove when not needed.
     final StatusBarManagerInternal mStatusBar;
@@ -175,9 +160,13 @@ class TransitionController {
         }
         final PendingStartTransition out = new PendingStartTransition(new Transition(type,
                 0 /* flags */, this, mAtm.mWindowManager.mSyncEngine));
+        // We want to start collecting immediately when the engine is free, otherwise it may
+        // be busy again.
+        out.setStartSync(() -> {
+            moveToCollecting(out.mTransition);
+        });
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Creating PendingTransition: %s",
                 out.mTransition);
-        mPendingStartTransitions.add(out);
         return out;
     }
 
@@ -451,15 +440,6 @@ class TransitionController {
             throw new IllegalStateException("Trying to move non-collecting transition to playing");
         }
         mCollectingTransition = null;
-        if (!mPendingStartTransitions.isEmpty()) {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "PendingStartTransition found");
-            final PendingStartTransition p = mPendingStartTransitions.remove(0);
-            moveToCollecting(p.mTransition);
-            if (p.mOnStartCollecting != null) {
-                // Post this so that the now-playing transition setup isn't interrupted.
-                p.mHandler.post(p.mOnStartCollecting);
-            }
-        }
         if (mPlayingTransitions.isEmpty()) {
             setAnimationRunning(true /* running */);
         }
@@ -557,23 +537,12 @@ class TransitionController {
         proto.end(token);
     }
 
-    /** Represents a startTransition call made while a transition was already collecting. */
-    static class PendingStartTransition {
+    /** Represents a startTransition call made while there is other active BLAST SyncGroup. */
+    class PendingStartTransition extends WindowOrganizerController.PendingTransaction {
         final Transition mTransition;
-
-        /** Handler to post the collecting callback onto. */
-        private Handler mHandler;
-
-        /** Runnable to post to `mHandler` once this pending transition starts collecting. */
-        private Runnable mOnStartCollecting;
 
         PendingStartTransition(Transition transition) {
             mTransition = transition;
-        }
-
-        void setOnStartCollecting(@NonNull Handler handler, @NonNull Runnable callback) {
-            mHandler = handler;
-            mOnStartCollecting = callback;
         }
     }
 
