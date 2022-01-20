@@ -156,7 +156,6 @@ import com.android.net.module.util.BinderUtils;
 import com.android.net.module.util.CollectionUtils;
 import com.android.net.module.util.NetworkStatsUtils;
 import com.android.net.module.util.PermissionUtils;
-import com.android.server.LocalServices;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -2120,7 +2119,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public void notifyWarningOrLimitReached() {
             Log.d(TAG, mTag + ": notifyWarningOrLimitReached");
             BinderUtils.withCleanCallingIdentity(() ->
-                    mNetworkPolicyManager.onStatsProviderWarningOrLimitReached());
+                    mNetworkPolicyManager.notifyStatsProviderWarningOrLimitReached());
         }
 
         @Override
