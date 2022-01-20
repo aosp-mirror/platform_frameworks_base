@@ -168,4 +168,8 @@ enum AudioDeviceType {
      * Output into a speaker of a phone / table dock.
      */
     OUT_DOCK = 145,
+    /**
+     * Output to a broadcast group.
+     */
+    OUT_BROADCAST = 146,
 }
