@@ -3181,9 +3181,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     ps.updatePermissionFlags(bp, PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
                                     | FLAG_PERMISSION_REVOKE_WHEN_REQUESTED,
                             PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED);
-                    // TODO(b/205888750): remove revoke once propagated through droidfood
-                    if (ps.isPermissionGranted(newPerm)) {
+                    // TODO(b/205888750): remove if/else block once propagated through droidfood
+                    if (ps.isPermissionGranted(newPerm)
+                            && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M) {
                         ps.revokePermission(bp);
+                    } else if (!ps.isPermissionGranted(newPerm)
+                            && pkg.getTargetSdkVersion() < Build.VERSION_CODES.M) {
+                        ps.grantPermission(bp);
                     }
                 }
             }
