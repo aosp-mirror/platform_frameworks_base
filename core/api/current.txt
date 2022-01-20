@@ -52211,6 +52211,7 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityNodeInfo getRoot();
     method @Nullable public android.view.accessibility.AccessibilityNodeInfo getRoot(int);
     method @Nullable public CharSequence getTitle();
+    method public long getTransitionTimeMillis();
     method public int getType();
     method public boolean isAccessibilityFocused();
     method public boolean isActive();
