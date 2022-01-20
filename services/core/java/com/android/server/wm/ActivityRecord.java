@@ -2722,9 +2722,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean isResizeable() {
+        return isResizeable(/* checkPictureInPictureSupport */ true);
+    }
+
+    boolean isResizeable(boolean checkPictureInPictureSupport) {
         return mAtmService.mForceResizableActivities
                 || ActivityInfo.isResizeableMode(info.resizeMode)
-                || info.supportsPictureInPicture()
+                || (info.supportsPictureInPicture() && checkPictureInPictureSupport)
                 // If the activity can be embedded, it should inherit the bounds of task fragment.
                 || isEmbedded();
     }
@@ -7679,10 +7683,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // orientation with insets applied.
             return;
         }
-        // Activity should be resizable if the task is.
+        // Not using Task#isResizeable() or ActivityRecord#isResizeable() directly because app
+        // compatibility testing showed that android:supportsPictureInPicture="true" alone is not
+        // sufficient signal for not letterboxing an app.
+        // TODO(214602463): Remove multi-window check since orientation and aspect ratio
+        // restrictions should always be applied in multi-window.
         final boolean isResizeable = task != null
-                ? task.isResizeable() || isResizeable()
-                : isResizeable();
+                // Activity should be resizable if the task is.
+                ? task.isResizeable(/* checkPictureInPictureSupport */ false)
+                        || isResizeable(/* checkPictureInPictureSupport */ false)
+                : isResizeable(/* checkPictureInPictureSupport */ false);
         if (WindowConfiguration.inMultiWindowMode(windowingMode) && isResizeable) {
             // Ignore orientation request for resizable apps in multi window.
             return;
@@ -8211,8 +8221,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final float maxAspectRatio = info.getMaxAspectRatio();
         final Task rootTask = getRootTask();
         final float minAspectRatio = getMinAspectRatio();
+        // Not using ActivityRecord#isResizeable() directly because app compatibility testing
+        // showed that android:supportsPictureInPicture="true" alone is not sufficient signal for
+        // not letterboxing an app.
+        // TODO(214602463): Remove multi-window check since orientation and aspect ratio
+        // restrictions should always be applied in multi-window.
         if (task == null || rootTask == null
-                || (inMultiWindowMode() && !shouldCreateCompatDisplayInsets()
+                || (inMultiWindowMode() && isResizeable(/* checkPictureInPictureSupport */ false)
                 && !fixedOrientationLetterboxed)
                 || (maxAspectRatio < 1 && minAspectRatio < 1 && desiredAspectRatio < 1)
                 || isInVrUiMode(getConfiguration())) {
