@@ -88,6 +88,11 @@ package android.app.usage {
 
 package android.bluetooth {
 
+  public class BluetoothFrameworkInitializer {
+    method public static void registerServiceWrappers();
+    method public static void setBluetoothServiceManager(@NonNull android.os.BluetoothServiceManager);
+  }
+
   public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.TETHER_PRIVILEGED}) public android.net.TetheringManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.TetheredInterfaceCallback);
   }
@@ -380,6 +385,21 @@ package android.os {
 
   public class Binder implements android.os.IBinder {
     method public final void markVintfStability();
+  }
+
+  public class BluetoothServiceManager {
+    method @NonNull public android.os.BluetoothServiceManager.ServiceRegisterer getBluetoothManagerServiceRegisterer();
+  }
+
+  public static class BluetoothServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor public BluetoothServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  public static final class BluetoothServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @NonNull public android.os.IBinder getOrThrow() throws android.os.BluetoothServiceManager.ServiceNotFoundException;
+    method public void register(@NonNull android.os.IBinder);
+    method @Nullable public android.os.IBinder tryGet();
   }
 
   public class Build {

@@ -49,7 +49,7 @@ import android.app.usage.StorageStatsManager;
 import android.app.usage.UsageStatsManager;
 import android.apphibernation.AppHibernationManager;
 import android.appwidget.AppWidgetManager;
-import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothFrameworkInitializer;
 import android.companion.CompanionDeviceManager;
 import android.companion.ICompanionDeviceManager;
 import android.companion.virtual.IVirtualDeviceManager;
@@ -344,13 +344,6 @@ public final class SystemServiceRegistry {
             @Override
             public MediaRouter createService(ContextImpl ctx) {
                 return new MediaRouter(ctx);
-            }});
-
-        registerService(Context.BLUETOOTH_SERVICE, BluetoothManager.class,
-                new CachedServiceFetcher<BluetoothManager>() {
-            @Override
-            public BluetoothManager createService(ContextImpl ctx) {
-                return new BluetoothManager(ctx);
             }});
 
         registerService(Context.HDMI_CONTROL_SERVICE, HdmiControlManager.class,
@@ -1530,6 +1523,7 @@ public final class SystemServiceRegistry {
             ConnectivityFrameworkInitializer.registerServiceWrappers();
             JobSchedulerFrameworkInitializer.registerServiceWrappers();
             BlobStoreManagerFrameworkInitializer.initialize();
+            BluetoothFrameworkInitializer.registerServiceWrappers();
             TelephonyFrameworkInitializer.registerServiceWrappers();
             AppSearchManagerFrameworkInitializer.initialize();
             WifiFrameworkInitializer.registerServiceWrappers();
