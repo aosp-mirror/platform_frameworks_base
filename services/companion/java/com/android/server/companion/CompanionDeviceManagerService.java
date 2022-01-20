@@ -77,6 +77,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.UserInfo;
 import android.net.MacAddress;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
@@ -1359,6 +1360,17 @@ public class CompanionDeviceManagerService extends SystemService
     }
 
     /**
+     * This method must only be called from {@link CompanionDeviceShellCommand} for testing
+     * purposes only!
+     */
+    void persistState() {
+        mUserPersistenceHandler.clearMessages();
+        for (UserInfo user : mUserManager.getAliveUsers()) {
+            persistStateForUser(user.id);
+        }
+    }
+
+    /**
      * This class is dedicated to handling requests to persist user state.
      */
     @SuppressLint("HandlerLeak")
@@ -1374,6 +1386,13 @@ public class CompanionDeviceManagerService extends SystemService
             if (!hasMessages(userId)) {
                 sendMessage(obtainMessage(userId));
             }
+        }
+
+        /**
+         * Clears *ALL* outstanding persist requests for *ALL* users.
+         */
+        synchronized void clearMessages() {
+            removeCallbacksAndMessages(null);
         }
 
         @Override

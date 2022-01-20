@@ -83,6 +83,7 @@ class CompanionDeviceShellCommand extends android.os.ShellCommand {
                 }
                 break;
                 case "clear-association-memory-cache": {
+                    mService.persistState();
                     mService.loadAssociationsFromDisk();
                 }
                 break;
