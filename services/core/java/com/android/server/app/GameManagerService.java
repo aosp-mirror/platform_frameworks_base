@@ -22,6 +22,7 @@ import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 
 import static com.android.internal.R.styleable.GameModeConfig_allowGameAngleDriver;
 import static com.android.internal.R.styleable.GameModeConfig_allowGameDownscaling;
+import static com.android.internal.R.styleable.GameModeConfig_allowGameFpsOverride;
 import static com.android.internal.R.styleable.GameModeConfig_supportsBatteryGameMode;
 import static com.android.internal.R.styleable.GameModeConfig_supportsPerformanceGameMode;
 import static com.android.server.wm.CompatModePackages.DOWNSCALED;
@@ -452,6 +453,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         private boolean mBatteryModeOptedIn;
         private boolean mAllowDownscale;
         private boolean mAllowAngle;
+        private boolean mAllowFpsOverride;
 
         GamePackageConfiguration(String packageName, int userId) {
             mPackageName = packageName;
@@ -470,6 +472,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         mBatteryModeOptedIn = false;
                         mAllowDownscale = true;
                         mAllowAngle = true;
+                        mAllowFpsOverride = true;
                     }
                 }
             } catch (NameNotFoundException e) {
@@ -527,6 +530,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         mAllowDownscale = array.getBoolean(GameModeConfig_allowGameDownscaling,
                                 true);
                         mAllowAngle = array.getBoolean(GameModeConfig_allowGameAngleDriver, true);
+                        mAllowFpsOverride = array.getBoolean(GameModeConfig_allowGameFpsOverride,
+                                true);
                         array.recycle();
                     }
                 }
@@ -565,7 +570,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 mScaling = !mAllowDownscale || willGamePerformOptimizations(mGameMode)
                         ? DEFAULT_SCALING : parser.getString(SCALING_KEY, DEFAULT_SCALING);
 
-                mFps = parser.getString(FPS_KEY, DEFAULT_FPS);
+                mFps = mAllowFpsOverride && !willGamePerformOptimizations(mGameMode)
+                        ? parser.getString(FPS_KEY, DEFAULT_FPS) : DEFAULT_FPS;
                 // We only want to use ANGLE if:
                 // - We're allowed to use ANGLE (the app hasn't opted out via the manifest) AND
                 // - The app has not opted in to performing the work itself AND

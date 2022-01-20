@@ -3259,6 +3259,7 @@
     <public name="supportsPerformanceGameMode" />
     <public name="allowGameAngleDriver" />
     <public name="allowGameDownscaling" />
+    <public name="allowGameFpsOverride" />
     <public name="localeConfig" />
     <public name="showBackground" />
     <public name="inheritKeyStoreKeys" />

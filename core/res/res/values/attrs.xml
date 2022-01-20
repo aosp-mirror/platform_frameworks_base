@@ -8887,6 +8887,8 @@
         <attr name="allowGameAngleDriver" format="boolean" />
         <!-- Set true to allow resolution downscaling intervention. -->
         <attr name="allowGameDownscaling" format="boolean" />
+        <!-- Set true to allow FPS override intervention. -->
+        <attr name="allowGameFpsOverride" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>voice-enrollment-application</code>
