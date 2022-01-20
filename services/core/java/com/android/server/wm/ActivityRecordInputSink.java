@@ -22,7 +22,6 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.os.IBinder;
 import android.os.InputConstants;
 import android.os.Looper;
@@ -47,7 +46,6 @@ class ActivityRecordInputSink {
      * Feature flag for making Activities consume all touches within their task bounds.
      */
     @ChangeId
-    @Disabled
     static final long ENABLE_TOUCH_OPAQUE_ACTIVITIES = 194480991L;
 
     private static final String TAG = "ActivityRecordInputSink";
