@@ -18,6 +18,7 @@ package android.app.usage;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -150,7 +151,13 @@ public class NetworkStatsManager {
      * @param pollOnOpen true if poll is needed.
      * @hide
      */
-    // @SystemApi(client = MODULE_LIBRARIES)
+    // The system will ignore any non-default values for non-privileged
+    // processes, so processes that don't hold the appropriate permissions
+    // can make no use of this API.
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
     public void setPollOnOpen(boolean pollOnOpen) {
         if (pollOnOpen) {
             mFlags |= FLAG_POLL_ON_OPEN;
@@ -877,7 +884,7 @@ public class NetworkStatsManager {
      *
      * @hide
      */
-    // @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})
@@ -890,17 +897,18 @@ public class NetworkStatsManager {
     }
 
     /**
-     * Advise persistence threshold; may be overridden internally.
+     * Set default value of global alert bytes, the value will be clamped to [128kB, 2MB].
      *
      * @hide
      */
-    // @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
-            android.Manifest.permission.NETWORK_STACK})
-    public void advisePersistThreshold(long thresholdBytes) {
+            Manifest.permission.NETWORK_STACK})
+    public void setDefaultGlobalAlert(long alertBytes) {
         try {
-            mService.advisePersistThreshold(thresholdBytes);
+            // TODO: Sync internal naming with the API surface.
+            mService.advisePersistThreshold(alertBytes);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -911,7 +919,7 @@ public class NetworkStatsManager {
      *
      * @hide
      */
-    // @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})
@@ -927,9 +935,17 @@ public class NetworkStatsManager {
      * Set the warning and limit to all registered custom network stats providers.
      * Note that invocation of any interface will be sent to all providers.
      *
+     * Asynchronicity notes : because traffic may be happening on the device at the same time, it
+     * doesn't make sense to wait for the warning and limit to be set – a caller still wouldn't
+     * know when exactly it was effective. All that can matter is that it's done quickly. Also,
+     * this method can't fail, so there is no status to return. All providers will see the new
+     * values soon.
+     * As such, this method returns immediately and sends the warning and limit to all providers
+     * as soon as possible through a one-way binder call.
+     *
      * @hide
      */
-    // @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})
