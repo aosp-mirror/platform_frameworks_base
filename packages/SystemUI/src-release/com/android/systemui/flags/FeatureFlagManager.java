@@ -16,12 +16,15 @@
 
 package com.android.systemui.flags;
 
+import android.content.res.Resources;
 import android.util.SparseBooleanArray;
 
+import androidx.annotation.BoolRes;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
@@ -38,8 +41,11 @@ import javax.inject.Inject;
 @SysUISingleton
 public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
     SparseBooleanArray mAccessedFlags = new SparseBooleanArray();
+    private Resources mResources;
+
     @Inject
-    public FeatureFlagManager(DumpManager dumpManager) {
+    public FeatureFlagManager(DumpManager dumpManager, @Main Resources resources) {
+        mResources = resources;
         dumpManager.registerDumpable("SysUIFlags", this);
     }
 
@@ -51,7 +57,20 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
 
     @Override
     public boolean isEnabled(BooleanFlag flag) {
-        return isEnabled(flag.getId(), flag.getDefault());
+        boolean def = flag.getDefault();
+        if (flag.hasResourceOverride()) {
+            try {
+                def = isEnabledInOverlay(flag.getResourceOverride());
+            } catch (Resources.NotFoundException e) {
+                // no-op
+            }
+        }
+
+        return isEnabled(flag.getId(), def);
+    }
+
+    private boolean isEnabledInOverlay(@BoolRes int resId) {
+        return mResources.getBoolean(resId);
     }
 
     @Override
