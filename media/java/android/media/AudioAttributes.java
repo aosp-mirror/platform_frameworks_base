@@ -101,6 +101,13 @@ public final class AudioAttributes implements Parcelable {
      * or short Foley sounds.
      */
     public final static int CONTENT_TYPE_SONIFICATION = 4;
+    /**
+     * @hide
+     * Content type value to use when the content type is ultrasound.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_ULTRASOUND)
+    public static final int CONTENT_TYPE_ULTRASOUND = 1997;
 
     /**
      * Invalid value, only ever used for an uninitialized usage value
@@ -958,6 +965,26 @@ public final class AudioAttributes implements Parcelable {
         }
 
         /**
+         * @hide
+         * Sets the attribute describing the content type of the audio signal, such as speech,
+         * , music or ultrasound.
+         * @param contentType the content type values.
+         * @return the same Builder instance.
+         */
+        @SystemApi
+        public @NonNull Builder setInternalContentType(@AttrInternalContentType int contentType) {
+            switch (contentType) {
+                case CONTENT_TYPE_ULTRASOUND:
+                    mContentType = contentType;
+                    break;
+                default:
+                    setContentType(contentType);
+                    break;
+            }
+            return this;
+        }
+
+        /**
          * Sets the combination of flags.
          *
          * This is a bitwise OR with the existing flags.
@@ -1234,7 +1261,8 @@ public final class AudioAttributes implements Parcelable {
         /**
          * @hide
          * Same as {@link #setCapturePreset(int)} but authorizes the use of HOTWORD,
-         * REMOTE_SUBMIX, RADIO_TUNER, VOICE_DOWNLINK, VOICE_UPLINK, VOICE_CALL and ECHO_REFERENCE.
+         * REMOTE_SUBMIX, RADIO_TUNER, VOICE_DOWNLINK, VOICE_UPLINK, VOICE_CALL, ECHO_REFERENCE
+         * and ULTRASOUND
          * @param preset
          * @return the same Builder instance.
          */
@@ -1246,7 +1274,8 @@ public final class AudioAttributes implements Parcelable {
                     || (preset == MediaRecorder.AudioSource.VOICE_DOWNLINK)
                     || (preset == MediaRecorder.AudioSource.VOICE_UPLINK)
                     || (preset == MediaRecorder.AudioSource.VOICE_CALL)
-                    || (preset == MediaRecorder.AudioSource.ECHO_REFERENCE)) {
+                    || (preset == MediaRecorder.AudioSource.ECHO_REFERENCE)
+                    || (preset == MediaRecorder.AudioSource.ULTRASOUND)) {
                 mSource = preset;
             } else {
                 setCapturePreset(preset);
@@ -1589,6 +1618,7 @@ public final class AudioAttributes implements Parcelable {
             case CONTENT_TYPE_MUSIC: return new String("CONTENT_TYPE_MUSIC");
             case CONTENT_TYPE_MOVIE: return new String("CONTENT_TYPE_MOVIE");
             case CONTENT_TYPE_SONIFICATION: return new String("CONTENT_TYPE_SONIFICATION");
+            case CONTENT_TYPE_ULTRASOUND: return new String("CONTENT_TYPE_ULTRASOUND");
             default: return new String("unknown content type " + mContentType);
         }
     }
@@ -1823,4 +1853,16 @@ public final class AudioAttributes implements Parcelable {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AttributeContentType {}
+
+    /** @hide */
+    @IntDef({
+        CONTENT_TYPE_UNKNOWN,
+        CONTENT_TYPE_SPEECH,
+        CONTENT_TYPE_MUSIC,
+        CONTENT_TYPE_MOVIE,
+        CONTENT_TYPE_SONIFICATION,
+        CONTENT_TYPE_ULTRASOUND
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AttrInternalContentType {}
 }

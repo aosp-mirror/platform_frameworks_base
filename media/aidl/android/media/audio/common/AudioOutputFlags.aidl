@@ -97,4 +97,8 @@ enum AudioOutputFlags {
      * tracks.
      */
     GAPLESS_OFFLOAD = 15,
+    /**
+     * Output is used for transmitting ultrasound audio.
+     */
+    ULTRASOUND = 16,
 }
