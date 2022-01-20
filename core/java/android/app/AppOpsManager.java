@@ -4058,7 +4058,7 @@ public class AppOpsManager {
                 LongSparseArray<NoteOpEvent> array = new LongSparseArray<>(numEntries);
 
                 for (int i = 0; i < numEntries; i++) {
-                    array.put(source.readLong(), source.readParcelable(null));
+                    array.put(source.readLong(), source.readParcelable(null, android.app.AppOpsManager.NoteOpEvent.class));
                 }
 
                 return array;
@@ -5178,7 +5178,7 @@ public class AppOpsManager {
             final int[] uids = parcel.createIntArray();
             if (!ArrayUtils.isEmpty(uids)) {
                 final ParceledListSlice<HistoricalUidOps> listSlice = parcel.readParcelable(
-                        HistoricalOps.class.getClassLoader());
+                        HistoricalOps.class.getClassLoader(), android.content.pm.ParceledListSlice.class);
                 final List<HistoricalUidOps> uidOps = (listSlice != null)
                         ? listSlice.getList() : null;
                 if (uidOps == null) {
@@ -10000,7 +10000,7 @@ public class AppOpsManager {
 
     private static @Nullable List<AttributedOpEntry> readDiscreteAccessArrayFromParcel(
             @NonNull Parcel parcel) {
-        final ParceledListSlice<AttributedOpEntry> listSlice = parcel.readParcelable(null);
+        final ParceledListSlice<AttributedOpEntry> listSlice = parcel.readParcelable(null, android.content.pm.ParceledListSlice.class);
         return listSlice == null ? null : listSlice.getList();
     }
 

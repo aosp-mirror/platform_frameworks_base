@@ -256,11 +256,11 @@ public final class QosBearerFilter implements Parcelable {
 
     private QosBearerFilter(Parcel source) {
         localAddresses = new ArrayList<>();
-        source.readList(localAddresses, LinkAddress.class.getClassLoader());
+        source.readList(localAddresses, LinkAddress.class.getClassLoader(), android.net.LinkAddress.class);
         remoteAddresses = new ArrayList<>();
-        source.readList(remoteAddresses, LinkAddress.class.getClassLoader());
-        localPort = source.readParcelable(PortRange.class.getClassLoader());
-        remotePort = source.readParcelable(PortRange.class.getClassLoader());
+        source.readList(remoteAddresses, LinkAddress.class.getClassLoader(), android.net.LinkAddress.class);
+        localPort = source.readParcelable(PortRange.class.getClassLoader(), android.telephony.data.QosBearerFilter.PortRange.class);
+        remotePort = source.readParcelable(PortRange.class.getClassLoader(), android.telephony.data.QosBearerFilter.PortRange.class);
         protocol = source.readInt();
         typeOfServiceMask = source.readInt();
         flowLabel = source.readLong();

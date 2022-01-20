@@ -1094,8 +1094,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         mInteractiveUiTimeout = parcel.readInt();
         flags = parcel.readInt();
         crashed = parcel.readInt() != 0;
-        mComponentName = parcel.readParcelable(this.getClass().getClassLoader());
-        mResolveInfo = parcel.readParcelable(null);
+        mComponentName = parcel.readParcelable(this.getClass().getClassLoader(), android.content.ComponentName.class);
+        mResolveInfo = parcel.readParcelable(null, android.content.pm.ResolveInfo.class);
         mSettingsActivityName = parcel.readString();
         mCapabilities = parcel.readInt();
         mSummaryResId = parcel.readInt();

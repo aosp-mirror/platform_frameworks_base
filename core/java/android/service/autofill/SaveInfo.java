@@ -888,14 +888,14 @@ public final class SaveInfo implements Parcelable {
                 builder.setOptionalIds(optionalIds);
             }
 
-            builder.setNegativeAction(parcel.readInt(), parcel.readParcelable(null));
+            builder.setNegativeAction(parcel.readInt(), parcel.readParcelable(null, android.content.IntentSender.class));
             builder.setPositiveAction(parcel.readInt());
             builder.setDescription(parcel.readCharSequence());
-            final CustomDescription customDescripton = parcel.readParcelable(null);
+            final CustomDescription customDescripton = parcel.readParcelable(null, android.service.autofill.CustomDescription.class);
             if (customDescripton != null) {
                 builder.setCustomDescription(customDescripton);
             }
-            final InternalValidator validator = parcel.readParcelable(null);
+            final InternalValidator validator = parcel.readParcelable(null, android.service.autofill.InternalValidator.class);
             if (validator != null) {
                 builder.setValidator(validator);
             }
@@ -909,7 +909,7 @@ public final class SaveInfo implements Parcelable {
                     builder.addSanitizer(sanitizers[i], autofillIds);
                 }
             }
-            final AutofillId triggerId = parcel.readParcelable(null);
+            final AutofillId triggerId = parcel.readParcelable(null, android.view.autofill.AutofillId.class);
             if (triggerId != null) {
                 builder.setTriggerId(triggerId);
             }

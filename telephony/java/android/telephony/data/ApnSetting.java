@@ -1628,7 +1628,7 @@ public class ApnSetting implements Parcelable {
                 .setApnName(in.readString())
                 .setProxyAddress(in.readString())
                 .setProxyPort(in.readInt())
-                .setMmsc(in.readParcelable(Uri.class.getClassLoader()))
+                .setMmsc(in.readParcelable(Uri.class.getClassLoader(), android.net.Uri.class))
                 .setMmsProxyAddress(in.readString())
                 .setMmsProxyPort(in.readInt())
                 .setUser(in.readString())

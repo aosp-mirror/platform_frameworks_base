@@ -371,7 +371,7 @@ public final class MediaRoute2Info implements Parcelable {
         mFeatures = in.createStringArrayList();
         mType = in.readInt();
         mIsSystem = in.readBoolean();
-        mIconUri = in.readParcelable(null);
+        mIconUri = in.readParcelable(null, android.net.Uri.class);
         mDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mConnectionState = in.readInt();
         mClientPackageName = in.readString();
