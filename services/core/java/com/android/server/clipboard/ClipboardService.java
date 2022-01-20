@@ -81,6 +81,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -127,6 +128,7 @@ public class ClipboardService extends SystemService {
     private final IUriGrantsManager mUgm;
     private final UriGrantsManagerInternal mUgmInternal;
     private final WindowManagerInternal mWm;
+    private final VirtualDeviceManagerInternal mVdm;
     private final IUserManager mUm;
     private final PackageManager mPm;
     private final AppOpsManager mAppOps;
@@ -158,6 +160,8 @@ public class ClipboardService extends SystemService {
         mUgm = UriGrantsManager.getService();
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mWm = LocalServices.getService(WindowManagerInternal.class);
+        // Can be null; not all products have CDM + VirtualDeviceManager
+        mVdm = LocalServices.getService(VirtualDeviceManagerInternal.class);
         mPm = getContext().getPackageManager();
         mUm = (IUserManager) ServiceManager.getService(Context.USER_SERVICE);
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
@@ -972,6 +976,13 @@ public class ClipboardService extends SystemService {
 
         // First, verify package ownership to ensure use below is safe.
         mAppOps.checkPackage(uid, callingPackage);
+
+        // Nothing in a virtual session is permitted to touch clipboard contents
+        if (mVdm != null && mVdm.isAppRunningOnAnyVirtualDevice(uid)) {
+            Slog.w(TAG, "Clipboard access denied to " + uid + "/" + callingPackage
+                    + " within a virtual device session");
+            return false;
+        }
 
         // Shell can access the clipboard for testing purposes.
         if (mPm.checkPermission(android.Manifest.permission.READ_CLIPBOARD_IN_BACKGROUND,
