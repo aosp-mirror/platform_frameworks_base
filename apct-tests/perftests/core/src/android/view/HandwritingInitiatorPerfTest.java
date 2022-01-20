@@ -25,7 +25,6 @@ import static android.view.MotionEvent.TOOL_TYPE_STYLUS;
 
 import android.app.Instrumentation;
 import android.content.Context;
-import android.graphics.Rect;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.view.inputmethod.EditorInfo;
@@ -190,7 +189,7 @@ public class HandwritingInitiatorPerfTest {
         final View view = new View(mContext);
         final EditorInfo editorInfo = new EditorInfo();
         while (state.keepRunning()) {
-            mHandwritingInitiator.onInputConnectionCreated(view, editorInfo);
+            mHandwritingInitiator.onInputConnectionCreated(view);
             state.pauseTiming();
             mHandwritingInitiator.onInputConnectionClosed(view);
             state.resumeTiming();
@@ -201,21 +200,11 @@ public class HandwritingInitiatorPerfTest {
     public void onInputConnectionClosed() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         final View view = new View(mContext);
-        final EditorInfo editorInfo = new EditorInfo();
         while (state.keepRunning()) {
             state.pauseTiming();
-            mHandwritingInitiator.onInputConnectionCreated(view, editorInfo);
+            mHandwritingInitiator.onInputConnectionCreated(view);
             state.resumeTiming();
             mHandwritingInitiator.onInputConnectionClosed(view);
-        }
-    }
-
-    @Test
-    public void updateEditorBoundary() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        final Rect rect = new Rect(0, 0, 100, 100);
-        while (state.keepRunning()) {
-            mHandwritingInitiator.updateEditorBound(rect);
         }
     }
 
