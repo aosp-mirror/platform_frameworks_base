@@ -23,6 +23,7 @@ import static android.content.pm.PackageManager.MATCH_ANY_USER;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsArgAt;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,6 +41,7 @@ import android.app.IActivityManager;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
+import android.apphibernation.HibernationStats;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -68,6 +70,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -126,7 +130,7 @@ public final class AppHibernationServiceTest {
         mUsageEventListener = mUsageEventListenerCaptor.getValue();
 
         doReturn(mUserInfos).when(mUserManager).getUsers();
-
+        doReturn(true).when(mPackageManagerInternal).canQueryPackage(anyInt(), any());
         doAnswer(returnsArgAt(2)).when(mIActivityManager).handleIncomingUser(anyInt(), anyInt(),
                 anyInt(), anyBoolean(), anyBoolean(), any(), any());
 
@@ -374,6 +378,58 @@ public final class AppHibernationServiceTest {
 
         // THEN the package is not hibernating globally anymore
         assertFalse(mAppHibernationService.isHibernatingGlobally(PACKAGE_NAME_1));
+    }
+
+    @Test
+    public void testGetHibernationStatsForUser_getsStatsForPackage() {
+        // GIVEN a package is hibernating globally and for a user
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
+
+        // WHEN we ask for the hibernation stats for the package
+        Map<String, HibernationStats> stats =
+                mAppHibernationService.getHibernationStatsForUser(
+                        Set.of(PACKAGE_NAME_1), USER_ID_1);
+
+        // THEN the stats exist for the package
+        assertTrue(stats.containsKey(PACKAGE_NAME_1));
+    }
+
+    @Test
+    public void testGetHibernationStatsForUser_noExceptionThrownWhenPackageDoesntExist() {
+        // WHEN we ask for the hibernation stats for a package that doesn't exist
+        Map<String, HibernationStats> stats =
+                mAppHibernationService.getHibernationStatsForUser(
+                        Set.of(PACKAGE_NAME_1), USER_ID_1);
+
+        // THEN no exception is thrown and empty stats are returned
+        assertNotNull(stats);
+    }
+
+    @Test
+    public void testGetHibernationStatsForUser_returnsAllIfNoPackagesSpecified()
+            throws RemoteException {
+        // GIVEN an unlocked user with all packages installed and they're all hibernating
+        UserInfo userInfo =
+                addUser(USER_ID_2, new String[]{PACKAGE_NAME_1, PACKAGE_NAME_2, PACKAGE_NAME_3});
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_2, true);
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_2, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_2, USER_ID_2, true);
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_3, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_3, USER_ID_2, true);
+
+        // WHEN we ask for the hibernation stats with no package specified
+        Map<String, HibernationStats> stats =
+                mAppHibernationService.getHibernationStatsForUser(
+                        null /* packageNames */, USER_ID_2);
+
+        // THEN all the package stats are returned
+        assertTrue(stats.containsKey(PACKAGE_NAME_1));
+        assertTrue(stats.containsKey(PACKAGE_NAME_2));
+        assertTrue(stats.containsKey(PACKAGE_NAME_3));
     }
 
     /**
