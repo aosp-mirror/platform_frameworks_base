@@ -22,32 +22,34 @@ import com.android.server.usb.descriptors.report.ReportCanvas;
  * An audio class-specific Midi Endpoint.
  * see midi10.pdf section 6.2.2
  */
-public final class UsbACMidiEndpoint extends UsbACEndpoint {
-    private static final String TAG = "UsbACMidiEndpoint";
+public final class UsbACMidi20Endpoint extends UsbACEndpoint {
+    private static final String TAG = "UsbACMidi20Endpoint";
 
-    private byte mNumJacks;
-    private byte[] mJackIds;
+    private byte mNumGroupTerminals;
+    private byte[] mBlockIds = new byte[0];
 
-    public UsbACMidiEndpoint(int length, byte type, int subclass) {
-        super(length, type, subclass);
+    public UsbACMidi20Endpoint(int length, byte type, int subclass, byte subtype) {
+        super(length, type, subclass, subtype);
     }
 
-    public byte getNumJacks() {
-        return mNumJacks;
+    public byte getNumGroupTerminals() {
+        return mNumGroupTerminals;
     }
 
-    public byte[] getJackIds() {
-        return mJackIds;
+    public byte[] getBlockIds() {
+        return mBlockIds;
     }
 
     @Override
     public int parseRawDescriptors(ByteStream stream) {
         super.parseRawDescriptors(stream);
 
-        mNumJacks = stream.getByte();
-        mJackIds = new byte[mNumJacks];
-        for (int jack = 0; jack < mNumJacks; jack++) {
-            mJackIds[jack] = stream.getByte();
+        mNumGroupTerminals = stream.getByte();
+        if (mNumGroupTerminals > 0) {
+            mBlockIds = new byte[mNumGroupTerminals];
+            for (int block = 0; block < mNumGroupTerminals; block++) {
+                mBlockIds[block] = stream.getByte();
+            }
         }
         return mLength;
     }
@@ -56,10 +58,10 @@ public final class UsbACMidiEndpoint extends UsbACEndpoint {
     public void report(ReportCanvas canvas) {
         super.report(canvas);
 
-        canvas.writeHeader(3, "AC Midi Endpoint: " + ReportCanvas.getHexString(getType())
+        canvas.writeHeader(3, "AC Midi20 Endpoint: " + ReportCanvas.getHexString(getType())
                 + " Length: " + getLength());
         canvas.openList();
-        canvas.writeListItem("" + getNumJacks() + " Jacks.");
+        canvas.writeListItem("" + getNumGroupTerminals() + " Group Terminals.");
         canvas.closeList();
     }
 }

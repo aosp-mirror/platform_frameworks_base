@@ -643,13 +643,31 @@ public class MidiService extends IMidiManager.Stub {
     private static final MidiDeviceInfo[] EMPTY_DEVICE_INFO_ARRAY = new MidiDeviceInfo[0];
 
     public MidiDeviceInfo[] getDevices() {
+        return getDevicesForTransport(MidiManager.TRANSPORT_MIDI_BYTE_STREAM);
+    }
+
+    /**
+    * @hide
+    */
+    public MidiDeviceInfo[] getDevicesForTransport(int transport) {
         ArrayList<MidiDeviceInfo> deviceInfos = new ArrayList<MidiDeviceInfo>();
         int uid = Binder.getCallingUid();
 
         synchronized (mDevicesByInfo) {
             for (Device device : mDevicesByInfo.values()) {
                 if (device.isUidAllowed(uid)) {
-                    deviceInfos.add(device.getDeviceInfo());
+                    // UMP devices have protocols that are not PROTOCOL_UNKNOWN
+                    if (transport == MidiManager.TRANSPORT_UNIVERSAL_MIDI_PACKETS) {
+                        if (device.getDeviceInfo().getDefaultProtocol()
+                                != MidiDeviceInfo.PROTOCOL_UNKNOWN) {
+                            deviceInfos.add(device.getDeviceInfo());
+                        }
+                    } else if (transport == MidiManager.TRANSPORT_MIDI_BYTE_STREAM) {
+                        if (device.getDeviceInfo().getDefaultProtocol()
+                                == MidiDeviceInfo.PROTOCOL_UNKNOWN) {
+                            deviceInfos.add(device.getDeviceInfo());
+                        }
+                    }
                 }
             }
         }
@@ -718,7 +736,7 @@ public class MidiService extends IMidiManager.Stub {
     @Override
     public MidiDeviceInfo registerDeviceServer(IMidiDeviceServer server, int numInputPorts,
             int numOutputPorts, String[] inputPortNames, String[] outputPortNames,
-            Bundle properties, int type) {
+            Bundle properties, int type, int defaultProtocol) {
         int uid = Binder.getCallingUid();
         if (type == MidiDeviceInfo.TYPE_USB && uid != Process.SYSTEM_UID) {
             throw new SecurityException("only system can create USB devices");
@@ -728,7 +746,8 @@ public class MidiService extends IMidiManager.Stub {
 
         synchronized (mDevicesByInfo) {
             return addDeviceLocked(type, numInputPorts, numOutputPorts, inputPortNames,
-                    outputPortNames, properties, server, null, false, uid);
+                    outputPortNames, properties, server, null, false, uid,
+                    defaultProtocol);
         }
     }
 
@@ -797,11 +816,12 @@ public class MidiService extends IMidiManager.Stub {
     private MidiDeviceInfo addDeviceLocked(int type, int numInputPorts, int numOutputPorts,
             String[] inputPortNames, String[] outputPortNames, Bundle properties,
             IMidiDeviceServer server, ServiceInfo serviceInfo,
-            boolean isPrivate, int uid) {
+            boolean isPrivate, int uid, int defaultProtocol) {
 
         int id = mNextDeviceId++;
         MidiDeviceInfo deviceInfo = new MidiDeviceInfo(type, id, numInputPorts, numOutputPorts,
-                inputPortNames, outputPortNames, properties, isPrivate);
+                inputPortNames, outputPortNames, properties, isPrivate,
+                defaultProtocol);
 
         if (server != null) {
             try {
@@ -988,10 +1008,11 @@ public class MidiService extends IMidiManager.Stub {
 
                             synchronized (mDevicesByInfo) {
                                 addDeviceLocked(MidiDeviceInfo.TYPE_VIRTUAL,
-                                    numInputPorts, numOutputPorts,
-                                    inputPortNames.toArray(EMPTY_STRING_ARRAY),
-                                    outputPortNames.toArray(EMPTY_STRING_ARRAY),
-                                    properties, null, serviceInfo, isPrivate, uid);
+                                        numInputPorts, numOutputPorts,
+                                        inputPortNames.toArray(EMPTY_STRING_ARRAY),
+                                        outputPortNames.toArray(EMPTY_STRING_ARRAY),
+                                        properties, null, serviceInfo, isPrivate, uid,
+                                        MidiDeviceInfo.PROTOCOL_UNKNOWN);
                             }
                             // setting properties to null signals that we are no longer
                             // processing a <device>

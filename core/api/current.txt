@@ -25710,6 +25710,7 @@ package android.media.midi {
 
   public final class MidiDeviceInfo implements android.os.Parcelable {
     method public int describeContents();
+    method public int getDefaultProtocol();
     method public int getId();
     method public int getInputPortCount();
     method public int getOutputPortCount();
@@ -25726,6 +25727,14 @@ package android.media.midi {
     field public static final String PROPERTY_SERIAL_NUMBER = "serial_number";
     field public static final String PROPERTY_USB_DEVICE = "usb_device";
     field public static final String PROPERTY_VERSION = "version";
+    field public static final int PROTOCOL_UMP_MIDI_1_0_UP_TO_128_BITS = 3; // 0x3
+    field public static final int PROTOCOL_UMP_MIDI_1_0_UP_TO_128_BITS_AND_JRTS = 4; // 0x4
+    field public static final int PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS = 1; // 0x1
+    field public static final int PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS_AND_JRTS = 2; // 0x2
+    field public static final int PROTOCOL_UMP_MIDI_2_0 = 17; // 0x11
+    field public static final int PROTOCOL_UMP_MIDI_2_0_AND_JRTS = 18; // 0x12
+    field public static final int PROTOCOL_UMP_USE_MIDI_CI = 0; // 0x0
+    field public static final int PROTOCOL_UNKNOWN = -1; // 0xffffffff
     field public static final int TYPE_BLUETOOTH = 3; // 0x3
     field public static final int TYPE_USB = 1; // 0x1
     field public static final int TYPE_VIRTUAL = 2; // 0x2
@@ -25767,10 +25776,14 @@ package android.media.midi {
 
   public final class MidiManager {
     method public android.media.midi.MidiDeviceInfo[] getDevices();
+    method @NonNull public java.util.Collection<android.media.midi.MidiDeviceInfo> getDevicesForTransport(int);
     method public void openBluetoothDevice(android.bluetooth.BluetoothDevice, android.media.midi.MidiManager.OnDeviceOpenedListener, android.os.Handler);
     method public void openDevice(android.media.midi.MidiDeviceInfo, android.media.midi.MidiManager.OnDeviceOpenedListener, android.os.Handler);
     method public void registerDeviceCallback(android.media.midi.MidiManager.DeviceCallback, android.os.Handler);
+    method public void registerDeviceCallbackForTransport(@NonNull android.media.midi.MidiManager.DeviceCallback, @Nullable android.os.Handler, int);
     method public void unregisterDeviceCallback(android.media.midi.MidiManager.DeviceCallback);
+    field public static final int TRANSPORT_MIDI_BYTE_STREAM = 1; // 0x1
+    field public static final int TRANSPORT_UNIVERSAL_MIDI_PACKETS = 2; // 0x2
   }
 
   public static class MidiManager.DeviceCallback {

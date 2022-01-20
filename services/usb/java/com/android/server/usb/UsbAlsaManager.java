@@ -257,10 +257,11 @@ public final class UsbAlsaManager {
 
         // look for MIDI devices
         boolean hasMidi = parser.hasMIDIInterface();
-        int midiNumInputs = parser.calculateNumMidiInputs();
-        int midiNumOutputs = parser.calculateNumMidiOutputs();
+        int midiNumInputs = parser.calculateNumLegacyMidiInputs();
+        int midiNumOutputs = parser.calculateNumLegacyMidiOutputs();
         if (DEBUG) {
             Slog.d(TAG, "hasMidi: " + hasMidi + " mHasMidiFeature:" + mHasMidiFeature);
+            Slog.d(TAG, "midiNumInputs: " + midiNumInputs + " midiNumOutputs:" + midiNumOutputs);
         }
         if (hasMidi && mHasMidiFeature) {
             int device = 0;
