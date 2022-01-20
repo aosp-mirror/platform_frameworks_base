@@ -52414,6 +52414,9 @@ package android.view.inputmethod {
     method public default boolean setImeConsumesInput(boolean);
     method public boolean setSelection(int, int);
     method @Nullable public default android.view.inputmethod.TextSnapshot takeSnapshot();
+    field public static final int CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS = 8; // 0x8
+    field public static final int CURSOR_UPDATE_FILTER_EDITOR_BOUNDS = 4; // 0x4
+    field public static final int CURSOR_UPDATE_FILTER_INSERTION_MARKER = 16; // 0x10
     field public static final int CURSOR_UPDATE_IMMEDIATE = 1; // 0x1
     field public static final int CURSOR_UPDATE_MONITOR = 2; // 0x2
     field public static final int GET_EXTRACTED_TEXT_MONITOR = 1; // 0x1

@@ -18,6 +18,7 @@ package android.view.inputmethod;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
+import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_IMMEDIATE;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_MONITOR;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.DISPLAY_ID;
@@ -1797,11 +1798,12 @@ public final class InputMethodManager {
             }
             if (mServedInputConnection != null && getDelegate().hasActiveConnection(view)) {
                 // TODO (b/210039666): optimize CURSOR_UPDATE_IMMEDIATE.
-                // TODO (b/215533103): Introduce new modes in requestCursorUpdates().
                 // TODO (b/210039666): Pipe IME displayId from InputBindResult and use it here.
                 //  instead of mDisplayId.
                 mServedInputConnection.requestCursorUpdatesFromImm(
-                        CURSOR_UPDATE_IMMEDIATE | CURSOR_UPDATE_MONITOR, mDisplayId);
+                        CURSOR_UPDATE_IMMEDIATE | CURSOR_UPDATE_MONITOR
+                                | CURSOR_UPDATE_FILTER_EDITOR_BOUNDS,
+                        mDisplayId);
             }
 
             try {
@@ -2445,6 +2447,17 @@ public final class InputMethodManager {
     public void setUpdateCursorAnchorInfoMode(int flags) {
         synchronized (mH) {
             mRequestUpdateCursorAnchorInfoMonitorMode = flags;
+        }
+    }
+
+    /**
+     * Get the requested mode for {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)}.
+     *
+     * @hide
+     */
+    public int getUpdateCursorAnchorInfoMode() {
+        synchronized (mH) {
+            return mRequestUpdateCursorAnchorInfoMonitorMode;
         }
     }
 
