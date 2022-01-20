@@ -1534,6 +1534,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             display.getBounds().splitVertically(primaryBounds, secondaryBounds);
             mPrimary.setBounds(primaryBounds);
             mSecondary.setBounds(secondaryBounds);
+
+            spyOn(mPrimary);
+            spyOn(mSecondary);
         }
 
         TestSplitOrganizer(ActivityTaskManagerService service) {
