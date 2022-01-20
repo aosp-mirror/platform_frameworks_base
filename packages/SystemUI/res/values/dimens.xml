@@ -261,11 +261,6 @@
     <!-- The padding on the global screenshot background image -->
     <dimen name="screenshot_x_scale">80dp</dimen>
     <dimen name="screenshot_bg_protection_height">242dp</dimen>
-    <dimen name="screenshot_preview_elevation">4dp</dimen>
-    <dimen name="screenshot_offset_y">8dp</dimen>
-    <dimen name="screenshot_offset_x">16dp</dimen>
-    <dimen name="screenshot_dismiss_button_tappable_size">48dp</dimen>
-    <dimen name="screenshot_dismiss_button_margin">8dp</dimen>
     <dimen name="screenshot_action_container_corner_radius">18dp</dimen>
     <dimen name="screenshot_action_container_padding_vertical">4dp</dimen>
     <dimen name="screenshot_action_container_margin_horizontal">8dp</dimen>
@@ -288,6 +283,19 @@
     <dimen name="screenshot_dismissal_height_delta">80dp</dimen>
     <dimen name="screenshot_crop_handle_thickness">3dp</dimen>
     <dimen name="long_screenshot_action_bar_top_margin">8dp</dimen>
+
+    <!-- Dimensions shared between "overlays" (clipboard and screenshot preview UIs) -->
+    <dimen name="overlay_offset_y">8dp</dimen>
+    <dimen name="overlay_offset_x">16dp</dimen>
+    <dimen name="overlay_preview_elevation">4dp</dimen>
+    <dimen name="overlay_dismiss_button_elevation">7dp</dimen>
+    <dimen name="overlay_dismiss_button_tappable_size">48dp</dimen>
+    <dimen name="overlay_dismiss_button_margin">8dp</dimen>
+    <dimen name="overlay_border_width">4dp</dimen>
+    <!-- need a negative margin for some of the constraints. should be overlay_border_width * -1 -->
+    <dimen name="overlay_border_width_neg">-4dp</dimen>
+
+    <dimen name="clipboard_preview_size">@dimen/screenshot_x_scale</dimen>
 
 
     <!-- The width of the view containing navigation buttons -->

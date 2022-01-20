@@ -2354,4 +2354,6 @@
     <string name="clipboard_edit_text_copy">Copy</string>
     <!-- Text informing user that content has been copied to the system clipboard [CHAR LIMIT=NONE] -->
     <string name="clipboard_overlay_text_copied">Copied</string>
+    <!-- Label for button to dismiss clipboard overlay [CHAR LIMIT=NONE] -->
+    <string name="clipboard_dismiss_description">Dismiss copy UI</string>
 </resources>
