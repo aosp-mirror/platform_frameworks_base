@@ -47,23 +47,6 @@ import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.net.TrafficStats.UID_TETHERING;
 import static android.net.TrafficStats.UNSUPPORTED;
 import static android.os.Trace.TRACE_TAG_NETWORK;
-import static android.provider.Settings.Global.NETSTATS_AUGMENT_ENABLED;
-import static android.provider.Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED;
-import static android.provider.Settings.Global.NETSTATS_DEV_BUCKET_DURATION;
-import static android.provider.Settings.Global.NETSTATS_DEV_DELETE_AGE;
-import static android.provider.Settings.Global.NETSTATS_DEV_PERSIST_BYTES;
-import static android.provider.Settings.Global.NETSTATS_DEV_ROTATE_AGE;
-import static android.provider.Settings.Global.NETSTATS_GLOBAL_ALERT_BYTES;
-import static android.provider.Settings.Global.NETSTATS_POLL_INTERVAL;
-import static android.provider.Settings.Global.NETSTATS_SAMPLE_ENABLED;
-import static android.provider.Settings.Global.NETSTATS_UID_BUCKET_DURATION;
-import static android.provider.Settings.Global.NETSTATS_UID_DELETE_AGE;
-import static android.provider.Settings.Global.NETSTATS_UID_PERSIST_BYTES;
-import static android.provider.Settings.Global.NETSTATS_UID_ROTATE_AGE;
-import static android.provider.Settings.Global.NETSTATS_UID_TAG_BUCKET_DURATION;
-import static android.provider.Settings.Global.NETSTATS_UID_TAG_DELETE_AGE;
-import static android.provider.Settings.Global.NETSTATS_UID_TAG_PERSIST_BYTES;
-import static android.provider.Settings.Global.NETSTATS_UID_TAG_ROTATE_AGE;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
@@ -156,7 +139,6 @@ import com.android.net.module.util.BinderUtils;
 import com.android.net.module.util.CollectionUtils;
 import com.android.net.module.util.NetworkStatsUtils;
 import com.android.net.module.util.PermissionUtils;
-import com.android.server.LocalServices;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -216,6 +198,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
       */
     private static final int LOG_TAG_NETSTATS_MOBILE_SAMPLE = 51100;
     private static final int LOG_TAG_NETSTATS_WIFI_SAMPLE = 51101;
+
+    // TODO: Replace the hardcoded string and move it into ConnectivitySettingsManager.
+    private static final String NETSTATS_COMBINE_SUBTYPE_ENABLED =
+            "netstats_combine_subtype_enabled";
 
     private final Context mContext;
     private final NetworkStatsFactory mStatsFactory;
@@ -428,7 +414,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStatsService service = new NetworkStatsService(context,
                 INetd.Stub.asInterface((IBinder) context.getSystemService(Context.NETD_SERVICE)),
                 alarmManager, wakeLock, getDefaultClock(),
-                new DefaultNetworkStatsSettings(context), new NetworkStatsFactory(netd),
+                new DefaultNetworkStatsSettings(), new NetworkStatsFactory(netd),
                 new NetworkStatsObservers(), getDefaultSystemDir(), getDefaultBaseDir(),
                 new Dependencies());
 
@@ -591,13 +577,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 mSettings.getPollInterval(), pollIntent);
 
         mContentResolver.registerContentObserver(Settings.Global
-                .getUriFor(Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED),
+                .getUriFor(NETSTATS_COMBINE_SUBTYPE_ENABLED),
                         false /* notifyForDescendants */, mContentObserver);
 
         // Post a runnable on handler thread to call onChange(). It's for getting current value of
         // NETSTATS_COMBINE_SUBTYPE_ENABLED to decide start or stop monitoring RAT type changes.
         mHandler.post(() -> mContentObserver.onChange(false, Settings.Global
-                .getUriFor(Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED)));
+                .getUriFor(NETSTATS_COMBINE_SUBTYPE_ENABLED)));
 
         registerGlobalAlert();
     }
@@ -2179,24 +2165,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * {@link android.provider.Settings.Global}.
      */
     private static class DefaultNetworkStatsSettings implements NetworkStatsSettings {
-        private final ContentResolver mResolver;
-
-        public DefaultNetworkStatsSettings(Context context) {
-            mResolver = Objects.requireNonNull(context.getContentResolver());
-            // TODO: adjust these timings for production builds
-        }
-
-        private long getGlobalLong(String name, long def) {
-            return Settings.Global.getLong(mResolver, name, def);
-        }
-        private boolean getGlobalBoolean(String name, boolean def) {
-            final int defInt = def ? 1 : 0;
-            return Settings.Global.getInt(mResolver, name, defInt) != 0;
-        }
+        DefaultNetworkStatsSettings() {}
 
         @Override
         public long getPollInterval() {
-            return getGlobalLong(NETSTATS_POLL_INTERVAL, 30 * MINUTE_IN_MILLIS);
+            return 30 * MINUTE_IN_MILLIS;
         }
         @Override
         public long getPollDelay() {
@@ -2204,25 +2177,23 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
         @Override
         public long getGlobalAlertBytes(long def) {
-            return getGlobalLong(NETSTATS_GLOBAL_ALERT_BYTES, def);
+            return def;
         }
         @Override
         public boolean getSampleEnabled() {
-            return getGlobalBoolean(NETSTATS_SAMPLE_ENABLED, true);
+            return true;
         }
         @Override
         public boolean getAugmentEnabled() {
-            return getGlobalBoolean(NETSTATS_AUGMENT_ENABLED, true);
+            return true;
         }
         @Override
         public boolean getCombineSubtypeEnabled() {
-            return getGlobalBoolean(NETSTATS_COMBINE_SUBTYPE_ENABLED, false);
+            return false;
         }
         @Override
         public Config getDevConfig() {
-            return new Config(getGlobalLong(NETSTATS_DEV_BUCKET_DURATION, HOUR_IN_MILLIS),
-                    getGlobalLong(NETSTATS_DEV_ROTATE_AGE, 15 * DAY_IN_MILLIS),
-                    getGlobalLong(NETSTATS_DEV_DELETE_AGE, 90 * DAY_IN_MILLIS));
+            return new Config(HOUR_IN_MILLIS, 15 * DAY_IN_MILLIS, 90 * DAY_IN_MILLIS);
         }
         @Override
         public Config getXtConfig() {
@@ -2230,31 +2201,27 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
         @Override
         public Config getUidConfig() {
-            return new Config(getGlobalLong(NETSTATS_UID_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
-                    getGlobalLong(NETSTATS_UID_ROTATE_AGE, 15 * DAY_IN_MILLIS),
-                    getGlobalLong(NETSTATS_UID_DELETE_AGE, 90 * DAY_IN_MILLIS));
+            return new Config(2 * HOUR_IN_MILLIS, 15 * DAY_IN_MILLIS, 90 * DAY_IN_MILLIS);
         }
         @Override
         public Config getUidTagConfig() {
-            return new Config(getGlobalLong(NETSTATS_UID_TAG_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
-                    getGlobalLong(NETSTATS_UID_TAG_ROTATE_AGE, 5 * DAY_IN_MILLIS),
-                    getGlobalLong(NETSTATS_UID_TAG_DELETE_AGE, 15 * DAY_IN_MILLIS));
+            return new Config(2 * HOUR_IN_MILLIS, 5 * DAY_IN_MILLIS, 15 * DAY_IN_MILLIS);
         }
         @Override
         public long getDevPersistBytes(long def) {
-            return getGlobalLong(NETSTATS_DEV_PERSIST_BYTES, def);
+            return def;
         }
         @Override
         public long getXtPersistBytes(long def) {
-            return getDevPersistBytes(def);
+            return def;
         }
         @Override
         public long getUidPersistBytes(long def) {
-            return getGlobalLong(NETSTATS_UID_PERSIST_BYTES, def);
+            return def;
         }
         @Override
         public long getUidTagPersistBytes(long def) {
-            return getGlobalLong(NETSTATS_UID_TAG_PERSIST_BYTES, def);
+            return def;
         }
     }
 
