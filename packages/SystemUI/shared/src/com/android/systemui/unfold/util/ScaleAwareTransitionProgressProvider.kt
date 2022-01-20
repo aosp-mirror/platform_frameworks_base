@@ -21,17 +21,18 @@ constructor(
     private val scopedUnfoldTransitionProgressProvider =
         ScopedUnfoldTransitionProgressProvider(progressProviderToWrap)
 
-    private val animatorDurationScaleObserver = object : ContentObserver(null) {
-        override fun onChange(selfChange: Boolean) {
-            onAnimatorScaleChanged()
+    private val animatorDurationScaleObserver =
+        object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                onAnimatorScaleChanged()
+            }
         }
-    }
 
     init {
         contentResolver.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
-                /* notifyForDescendants= */ false,
-                animatorDurationScaleObserver)
+            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+            /* notifyForDescendants= */ false,
+            animatorDurationScaleObserver)
         onAnimatorScaleChanged()
     }
 

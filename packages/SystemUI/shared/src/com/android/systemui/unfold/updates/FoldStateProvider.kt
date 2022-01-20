@@ -17,8 +17,8 @@ package com.android.systemui.unfold.updates
 
 import android.annotation.FloatRange
 import android.annotation.IntDef
-import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 import com.android.systemui.statusbar.policy.CallbackController
+import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 
 /**
  * Allows to subscribe to main events related to fold/unfold process such as hinge angle update,
@@ -35,14 +35,16 @@ interface FoldStateProvider : CallbackController<FoldUpdatesListener> {
         fun onFoldUpdate(@FoldUpdate update: Int)
     }
 
-    @IntDef(prefix = ["FOLD_UPDATE_"], value = [
-        FOLD_UPDATE_START_OPENING,
-        FOLD_UPDATE_START_CLOSING,
-        FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE,
-        FOLD_UPDATE_FINISH_HALF_OPEN,
-        FOLD_UPDATE_FINISH_FULL_OPEN,
-        FOLD_UPDATE_FINISH_CLOSED
-    ])
+    @IntDef(
+        prefix = ["FOLD_UPDATE_"],
+        value =
+            [
+                FOLD_UPDATE_START_OPENING,
+                FOLD_UPDATE_START_CLOSING,
+                FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE,
+                FOLD_UPDATE_FINISH_HALF_OPEN,
+                FOLD_UPDATE_FINISH_FULL_OPEN,
+                FOLD_UPDATE_FINISH_CLOSED])
     @Retention(AnnotationRetention.SOURCE)
     annotation class FoldUpdate
 }

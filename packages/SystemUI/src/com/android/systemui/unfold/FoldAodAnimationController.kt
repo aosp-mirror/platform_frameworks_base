@@ -30,17 +30,17 @@ import dagger.Lazy
 import javax.inject.Inject
 
 /**
- * Controls folding to AOD animation: when AOD is enabled and foldable device is folded
- * we play a special AOD animation on the outer screen
+ * Controls folding to AOD animation: when AOD is enabled and foldable device is folded we play a
+ * special AOD animation on the outer screen
  */
 @SysUIUnfoldScope
-class FoldAodAnimationController @Inject constructor(
+class FoldAodAnimationController
+@Inject
+constructor(
     private val keyguardViewMediatorLazy: Lazy<KeyguardViewMediator>,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
     private val globalSettings: GlobalSettings
-) : CallbackController<FoldAodAnimationStatus>,
-    ScreenOffAnimation,
-    WakefulnessLifecycle.Observer {
+) : CallbackController<FoldAodAnimationStatus>, ScreenOffAnimation, WakefulnessLifecycle.Observer {
 
     private var alwaysOnEnabled: Boolean = false
     private var isScrimOpaque: Boolean = false
@@ -58,17 +58,13 @@ class FoldAodAnimationController @Inject constructor(
         wakefulnessLifecycle.addObserver(this)
     }
 
-    /**
-     * Returns true if we should run fold to AOD animation
-     */
-    override fun shouldPlayAnimation(): Boolean =
-        shouldPlayAnimation
+    /** Returns true if we should run fold to AOD animation */
+    override fun shouldPlayAnimation(): Boolean = shouldPlayAnimation
 
     override fun startAnimation(): Boolean =
         if (alwaysOnEnabled &&
             wakefulnessLifecycle.lastSleepReason == PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD &&
-            globalSettings.getString(Settings.Global.ANIMATOR_DURATION_SCALE) != "0"
-        ) {
+            globalSettings.getString(Settings.Global.ANIMATOR_DURATION_SCALE) != "0") {
             shouldPlayAnimation = true
 
             isAnimationPlaying = true
@@ -107,9 +103,7 @@ class FoldAodAnimationController @Inject constructor(
         }
     }
 
-    /**
-     * Called when keyguard scrim opaque changed
-     */
+    /** Called when keyguard scrim opaque changed */
     override fun onScrimOpaqueChanged(isOpaque: Boolean) {
         isScrimOpaque = isOpaque
 
@@ -130,27 +124,19 @@ class FoldAodAnimationController @Inject constructor(
         }
     }
 
-    override fun isAnimationPlaying(): Boolean =
-        isAnimationPlaying
+    override fun isAnimationPlaying(): Boolean = isAnimationPlaying
 
-    override fun isKeyguardHideDelayed(): Boolean =
-        isAnimationPlaying()
+    override fun isKeyguardHideDelayed(): Boolean = isAnimationPlaying()
 
-    override fun shouldShowAodIconsWhenShade(): Boolean =
-        shouldPlayAnimation()
+    override fun shouldShowAodIconsWhenShade(): Boolean = shouldPlayAnimation()
 
-    override fun shouldAnimateAodIcons(): Boolean =
-        !shouldPlayAnimation()
+    override fun shouldAnimateAodIcons(): Boolean = !shouldPlayAnimation()
 
-    override fun shouldAnimateDozingChange(): Boolean =
-        !shouldPlayAnimation()
+    override fun shouldAnimateDozingChange(): Boolean = !shouldPlayAnimation()
 
-    override fun shouldAnimateClockChange(): Boolean =
-        !isAnimationPlaying()
+    override fun shouldAnimateClockChange(): Boolean = !isAnimationPlaying()
 
-    /**
-     * Called when AOD status is changed
-     */
+    /** Called when AOD status is changed */
     override fun onAlwaysOnChanged(alwaysOn: Boolean) {
         alwaysOnEnabled = alwaysOn
     }
