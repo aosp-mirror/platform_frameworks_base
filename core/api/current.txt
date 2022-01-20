@@ -17276,6 +17276,8 @@ package android.hardware.camera2 {
     method @NonNull public java.util.List<android.hardware.camera2.CameraCharacteristics.Key<?>> getKeysNeedingPermission();
     method @NonNull public java.util.Set<java.lang.String> getPhysicalCameraIds();
     method @Nullable public android.hardware.camera2.params.RecommendedStreamConfigurationMap getRecommendedStreamConfigurationMap(int);
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> AUTOMOTIVE_LENS_FACING;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> AUTOMOTIVE_LOCATION;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AE_AVAILABLE_ANTIBANDING_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AE_AVAILABLE_MODES;
@@ -17509,6 +17511,32 @@ package android.hardware.camera2 {
 
   public abstract class CameraMetadata<TKey> {
     method @NonNull public java.util.List<TKey> getKeys();
+    field public static final int AUTOMOTIVE_LENS_FACING_EXTERIOR_FRONT = 1; // 0x1
+    field public static final int AUTOMOTIVE_LENS_FACING_EXTERIOR_LEFT = 3; // 0x3
+    field public static final int AUTOMOTIVE_LENS_FACING_EXTERIOR_OTHER = 0; // 0x0
+    field public static final int AUTOMOTIVE_LENS_FACING_EXTERIOR_REAR = 2; // 0x2
+    field public static final int AUTOMOTIVE_LENS_FACING_EXTERIOR_RIGHT = 4; // 0x4
+    field public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_OTHER = 5; // 0x5
+    field public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_1_CENTER = 7; // 0x7
+    field public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_1_LEFT = 6; // 0x6
+    field public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_1_RIGHT = 8; // 0x8
+    field public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_2_CENTER = 10; // 0xa
+    field public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_2_LEFT = 9; // 0x9
+    field public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_2_RIGHT = 11; // 0xb
+    field public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_3_CENTER = 13; // 0xd
+    field public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_3_LEFT = 12; // 0xc
+    field public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_3_RIGHT = 14; // 0xe
+    field public static final int AUTOMOTIVE_LOCATION_EXTERIOR_FRONT = 2; // 0x2
+    field public static final int AUTOMOTIVE_LOCATION_EXTERIOR_LEFT = 4; // 0x4
+    field public static final int AUTOMOTIVE_LOCATION_EXTERIOR_OTHER = 1; // 0x1
+    field public static final int AUTOMOTIVE_LOCATION_EXTERIOR_REAR = 3; // 0x3
+    field public static final int AUTOMOTIVE_LOCATION_EXTERIOR_RIGHT = 5; // 0x5
+    field public static final int AUTOMOTIVE_LOCATION_EXTRA_FRONT = 7; // 0x7
+    field public static final int AUTOMOTIVE_LOCATION_EXTRA_LEFT = 9; // 0x9
+    field public static final int AUTOMOTIVE_LOCATION_EXTRA_OTHER = 6; // 0x6
+    field public static final int AUTOMOTIVE_LOCATION_EXTRA_REAR = 8; // 0x8
+    field public static final int AUTOMOTIVE_LOCATION_EXTRA_RIGHT = 10; // 0xa
+    field public static final int AUTOMOTIVE_LOCATION_INTERIOR = 0; // 0x0
     field public static final int COLOR_CORRECTION_ABERRATION_MODE_FAST = 1; // 0x1
     field public static final int COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int COLOR_CORRECTION_ABERRATION_MODE_OFF = 0; // 0x0
@@ -17643,6 +17671,7 @@ package android.hardware.camera2 {
     field public static final int LENS_INFO_FOCUS_DISTANCE_CALIBRATION_UNCALIBRATED = 0; // 0x0
     field public static final int LENS_OPTICAL_STABILIZATION_MODE_OFF = 0; // 0x0
     field public static final int LENS_OPTICAL_STABILIZATION_MODE_ON = 1; // 0x1
+    field public static final int LENS_POSE_REFERENCE_AUTOMOTIVE = 3; // 0x3
     field public static final int LENS_POSE_REFERENCE_GYROSCOPE = 1; // 0x1
     field public static final int LENS_POSE_REFERENCE_PRIMARY_CAMERA = 0; // 0x0
     field public static final int LENS_POSE_REFERENCE_UNDEFINED = 2; // 0x2
