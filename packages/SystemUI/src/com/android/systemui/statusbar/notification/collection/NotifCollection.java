@@ -46,6 +46,7 @@ import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.UserIdInt;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -72,6 +73,7 @@ import com.android.systemui.statusbar.notification.collection.coalescer.Coalesce
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer.BatchableNotificationHandler;
 import com.android.systemui.statusbar.notification.collection.notifcollection.BindEntryEvent;
+import com.android.systemui.statusbar.notification.collection.notifcollection.ChannelChangedEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CleanUpEntryEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
@@ -421,6 +423,16 @@ public class NotifCollection implements Dumpable {
         Assert.isMainThread();
         mEventQueue.add(new RankingUpdatedEvent(rankingMap));
         applyRanking(rankingMap);
+        dispatchEventsAndRebuildList();
+    }
+
+    private void onNotificationChannelModified(
+            String pkgName,
+            UserHandle user,
+            NotificationChannel channel,
+            int modificationType) {
+        Assert.isMainThread();
+        mEventQueue.add(new ChannelChangedEvent(pkgName, user, channel, modificationType));
         dispatchEventsAndRebuildList();
     }
 
@@ -832,6 +844,19 @@ public class NotifCollection implements Dumpable {
         @Override
         public void onNotificationRankingUpdate(RankingMap rankingMap) {
             NotifCollection.this.onNotificationRankingUpdate(rankingMap);
+        }
+
+        @Override
+        public void onNotificationChannelModified(
+                String pkgName,
+                UserHandle user,
+                NotificationChannel channel,
+                int modificationType) {
+            NotifCollection.this.onNotificationChannelModified(
+                    pkgName,
+                    user,
+                    channel,
+                    modificationType);
         }
 
         @Override

@@ -427,15 +427,29 @@ public class BubblesManager implements Dumpable {
                     }
 
                     @Override
-                    public void onEntryRemoved(NotificationEntry entry,
+                    public void onEntryRemoved(
+                            NotificationEntry entry,
                             @Nullable NotificationVisibility visibility,
-                            boolean removedByUser, int reason) {
+                            boolean removedByUser,
+                            int reason) {
                         BubblesManager.this.onEntryRemoved(entry);
                     }
 
                     @Override
                     public void onNotificationRankingUpdated(RankingMap rankingMap) {
                         BubblesManager.this.onRankingUpdate(rankingMap);
+                    }
+
+                    @Override
+                    public void onNotificationChannelModified(
+                            String pkgName,
+                            UserHandle user,
+                            NotificationChannel channel,
+                            int modificationType) {
+                        BubblesManager.this.onNotificationChannelModified(pkgName,
+                                user,
+                                channel,
+                                modificationType);
                     }
                 });
 
@@ -556,6 +570,19 @@ public class BubblesManager implements Dumpable {
             public void onRankingUpdate(RankingMap rankingMap) {
                 BubblesManager.this.onRankingUpdate(rankingMap);
             }
+
+            @Override
+            public void onNotificationChannelModified(
+                    String pkgName,
+                    UserHandle user,
+                    NotificationChannel channel,
+                    int modificationType) {
+                BubblesManager.this.onNotificationChannelModified(
+                        pkgName,
+                        user,
+                        channel,
+                        modificationType);
+            }
         });
     }
 
@@ -590,6 +617,14 @@ public class BubblesManager implements Dumpable {
             pendingOrActiveNotif.put(key, new Pair<>(bubbleEntry, shouldBubbleUp));
         }
         mBubbles.onRankingUpdated(rankingMap, pendingOrActiveNotif);
+    }
+
+    void onNotificationChannelModified(
+            String pkg,
+            UserHandle user,
+            NotificationChannel channel,
+            int modificationType) {
+        mBubbles.onNotificationChannelModified(pkg, user, channel, modificationType);
     }
 
     /**

@@ -17,6 +17,8 @@
 package com.android.wm.shell.bubbles;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
@@ -42,6 +44,7 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -1092,6 +1095,24 @@ public class BubbleController {
         }
     }
 
+    @VisibleForTesting
+    public void onNotificationChannelModified(String pkg, UserHandle user,
+            NotificationChannel channel, int modificationType) {
+        // Only query overflow bubbles here because active bubbles will have an active notification
+        // and channel changes we care about would result in a ranking update.
+        List<Bubble> overflowBubbles = new ArrayList<>(mBubbleData.getOverflowBubbles());
+        for (int i = 0; i < overflowBubbles.size(); i++) {
+            Bubble b = overflowBubbles.get(i);
+            if (Objects.equals(b.getShortcutId(), channel.getConversationId())
+                    && b.getPackageName().equals(pkg)
+                    && b.getUser().getIdentifier() == user.getIdentifier()) {
+                if (!channel.canBubble() || channel.isDeleted()) {
+                    mBubbleData.dismissBubbleWithKey(b.getKey(), DISMISS_NO_LONGER_BUBBLE);
+                }
+            }
+        }
+    }
+
     /**
      * Retrieves any bubbles that are part of the notification group represented by the provided
      * group key.
@@ -1667,6 +1688,19 @@ public class BubbleController {
             mMainExecutor.execute(() -> {
                 BubbleController.this.onRankingUpdated(rankingMap, entryDataByKey);
             });
+        }
+
+        @Override
+        public void onNotificationChannelModified(String pkg,
+                UserHandle user, NotificationChannel channel, int modificationType) {
+            // Bubbles only cares about updates or deletions.
+            if (modificationType == NOTIFICATION_CHANNEL_OR_GROUP_UPDATED
+                    || modificationType == NOTIFICATION_CHANNEL_OR_GROUP_DELETED) {
+                mMainExecutor.execute(() -> {
+                    BubbleController.this.onNotificationChannelModified(pkg, user, channel,
+                            modificationType);
+                });
+            }
         }
 
         @Override
