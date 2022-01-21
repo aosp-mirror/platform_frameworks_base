@@ -476,13 +476,9 @@ final class AppDataHelper {
             } else if (!ps.getInstalled(userId)) {
                 throw new PackageManagerException(
                         "Package " + packageName + " not installed for user " + userId);
-            } else if (ps.getPkg() == null) {
-                throw new PackageManagerException("Package " + packageName + " is not parsed yet");
-            } else {
-                if (!shouldHaveAppStorage(ps.getPkg())) {
-                    throw new PackageManagerException(
-                            "Package " + packageName + " shouldn't have storage");
-                }
+            } else if (ps.getPkg() != null && !shouldHaveAppStorage(ps.getPkg())) {
+                throw new PackageManagerException(
+                        "Package " + packageName + " shouldn't have storage");
             }
         }
     }
