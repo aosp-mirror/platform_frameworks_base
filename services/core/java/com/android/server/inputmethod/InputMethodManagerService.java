@@ -221,7 +221,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
     private static final int MSG_SHOW_IM_CONFIG = 3;
 
-    private static final int MSG_SHOW_SOFT_INPUT = 1020;
     private static final int MSG_HIDE_SOFT_INPUT = 1030;
     private static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
     private static final int MSG_INITIALIZE_IME = 1040;
@@ -781,7 +780,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final int mFocusedWindowSoftInputMode;
             @SoftInputShowHideReason
             final int mReason;
-            // The timing of handling MSG_SHOW_SOFT_INPUT or MSG_HIDE_SOFT_INPUT.
+            // The timing of handling showCurrentInputLocked() or MSG_HIDE_SOFT_INPUT.
             final long mTimestamp;
             final long mWallTime;
             final boolean mInFullscreenMode;
@@ -3132,18 +3131,25 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         mBindingController.setCurrentMethodVisible();
-        if (getCurMethodLocked() != null) {
+        final IInputMethod curMethod = getCurMethodLocked();
+        if (curMethod != null) {
             // create a placeholder token for IMS so that IMS cannot inject windows into client app.
             Binder showInputToken = new Binder();
             mShowRequestWindowMap.put(showInputToken, windowToken);
-            IInputMethod curMethod = getCurMethodLocked();
-            executeOrSendMessage(curMethod, mCaller.obtainMessageIIOOO(MSG_SHOW_SOFT_INPUT,
-                    getImeShowFlagsLocked(), reason, curMethod, resultReceiver,
-                    showInputToken));
+            final int showFlags = getImeShowFlagsLocked();
+            try {
+                if (DEBUG) {
+                    Slog.v(TAG, "Calling " + curMethod + ".showSoftInput(" + showInputToken
+                            + ", " + showFlags + ", " + resultReceiver + ") for reason: "
+                            + InputMethodDebug.softInputDisplayReasonToString(reason));
+                }
+                curMethod.showSoftInput(showInputToken, showFlags, resultReceiver);
+                onShowHideSoftInputRequested(true /* show */, windowToken, reason);
+            } catch (RemoteException e) {
+            }
             mInputShown = true;
             return true;
         }
-
         return false;
     }
 
@@ -4228,25 +4234,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // ---------------------------------------------------------
 
-            case MSG_SHOW_SOFT_INPUT:
-                args = (SomeArgs) msg.obj;
-                try {
-                    final @SoftInputShowHideReason int reason = msg.arg2;
-                    if (DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".showSoftInput("
-                            + args.arg3 + ", " + msg.arg1 + ", " + args.arg2 + ") for reason: "
-                            + InputMethodDebug.softInputDisplayReasonToString(reason));
-                    final IBinder token = (IBinder) args.arg3;
-                    ((IInputMethod) args.arg1).showSoftInput(
-                            token, msg.arg1 /* flags */, (ResultReceiver) args.arg2);
-                    final IBinder requestToken;
-                    synchronized (ImfLock.class) {
-                        requestToken = mShowRequestWindowMap.get(token);
-                        onShowHideSoftInputRequested(true /* show */, requestToken, reason);
-                    }
-                } catch (RemoteException e) {
-                }
-                args.recycle();
-                return true;
             case MSG_HIDE_SOFT_INPUT:
                 args = (SomeArgs) msg.obj;
                 try {
