@@ -136,9 +136,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -11873,13 +11871,15 @@ public class BatteryStatsImpl extends BatteryStats {
     private NetworkStats mLastModemNetworkStats = new NetworkStats(0, -1);
 
     @VisibleForTesting
-    protected NetworkStats readNetworkStatsLocked(@NonNull NetworkStatsManager networkStatsManager,
-            String[] ifaces) {
-        Objects.requireNonNull(networkStatsManager);
-        if (!ArrayUtils.isEmpty(ifaces)) {
-            return networkStatsManager.getDetailedUidStats(Set.of(ifaces));
-        }
-        return null;
+    protected NetworkStats readMobileNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
+        return networkStatsManager.getMobileUidStats();
+    }
+
+    @VisibleForTesting
+    protected NetworkStats readWifiNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
+        return networkStatsManager.getWifiUidStats();
     }
 
     /**
@@ -11896,8 +11896,7 @@ public class BatteryStatsImpl extends BatteryStats {
         // Grab a separate lock to acquire the network stats, which may do I/O.
         NetworkStats delta = null;
         synchronized (mWifiNetworkLock) {
-            final NetworkStats latestStats = readNetworkStatsLocked(networkStatsManager,
-                    mWifiIfaces);
+            final NetworkStats latestStats = readWifiNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
                 delta = NetworkStats.subtract(latestStats, mLastWifiNetworkStats, null, null,
                         mNetworkStatsPool.acquire());
@@ -12264,8 +12263,7 @@ public class BatteryStatsImpl extends BatteryStats {
         // Grab a separate lock to acquire the network stats, which may do I/O.
         NetworkStats delta = null;
         synchronized (mModemNetworkLock) {
-            final NetworkStats latestStats = readNetworkStatsLocked(networkStatsManager,
-                    mModemIfaces);
+            final NetworkStats latestStats = readMobileNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
                 delta = NetworkStats.subtract(latestStats, mLastModemNetworkStats, null, null,
                         mNetworkStatsPool.acquire());

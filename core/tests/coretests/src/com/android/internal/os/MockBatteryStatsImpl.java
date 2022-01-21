@@ -40,6 +40,7 @@ import java.util.concurrent.Future;
 public class MockBatteryStatsImpl extends BatteryStatsImpl {
     public BatteryStatsImpl.Clocks clocks;
     public boolean mForceOnBattery;
+    // The mNetworkStats will be used for both wifi and mobile categories
     private NetworkStats mNetworkStats;
     private DummyExternalStatsSync mExternalStatsSync = new DummyExternalStatsSync();
 
@@ -108,11 +109,16 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     @Override
-    protected NetworkStats readNetworkStatsLocked(@NonNull NetworkStatsManager networkStatsManager,
-            String[] ifaces) {
+    protected NetworkStats readMobileNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
         return mNetworkStats;
     }
 
+    @Override
+    protected NetworkStats readWifiNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
+        return mNetworkStats;
+    }
     public MockBatteryStatsImpl setPowerProfile(PowerProfile powerProfile) {
         mPowerProfile = powerProfile;
         return this;

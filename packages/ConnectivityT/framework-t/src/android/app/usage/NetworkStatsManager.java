@@ -17,6 +17,8 @@
 package android.app.usage;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -55,7 +57,6 @@ import com.android.net.module.util.NetworkIdentityUtils;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Provides access to network usage history and statistics. Usage data is collected in
@@ -670,26 +671,49 @@ public class NetworkStatsManager {
     }
 
     /**
-     * Query realtime network usage statistics details with interfaces constrains.
-     * Return snapshot of current UID statistics, including any {@link TrafficStats#UID_TETHERING},
-     * video calling data usage and count of network operations that set by
-     * {@link TrafficStats#incrementOperationCount}. The returned data doesn't include any
-     * statistics that is reported by {@link NetworkStatsProvider}.
+     * Query realtime mobile network usage statistics.
      *
-     * @param requiredIfaces A list of interfaces the stats should be restricted to, or
-     *               {@link NetworkStats#INTERFACES_ALL}.
+     * Return a snapshot of current UID network statistics, as it applies
+     * to the mobile radios of the device. The snapshot will include any
+     * tethering traffic, video calling data usage and count of
+     * network operations set by {@link TrafficStats#incrementOperationCount}
+     * made over a mobile radio.
+     * The snapshot will not include any statistics that cannot be seen by
+     * the kernel, e.g. statistics reported by {@link NetworkStatsProvider}s.
      *
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
-    @NonNull public android.net.NetworkStats getDetailedUidStats(
-                @NonNull Set<String> requiredIfaces) {
-        Objects.requireNonNull(requiredIfaces, "requiredIfaces cannot be null");
+    @NonNull public android.net.NetworkStats getMobileUidStats() {
         try {
-            return mService.getDetailedUidStats(requiredIfaces.toArray(new String[0]));
+            return mService.getUidStatsForTransport(TRANSPORT_CELLULAR);
         } catch (RemoteException e) {
-            if (DBG) Log.d(TAG, "Remote exception when get detailed uid stats");
+            if (DBG) Log.d(TAG, "Remote exception when get Mobile uid stats");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Query realtime Wi-Fi network usage statistics.
+     *
+     * Return a snapshot of current UID network statistics, as it applies
+     * to the Wi-Fi radios of the device. The snapshot will include any
+     * tethering traffic, video calling data usage and count of
+     * network operations set by {@link TrafficStats#incrementOperationCount}
+     * made over a Wi-Fi radio.
+     * The snapshot will not include any statistics that cannot be seen by
+     * the kernel, e.g. statistics reported by {@link NetworkStatsProvider}s.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    @NonNull public android.net.NetworkStats getWifiUidStats() {
+        try {
+            return mService.getUidStatsForTransport(TRANSPORT_WIFI);
+        } catch (RemoteException e) {
+            if (DBG) Log.d(TAG, "Remote exception when get WiFi uid stats");
             throw e.rethrowFromSystemServer();
         }
     }
