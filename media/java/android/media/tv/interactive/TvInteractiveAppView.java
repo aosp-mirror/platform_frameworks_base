@@ -213,7 +213,7 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /** @hide */
     @Override
-    protected void onVisibilityChanged(View changedView, int visibility) {
+    protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         mSurfaceView.setVisibility(visibility);
         if (visibility == View.VISIBLE) {
@@ -330,6 +330,11 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Dispatches an unhandled input event to the next receiver.
+     *
+     * It gives the host application a chance to dispatch the unhandled input events.
+     *
+     * @param event The input event.
+     * @return {@code true} if the event was handled by the view, {@code false} otherwise.
      * @hide
      */
     public boolean dispatchUnhandledInputEvent(@NonNull InputEvent event) {
@@ -356,14 +361,24 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
-     * Registers a callback to be invoked when an input event is not handled
+     * Sets a listener to be invoked when an input event is not handled
      * by the TV Interactive App.
      *
      * @param listener The callback to be invoked when the unhandled input event is received.
      * @hide
      */
-    public void setOnUnhandledInputEventListener(@NonNull OnUnhandledInputEventListener listener) {
+    public void setOnUnhandledInputEventListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnUnhandledInputEventListener listener) {
         mOnUnhandledInputEventListener = listener;
+        // TODO: handle CallbackExecutor
+    }
+    /**
+     * Clears the {@link OnUnhandledInputEventListener}
+     * @hide
+     */
+    public void clearOnUnhandledInputEventListener() {
+        mOnUnhandledInputEventListener = null;
     }
 
     @Override
@@ -440,9 +455,12 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Sends current channel URI to related TV interactive app.
+     *
+     * @param channelUri The current channel URI; {@code null} if there is no currently tuned
+     *                   channel.
      * @hide
      */
-    public void sendCurrentChannelUri(Uri channelUri) {
+    public void sendCurrentChannelUri(@Nullable Uri channelUri) {
         if (DEBUG) {
             Log.d(TAG, "sendCurrentChannelUri");
         }
@@ -481,7 +499,7 @@ public class TvInteractiveAppView extends ViewGroup {
      * Sends track info list to related TV interactive app.
      * @hide
      */
-    public void sendTrackInfoList(List<TvTrackInfo> tracks) {
+    public void sendTrackInfoList(@Nullable List<TvTrackInfo> tracks) {
         if (DEBUG) {
             Log.d(TAG, "sendTrackInfoList");
         }
@@ -588,7 +606,11 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * To toggle Digital Teletext Application if there is one in AIT app list.
-     * @param enable
+     *
+     * <p>A Teletext Application is a broadcast-related application to display text and basic
+     * graphics.
+     *
+     * @param enable {@code true} to enable Teletext app; {@code false} to disable it.
      * @hide
      */
     public void setTeletextAppEnabled(boolean enable) {
@@ -607,17 +629,18 @@ public class TvInteractiveAppView extends ViewGroup {
         // TODO: unhide the following public APIs
 
         /**
-         * This is called when a command is requested to be processed by the related TV input.
+         * This is called when a playback command is requested to be processed by the related TV
+         * input.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param cmdType type of the command
          * @param parameters parameters of the command
          * @hide
          */
-        public void onCommandRequest(
+        public void onPlaybackCommandRequest(
                 @NonNull String iAppServiceId,
-                @NonNull @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
-                @Nullable Bundle parameters) {
+                @NonNull @TvInteractiveAppService.PlaybackCommandType String cmdType,
+                @NonNull Bundle parameters) {
         }
 
         /**
@@ -818,7 +841,7 @@ public class TvInteractiveAppView extends ViewGroup {
         @Override
         public void onCommandRequest(
                 Session session,
-                @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
+                @TvInteractiveAppService.PlaybackCommandType String cmdType,
                 Bundle parameters) {
             if (DEBUG) {
                 Log.d(TAG, "onCommandRequest (cmdType=" + cmdType + ", parameters="
@@ -833,7 +856,8 @@ public class TvInteractiveAppView extends ViewGroup {
                     mCallbackExecutor.execute(() -> {
                         synchronized (mCallbackLock) {
                             if (mCallback != null) {
-                                mCallback.onCommandRequest(mIAppServiceId, cmdType, parameters);
+                                mCallback.onPlaybackCommandRequest(
+                                        mIAppServiceId, cmdType, parameters);
                             }
                         }
                     });

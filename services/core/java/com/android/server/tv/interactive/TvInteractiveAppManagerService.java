@@ -2095,7 +2095,7 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         @Override
         public void onCommandRequest(
-                @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
+                @TvInteractiveAppService.PlaybackCommandType String cmdType,
                 Bundle parameters) {
             synchronized (mLock) {
                 if (DEBUG) {

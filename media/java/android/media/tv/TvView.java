@@ -1079,12 +1079,13 @@ public class TvView extends ViewGroup {
 
         /**
          * This is called when signal strength is updated.
+         *
          * @param inputId The ID of the TV input bound to this view.
          * @param strength The current signal strength.
-         *
          * @hide
          */
-        public void onSignalStrength(String inputId, @TvInputManager.SignalStrength int strength) {
+        public void onSignalStrength(
+                @NonNull String inputId, @TvInputManager.SignalStrength int strength) {
         }
 
         /**
@@ -1093,7 +1094,7 @@ public class TvView extends ViewGroup {
          * @param channelUri The URI of a channel.
          * @hide
          */
-        public void onTuned(String inputId, Uri channelUri) {
+        public void onTuned(@NonNull String inputId, @NonNull Uri channelUri) {
         }
     }
 
