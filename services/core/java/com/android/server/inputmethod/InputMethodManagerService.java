@@ -222,7 +222,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_SHOW_IM_CONFIG = 3;
 
     private static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
-    private static final int MSG_CREATE_SESSION = 1050;
     private static final int MSG_REMOVE_IME_SURFACE = 1060;
     private static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
     private static final int MSG_UPDATE_IME_WINDOW_STATUS = 1070;
@@ -2604,22 +2603,39 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     void requestClientSessionLocked(ClientState cs) {
         if (!cs.sessionRequested) {
             if (DEBUG) Slog.v(TAG, "Creating new session for client " + cs);
-            InputChannel[] channels = InputChannel.openInputChannelPair(cs.toString());
+            final InputChannel serverChannel;
+            final InputChannel clientChannel;
+            {
+                final InputChannel[] channels = InputChannel.openInputChannelPair(cs.toString());
+                serverChannel = channels[0];
+                clientChannel = channels[1];
+            }
+
             cs.sessionRequested = true;
-            IInputMethod curMethod = getCurMethodLocked();
-            executeOrSendMessage(curMethod, mCaller.obtainMessageOOO(
-                    MSG_CREATE_SESSION, curMethod, channels[1],
-                    new IInputSessionCallback.Stub() {
-                        @Override
-                        public void sessionCreated(IInputMethodSession session) {
-                            final long ident = Binder.clearCallingIdentity();
-                            try {
-                                onSessionCreated(curMethod, session, channels[0]);
-                            } finally {
-                                Binder.restoreCallingIdentity(ident);
-                            }
-                        }
-                    }));
+
+            final IInputMethod curMethod = getCurMethodLocked();
+            final IInputSessionCallback.Stub callback = new IInputSessionCallback.Stub() {
+                @Override
+                public void sessionCreated(IInputMethodSession session) {
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        onSessionCreated(curMethod, session, serverChannel);
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                }
+            };
+
+            try {
+                curMethod.createSession(clientChannel, callback);
+            } catch (RemoteException e) {
+            } finally {
+                // Dispose the channel because the remote proxy will get its own copy when
+                // unparceled.
+                if (clientChannel != null) {
+                    clientChannel.dispose();
+                }
+            }
         }
     }
 
@@ -4255,23 +4271,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                 }
                 return true;
-            case MSG_CREATE_SESSION: {
-                args = (SomeArgs)msg.obj;
-                IInputMethod method = (IInputMethod)args.arg1;
-                InputChannel channel = (InputChannel)args.arg2;
-                try {
-                    method.createSession(channel, (IInputSessionCallback)args.arg3);
-                } catch (RemoteException e) {
-                } finally {
-                    // Dispose the channel if the input method is not local to this process
-                    // because the remote proxy will get its own copy when unparceled.
-                    if (channel != null && Binder.isProxy(method)) {
-                        channel.dispose();
-                    }
-                }
-                args.recycle();
-                return true;
-            }
             case MSG_REMOVE_IME_SURFACE: {
                 synchronized (ImfLock.class) {
                     try {
