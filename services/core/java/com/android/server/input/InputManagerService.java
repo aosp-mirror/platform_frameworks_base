@@ -150,7 +150,7 @@ public class InputManagerService extends IInputManager.Stub
     static final String TAG = "InputManager";
     static final boolean DEBUG = false;
 
-    private static final boolean USE_SPY_WINDOW_GESTURE_MONITORS = false;
+    private static final boolean USE_SPY_WINDOW_GESTURE_MONITORS = true;
 
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
     private static final String PORT_ASSOCIATIONS_PATH = "etc/input-port-associations.xml";
