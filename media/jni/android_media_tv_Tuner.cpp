@@ -2610,6 +2610,24 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                 env->SetObjectField(statusObj, field, valObj);
                 break;
             }
+            case FrontendStatus::Tag::allPlpInfo: {
+                jfieldID field = env->GetFieldID(clazz, "mAllPlpInfo",
+                                                 "[Landroid/media/tv/tuner/frontend/Atsc3PlpInfo;");
+                jclass plpClazz = env->FindClass("android/media/tv/tuner/frontend/Atsc3PlpInfo");
+                jmethodID initPlp = env->GetMethodID(plpClazz, "<init>", "(IZ)V");
+
+                vector<FrontendScanAtsc3PlpInfo> plpInfos =
+                        s.get<FrontendStatus::Tag::allPlpInfo>();
+                jobjectArray valObj = env->NewObjectArray(plpInfos.size(), plpClazz, nullptr);
+                for (int i = 0; i < plpInfos.size(); i++) {
+                    jobject plpObj = env->NewObject(plpClazz, initPlp, plpInfos[i].plpId,
+                                                    plpInfos[i].bLlsFlag);
+                    env->SetObjectArrayElement(valObj, i, plpObj);
+                }
+
+                env->SetObjectField(statusObj, field, valObj);
+                break;
+            }
         }
     }
     return statusObj;
