@@ -20,6 +20,7 @@ import static android.Manifest.permission.DELETE_PACKAGES;
 import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
+import static android.content.ContentProvider.isAuthorityRedirectedForCloneProfile;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.Intent.CATEGORY_HOME;
@@ -92,14 +93,6 @@ import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedInstrumentation;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.pm.pkg.component.ParsedService;
-import com.android.server.pm.pkg.PackageUserStateUtils;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -142,6 +135,14 @@ import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.PackageUserStateUtils;
+import com.android.server.pm.pkg.component.ParsedActivity;
+import com.android.server.pm.pkg.component.ParsedInstrumentation;
+import com.android.server.pm.pkg.component.ParsedIntentInfo;
+import com.android.server.pm.pkg.component.ParsedMainComponent;
+import com.android.server.pm.pkg.component.ParsedProvider;
+import com.android.server.pm.pkg.component.ParsedService;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationUtils;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -4617,8 +4618,24 @@ public class ComputerEngine implements Computer {
             }
         }
         if (!checkedGrants) {
-            enforceCrossUserPermission(callingUid, userId, false, false, "resolveContentProvider");
+            boolean enforceCrossUser = true;
+
+            if (isAuthorityRedirectedForCloneProfile(name)) {
+                final UserManagerInternal umInternal = mInjector.getUserManagerInternal();
+
+                UserInfo userInfo = umInternal.getUserInfo(UserHandle.getUserId(callingUid));
+                if (userInfo != null && userInfo.isCloneProfile()
+                        && userInfo.profileGroupId == userId) {
+                    enforceCrossUser = false;
+                }
+            }
+
+            if (enforceCrossUser) {
+                enforceCrossUserPermission(callingUid, userId, false, false,
+                        "resolveContentProvider");
+            }
         }
+
         if (providerInfo == null) {
             return null;
         }
