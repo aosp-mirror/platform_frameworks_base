@@ -349,6 +349,9 @@ public class NotificationIconAreaController implements
     }
 
     private void updateShelfIcons() {
+        if (mShelfIcons == null) {
+            return;
+        }
         updateIconsForLayout(entry -> entry.getIcons().getShelfIcon(), mShelfIcons,
                 true /* showAmbient */,
                 true /* showLowPriority */,
