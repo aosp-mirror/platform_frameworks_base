@@ -1338,7 +1338,6 @@ public final class SystemServer implements Dumpable {
         VcnManagementService vcnManagement = null;
         NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
-        NsdService serviceDiscovery = null;
         WindowManagerService wm = null;
         SerialService serial = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
@@ -1938,16 +1937,6 @@ public final class SystemServer implements Dumpable {
                 ServiceManager.addService(Context.VCN_MANAGEMENT_SERVICE, vcnManagement);
             } catch (Throwable e) {
                 reportWtf("starting VCN Management Service", e);
-            }
-            t.traceEnd();
-
-            t.traceBegin("StartNsdService");
-            try {
-                serviceDiscovery = NsdService.create(context);
-                ServiceManager.addService(
-                        Context.NSD_SERVICE, serviceDiscovery);
-            } catch (Throwable e) {
-                reportWtf("starting Service Discovery Service", e);
             }
             t.traceEnd();
 

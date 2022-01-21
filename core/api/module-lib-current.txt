@@ -54,7 +54,25 @@ package android.app {
 package android.app.usage {
 
   public class NetworkStatsManager {
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void forceUpdate();
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void notifyNetworkStatus(@NonNull java.util.List<android.net.Network>, @NonNull java.util.List<android.net.NetworkStateSnapshot>, @Nullable String, @NonNull java.util.List<android.net.UnderlyingNetworkInfo>);
+    method @NonNull @WorkerThread public android.app.usage.NetworkStats queryDetailsForDevice(@NonNull android.net.NetworkTemplate, long, long);
+    method @NonNull @WorkerThread public android.app.usage.NetworkStats queryDetailsForUidTagState(@NonNull android.net.NetworkTemplate, long, long, int, int, int) throws java.lang.SecurityException;
+    method @NonNull @WorkerThread public android.app.usage.NetworkStats querySummary(@NonNull android.net.NetworkTemplate, long, long) throws java.lang.SecurityException;
+    method @NonNull @WorkerThread public android.app.usage.NetworkStats.Bucket querySummaryForDevice(@NonNull android.net.NetworkTemplate, long, long);
+    method @NonNull @WorkerThread public android.app.usage.NetworkStats queryTaggedSummary(@NonNull android.net.NetworkTemplate, long, long) throws java.lang.SecurityException;
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setDefaultGlobalAlert(long);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setPollOnOpen(boolean);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setStatsProviderWarningAndLimitAsync(@NonNull String, long, long);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setUidForeground(int, boolean);
+  }
+
+}
+
+package android.bluetooth {
+
+  public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.TETHER_PRIVILEGED}) public android.net.TetheringManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.TetheredInterfaceCallback);
   }
 
 }
@@ -201,10 +219,6 @@ package android.media.session {
 
 package android.net {
 
-  public final class ConnectivityFrameworkInitializerTiramisu {
-    method public static void registerServiceWrappers();
-  }
-
   public final class EthernetNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
     ctor public EthernetNetworkSpecifier(@NonNull String);
     method public int describeContents();
@@ -224,8 +238,10 @@ package android.net {
   public class NetworkPolicyManager {
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public int getMultipathPreference(@NonNull android.net.Network);
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public int getRestrictBackgroundStatus(int);
+    method @Nullable @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public android.telephony.SubscriptionPlan getSubscriptionPlan(@NonNull android.net.NetworkTemplate);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public boolean isUidNetworkingBlocked(int, boolean);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public boolean isUidRestrictedOnMeteredNetworks(int);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void notifyStatsProviderWarningOrLimitReached();
     method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void registerNetworkPolicyCallback(@Nullable java.util.concurrent.Executor, @NonNull android.net.NetworkPolicyManager.NetworkPolicyCallback);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void unregisterNetworkPolicyCallback(@NonNull android.net.NetworkPolicyManager.NetworkPolicyCallback);
   }
@@ -344,6 +360,7 @@ package android.os {
   }
 
   public class Process {
+    field public static final int NFC_UID = 1027; // 0x403
     field public static final int VPN_UID = 1016; // 0x3f8
   }
 
@@ -373,6 +390,16 @@ package android.os {
 
   public class SystemConfigManager {
     method @NonNull public java.util.List<android.content.ComponentName> getEnabledComponentOverrides(@NonNull String);
+  }
+
+  public final class Trace {
+    method public static void asyncTraceBegin(long, @NonNull String, int);
+    method public static void asyncTraceEnd(long, @NonNull String, int);
+    method public static boolean isTagEnabled(long);
+    method public static void traceBegin(long, @NonNull String);
+    method public static void traceCounter(long, @NonNull String, int);
+    method public static void traceEnd(long);
+    field public static final long TRACE_TAG_NETWORK = 2097152L; // 0x200000L
   }
 
 }
