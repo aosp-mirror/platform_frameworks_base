@@ -82,7 +82,7 @@ public abstract class SectionSettings extends Settings {
      * The section filter uses this for CRC (Cyclic redundancy check) checking when
      * {@link #isCrcEnabled()} is {@code true}.
      */
-    public int getBitWidthOfLengthField() {
+    public int getLengthFieldBitWidth() {
         return mBitWidthOfLengthField;
     }
 

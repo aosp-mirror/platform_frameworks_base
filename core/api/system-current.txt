@@ -7059,7 +7059,7 @@ package android.media.tv.tuner.filter {
   }
 
   public abstract class SectionSettings extends android.media.tv.tuner.filter.Settings {
-    method public int getBitWidthOfLengthField();
+    method public int getLengthFieldBitWidth();
     method public boolean isCrcEnabled();
     method public boolean isRaw();
     method public boolean isRepeat();
