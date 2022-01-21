@@ -70,6 +70,7 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
             PACKAGE_SYSTEM,
             PACKAGE_SETUP_WIZARD,
             PACKAGE_INSTALLER,
+            PACKAGE_UNINSTALLER,
             PACKAGE_VERIFIER,
             PACKAGE_BROWSER,
             PACKAGE_SYSTEM_TEXT_CLASSIFIER,
@@ -89,20 +90,21 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     public static final int PACKAGE_SYSTEM = 0;
     public static final int PACKAGE_SETUP_WIZARD = 1;
     public static final int PACKAGE_INSTALLER = 2;
-    public static final int PACKAGE_VERIFIER = 3;
-    public static final int PACKAGE_BROWSER = 4;
-    public static final int PACKAGE_SYSTEM_TEXT_CLASSIFIER = 5;
-    public static final int PACKAGE_PERMISSION_CONTROLLER = 6;
-    public static final int PACKAGE_WELLBEING = 7;
-    public static final int PACKAGE_DOCUMENTER = 8;
-    public static final int PACKAGE_CONFIGURATOR = 9;
-    public static final int PACKAGE_INCIDENT_REPORT_APPROVER = 10;
-    public static final int PACKAGE_APP_PREDICTOR = 11;
-    public static final int PACKAGE_OVERLAY_CONFIG_SIGNATURE = 12;
-    public static final int PACKAGE_WIFI = 13;
-    public static final int PACKAGE_COMPANION = 14;
-    public static final int PACKAGE_RETAIL_DEMO = 15;
-    public static final int PACKAGE_RECENTS = 16;
+    public static final int PACKAGE_UNINSTALLER = 3;
+    public static final int PACKAGE_VERIFIER = 4;
+    public static final int PACKAGE_BROWSER = 5;
+    public static final int PACKAGE_SYSTEM_TEXT_CLASSIFIER = 6;
+    public static final int PACKAGE_PERMISSION_CONTROLLER = 7;
+    public static final int PACKAGE_WELLBEING = 8;
+    public static final int PACKAGE_DOCUMENTER = 9;
+    public static final int PACKAGE_CONFIGURATOR = 10;
+    public static final int PACKAGE_INCIDENT_REPORT_APPROVER = 11;
+    public static final int PACKAGE_APP_PREDICTOR = 12;
+    public static final int PACKAGE_OVERLAY_CONFIG_SIGNATURE = 13;
+    public static final int PACKAGE_WIFI = 14;
+    public static final int PACKAGE_COMPANION = 15;
+    public static final int PACKAGE_RETAIL_DEMO = 16;
+    public static final int PACKAGE_RECENTS = 17;
     // Integer value of the last known package ID. Increases as new ID is added to KnownPackage.
     // Please note the numbers should be continuous.
     public static final int LAST_KNOWN_PACKAGE = PACKAGE_RECENTS;
@@ -1141,6 +1143,8 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
                 return "Setup Wizard";
             case PACKAGE_INSTALLER:
                 return "Installer";
+            case PACKAGE_UNINSTALLER:
+                return "Uninstaller";
             case PACKAGE_VERIFIER:
                 return "Verifier";
             case PACKAGE_BROWSER:

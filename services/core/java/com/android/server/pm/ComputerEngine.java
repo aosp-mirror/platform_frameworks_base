@@ -350,7 +350,6 @@ public class ComputerEngine implements Computer {
     private final CompilerStats mCompilerStats;
     private final BackgroundDexOptService mBackgroundDexOptService;
     private final PackageManagerInternal.ExternalSourcesPolicy mExternalSourcesPolicy;
-    private final ProtectedPackages mProtectedPackages;
 
     // PackageManagerService attributes that are primitives are referenced through the
     // pms object directly.  Primitives are the only attributes so referenced.
@@ -402,7 +401,6 @@ public class ComputerEngine implements Computer {
         mCompilerStats = args.service.mCompilerStats;
         mBackgroundDexOptService = args.service.mBackgroundDexOptService;
         mExternalSourcesPolicy = args.service.mExternalSourcesPolicy;
-        mProtectedPackages = args.service.mProtectedPackages;
 
         // Used to reference PMS attributes that are primitives and which are not
         // updated under control of the PMS lock.

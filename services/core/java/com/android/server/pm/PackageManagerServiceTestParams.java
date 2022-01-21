@@ -111,4 +111,5 @@ public final class PackageManagerServiceTestParams {
     public PreferredActivityHelper preferredActivityHelper;
     public ResolveIntentHelper resolveIntentHelper;
     public DexOptHelper dexOptHelper;
+    public SuspendPackageHelper suspendPackageHelper;
 }
