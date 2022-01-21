@@ -413,6 +413,16 @@ package android.os {
     method @NonNull public java.util.List<android.content.ComponentName> getEnabledComponentOverrides(@NonNull String);
   }
 
+  public final class Trace {
+    method public static void asyncTraceBegin(long, @NonNull String, int);
+    method public static void asyncTraceEnd(long, @NonNull String, int);
+    method public static boolean isTagEnabled(long);
+    method public static void traceBegin(long, @NonNull String);
+    method public static void traceCounter(long, @NonNull String, int);
+    method public static void traceEnd(long);
+    field public static final long TRACE_TAG_NETWORK = 2097152L; // 0x200000L
+  }
+
 }
 
 package android.os.storage {
