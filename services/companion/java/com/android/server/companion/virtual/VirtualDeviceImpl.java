@@ -53,8 +53,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 
 final class VirtualDeviceImpl extends IVirtualDevice.Stub
@@ -69,7 +68,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final int mOwnerUid;
     private final InputController mInputController;
     @VisibleForTesting
-    final List<Integer> mVirtualDisplayIds = new ArrayList<>();
+    final Set<Integer> mVirtualDisplayIds = new ArraySet<>();
     private final OnDeviceCloseListener mListener;
     private final IBinder mAppToken;
     private final VirtualDeviceParams mParams;

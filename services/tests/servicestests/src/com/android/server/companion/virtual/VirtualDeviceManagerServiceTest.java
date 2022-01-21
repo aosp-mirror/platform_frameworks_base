@@ -23,9 +23,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
 import android.Manifest;
+import android.app.admin.DevicePolicyManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -73,6 +75,8 @@ public class VirtualDeviceManagerServiceTest {
     private DisplayManagerInternal mDisplayManagerInternalMock;
     @Mock
     private VirtualDeviceImpl.PendingTrampolineCallback mPendingTrampolineCallback;
+    @Mock
+    private DevicePolicyManager mDevicePolicyManagerMock;
 
     @Before
     public void setUp() {
@@ -84,11 +88,22 @@ public class VirtualDeviceManagerServiceTest {
         mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         doNothing().when(mContext).enforceCallingOrSelfPermission(
                 eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
+        when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(
+                mDevicePolicyManagerMock);
+
         mInputController = new InputController(new Object(), mNativeWrapperMock);
         mDeviceImpl = new VirtualDeviceImpl(mContext,
                 /* association info */ null, new Binder(), /* uid */ 0, mInputController,
                 (int associationId) -> {}, mPendingTrampolineCallback,
                 new VirtualDeviceParams.Builder().build());
+    }
+
+    @Test
+    public void onVirtualDisplayRemovedLocked_doesNotThrowException() {
+        final int displayId = 2;
+        mDeviceImpl.onVirtualDisplayCreatedLocked(displayId);
+        // This call should not throw any exceptions.
+        mDeviceImpl.onVirtualDisplayRemovedLocked(displayId);
     }
 
     @Test
