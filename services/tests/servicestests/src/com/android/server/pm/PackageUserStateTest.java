@@ -236,7 +236,7 @@ public class PackageUserStateTest {
         testUserState1.setSuspendParams(paramsMap1);
 
         PackageUserStateImpl testUserState2 =
-                new PackageUserStateImpl(testUserState1);
+                new PackageUserStateImpl(null, testUserState1);
         assertThat(testUserState1.equals(testUserState2), is(true));
         testUserState2.setSuspendParams(paramsMap2);
         // Should not be equal since suspendParams maps are different
@@ -250,12 +250,12 @@ public class PackageUserStateTest {
         userState1.setDistractionFlags(PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS);
 
         final PackageUserStateImpl copyOfUserState1 =
-                new PackageUserStateImpl(userState1);
+                new PackageUserStateImpl(null, userState1);
         assertThat(userState1.getDistractionFlags(), is(copyOfUserState1.getDistractionFlags()));
         assertThat(userState1.equals(copyOfUserState1), is(true));
 
         final PackageUserStateImpl userState2 =
-                new PackageUserStateImpl(userState1);
+                new PackageUserStateImpl(null, userState1);
         userState2.setDistractionFlags(PackageManager.RESTRICTION_HIDE_NOTIFICATIONS);
         assertThat(userState1.equals(userState2), is(false));
     }
