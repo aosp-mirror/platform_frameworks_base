@@ -26,7 +26,6 @@ import com.android.systemui.accessibility.WindowMagnification;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.clipboardoverlay.ClipboardListener;
 import com.android.systemui.dreams.DreamOverlayRegistrant;
-import com.android.systemui.dreams.appwidgets.ComplicationPrimer;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
@@ -212,11 +211,4 @@ public abstract class SystemUIBinder {
     @ClassKey(DreamOverlayRegistrant.class)
     public abstract CoreStartable bindDreamOverlayRegistrant(
             DreamOverlayRegistrant dreamOverlayRegistrant);
-
-    /** Inject into AppWidgetOverlayPrimer. */
-    @Binds
-    @IntoMap
-    @ClassKey(ComplicationPrimer.class)
-    public abstract CoreStartable bindAppWidgetOverlayPrimer(
-            ComplicationPrimer complicationPrimer);
 }
