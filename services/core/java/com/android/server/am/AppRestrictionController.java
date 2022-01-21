@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
@@ -60,6 +61,7 @@ import static com.android.server.am.AppFGSTracker.foregroundServiceTypeToIndex;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RestrictionLevel;
@@ -140,6 +142,11 @@ public final class AppRestrictionController {
 
     static final int STOCK_PM_FLAGS = MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
             | MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+
+    /**
+     * Whether or not to show the foreground service manager on tapping notifications.
+     */
+    private static final boolean ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER = false;
 
     private final Context mContext;
     private final HandlerThread mBgHandlerThread;
@@ -641,6 +648,7 @@ public final class AppRestrictionController {
         initRestrictionStates();
         registerForUidObservers();
         registerForSystemBroadcasts();
+        mNotificationHelper.onSystemReady();
         mInjector.getAppStateTracker().addBackgroundRestrictedAppListener(
                 mBackgroundRestrictionListener);
         mInjector.getAppStandbyInternal().addListener(mAppIdleStateChangeListener);
@@ -1165,6 +1173,9 @@ public final class AppRestrictionController {
             "Long-running FGS",
         };
 
+        static final String ACTION_FGS_MANAGER_TRAMPOLINE =
+                "com.android.server.am.ACTION_FGS_MANAGER_TRAMPOLINE";
+
         static String notificationTypeToString(@NotificationType int notificationType) {
             return NOTIFICATION_TYPE_STRINGS[notificationType];
         }
@@ -1174,6 +1185,24 @@ public final class AppRestrictionController {
         private final Injector mInjector;
         private final Object mLock;
         private final Context mContext;
+
+        private final BroadcastReceiver mActionButtonReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+                switch (intent.getAction()) {
+                    case ACTION_FGS_MANAGER_TRAMPOLINE:
+                        final String packageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
+                        final int uid = intent.getIntExtra(Intent.EXTRA_UID, 0);
+                        cancelRequestBgRestrictedIfNecessary(packageName, uid);
+                        final Intent newIntent = new Intent(ACTION_SHOW_FOREGROUND_SERVICE_MANAGER);
+                        newIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                        mContext.sendBroadcastAsUser(newIntent,
+                                UserHandle.of(UserHandle.getUserId(uid)));
+                        break;
+                }
+            }
+        };
 
         @GuardedBy("mLock")
         private int mNotificationIDStepper = SUMMARY_NOTIFICATION_ID + 1;
@@ -1186,6 +1215,12 @@ public final class AppRestrictionController {
             mContext = mInjector.getContext();
         }
 
+        void onSystemReady() {
+            mContext.registerReceiverForAllUsers(mActionButtonReceiver,
+                    new IntentFilter(ACTION_FGS_MANAGER_TRAMPOLINE),
+                    MANAGE_ACTIVITY_TASKS, mBgController.mBgHandler);
+        }
+
         void postRequestBgRestrictedIfNecessary(String packageName, int uid) {
             final Intent intent = new Intent(Settings.ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL);
             intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
@@ -1193,23 +1228,51 @@ public final class AppRestrictionController {
             final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(mContext, 0,
                     intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE, null,
                     UserHandle.of(UserHandle.getUserId(uid)));
+            Notification.Action[] actions = null;
+            if (ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER
+                    && mBgController.hasForegroundServices(packageName, uid)) {
+                final Intent trampoline = new Intent(ACTION_FGS_MANAGER_TRAMPOLINE);
+                trampoline.setPackage("android");
+                trampoline.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
+                trampoline.putExtra(Intent.EXTRA_UID, uid);
+                final PendingIntent fgsMgrTrampoline = PendingIntent.getBroadcastAsUser(
+                        mContext, 0, trampoline,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                        UserHandle.CURRENT);
+                actions = new Notification.Action[] {
+                    new Notification.Action.Builder(null,
+                            mContext.getString(
+                            com.android.internal.R.string.notification_action_check_bg_apps),
+                            fgsMgrTrampoline)
+                            .build()
+                };
+            }
             postNotificationIfNecessary(NOTIFICATION_TYPE_ABUSIVE_CURRENT_DRAIN,
                     com.android.internal.R.string.notification_title_abusive_bg_apps,
                     com.android.internal.R.string.notification_content_abusive_bg_apps,
-                    pendingIntent, packageName, uid);
+                    pendingIntent, packageName, uid, actions);
         }
 
         void postLongRunningFgsIfNecessary(String packageName, int uid) {
-            final Intent intent = new Intent(ACTION_SHOW_FOREGROUND_SERVICE_MANAGER);
-            intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+            PendingIntent pendingIntent;
+            if (ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER) {
+                final Intent intent = new Intent(ACTION_SHOW_FOREGROUND_SERVICE_MANAGER);
+                intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                pendingIntent = PendingIntent.getBroadcastAsUser(mContext, 0,
+                        intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                        UserHandle.of(UserHandle.getUserId(uid)));
+            } else {
+                final Intent intent = new Intent(Settings.ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL);
+                intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
+                pendingIntent = PendingIntent.getActivityAsUser(mContext, 0,
+                        intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                        null, UserHandle.of(UserHandle.getUserId(uid)));
+            }
 
-            final PendingIntent pendingIntent = PendingIntent.getBroadcastAsUser(mContext, 0,
-                    intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
-                    UserHandle.of(UserHandle.getUserId(uid)));
             postNotificationIfNecessary(NOTIFICATION_TYPE_LONG_RUNNING_FGS,
                     com.android.internal.R.string.notification_title_abusive_bg_apps,
                     com.android.internal.R.string.notification_content_long_running_fgs,
-                    pendingIntent, packageName, uid);
+                    pendingIntent, packageName, uid, null);
         }
 
         int getNotificationIdIfNecessary(@NotificationType int notificationType,
@@ -1251,7 +1314,8 @@ public final class AppRestrictionController {
         }
 
         void postNotificationIfNecessary(@NotificationType int notificationType, int titleRes,
-                int messageRes, PendingIntent pendingIntent, String packageName, int uid) {
+                int messageRes, PendingIntent pendingIntent, String packageName, int uid,
+                @Nullable Notification.Action[] actions) {
             int notificationId = getNotificationIdIfNecessary(notificationType, packageName, uid);
             if (notificationId <= 0) {
                 return;
@@ -1266,11 +1330,13 @@ public final class AppRestrictionController {
                     ai != null ? pm.getText(packageName, ai.labelRes, ai) : packageName);
             final Icon icon = ai != null ? Icon.createWithResource(packageName, ai.icon) : null;
 
-            postNotification(notificationId, packageName, uid, title, message, icon, pendingIntent);
+            postNotification(notificationId, packageName, uid, title, message, icon, pendingIntent,
+                    actions);
         }
 
         void postNotification(int notificationId, String packageName, int uid, String title,
-                String message, Icon icon, PendingIntent pendingIntent) {
+                String message, Icon icon, PendingIntent pendingIntent,
+                @Nullable Notification.Action[] actions) {
             final UserHandle targetUser = UserHandle.of(UserHandle.getUserId(uid));
             postSummaryNotification(targetUser);
 
@@ -1287,6 +1353,11 @@ public final class AppRestrictionController {
                     .setContentIntent(pendingIntent);
             if (icon != null) {
                 notificationBuilder.setLargeIcon(icon);
+            }
+            if (actions != null) {
+                for (Notification.Action action : actions) {
+                    notificationBuilder.addAction(action);
+                }
             }
 
             final Notification notification = notificationBuilder.build();

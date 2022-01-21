@@ -6212,4 +6212,6 @@ ul.</string>
     <string name="notification_content_long_running_fgs">
         <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background for a long time. Tap to review.
     </string>
+    <!-- Action label of notification for user to check background apps. [CHAR LIMIT=NONE]  -->
+    <string name="notification_action_check_bg_apps">Check active apps</string>
 </resources>
