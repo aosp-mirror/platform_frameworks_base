@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -153,6 +154,10 @@ public class ContextHubService extends IContextHubService.Stub {
     private boolean mIsWifiAvailable = false;
     private boolean mIsWifiScanningEnabled = false;
     private boolean mIsWifiMainEnabled = false;
+
+    // True if BT is available for the Context Hub
+    private boolean mIsBtScanningEnabled = false;
+    private boolean mIsBtMainEnabled = false;
 
     // A hashmap used to record if a contexthub is waiting for daily query
     private Set<Integer> mMetricQueryPendingContextHubIds =
@@ -331,6 +336,25 @@ public class ContextHubService extends IContextHubService.Stub {
                         }
                     });
 
+        }
+
+        if (mContextHubWrapper.supportsBtSettingNotifications()) {
+            sendBtSettingUpdate(true /* forceUpdate */);
+
+            BroadcastReceiver btReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())
+                            || BluetoothAdapter.ACTION_BLE_STATE_CHANGED.equals(
+                                    intent.getAction())) {
+                        sendBtSettingUpdate(false /* forceUpdate */);
+                    }
+                }
+            };
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+            filter.addAction(BluetoothAdapter.ACTION_BLE_STATE_CHANGED);
+            mContext.registerReceiver(btReceiver, filter);
         }
 
         scheduleDailyMetricSnapshot();
@@ -735,6 +759,7 @@ public class ContextHubService extends IContextHubService.Stub {
             sendWifiSettingUpdate(true /* forceUpdate */);
             sendAirplaneModeSettingUpdate();
             sendMicrophoneDisableSettingUpdateForCurrentUser();
+            sendBtSettingUpdate(true /* forceUpdate */);
 
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
@@ -1128,6 +1153,39 @@ public class ContextHubService extends IContextHubService.Stub {
             if (forceUpdate || mIsWifiMainEnabled != wifiEnabled) {
                 mIsWifiMainEnabled = wifiEnabled;
                 mContextHubWrapper.onWifiMainSettingChanged(wifiEnabled);
+            }
+        }
+    }
+
+    /**
+     * Obtains the latest BT availability setting value and notifies the Context Hub.
+     *
+     * @param forceUpdate True to force send update to the Context Hub, otherwise only send the
+     *                    update when the BT availability changes.
+     */
+    private void sendBtSettingUpdate(boolean forceUpdate) {
+        final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        // Adapter may be null if BT is not supported.
+        if (adapter != null) {
+            boolean btEnabled = adapter.isEnabled();
+            boolean btScanEnabled = adapter.isBleScanAlwaysAvailable();
+            if (forceUpdate || mIsBtScanningEnabled != btScanEnabled) {
+                mIsBtScanningEnabled = btScanEnabled;
+                mContextHubWrapper.onBtScanningSettingChanged(btScanEnabled);
+            }
+            if (forceUpdate || mIsBtMainEnabled != btEnabled) {
+                mIsBtMainEnabled = btEnabled;
+                mContextHubWrapper.onBtMainSettingChanged(btEnabled);
+            }
+        } else {
+            Log.d(TAG, "BT adapter not available. Defaulting to disabled");
+            if (mIsBtMainEnabled) {
+                mIsBtMainEnabled = false;
+                mContextHubWrapper.onBtMainSettingChanged(mIsBtMainEnabled);
+            }
+            if (mIsBtScanningEnabled) {
+                mIsBtScanningEnabled = false;
+                mContextHubWrapper.onBtScanningSettingChanged(mIsBtScanningEnabled);
             }
         }
     }
