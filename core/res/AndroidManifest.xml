@@ -6048,6 +6048,11 @@
     <permission android:name="android.permission.MANAGE_GAME_MODE"
                 android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows accessing the frame rate per second of a given application
+     @hide -->
+    <permission android:name="android.permission.ACCESS_FPS_COUNTER"
+                android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows the holder to register callbacks to inform the RebootReadinessManager
          when they are performing reboot-blocking work.
          @hide -->

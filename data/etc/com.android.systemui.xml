@@ -72,5 +72,6 @@
         <permission name="android.permission.USE_BACKGROUND_BLUR" />
         <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
         <permission name="android.permission.FORCE_STOP_PACKAGES" />
+        <permission name="android.permission.ACCESS_FPS_COUNTER" />
     </privapp-permissions>
 </permissions>

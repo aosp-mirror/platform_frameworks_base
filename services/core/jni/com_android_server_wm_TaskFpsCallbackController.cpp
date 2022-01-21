@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Android Open Source Project
+ * Copyright 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SurfaceControlFpsListener"
+#define LOG_TAG "TaskFpsCallbackController"
 
 #include <android/gui/BnFpsListener.h>
 #include <android_runtime/AndroidRuntime.h>
@@ -35,11 +35,10 @@ namespace {
 struct {
     jclass mClass;
     jmethodID mDispatchOnFpsReported;
-} gListenerClassInfo;
+} gCallbackClassInfo;
 
-struct SurfaceControlFpsListener : public gui::BnFpsListener {
-    SurfaceControlFpsListener(JNIEnv* env, jobject listener)
-          : mListener(env->NewWeakGlobalRef(listener)) {}
+struct TaskFpsCallback : public gui::BnFpsListener {
+    TaskFpsCallback(JNIEnv* env, jobject listener) : mListener(env->NewWeakGlobalRef(listener)) {}
 
     binder::Status onFpsReported(float fps) override {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
@@ -50,13 +49,13 @@ struct SurfaceControlFpsListener : public gui::BnFpsListener {
             // Weak reference went out of scope
             return binder::Status::ok();
         }
-        env->CallStaticVoidMethod(gListenerClassInfo.mClass,
-                                  gListenerClassInfo.mDispatchOnFpsReported, listener,
+        env->CallStaticVoidMethod(gCallbackClassInfo.mClass,
+                                  gCallbackClassInfo.mDispatchOnFpsReported, listener,
                                   static_cast<jfloat>(fps));
         env->DeleteGlobalRef(listener);
 
         if (env->ExceptionCheck()) {
-            ALOGE("SurfaceControlFpsListener.onFpsReported() failed.");
+            ALOGE("TaskFpsCallback.onFpsReported() failed.");
             LOGE_EX(env);
             env->ExceptionClear();
         }
@@ -64,7 +63,7 @@ struct SurfaceControlFpsListener : public gui::BnFpsListener {
     }
 
 protected:
-    virtual ~SurfaceControlFpsListener() {
+    virtual ~TaskFpsCallback() {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         env->DeleteWeakGlobalRef(mListener);
     }
@@ -73,55 +72,48 @@ private:
     jweak mListener;
 };
 
-jlong nativeCreate(JNIEnv* env, jclass clazz, jobject obj) {
-    SurfaceControlFpsListener* listener = new SurfaceControlFpsListener(env, obj);
-    listener->incStrong((void*)nativeCreate);
-    return reinterpret_cast<jlong>(listener);
-}
+jlong nativeRegister(JNIEnv* env, jclass clazz, jobject obj, jint taskId) {
+    TaskFpsCallback* callback = new TaskFpsCallback(env, obj);
 
-void nativeDestroy(JNIEnv* env, jclass clazz, jlong ptr) {
-    SurfaceControlFpsListener* listener = reinterpret_cast<SurfaceControlFpsListener*>(ptr);
-    listener->decStrong((void*)nativeCreate);
-}
-
-void nativeRegister(JNIEnv* env, jclass clazz, jlong ptr, jint taskId) {
-    sp<SurfaceControlFpsListener> listener = reinterpret_cast<SurfaceControlFpsListener*>(ptr);
-    if (SurfaceComposerClient::addFpsListener(taskId, listener) != OK) {
+    if (SurfaceComposerClient::addFpsListener(taskId, callback) != OK) {
         constexpr auto error_msg = "Couldn't addFpsListener";
         ALOGE(error_msg);
         jniThrowRuntimeException(env, error_msg);
     }
+    callback->incStrong((void*)nativeRegister);
+
+    return reinterpret_cast<jlong>(callback);
 }
 
 void nativeUnregister(JNIEnv* env, jclass clazz, jlong ptr) {
-    sp<SurfaceControlFpsListener> listener = reinterpret_cast<SurfaceControlFpsListener*>(ptr);
+    sp<TaskFpsCallback> callback = reinterpret_cast<TaskFpsCallback*>(ptr);
 
-    if (SurfaceComposerClient::removeFpsListener(listener) != OK) {
+    if (SurfaceComposerClient::removeFpsListener(callback) != OK) {
         constexpr auto error_msg = "Couldn't removeFpsListener";
         ALOGE(error_msg);
         jniThrowRuntimeException(env, error_msg);
     }
+
+    callback->decStrong((void*)nativeRegister);
 }
 
-const JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
-        {"nativeCreate", "(Landroid/view/SurfaceControlFpsListener;)J", (void*)nativeCreate},
-        {"nativeDestroy", "(J)V", (void*)nativeDestroy},
-        {"nativeRegister", "(JI)V", (void*)nativeRegister},
+        {"nativeRegister", "(Landroid/window/IOnFpsCallbackListener;I)J", (void*)nativeRegister},
         {"nativeUnregister", "(J)V", (void*)nativeUnregister}};
 
 } // namespace
 
-int register_android_view_SurfaceControlFpsListener(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "android/view/SurfaceControlFpsListener", gMethods,
-                                       NELEM(gMethods));
+int register_com_android_server_wm_TaskFpsCallbackController(JNIEnv* env) {
+    int res = jniRegisterNativeMethods(env, "com/android/server/wm/TaskFpsCallbackController",
+                                       gMethods, NELEM(gMethods));
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
 
-    jclass clazz = env->FindClass("android/view/SurfaceControlFpsListener");
-    gListenerClassInfo.mClass = MakeGlobalRefOrDie(env, clazz);
-    gListenerClassInfo.mDispatchOnFpsReported =
+    jclass clazz = env->FindClass("android/window/TaskFpsCallback");
+    gCallbackClassInfo.mClass = MakeGlobalRefOrDie(env, clazz);
+    gCallbackClassInfo.mDispatchOnFpsReported =
             env->GetStaticMethodID(clazz, "dispatchOnFpsReported",
-                                   "(Landroid/view/SurfaceControlFpsListener;F)V");
+                                   "(Landroid/window/IOnFpsCallbackListener;F)V");
     return 0;
 }
 
