@@ -237,8 +237,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_SYSTEM_UNLOCK_USER = 5000;
     private static final int MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED = 5010;
 
-    private static final int MSG_INLINE_SUGGESTIONS_REQUEST = 6000;
-
     private static final int MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE = 7000;
 
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
@@ -1957,12 +1955,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             IInputMethod curMethod = getCurMethodLocked();
             if (userId == mSettings.getCurrentUserId() && imi != null
                     && imi.isInlineSuggestionsEnabled() && curMethod != null) {
-                executeOrSendMessage(curMethod,
-                        mCaller.obtainMessageOOO(MSG_INLINE_SUGGESTIONS_REQUEST, curMethod,
-                                requestInfo, new InlineSuggestionsRequestCallbackDecorator(callback,
-                                        imi.getPackageName(), mCurTokenDisplayId,
-                                        getCurTokenLocked(),
-                                        this)));
+                final IInlineSuggestionsRequestCallback callbackImpl =
+                        new InlineSuggestionsRequestCallbackDecorator(callback,
+                                imi.getPackageName(), mCurTokenDisplayId, getCurTokenLocked(),
+                                this);
+                try {
+                    curMethod.onCreateInlineSuggestionsRequest(requestInfo, callbackImpl);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest()", e);
+                }
             } else {
                 callback.onInlineSuggestionsUnsupported();
             }
@@ -4377,23 +4378,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final List<InputMethodInfo> imes = (List<InputMethodInfo>) msg.obj;
                 mInputMethodListListeners.forEach(
                         listener -> listener.onInputMethodListUpdated(imes, userId));
-                return true;
-            }
-
-            // ---------------------------------------------------------------
-            case MSG_INLINE_SUGGESTIONS_REQUEST: {
-                args = (SomeArgs) msg.obj;
-                final InlineSuggestionsRequestInfo requestInfo =
-                        (InlineSuggestionsRequestInfo) args.arg2;
-                final IInlineSuggestionsRequestCallback callback =
-                        (IInlineSuggestionsRequestCallback) args.arg3;
-                try {
-                    ((IInputMethod) args.arg1).onCreateInlineSuggestionsRequest(requestInfo,
-                            callback);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest(): " + e);
-                }
-                args.recycle();
                 return true;
             }
 
