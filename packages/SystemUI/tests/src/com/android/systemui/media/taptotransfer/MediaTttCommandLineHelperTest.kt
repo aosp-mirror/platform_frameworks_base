@@ -21,7 +21,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
-import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderService
 import com.android.systemui.shared.mediattt.DeviceInfo
 import com.android.systemui.shared.mediattt.IDeviceSenderService
@@ -52,8 +51,6 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     private lateinit var mediaTttCommandLineHelper: MediaTttCommandLineHelper
 
     @Mock
-    private lateinit var mediaTttChipControllerSender: MediaTttChipControllerSender
-    @Mock
     private lateinit var mediaTttChipControllerReceiver: MediaTttChipControllerReceiver
     @Mock
     private lateinit var mediaSenderService: IDeviceSenderService.Stub
@@ -72,27 +69,15 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
             MediaTttCommandLineHelper(
                 commandRegistry,
                 context,
-                mediaTttChipControllerSender,
                 mediaTttChipControllerReceiver,
             )
     }
 
     @Test(expected = IllegalStateException::class)
-    fun constructor_addSenderCommandAlreadyRegistered() {
-        // Since creating the chip controller should automatically register the add command, it
+    fun constructor_senderCommandAlreadyRegistered() {
+        // Since creating the chip controller should automatically register the sender command, it
         // should throw when registering it again.
-        commandRegistry.registerCommand(
-            ADD_CHIP_COMMAND_SENDER_TAG
-        ) { EmptyCommand() }
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun constructor_removeSenderCommandAlreadyRegistered() {
-        // Since creating the chip controller should automatically register the remove command, it
-        // should throw when registering it again.
-        commandRegistry.registerCommand(
-            REMOVE_CHIP_COMMAND_SENDER_TAG
-        ) { EmptyCommand() }
+        commandRegistry.registerCommand(SENDER_COMMAND) { EmptyCommand() }
     }
 
     @Test(expected = IllegalStateException::class)
@@ -187,10 +172,12 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     }
 
     @Test
-    fun sender_removeCommand_chipRemoved() {
-        commandRegistry.onShellCommand(pw, arrayOf(REMOVE_CHIP_COMMAND_SENDER_TAG))
+    fun sender_noLongerCloseToReceiver_serviceCallbackCalledAndServiceUnbound() {
+        commandRegistry.onShellCommand(pw, getNoLongerCloseToReceiverCommand())
 
-        verify(mediaTttChipControllerSender).removeChip()
+        // Once we're no longer close to the receiver, we should unbind the service.
+        assertThat(context.isBound(mediaSenderServiceComponentName)).isFalse()
+        verify(mediaSenderService).noLongerCloseToReceiver(any(), any())
     }
 
     @Test
@@ -209,51 +196,58 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
 
     private fun getMoveCloserToStartCastCommand(): Array<String> =
         arrayOf(
-            ADD_CHIP_COMMAND_SENDER_TAG,
+            SENDER_COMMAND,
             DEVICE_NAME,
             MOVE_CLOSER_TO_START_CAST_COMMAND_NAME
         )
 
     private fun getMoveCloserToEndCastCommand(): Array<String> =
         arrayOf(
-            ADD_CHIP_COMMAND_SENDER_TAG,
+            SENDER_COMMAND,
             DEVICE_NAME,
             MOVE_CLOSER_TO_END_CAST_COMMAND_NAME
         )
 
     private fun getTransferToReceiverTriggeredCommand(): Array<String> =
         arrayOf(
-            ADD_CHIP_COMMAND_SENDER_TAG,
+            SENDER_COMMAND,
             DEVICE_NAME,
             TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME
         )
 
     private fun getTransferToThisDeviceTriggeredCommand(): Array<String> =
         arrayOf(
-            ADD_CHIP_COMMAND_SENDER_TAG,
+            SENDER_COMMAND,
             DEVICE_NAME,
             TRANSFER_TO_THIS_DEVICE_TRIGGERED_COMMAND_NAME
         )
 
     private fun getTransferToReceiverSucceededCommand(): Array<String> =
         arrayOf(
-            ADD_CHIP_COMMAND_SENDER_TAG,
+            SENDER_COMMAND,
             DEVICE_NAME,
             TRANSFER_TO_RECEIVER_SUCCEEDED_COMMAND_NAME
         )
 
     private fun getTransferToThisDeviceSucceededCommand(): Array<String> =
         arrayOf(
-            ADD_CHIP_COMMAND_SENDER_TAG,
+            SENDER_COMMAND,
             DEVICE_NAME,
             TRANSFER_TO_THIS_DEVICE_SUCCEEDED_COMMAND_NAME
         )
 
     private fun getTransferFailedCommand(): Array<String> =
         arrayOf(
-            ADD_CHIP_COMMAND_SENDER_TAG,
+            SENDER_COMMAND,
             DEVICE_NAME,
             TRANSFER_FAILED_COMMAND_NAME
+        )
+
+    private fun getNoLongerCloseToReceiverCommand(): Array<String> =
+        arrayOf(
+            SENDER_COMMAND,
+            DEVICE_NAME,
+            NO_LONGER_CLOSE_TO_RECEIVER_COMMAND_NAME
         )
 
     class EmptyCommand : Command {

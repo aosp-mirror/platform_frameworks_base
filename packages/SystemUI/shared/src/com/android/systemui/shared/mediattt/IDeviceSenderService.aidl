@@ -124,4 +124,10 @@ interface IDeviceSenderService {
      * on the receiver and the transfer that should've *ended* the playing on the receiver.
      */
     oneway void transferFailed(in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
+
+    /**
+     * Invoke to notify System UI that this device is no longer close to the receiver device.
+     */
+    oneway void noLongerCloseToReceiver(
+        in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
 }

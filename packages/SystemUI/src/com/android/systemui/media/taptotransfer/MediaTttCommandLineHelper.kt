@@ -30,7 +30,6 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
 import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
-import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderService
 import com.android.systemui.media.taptotransfer.sender.MoveCloserToEndCast
 import com.android.systemui.media.taptotransfer.sender.MoveCloserToStartCast
@@ -55,7 +54,6 @@ import javax.inject.Inject
 class MediaTttCommandLineHelper @Inject constructor(
     commandRegistry: CommandRegistry,
     private val context: Context,
-    private val mediaTttChipControllerSender: MediaTttChipControllerSender,
     private val mediaTttChipControllerReceiver: MediaTttChipControllerReceiver,
 ) {
     private var senderService: IDeviceSenderService? = null
@@ -67,17 +65,15 @@ class MediaTttCommandLineHelper @Inject constructor(
         }
 
     init {
-        commandRegistry.registerCommand(
-            ADD_CHIP_COMMAND_SENDER_TAG) { AddChipCommandSender() }
-        commandRegistry.registerCommand(
-            REMOVE_CHIP_COMMAND_SENDER_TAG) { RemoveChipCommandSender() }
+        commandRegistry.registerCommand(SENDER_COMMAND) { SenderCommand() }
         commandRegistry.registerCommand(
             ADD_CHIP_COMMAND_RECEIVER_TAG) { AddChipCommandReceiver() }
         commandRegistry.registerCommand(
             REMOVE_CHIP_COMMAND_RECEIVER_TAG) { RemoveChipCommandReceiver() }
     }
 
-    inner class AddChipCommandSender : Command {
+    /** All commands for the sender device. */
+    inner class SenderCommand : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
             val otherDeviceName = args[0]
             val mediaInfo = MediaRoute2Info.Builder("id", "Test Name")
@@ -145,24 +141,29 @@ class MediaTttCommandLineHelper @Inject constructor(
                         senderService.transferFailed(mediaInfo, otherDeviceInfo)
                     }
                 }
+                NO_LONGER_CLOSE_TO_RECEIVER_COMMAND_NAME -> {
+                    runOnService { senderService ->
+                        senderService.noLongerCloseToReceiver(mediaInfo, otherDeviceInfo)
+                        context.unbindService(senderServiceConnection)
+                    }
+                }
                 else -> {
-                    pw.println("Chip type must be one of " +
+                    pw.println("Sender command must be one of " +
                             "$MOVE_CLOSER_TO_START_CAST_COMMAND_NAME, " +
                             "$MOVE_CLOSER_TO_END_CAST_COMMAND_NAME, " +
                             "$TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME, " +
                             "$TRANSFER_TO_THIS_DEVICE_TRIGGERED_COMMAND_NAME, " +
                             "$TRANSFER_TO_RECEIVER_SUCCEEDED_COMMAND_NAME, " +
                             "$TRANSFER_TO_THIS_DEVICE_SUCCEEDED_COMMAND_NAME, " +
-                            TRANSFER_FAILED_COMMAND_NAME
+                            "$TRANSFER_FAILED_COMMAND_NAME, " +
+                            NO_LONGER_CLOSE_TO_RECEIVER_COMMAND_NAME
                     )
                 }
             }
         }
 
         override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar " +
-                    "$ADD_CHIP_COMMAND_SENDER_TAG <deviceName> <chipStatus>"
-            )
+            pw.println("Usage: adb shell cmd statusbar $SENDER_COMMAND <deviceName> <chipStatus>")
         }
 
         private fun runOnService(command: SenderServiceCommand) {
@@ -182,19 +183,6 @@ class MediaTttCommandLineHelper @Inject constructor(
                 Context.BIND_AUTO_CREATE
             )
             Log.i(TAG, "Starting service binding? $binding")
-        }
-    }
-
-    /** A command to REMOVE the media ttt chip on the SENDER device. */
-    inner class RemoveChipCommandSender : Command {
-        override fun execute(pw: PrintWriter, args: List<String>) {
-            mediaTttChipControllerSender.removeChip()
-            if (senderService != null) {
-                context.unbindService(senderServiceConnection)
-            }
-        }
-        override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar $REMOVE_CHIP_COMMAND_SENDER_TAG")
         }
     }
 
@@ -245,7 +233,7 @@ class MediaTttCommandLineHelper @Inject constructor(
 }
 
 @VisibleForTesting
-const val ADD_CHIP_COMMAND_SENDER_TAG = "media-ttt-chip-add-sender"
+const val SENDER_COMMAND = "media-ttt-chip-sender"
 @VisibleForTesting
 const val REMOVE_CHIP_COMMAND_SENDER_TAG = "media-ttt-chip-remove-sender"
 @VisibleForTesting
@@ -268,6 +256,8 @@ val TRANSFER_TO_THIS_DEVICE_SUCCEEDED_COMMAND_NAME =
     TransferToThisDeviceSucceeded::class.simpleName!!
 @VisibleForTesting
 val TRANSFER_FAILED_COMMAND_NAME = TransferFailed::class.simpleName!!
+@VisibleForTesting
+val NO_LONGER_CLOSE_TO_RECEIVER_COMMAND_NAME = "NoLongerCloseToReceiver"
 
 private const val APP_ICON_CONTENT_DESCRIPTION = "Fake media app icon"
 private const val TAG = "MediaTapToTransferCli"

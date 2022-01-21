@@ -114,4 +114,11 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
 
         verify(controller).displayChip(any<TransferFailed>())
     }
+
+    @Test
+    fun noLongerCloseToReceiver_controllerRemoveChipTriggered() {
+        service.noLongerCloseToReceiver(mediaInfo, DeviceInfo("Fake name"))
+
+        verify(controller).removeChip()
+    }
 }

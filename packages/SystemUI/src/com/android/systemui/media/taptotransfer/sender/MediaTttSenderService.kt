@@ -88,6 +88,13 @@ class MediaTttSenderService @Inject constructor(
                 mediaInfo, otherDeviceInfo, undoCallback
             )
         }
+
+        override fun noLongerCloseToReceiver(
+            mediaInfo: MediaRoute2Info,
+            otherDeviceInfo: DeviceInfo
+        ) {
+            this@MediaTttSenderService.noLongerCloseToReceiver()
+        }
     }
 
     // TODO(b/203800643): Use the app icon from the media info instead of a fake one.
@@ -167,5 +174,9 @@ class MediaTttSenderService @Inject constructor(
             undoCallback = undoCallback
         )
         controller.displayChip(chipState)
+    }
+
+    private fun noLongerCloseToReceiver() {
+        controller.removeChip()
     }
 }
