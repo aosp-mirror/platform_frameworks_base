@@ -154,6 +154,7 @@ import com.android.net.module.util.BaseNetdUnsolicitedEventListener;
 import com.android.net.module.util.BestClock;
 import com.android.net.module.util.BinderUtils;
 import com.android.net.module.util.CollectionUtils;
+import com.android.net.module.util.LocationPermissionChecker;
 import com.android.net.module.util.NetworkStatsUtils;
 import com.android.net.module.util.PermissionUtils;
 
@@ -365,6 +366,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @NonNull
     private final NetworkStatsSubscriptionsMonitor mNetworkStatsSubscriptionsMonitor;
 
+    @NonNull
+    private final LocationPermissionChecker mLocationPermissionChecker;
+
     private static @NonNull File getDefaultSystemDir() {
         return new File(Environment.getDataDirectory(), "system");
     }
@@ -461,6 +465,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mContentResolver = mContext.getContentResolver();
         mContentObserver = mDeps.makeContentObserver(mHandler, mSettings,
                 mNetworkStatsSubscriptionsMonitor);
+        mLocationPermissionChecker = mDeps.makeLocationPermissionChecker(mContext);
     }
 
     /**
@@ -507,6 +512,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     }
                 }
             };
+        }
+
+        /**
+         * @see LocationPermissionChecker
+         */
+        public LocationPermissionChecker makeLocationPermissionChecker(final Context context) {
+            return new LocationPermissionChecker(context);
         }
     }
 
@@ -773,6 +785,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStats getDeviceSummaryForNetwork(
                     NetworkTemplate template, long start, long end) {
+                enforceTemplatePermissions(template, callingPackage);
                 return internalGetSummaryForNetwork(template, restrictedFlags, start, end,
                         mAccessLevel, mCallingUid);
             }
@@ -780,19 +793,33 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStats getSummaryForNetwork(
                     NetworkTemplate template, long start, long end) {
+                enforceTemplatePermissions(template, callingPackage);
                 return internalGetSummaryForNetwork(template, restrictedFlags, start, end,
                         mAccessLevel, mCallingUid);
             }
 
+            // TODO: Remove this after all callers are removed.
             @Override
             public NetworkStatsHistory getHistoryForNetwork(NetworkTemplate template, int fields) {
+                enforceTemplatePermissions(template, callingPackage);
                 return internalGetHistoryForNetwork(template, restrictedFlags, fields,
-                        mAccessLevel, mCallingUid);
+                        mAccessLevel, mCallingUid, Long.MIN_VALUE, Long.MAX_VALUE);
+            }
+
+            @Override
+            public NetworkStatsHistory getHistoryIntervalForNetwork(NetworkTemplate template,
+                    int fields, long start, long end) {
+                enforceTemplatePermissions(template, callingPackage);
+                // TODO(b/200768422): Redact returned history if the template is location
+                //  sensitive but the caller is not privileged.
+                return internalGetHistoryForNetwork(template, restrictedFlags, fields,
+                        mAccessLevel, mCallingUid, start, end);
             }
 
             @Override
             public NetworkStats getSummaryForAllUid(
                     NetworkTemplate template, long start, long end, boolean includeTags) {
+                enforceTemplatePermissions(template, callingPackage);
                 try {
                     final NetworkStats stats = getUidComplete()
                             .getSummary(template, start, end, mAccessLevel, mCallingUid);
@@ -810,6 +837,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStats getTaggedSummaryForAllUid(
                     NetworkTemplate template, long start, long end) {
+                enforceTemplatePermissions(template, callingPackage);
                 try {
                     final NetworkStats tagStats = getUidTagComplete()
                             .getSummary(template, start, end, mAccessLevel, mCallingUid);
@@ -822,6 +850,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStatsHistory getHistoryForUid(
                     NetworkTemplate template, int uid, int set, int tag, int fields) {
+                enforceTemplatePermissions(template, callingPackage);
                 // NOTE: We don't augment UID-level statistics
                 if (tag == TAG_NONE) {
                     return getUidComplete().getHistory(template, null, uid, set, tag, fields,
@@ -836,6 +865,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             public NetworkStatsHistory getHistoryIntervalForUid(
                     NetworkTemplate template, int uid, int set, int tag, int fields,
                     long start, long end) {
+                enforceTemplatePermissions(template, callingPackage);
+                // TODO(b/200768422): Redact returned history if the template is location
+                //  sensitive but the caller is not privileged.
                 // NOTE: We don't augment UID-level statistics
                 if (tag == TAG_NONE) {
                     return getUidComplete().getHistory(template, null, uid, set, tag, fields,
@@ -855,6 +887,26 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 mUidTagComplete = null;
             }
         };
+    }
+
+    private void enforceTemplatePermissions(@NonNull NetworkTemplate template,
+            @NonNull String callingPackage) {
+        // For a template with wifi network keys, it is possible for a malicious
+        // client to track the user locations via querying data usage. Thus, enforce
+        // fine location permission check.
+        if (!template.getWifiNetworkKeys().isEmpty()) {
+            final boolean canAccessFineLocation = mLocationPermissionChecker
+                    .checkCallersLocationPermission(callingPackage,
+                    null /* featureId */,
+                            Binder.getCallingUid(),
+                            false /* coarseForTargetSdkLessThanQ */,
+                            null /* message */);
+            if (!canAccessFineLocation) {
+                throw new SecurityException("Access fine location is required when querying"
+                        + " with wifi network keys, make sure the app has the necessary"
+                        + "permissions and the location toggle is on.");
+            }
+        }
     }
 
     private @NetworkStatsAccess.Level int checkAccessLevel(String callingPackage) {
@@ -893,7 +945,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // We've been using pure XT stats long enough that we no longer need to
         // splice DEV and XT together.
         final NetworkStatsHistory history = internalGetHistoryForNetwork(template, flags, FIELD_ALL,
-                accessLevel, callingUid);
+                accessLevel, callingUid, start, end);
 
         final long now = System.currentTimeMillis();
         final NetworkStatsHistory.Entry entry = history.getValues(start, end, now, null);
@@ -910,14 +962,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * appropriate.
      */
     private NetworkStatsHistory internalGetHistoryForNetwork(NetworkTemplate template,
-            int flags, int fields, @NetworkStatsAccess.Level int accessLevel, int callingUid) {
+            int flags, int fields, @NetworkStatsAccess.Level int accessLevel, int callingUid,
+            long start, long end) {
         // We've been using pure XT stats long enough that we no longer need to
         // splice DEV and XT together.
         final SubscriptionPlan augmentPlan = resolveSubscriptionPlan(template, flags);
         synchronized (mStatsLock) {
             return mXtStatsCached.getHistory(template, augmentPlan,
-                    UID_ALL, SET_ALL, TAG_NONE, fields, Long.MIN_VALUE, Long.MAX_VALUE,
-                    accessLevel, callingUid);
+                    UID_ALL, SET_ALL, TAG_NONE, fields, start, end, accessLevel, callingUid);
         }
     }
 
