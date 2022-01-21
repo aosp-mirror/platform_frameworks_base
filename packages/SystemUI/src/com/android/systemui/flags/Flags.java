@@ -74,9 +74,6 @@ public class Flags {
     public static final ResourceBooleanFlag BOUNCER_USER_SWITCHER =
             new ResourceBooleanFlag(204, R.bool.config_enableBouncerUserSwitcher);
 
-    public static final ResourceBooleanFlag ACTIVE_UNLOCK =
-            new ResourceBooleanFlag(205, R.bool.flag_active_unlock);
-
     /***************************************/
     // 300 - power menu
     public static final BooleanFlag POWER_MENU_LITE =

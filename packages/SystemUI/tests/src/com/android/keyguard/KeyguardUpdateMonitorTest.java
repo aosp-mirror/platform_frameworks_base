@@ -88,7 +88,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -174,8 +173,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private InteractionJankMonitor mInteractionJankMonitor;
     @Mock
     private LatencyTracker mLatencyTracker;
-    @Mock
-    private FeatureFlags mFeatureFlags;
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
     // Direct executor
@@ -1108,7 +1105,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mRingerModeTracker, mBackgroundExecutor, mMainExecutor,
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager,
-                    mInteractionJankMonitor, mLatencyTracker, mFeatureFlags);
+                    mInteractionJankMonitor, mLatencyTracker);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 
