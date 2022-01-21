@@ -265,6 +265,7 @@ public class BatteryStatsImpl extends BatteryStats {
             MeasuredEnergyStats.POWER_BUCKET_CPU,
             MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO,
             MeasuredEnergyStats.POWER_BUCKET_WIFI,
+            MeasuredEnergyStats.POWER_BUCKET_BLUETOOTH,
     };
 
     // TimeInState counters need NUM_PROCESS_STATE states in order to accommodate
@@ -8371,6 +8372,11 @@ public class BatteryStatsImpl extends BatteryStats {
             if (wifiControllerActivity != null) {
                 wifiControllerActivity.setState(batteryConsumerProcessState, elapsedTimeMs);
             }
+            final ControllerActivityCounterImpl bluetoothControllerActivity =
+                    getBluetoothControllerActivity();
+            if (bluetoothControllerActivity != null) {
+                bluetoothControllerActivity.setState(batteryConsumerProcessState, elapsedTimeMs);
+            }
             final MeasuredEnergyStats energyStats =
                     getOrCreateMeasuredEnergyStatsIfSupportedLocked();
             if (energyStats != null) {
@@ -8718,7 +8724,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        public ControllerActivityCounter getBluetoothControllerActivity() {
+        public ControllerActivityCounterImpl getBluetoothControllerActivity() {
             return mBluetoothControllerActivity;
         }
 
@@ -8835,6 +8841,14 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public long getBluetoothMeasuredBatteryConsumptionUC() {
             return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_BLUETOOTH);
+        }
+
+        @GuardedBy("mBsi")
+        @Override
+        public long getBluetoothMeasuredBatteryConsumptionUC(
+                @BatteryConsumer.ProcessState int processState) {
+            return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_BLUETOOTH,
+                    processState);
         }
 
         @GuardedBy("mBsi")
@@ -11422,6 +11436,13 @@ public class BatteryStatsImpl extends BatteryStats {
                         getWifiControllerActivity();
                 if (wifiControllerActivity != null) {
                     wifiControllerActivity.setState(batteryConsumerProcessState, elapsedRealtimeMs);
+                }
+
+                final ControllerActivityCounterImpl bluetoothControllerActivity =
+                        getBluetoothControllerActivity();
+                if (bluetoothControllerActivity != null) {
+                    bluetoothControllerActivity.setState(batteryConsumerProcessState,
+                            elapsedRealtimeMs);
                 }
 
                 final MeasuredEnergyStats energyStats =
