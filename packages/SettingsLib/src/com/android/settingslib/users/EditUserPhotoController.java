@@ -16,17 +16,21 @@
 
 package com.android.settingslib.users;
 
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.android.internal.util.UserIcons;
+import com.android.settingslib.R;
 import com.android.settingslib.drawable.CircleFramedDrawable;
+import com.android.settingslib.utils.ThreadUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,6 +38,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutionException;
 
 /**
  * This class contains logic for starting activities to take/choose/crop photo, reads and transforms
@@ -81,10 +86,17 @@ public class EditUserPhotoController {
         }
 
         if (requestCode == REQUEST_CODE_PICK_AVATAR) {
+            if (data.hasExtra(AvatarPickerActivity.EXTRA_DEFAULT_ICON_TINT_COLOR)) {
+                int tintColor =
+                        data.getIntExtra(AvatarPickerActivity.EXTRA_DEFAULT_ICON_TINT_COLOR, -1);
+                onDefaultIconSelected(tintColor);
+                return true;
+            }
             if (data.getData() != null) {
                 onPhotoCropped(data.getData());
+                return true;
             }
-            return true;
+
         }
         return false;
     }
@@ -99,36 +111,54 @@ public class EditUserPhotoController {
         mActivityStarter.startActivityForResult(intent, REQUEST_CODE_PICK_AVATAR);
     }
 
+    private void onDefaultIconSelected(int tintColor) {
+        try {
+            ThreadUtils.postOnBackgroundThread(() -> {
+                Drawable drawable =
+                        UserIcons.getDefaultUserIconInColor(mActivity.getResources(), tintColor);
+                Bitmap bitmap = convertToBitmap(drawable,
+                        (int) mActivity.getResources().getDimension(R.dimen.circle_avatar_size));
+
+                ThreadUtils.postOnMainThread(() -> onPhotoProcessed(bitmap));
+            }).get();
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e(TAG, "Error processing default icon", e);
+        }
+    }
+
+    private static Bitmap convertToBitmap(@NonNull Drawable icon, int size) {
+        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        icon.setBounds(0, 0, size, size);
+        icon.draw(canvas);
+        return bitmap;
+    }
+
     private void onPhotoCropped(final Uri data) {
-        // TODO: Replace AsyncTask to avoid possible memory leaks and handle configuration change
-        new AsyncTask<Void, Void, Bitmap>() {
-            @Override
-            protected Bitmap doInBackground(Void... params) {
-                InputStream imageStream = null;
-                try {
-                    imageStream = mActivity.getContentResolver()
-                            .openInputStream(data);
-                    return BitmapFactory.decodeStream(imageStream);
-                } catch (FileNotFoundException fe) {
-                    Log.w(TAG, "Cannot find image file", fe);
-                    return null;
-                } finally {
-                    if (imageStream != null) {
-                        try {
-                            imageStream.close();
-                        } catch (IOException ioe) {
-                            Log.w(TAG, "Cannot close image stream", ioe);
-                        }
+        ThreadUtils.postOnBackgroundThread(() -> {
+            InputStream imageStream = null;
+            Bitmap bitmap = null;
+            try {
+                imageStream = mActivity.getContentResolver()
+                        .openInputStream(data);
+                bitmap = BitmapFactory.decodeStream(imageStream);
+            } catch (FileNotFoundException fe) {
+                Log.w(TAG, "Cannot find image file", fe);
+            } finally {
+                if (imageStream != null) {
+                    try {
+                        imageStream.close();
+                    } catch (IOException ioe) {
+                        Log.w(TAG, "Cannot close image stream", ioe);
                     }
                 }
             }
 
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-                onPhotoProcessed(bitmap);
-
+            if (bitmap != null) {
+                Bitmap finalBitmap = bitmap;
+                ThreadUtils.postOnMainThread(() -> onPhotoProcessed(finalBitmap));
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+        });
     }
 
     private void onPhotoProcessed(Bitmap bitmap) {

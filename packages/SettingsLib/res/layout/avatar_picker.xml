@@ -20,7 +20,7 @@
     android:id="@+id/glif_layout"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:icon="@drawable/ic_account_circle"
+    android:icon="@drawable/ic_account_circle_outline"
     app:sucUsePartnerResource="true"
     app:sucHeaderText="@string/avatar_picker_title">
 

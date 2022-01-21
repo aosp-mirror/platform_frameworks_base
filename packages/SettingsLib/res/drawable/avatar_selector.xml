@@ -17,7 +17,9 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_selected="true">
         <shape android:shape="oval">
-            <solid android:color="?android:attr/colorPrimary"/>
+            <stroke
+                android:color="?android:attr/colorPrimary"
+                android:width="@dimen/avatar_picker_padding"/>
         </shape>
     </item>
 </selector>

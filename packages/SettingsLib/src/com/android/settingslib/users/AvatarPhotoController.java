@@ -102,7 +102,7 @@ class AvatarPhotoController {
 
         switch (requestCode) {
             case REQUEST_CODE_CROP_PHOTO:
-                mActivity.returnResult(pictureUri);
+                mActivity.returnUriResult(pictureUri);
                 return true;
             case REQUEST_CODE_TAKE_PHOTO:
             case REQUEST_CODE_CHOOSE_PHOTO:
@@ -232,7 +232,7 @@ class AvatarPhotoController {
             @Override
             protected void onPostExecute(Bitmap bitmap) {
                 saveBitmapToFile(bitmap, new File(mImagesDir, CROP_PICTURE_FILE_NAME));
-                mActivity.returnResult(mCropPictureUri);
+                mActivity.returnUriResult(mCropPictureUri);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
     }

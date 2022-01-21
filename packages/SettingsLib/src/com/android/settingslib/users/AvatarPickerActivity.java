@@ -36,6 +36,7 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.internal.util.UserIcons;
 import com.android.settingslib.R;
 
 import com.google.android.setupcompat.template.FooterBarMixin;
@@ -43,12 +44,29 @@ import com.google.android.setupcompat.template.FooterButton;
 import com.google.android.setupdesign.GlifLayout;
 import com.google.android.setupdesign.util.ThemeHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Activity to allow the user to choose a user profile picture.
+ *
+ * <p>Options are provided to take a photo or choose a photo using the photo picker. In addition,
+ * preselected avatar images may be provided in the resource array {@code avatar_images}. If
+ * provided, every element of that array must be a bitmap drawable.
+ *
+ * <p>If preselected images are not provided, the default avatar will be shown instead, in a range
+ * of colors.
+ *
+ * <p>This activity should be started with startActivityForResult. If a photo or a preselected image
+ * is selected, a Uri will be returned in the data field of the result intent. If a colored default
+ * avatar is selected, the chosen color will be returned as {@code EXTRA_DEFAULT_ICON_TINT_COLOR}
+ * and the data field will be empty.
  */
 public class AvatarPickerActivity extends Activity {
 
     static final String EXTRA_FILE_AUTHORITY = "file_authority";
+    static final String EXTRA_DEFAULT_ICON_TINT_COLOR = "default_icon_tint_color";
+
     private static final String KEY_AWAITING_RESULT = "awaiting_result";
     private static final String KEY_SELECTED_POSITION = "selected_position";
 
@@ -91,7 +109,7 @@ public class AvatarPickerActivity extends Activity {
         mDoneButton =
                 new FooterButton.Builder(this)
                         .setText("Done")
-                        .setListener(view -> returnResult(mAdapter.uriForSelection()))
+                        .setListener(view -> mAdapter.returnSelectionResult())
                         .build();
         mDoneButton.setEnabled(false);
 
@@ -134,9 +152,16 @@ public class AvatarPickerActivity extends Activity {
         super.startActivityForResult(intent, requestCode);
     }
 
-    void returnResult(Uri uri) {
+    void returnUriResult(Uri uri) {
         Intent resultData = new Intent();
         resultData.setData(uri);
+        setResult(RESULT_OK, resultData);
+        finish();
+    }
+
+    void returnColorResult(int color) {
+        Intent resultData = new Intent();
+        resultData.putExtra(EXTRA_DEFAULT_ICON_TINT_COLOR, color);
         setResult(RESULT_OK, resultData);
         finish();
     }
@@ -154,7 +179,9 @@ public class AvatarPickerActivity extends Activity {
         private final int mChoosePhotoPosition;
         private final int mPreselectedImageStartPosition;
 
-        private final TypedArray mImageDrawables;
+        private final List<Drawable> mImageDrawables;
+        private final TypedArray mPreselectedImages;
+        private final int[] mUserIconColors;
         private int mSelectedPosition = NONE;
 
         AvatarAdapter() {
@@ -166,7 +193,9 @@ public class AvatarPickerActivity extends Activity {
             mChoosePhotoPosition = (canChoosePhoto ? (canTakePhoto ? 1 : 0) : NONE);
             mPreselectedImageStartPosition = (canTakePhoto ? 1 : 0) + (canChoosePhoto ? 1 : 0);
 
-            mImageDrawables = getResources().obtainTypedArray(R.array.avatar_images);
+            mPreselectedImages = getResources().obtainTypedArray(R.array.avatar_images);
+            mUserIconColors = UserIcons.getUserIconColors(getResources());
+            mImageDrawables = buildDrawableList();
         }
 
         @NonNull
@@ -188,14 +217,8 @@ public class AvatarPickerActivity extends Activity {
                 viewHolder.setClickListener(view -> mAvatarPhotoController.choosePhoto());
 
             } else if (position >= mPreselectedImageStartPosition) {
-                Drawable drawable = mImageDrawables.getDrawable(indexFromPosition(position));
-                if (drawable instanceof BitmapDrawable) {
-                    drawable = circularDrawableFrom((BitmapDrawable) drawable);
-                } else {
-                    throw new IllegalStateException("Avatar drawables must be bitmaps");
-                }
                 viewHolder.setSelected(position == mSelectedPosition);
-                viewHolder.setDrawable(drawable);
+                viewHolder.setDrawable(mImageDrawables.get(indexFromPosition(position)));
                 viewHolder.setClickListener(view -> {
                     if (mSelectedPosition == position) {
                         deselect(position);
@@ -208,7 +231,29 @@ public class AvatarPickerActivity extends Activity {
 
         @Override
         public int getItemCount() {
-            return mPreselectedImageStartPosition + mImageDrawables.length();
+            return mPreselectedImageStartPosition + mImageDrawables.size();
+        }
+
+        private List<Drawable> buildDrawableList() {
+            List<Drawable> result = new ArrayList<>();
+
+            for (int i = 0; i < mPreselectedImages.length(); i++) {
+                Drawable drawable = mPreselectedImages.getDrawable(i);
+                if (drawable instanceof BitmapDrawable) {
+                    result.add(circularDrawableFrom((BitmapDrawable) drawable));
+                } else {
+                    throw new IllegalStateException("Avatar drawables must be bitmaps");
+                }
+            }
+            if (!result.isEmpty()) {
+                return result;
+            }
+
+            // No preselected images. Use tinted default icon.
+            for (int i = 0; i < mUserIconColors.length; i++) {
+                result.add(UserIcons.getDefaultUserIconInColor(getResources(), mUserIconColors[i]));
+            }
+            return result;
         }
 
         private Drawable circularDrawableFrom(BitmapDrawable drawable) {
@@ -242,13 +287,18 @@ public class AvatarPickerActivity extends Activity {
             mDoneButton.setEnabled(false);
         }
 
-        private Uri uriForSelection() {
-            int resourceId =
-                    mImageDrawables.getResourceId(indexFromPosition(mSelectedPosition), -1);
-            if (resourceId == -1) {
-                throw new IllegalStateException("Preselected avatar images must be resources.");
+        private void returnSelectionResult() {
+            int index = indexFromPosition(mSelectedPosition);
+            if (mPreselectedImages.length() > 0) {
+                int resourceId = mPreselectedImages.getResourceId(index, -1);
+                if (resourceId == -1) {
+                    throw new IllegalStateException("Preselected avatar images must be resources.");
+                }
+                returnUriResult(uriForResourceId(resourceId));
+            } else {
+                returnColorResult(
+                        mUserIconColors[index]);
             }
-            return uriForResourceId(resourceId);
         }
 
         private Uri uriForResourceId(int resourceId) {
