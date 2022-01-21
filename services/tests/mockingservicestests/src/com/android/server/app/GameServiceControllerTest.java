@@ -207,12 +207,12 @@ public final class GameServiceControllerTest {
     }
 
     private void seedNoConfigurationForUser(SystemService.TargetUser user) {
-        when(mMockGameServiceProviderSelector.get(user)).thenReturn(null);
+        when(mMockGameServiceProviderSelector.get(user, "")).thenReturn(null);
     }
 
     private FakeGameServiceProviderInstance seedConfigurationForUser(SystemService.TargetUser user,
             GameServiceProviderConfiguration configuration) {
-        when(mMockGameServiceProviderSelector.get(user)).thenReturn(configuration);
+        when(mMockGameServiceProviderSelector.get(user, "")).thenReturn(configuration);
         FakeGameServiceProviderInstance instanceForConfiguration =
                 spy(new FakeGameServiceProviderInstance());
         when(mMockGameServiceProviderInstanceFactory.create(configuration))
