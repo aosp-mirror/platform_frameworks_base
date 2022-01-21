@@ -5612,4 +5612,7 @@
 
     <!-- Flag indicating if help links for Settings app should be enabled. -->
     <bool name="config_settingsHelpLinksEnabled">false</bool>
+
+    <!-- Whether or not to enable the lock screen entry point for the QR code scanner. -->
+    <bool name="config_enableQrCodeScannerOnLockScreen">false</bool>
 </resources>
