@@ -222,7 +222,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_SHOW_IM_CONFIG = 3;
 
     private static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
-    private static final int MSG_INITIALIZE_IME = 1040;
     private static final int MSG_CREATE_SESSION = 1050;
     private static final int MSG_REMOVE_IME_SURFACE = 1060;
     private static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
@@ -2519,11 +2518,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @AnyThread
-    void executeOrSendInitializeIme(@NonNull IInputMethod inputMethod, @NonNull IBinder token,
+    @GuardedBy("ImfLock.class")
+    void initializeImeLocked(@NonNull IInputMethod inputMethod, @NonNull IBinder token,
             @android.content.pm.ActivityInfo.Config int configChanges, boolean supportStylusHw) {
-        executeOrSendMessage(inputMethod, mCaller.obtainMessageIOOO(MSG_INITIALIZE_IME,
-                configChanges, inputMethod, token, supportStylusHw));
+        if (DEBUG) {
+            Slog.v(TAG, "Sending attach of token: " + token + " for display: "
+                    + mCurTokenDisplayId);
+        }
+        try {
+            inputMethod.initializeInternal(token,
+                    new InputMethodPrivilegedOperationsImpl(this, token), configChanges,
+                    supportStylusHw);
+        } catch (RemoteException e) {
+        }
     }
 
     @AnyThread
@@ -4247,23 +4254,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     hideCurrentInputLocked(mCurFocusedWindow, 0, null, reason);
 
                 }
-                return true;
-            case MSG_INITIALIZE_IME:
-                args = (SomeArgs)msg.obj;
-                try {
-                    if (DEBUG) {
-                        synchronized (ImfLock.class) {
-                            Slog.v(TAG, "Sending attach of token: " + args.arg2 + " for display: "
-                                    + mCurTokenDisplayId);
-                        }
-                    }
-                    final IBinder token = (IBinder) args.arg2;
-                    ((IInputMethod) args.arg1).initializeInternal(token,
-                            new InputMethodPrivilegedOperationsImpl(this, token),
-                            msg.arg1, (boolean) args.arg3);
-                } catch (RemoteException e) {
-                }
-                args.recycle();
                 return true;
             case MSG_CREATE_SESSION: {
                 args = (SomeArgs)msg.obj;
