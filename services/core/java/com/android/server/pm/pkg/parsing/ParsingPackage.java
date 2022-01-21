@@ -26,6 +26,10 @@ import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.SigningDetails;
+import android.os.Bundle;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
+
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedApexSystemService;
 import com.android.server.pm.pkg.component.ParsedAttribution;
@@ -37,9 +41,6 @@ import com.android.server.pm.pkg.component.ParsedProcess;
 import com.android.server.pm.pkg.component.ParsedProvider;
 import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.pm.pkg.component.ParsedUsesPermission;
-import android.os.Bundle;
-import android.util.SparseArray;
-import android.util.SparseIntArray;
 
 import java.security.PublicKey;
 import java.util.Map;
@@ -285,6 +286,9 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage setIconRes(int iconRes);
 
     ParsingPackage setInstallLocation(int installLocation);
+
+    /** @see R#styleable.AndroidManifest_inheritKeyStoreKeys */
+    ParsingPackage setInheritKeyStoreKeys(boolean inheritKeyStoreKeys);
 
     ParsingPackage setLabelRes(int labelRes);
 
