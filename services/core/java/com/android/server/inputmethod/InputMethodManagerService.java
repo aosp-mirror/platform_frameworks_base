@@ -225,7 +225,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_REMOVE_IME_SURFACE = 1060;
     private static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
     private static final int MSG_UPDATE_IME_WINDOW_STATUS = 1070;
-    private static final int MSG_START_HANDWRITING = 1100;
 
     private static final int MSG_START_INPUT = 2000;
 
@@ -3100,9 +3099,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     return;
                 }
                 if (DEBUG) Slog.v(TAG, "Client requesting Stylus Handwriting to be started");
-                if (getCurMethodLocked() != null) {
-                    executeOrSendMessage(getCurMethodLocked(), mCaller.obtainMessageIO(
-                            MSG_START_HANDWRITING, ++mHwRequestId, getCurMethodLocked()));
+                final IInputMethod curMethod = getCurMethodLocked();
+                if (curMethod != null) {
+                    try {
+                        curMethod.canStartStylusHandwriting(++mHwRequestId);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "RemoteException calling canStartStylusHandwriting(): ", e);
+                    }
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -4420,13 +4423,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 return true;
             }
-            case MSG_START_HANDWRITING:
-                try {
-                    (((IInputMethod) msg.obj)).canStartStylusHandwriting(msg.arg1);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "RemoteException calling canStartStylusHandwriting(): ", e);
-                }
-                return true;
         }
         return false;
     }
