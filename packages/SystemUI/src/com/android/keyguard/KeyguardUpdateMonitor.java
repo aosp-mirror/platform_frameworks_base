@@ -37,8 +37,6 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.UserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
@@ -104,8 +102,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -113,7 +109,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.Assert;
-import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.util.RingerModeTracker;
 
 import com.google.android.collect.Lists;
@@ -338,7 +333,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private final Executor mBackgroundExecutor;
     private SensorPrivacyManager mSensorPrivacyManager;
-    private FeatureFlags mFeatureFlags;
     private int mFaceAuthUserId;
 
     /**
@@ -1790,8 +1784,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             AuthController authController,
             TelephonyListenerManager telephonyListenerManager,
             InteractionJankMonitor interactionJankMonitor,
-            LatencyTracker latencyTracker,
-            FeatureFlags featureFlags) {
+            LatencyTracker latencyTracker) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mTelephonyListenerManager = telephonyListenerManager;
@@ -1809,7 +1802,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mAuthController = authController;
         dumpManager.registerDumpable(getClass().getName(), this);
         mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
-        mFeatureFlags = featureFlags;
 
         mHandler = new Handler(mainLooper) {
             @Override
@@ -2253,34 +2245,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             return;
         }
 
-        if (shouldTriggerActiveUnlock() && mFeatureFlags.isEnabled(Flags.ACTIVE_UNLOCK)) {
-            // TODO (b/192405661): call new TrustManager API
-            mNumActiveUnlockTriggers++;
-            Log.d("ActiveUnlock", "would have triggered times=" + mNumActiveUnlockTriggers);
-            showActiveUnlockNotification(mNumActiveUnlockTriggers);
+        if (shouldTriggerActiveUnlock()) {
+            mTrustManager.reportUserRequestedUnlock(KeyguardUpdateMonitor.getCurrentUser());
         }
     }
 
-    /**
-     * TODO (b/192405661): Only for testing. Remove before release.
-     */
-    private void showActiveUnlockNotification(int times) {
-        final String message = "Active unlock triggered "  + times + " times.";
-        final Notification.Builder nb =
-                new Notification.Builder(mContext, NotificationChannels.GENERAL)
-                        .setSmallIcon(R.drawable.ic_volume_ringer)
-                        .setContentTitle(message)
-                        .setStyle(new Notification.BigTextStyle().bigText(message));
-        mContext.getSystemService(NotificationManager.class).notifyAsUser(
-                "active_unlock",
-                0,
-                nb.build(),
-                UserHandle.ALL);
-    }
-
     private boolean shouldTriggerActiveUnlock() {
-        // TODO: check if active unlock is ENABLED / AVAILABLE
-
         // Triggers:
         final boolean triggerActiveUnlockForAssistant = shouldTriggerActiveUnlockForAssistant();
         final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep
@@ -2294,7 +2264,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean userCanDismissLockScreen = getUserCanSkipBouncer(user)
                 || !mLockPatternUtils.isSecure(user);
 
-        // Don't trigger active unlock if fp is locked out TODO: confirm this one
+        // Don't trigger active unlock if fp is locked out
         final boolean fpLockedout = mFingerprintLockedOut || mFingerprintLockedOutPermanent;
 
         // Don't trigger active unlock if primary auth is required
