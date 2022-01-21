@@ -219,7 +219,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
-    private static final int MSG_SHOW_IM_SUBTYPE_ENABLER = 2;
     private static final int MSG_SHOW_IM_CONFIG = 3;
 
     private static final int MSG_UNBIND_INPUT = 1000;
@@ -3694,8 +3693,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (!calledFromValidUserLocked()) {
                 return;
             }
-            executeOrSendMessage(getCurMethodLocked(), mCaller.obtainMessageO(
-                    MSG_SHOW_IM_SUBTYPE_ENABLER, inputMethodId));
+            showInputMethodAndSubtypeEnabler(inputMethodId);
         }
     }
 
@@ -4216,10 +4214,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         return false;
                 }
                 mMenuController.showInputMethodMenu(showAuxSubtypes, displayId);
-                return true;
-
-            case MSG_SHOW_IM_SUBTYPE_ENABLER:
-                showInputMethodAndSubtypeEnabler((String)msg.obj);
                 return true;
 
             case MSG_SHOW_IM_CONFIG:
