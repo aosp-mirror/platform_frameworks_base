@@ -2604,10 +2604,32 @@ package android.companion {
 package android.companion.virtual {
 
   public final class VirtualDeviceManager {
+    method @Nullable @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.VirtualDeviceManager.VirtualDevice createVirtualDevice(int, @NonNull android.companion.virtual.VirtualDeviceParams);
   }
 
   public static class VirtualDeviceManager.VirtualDevice implements java.lang.AutoCloseable {
     method public void close();
+    method @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(int, int, int, @Nullable android.view.Surface, int, @Nullable android.os.Handler, @Nullable android.hardware.display.VirtualDisplay.Callback);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualKeyboard createVirtualKeyboard(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
+  }
+
+  public final class VirtualDeviceParams implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getLockState();
+    method @NonNull public java.util.Set<android.os.UserHandle> getUsersWithMatchingAccounts();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.VirtualDeviceParams> CREATOR;
+    field public static final int LOCK_STATE_ALWAYS_LOCKED = 0; // 0x0
+    field public static final int LOCK_STATE_ALWAYS_UNLOCKED = 1; // 0x1
+  }
+
+  public static final class VirtualDeviceParams.Builder {
+    ctor public VirtualDeviceParams.Builder();
+    method @NonNull public android.companion.virtual.VirtualDeviceParams build();
+    method @NonNull @RequiresPermission(value="android.permission.ADD_ALWAYS_UNLOCKED_DISPLAY", conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
+    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setUsersWithMatchingAccounts(@NonNull java.util.Set<android.os.UserHandle>);
   }
 
 }
@@ -3661,6 +3683,7 @@ package android.hardware.display {
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public void setBrightnessConfigurationForDisplay(@NonNull android.hardware.display.BrightnessConfiguration, @NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CONTROL_DISPLAY_SATURATION) public void setSaturationLevel(float);
+    field public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1024; // 0x400
   }
 
 }
