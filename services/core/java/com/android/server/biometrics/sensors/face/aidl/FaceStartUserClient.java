@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.StartUserClient;
 
 public class FaceStartUserClient extends StartUserClient<IFace, ISession> {
@@ -43,7 +44,7 @@ public class FaceStartUserClient extends StartUserClient<IFace, ISession> {
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
         startHalOperation();
     }

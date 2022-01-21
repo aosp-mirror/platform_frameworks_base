@@ -52,7 +52,7 @@ public class AcquisitionClientTest {
     @Mock
     private ClientMonitorCallbackConverter mClientCallback;
     @Mock
-    private BaseClientMonitor.Callback mSchedulerCallback;
+    private ClientMonitorCallback mSchedulerCallback;
 
     @Before
     public void setUp() {
@@ -96,7 +96,7 @@ public class AcquisitionClientTest {
         }
 
         @Override
-        public void start(@NonNull Callback callback) {
+        public void start(@NonNull ClientMonitorCallback callback) {
             super.start(callback);
             startHalOperation();
         }

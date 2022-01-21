@@ -60,6 +60,7 @@ import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricScheduler;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
@@ -534,7 +535,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
                     opPackageName, mSensorId, sSystemClock.millis());
             mGeneratedChallengeCache = client;
-            mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
+            mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
                 @Override
                 public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
                     if (client != clientMonitor) {
@@ -562,7 +563,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             final FaceRevokeChallengeClient client = new FaceRevokeChallengeClient(mContext,
                     mLazyDaemon, token, userId, opPackageName, mSensorId);
-            mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
+            mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
                 @Override
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                         boolean success) {
@@ -591,7 +592,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                     opPackageName, id, FaceUtils.getLegacyInstance(mSensorId), disabledFeatures,
                     ENROLL_TIMEOUT_SEC, previewSurface, mSensorId);
 
-            mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
+            mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
                 @Override
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                         boolean success) {
@@ -742,7 +743,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             final int faceId = faces.get(0).getBiometricId();
             final FaceGetFeatureClient client = new FaceGetFeatureClient(mContext, mLazyDaemon,
                     token, listener, userId, opPackageName, mSensorId, feature, faceId);
-            mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
+            mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
                 @Override
                 public void onClientFinished(
                         @NonNull BaseClientMonitor clientMonitor, boolean success) {
@@ -760,7 +761,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     private void scheduleInternalCleanup(int userId,
-            @Nullable BaseClientMonitor.Callback callback) {
+            @Nullable ClientMonitorCallback callback) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -774,7 +775,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     @Override
     public void scheduleInternalCleanup(int sensorId, int userId,
-            @Nullable BaseClientMonitor.Callback callback) {
+            @Nullable ClientMonitorCallback callback) {
         scheduleInternalCleanup(userId, callback);
     }
 
@@ -890,7 +891,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         final FaceUpdateActiveUserClient client = new FaceUpdateActiveUserClient(mContext,
                 mLazyDaemon, targetUserId, mContext.getOpPackageName(), mSensorId,
                 hasEnrolled, mAuthenticatorIds);
-        mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
+        mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
             @Override
             public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                     boolean success) {

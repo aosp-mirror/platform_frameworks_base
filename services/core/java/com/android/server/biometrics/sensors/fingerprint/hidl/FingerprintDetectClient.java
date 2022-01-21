@@ -32,6 +32,7 @@ import android.util.Slog;
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.SensorOverlays;
@@ -82,7 +83,7 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
         startHalOperation();
     }

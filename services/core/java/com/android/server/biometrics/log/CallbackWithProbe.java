@@ -19,6 +19,7 @@ package com.android.server.biometrics.log;
 import android.annotation.NonNull;
 
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 
 /**
  * Client monitor callback that exposes a probe.
@@ -27,7 +28,7 @@ import com.android.server.biometrics.sensors.BaseClientMonitor;
  *
  * @param <T> probe type
  */
-public class CallbackWithProbe<T extends Probe> implements BaseClientMonitor.Callback {
+public class CallbackWithProbe<T extends Probe> implements ClientMonitorCallback {
     private final boolean mStartWithClient;
     private final T mProbe;
 

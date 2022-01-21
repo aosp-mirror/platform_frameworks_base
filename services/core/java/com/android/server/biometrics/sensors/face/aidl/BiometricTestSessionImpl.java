@@ -35,6 +35,7 @@ import android.util.Slog;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.face.FaceUtils;
 
 import java.util.HashSet;
@@ -221,7 +222,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         Slog.d(TAG, "cleanupInternalState: " + userId);
-        mProvider.scheduleInternalCleanup(mSensorId, userId, new BaseClientMonitor.Callback() {
+        mProvider.scheduleInternalCleanup(mSensorId, userId, new ClientMonitorCallback() {
             @Override
             public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
                 try {

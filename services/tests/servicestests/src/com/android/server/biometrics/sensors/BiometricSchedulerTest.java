@@ -114,13 +114,13 @@ public class BiometricSchedulerTest {
         final TestHalClientMonitor client2 = new TestHalClientMonitor(
                 mContext, mToken, () -> mock(Object.class));
 
-        final BaseClientMonitor.Callback callback1 = mock(BaseClientMonitor.Callback.class);
-        final BaseClientMonitor.Callback callback2 = mock(BaseClientMonitor.Callback.class);
+        final ClientMonitorCallback callback1 = mock(ClientMonitorCallback.class);
+        final ClientMonitorCallback callback2 = mock(ClientMonitorCallback.class);
 
         // Pretend the scheduler is busy so the first operation doesn't start right away. We want
         // to pretend like there are two operations in the queue before kicking things off
         mScheduler.mCurrentOperation = new BiometricSchedulerOperation(
-                mock(BaseClientMonitor.class), mock(BaseClientMonitor.Callback.class));
+                mock(BaseClientMonitor.class), mock(ClientMonitorCallback.class));
 
         mScheduler.scheduleClientMonitor(client1, callback1);
         assertEquals(1, mScheduler.mPendingOperations.size());
@@ -152,13 +152,13 @@ public class BiometricSchedulerTest {
         final TestHalClientMonitor client2 =
                 new TestHalClientMonitor(mContext, mToken, () -> daemon2);
 
-        final BaseClientMonitor.Callback callback1 = mock(BaseClientMonitor.Callback.class);
-        final BaseClientMonitor.Callback callback2 = mock(BaseClientMonitor.Callback.class);
+        final ClientMonitorCallback callback1 = mock(ClientMonitorCallback.class);
+        final ClientMonitorCallback callback2 = mock(ClientMonitorCallback.class);
 
         // Pretend the scheduler is busy so the first operation doesn't start right away. We want
         // to pretend like there are two operations in the queue before kicking things off
         mScheduler.mCurrentOperation = new BiometricSchedulerOperation(
-                mock(BaseClientMonitor.class), mock(BaseClientMonitor.Callback.class));
+                mock(BaseClientMonitor.class), mock(ClientMonitorCallback.class));
 
         mScheduler.scheduleClientMonitor(client1, callback1);
         assertEquals(1, mScheduler.mPendingOperations.size());
@@ -187,7 +187,7 @@ public class BiometricSchedulerTest {
         final HalClientMonitor.LazyDaemon<Object> lazyDaemon1 = () -> mock(Object.class);
         final TestAuthenticationClient client1 = new TestAuthenticationClient(mContext,
                 lazyDaemon1, mToken, mock(ClientMonitorCallbackConverter.class));
-        final BaseClientMonitor.Callback callback1 = mock(BaseClientMonitor.Callback.class);
+        final ClientMonitorCallback callback1 = mock(ClientMonitorCallback.class);
 
         // Schedule a BiometricPrompt authentication request
         mScheduler.scheduleClientMonitor(client1, callback1);
@@ -628,7 +628,7 @@ public class BiometricSchedulerTest {
         }
 
         @Override
-        public void start(@NonNull Callback callback) {
+        public void start(@NonNull ClientMonitorCallback callback) {
             super.start(callback);
             assertFalse(mStarted);
             mStarted = true;

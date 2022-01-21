@@ -34,7 +34,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 
-import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 
 import org.junit.Before;
@@ -61,7 +61,7 @@ public class FaceGenerateChallengeClientTest {
     @Mock
     private IFaceServiceReceiver mOtherReceiver;
     @Mock
-    private BaseClientMonitor.Callback mMonitorCallback;
+    private ClientMonitorCallback mMonitorCallback;
 
     private FaceGenerateChallengeClient mClient;
 
