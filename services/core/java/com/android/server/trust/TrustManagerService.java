@@ -75,7 +75,6 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -392,7 +391,6 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-
     public void updateTrust(int userId, int flags) {
         updateTrust(userId, flags, false /* isFromUnlock */);
     }
@@ -432,7 +430,7 @@ public class TrustManagerService extends SystemService {
             changed = mUserIsTrusted.get(userId) != trusted;
             mUserIsTrusted.put(userId, trusted);
         }
-        dispatchOnTrustChanged(trusted, userId, flags);
+        dispatchOnTrustChanged(trusted, userId, flags, getTrustGrantedMessages(userId));
         if (changed) {
             refreshDeviceLockedForUser(userId);
             if (!trusted) {
@@ -952,6 +950,24 @@ public class TrustManagerService extends SystemService {
         return false;
     }
 
+    private List<String> getTrustGrantedMessages(int userId) {
+        if (!mStrongAuthTracker.isTrustAllowedForUser(userId)) {
+            return new ArrayList<>();
+        }
+
+        List<String> trustGrantedMessages = new ArrayList<>();
+        for (int i = 0; i < mActiveAgents.size(); i++) {
+            AgentInfo info = mActiveAgents.valueAt(i);
+            if (info.userId == userId
+                    && info.agent.isTrusted()
+                    && info.agent.shouldDisplayTrustGrantedMessage()
+                    && !TextUtils.isEmpty(info.agent.getMessage())) {
+                trustGrantedMessages.add(info.agent.getMessage().toString());
+            }
+        }
+        return trustGrantedMessages;
+    }
+
     private boolean aggregateIsTrustManaged(int userId) {
         if (!mStrongAuthTracker.isTrustAllowedForUser(userId)) {
             return false;
@@ -1021,7 +1037,8 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    private void dispatchOnTrustChanged(boolean enabled, int userId, int flags) {
+    private void dispatchOnTrustChanged(boolean enabled, int userId, int flags,
+            @NonNull List<String> trustGrantedMessages) {
         if (DEBUG) {
             Log.i(TAG, "onTrustChanged(" + enabled + ", " + userId + ", 0x"
                     + Integer.toHexString(flags) + ")");
@@ -1029,7 +1046,7 @@ public class TrustManagerService extends SystemService {
         if (!enabled) flags = 0;
         for (int i = 0; i < mTrustListeners.size(); i++) {
             try {
-                mTrustListeners.get(i).onTrustChanged(enabled, userId, flags);
+                mTrustListeners.get(i).onTrustChanged(enabled, userId, flags, trustGrantedMessages);
             } catch (DeadObjectException e) {
                 Slog.d(TAG, "Removing dead TrustListener.");
                 mTrustListeners.remove(i);
