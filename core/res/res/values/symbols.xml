@@ -2438,6 +2438,24 @@
   <!-- From PinyinIME(!!!) -->
   <java-symbol type="string" name="inputMethod" />
 
+  <!-- Gestural Nav buttons within InputMethodService -->
+  <java-symbol type="dimen" name="input_method_nav_key_button_ripple_max_width" />
+  <java-symbol type="drawable" name="ic_ime_nav_back" />
+  <java-symbol type="drawable" name="ic_ime_switcher" />
+  <java-symbol type="id" name="input_method_nav_back" />
+  <java-symbol type="id" name="input_method_nav_buttons" />
+  <java-symbol type="id" name="input_method_nav_center_group" />
+  <java-symbol type="id" name="input_method_nav_ends_group" />
+  <java-symbol type="id" name="input_method_nav_home_handle" />
+  <java-symbol type="id" name="input_method_nav_horizontal" />
+  <java-symbol type="id" name="input_method_nav_ime_switcher" />
+  <java-symbol type="id" name="input_method_nav_inflater" />
+  <java-symbol type="layout" name="input_method_navigation_bar" />
+  <java-symbol type="layout" name="input_method_navigation_layout" />
+  <java-symbol type="layout" name="input_method_nav_back" />
+  <java-symbol type="layout" name="input_method_nav_home_handle" />
+  <java-symbol type="layout" name="input_method_nav_ime_switcher" />
+
   <!-- From Chromium-WebView -->
   <java-symbol type="attr" name="actionModeWebSearchDrawable" />
   <java-symbol type="string" name="websearch" />

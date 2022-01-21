@@ -469,6 +469,10 @@ public class InputMethodService extends AbstractInputMethodService {
     InputMethodManager mImm;
     private InputMethodPrivilegedOperations mPrivOps = new InputMethodPrivilegedOperations();
 
+    @NonNull
+    private final NavigationBarController mNavigationBarController =
+            new NavigationBarController(this);
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int mTheme = 0;
 
@@ -611,6 +615,7 @@ public class InputMethodService extends AbstractInputMethodService {
             info.touchableRegion.set(mTmpInsets.touchableRegion);
             info.setTouchableInsets(mTmpInsets.touchableInsets);
         }
+        mNavigationBarController.updateTouchableInsets(mTmpInsets, info);
 
         if (mInputFrame != null) {
             setImeExclusionRect(mTmpInsets.visibleTopInsets);
@@ -1534,6 +1539,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mCandidatesVisibility = getCandidatesHiddenVisibility();
         mCandidatesFrame.setVisibility(mCandidatesVisibility);
         mInputFrame.setVisibility(View.GONE);
+        mNavigationBarController.onViewInitialized();
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
@@ -1543,6 +1549,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
                 mInsetsComputer);
         doFinishInput();
+        mNavigationBarController.onDestroy();
         mWindow.dismissForDestroyIfNecessary();
         if (mSettingsObserver != null) {
             mSettingsObserver.unregister();
@@ -2451,6 +2458,7 @@ public class InputMethodService extends AbstractInputMethodService {
             setImeWindowStatus(nextImeWindowStatus, mBackDisposition);
         }
 
+        mNavigationBarController.onWindowShown();
         // compute visibility
         onWindowShown();
         mWindowVisible = true;
@@ -3656,6 +3664,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 + " touchableInsets=" + mTmpInsets.touchableInsets
                 + " touchableRegion=" + mTmpInsets.touchableRegion);
         p.println(" mSettingsObserver=" + mSettingsObserver);
+        p.println(" mNavigationBarController=" + mNavigationBarController.toDebugString());
     }
 
     private final ImeTracing.ServiceDumper mDumper = new ImeTracing.ServiceDumper() {
