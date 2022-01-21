@@ -23,7 +23,6 @@ import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
-import static com.android.systemui.statusbar.notification.ViewGroupFadeHelper.reset;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -38,6 +37,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -120,6 +120,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.QsFrameTranslateController;
@@ -365,6 +366,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private StatusBarWindowStateController mStatusBarWindowStateController;
     @Mock
     private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    @Mock
+    private NotificationShadeWindowController mNotificationShadeWindowController;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -490,7 +493,10 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 .thenReturn(true);
         when(mInteractionJankMonitor.end(anyInt()))
                 .thenReturn(true);
-        reset(mView);
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(mNotificationShadeWindowController).batchApplyWindowLayoutParams(any());
 
         mMainHandler = new Handler(Looper.getMainLooper());
 
@@ -505,6 +511,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mCommunalStateController, mKeyguardStateController,
                 mStatusBarStateController,
                 mStatusBarWindowStateController,
+                mNotificationShadeWindowController,
                 mDozeLog, mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
                 mCommunalSourceMonitor, mMetricsLogger, mActivityManager, mConfigurationController,
