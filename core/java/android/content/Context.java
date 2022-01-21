@@ -6417,10 +6417,10 @@ public abstract class Context {
      * Triggers the asynchronous revocation of a permission.
      *
      * @param permName The name of the permission to be revoked.
-     * @see #selfRevokePermissions(Collection)
+     * @see #revokeOwnPermissionsOnKill(Collection)
      */
-    public void selfRevokePermission(@NonNull String permName) {
-        selfRevokePermissions(Collections.singletonList(permName));
+    public void revokeOwnPermissionOnKill(@NonNull String permName) {
+        revokeOwnPermissionsOnKill(Collections.singletonList(permName));
     }
 
     /**
@@ -6445,7 +6445,7 @@ public abstract class Context {
      * @see PackageManager#getGroupOfPlatformPermission(String, Executor, Consumer)
      * @see PackageManager#getPlatformPermissionsForGroup(String, Executor, Consumer)
      */
-    public void selfRevokePermissions(@NonNull Collection<String> permissions) {
+    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 

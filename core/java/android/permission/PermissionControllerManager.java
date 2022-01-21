@@ -836,15 +836,15 @@ public final class PermissionControllerManager {
      * @param packageName The name of the package for which the permissions will be revoked.
      * @param permissions List of permissions to be revoked.
      *
-     * @see Context#selfRevokePermissions(Collection)
+     * @see Context#revokeOwnPermissionsOnKill(Collection)
      *
      * @hide
      */
-    public void selfRevokePermissions(@NonNull String packageName,
+    public void revokeOwnPermissionsOnKill(@NonNull String packageName,
             @NonNull List<String> permissions) {
         mRemoteService.postAsync(service -> {
             AndroidFuture<Void> future = new AndroidFuture<>();
-            service.selfRevokePermissions(packageName, permissions, future);
+            service.revokeOwnPermissionsOnKill(packageName, permissions, future);
             return future;
         }).whenComplete((result, err) -> {
             if (err != null) {

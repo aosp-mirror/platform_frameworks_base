@@ -1592,7 +1592,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public void selfRevokePermissions(String packageName, List<String> permissions) {
+    public void revokeOwnPermissionsOnKill(String packageName, List<String> permissions) {
         final int callingUid = Binder.getCallingUid();
         int callingUserId = UserHandle.getUserId(callingUid);
         int targetPackageUid = mPackageManagerInt.getPackageUid(packageName, 0, callingUserId);
@@ -1607,7 +1607,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                         + permName + " because it does not hold that permission");
             }
         }
-        mPermissionControllerManager.selfRevokePermissions(packageName, permissions);
+        mPermissionControllerManager.revokeOwnPermissionsOnKill(packageName, permissions);
     }
 
     private boolean mayManageRolePermission(int uid) {

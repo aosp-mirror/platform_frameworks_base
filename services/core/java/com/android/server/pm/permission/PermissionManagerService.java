@@ -558,9 +558,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public void selfRevokePermissions(@NonNull String packageName,
+    public void revokeOwnPermissionsOnKill(@NonNull String packageName,
             @NonNull List<String> permissions) {
-        mPermissionManagerServiceImpl.selfRevokePermissions(packageName, permissions);
+        mPermissionManagerServiceImpl.revokeOwnPermissionsOnKill(packageName, permissions);
     }
 
     @Override

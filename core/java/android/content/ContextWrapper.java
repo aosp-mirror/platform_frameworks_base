@@ -1016,8 +1016,8 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public void selfRevokePermissions(@NonNull Collection<String> permissions) {
-        mBase.selfRevokePermissions(permissions);
+    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
+        mBase.revokeOwnPermissionsOnKill(permissions);
     }
 
     @Override
