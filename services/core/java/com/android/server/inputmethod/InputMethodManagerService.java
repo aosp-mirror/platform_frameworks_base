@@ -221,7 +221,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
     private static final int MSG_SHOW_IM_CONFIG = 3;
 
-    private static final int MSG_HIDE_SOFT_INPUT = 1030;
     private static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
     private static final int MSG_INITIALIZE_IME = 1040;
     private static final int MSG_CREATE_SESSION = 1050;
@@ -780,7 +779,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final int mFocusedWindowSoftInputMode;
             @SoftInputShowHideReason
             final int mReason;
-            // The timing of handling showCurrentInputLocked() or MSG_HIDE_SOFT_INPUT.
+            // The timing of handling showCurrentInputLocked() or hideCurrentInputLocked().
             final long mTimestamp;
             final long mWallTime;
             final boolean mInFullscreenMode;
@@ -1570,7 +1569,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mHandler.removeCallbacks(mUserSwitchHandlerTask);
         }
         // Hide soft input before user switch task since switch task may block main handler a while
-        // and delayed the MSG_HIDE_SOFT_INPUT.
+        // and delayed the hideCurrentInputLocked().
         hideCurrentInputLocked(
                 mCurFocusedWindow, 0, null, SoftInputShowHideReason.HIDE_SWITCH_USER);
         final UserSwitchHandlerTask task = new UserSwitchHandlerTask(this, userId,
@@ -3228,8 +3227,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // delivered to the IME process as an IPC.  Hence the inconsistency between
             // IMMS#mInputShown and IMMS#mImeWindowVis should be resolved spontaneously in
             // the final state.
-            executeOrSendMessage(curMethod, mCaller.obtainMessageIOOO(MSG_HIDE_SOFT_INPUT,
-                    reason, curMethod, resultReceiver, hideInputToken));
+            if (DEBUG) {
+                Slog.v(TAG, "Calling " + curMethod + ".hideSoftInput(0, " + hideInputToken
+                        + ", " + resultReceiver + ") for reason: "
+                        + InputMethodDebug.softInputDisplayReasonToString(reason));
+            }
+            try {
+                curMethod.hideSoftInput(hideInputToken, 0 /* flags */, resultReceiver);
+                onShowHideSoftInputRequested(false /* show */, windowToken, reason);
+            } catch (RemoteException e) {
+            }
             res = true;
         } else {
             res = false;
@@ -4234,25 +4241,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // ---------------------------------------------------------
 
-            case MSG_HIDE_SOFT_INPUT:
-                args = (SomeArgs) msg.obj;
-                try {
-                    final @SoftInputShowHideReason int reason = msg.arg1;
-                    if (DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".hideSoftInput(0, "
-                            + args.arg3 + ", " + args.arg2 + ") for reason: "
-                            + InputMethodDebug.softInputDisplayReasonToString(reason));
-                    final IBinder token = (IBinder) args.arg3;
-                    ((IInputMethod)args.arg1).hideSoftInput(
-                            token, 0 /* flags */, (ResultReceiver) args.arg2);
-                    final IBinder requestToken;
-                    synchronized (ImfLock.class) {
-                        requestToken = mHideRequestWindowMap.get(token);
-                        onShowHideSoftInputRequested(false /* show */, requestToken, reason);
-                    }
-                } catch (RemoteException e) {
-                }
-                args.recycle();
-                return true;
             case MSG_HIDE_CURRENT_INPUT_METHOD:
                 synchronized (ImfLock.class) {
                     final @SoftInputShowHideReason int reason = (int) msg.obj;
