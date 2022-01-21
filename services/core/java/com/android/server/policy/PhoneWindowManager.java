@@ -632,6 +632,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_HIDE_BOOT_MESSAGE = 11;
     private static final int MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK = 12;
     private static final int MSG_SHOW_PICTURE_IN_PICTURE_MENU = 15;
+    private static final int MSG_SCREENSHOT_CHORD = 16;
     private static final int MSG_ACCESSIBILITY_SHORTCUT = 17;
     private static final int MSG_BUGREPORT_TV = 18;
     private static final int MSG_ACCESSIBILITY_TV = 19;
@@ -706,6 +707,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_RINGER_TOGGLE_CHORD:
                     handleRingerChordGesture();
+                    break;
+                case MSG_SCREENSHOT_CHORD:
+                    handleScreenShot(msg.arg1, msg.arg2);
                     break;
             }
         }
@@ -1452,11 +1456,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 || mShortPressOnStemPrimaryBehavior != SHORT_PRESS_PRIMARY_NOTHING;
     }
 
-    private void interceptScreenshotChord() {
-        mHandler.removeCallbacks(mScreenshotRunnable);
-        mScreenshotRunnable.setScreenshotType(TAKE_SCREENSHOT_FULLSCREEN);
-        mScreenshotRunnable.setScreenshotSource(SCREENSHOT_KEY_CHORD);
-        mHandler.postDelayed(mScreenshotRunnable, getScreenshotChordLongPressDelay());
+    private void interceptScreenshotChord(int type, int source, long pressDelay) {
+        mHandler.removeMessages(MSG_SCREENSHOT_CHORD);
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SCREENSHOT_CHORD, type, source),
+                pressDelay);
     }
 
     private void interceptAccessibilityShortcutChord() {
@@ -1496,7 +1499,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void cancelPendingScreenshotChordAction() {
-        mHandler.removeCallbacks(mScreenshotRunnable);
+        mHandler.removeMessages(MSG_SCREENSHOT_CHORD);
     }
 
     private void cancelPendingAccessibilityShortcutAction() {
@@ -1517,25 +1520,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
-    private class ScreenshotRunnable implements Runnable {
-        private int mScreenshotType = TAKE_SCREENSHOT_FULLSCREEN;
-        private int mScreenshotSource = SCREENSHOT_KEY_OTHER;
-
-        public void setScreenshotType(int screenshotType) {
-            mScreenshotType = screenshotType;
-        }
-
-        public void setScreenshotSource(int screenshotSource) {
-            mScreenshotSource = screenshotSource;
-        }
-
-        @Override
-        public void run() {
-            mDefaultDisplayPolicy.takeScreenshot(mScreenshotType, mScreenshotSource);
-        }
+    private void handleScreenShot(@WindowManager.ScreenshotType int type,
+            @WindowManager.ScreenshotSource int source) {
+        mDefaultDisplayPolicy.takeScreenshot(type, source);
     }
-
-    private final ScreenshotRunnable mScreenshotRunnable = new ScreenshotRunnable();
 
     @Override
     public void showGlobalActions() {
@@ -2111,7 +2099,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         @Override
                         void execute() {
                             mPowerKeyHandled = true;
-                            interceptScreenshotChord();
+                            interceptScreenshotChord(TAKE_SCREENSHOT_FULLSCREEN,
+                                    SCREENSHOT_KEY_CHORD, getScreenshotChordLongPressDelay());
                         }
                         @Override
                         void cancel() {
@@ -2785,9 +2774,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
                     int type = event.isShiftPressed() ? TAKE_SCREENSHOT_SELECTED_REGION
                             : TAKE_SCREENSHOT_FULLSCREEN;
-                    mScreenshotRunnable.setScreenshotType(type);
-                    mScreenshotRunnable.setScreenshotSource(SCREENSHOT_KEY_OTHER);
-                    mHandler.post(mScreenshotRunnable);
+                    interceptScreenshotChord(type, SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
                     return key_consumed;
                 }
                 break;
@@ -2821,13 +2808,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_DEMO_APP_3:
             case KeyEvent.KEYCODE_DEMO_APP_4:
                 Slog.wtf(TAG, "KEYCODE_APP_X should be handled in interceptKeyBeforeQueueing");
-                return key_consumed;
-            case KeyEvent.KEYCODE_SYSRQ:
-                if (down && repeatCount == 0) {
-                    mScreenshotRunnable.setScreenshotType(TAKE_SCREENSHOT_FULLSCREEN);
-                    mScreenshotRunnable.setScreenshotSource(SCREENSHOT_KEY_OTHER);
-                    mHandler.post(mScreenshotRunnable);
-                }
                 return key_consumed;
             case KeyEvent.KEYCODE_BRIGHTNESS_UP:
             case KeyEvent.KEYCODE_BRIGHTNESS_DOWN:
@@ -3145,6 +3125,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 break;
+            case KeyEvent.KEYCODE_SYSRQ:
+                if (down && repeatCount == 0) {
+                    interceptScreenshotChord(
+                            TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
+                }
+                return true;
         }
 
         return false;
