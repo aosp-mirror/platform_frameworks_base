@@ -779,7 +779,7 @@ public final class Choreographer {
                                 + "time to " + (lastFrameOffset * 0.000001f) + " ms in the past.");
                     }
                     frameTimeNanos = startNanos - lastFrameOffset;
-                    frameData.setFrameTimeNanos(-lastFrameOffset);
+                    frameData.setFrameTimeNanos(frameTimeNanos);
                 }
 
                 if (frameTimeNanos < mLastFrameTimeNanos) {
