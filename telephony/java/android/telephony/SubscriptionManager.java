@@ -3820,6 +3820,11 @@ public class SubscriptionManager {
      * {@link #PHONE_NUMBER_SOURCE_UICC UICC} and decide if the previously set phone number
      * of source {@link #PHONE_NUMBER_SOURCE_CARRIER carrier} should be updated.
      *
+     * <p>The API provides no guarantees of what format the number is in: the format can vary
+     * depending on the {@code source} and the network etc. Programmatic parsing should be done
+     * cautiously, for example, after formatting the number to a consistent format with
+     * {@link android.telephony.PhoneNumberUtils#formatNumberToE164(String, String)}.
+     *
      * <p>Note the assumption is that one subscription (which usually means one SIM) has
      * only one phone number. The multiple sources backup each other so hopefully at least one
      * is availavle. For example, for a carrier that doesn't typically set phone numbers
@@ -3878,6 +3883,11 @@ public class SubscriptionManager {
      * from available sources in the following order: {@link #PHONE_NUMBER_SOURCE_CARRIER}
      * > {@link #PHONE_NUMBER_SOURCE_UICC} > {@link #PHONE_NUMBER_SOURCE_IMS}.
      *
+     * <p>The API provides no guarantees of what format the number is in: the format can vary
+     * depending on the underlying source and the network etc. Programmatic parsing should be done
+     * cautiously, for example, after formatting the number to a consistent format with
+     * {@link android.telephony.PhoneNumberUtils#formatNumberToE164(String, String)}.
+     *
      * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
      *                       for the default one.
      * @return the phone number, or an empty string if not available.
@@ -3915,6 +3925,9 @@ public class SubscriptionManager {
      *
      * <p>The API is suitable for carrier apps to provide a phone number, for example when
      * it's not possible to update {@link #PHONE_NUMBER_SOURCE_UICC UICC} directly.
+     *
+     * <p>It's recommended that the phone number is formatted to well-known formats,
+     * for example, by {@link PhoneNumberUtils} {@code formatNumber*} methods.
      *
      * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
      *                       for the default one.
