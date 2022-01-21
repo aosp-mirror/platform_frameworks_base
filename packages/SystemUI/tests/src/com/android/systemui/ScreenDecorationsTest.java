@@ -14,7 +14,6 @@
 
 package com.android.systemui;
 
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LENGTH;
@@ -22,7 +21,7 @@ import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 
-import static com.android.systemui.ScreenDecorations.rectsToRegion;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -32,7 +31,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.atLeastOnce;
@@ -49,10 +47,12 @@ import android.annotation.IdRes;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Insets;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.VectorDrawable;
 import android.hardware.display.DisplayManager;
+import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -89,7 +89,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 @RunWithLooper
 @RunWith(AndroidTestingRunner.class)
@@ -105,6 +104,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private FakeThreadFactory mThreadFactory;
     private ArrayList<DecorProvider> mDecorProviders;
+    @Mock
+    private Display mDisplay;
     @Mock
     private TunerService mTunerService;
     @Mock
@@ -140,14 +141,15 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 .getMaximumWindowMetrics();
         when(mWindowManager.getMaximumWindowMetrics()).thenReturn(metrics);
         mContext.addMockSystemService(WindowManager.class, mWindowManager);
-
         mDisplayManager = mock(DisplayManager.class);
-        Display display = mContext.getSystemService(DisplayManager.class)
-                .getDisplay(DEFAULT_DISPLAY);
-        when(mDisplayManager.getDisplay(anyInt())).thenReturn(display);
         mContext.addMockSystemService(DisplayManager.class, mDisplayManager);
-        when(mMockTypedArray.length()).thenReturn(0);
 
+        spyOn(mContext);
+        when(mContext.getDisplay()).thenReturn(mDisplay);
+        // Not support hwc layer by default
+        doReturn(null).when(mDisplay).getDisplayDecorationSupport();
+
+        when(mMockTypedArray.length()).thenReturn(0);
         mPrivacyDotTopLeftDecorProvider = spy(new PrivacyDotCornerDecorProviderImpl(
                 R.id.privacy_dot_top_left_container,
                 DisplayCutout.BOUNDS_POSITION_TOP,
@@ -975,12 +977,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBoundingRectsToRegion() throws Exception {
-        Rect rect = new Rect(1, 2, 3, 4);
-        assertThat(rectsToRegion(Collections.singletonList(rect)).getBounds(), is(rect));
-    }
-
-    @Test
     public void testRegistration_From_NoOverlay_To_HasOverlays() {
         doReturn(false).when(mScreenDecorations).hasOverlays();
         mScreenDecorations.start();
@@ -1027,6 +1023,114 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         verify(mTunerService, times(0)).addTunable(any(), any());
         verify(mTunerService, times(1)).removeTunable(any());
         assertThat(mScreenDecorations.mIsRegistered, is(false));
+    }
+
+    @Test
+    public void testSupportHwcLayer_SwitchFrom_NotSupport() {
+        setupResources(0 /* radius */, 10 /* radiusTop */, 20 /* radiusBottom */,
+                0 /* roundedPadding */, false /* multipleRadius */,
+                true /* fillCutout */, false /* privacyDot */);
+
+        // top cutout
+        final Rect[] bounds = {null, new Rect(9, 0, 10, 1), null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(0, 1, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+        // should only inflate mOverlays when the hwc doesn't support screen decoration
+        assertNull(mScreenDecorations.mScreenDecorHwcWindow);
+        assertNotNull(mScreenDecorations.mOverlays);
+        assertNotNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]);
+        assertNotNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]);
+
+        final DisplayDecorationSupport decorationSupport = new DisplayDecorationSupport();
+        decorationSupport.format = PixelFormat.R_8;
+        doReturn(decorationSupport).when(mDisplay).getDisplayDecorationSupport();
+        // Trigger the support hwc screen decoration change by changing the display unique id
+        mScreenDecorations.mDisplayUniqueId = "test";
+        mScreenDecorations.mDisplayListener.onDisplayChanged(1);
+
+        // should only inflate hwc layer when the hwc supports screen decoration
+        assertNotNull(mScreenDecorations.mScreenDecorHwcWindow);
+        assertNull(mScreenDecorations.mOverlays);
+    }
+
+    @Test
+    public void testNotSupportHwcLayer_SwitchFrom_Support() {
+        setupResources(0 /* radius */, 10 /* radiusTop */, 20 /* radiusBottom */,
+                0 /* roundedPadding */, false /* multipleRadius */,
+                true /* fillCutout */, false /* privacyDot */);
+        final DisplayDecorationSupport decorationSupport = new DisplayDecorationSupport();
+        decorationSupport.format = PixelFormat.R_8;
+        doReturn(decorationSupport).when(mDisplay).getDisplayDecorationSupport();
+
+        // top cutout
+        final Rect[] bounds = {null, new Rect(9, 0, 10, 1), null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(0, 1, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+        // should only inflate hwc layer when the hwc supports screen decoration
+        assertNotNull(mScreenDecorations.mScreenDecorHwcWindow);
+        assertNull(mScreenDecorations.mOverlays);
+
+        doReturn(null).when(mDisplay).getDisplayDecorationSupport();
+        // Trigger the support hwc screen decoration change by changing the display unique id
+        mScreenDecorations.mDisplayUniqueId = "test";
+        mScreenDecorations.mDisplayListener.onDisplayChanged(1);
+
+        // should only inflate mOverlays when the hwc doesn't support screen decoration
+        assertNull(mScreenDecorations.mScreenDecorHwcWindow);
+        assertNotNull(mScreenDecorations.mOverlays);
+        assertNotNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]);
+        assertNotNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]);
+    }
+
+    @Test
+    public void testHwcLayer_noPrivacyDot() {
+        setupResources(0 /* radius */, 10 /* radiusTop */, 20 /* radiusBottom */,
+                0 /* roundedPadding */, false /* multipleRadius */,
+                true /* fillCutout */, false /* privacyDot */);
+        final DisplayDecorationSupport decorationSupport = new DisplayDecorationSupport();
+        decorationSupport.format = PixelFormat.R_8;
+        doReturn(decorationSupport).when(mDisplay).getDisplayDecorationSupport();
+
+        // top cutout
+        final Rect[] bounds = {null, new Rect(9, 0, 10, 1), null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(0, 1, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+
+        // Should only inflate hwc layer.
+        assertNotNull(mScreenDecorations.mScreenDecorHwcWindow);
+        assertNull(mScreenDecorations.mOverlays);
+    }
+
+    @Test
+    public void testHwcLayer_PrivacyDot() {
+        setupResources(0 /* radius */, 10 /* radiusTop */, 20 /* radiusBottom */,
+                0 /* roundedPadding */, false /* multipleRadius */,
+                true /* fillCutout */, true /* privacyDot */);
+        final DisplayDecorationSupport decorationSupport = new DisplayDecorationSupport();
+        decorationSupport.format = PixelFormat.R_8;
+        doReturn(decorationSupport).when(mDisplay).getDisplayDecorationSupport();
+
+        // top cutout
+        final Rect[] bounds = {null, new Rect(9, 0, 10, 1), null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(0, 1, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+
+        assertNotNull(mScreenDecorations.mScreenDecorHwcWindow);
+        // mOverlays are inflated but the visibility should be GONE.
+        assertNotNull(mScreenDecorations.mOverlays);
+        final View topOverlay = mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP].getRootView();
+        final View botOverlay = mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].getRootView();
+        assertEquals(topOverlay.getVisibility(), View.INVISIBLE);
+        assertEquals(botOverlay.getVisibility(), View.INVISIBLE);
+
     }
 
     private void setupResources(int radius, int radiusTop, int radiusBottom, int roundedPadding,

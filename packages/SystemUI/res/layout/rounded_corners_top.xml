@@ -25,6 +25,7 @@
         android:layout_height="12dp"
         android:layout_gravity="left|top"
         android:tint="#ff000000"
+        android:visibility="gone"
         android:src="@drawable/rounded_corner_top"/>
 
     <ImageView
@@ -32,6 +33,7 @@
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:tint="#ff000000"
+        android:visibility="gone"
         android:layout_gravity="right|top"
         android:src="@drawable/rounded_corner_top"/>
 
