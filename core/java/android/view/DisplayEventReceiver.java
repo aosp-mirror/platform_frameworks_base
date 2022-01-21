@@ -138,28 +138,13 @@ public abstract class DisplayEventReceiver {
     }
 
     static final class VsyncEventData {
+        // The frame timeline vsync id, used to correlate a frame
+        // produced by HWUI with the timeline data stored in Surface Flinger.
+        public final long id;
 
-        static final FrameTimeline[] INVALID_FRAME_TIMELINES =
-                {new FrameTimeline(FrameInfo.INVALID_VSYNC_ID, Long.MAX_VALUE, Long.MAX_VALUE)};
-
-        public static class FrameTimeline {
-            FrameTimeline(long vsyncId, long expectedPresentTime, long deadline) {
-                this.vsyncId = vsyncId;
-                this.expectedPresentTime = expectedPresentTime;
-                this.deadline = deadline;
-            }
-
-            // The frame timeline vsync id, used to correlate a frame
-            // produced by HWUI with the timeline data stored in Surface Flinger.
-            public final long vsyncId;
-
-            // The frame timestamp for when the frame is expected to be presented.
-            public final long expectedPresentTime;
-
-            // The frame deadline timestamp in {@link System#nanoTime()} timebase that it is
-            // allotted for the frame to be completed.
-            public final long deadline;
-        }
+        // The frame deadline timestamp in {@link System#nanoTime()} timebase that it is
+        // allotted for the frame to be completed.
+        public final long frameDeadline;
 
         /**
          * The current interval between frames in ns. This will be used to align
@@ -168,27 +153,16 @@ public abstract class DisplayEventReceiver {
          */
         public final long frameInterval;
 
-        public final FrameTimeline[] frameTimelines;
-
-        public final int preferredFrameTimelineIndex;
-
-        // Called from native code.
-        @SuppressWarnings("unused")
-        VsyncEventData(FrameTimeline[] frameTimelines, int preferredFrameTimelineIndex,
-                long frameInterval) {
-            this.frameTimelines = frameTimelines;
-            this.preferredFrameTimelineIndex = preferredFrameTimelineIndex;
+        VsyncEventData(long id, long frameDeadline, long frameInterval) {
+            this.id = id;
+            this.frameDeadline = frameDeadline;
             this.frameInterval = frameInterval;
         }
 
         VsyncEventData() {
+            this.id = FrameInfo.INVALID_VSYNC_ID;
+            this.frameDeadline = Long.MAX_VALUE;
             this.frameInterval = -1;
-            this.frameTimelines = INVALID_FRAME_TIMELINES;
-            this.preferredFrameTimelineIndex = 0;
-        }
-
-        public FrameTimeline preferredFrameTimeline() {
-            return frameTimelines[preferredFrameTimelineIndex];
         }
     }
 
@@ -282,8 +256,9 @@ public abstract class DisplayEventReceiver {
     // Called from native code.
     @SuppressWarnings("unused")
     private void dispatchVsync(long timestampNanos, long physicalDisplayId, int frame,
-            VsyncEventData vsyncEventData) {
-        onVsync(timestampNanos, physicalDisplayId, frame, vsyncEventData);
+            long frameTimelineVsyncId, long frameDeadline, long frameInterval) {
+        onVsync(timestampNanos, physicalDisplayId, frame,
+                new VsyncEventData(frameTimelineVsyncId, frameDeadline, frameInterval));
     }
 
     // Called from native code.
