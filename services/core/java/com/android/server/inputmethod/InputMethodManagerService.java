@@ -97,7 +97,6 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IInterface;
 import android.os.LocaleList;
 import android.os.Message;
 import android.os.Parcel;
@@ -2216,8 +2215,24 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private void executeOrSendMessage(IInterface target, Message msg) {
+    // TODO(b/215609403): This method will be removed soon!
+    private void executeOrSendMessage(IInputMethod target, Message msg) {
+        if (target.asBinder() instanceof Binder) {
+            throw new UnsupportedOperationException(
+                    "InputMethodService is not supported to run in the system_server");
+        }
+        handleMessage(msg);
+        msg.recycle();
+    }
+
+    private void executeOrSendMessage(IInputMethodClient target, Message msg) {
          if (target.asBinder() instanceof Binder) {
+             // This is supposed to be emulating the one-way semantics when the IME client is
+             // system_server itself, which has not been explicitly prohibited so far while we have
+             // never ever officially supported such a use case...
+             // We probably should create a simple wrapper of IInputMethodClient as the first step
+             // to get rid of executeOrSendMessage() then should prohibit system_server to be the
+             // IME client for long term.
              mCaller.sendMessage(msg);
          } else {
              handleMessage(msg);
