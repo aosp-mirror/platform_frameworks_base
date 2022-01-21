@@ -1402,12 +1402,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 // VT is considered always metered in framework's layer. If VT is not metered
                 // per carrier's policy, modem will report 0 usage for VT calls.
                 if (snapshot.getNetworkCapabilities().hasCapability(
-                        NetworkCapabilities.NET_CAPABILITY_IMS) && !ident.getMetered()) {
+                        NetworkCapabilities.NET_CAPABILITY_IMS) && !ident.isMetered()) {
 
                     // Copy the identify from IMS one but mark it as metered.
                     NetworkIdentity vtIdent = new NetworkIdentity(ident.getType(),
                             ident.getRatType(), ident.getSubscriberId(), ident.getWifiNetworkKey(),
-                            ident.getRoaming(), true /* metered */,
+                            ident.isRoaming(), true /* metered */,
                             true /* onDefaultNetwork */, ident.getOemManaged());
                     final String ifaceVt = IFACE_VT + getSubIdForMobile(snapshot);
                     findOrCreateNetworkIdentitySet(mActiveIfaces, ifaceVt).add(vtIdent);

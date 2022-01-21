@@ -19,8 +19,10 @@ package android.net;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.service.NetworkIdentityProto;
@@ -31,6 +33,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.net.module.util.NetworkIdentityUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -48,6 +52,15 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     // TODO: Remove this after migrating all callers to use
     //  {@link NetworkTemplate#NETWORK_TYPE_ALL} instead.
     public static final int SUBTYPE_COMBINED = -1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "OEM_MANAGED_" }, value = {
+            NetworkTemplate.OEM_MANAGED_NO,
+            NetworkTemplate.OEM_MANAGED_PAID,
+            NetworkTemplate.OEM_MANAGED_PRIVATE
+    })
+    public @interface OemManaged{}
 
     /**
      * Network has no {@code NetworkCapabilities#NET_CAPABILITY_OEM_*}.
@@ -177,42 +190,62 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         proto.end(start);
     }
 
-    /** @hide */
+    /** Get the network type of this instance. */
     public int getType() {
         return mType;
     }
 
-    /** @hide */
+    /** Get the Radio Access Technology(RAT) type of this instance. */
     public int getRatType() {
         return mRatType;
     }
 
-    /** @hide */
+    /** Get the Subscriber Id of this instance. */
+    @Nullable
     public String getSubscriberId() {
         return mSubscriberId;
     }
 
-    /** @hide */
+    /** Get the Wifi Network Key of this instance. See {@link WifiInfo#getCurrentNetworkKey()}. */
+    @Nullable
     public String getWifiNetworkKey() {
         return mWifiNetworkKey;
     }
 
     /** @hide */
+    // TODO: Remove this function after all callers are removed.
     public boolean getRoaming() {
         return mRoaming;
     }
 
+    /** Return the roaming status of this instance. */
+    public boolean isRoaming() {
+        return mRoaming;
+    }
+
     /** @hide */
+    // TODO: Remove this function after all callers are removed.
     public boolean getMetered() {
         return mMetered;
     }
 
+    /** Return the meteredness of this instance. */
+    public boolean isMetered() {
+        return mMetered;
+    }
+
     /** @hide */
+    // TODO: Remove this function after all callers are removed.
     public boolean getDefaultNetwork() {
         return mDefaultNetwork;
     }
 
-    /** @hide */
+    /** Return the default network status of this instance. */
+    public boolean isDefaultNetwork() {
+        return mDefaultNetwork;
+    }
+
+    /** Get the OEM managed type of this instance. */
     public int getOemManaged() {
         return mOemManaged;
     }
@@ -229,36 +262,16 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
      *                {@link TelephonyManager#NETWORK_TYPE_UNKNOWN} if not applicable.
      *                See {@code TelephonyManager.NETWORK_TYPE_*}.
      * @hide
+     * @deprecated See {@link NetworkIdentity#Builder}.
      */
     // TODO: Remove this after all callers are migrated to use new Api.
+    @Deprecated
     @NonNull
     public static NetworkIdentity buildNetworkIdentity(Context context,
             @NonNull NetworkStateSnapshot snapshot,
             boolean defaultNetwork, @Annotation.NetworkType int ratType) {
-        final int legacyType = snapshot.getLegacyType();
-
-        final String subscriberId = snapshot.getSubscriberId();
-        String wifiNetworkKey = null;
-        boolean roaming = !snapshot.getNetworkCapabilities().hasCapability(
-                NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING);
-        boolean metered = !(snapshot.getNetworkCapabilities().hasCapability(
-                NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
-                || snapshot.getNetworkCapabilities().hasCapability(
-                NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED));
-
-        final int oemManaged = getOemBitfield(snapshot.getNetworkCapabilities());
-
-        if (legacyType == TYPE_WIFI) {
-            final TransportInfo transportInfo = snapshot.getNetworkCapabilities()
-                    .getTransportInfo();
-            if (transportInfo instanceof WifiInfo) {
-                final WifiInfo info = (WifiInfo) transportInfo;
-                wifiNetworkKey = info != null ? info.getCurrentNetworkKey() : null;
-            }
-        }
-
-        return new NetworkIdentity(legacyType, ratType, subscriberId, wifiNetworkKey, roaming,
-                metered, defaultNetwork, oemManaged);
+        return new NetworkIdentity.Builder().setNetworkStateSnapshot(snapshot)
+                .setDefaultNetwork(defaultNetwork).setRatType(ratType).build();
     }
 
     /**
@@ -304,5 +317,193 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
             res = Integer.compare(mOemManaged, another.mOemManaged);
         }
         return res;
+    }
+
+    /**
+     * Builder class for {@link NetworkIdentity}.
+     */
+    public static final class Builder {
+        private int mType;
+        private int mRatType;
+        private String mSubscriberId;
+        private String mWifiNetworkKey;
+        private boolean mRoaming;
+        private boolean mMetered;
+        private boolean mDefaultNetwork;
+        private int mOemManaged;
+
+        /**
+         * Creates a new Builder.
+         */
+        public Builder() {
+            // Initialize with default values. Will be overwritten by setters.
+            mType = ConnectivityManager.TYPE_NONE;
+            mRatType = NetworkTemplate.NETWORK_TYPE_ALL;
+            mSubscriberId = null;
+            mWifiNetworkKey = null;
+            mRoaming = false;
+            mMetered = false;
+            mDefaultNetwork = false;
+            mOemManaged = NetworkTemplate.OEM_MANAGED_NO;
+        }
+
+        /**
+         * Add an {@link NetworkStateSnapshot} into the {@link NetworkIdentity} instance.
+         * This is to read roaming, metered, wifikey... from the snapshot for convenience.
+         *
+         * @param snapshot The target {@link NetworkStateSnapshot} object.
+         * @return The builder object.
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @NonNull
+        public Builder setNetworkStateSnapshot(@NonNull NetworkStateSnapshot snapshot) {
+            setType(snapshot.getLegacyType());
+
+            setSubscriberId(snapshot.getSubscriberId());
+            setRoaming(!snapshot.getNetworkCapabilities().hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING));
+            setMetered(!(snapshot.getNetworkCapabilities().hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+                    || snapshot.getNetworkCapabilities().hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED)));
+
+            setOemManaged(getOemBitfield(snapshot.getNetworkCapabilities()));
+
+            if (mType == TYPE_WIFI) {
+                final TransportInfo transportInfo = snapshot.getNetworkCapabilities()
+                        .getTransportInfo();
+                if (transportInfo instanceof WifiInfo) {
+                    final WifiInfo info = (WifiInfo) transportInfo;
+                    if (info != null) {
+                        setWifiNetworkKey(info.getCurrentNetworkKey());
+                    }
+                }
+            }
+            return this;
+        }
+
+        /**
+         * Set the network type of the network.
+         *
+         * @param type the network type. See {@link ConnectivityManager#TYPE_*}.
+         *
+         * @return this builder.
+         */
+        @NonNull
+        public Builder setType(int type) {
+            mType = type;
+            return this;
+        }
+
+        /**
+         * Set the Radio Access Technology(RAT) type of the network.
+         *
+         * @param ratType the Radio Access Technology(RAT) type if applicable. See
+         *                {@code TelephonyManager.NETWORK_TYPE_*}.
+         *
+         * @return this builder.
+         */
+        @NonNull
+        public Builder setRatType(@Annotation.NetworkType int ratType) {
+            mRatType = ratType;
+            return this;
+        }
+
+        /**
+         * Clear the Radio Access Technology(RAT) type of the network.
+         *
+         * @return this builder.
+         */
+        @NonNull
+        public Builder clearRatType() {
+            mRatType = NetworkTemplate.NETWORK_TYPE_ALL;
+            return this;
+        }
+
+        /**
+         * Set the Subscriber Id.
+         *
+         * @param subscriberId the Subscriber Id of the network. Or null if not applicable.
+         * @return this builder.
+         */
+        @NonNull
+        public Builder setSubscriberId(@Nullable String subscriberId) {
+            mSubscriberId = subscriberId;
+            return this;
+        }
+
+        /**
+         * Set the Wifi Network Key.
+         *
+         * @param wifiNetworkKey Wifi Network Key of the network,
+         *                        see {@link WifiInfo#getCurrentNetworkKey()}.
+         *                        Or null if not applicable.
+         * @return this builder.
+         */
+        @NonNull
+        public Builder setWifiNetworkKey(@Nullable String wifiNetworkKey) {
+            mWifiNetworkKey = wifiNetworkKey;
+            return this;
+        }
+
+        /**
+         * Set the roaming.
+         *
+         * @param roaming the roaming status of the network.
+         * @return this builder.
+         */
+        @NonNull
+        public Builder setRoaming(boolean roaming) {
+            mRoaming = roaming;
+            return this;
+        }
+
+        /**
+         * Set the meteredness.
+         *
+         * @param metered the meteredness of the network.
+         * @return this builder.
+         */
+        @NonNull
+        public Builder setMetered(boolean metered) {
+            mMetered = metered;
+            return this;
+        }
+
+        /**
+         * Set the default network status.
+         *
+         * @param defaultNetwork the default network status of the network.
+         * @return this builder.
+         */
+        @NonNull
+        public Builder setDefaultNetwork(boolean defaultNetwork) {
+            mDefaultNetwork = defaultNetwork;
+            return this;
+        }
+
+        /**
+         * Set the OEM managed type.
+         *
+         * @param oemManaged Type of OEM managed network or unmanaged networks.
+         *                   See {@code NetworkTemplate#OEM_MANAGED_*}.
+         * @return this builder.
+         */
+        @NonNull
+        public Builder setOemManaged(@OemManaged int oemManaged) {
+            mOemManaged = oemManaged;
+            return this;
+        }
+
+        /**
+         * Builds the instance of the {@link NetworkIdentity}.
+         *
+         * @return the built instance of {@link NetworkIdentity}.
+         */
+        @NonNull
+        public NetworkIdentity build() {
+            return new NetworkIdentity(mType, mRatType, mSubscriberId, mWifiNetworkKey,
+                    mRoaming, mMetered, mDefaultNetwork, mOemManaged);
+        }
     }
 }
