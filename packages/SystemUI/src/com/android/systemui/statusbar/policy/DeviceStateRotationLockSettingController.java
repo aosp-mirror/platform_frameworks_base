@@ -127,10 +127,12 @@ public final class DeviceStateRotationLockSettingController
         int rotationLockSetting =
                 mDeviceStateRotationLockSettingsManager.getRotationLockSetting(state);
         if (rotationLockSetting == DEVICE_STATE_ROTATION_LOCK_IGNORED) {
+            // This should not happen. Device states that have an ignored setting, should also
+            // specify a fallback device state which is not ignored.
             // We won't handle this device state. The same rotation lock setting as before should
             // apply and any changes to the rotation lock setting will be written for the previous
             // valid device state.
-            Log.v(TAG, "Ignoring new device state: " + state);
+            Log.w(TAG, "Missing fallback. Ignoring new device state: " + state);
             return;
         }
 
