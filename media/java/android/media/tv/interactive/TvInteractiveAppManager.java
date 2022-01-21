@@ -57,10 +57,10 @@ import java.util.List;
  * Central system API to the overall TV interactive application framework (TIAF) architecture, which
  * arbitrates interaction between applications and interactive apps.
  */
-@SystemService(Context.TV_IAPP_SERVICE)
-public final class TvIAppManager {
+@SystemService(Context.TV_INTERACTIVE_APP_SERVICE)
+public final class TvInteractiveAppManager {
     // TODO: cleanup and unhide public APIs
-    private static final String TAG = "TvIAppManager";
+    private static final String TAG = "TvInteractiveAppManager";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -190,7 +190,7 @@ public final class TvIAppManager {
      */
     public static final String KEY_BACK_URI = "back_uri";
 
-    private final ITvIAppManager mService;
+    private final ITvInteractiveAppManager mService;
     private final int mUserId;
 
     // A mapping from the sequence number of a session to its SessionCallbackRecord.
@@ -209,7 +209,7 @@ public final class TvIAppManager {
     private final ITvInteractiveAppClient mClient;
 
     /** @hide */
-    public TvIAppManager(ITvIAppManager service, int userId) {
+    public TvInteractiveAppManager(ITvInteractiveAppManager service, int userId) {
         mService = service;
         mUserId = userId;
         mClient = new ITvInteractiveAppClient.Stub() {
@@ -285,7 +285,7 @@ public final class TvIAppManager {
 
             @Override
             public void onCommandRequest(
-                    @TvIAppService.InteractiveAppServiceCommandType String cmdType,
+                    @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
                     Bundle parameters,
                     int seq) {
                 synchronized (mSessionCallbackRecordMap) {
@@ -484,7 +484,7 @@ public final class TvIAppManager {
          * This is called when a TV Interactive App service is added to the system.
          *
          * <p>Normally it happens when the user installs a new TV Interactive App service package
-         * that implements {@link TvIAppService} interface.
+         * that implements {@link TvInteractiveAppService} interface.
          *
          * @param iAppServiceId The ID of the TV Interactive App service.
          */
@@ -635,7 +635,6 @@ public final class TvIAppManager {
      *
      * @return List of {@link TvInteractiveAppInfo} for each TV Interactive App service that
      *         describes its meta information.
-     * @hide
      */
     @NonNull
     public List<TvInteractiveAppInfo> getTvInteractiveAppServiceList() {
@@ -742,7 +741,7 @@ public final class TvIAppManager {
 
         private static final long INPUT_SESSION_NOT_RESPONDING_TIMEOUT = 2500;
 
-        private final ITvIAppManager mService;
+        private final ITvInteractiveAppManager mService;
         private final int mUserId;
         private final int mSeq;
         private final SparseArray<SessionCallbackRecord> mSessionCallbackRecordMap;
@@ -759,7 +758,7 @@ public final class TvIAppManager {
         private TvInputEventSender mSender;
         private InputChannel mInputChannel;
 
-        private Session(IBinder token, InputChannel channel, ITvIAppManager service,
+        private Session(IBinder token, InputChannel channel, ITvInteractiveAppManager service,
                 int userId, int seq, SparseArray<SessionCallbackRecord> sessionCallbackRecordMap) {
             mToken = token;
             mInputChannel = channel;
@@ -1142,7 +1141,7 @@ public final class TvIAppManager {
         }
 
         /**
-         * Notifies IAPP session when video is available.
+         * Notifies Interactive APP session when video is available.
          */
         public void notifyVideoAvailable() {
             if (mToken == null) {
@@ -1157,7 +1156,7 @@ public final class TvIAppManager {
         }
 
         /**
-         * Notifies IAPP session when video is unavailable.
+         * Notifies Interactive APP session when video is unavailable.
          */
         public void notifyVideoUnavailable(int reason) {
             if (mToken == null) {
@@ -1172,7 +1171,7 @@ public final class TvIAppManager {
         }
 
         /**
-         * Notifies IAPP session when content is allowed.
+         * Notifies Interactive APP session when content is allowed.
          */
         public void notifyContentAllowed() {
             if (mToken == null) {
@@ -1187,7 +1186,7 @@ public final class TvIAppManager {
         }
 
         /**
-         * Notifies IAPP session when content is blocked.
+         * Notifies Interactive APP session when content is blocked.
          */
         public void notifyContentBlocked(TvContentRating rating) {
             if (mToken == null) {
@@ -1478,7 +1477,7 @@ public final class TvIAppManager {
         }
 
         void postCommandRequest(
-                final @TvIAppService.InteractiveAppServiceCommandType String cmdType,
+                final @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
                 final Bundle parameters) {
             mHandler.post(new Runnable() {
                 @Override
@@ -1587,28 +1586,28 @@ public final class TvIAppManager {
      */
     public abstract static class SessionCallback {
         /**
-         * This is called after {@link TvIAppManager#createSession} has been processed.
+         * This is called after {@link TvInteractiveAppManager#createSession} has been processed.
          *
-         * @param session A {@link TvIAppManager.Session} instance created. This can be
+         * @param session A {@link TvInteractiveAppManager.Session} instance created. This can be
          *                {@code null} if the creation request failed.
          */
         public void onSessionCreated(@Nullable Session session) {
         }
 
         /**
-         * This is called when {@link TvIAppManager.Session} is released.
+         * This is called when {@link TvInteractiveAppManager.Session} is released.
          * This typically happens when the process hosting the session has crashed or been killed.
          *
-         * @param session the {@link TvIAppManager.Session} instance released.
+         * @param session the {@link TvInteractiveAppManager.Session} instance released.
          */
         public void onSessionReleased(@NonNull Session session) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#layoutSurface} is called to
+         * This is called when {@link TvInteractiveAppService.Session#layoutSurface} is called to
          * change the layout of surface.
          *
-         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          * @param left Left position.
          * @param top Top position.
          * @param right Right position.
@@ -1618,85 +1617,87 @@ public final class TvIAppManager {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#requestCommand} is called.
+         * This is called when {@link TvInteractiveAppService.Session#requestCommand} is called.
          *
-         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          * @param cmdType type of the command.
          * @param parameters parameters of the command.
          */
         public void onCommandRequest(
                 Session session,
-                @TvIAppService.InteractiveAppServiceCommandType String cmdType,
+                @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
                 Bundle parameters) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#SetVideoBounds} is called.
+         * This is called when {@link TvInteractiveAppService.Session#SetVideoBounds} is called.
          *
-         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          */
         public void onSetVideoBounds(Session session, Rect rect) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#RequestCurrentChannelUri} is
+         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentChannelUri} is
          * called.
          *
-         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          */
         public void onRequestCurrentChannelUri(Session session) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#RequestCurrentChannelLcn} is
+         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentChannelLcn} is
          * called.
          *
-         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          */
         public void onRequestCurrentChannelLcn(Session session) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#RequestStreamVolume} is
+         * This is called when {@link TvInteractiveAppService.Session#RequestStreamVolume} is
          * called.
          *
-         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          */
         public void onRequestStreamVolume(Session session) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#RequestTrackInfoList} is
+         * This is called when {@link TvInteractiveAppService.Session#RequestTrackInfoList} is
          * called.
          *
-         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          */
         public void onRequestTrackInfoList(Session session) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#RequestCurrentTvInputId} is called.
+         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentTvInputId} is
+         * called.
          *
-         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
          * @hide
          */
         public void onRequestCurrentTvInputId(Session session) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#notifySessionStateChanged} is called.
+         * This is called when {@link TvInteractiveAppService.Session#notifySessionStateChanged} is
+         * called.
          *
-         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          * @param state the current state.
          */
         public void onSessionStateChanged(Session session, int state) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#notifyBiInteractiveAppCreated}
+         * This is called when {@link TvInteractiveAppService.Session#notifyBiInteractiveAppCreated}
          * is called.
          *
-         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          * @param biIAppUri URI associated this BI interactive app. This is the same URI in
          *                  {@link Session#createBiInteractiveApp(Uri, Bundle)}
          * @param biIAppId BI interactive app ID, which can be used to destroy the BI interactive
@@ -1709,11 +1710,11 @@ public final class TvIAppManager {
          * This is called when {@link TvIAppService.Session#notifyTeletextAppStateChanged} is
          * called.
          *
-         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          * @param state the current state.
          */
         public void onTeletextAppStateChanged(
-                Session session, @TvIAppManager.TeletextAppState int state) {
+                Session session, @TvInteractiveAppManager.TeletextAppState int state) {
         }
     }
 }

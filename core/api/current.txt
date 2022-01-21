@@ -11066,8 +11066,8 @@ package android.content {
     field public static final String TELEPHONY_SUBSCRIPTION_SERVICE = "telephony_subscription_service";
     field public static final String TEXT_CLASSIFICATION_SERVICE = "textclassification";
     field public static final String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
-    field public static final String TV_IAPP_SERVICE = "tv_iapp";
     field public static final String TV_INPUT_SERVICE = "tv_input";
+    field public static final String TV_INTERACTIVE_APP_SERVICE = "tv_interactive_app";
     field public static final String UI_MODE_SERVICE = "uimode";
     field public static final String USAGE_STATS_SERVICE = "usagestats";
     field public static final String USB_SERVICE = "usb";
@@ -26868,14 +26868,41 @@ package android.media.tv {
 
 package android.media.tv.interactive {
 
-  public final class TvIAppManager {
+  public final class TvInteractiveAppInfo implements android.os.Parcelable {
+    ctor public TvInteractiveAppInfo(@NonNull android.content.Context, @NonNull android.content.ComponentName);
+    method public int describeContents();
+    method @NonNull public String getId();
+    method @Nullable public android.content.pm.ServiceInfo getServiceInfo();
+    method @NonNull public int getSupportedTypes();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.interactive.TvInteractiveAppInfo> CREATOR;
+    field public static final int INTERACTIVE_APP_TYPE_ATSC = 2; // 0x2
+    field public static final int INTERACTIVE_APP_TYPE_GINGA = 4; // 0x4
+    field public static final int INTERACTIVE_APP_TYPE_HBBTV = 1; // 0x1
   }
 
-  public abstract class TvIAppService extends android.app.Service {
-    ctor public TvIAppService();
+  public final class TvInteractiveAppManager {
+    method @NonNull public java.util.List<android.media.tv.interactive.TvInteractiveAppInfo> getTvInteractiveAppServiceList();
+  }
+
+  public abstract class TvInteractiveAppService extends android.app.Service {
+    ctor public TvInteractiveAppService();
     method public final android.os.IBinder onBind(android.content.Intent);
-    field public static final String SERVICE_INTERFACE = "android.media.tv.interactive.TvIAppService";
+    field public static final String SERVICE_INTERFACE = "android.media.tv.interactive.TvInteractiveAppService";
     field public static final String SERVICE_META_DATA = "android.media.tv.interactive.app";
+  }
+
+  public class TvInteractiveAppView extends android.view.ViewGroup {
+    ctor public TvInteractiveAppView(@NonNull android.content.Context);
+    ctor public TvInteractiveAppView(@NonNull android.content.Context, @Nullable android.util.AttributeSet);
+    ctor public TvInteractiveAppView(@NonNull android.content.Context, @Nullable android.util.AttributeSet, int);
+    method public void clearCallback();
+    method public void setCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppView.TvInteractiveAppCallback);
+    method public void startInteractiveApp();
+  }
+
+  public abstract static class TvInteractiveAppView.TvInteractiveAppCallback {
+    ctor public TvInteractiveAppView.TvInteractiveAppCallback();
   }
 
 }

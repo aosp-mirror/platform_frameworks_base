@@ -31,7 +31,7 @@ import android.view.Surface;
  * Interface to the TV interactive app service.
  * @hide
  */
-interface ITvIAppManager {
+interface ITvInteractiveAppManager {
     List<TvInteractiveAppInfo> getTvInteractiveAppServiceList(int userId);
     void prepare(String tiasId, int type, int userId);
     void registerAppLinkInfo(String tiasId, in Bundle info, int userId);

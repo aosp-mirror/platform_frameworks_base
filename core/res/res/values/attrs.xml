@@ -9376,11 +9376,12 @@
         <attr name="canPauseRecording" format="boolean" />
     </declare-styleable>
 
-    <!-- Use <code>tv-iapp</code> as the root tag of the XML resource that describes a
-         {@link android.media.tv.interactive.TvIAppService}, which is referenced from its
-         {@link android.media.tv.interactive.TvIAppService#SERVICE_META_DATA} meta-data entry.
-         Described here are the attributes that can be included in that tag. -->
-    <declare-styleable name="TvIAppService">
+    <!-- Use <code>tv-interactive-app</code> as the root tag of the XML resource that describes a
+         {@link android.media.tv.interactive.TvInteractiveAppService}, which is referenced
+         from its
+         {@link android.media.tv.interactive.TvInteractiveAppService#SERVICE_META_DATA}
+         meta-data entry. Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="TvInteractiveAppService">
         <!-- The interactive app types that the TV interactive app service supports.
              Reference to a string array resource that describes the supported types,
              e.g. HbbTv, Ginga. -->

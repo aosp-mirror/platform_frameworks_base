@@ -34,15 +34,15 @@ import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvTrackInfo;
-import android.media.tv.interactive.ITvIAppManager;
 import android.media.tv.interactive.ITvInteractiveAppClient;
+import android.media.tv.interactive.ITvInteractiveAppManager;
 import android.media.tv.interactive.ITvInteractiveAppManagerCallback;
 import android.media.tv.interactive.ITvInteractiveAppService;
 import android.media.tv.interactive.ITvInteractiveAppServiceCallback;
 import android.media.tv.interactive.ITvInteractiveAppSession;
 import android.media.tv.interactive.ITvInteractiveAppSessionCallback;
-import android.media.tv.interactive.TvIAppService;
 import android.media.tv.interactive.TvInteractiveAppInfo;
+import android.media.tv.interactive.TvInteractiveAppService;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -79,9 +79,9 @@ import java.util.Set;
 /**
  * This class provides a system service that manages interactive TV applications.
  */
-public class TvIAppManagerService extends SystemService {
+public class TvInteractiveAppManagerService extends SystemService {
     private static final boolean DEBUG = false;
-    private static final String TAG = "TvIAppManagerService";
+    private static final String TAG = "TvInteractiveAppManagerService";
     // A global lock.
     private final Object mLock = new Object();
     private final Context mContext;
@@ -106,7 +106,7 @@ public class TvIAppManagerService extends SystemService {
      *
      * @param context The system server context.
      */
-    public TvIAppManagerService(Context context) {
+    public TvInteractiveAppManagerService(Context context) {
         super(context);
         mContext = context;
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
@@ -122,7 +122,7 @@ public class TvIAppManagerService extends SystemService {
         }
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> services = pm.queryIntentServicesAsUser(
-                new Intent(TvIAppService.SERVICE_INTERFACE),
+                new Intent(TvInteractiveAppService.SERVICE_INTERFACE),
                 PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
                 userId);
         List<TvInteractiveAppInfo> iAppList = new ArrayList<>();
@@ -287,7 +287,7 @@ public class TvIAppManagerService extends SystemService {
         if (DEBUG) {
             Slogf.d(TAG, "onStart");
         }
-        publishBinderService(Context.TV_IAPP_SERVICE, new BinderService());
+        publishBinderService(Context.TV_INTERACTIVE_APP_SERVICE, new BinderService());
     }
 
     @Override
@@ -628,7 +628,7 @@ public class TvIAppManagerService extends SystemService {
         return session;
     }
 
-    private final class BinderService extends ITvIAppManager.Stub {
+    private final class BinderService extends ITvInteractiveAppManager.Stub {
 
         @Override
         public List<TvInteractiveAppInfo> getTvInteractiveAppServiceList(int userId) {
@@ -1361,7 +1361,7 @@ public class TvIAppManagerService extends SystemService {
                 }
             } finally {
                 if (surface != null) {
-                    // surface is not used in TvIAppManagerService.
+                    // surface is not used in TvInteractiveAppManagerService.
                     surface.release();
                 }
                 Binder.restoreCallingIdentity(identity);
@@ -1678,7 +1678,7 @@ public class TvIAppManagerService extends SystemService {
             }
 
             Intent i =
-                    new Intent(TvIAppService.SERVICE_INTERFACE).setComponent(component);
+                    new Intent(TvInteractiveAppService.SERVICE_INTERFACE).setComponent(component);
             serviceState.mBound = mContext.bindServiceAsUser(
                     i, serviceState.mConnection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
@@ -2072,7 +2072,7 @@ public class TvIAppManagerService extends SystemService {
 
         @Override
         public void onCommandRequest(
-                @TvIAppService.InteractiveAppServiceCommandType String cmdType,
+                @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
                 Bundle parameters) {
             synchronized (mLock) {
                 if (DEBUG) {

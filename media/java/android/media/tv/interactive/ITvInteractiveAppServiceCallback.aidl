@@ -17,8 +17,8 @@
 package android.media.tv.interactive;
 
 /**
- * Helper interface for ITvInteractiveAppService to allow the TvIAppService to notify the
- * TvIAppManagerService.
+ * Helper interface for ITvInteractiveAppService to allow the TvInteractiveAppService to notify the
+ * TvInteractiveAppManagerService.
  * @hide
  */
 oneway interface ITvInteractiveAppServiceCallback {
