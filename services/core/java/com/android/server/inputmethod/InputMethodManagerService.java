@@ -221,7 +221,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
     private static final int MSG_SHOW_IM_CONFIG = 3;
 
-    private static final int MSG_UNBIND_INPUT = 1000;
     private static final int MSG_BIND_INPUT = 1010;
     private static final int MSG_SHOW_SOFT_INPUT = 1020;
     private static final int MSG_HIDE_SOFT_INPUT = 1030;
@@ -2201,8 +2200,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         mBoundToMethod = false;
                         IInputMethod curMethod = getCurMethodLocked();
                         if (curMethod != null) {
-                            executeOrSendMessage(curMethod, mCaller.obtainMessageO(
-                                    MSG_UNBIND_INPUT, curMethod));
+                            try {
+                                curMethod.unbindInput();
+                            } catch (RemoteException e) {
+                                // There is nothing interesting about the method dying.
+                            }
                         }
                     }
                     mCurClient = null;
@@ -2248,8 +2250,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mBoundToMethod = false;
                 IInputMethod curMethod = getCurMethodLocked();
                 if (curMethod != null) {
-                    executeOrSendMessage(curMethod, mCaller.obtainMessageO(
-                            MSG_UNBIND_INPUT, curMethod));
+                    try {
+                        curMethod.unbindInput();
+                    } catch (RemoteException e) {
+                        // There is nothing interesting about the method dying.
+                    }
                 }
             }
 
@@ -4222,13 +4227,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // ---------------------------------------------------------
 
-            case MSG_UNBIND_INPUT:
-                try {
-                    ((IInputMethod)msg.obj).unbindInput();
-                } catch (RemoteException e) {
-                    // There is nothing interesting about the method dying.
-                }
-                return true;
             case MSG_BIND_INPUT:
                 args = (SomeArgs)msg.obj;
                 try {
