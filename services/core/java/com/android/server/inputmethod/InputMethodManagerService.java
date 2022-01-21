@@ -221,7 +221,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
     private static final int MSG_SHOW_IM_CONFIG = 3;
 
-    private static final int MSG_BIND_INPUT = 1010;
     private static final int MSG_SHOW_SOFT_INPUT = 1020;
     private static final int MSG_HIDE_SOFT_INPUT = 1030;
     private static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
@@ -2304,8 +2303,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     InputBindResult attachNewInputLocked(@StartInputReason int startInputReason, boolean initial) {
         if (!mBoundToMethod) {
             IInputMethod curMethod = getCurMethodLocked();
-            executeOrSendMessage(curMethod, mCaller.obtainMessageOO(
-                    MSG_BIND_INPUT, curMethod, mCurClient.binding));
+            try {
+                curMethod.bindInput(mCurClient.binding);
+            } catch (RemoteException e) {
+            }
             mBoundToMethod = true;
         }
 
@@ -4227,14 +4228,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // ---------------------------------------------------------
 
-            case MSG_BIND_INPUT:
-                args = (SomeArgs)msg.obj;
-                try {
-                    ((IInputMethod)args.arg1).bindInput((InputBinding)args.arg2);
-                } catch (RemoteException e) {
-                }
-                args.recycle();
-                return true;
             case MSG_SHOW_SOFT_INPUT:
                 args = (SomeArgs) msg.obj;
                 try {
