@@ -86,6 +86,14 @@ package android.app.usage {
 
 }
 
+package android.bluetooth {
+
+  public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.TETHER_PRIVILEGED}) public android.net.TetheringManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.TetheredInterfaceCallback);
+  }
+
+}
+
 package android.content {
 
   public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
