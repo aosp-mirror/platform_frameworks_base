@@ -297,8 +297,12 @@ public class QRCodeScannerController implements
         // Our intent should always be explicit and should have a component set
         if (intent.getComponent() == null) return false;
 
-        int flags = PackageManager.MATCH_DEFAULT_ONLY | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+        int flags = PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                | PackageManager.MATCH_UNINSTALLED_PACKAGES
+                | PackageManager.MATCH_DISABLED_COMPONENTS
+                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS;
         return !mContext.getPackageManager().queryIntentActivities(intent,
                 flags).isEmpty();
     }
