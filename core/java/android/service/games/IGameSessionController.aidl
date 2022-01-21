@@ -16,6 +16,7 @@
 
 package android.service.games;
 
+import android.content.Intent;
 import com.android.internal.infra.AndroidFuture;
 
 /**
@@ -23,4 +24,6 @@ import com.android.internal.infra.AndroidFuture;
  */
 oneway interface IGameSessionController {
     void takeScreenshot(int taskId, in AndroidFuture gameScreenshotResultFuture);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)")
+    void restartGame(in int taskId);
 }

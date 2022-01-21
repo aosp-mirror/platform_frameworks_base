@@ -16,13 +16,18 @@
 
 package com.android.server.app;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
+import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -110,12 +115,23 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                                 gameScreenshotResultFuture);
                     });
                 }
+
+                @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
+                public void restartGame(int taskId) {
+                    mContext.enforceCallingPermission(Manifest.permission.FORCE_STOP_PACKAGES,
+                            "restartGame()");
+                    mBackgroundExecutor.execute(() -> {
+                        GameServiceProviderInstanceImpl.this.restartGame(taskId);
+                    });
+                }
             };
 
     private final Object mLock = new Object();
     private final UserHandle mUserHandle;
     private final Executor mBackgroundExecutor;
+    private final Context mContext;
     private final GameClassifier mGameClassifier;
+    private final IActivityManager mActivityManager;
     private final IActivityTaskManager mActivityTaskManager;
     private final WindowManagerService mWindowManagerService;
     private final WindowManagerInternal mWindowManagerInternal;
@@ -131,7 +147,9 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     GameServiceProviderInstanceImpl(
             @NonNull UserHandle userHandle,
             @NonNull Executor backgroundExecutor,
+            @NonNull Context context,
             @NonNull GameClassifier gameClassifier,
+            @NonNull IActivityManager activityManager,
             @NonNull IActivityTaskManager activityTaskManager,
             @NonNull WindowManagerService windowManagerService,
             @NonNull WindowManagerInternal windowManagerInternal,
@@ -139,7 +157,9 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
             @NonNull ServiceConnector<IGameSessionService> gameSessionServiceConnector) {
         mUserHandle = userHandle;
         mBackgroundExecutor = backgroundExecutor;
+        mContext = context;
         mGameClassifier = gameClassifier;
+        mActivityManager = activityManager;
         mActivityTaskManager = activityTaskManager;
         mWindowManagerService = windowManagerService;
         mWindowManagerInternal = windowManagerInternal;
@@ -310,6 +330,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                     + ") is not awaiting game session request. Ignoring.");
             return;
         }
+        mGameSessions.put(taskId, existingGameSessionRecord.withGameSessionRequested());
 
         GameSessionViewHostConfiguration gameSessionViewHostConfiguration =
                 createViewHostConfigurationForTask(taskId);
@@ -531,5 +552,28 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 callback.complete(GameScreenshotResult.createSuccessResult(bitmap));
             }
         });
+    }
+
+    private void restartGame(int taskId) {
+        String packageName;
+
+        synchronized (mLock) {
+            boolean isTaskAssociatedWithGameSession = mGameSessions.containsKey(taskId);
+            if (!isTaskAssociatedWithGameSession) {
+                return;
+            }
+
+            packageName = mGameSessions.get(taskId).getComponentName().getPackageName();
+        }
+
+        try {
+            mActivityManager.forceStopPackage(packageName, UserHandle.USER_CURRENT);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        Intent launchIntent =
+                mContext.getPackageManager().getLaunchIntentForPackage(packageName);
+        mContext.startActivity(launchIntent);
     }
 }
