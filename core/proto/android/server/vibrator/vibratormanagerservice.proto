@@ -97,7 +97,7 @@ message VibrationProto {
     optional int32 status = 6;
 }
 
-// Next id: 24
+// Next id: 25
 message VibratorManagerServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
     repeated int32 vibrator_ids = 1;
@@ -106,6 +106,7 @@ message VibratorManagerServiceDumpProto {
     optional VibrationProto current_external_vibration = 4;
     optional bool vibrator_under_external_control = 5;
     optional bool low_power_mode = 6;
+    optional bool vibrate_on = 24;
     optional int32 alarm_intensity = 18;
     optional int32 alarm_default_intensity = 19;
     optional int32 haptic_feedback_intensity = 7;
