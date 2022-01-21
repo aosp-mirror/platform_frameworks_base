@@ -50,4 +50,9 @@ public interface NotificationRowBinder {
             NotificationUiAdjustment oldAdjustment,
             NotificationUiAdjustment newAdjustment,
             NotificationRowContentBinder.InflationCallback callback);
+
+    /**
+     * Called when a notification is no longer likely to be displayed and can have its views freed.
+     */
+    void releaseViews(NotificationEntry entry);
 }

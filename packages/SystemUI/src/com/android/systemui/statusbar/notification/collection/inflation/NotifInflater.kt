@@ -47,6 +47,11 @@ interface NotifInflater {
     fun abortInflation(entry: NotificationEntry)
 
     /**
+     * Called to let the system remove the content views from the notification row.
+     */
+    fun releaseViews(entry: NotificationEntry)
+
+    /**
      * Callback once all the views are inflated and bound for a given NotificationEntry.
      */
     interface InflationCallback {

@@ -79,6 +79,11 @@ public class NotifInflaterImpl implements NotifInflater {
         entry.abortTask();
     }
 
+    @Override
+    public void releaseViews(@NonNull NotificationEntry entry) {
+        requireBinder().releaseViews(entry);
+    }
+
     private NotificationContentInflater.InflationCallback wrapInflationCallback(
             InflationCallback callback) {
         return new NotificationContentInflater.InflationCallback() {

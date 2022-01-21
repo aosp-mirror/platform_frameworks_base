@@ -375,6 +375,7 @@ public class PreparationCoordinator implements Coordinator {
 
     private void freeNotifViews(NotificationEntry entry) {
         mViewBarn.removeViewForEntry(entry);
+        mNotifInflater.releaseViews(entry);
         // TODO: clear the entry's row here, or even better, stop setting the row on the entry!
         mInflationStates.put(entry, STATE_UNINFLATED);
     }
