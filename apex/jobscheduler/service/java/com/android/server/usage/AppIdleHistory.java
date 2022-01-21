@@ -892,7 +892,8 @@ public class AppIdleHistory {
                 }
                 if (history.bucketExpiryTimesMs != null) {
                     xml.startTag(null, TAG_BUCKET_EXPIRY_TIMES);
-                    for (int j = 0; j < history.bucketExpiryTimesMs.size(); ++j) {
+                    final int size = history.bucketExpiryTimesMs.size();
+                    for (int j = 0; j < size; ++j) {
                         final long expiryTimeMs = history.bucketExpiryTimesMs.valueAt(j);
                         // Skip writing to disk if the expiry time already elapsed.
                         if (expiryTimeMs < elapsedTimeMs) {
@@ -994,7 +995,8 @@ public class AppIdleHistory {
             return;
         }
         idpw.print("(");
-        for (int i = 0; i < appUsageHistory.bucketExpiryTimesMs.size(); ++i) {
+        final int size = appUsageHistory.bucketExpiryTimesMs.size();
+        for (int i = 0; i < size; ++i) {
             final int bucket = appUsageHistory.bucketExpiryTimesMs.keyAt(i);
             final long expiryTimeMs = appUsageHistory.bucketExpiryTimesMs.valueAt(i);
             if (i != 0) {
