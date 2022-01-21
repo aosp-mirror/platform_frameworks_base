@@ -402,7 +402,10 @@ public class DreamBackend {
         if (dreamInfo == null || dreamInfo.settingsComponentName == null) {
             return;
         }
-        uiContext.startActivity(new Intent().setComponent(dreamInfo.settingsComponentName));
+        final Intent intent = new Intent()
+                .setComponent(dreamInfo.settingsComponentName)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        uiContext.startActivity(intent);
     }
 
     public void preview(DreamInfo dreamInfo) {
