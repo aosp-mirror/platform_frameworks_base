@@ -787,6 +787,12 @@ public class CompanionDeviceManagerService extends SystemService
         Slog.i(LOG_TAG, "New CDM association created=" + association);
         mAssociationStore.addAssociation(association);
 
+        // If the "Device Profile" is specified, make the companion application a holder of the
+        // corresponding role.
+        if (deviceProfile != null) {
+            addRoleHolderForAssociation(getContext(), association);
+        }
+
         updateSpecialAccessPermissionForAssociatedPackage(association);
 
         return association;
@@ -930,14 +936,8 @@ public class CompanionDeviceManagerService extends SystemService
 
         exemptFromAutoRevoke(packageInfo.packageName, packageInfo.applicationInfo.uid);
 
-        if (!association.isSelfManaged()) {
-            if (mCurrentlyConnectedDevices.contains(association.getDeviceMacAddressAsString())) {
-                addRoleHolderForAssociation(getContext(), association);
-            }
-
-            if (association.isNotifyOnDeviceNearby()) {
-                restartBleScan();
-            }
+        if (association.isNotifyOnDeviceNearby()) {
+            restartBleScan();
         }
     }
 
@@ -983,19 +983,7 @@ public class CompanionDeviceManagerService extends SystemService
 
     void onDeviceConnected(String address) {
         Slog.d(LOG_TAG, "onDeviceConnected(address = " + address + ")");
-
         mCurrentlyConnectedDevices.add(address);
-
-        for (AssociationInfo association : mAssociationStore.getAssociationsByAddress(address)) {
-            if (association.getDeviceProfile() != null) {
-                Slog.i(LOG_TAG, "Granting role " + association.getDeviceProfile()
-                        + " to " + association.getPackageName()
-                        + " due to device connected: " + association.getDeviceMacAddress());
-
-                addRoleHolderForAssociation(getContext(), association);
-            }
-        }
-
         onDeviceNearby(address);
     }
 
