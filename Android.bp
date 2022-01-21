@@ -50,12 +50,8 @@ license {
         "SPDX-license-identifier-Apache-2.0",
         "SPDX-license-identifier-BSD",
         "SPDX-license-identifier-CC-BY",
-        "SPDX-license-identifier-CPL-1.0",
-        "SPDX-license-identifier-GPL",
-        "SPDX-license-identifier-GPL-2.0",
         "SPDX-license-identifier-MIT",
         "SPDX-license-identifier-Unicode-DFS",
-        "SPDX-license-identifier-W3C",
         "legacy_unencumbered",
     ],
     license_text: [
@@ -69,6 +65,7 @@ filegroup {
         // Java/AIDL sources under frameworks/base
         ":framework-annotations",
         ":framework-blobstore-sources",
+        ":framework-bluetooth-sources", // TODO(b/214988855) : Remove once framework-bluetooth jar is ready
         ":framework-connectivity-tiramisu-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
@@ -148,6 +145,7 @@ java_library {
         "framework-minus-apex",
         "framework-appsearch.impl",
         "framework-connectivity.impl",
+        "framework-connectivity-tiramisu.impl",
         "framework-graphics.impl",
         "framework-mediaprovider.impl",
         "framework-permission.impl",

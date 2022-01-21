@@ -16,7 +16,10 @@
 
 package android.os;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -90,6 +93,7 @@ public final class Trace {
     /** @hide */
     public static final long TRACE_TAG_DATABASE = 1L << 20;
     /** @hide */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final long TRACE_TAG_NETWORK = 1L << 21;
     /** @hide */
     public static final long TRACE_TAG_ADB = 1L << 22;
@@ -148,6 +152,7 @@ public final class Trace {
      * @hide
      */
     @UnsupportedAppUsage
+    @SystemApi(client = MODULE_LIBRARIES)
     public static boolean isTagEnabled(long traceTag) {
         long tags = nativeGetEnabledTags();
         return (tags & traceTag) != 0;
@@ -163,7 +168,8 @@ public final class Trace {
      * @hide
      */
     @UnsupportedAppUsage
-    public static void traceCounter(long traceTag, String counterName, int counterValue) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void traceCounter(long traceTag, @NonNull String counterName, int counterValue) {
         if (isTagEnabled(traceTag)) {
             nativeTraceCounter(traceTag, counterName, counterValue);
         }
@@ -202,7 +208,8 @@ public final class Trace {
      * @hide
      */
     @UnsupportedAppUsage
-    public static void traceBegin(long traceTag, String methodName) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void traceBegin(long traceTag, @NonNull String methodName) {
         if (isTagEnabled(traceTag)) {
             nativeTraceBegin(traceTag, methodName);
         }
@@ -217,6 +224,7 @@ public final class Trace {
      * @hide
      */
     @UnsupportedAppUsage
+    @SystemApi(client = MODULE_LIBRARIES)
     public static void traceEnd(long traceTag) {
         if (isTagEnabled(traceTag)) {
             nativeTraceEnd(traceTag);
@@ -237,7 +245,8 @@ public final class Trace {
      * @hide
      */
     @UnsupportedAppUsage
-    public static void asyncTraceBegin(long traceTag, String methodName, int cookie) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void asyncTraceBegin(long traceTag, @NonNull String methodName, int cookie) {
         if (isTagEnabled(traceTag)) {
             nativeAsyncTraceBegin(traceTag, methodName, cookie);
         }
@@ -255,7 +264,8 @@ public final class Trace {
      * @hide
      */
     @UnsupportedAppUsage
-    public static void asyncTraceEnd(long traceTag, String methodName, int cookie) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void asyncTraceEnd(long traceTag, @NonNull String methodName, int cookie) {
         if (isTagEnabled(traceTag)) {
             nativeAsyncTraceEnd(traceTag, methodName, cookie);
         }

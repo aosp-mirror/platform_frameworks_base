@@ -23,8 +23,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Objects;
 
 /**
@@ -47,7 +45,9 @@ public final class EthernetNetworkSpecifier extends NetworkSpecifier implements 
      * @param interfaceName Name of the ethernet interface the specifier refers to.
      */
     public EthernetNetworkSpecifier(@NonNull String interfaceName) {
-        Preconditions.checkStringNotEmpty(interfaceName);
+        if (TextUtils.isEmpty(interfaceName)) {
+            throw new IllegalArgumentException();
+        }
         mInterfaceName = interfaceName;
     }
 

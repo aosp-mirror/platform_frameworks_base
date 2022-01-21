@@ -17,7 +17,10 @@
 package android.app.usage;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -54,7 +57,6 @@ import com.android.net.module.util.NetworkIdentityUtils;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Provides access to network usage history and statistics. Usage data is collected in
@@ -124,6 +126,19 @@ public class NetworkStatsManager {
     private final Context mContext;
     private final INetworkStatsService mService;
 
+    /**
+     * Type constants for reading different types of Data Usage.
+     * @hide
+     */
+    // @SystemApi(client = MODULE_LIBRARIES)
+    public static final String PREFIX_DEV = "dev";
+    /** @hide */
+    public static final String PREFIX_XT = "xt";
+    /** @hide */
+    public static final String PREFIX_UID = "uid";
+    /** @hide */
+    public static final String PREFIX_UID_TAG = "uid_tag";
+
     /** @hide */
     public static final int FLAG_POLL_ON_OPEN = 1 << 0;
     /** @hide */
@@ -150,7 +165,13 @@ public class NetworkStatsManager {
      * @param pollOnOpen true if poll is needed.
      * @hide
      */
-    // @SystemApi(client = MODULE_LIBRARIES)
+    // The system will ignore any non-default values for non-privileged
+    // processes, so processes that don't hold the appropriate permissions
+    // can make no use of this API.
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
     public void setPollOnOpen(boolean pollOnOpen) {
         if (pollOnOpen) {
             mFlags |= FLAG_POLL_ON_OPEN;
@@ -204,9 +225,10 @@ public class NetworkStatsManager {
      */
     @NonNull
     @WorkerThread
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     public Bucket querySummaryForDevice(@NonNull NetworkTemplate template,
             long startTime, long endTime) {
+        Objects.requireNonNull(template);
         try {
             NetworkStats stats =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
@@ -378,10 +400,11 @@ public class NetworkStatsManager {
      * @hide
      */
     @NonNull
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     @WorkerThread
     public NetworkStats querySummary(@NonNull NetworkTemplate template, long startTime,
             long endTime) throws SecurityException {
+        Objects.requireNonNull(template);
         try {
             NetworkStats result =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
@@ -411,10 +434,11 @@ public class NetworkStatsManager {
      * @hide
      */
     @NonNull
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     @WorkerThread
     public NetworkStats queryTaggedSummary(@NonNull NetworkTemplate template, long startTime,
             long endTime) throws SecurityException {
+        Objects.requireNonNull(template);
         try {
             NetworkStats result =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
@@ -423,6 +447,43 @@ public class NetworkStatsManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+        return null; // To make the compiler happy.
+    }
+
+    /**
+     * Query usage statistics details for networks matching a given {@link NetworkTemplate}.
+     *
+     * Result is not aggregated over time. This means buckets' start and
+     * end timestamps will be between 'startTime' and 'endTime' parameters.
+     * <p>Only includes buckets whose entire time period is included between
+     * startTime and endTime. Doesn't interpolate or return partial buckets.
+     * Since bucket length is in the order of hours, this
+     * method cannot be used to measure data usage on a fine grained time scale.
+     * This may take a long time, and apps should avoid calling this on their main thread.
+     *
+     * @param template Template used to match networks. See {@link NetworkTemplate}.
+     * @param startTime Start of period, in milliseconds since the Unix epoch, see
+     *                  {@link java.lang.System#currentTimeMillis}.
+     * @param endTime End of period, in milliseconds since the Unix epoch, see
+     *                {@link java.lang.System#currentTimeMillis}.
+     * @return Statistics which is described above.
+     * @hide
+     */
+    @NonNull
+    @SystemApi(client = MODULE_LIBRARIES)
+    @WorkerThread
+    public NetworkStats queryDetailsForDevice(@NonNull NetworkTemplate template,
+            long startTime, long endTime) {
+        Objects.requireNonNull(template);
+        try {
+            final NetworkStats result =
+                    new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
+            result.startHistoryDeviceEnumeration();
+            return result;
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
         return null; // To make the compiler happy.
     }
 
@@ -492,7 +553,8 @@ public class NetworkStatsManager {
      * @param endTime End of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param uid UID of app
-     * @param tag TAG of interest. Use {@link NetworkStats.Bucket#TAG_NONE} for no tags.
+     * @param tag TAG of interest. Use {@link NetworkStats.Bucket#TAG_NONE} for aggregated data
+     *            across all the tags.
      * @param state state of interest. Use {@link NetworkStats.Bucket#STATE_ALL} to aggregate
      *            traffic from all states.
      * @return Statistics object or null if an error happened during statistics collection.
@@ -507,21 +569,52 @@ public class NetworkStatsManager {
         return queryDetailsForUidTagState(template, startTime, endTime, uid, tag, state);
     }
 
-    /** @hide */
-    public NetworkStats queryDetailsForUidTagState(NetworkTemplate template,
+    /**
+     * Query network usage statistics details for a given template, uid, tag, and state.
+     *
+     * Only usable for uids belonging to calling user. Result is not aggregated over time.
+     * This means buckets' start and end timestamps are going to be between 'startTime' and
+     * 'endTime' parameters. The uid is going to be the same as the 'uid' parameter, the tag
+     * the same as the 'tag' parameter, and the state the same as the 'state' parameter.
+     * defaultNetwork is going to be {@link NetworkStats.Bucket#DEFAULT_NETWORK_ALL},
+     * metered is going to be {@link NetworkStats.Bucket#METERED_ALL}, and
+     * roaming is going to be {@link NetworkStats.Bucket#ROAMING_ALL}.
+     * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
+     * interpolate across partial buckets. Since bucket length is in the order of hours, this
+     * method cannot be used to measure data usage on a fine grained time scale.
+     * This may take a long time, and apps should avoid calling this on their main thread.
+     *
+     * @param template Template used to match networks. See {@link NetworkTemplate}.
+     * @param startTime Start of period, in milliseconds since the Unix epoch, see
+     *                  {@link java.lang.System#currentTimeMillis}.
+     * @param endTime End of period, in milliseconds since the Unix epoch, see
+     *                {@link java.lang.System#currentTimeMillis}.
+     * @param uid UID of app
+     * @param tag TAG of interest. Use {@link NetworkStats.Bucket#TAG_NONE} for aggregated data
+     *            across all the tags.
+     * @param state state of interest. Use {@link NetworkStats.Bucket#STATE_ALL} to aggregate
+     *            traffic from all states.
+     * @return Statistics which is described above.
+     * @hide
+     */
+    @NonNull
+    @SystemApi(client = MODULE_LIBRARIES)
+    @WorkerThread
+    public NetworkStats queryDetailsForUidTagState(@NonNull NetworkTemplate template,
             long startTime, long endTime, int uid, int tag, int state) throws SecurityException {
-
-        NetworkStats result;
+        Objects.requireNonNull(template);
         try {
-            result = new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
-            result.startHistoryEnumeration(uid, tag, state);
+            final NetworkStats result = new NetworkStats(
+                    mContext, template, mFlags, startTime, endTime, mService);
+            result.startHistoryUidEnumeration(uid, tag, state);
+            return result;
         } catch (RemoteException e) {
             Log.e(TAG, "Error while querying stats for uid=" + uid + " tag=" + tag
                     + " state=" + state, e);
-            return null;
+            e.rethrowFromSystemServer();
         }
 
-        return result;
+        return null; // To make the compiler happy.
     }
 
     /**
@@ -578,26 +671,49 @@ public class NetworkStatsManager {
     }
 
     /**
-     * Query realtime network usage statistics details with interfaces constrains.
-     * Return snapshot of current UID statistics, including any {@link TrafficStats#UID_TETHERING},
-     * video calling data usage and count of network operations that set by
-     * {@link TrafficStats#incrementOperationCount}. The returned data doesn't include any
-     * statistics that is reported by {@link NetworkStatsProvider}.
+     * Query realtime mobile network usage statistics.
      *
-     * @param requiredIfaces A list of interfaces the stats should be restricted to, or
-     *               {@link NetworkStats#INTERFACES_ALL}.
+     * Return a snapshot of current UID network statistics, as it applies
+     * to the mobile radios of the device. The snapshot will include any
+     * tethering traffic, video calling data usage and count of
+     * network operations set by {@link TrafficStats#incrementOperationCount}
+     * made over a mobile radio.
+     * The snapshot will not include any statistics that cannot be seen by
+     * the kernel, e.g. statistics reported by {@link NetworkStatsProvider}s.
      *
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
-    @NonNull public android.net.NetworkStats getDetailedUidStats(
-                @NonNull Set<String> requiredIfaces) {
-        Objects.requireNonNull(requiredIfaces, "requiredIfaces cannot be null");
+    @NonNull public android.net.NetworkStats getMobileUidStats() {
         try {
-            return mService.getDetailedUidStats(requiredIfaces.toArray(new String[0]));
+            return mService.getUidStatsForTransport(TRANSPORT_CELLULAR);
         } catch (RemoteException e) {
-            if (DBG) Log.d(TAG, "Remote exception when get detailed uid stats");
+            if (DBG) Log.d(TAG, "Remote exception when get Mobile uid stats");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Query realtime Wi-Fi network usage statistics.
+     *
+     * Return a snapshot of current UID network statistics, as it applies
+     * to the Wi-Fi radios of the device. The snapshot will include any
+     * tethering traffic, video calling data usage and count of
+     * network operations set by {@link TrafficStats#incrementOperationCount}
+     * made over a Wi-Fi radio.
+     * The snapshot will not include any statistics that cannot be seen by
+     * the kernel, e.g. statistics reported by {@link NetworkStatsProvider}s.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    @NonNull public android.net.NetworkStats getWifiUidStats() {
+        try {
+            return mService.getUidStatsForTransport(TRANSPORT_WIFI);
+        } catch (RemoteException e) {
+            if (DBG) Log.d(TAG, "Remote exception when get WiFi uid stats");
             throw e.rethrowFromSystemServer();
         }
     }
@@ -877,7 +993,7 @@ public class NetworkStatsManager {
      *
      * @hide
      */
-    // @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})
@@ -890,17 +1006,18 @@ public class NetworkStatsManager {
     }
 
     /**
-     * Advise persistence threshold; may be overridden internally.
+     * Set default value of global alert bytes, the value will be clamped to [128kB, 2MB].
      *
      * @hide
      */
-    // @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
-            android.Manifest.permission.NETWORK_STACK})
-    public void advisePersistThreshold(long thresholdBytes) {
+            Manifest.permission.NETWORK_STACK})
+    public void setDefaultGlobalAlert(long alertBytes) {
         try {
-            mService.advisePersistThreshold(thresholdBytes);
+            // TODO: Sync internal naming with the API surface.
+            mService.advisePersistThreshold(alertBytes);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -911,7 +1028,7 @@ public class NetworkStatsManager {
      *
      * @hide
      */
-    // @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})
@@ -927,9 +1044,17 @@ public class NetworkStatsManager {
      * Set the warning and limit to all registered custom network stats providers.
      * Note that invocation of any interface will be sent to all providers.
      *
+     * Asynchronicity notes : because traffic may be happening on the device at the same time, it
+     * doesn't make sense to wait for the warning and limit to be set – a caller still wouldn't
+     * know when exactly it was effective. All that can matter is that it's done quickly. Also,
+     * this method can't fail, so there is no status to return. All providers will see the new
+     * values soon.
+     * As such, this method returns immediately and sends the warning and limit to all providers
+     * as soon as possible through a one-way binder call.
+     *
      * @hide
      */
-    // @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})

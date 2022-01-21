@@ -9061,6 +9061,7 @@ package android.bluetooth {
     field public static final int SOURCE_CODEC_TYPE_APTX = 2; // 0x2
     field public static final int SOURCE_CODEC_TYPE_APTX_HD = 3; // 0x3
     field public static final int SOURCE_CODEC_TYPE_INVALID = 1000000; // 0xf4240
+    field public static final int SOURCE_CODEC_TYPE_LC3 = 5; // 0x5
     field public static final int SOURCE_CODEC_TYPE_LDAC = 4; // 0x4
     field public static final int SOURCE_CODEC_TYPE_SBC = 0; // 0x0
   }
@@ -9553,6 +9554,7 @@ package android.bluetooth {
     field public static final String EXTRA_STATE = "android.bluetooth.profile.extra.STATE";
     field public static final int GATT = 7; // 0x7
     field public static final int GATT_SERVER = 8; // 0x8
+    field public static final int HAP_CLIENT = 28; // 0x1c
     field public static final int HEADSET = 1; // 0x1
     field @Deprecated public static final int HEALTH = 3; // 0x3
     field public static final int HEARING_AID = 21; // 0x15
@@ -21920,6 +21922,7 @@ package android.media {
     field @Deprecated public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 2130706688; // 0x7f000100
     field public static final String FEATURE_AdaptivePlayback = "adaptive-playback";
     field public static final String FEATURE_DynamicTimestamp = "dynamic-timestamp";
+    field public static final String FEATURE_EncodingStatistics = "encoding-statistics";
     field public static final String FEATURE_FrameParsing = "frame-parsing";
     field public static final String FEATURE_IntraRefresh = "intra-refresh";
     field public static final String FEATURE_LowLatency = "low-latency";
@@ -22693,6 +22696,7 @@ package android.media {
     field public static final String KEY_OPERATING_RATE = "operating-rate";
     field public static final String KEY_OUTPUT_REORDER_DEPTH = "output-reorder-depth";
     field public static final String KEY_PCM_ENCODING = "pcm-encoding";
+    field public static final String KEY_PICTURE_TYPE = "picture-type";
     field public static final String KEY_PIXEL_ASPECT_RATIO_HEIGHT = "sar-height";
     field public static final String KEY_PIXEL_ASPECT_RATIO_WIDTH = "sar-width";
     field public static final String KEY_PREPEND_HEADER_TO_SYNC_FRAMES = "prepend-sps-pps-to-idr-frames";
@@ -22710,6 +22714,8 @@ package android.media {
     field public static final String KEY_TILE_HEIGHT = "tile-height";
     field public static final String KEY_TILE_WIDTH = "tile-width";
     field public static final String KEY_TRACK_ID = "track-id";
+    field public static final String KEY_VIDEO_ENCODING_STATISTICS_LEVEL = "video-encoding-statistics-level";
+    field public static final String KEY_VIDEO_QP_AVERAGE = "video-qp-average";
     field public static final String KEY_VIDEO_QP_B_MAX = "video-qp-b-max";
     field public static final String KEY_VIDEO_QP_B_MIN = "video-qp-b-min";
     field public static final String KEY_VIDEO_QP_I_MAX = "video-qp-i-max";
@@ -22754,12 +22760,18 @@ package android.media {
     field public static final String MIMETYPE_VIDEO_SCRAMBLED = "video/scrambled";
     field public static final String MIMETYPE_VIDEO_VP8 = "video/x-vnd.on2.vp8";
     field public static final String MIMETYPE_VIDEO_VP9 = "video/x-vnd.on2.vp9";
+    field public static final int PICTURE_TYPE_B = 3; // 0x3
+    field public static final int PICTURE_TYPE_I = 1; // 0x1
+    field public static final int PICTURE_TYPE_P = 2; // 0x2
+    field public static final int PICTURE_TYPE_UNKNOWN = 0; // 0x0
     field public static final int TYPE_BYTE_BUFFER = 5; // 0x5
     field public static final int TYPE_FLOAT = 3; // 0x3
     field public static final int TYPE_INTEGER = 1; // 0x1
     field public static final int TYPE_LONG = 2; // 0x2
     field public static final int TYPE_NULL = 0; // 0x0
     field public static final int TYPE_STRING = 4; // 0x4
+    field public static final int VIDEO_ENCODING_STATISTICS_LEVEL_1 = 1; // 0x1
+    field public static final int VIDEO_ENCODING_STATISTICS_LEVEL_NONE = 0; // 0x0
   }
 
   public final class MediaMetadata implements android.os.Parcelable {
@@ -26980,65 +26992,6 @@ package android.net.http {
     method public java.util.List<java.security.cert.X509Certificate> checkServerTrusted(java.security.cert.X509Certificate[], String, String) throws java.security.cert.CertificateException;
     method public boolean isSameTrustConfiguration(String, String);
     method public boolean isUserAddedCertificate(java.security.cert.X509Certificate);
-  }
-
-}
-
-package android.net.nsd {
-
-  public final class NsdManager {
-    method public void discoverServices(String, int, android.net.nsd.NsdManager.DiscoveryListener);
-    method public void registerService(android.net.nsd.NsdServiceInfo, int, android.net.nsd.NsdManager.RegistrationListener);
-    method public void resolveService(android.net.nsd.NsdServiceInfo, android.net.nsd.NsdManager.ResolveListener);
-    method public void stopServiceDiscovery(android.net.nsd.NsdManager.DiscoveryListener);
-    method public void unregisterService(android.net.nsd.NsdManager.RegistrationListener);
-    field public static final String ACTION_NSD_STATE_CHANGED = "android.net.nsd.STATE_CHANGED";
-    field public static final String EXTRA_NSD_STATE = "nsd_state";
-    field public static final int FAILURE_ALREADY_ACTIVE = 3; // 0x3
-    field public static final int FAILURE_INTERNAL_ERROR = 0; // 0x0
-    field public static final int FAILURE_MAX_LIMIT = 4; // 0x4
-    field public static final int NSD_STATE_DISABLED = 1; // 0x1
-    field public static final int NSD_STATE_ENABLED = 2; // 0x2
-    field public static final int PROTOCOL_DNS_SD = 1; // 0x1
-  }
-
-  public static interface NsdManager.DiscoveryListener {
-    method public void onDiscoveryStarted(String);
-    method public void onDiscoveryStopped(String);
-    method public void onServiceFound(android.net.nsd.NsdServiceInfo);
-    method public void onServiceLost(android.net.nsd.NsdServiceInfo);
-    method public void onStartDiscoveryFailed(String, int);
-    method public void onStopDiscoveryFailed(String, int);
-  }
-
-  public static interface NsdManager.RegistrationListener {
-    method public void onRegistrationFailed(android.net.nsd.NsdServiceInfo, int);
-    method public void onServiceRegistered(android.net.nsd.NsdServiceInfo);
-    method public void onServiceUnregistered(android.net.nsd.NsdServiceInfo);
-    method public void onUnregistrationFailed(android.net.nsd.NsdServiceInfo, int);
-  }
-
-  public static interface NsdManager.ResolveListener {
-    method public void onResolveFailed(android.net.nsd.NsdServiceInfo, int);
-    method public void onServiceResolved(android.net.nsd.NsdServiceInfo);
-  }
-
-  public final class NsdServiceInfo implements android.os.Parcelable {
-    ctor public NsdServiceInfo();
-    method public int describeContents();
-    method public java.util.Map<java.lang.String,byte[]> getAttributes();
-    method public java.net.InetAddress getHost();
-    method public int getPort();
-    method public String getServiceName();
-    method public String getServiceType();
-    method public void removeAttribute(String);
-    method public void setAttribute(String, String);
-    method public void setHost(java.net.InetAddress);
-    method public void setPort(int);
-    method public void setServiceName(String);
-    method public void setServiceType(String);
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.nsd.NsdServiceInfo> CREATOR;
   }
 
 }
@@ -31647,7 +31600,7 @@ package android.os {
     method @Deprecated public void readMap(@NonNull java.util.Map, @Nullable ClassLoader);
     method public <K, V> void readMap(@NonNull java.util.Map<? super K,? super V>, @Nullable ClassLoader, @NonNull Class<K>, @NonNull Class<V>);
     method @Deprecated @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader);
-    method @Nullable public <T> T readParcelable(@Nullable ClassLoader, @NonNull Class<T>);
+    method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader, @NonNull Class<? super T>);
     method @Deprecated @Nullable public android.os.Parcelable[] readParcelableArray(@Nullable ClassLoader);
     method @Nullable public <T> T[] readParcelableArray(@Nullable ClassLoader, @NonNull Class<T>);
     method @Deprecated @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
@@ -31657,7 +31610,7 @@ package android.os {
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
     method @Deprecated @Nullable public java.io.Serializable readSerializable();
-    method @Nullable public <T> T readSerializable(@Nullable ClassLoader, @NonNull Class<T>);
+    method @Nullable public <T extends java.io.Serializable> T readSerializable(@Nullable ClassLoader, @NonNull Class<? super T>);
     method @NonNull public android.util.Size readSize();
     method @NonNull public android.util.SizeF readSizeF();
     method @Deprecated @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader);

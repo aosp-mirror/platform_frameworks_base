@@ -2459,6 +2459,10 @@ public class CarrierConfigManager {
      *
      * Note: If {@code *} is specified for the original code, any ImsReasonInfo with the matching
      * {@code MESSAGE} will be remapped to {@code NEW_CODE}.
+     * If {@code *} is specified for the message, any ImsReasonInfo with the matching
+     * {@code ORIGINAL_CODE} will be remapped to {@code NEW_CODE}.
+     * The wildcard for {@code ORIGINAL_CODE} takes precedence to the wildcard for {@code MESSAGE}.
+     * A mapping with both wildcards has no effect.
      *
      * Example: "501|call completion elsewhere|1014"
      * When the {@link ImsReasonInfo#getCode()} is {@link ImsReasonInfo#CODE_USER_TERMINATED} and
@@ -5849,10 +5853,10 @@ public class CarrierConfigManager {
         /* Default value is 2 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 2000);
         sDefaults.putBoolean(KEY_ENABLE_4G_OPPORTUNISTIC_NETWORK_SCAN_BOOL, true);
-        sDefaults.putInt(KEY_TIME_TO_SWITCH_BACK_TO_PRIMARY_IF_OPPORTUNISTIC_OOS_LONG, 60000);
-        sDefaults.putInt(
+        sDefaults.putLong(KEY_TIME_TO_SWITCH_BACK_TO_PRIMARY_IF_OPPORTUNISTIC_OOS_LONG, 60000L);
+        sDefaults.putLong(
                 KEY_OPPORTUNISTIC_TIME_TO_SCAN_AFTER_CAPABILITY_SWITCH_TO_PRIMARY_LONG,
-                120000);
+                120000L);
         sDefaults.putAll(ImsServiceEntitlement.getDefaults());
         sDefaults.putAll(Gps.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
