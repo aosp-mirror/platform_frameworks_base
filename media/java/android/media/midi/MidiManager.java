@@ -31,11 +31,14 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
+
+// BLE-MIDI
 
 /**
  * This class is the public application interface to the MIDI service.
@@ -399,9 +402,11 @@ public final class MidiManager {
         final OnDeviceOpenedListener listenerF = listener;
         final Handler handlerF = handler;
 
+        Log.d(TAG, "openBluetoothDevice() " + bluetoothDevice);
         IMidiDeviceOpenCallback callback = new IMidiDeviceOpenCallback.Stub() {
             @Override
             public void onDeviceOpened(IMidiDeviceServer server, IBinder deviceToken) {
+                Log.d(TAG, "onDeviceOpened() server:" + server);
                 MidiDevice device = null;
                 if (server != null) {
                     try {
@@ -420,6 +425,15 @@ public final class MidiManager {
             mService.openBluetoothDevice(mToken, bluetoothDevice, callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */ // for now
+    public void closeBluetoothDevice(@NonNull MidiDevice midiDevice) {
+        try {
+            midiDevice.close();
+        } catch (IOException ex) {
+            Log.e(TAG, "Exception closing BLE-MIDI device" + ex);
         }
     }
 
